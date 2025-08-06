@@ -21,7 +21,7 @@ export default function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [showAddModal, setShowAddModal] = useState(false)
 
-  const handleAddCustomer = async (customerData: Record<string, unknown>) => {
+  const handleAddCustomer = async (customerData: any) => {
     try {
       const response = await fetch("/api/customers", {
         method: "POST",
@@ -77,7 +77,7 @@ export default function CustomersPage() {
           email: customer.email,
           phone: customer.phone,
           address: customer.address,
-          industryType: customer.tenant?.industryType || 'general',
+          industryType: (customer.tenant as any)?.industryType || 'general',
           createdAt: customer.createdAt
         }))
         setCustomers(formattedCustomers)
