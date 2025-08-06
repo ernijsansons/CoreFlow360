@@ -1,0 +1,4846 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ============================================================================
+// CORE BUSINESS ENTITIES
+// ============================================================================
+
+// Multi-tenant architecture with AI configuration
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String   @unique
+  slug      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Industry Configuration
+  industryType            String? @default("general") // general, hvac, construction, healthcare, legal, consulting, etc.
+  industrySubType         String? // residential, commercial, industrial for HVAC
+  industrySettings        Json    @default("{}") // Industry-specific settings and configurations
+  industryFeatures        Json    @default("{}") // Industry-specific feature flags
+  industryWorkflowsConfig Json    @default("{}") // Industry-specific workflow templates
+  industryTemplatesConfig Json    @default("{}") // Industry-specific document templates
+  industryCompliance      Json    @default("{}") // Industry-specific compliance requirements
+
+  // Module Configuration
+  enabledModules  Json @default("{\"crm\":true,\"accounting\":true,\"hr\":true,\"inventory\":true,\"projects\":true,\"time_tracking\":true,\"communications\":true}") // Which modules are active
+  moduleSettings  Json @default("{}") // Module-specific settings and configurations
+  workflowConfig  Json @default("{}") // Custom workflows per module
+  automationRules Json @default("{}") // Custom automation rules per module
+
+  // Department-level AI Configuration
+  departmentAIConfig Json @default("{}") // AI on/off per department with granular controls
+
+  // AI Configuration & Features
+  aiEnabled                Boolean @default(true)
+  aiModels                 Json    @default("{\"primary\":\"gpt-4\",\"fallback\":\"claude-3\",\"vision\":\"gpt-4-vision\"}")
+  aiDepartmentConfig       Json    @default("{}") // AI config per department
+  aiInsightRetention       Int     @default(90) // Days to keep AI insights
+  aiCrossDepartmentSharing Boolean @default(true)
+  aiGlobalVisibility       Json    @default("{}") // Which data is visible across departments
+  aiFeatureFlags           Json    @default("{\"predictive_analytics\":true,\"anomaly_detection\":true,\"nlp_queries\":true,\"auto_insights\":true}")
+  aiProcessingRules        Json    @default("{}") // Custom AI processing rules
+
+  // Subscription & Billing
+  subscriptionStatus   SubscriptionStatus @default(TRIAL)
+  subscriptionPlan     String? // Free, Pro, Enterprise
+  billingEmail         String?
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+
+  // Settings & Limits
+  settings Json @default("{}")
+  features Json @default("{}")
+  limits   Json @default("{}")
+
+  // Relationships
+  users                User[]
+  departments          Department[]
+  customers            Customer[]
+  customerIntelligence CustomerIntelligence[]
+  deals                Deal[]
+  dealActivities       DealActivity[]
+  communicationThreads CommunicationThread[]
+  leads                Lead[]
+  aiAgents             AIAgent[]
+  aiAgentInteractions  AIAgentInteraction[]
+  projects             Project[]
+  tasks                Task[]
+  invoices             Invoice[]
+  timeEntries          TimeEntry[]
+  communications       Communication[]
+
+  // Industry-specific relationships
+  industryCustomFields IndustryCustomField[]
+  industryTemplates    IndustryTemplate[]
+  industryWorkflows    IndustryWorkflow[]
+
+  // AI Intelligence Models
+  aiInsights            AIInsight[]
+  aiActivities          AIActivity[]
+  aiConversations       AIConversation[]
+  crossDeptCorrelations CrossDeptCorrelation[]
+  auditLogs             AuditLog[]
+  systemHealth          SystemHealth[]
+
+  // Authentication & Authorization
+  rbacRoles     RBACRole[]
+  userRoles     UserRole[]
+  mfaMethods    MfaMethod[]
+  mfaChallenges MfaChallenge[]
+  userSessions  UserSession[]
+  apiKeys       ApiKey[]
+
+  // Compliance & Security
+  compliancePolicies CompliancePolicy[]
+  securityPolicies   SecurityPolicy[]
+  communicationLogs  CommunicationLog[]
+  changeLogs         ChangeLog[]
+  riskMitigations    RiskMitigation[]
+  complianceReports  ComplianceReport[]
+
+  // AI Explainability System
+  aiDecisions    AIDecision[]
+  aiExplanations AIExplanation[]
+
+  // AI Streaming & Real-time Systems
+  aiStreamSources       AIStreamSource[]
+  aiStreamEvents        AIStreamEvent[]
+  aiRealtimeInsights    AIRealtimeInsight[]
+  aiStreamActions       AIStreamAction[]
+  aiExplanationFeedback AIExplanationFeedback[]
+  aiBiasAnalysis        AIBiasAnalysis[]
+  aiComplianceRecords   AIComplianceRecord[]
+  aiExplanationConfigs  AIExplanationConfig[]
+
+  // AI Batch Processing System
+  aiBatchJobs       AIBatchJob[]
+  aiBatchSchedules  AIBatchSchedule[]
+  aiBatchJobResults AIBatchJobResult[]
+  aiBatchJobErrors  AIBatchJobError[]
+  aiBatchMetrics    AIBatchMetric[]
+
+  // Channel Integrations
+  channelIntegrations ChannelIntegration[]
+
+  // AI Cost Monitoring
+  aiUsageRecords      AIUsageRecord[]
+  tenantAIBudget      TenantAIBudget?
+  aiBudgetAlerts      AIBudgetAlert[]
+  aiCostOptimizations AICostOptimization[]
+
+  // Vector Database
+  vectorInsightReferences VectorInsightReference[]
+
+  // AI Security
+  aiSecurityPolicy AISecurityPolicy?
+  aiSecurityAudits AISecurityAudit[]
+
+  // AI Configuration
+  tenantAIConfig TenantAIConfig?
+
+  // AI Error Handling
+  aiErrorLogs        AIErrorLog[]
+  aiErrorStatistics  AIErrorStatistics[]
+  aiRecoveryPatterns AIRecoveryPattern[]
+
+  // AI Performance Monitoring
+  aiPerformanceMetrics          AIPerformanceMetric[]
+  aiPerformanceBenchmarks       AIPerformanceBenchmark[]
+  aiPerformanceAlerts           AIPerformanceAlert[]
+  aiPerformanceSLAs             AIPerformanceSLA[]
+  aiOptimizationRecommendations AIOptimizationRecommendation[]
+  aiPerformanceTrends           AIPerformanceTrend[]
+
+  // AI Learning System
+  aiLearningFeedback    AILearningFeedback[]
+  aiLearningPatterns    AILearningPattern[]
+  aiLearningModels      AILearningModel[]
+  aiLearningExperiments AILearningExperiment[]
+  aiKnowledgeGraphs     AIKnowledgeGraph[]
+  aiLearningInsights    AILearningInsight[]
+  aiLearningAnalytics   AILearningAnalytic[]
+
+  // AI Correlation Engine
+  aiCorrelations        AICorrelation[]
+  aiCorrelationMatrices AICorrelationMatrix[]
+  aiCausalChains        AICausalChain[]
+  aiPatternClusters     AIPatternCluster[]
+  aiCorrelationStreams  AICorrelationStream[]
+
+  // AI Prediction Models
+  aiPredictions       AIPrediction[]
+  aiPredictionModels  AIPredictionModel[]
+  aiModelPerformances AIModelPerformance[]
+  aiPredictionStreams AIPredictionStream[]
+  aiAnomalyDetections AIAnomalyDetection[]
+
+  // AI Cache Management
+  aiCacheEntries        AICacheEntry[]
+  aiCacheAnalytics      AICacheAnalytics[]
+  aiCachePerformances   AICachePerformance[]
+  aiCacheConfigurations AICacheConfiguration[]
+  aiCacheDependencies   AICacheDependency[]
+
+  // AI Model Versioning
+  aiModelVersions              AIModelVersion[]
+  aiABTests                    AIABTest[]
+  aiDeploymentRecords          AIDeploymentRecord[]
+  aiRollbackRecords            AIRollbackRecord[]
+  aiVersionMetrics             AIVersionMetric[]
+  IndustryCustomerIntelligence IndustryCustomerIntelligence[]
+  IndustryAIAgent              IndustryAIAgent[]
+  IndustryCompliance           IndustryCompliance[]
+  IndustryIntegration          IndustryIntegration[]
+
+  @@index([slug])
+  @@index([domain])
+  @@index([subscriptionStatus])
+  @@index([industryType])
+  @@map("tenants")
+}
+
+// User management with AI interaction preferences
+model User {
+  id          String     @id @default(cuid())
+  email       String     @unique
+  password    String?
+  name        String?
+  avatar      String?
+  role        Role       @default(USER)
+  status      UserStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  lastLoginAt DateTime?
+
+  // Security & Verification
+  emailVerified          DateTime?
+  emailVerificationToken String?
+  passwordResetToken     String?
+  passwordResetExpires   DateTime?
+  loginAttempts          Int       @default(0)
+  lockoutUntil           DateTime?
+
+  // Multi-tenancy
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Department & Permissions
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  permissions  Json        @default("[]")
+
+  // AI Interaction Preferences
+  aiAssistantEnabled   Boolean   @default(true)
+  aiNotificationLevel  String    @default("medium") // low, medium, high
+  aiDepartmentAccess   String[] // Which departments AI can show data from
+  aiPreferences        Json? // AI assistant personalization
+  aiInteractionHistory Json? // Summary of AI interactions
+  aiProductivityScore  Float?    @default(0)
+  aiLastActivity       DateTime?
+
+  // Module access control
+  enabledModules     Json? @default("{}") // Which modules user can access
+  departmentAIConfig Json? @default("{}") // Department-specific AI configuration
+
+  // Business Relationships
+  assignedProjects   Project[]             @relation("ProjectAssignee")
+  createdProjects    Project[]             @relation("ProjectCreator")
+  assignedTasks      Task[]                @relation("TaskAssignee")
+  createdTasks       Task[]                @relation("TaskCreator")
+  timeEntries        TimeEntry[]
+  createdInvoices    Invoice[]             @relation("InvoiceCreator")
+  assignedCustomers  Customer[]            @relation("CustomerAssignee")
+  assignedDeals      Deal[]                @relation("DealAssignee")
+  dealActivities     DealActivity[]        @relation("DealActivityUser")
+  assignedLeads      Lead[]                @relation("LeadAssignee")
+  communicationsFrom CommunicationThread[] @relation("CommunicationFrom")
+  communicationsTo   CommunicationThread[] @relation("CommunicationTo")
+
+  // AI Relationships
+  aiConversations AIConversation[]
+  aiActivities    AIActivity[]
+  auditLogs       AuditLog[]
+
+  // Authentication & Authorization
+  userRoles     UserRole[]
+  mfaMethods    MfaMethod[]
+  mfaChallenges MfaChallenge[]
+  userSessions  UserSession[]
+  apiKeys       ApiKey[]
+  authTokens    AuthToken[]
+
+  // Channel Integrations
+  channelIntegrations ChannelIntegration[]
+
+  // AI Cost Monitoring
+  aiUsageRecords AIUsageRecord[]
+
+  // AI Configuration
+  userAIPreferences UserAIPreferences[]
+
+  // Audit trail
+  createdBy String?
+  updatedBy String?
+
+  @@index([email])
+  @@index([tenantId])
+  @@index([status])
+  @@index([role])
+  @@map("users")
+}
+
+// Department structure for organizational hierarchy
+model Department {
+  id          String       @id @default(cuid())
+  name        String
+  code        String       @unique
+  description String?
+  parentId    String?
+  parent      Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  children    Department[] @relation("DepartmentHierarchy")
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // AI Configuration
+  aiPermissions  Json?    @default("{}")
+  aiDataAccess   Json?    @default("{}") // What data this department can access
+  aiInsightTypes String[] // Which types of insights this department receives
+
+  // Relationships
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  users User[]
+
+  @@index([tenantId])
+  @@index([code])
+  @@map("departments")
+}
+
+// Customer management with AI health scoring
+model Customer {
+  id        String  @id @default(cuid())
+  firstName String
+  lastName  String?
+  email     String?
+  phone     String?
+  company   String?
+
+  // Address information
+  address String?
+  city    String?
+  state   String?
+  zipCode String?
+  country String  @default("US")
+
+  // Customer status and lifecycle
+  status   CustomerStatus @default(LEAD)
+  source   LeadSource     @default(WEBSITE)
+  priority Priority       @default(MEDIUM)
+
+  // Business information
+  creditLimit  Decimal? @db.Decimal(10, 2)
+  paymentTerms Int?     @default(30)
+  taxExempt    Boolean  @default(false)
+  tags         String[]
+  notes        String?
+
+  // AI-driven customer intelligence
+  aiHealthScore     Float?    @default(0.0) // 0-1 customer health
+  aiLifetimeValue   Decimal?  @db.Decimal(10, 2) // Predicted CLV
+  aiChurnRisk       Float?    @default(0.0) // 0-1 churn probability
+  aiNextBestAction  String? // AI recommendation for next interaction
+  aiPersonality     Json? // AI-determined personality traits
+  aiPreferences     Json? // AI-learned preferences
+  aiEngagementScore Float?    @default(0.0) // Engagement level
+  aiLastContact     DateTime?
+
+  // AI engagement settings
+  aiCommunicationStyle String? // formal, casual, technical
+  aiOptimalContactTime String? // morning, afternoon, evening
+  aiOptimalChannel     String? // email, phone, sms, in-person
+
+  // AI-driven tags (automatically generated)
+  aiTags     String[] // AI-generated tags based on behavior
+  manualTags String[] // Human-added tags
+
+  // Multi-tenancy
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Relationships
+  assignedUserId String?
+  assignedUser   User?   @relation("CustomerAssignee", fields: [assignedUserId], references: [id])
+
+  projects             Project[]
+  invoices             Invoice[]
+  communications       Communication[]
+  communicationThreads CommunicationThread[] @relation("CustomerCommunications")
+  aiInsights           AIInsight[]           @relation("CustomerInsights")
+
+  // Customer Intelligence relationship
+  customerIntelligence CustomerIntelligence?
+
+  // Deal relationships
+  deals Deal[]
+
+  // Lead conversion relationship
+  convertedFromLeads Lead[] @relation("LeadToCustomer")
+
+  // AI Agent interactions
+  aiAgentInteractions AIAgentInteraction[] @relation("AIAgentCustomerInteractions")
+
+  // Industry-specific intelligence
+  industryIntelligence IndustryCustomerIntelligence[]
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastContact DateTime?
+
+  @@index([tenantId])
+  @@index([email])
+  @@index([status])
+  @@index([source])
+  @@index([aiHealthScore])
+  @@index([aiChurnRisk])
+  @@index([tenantId, email])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, status])
+  @@index([tenantId, aiHealthScore])
+  @@index([tenantId, assignedUserId])
+  @@index([tenantId, lastContact])
+  @@map("customers")
+}
+
+// Customer Intelligence with advanced AI metrics
+model CustomerIntelligence {
+  id         String   @id @default(cuid())
+  customerId String   @unique
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // AI Health Metrics
+  aiHealthScore       Decimal? @db.Decimal(5, 2) // 0-100 scale
+  aiChurnProbability  Decimal? @db.Decimal(5, 2) // 0-100 probability
+  aiLifetimeValue     Decimal? @db.Decimal(12, 2)
+  aiEngagementScore   Decimal? @db.Decimal(5, 2)
+  aiSatisfactionScore Decimal? @db.Decimal(5, 2)
+
+  // AI Predictions
+  aiNextBestAction     String? @db.Text
+  aiRiskFactors        Json? // Array of risk factors
+  aiOpportunities      Json? // Array of opportunities
+  aiPersonalityProfile Json? // AI personality analysis
+  aiCommunicationStyle String? // preferred communication style
+
+  // Cross-Department Insights
+  aiCrossDeptInsights  Json? // Insights for other departments
+  aiAccountingInsights Json? // Payment behavior, creditworthiness
+  aiHvacInsights       Json? // Equipment preferences, service history
+  aiHrInsights         Json? // If customer is also employee
+
+  // AI Metadata
+  lastAiAnalysis    DateTime?
+  aiModelVersion    String?
+  aiConfidenceScore Decimal?  @db.Decimal(5, 2)
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([aiHealthScore])
+  @@index([aiChurnProbability])
+  @@index([tenantId])
+  @@map("customer_intelligence")
+}
+
+// Deal management with AI-powered sales insights
+model Deal {
+  id           String   @id @default(cuid())
+  customerId   String
+  customer     Customer @relation(fields: [customerId], references: [id])
+  assignedToId String?
+  assignedTo   User?    @relation("DealAssignee", fields: [assignedToId], references: [id])
+
+  // Deal Basics
+  title       String
+  description String? @db.Text
+  value       Decimal @db.Decimal(12, 2)
+  currency    String  @default("USD")
+  stage       String // "lead", "qualified", "proposal", "negotiation", "closed_won", "closed_lost"
+  priority    String  @default("medium") // "low", "medium", "high", "urgent"
+
+  // AI Intelligence
+  aiProbability        Decimal?  @db.Decimal(5, 2) // Win probability 0-100
+  aiRiskFactors        Json? // AI identified risks
+  aiNextActions        Json? // AI recommended actions
+  aiCompetitorThreats  Json? // AI competitor analysis
+  aiDealHealth         Decimal?  @db.Decimal(5, 2) // Overall deal health
+  aiExpectedCloseDate  DateTime?
+  aiRecommendedActions Json? // Step-by-step AI recommendations
+
+  // Timeline
+  expectedCloseDate DateTime?
+  actualCloseDate   DateTime?
+  lastContactDate   DateTime?
+  nextFollowUpDate  DateTime?
+
+  // Relationships
+  activities          DealActivity[]
+  communications      CommunicationThread[]
+  aiAgentInteractions AIAgentInteraction[]  @relation("AIAgentDealInteractions")
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([stage])
+  @@index([aiProbability])
+  @@index([expectedCloseDate])
+  @@index([tenantId])
+  @@index([tenantId, stage])
+  @@index([tenantId, assignedToId])
+  @@index([tenantId, expectedCloseDate])
+  @@index([tenantId, aiProbability])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, value])
+  @@map("deals")
+}
+
+// Deal activity tracking with AI insights
+model DealActivity {
+  id     String @id @default(cuid())
+  dealId String
+  deal   Deal   @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation("DealActivityUser", fields: [userId], references: [id])
+
+  // Activity Details
+  type        String // "call", "email", "meeting", "note", "task", "demo"
+  title       String
+  description String? @db.Text
+  outcome     String? // "positive", "neutral", "negative", "no_response"
+
+  // AI Analysis
+  aiSentimentScore  Decimal? @db.Decimal(5, 2) // -100 to +100
+  aiKeyTopics       Json? // AI extracted topics
+  aiNextSteps       Json? // AI recommended next steps
+  aiDealImpact      String? // "positive", "neutral", "negative"
+  aiConfidenceScore Decimal? @db.Decimal(5, 2)
+
+  // Timing
+  scheduledAt DateTime?
+  completedAt DateTime?
+  duration    Int? // Duration in minutes
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([dealId])
+  @@index([type])
+  @@index([scheduledAt])
+  @@index([tenantId])
+  @@map("deal_activities")
+}
+
+// Communication thread for customers, leads, and deals
+model CommunicationThread {
+  id String @id @default(cuid())
+
+  // Relationships
+  customerId String?
+  customer   Customer? @relation("CustomerCommunications", fields: [customerId], references: [id])
+  leadId     String?
+  lead       Lead?     @relation("LeadCommunications", fields: [leadId], references: [id])
+  dealId     String?
+  deal       Deal?     @relation(fields: [dealId], references: [id])
+
+  // Communication Details
+  type      String // "email", "sms", "call", "meeting", "chat", "video_call"
+  direction String // "inbound", "outbound"
+  subject   String?
+  content   String? @db.Text
+
+  // Participants
+  fromUserId String?
+  fromUser   User?   @relation("CommunicationFrom", fields: [fromUserId], references: [id])
+  toUserId   String?
+  toUser     User?   @relation("CommunicationTo", fields: [toUserId], references: [id])
+
+  // External Contact Info
+  externalEmail String?
+  externalPhone String?
+  externalName  String?
+
+  // AI Analysis
+  aiSentimentScore      Decimal? @db.Decimal(5, 2) // -100 to +100
+  aiEmotionalTone       String? // "happy", "frustrated", "neutral", "excited", "angry"
+  aiKeyTopics           Json? // AI extracted topics
+  aiIntentAnalysis      Json? // AI intent analysis
+  aiResponseSuggestions Json? // AI response suggestions
+  aiPriority            String? // "low", "medium", "high", "urgent"
+  aiFollowUpNeeded      Boolean  @default(false)
+
+  // Status
+  status      String    @default("active") // "active", "resolved", "archived"
+  readAt      DateTime?
+  respondedAt DateTime?
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([leadId])
+  @@index([dealId])
+  @@index([type])
+  @@index([aiSentimentScore])
+  @@index([tenantId])
+  @@map("communication_threads")
+}
+
+// Lead management with AI scoring and qualification
+model Lead {
+  id String @id @default(cuid())
+
+  // Lead Information
+  firstName String
+  lastName  String
+  email     String
+  phone     String?
+  company   String?
+  jobTitle  String?
+
+  // Lead Details
+  source   String // "website", "referral", "cold_outreach", "social_media", "advertising"
+  status   String @default("new") // "new", "contacted", "qualified", "converted", "lost"
+  priority String @default("medium") // "low", "medium", "high", "urgent"
+
+  // AI Intelligence
+  aiScore              Decimal? @db.Decimal(5, 2) // Lead score 0-100
+  aiQualificationScore Decimal? @db.Decimal(5, 2) // Qualification probability
+  aiConversionProb     Decimal? @db.Decimal(5, 2) // Conversion probability
+  aiPersonalityType    String? // AI personality analysis
+  aiInterestTopics     Json? // AI identified interests
+  aiOptimalContact     Json? // Best contact method and timing
+  aiNurturingStrategy  Json? // AI nurturing recommendations
+
+  // Conversion
+  convertedAt           DateTime?
+  convertedToCustomerId String?
+  convertedToCustomer   Customer? @relation("LeadToCustomer", fields: [convertedToCustomerId], references: [id])
+
+  // Assignment
+  assignedToId String?
+  assignedTo   User?   @relation("LeadAssignee", fields: [assignedToId], references: [id])
+
+  // Relationships
+  communications      CommunicationThread[] @relation("LeadCommunications")
+  aiAgentInteractions AIAgentInteraction[]  @relation("AIAgentLeadInteractions")
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([status])
+  @@index([aiScore])
+  @@index([source])
+  @@index([tenantId])
+  @@index([tenantId, email])
+  @@index([tenantId, status])
+  @@index([tenantId, assignedToId])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, aiScore])
+  @@index([tenantId, source])
+  @@map("leads")
+}
+
+// AI Agent workforce management
+model AIAgent {
+  id String @id @default(cuid())
+
+  // Agent Identity
+  name         String
+  agentType    String // "sdr", "account_executive", "customer_success", "support"
+  personality  Json // AI personality configuration
+  capabilities Json // What the agent can do
+
+  // Agent Status
+  isActive    Boolean @default(true)
+  isLearning  Boolean @default(true)
+  currentLoad Int     @default(0) // Current number of active conversations
+  maxLoad     Int     @default(50) // Maximum concurrent conversations
+
+  // Performance Metrics
+  totalInteractions    Int      @default(0)
+  successRate          Decimal? @db.Decimal(5, 2) // Success rate percentage
+  customerSatisfaction Decimal? @db.Decimal(5, 2) // Customer satisfaction score
+  averageResponseTime  Int? // Average response time in minutes
+
+  // AI Configuration
+  aiModelVersion String
+  promptTemplate String? @db.Text
+  trainingData   Json? // Training data references
+
+  // Specialization
+  departments Json? // Departments this agent works with
+  industries  Json? // Industries this agent specializes in
+  languages   Json? // Languages this agent supports
+
+  // Relationships
+  interactions AIAgentInteraction[]
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([agentType])
+  @@index([isActive])
+  @@index([tenantId])
+  @@map("ai_agents")
+}
+
+// AI Agent interaction tracking
+model AIAgentInteraction {
+  id      String  @id @default(cuid())
+  agentId String
+  agent   AIAgent @relation(fields: [agentId], references: [id])
+
+  // Interaction Context
+  customerId String?
+  customer   Customer? @relation("AIAgentCustomerInteractions", fields: [customerId], references: [id])
+  leadId     String?
+  lead       Lead?     @relation("AIAgentLeadInteractions", fields: [leadId], references: [id])
+  dealId     String?
+  deal       Deal?     @relation("AIAgentDealInteractions", fields: [dealId], references: [id])
+
+  // Interaction Details
+  interactionType String // "conversation", "analysis", "recommendation", "action"
+  channel         String // "email", "chat", "phone", "sms"
+  prompt          String? @db.Text
+  response        String? @db.Text
+
+  // Outcome
+  outcome          String? // "successful", "failed", "partial", "escalated"
+  customerFeedback String? // Customer feedback on interaction
+  customerRating   Int? // 1-5 rating
+
+  // AI Metrics
+  tokensUsed      Int?
+  responseTime    Int? // Response time in milliseconds
+  confidenceScore Decimal? @db.Decimal(5, 2)
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([agentId])
+  @@index([customerId])
+  @@index([interactionType])
+  @@index([outcome])
+  @@index([tenantId])
+  @@map("ai_agent_interactions")
+}
+
+// Project management with AI forecasting
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  status      ProjectStatus @default(PLANNING)
+  priority    Priority      @default(MEDIUM)
+
+  // Dates and timeline
+  startDate DateTime?
+  endDate   DateTime?
+  deadline  DateTime?
+
+  // Financial information
+  budget      Decimal? @db.Decimal(10, 2)
+  plannedCost Decimal? @db.Decimal(10, 2) // Planned/estimated cost for project
+  actualCost  Decimal? @db.Decimal(10, 2)
+
+  // AI Predictions & Analysis
+  aiCompletionPrediction DateTime? // AI-predicted completion date
+  aiBudgetForecast       Decimal?  @db.Decimal(10, 2) // AI budget prediction
+  aiRiskAssessment       String? // low, medium, high
+  aiResourceOptimization Json? // AI-suggested resource allocation
+  aiSuccessProbability   Float?    @default(0.0) // 0-1 success probability
+  aiBottleneckAnalysis   Json? // AI-identified bottlenecks
+  aiTimelineOptimization Json? // AI-suggested timeline adjustments
+
+  // Project metadata for additional information
+  metadata Json? // Additional project metadata and custom fields
+
+  // Relationships
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  assigneeId String?
+  assignee   User?   @relation("ProjectAssignee", fields: [assigneeId], references: [id])
+
+  createdById String
+  createdBy   User   @relation("ProjectCreator", fields: [createdById], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Child relationships
+  tasks          Task[]
+  timeEntries    TimeEntry[]
+  invoices       Invoice[]
+  communications Communication[]
+
+  // AI project insights
+  aiInsights AIInsight[] @relation("ProjectInsights")
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([status])
+  @@index([aiSuccessProbability])
+  @@map("projects")
+}
+
+// Task management with AI optimization
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  priority    Priority   @default(MEDIUM)
+
+  // Time tracking
+  estimatedHours Decimal? @db.Decimal(5, 2)
+  actualHours    Decimal? @db.Decimal(5, 2)
+
+  // Dates
+  dueDate     DateTime?
+  completedAt DateTime?
+
+  // AI Optimization
+  aiEstimatedHours         Decimal?  @db.Decimal(5, 2) // AI-estimated time
+  aiComplexityScore        Float?    @default(0.0) // 0-1 complexity
+  aiDependencyAnalysis     Json? // AI-identified dependencies
+  aiResourceRecommendation Json? // AI-suggested resources
+  aiCompletionPrediction   DateTime? // AI-predicted completion
+
+  // Relationships
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  assigneeId String?
+  assignee   User?   @relation("TaskAssignee", fields: [assigneeId], references: [id])
+
+  createdById String
+  createdBy   User   @relation("TaskCreator", fields: [createdById], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Child relationships
+  timeEntries    TimeEntry[]
+  communications Communication[]
+  aiInsights     AIInsight[]     @relation("TaskInsights")
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+  @@index([assigneeId])
+  @@index([dueDate])
+  @@map("tasks")
+}
+
+// Invoice management with AI discrepancy detection
+model Invoice {
+  id     String        @id @default(cuid())
+  number String        @unique
+  status InvoiceStatus @default(DRAFT)
+
+  // Amounts
+  subtotal  Decimal @db.Decimal(10, 2)
+  taxAmount Decimal @default(0) @db.Decimal(10, 2)
+  total     Decimal @db.Decimal(10, 2)
+
+  // Dates
+  issueDate DateTime  @default(now())
+  dueDate   DateTime
+  paidAt    DateTime?
+
+  // Payment information
+  paymentMethod         String?
+  stripePaymentIntentId String?
+
+  // AI Analysis & Detection
+  aiDiscrepancies      Json? // AI-detected discrepancies
+  aiPaymentPrediction  Float? // Probability of on-time payment
+  aiCollectionRisk     String? // low, medium, high
+  aiRecommendedActions String[] // AI-suggested collection actions
+  aiAnomalyScore       Float?   @default(0.0) // 0-1 anomaly probability
+  aiPricingAnalysis    Json? // AI pricing recommendations
+  aiCustomerRisk       String? // low, medium, high
+
+  // Relationships
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdById String
+  createdBy   User   @relation("InvoiceCreator", fields: [createdById], references: [id])
+
+  // Invoice items
+  items InvoiceItem[]
+
+  // AI-driven insights
+  aiInsights AIInsight[] @relation("InvoiceInsights")
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([status])
+  @@index([number])
+  @@index([dueDate])
+  @@index([aiPaymentPrediction])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  description String
+  quantity    Decimal  @db.Decimal(8, 2)
+  rate        Decimal  @db.Decimal(8, 2)
+  unitPrice   Decimal? @db.Decimal(8, 2) // Unit price for individual items
+  amount      Decimal  @db.Decimal(10, 2)
+
+  // AI Analysis
+  aiPricingAnomaly   Boolean @default(false)
+  aiQuantityAnalysis Json? // AI analysis of quantity patterns
+  aiRateOptimization Json? // AI rate recommendations
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+// ============================================================================
+// AI INTELLIGENCE MODELS
+// ============================================================================
+
+// Central AI intelligence hub
+model AIInsight {
+  id          String          @id @default(cuid())
+  type        AIInsightType
+  category    String // accounting, sales, inventory, collections, etc.
+  title       String
+  description String          @db.Text
+  confidence  Float           @default(0.0) // 0-1 confidence score
+  priority    Priority        @default(MEDIUM)
+  status      AIInsightStatus @default(ACTIVE)
+
+  // AI Analysis Data
+  data        Json // Raw analysis data
+  metadata    Json // AI processing metadata
+  aiModel     String // "gpt-4", "claude-3", "custom-model"
+  processedAt DateTime @default(now())
+
+  // Vector Embeddings for AI Intelligence Core
+  embedding           Float[] // Vector embedding for semantic similarity and correlation
+  embeddingModel      String  @default("text-embedding-ada-002") // Model used for embeddings
+  embeddingDimensions Int     @default(1536) // Dimension count for embeddings
+  similarityScore     Float? // Calculated similarity to other insights
+
+  // AI Cost Tracking
+  aiCostUsd        Decimal? @db.Decimal(8, 6) // Cost in USD for generating this insight
+  tokenUsage       Int? // Total tokens used
+  processingTimeMs Int? // Processing time in milliseconds
+
+  // Cross-Departmental Intelligence
+  crossDeptRelevance String[] // Departments this insight is relevant to
+  correlationIds     String[] // IDs of CrossDeptCorrelation records
+  triggersActions    Json? // Automated actions this insight should trigger
+
+  // Cross-departmental visibility
+  visibleTo         String[] // Department names or "ALL"
+  assignedTo        String[] // User IDs who should act on this
+  notifyDepartments String[] // Departments to notify
+
+  // Related business entities
+  customerId String?
+  customer   Customer? @relation("CustomerInsights", fields: [customerId], references: [id], onDelete: Cascade)
+
+  projectId String?
+  project   Project? @relation("ProjectInsights", fields: [projectId], references: [id], onDelete: Cascade)
+
+  taskId String?
+  task   Task?   @relation("TaskInsights", fields: [taskId], references: [id], onDelete: Cascade)
+
+  invoiceId String?
+  invoice   Invoice? @relation("InvoiceInsights", fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  // Actions taken
+  actionsLog Json? // Log of actions taken based on insight
+  resolvedAt DateTime?
+  resolvedBy String?
+
+  // Multi-tenancy
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, type])
+  @@index([status, priority])
+  @@index([category])
+  @@index([confidence])
+  @@index([processedAt])
+  @@map("ai_insights")
+}
+
+// Universal AI activity stream
+model AIActivity {
+  id          String @id @default(cuid())
+  action      String // "bill_discrepancy_detected", "inventory_forecast_updated", etc.
+  department  String // originating department
+  description String @db.Text
+
+  // AI Context
+  aiContext      Json // Full AI analysis context
+  triggerData    Json // What triggered this AI activity
+  aiModel        String // Which AI model was used
+  processingTime Int? // Processing time in milliseconds
+
+  // Vector Embeddings for Activity Intelligence
+  embedding           Float[] // Vector embedding for activity pattern matching
+  embeddingModel      String  @default("text-embedding-ada-002") // Model used for embeddings
+  embeddingDimensions Int     @default(1536) // Dimension count for embeddings
+
+  // AI Cost Tracking for Activities
+  aiCostUsd  Decimal? @db.Decimal(8, 6) // Cost in USD for AI processing
+  tokenUsage Int? // Total tokens used in AI analysis
+
+  // Cross-Departmental Flow Intelligence
+  correlationsGenerated String[] // IDs of CrossDeptCorrelation records generated
+  insightsTriggered     String[] // IDs of AIInsight records triggered by this activity
+  automatedActions      Json? // Automated actions triggered across departments
+
+  // Cross-department notifications
+  notifyDepartments String[] // Which departments to notify
+  relatedInsights   String[] // Related AI insight IDs
+  priority          Priority @default(MEDIUM)
+
+  // Entity relationships (what this activity relates to)
+  entityType String? // "customer", "invoice", "project", "inventory_item"
+  entityId   String?
+
+  // User interaction
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Communication relationship
+  communicationId String?
+  communication   Communication? @relation("CommunicationActivities", fields: [communicationId], references: [id], onDelete: SetNull)
+
+  // Multi-tenancy
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  timestamp DateTime @default(now())
+
+  @@index([tenantId, department])
+  @@index([entityType, entityId])
+  @@index([timestamp])
+  @@index([action])
+  @@map("ai_activities")
+}
+
+// AI assistant interactions
+model AIConversation {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Conversation context
+  context  Json // Business context (viewing invoices, customer data, etc.)
+  messages Json // Full conversation history
+  summary  String? // AI-generated conversation summary
+
+  // AI assistant metadata
+  aiModel     String // which AI model was used
+  totalTokens Int      @default(0)
+  cost        Decimal? @db.Decimal(8, 4) // Cost of conversation
+
+  // Business outcomes
+  actionsTaken      Json? // What business actions resulted from this conversation
+  insightsGenerated String[] // AI insights generated during conversation
+  followUpRequired  Boolean   @default(false)
+  followUpDate      DateTime?
+
+  // Multi-tenancy
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, tenantId])
+  @@index([createdAt])
+  @@map("ai_conversations")
+}
+
+// AI-enhanced communication tracking
+model Communication {
+  id        String                 @id @default(cuid())
+  type      CommunicationType
+  direction CommunicationDirection
+  subject   String?
+  content   String
+
+  // Enhanced AI Processing
+  aiProcessed  Boolean  @default(false)
+  aiSentiment  String? // positive, negative, neutral, urgent
+  aiSummary    String?
+  aiNextAction String?
+  aiIntents    String[] // ["payment_inquiry", "service_request", "complaint"]
+  aiEntities   Json? // Extracted entities (amounts, dates, products, etc.)
+  aiUrgency    String? // low, medium, high, critical
+  aiConfidence Float?   @default(0.0) // AI processing confidence
+
+  // Cross-departmental AI routing
+  routeToDepartments String[] // AI determines which departments need to see this
+  aiRecommendations  Json? // AI recommendations for each department
+  aiPriority         Priority @default(MEDIUM)
+
+  // Auto-generated follow-ups
+  aiFollowUps          Json? // AI-suggested follow-up actions with timelines
+  aiEscalationRequired Boolean @default(false)
+
+  // Communication metadata for additional information  
+  metadata Json? // Additional communication metadata and tracking data
+
+  // Status tracking
+  status      CommunicationStatus @default(SENT)
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  readAt      DateTime?
+
+  // External IDs for tracking
+  externalId String? // Twilio SID, SendGrid ID, etc.
+
+  // Relationships
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // AI-driven project/task linking
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+
+  taskId String?
+  task   Task?   @relation(fields: [taskId], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // AI Activity Generation
+  aiActivities AIActivity[] @relation("CommunicationActivities")
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId, type])
+  @@index([aiSentiment])
+  @@index([aiUrgency])
+  @@index([status])
+  @@map("communications")
+}
+
+// ============================================================================
+// BUSINESS INTELLIGENCE
+// ============================================================================
+
+// Time tracking with AI optimization
+model TimeEntry {
+  id          String   @id @default(cuid())
+  description String?
+  hours       Decimal  @db.Decimal(5, 2)
+  date        DateTime @default(now())
+  billable    Boolean  @default(true)
+
+  // AI Optimization
+  aiRecommendedHours   Decimal? @db.Decimal(5, 2) // AI-suggested hours
+  aiProductivityScore  Float?   @default(0.0) // 0-1 productivity score
+  aiEfficiencyAnalysis Json? // AI efficiency recommendations
+  aiTimeOptimization   Json? // AI time optimization suggestions
+
+  // Relationships
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  taskId String?
+  task   Task?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  // Multi-tenancy
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([date])
+  @@index([tenantId])
+  @@map("time_entries")
+}
+
+// Audit logging for compliance tracking
+model AuditLog {
+  id         String  @id @default(cuid())
+  action     String // CREATE, UPDATE, DELETE, LOGIN, etc.
+  resource   String // User, Customer, Project, etc.
+  resourceId String?
+
+  // User information
+  userId    String?
+  user      User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userEmail String?
+
+  // Multi-tenancy
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Request information
+  ipAddress String?
+  userAgent String?
+  sessionId String?
+
+  // Changes
+  oldValues Json?
+  newValues Json?
+  metadata  Json? // Additional audit metadata
+
+  // AI Analysis
+  aiRiskScore       Float?  @default(0.0) // 0-1 risk score
+  aiAnomalyFlag     Boolean @default(false)
+  aiComplianceCheck Json? // Compliance analysis
+
+  // Timestamps
+  timestamp DateTime @default(now())
+
+  @@index([action])
+  @@index([resource])
+  @@index([userId])
+  @@index([tenantId])
+  @@index([timestamp])
+  @@index([aiRiskScore])
+  @@map("audit_logs")
+}
+
+// System health monitoring with AI
+model SystemHealth {
+  id           String       @id @default(cuid())
+  service      String // database, email, sms, ai, etc.
+  status       HealthStatus
+  details      Json?
+  checkedAt    DateTime     @default(now())
+  responseTime Int? // milliseconds
+
+  // AI Analysis
+  aiAnomalyDetected Boolean @default(false)
+  aiPredictedIssues Json? // AI-predicted potential issues
+  aiRecommendations Json? // AI recommendations for improvement
+  aiTrendAnalysis   Json? // AI trend analysis
+
+  // Multi-tenancy
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([service])
+  @@index([status])
+  @@index([checkedAt])
+  @@index([tenantId])
+  @@map("system_health")
+}
+
+// ============================================================================
+// ENUMS FOR TYPE SAFETY
+// ============================================================================
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  USER
+  GUEST
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  SUSPENDED
+  DELETED
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  UNPAID
+}
+
+enum CustomerStatus {
+  LEAD
+  PROSPECT
+  ACTIVE
+  INACTIVE
+  CHURNED
+}
+
+enum LeadSource {
+  WEBSITE
+  PHONE
+  EMAIL
+  REFERRAL
+  SOCIAL_MEDIA
+  ADVERTISEMENT
+  TRADE_SHOW
+  COLD_OUTREACH
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+  CRITICAL
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+  CANCELLED
+}
+
+enum CommunicationType {
+  EMAIL
+  SMS
+  PHONE_CALL
+  MEETING
+  NOTE
+  CHAT
+}
+
+enum CommunicationDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum CommunicationStatus {
+  DRAFT
+  SENT
+  DELIVERED
+  READ
+  REPLIED
+  FAILED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum HealthStatus {
+  HEALTHY
+  DEGRADED
+  UNHEALTHY
+  UNKNOWN
+}
+
+enum AIInsightType {
+  DISCREPANCY
+  FORECAST
+  RECOMMENDATION
+  ALERT
+  OPTIMIZATION
+  RISK_ASSESSMENT
+  TREND_ANALYSIS
+  ANOMALY
+  PREDICTION
+  INSIGHT
+}
+
+enum AIInsightStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  RESOLVED
+  DISMISSED
+  ESCALATED
+}
+
+// ============================================================================
+// AUTHENTICATION & AUTHORIZATION MODELS
+// ============================================================================
+
+// Extended Role model for RBAC system
+model RBACRole {
+  id           String     @id @default(cuid())
+  name         String     @unique
+  description  String?
+  level        Int // Hierarchy level (1 = lowest, 100 = highest)
+  parentRoleId String?
+  parentRole   RBACRole?  @relation("RoleHierarchy", fields: [parentRoleId], references: [id])
+  childRoles   RBACRole[] @relation("RoleHierarchy")
+  tenantId     String? // null for system roles
+  tenant       Tenant?    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  isSystemRole Boolean    @default(false)
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // Relationships
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+
+  @@index([tenantId])
+  @@index([name])
+  @@index([level])
+  @@map("rbac_roles")
+}
+
+// Permission model
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  resource    String // e.g., "users", "projects", "invoices"
+  action      String // e.g., "read", "create", "update", "delete"
+  scope       String // "GLOBAL", "TENANT", "DEPARTMENT", "TEAM", "OWN"
+  conditions  Json? // Additional conditions for the permission
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  rolePermissions RolePermission[]
+
+  @@unique([resource, action, scope])
+  @@index([resource])
+  @@index([action])
+  @@map("permissions")
+}
+
+// Many-to-many relationship between roles and permissions
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  role         RBACRole   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+// User-Role assignment
+model UserRole {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId     String
+  role       RBACRole  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignedBy String
+  assignedAt DateTime  @default(now())
+  expiresAt  DateTime?
+  isActive   Boolean   @default(true)
+  conditions Json? // Role conditions (e.g., temporary, conditional)
+
+  @@unique([userId, roleId, tenantId])
+  @@index([userId])
+  @@index([roleId])
+  @@index([tenantId])
+  @@index([expiresAt])
+  @@map("user_roles")
+}
+
+// ============================================================================
+// MFA (Multi-Factor Authentication) Models
+// ============================================================================
+
+// MFA methods configured for users
+model MfaMethod {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type            String // SMS, EMAIL, TOTP, BACKUP_CODE, WEBAUTHN
+  identifier      String // Phone number, email, or TOTP label
+  encryptedSecret String? // For TOTP secret storage
+  backupCodes     String[] // Hashed backup codes
+  isEnabled       Boolean   @default(false)
+  isPrimary       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  lastUsedAt      DateTime?
+  failureCount    Int       @default(0)
+  maxFailures     Int       @default(5)
+
+  @@unique([userId, tenantId, type])
+  @@index([userId])
+  @@index([tenantId])
+  @@index([type])
+  @@map("mfa_methods")
+}
+
+// MFA challenges (temporary codes sent to users)
+model MfaChallenge {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  method      String // SMS, EMAIL, etc.
+  hashedToken String // Hashed verification code
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+  ipAddress   String
+  userAgent   String
+  attempts    Int      @default(0)
+  maxAttempts Int      @default(3)
+  isUsed      Boolean  @default(false)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([hashedToken])
+  @@map("mfa_challenges")
+}
+
+// ============================================================================
+// SECURITY & AUDIT Models
+// ============================================================================
+
+// Session management for enhanced security
+model UserSession {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sessionToken   String    @unique
+  refreshToken   String?   @unique
+  ipAddress      String
+  userAgent      String
+  mfaVerified    Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  lastActivityAt DateTime  @default(now())
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  revokedReason  String?
+
+  @@index([userId])
+  @@index([sessionToken])
+  @@index([refreshToken])
+  @@index([expiresAt])
+  @@map("user_sessions")
+}
+
+// API key management
+model ApiKey {
+  id          String    @id @default(cuid())
+  name        String
+  key         String    @unique // Hashed API key
+  prefix      String // First few characters for identification
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  permissions Json // Specific permissions for this API key
+  rateLimit   Int       @default(1000) // Requests per hour
+  lastUsedAt  DateTime?
+  lastUsedIp  String?
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([key])
+  @@index([prefix])
+  @@map("api_keys")
+}
+
+// Authorization tokens for OAuth flows
+model AuthToken {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          String // access_token, refresh_token, authorization_code
+  token         String    @unique
+  clientId      String? // OAuth client ID
+  scope         String? // OAuth scopes
+  redirectUri   String?
+  codeChallenge String? // For PKCE
+  expiresAt     DateTime
+  usedAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([type])
+  @@index([expiresAt])
+  @@map("auth_tokens")
+}
+
+// ============================================================================
+// COMPLIANCE & AUDIT Models
+// ============================================================================
+
+// Compliance policies
+model CompliancePolicy {
+  id            String    @id @default(cuid())
+  tenantId      String
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type          String // ETHICS, SECURITY, PRIVACY, DATA_RETENTION
+  name          String
+  description   String    @db.Text
+  version       String
+  isActive      Boolean   @default(true)
+  effectiveDate DateTime
+  reviewDate    DateTime?
+  approvedBy    String?
+  content       Json // Policy content and requirements
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([tenantId, type])
+  @@index([isActive])
+  @@map("compliance_policies")
+}
+
+// Security policies for SOC 2 compliance
+model SecurityPolicy {
+  id             String    @id @default(cuid())
+  tenantId       String
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type           String // PASSWORD, ACCESS_CONTROL, DATA_CLASSIFICATION
+  requirements   Json // Policy requirements
+  isActive       Boolean   @default(true)
+  lastReviewDate DateTime?
+  nextReviewDate DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([tenantId, type])
+  @@index([isActive])
+  @@map("security_policies")
+}
+
+// Communication logs for SOC 2 CC2
+model CommunicationLog {
+  id         String   @id @default(cuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type       String // SECURITY_INCIDENT, POLICY_UPDATE, AUDIT_FINDING
+  subject    String
+  content    String   @db.Text
+  recipients String[]
+  sentAt     DateTime
+  sentBy     String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId, type])
+  @@index([sentAt])
+  @@map("communication_logs")
+}
+
+// Change management logs
+model ChangeLog {
+  id            String    @id @default(cuid())
+  tenantId      String
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  changeType    String // CODE_DEPLOYMENT, CONFIG_CHANGE, SCHEMA_MIGRATION
+  description   String    @db.Text
+  riskLevel     String // HIGH, MEDIUM, LOW
+  approvedBy    String?
+  approvedAt    DateTime?
+  testedBy      String?
+  testedAt      DateTime?
+  implementedBy String?
+  implementedAt DateTime?
+  rollbackPlan  String?   @db.Text
+  status        String // PENDING, APPROVED, IMPLEMENTED, ROLLED_BACK
+  metadata      Json?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([tenantId, changeType])
+  @@index([status])
+  @@index([createdAt])
+  @@map("change_logs")
+}
+
+// Risk mitigation tracking
+model RiskMitigation {
+  id              String    @id @default(cuid())
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  riskId          String
+  riskDescription String    @db.Text
+  mitigationType  String // TECHNICAL, ADMINISTRATIVE, PHYSICAL
+  controls        Json // Mitigation controls implemented
+  status          String // ACTIVE, INACTIVE, PENDING
+  effectiveness   Float? // 0-1 effectiveness score
+  reviewDate      DateTime?
+  reviewedBy      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([tenantId])
+  @@index([status])
+  @@map("risk_mitigations")
+}
+
+// Compliance reports
+model ComplianceReport {
+  id          String    @id @default(cuid())
+  reportId    String    @unique
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type        String // SOC2_TYPE_II, GDPR, HIPAA, PCI_DSS
+  status      String // COMPLIANT, NON_COMPLIANT, PARTIAL
+  data        Json // Full report data
+  generatedAt DateTime
+  generatedBy String?
+  validUntil  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([tenantId, type])
+  @@index([reportId])
+  @@index([generatedAt])
+  @@map("compliance_reports")
+}
+
+// ============================================================================
+// GDPR Compliance Models
+// ============================================================================
+
+// Data subject consent records
+model DataConsent {
+  id                    String    @id @default(cuid())
+  dataSubjectId         String
+  purpose               String // Marketing, Analytics, Processing, etc.
+  scope                 String[] // Data categories covered
+  lawfulBasis           String // Consent, Contract, Legal, etc.
+  consentGiven          Boolean   @default(true)
+  consentMethod         String // Web form, Email, Phone, etc.
+  ipAddress             String?
+  userAgent             String?
+  timestamp             DateTime  @default(now())
+  expiresAt             DateTime?
+  version               String // Consent version/policy version
+  parentGuardianConsent Boolean? // For minors
+  withdrawable          Boolean   @default(true)
+  withdrawnAt           DateTime?
+  withdrawalMethod      String?
+
+  @@index([dataSubjectId])
+  @@index([purpose])
+  @@index([consentGiven])
+  @@map("data_consents")
+}
+
+// Data subject requests (access, rectification, erasure, etc.)
+model DataSubjectRequest {
+  id              String    @id @default(cuid())
+  type            String // ACCESS, RECTIFICATION, ERASURE, PORTABILITY, etc.
+  dataSubjectId   String
+  status          String // PENDING, IN_PROGRESS, COMPLETED, REJECTED
+  receivedAt      DateTime  @default(now())
+  completedAt     DateTime?
+  responseData    Json? // Response data for the request
+  rejectionReason String?
+  handledBy       String?
+  metadata        Json?
+
+  @@index([dataSubjectId])
+  @@index([type, status])
+  @@index([receivedAt])
+  @@map("data_subject_requests")
+}
+
+// Processing activities record
+model ProcessingActivity {
+  id             String   @id @default(cuid())
+  name           String
+  description    String   @db.Text
+  purpose        String[]
+  lawfulBasis    String
+  dataCategories String[]
+  dataSubjects   String[] // Categories of data subjects
+  recipients     String[] // Categories of recipients
+  transfers      String[] // International transfers
+  retention      String // Retention period
+  security       String[] // Security measures
+  active         Boolean  @default(true)
+  consentId      String? // Link to consent if applicable
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([active])
+  @@index([consentId])
+  @@map("processing_activities")
+}
+
+// Data breach records
+model DataBreach {
+  id                  String    @id @default(cuid())
+  discoveredAt        DateTime
+  reportedAt          DateTime?
+  description         String    @db.Text
+  dataCategories      String[]
+  affectedSubjects    Int
+  estimatedImpact     String
+  measures            String[] // Measures taken
+  notifiedDPA         Boolean   @default(false) // Data Protection Authority
+  notifiedSubjects    Boolean   @default(false)
+  status              String // INVESTIGATING, CONTAINED, RESOLVED
+  investigationReport Json?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([status])
+  @@index([discoveredAt])
+  @@map("data_breaches")
+}
+
+// Data Protection Impact Assessment reports
+model DpiaReport {
+  id          String    @id @default(cuid())
+  projectName String
+  description String    @db.Text
+  status      String // DRAFT, IN_REVIEW, COMPLETED, APPROVED
+  report      Json // Full DPIA report data
+  riskLevel   String // LOW, MEDIUM, HIGH
+  approved    Boolean   @default(false)
+  approvedBy  String?
+  approvedAt  DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+  @@index([projectName])
+  @@map("dpia_reports")
+}
+
+// Processing restrictions
+model ProcessingRestriction {
+  id            String    @id @default(cuid())
+  dataSubjectId String
+  scope         String[] // Data categories or processing types
+  reason        String
+  requestId     String? // Link to data subject request
+  appliedAt     DateTime  @default(now())
+  expiresAt     DateTime?
+  active        Boolean   @default(true)
+
+  @@index([dataSubjectId])
+  @@index([active])
+  @@map("processing_restrictions")
+}
+
+// Processing objections
+model ProcessingObjection {
+  id             String   @id @default(cuid())
+  dataSubjectId  String
+  processingType String // DIRECT_MARKETING, PROFILING, etc.
+  reason         String   @db.Text
+  requestId      String? // Link to data subject request
+  appliedAt      DateTime @default(now())
+  active         Boolean  @default(true)
+
+  @@index([dataSubjectId])
+  @@index([processingType])
+  @@map("processing_objections")
+}
+
+// Automated decision preferences
+model AutomatedDecisionPreference {
+  id            String   @id @default(cuid())
+  dataSubjectId String   @unique
+  optedOut      Boolean  @default(false)
+  categories    String[] // Categories opted out from
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("automated_decision_preferences")
+}
+
+// Security events for GDPR Article 32
+model SecurityEvent {
+  id           String    @id @default(cuid())
+  type         String // UNAUTHORIZED_ACCESS, DATA_LOSS, etc.
+  severity     String // LOW, MEDIUM, HIGH, CRITICAL
+  description  String    @db.Text
+  affectedData String[]
+  measures     String[] // Measures taken
+  resolved     Boolean   @default(false)
+  resolvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([type, severity])
+  @@index([resolved])
+  @@index([createdAt])
+  @@map("security_events")
+}
+
+// Vulnerability tracking
+model Vulnerability {
+  id           String    @id @default(cuid())
+  identifier   String    @unique // CVE or internal ID
+  description  String    @db.Text
+  severity     String // LOW, MEDIUM, HIGH, CRITICAL
+  status       String // OPEN, IN_PROGRESS, RESOLVED, ACCEPTED
+  discoveredAt DateTime
+  resolvedAt   DateTime?
+  measures     String[]
+  metadata     Json?
+
+  @@index([status, severity])
+  @@index([discoveredAt])
+  @@map("vulnerabilities")
+}
+
+// ============================================================================
+// CHANNEL INTEGRATIONS
+// ============================================================================
+
+model ChannelIntegration {
+  id                  String    @id @default(cuid())
+  userId              String
+  tenantId            String
+  channel             String // email, linkedin, facebook, sms, whatsapp
+  provider            String // gmail, outlook, twilio, etc.
+  accountIdentifier   String // email address, phone number, etc.
+  integrationStatus   String    @default("active") // active, expired, error
+  accessToken         String?
+  refreshToken        String?
+  tokenExpiresAt      DateTime?
+  settings            Json      @default("{}")
+  dailyLimits         Json      @default("{}")
+  lastSuccessfulSend  DateTime?
+  consecutiveFailures Int       @default(0)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relationships
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, channel, accountIdentifier])
+  @@index([userId, channel])
+  @@index([integrationStatus])
+  @@map("channel_integrations")
+}
+
+// ============================================================================
+// AI COST MONITORING MODELS
+// ============================================================================
+
+// AI usage tracking for cost monitoring
+model AIUsageRecord {
+  id               String   @id @default(cuid())
+  tenantId         String
+  userId           String
+  department       String
+  model            String
+  promptTokens     Int
+  completionTokens Int
+  totalTokens      Int
+  cost             Float
+  requestType      String
+  metadata         Json?
+  createdAt        DateTime @default(now())
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@index([userId, createdAt])
+  @@index([department, createdAt])
+  @@index([model])
+  @@map("ai_usage_records")
+}
+
+// AI budget configuration per tenant
+model TenantAIBudget {
+  id                   String   @id @default(cuid())
+  tenantId             String   @unique
+  dailyLimit           Float
+  monthlyLimit         Float
+  perUserLimit         Float?
+  departmentLimits     Json? // Map of department to limit
+  warningThreshold     Float    @default(80) // Percentage
+  criticalThreshold    Float    @default(90) // Percentage
+  emailRecipients      String[]
+  webhookUrl           String?
+  blockOnExceed        Boolean  @default(false)
+  fallbackToLowerModel Boolean  @default(true)
+  requireApprovalAbove Float?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_ai_budgets")
+}
+
+// AI budget alerts
+model AIBudgetAlert {
+  id        String   @id @default(cuid())
+  tenantId  String
+  type      String // approaching_limit, exceeded_limit, unusual_spike, etc.
+  data      Json // Alert specific data
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@index([type])
+  @@index([resolved])
+  @@map("ai_budget_alerts")
+}
+
+// AI cost optimization recommendations
+model AICostOptimization {
+  id               String    @id @default(cuid())
+  tenantId         String
+  strategy         String
+  description      String    @db.Text
+  estimatedSavings Float
+  priority         Int
+  implemented      Boolean   @default(false)
+  implementedAt    DateTime?
+  actualSavings    Float?
+  createdAt        DateTime  @default(now())
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, implemented])
+  @@index([priority])
+  @@map("ai_cost_optimizations")
+}
+
+// ============================================================================
+// VECTOR DATABASE MODELS
+// ============================================================================
+
+// Vector insight references stored in PostgreSQL
+model VectorInsightReference {
+  id          String   @id @default(cuid())
+  tenantId    String
+  content     String   @db.Text
+  insightType String
+  department  String
+  metadata    Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([insightType])
+  @@index([department])
+  @@index([createdAt])
+  @@map("vector_insight_references")
+}
+
+// ============================================================================
+// AI SECURITY MODELS
+// ============================================================================
+
+// AI Security Policy per tenant
+model AISecurityPolicy {
+  id                     String   @id @default(cuid())
+  tenantId               String   @unique
+  allowedModels          String[]
+  blockedPromptPatterns  String[]
+  maxTokensPerRequest    Int      @default(4000)
+  maxRequestsPerHour     Int      @default(100)
+  maxRequestsPerDay      Int      @default(1000)
+  enableBiasDetection    Boolean  @default(true)
+  enableContentFiltering Boolean  @default(true)
+  enableAuditLogging     Boolean  @default(true)
+  allowCrossTenantData   Boolean  @default(false)
+  sensitiveDataPatterns  String[]
+  departmentRestrictions Json     @default("{}")
+  userRestrictions       Json     @default("{}")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("ai_security_policies")
+}
+
+// AI Security Audit Log
+model AISecurityAudit {
+  id                String   @id @default(cuid())
+  tenantId          String
+  userId            String
+  eventType         String
+  riskLevel         String
+  description       String   @db.Text
+  context           Json
+  blocked           Boolean  @default(false)
+  mitigationApplied String?
+  metadata          Json?
+  timestamp         DateTime @default(now())
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, timestamp])
+  @@index([eventType])
+  @@index([riskLevel])
+  @@index([userId])
+  @@index([blocked])
+  @@map("ai_security_audits")
+}
+
+// ============================================================================
+// AI CONFIGURATION MODELS
+// ============================================================================
+
+// Tenant AI Configuration
+model TenantAIConfig {
+  id                String   @id @default(cuid())
+  tenantId          String   @unique
+  subscription      Json // Subscription tier and limits
+  modelPreferences  Json // Primary model, fallbacks, auto-selection
+  featureFlags      Json // Enabled AI features
+  departmentConfigs Json // Department-specific configurations
+  customSettings    Json // Custom tenant settings
+  retentionPolicies Json // Data retention policies
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("tenant_ai_configs")
+}
+
+// User AI Preferences
+model UserAIPreferences {
+  id                      String   @id @default(cuid())
+  userId                  String
+  tenantId                String
+  aiAssistantEnabled      Boolean  @default(true)
+  preferredModel          String?
+  communicationStyle      String   @default("FRIENDLY")
+  responseLength          String   @default("STANDARD")
+  enabledFeatures         String[]
+  customSettings          Json     @default("{}")
+  notificationPreferences Json     @default("{}")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
+  @@index([userId])
+  @@index([tenantId])
+  @@map("user_ai_preferences")
+}
+
+// ============================================================================
+// AI ERROR HANDLING MODELS
+// ============================================================================
+
+// AI Error Logs
+model AIErrorLog {
+  id               String    @id @default(cuid())
+  tenantId         String
+  userId           String?
+  requestId        String
+  errorType        String // AIErrorType
+  severity         String // AIErrorSeverity
+  recoveryStrategy String // AIErrorRecoveryStrategy
+  message          String    @db.Text
+  context          Json // AIErrorContext
+  originalError    Json? // Original error details
+  retryCount       Int       @default(0)
+  recoveryAttempts Json      @default("[]") // Array of recovery attempts
+  resolvedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, errorType])
+  @@index([createdAt])
+  @@index([severity])
+  @@index([requestId])
+  @@index([userId])
+  @@map("ai_error_logs")
+}
+
+// Circuit Breaker State Management
+model AICircuitBreakerState {
+  id                   String    @id @default(cuid())
+  serviceName          String    @unique
+  state                String // CLOSED, OPEN, HALF_OPEN
+  failureCount         Int       @default(0)
+  lastFailureTime      DateTime?
+  halfOpenRequestCount Int       @default(0)
+  config               Json // CircuitBreakerConfig
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([serviceName])
+  @@index([state])
+  @@index([lastFailureTime])
+  @@map("ai_circuit_breaker_states")
+}
+
+// AI Error Statistics and Analytics
+model AIErrorStatistics {
+  id             String    @id @default(cuid())
+  tenantId       String? // null for global stats
+  errorType      String // AIErrorType
+  count          Int       @default(0)
+  lastOccurrence DateTime?
+  period         String // HOURLY, DAILY, MONTHLY
+  periodStart    DateTime
+  periodEnd      DateTime
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, errorType, period, periodStart])
+  @@index([tenantId, period])
+  @@index([errorType])
+  @@index([periodStart])
+  @@index([lastOccurrence])
+  @@map("ai_error_statistics")
+}
+
+// AI Recovery Patterns and Learning
+model AIRecoveryPattern {
+  id               String   @id @default(cuid())
+  tenantId         String? // null for global patterns
+  errorType        String // AIErrorType
+  context          Json // Pattern context (model, department, etc.)
+  recoveryStrategy String // Most successful recovery strategy
+  successRate      Float // Success rate for this pattern
+  avgRecoveryTime  Int // Average recovery time in ms
+  sampleSize       Int // Number of samples used for this pattern
+  confidence       Float // Confidence in this pattern (0-1)
+  lastUpdated      DateTime @updatedAt
+  createdAt        DateTime @default(now())
+
+  // Relations
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, errorType, context])
+  @@index([tenantId])
+  @@index([errorType])
+  @@index([successRate])
+  @@index([confidence])
+  @@map("ai_recovery_patterns")
+}
+
+// ============================================================================
+// AI PERFORMANCE MONITORING MODELS
+// ============================================================================
+
+// AI Performance Metrics Storage
+model AIPerformanceMetric {
+  id            String   @id @default(cuid())
+  tenantId      String
+  userId        String?
+  modelId       String
+  requestId     String
+  operationType String
+  metricType    String // AIPerformanceMetricType
+  value         Float
+  unit          String
+  tags          Json     @default("{}")
+  metadata      Json     @default("{}")
+  timestamp     DateTime @default(now())
+
+  // Context Information
+  department   String?
+  complexity   String?
+  urgency      String?
+  sessionId    String?
+  experimentId String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, metricType])
+  @@index([modelId, operationType])
+  @@index([timestamp])
+  @@index([requestId])
+  @@index([userId])
+  @@index([department])
+  @@map("ai_performance_metrics")
+}
+
+// AI Performance Benchmarks
+model AIPerformanceBenchmark {
+  id            String  @id @default(cuid())
+  tenantId      String? // null for global benchmarks
+  modelId       String
+  department    String?
+  operationType String
+  sampleSize    Int     @default(0)
+
+  // Performance Metrics
+  averageResponseTime Float @default(0)
+  p95ResponseTime     Float @default(0)
+  p99ResponseTime     Float @default(0)
+  throughput          Float @default(0)
+  successRate         Float @default(0)
+  costPerRequest      Float @default(0)
+
+  // Performance Assessment
+  performanceTier String // AIModelPerformanceTier
+  recommendations String[]
+
+  // Comparison Data
+  baselineComparison Json? // Comparison with baseline benchmark
+
+  // Metadata
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastSampleAt DateTime?
+
+  // Relations
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, modelId, department, operationType])
+  @@index([modelId])
+  @@index([department])
+  @@index([operationType])
+  @@index([performanceTier])
+  @@index([updatedAt])
+  @@map("ai_performance_benchmarks")
+}
+
+// AI Performance Alerts
+model AIPerformanceAlert {
+  id        String  @id @default(cuid())
+  tenantId  String
+  userId    String?
+  modelId   String
+  alertType String // AIPerformanceAlertType
+  severity  String // LOW, MEDIUM, HIGH, CRITICAL
+  title     String
+  message   String  @db.Text
+
+  // Alert Context
+  requestId     String?
+  operationType String?
+  department    String?
+
+  // Alert Details
+  currentValue    Float
+  thresholdValue  Float
+  recommendations String[]
+
+  // Resolution
+  isResolved      Boolean   @default(false)
+  resolvedAt      DateTime?
+  resolvedBy      String?
+  resolutionNotes String?   @db.Text
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, alertType])
+  @@index([modelId])
+  @@index([severity])
+  @@index([isResolved])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("ai_performance_alerts")
+}
+
+// AI Performance SLAs
+model AIPerformanceSLA {
+  id            String  @id @default(cuid())
+  tenantId      String
+  department    String?
+  modelId       String?
+  operationType String?
+  slaType       String // RESPONSE_TIME, THROUGHPUT, SUCCESS_RATE, COST
+
+  // SLA Targets
+  targetValue       Float
+  thresholdValue    Float
+  measurementWindow Int // minutes
+  breachTolerance   Float // percentage
+
+  // Status
+  isActive    Boolean   @default(true)
+  lastBreach  DateTime?
+  breachCount Int       @default(0)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, slaType])
+  @@index([modelId])
+  @@index([department])
+  @@index([isActive])
+  @@index([lastBreach])
+  @@map("ai_performance_slas")
+}
+
+// AI Optimization Recommendations
+model AIOptimizationRecommendation {
+  id                 String @id @default(cuid())
+  tenantId           String
+  recommendationType String // MODEL_SELECTION, RESOURCE_SCALING, CACHING, etc.
+  priority           String // LOW, MEDIUM, HIGH, CRITICAL
+  title              String
+  description        String @db.Text
+
+  // Context
+  modelId       String?
+  department    String?
+  operationType String?
+
+  // Expected Impact
+  expectedImpact       Json // Performance improvements
+  implementationEffort String // LOW, MEDIUM, HIGH
+
+  // Implementation Details
+  implementationSteps String[]
+  estimatedDuration   Int? // minutes
+  rollbackPlan        String[]
+
+  // Status
+  status            String    @default("PENDING") // PENDING, IMPLEMENTED, VALIDATED, REJECTED
+  implementedAt     DateTime?
+  implementedBy     String?
+  validatedAt       DateTime?
+  validationResults Json?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, recommendationType])
+  @@index([priority])
+  @@index([status])
+  @@index([modelId])
+  @@index([createdAt])
+  @@map("ai_optimization_recommendations")
+}
+
+// AI Performance Trends Analysis
+model AIPerformanceTrend {
+  id            String  @id @default(cuid())
+  tenantId      String? // null for global trends
+  modelId       String?
+  department    String?
+  metricType    String // AIPerformanceMetricType
+  operationType String?
+
+  // Trend Analysis
+  trendDirection String // IMPROVING, DEGRADING, STABLE
+  trendSlope     Float // Rate of change
+  confidence     Float // Confidence in trend (0-1)
+  dataPoints     Int // Number of data points used
+
+  // Time Period
+  periodStart DateTime
+  periodEnd   DateTime
+
+  // Statistical Data
+  startValue   Float
+  endValue     Float
+  averageValue Float
+  variability  Float // Standard deviation
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, modelId, department, metricType, operationType, periodStart])
+  @@index([tenantId])
+  @@index([modelId])
+  @@index([metricType])
+  @@index([trendDirection])
+  @@index([periodStart, periodEnd])
+  @@map("ai_performance_trends")
+}
+
+// ============================================================================
+// AI LEARNING SYSTEM MODELS
+// ============================================================================
+
+// AI Learning Feedback Collection
+model AILearningFeedback {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Context Information
+  userId        String?
+  department    String?
+  modelId       String
+  requestId     String
+  operationType String
+  sessionId     String?
+  experimentId  String?
+
+  // Feedback Details
+  feedbackType  String // THUMBS_UP, THUMBS_DOWN, RATING_SCALE, TEXT_FEEDBACK, etc.
+  feedbackValue Json // Flexible value storage
+  confidence    Float  @default(0.5)
+  source        String // user, system, analytics, etc.
+
+  // Business Context
+  businessContext    Json @default("{}")
+  environmentContext Json @default("{}")
+
+  // Outcome Information
+  businessOutcome    Json? // Revenue impact, efficiency gains, etc.
+  outcomeAttribution Float? // How much outcome is attributed to AI (0-1)
+  outcomeVerified    Boolean @default(false)
+
+  // Processing Status
+  processed     Boolean   @default(false)
+  processedAt   DateTime?
+  correlationId String? // For linking related feedback
+
+  // Metadata
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, modelId])
+  @@index([feedbackType])
+  @@index([userId])
+  @@index([processed])
+  @@index([createdAt])
+  @@index([correlationId])
+  @@map("ai_learning_feedback")
+}
+
+// ============================================================================
+// AI EXPLAINABILITY SYSTEM MODELS
+// ============================================================================
+
+// AI Decisions - Core decision records that need explanations
+model AIDecision {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Model Information
+  modelId      String
+  modelVersion String
+
+  // Decision Data
+  inputData         Json // Input features and data
+  outputData        Json // Decision outputs and predictions
+  confidenceScore   Float // Overall decision confidence (0-1)
+  decisionTimestamp DateTime @default(now())
+
+  // Context Information
+  userId            String?
+  sessionId         String?
+  departmentContext String? // Department that made the decision
+  businessUseCase   String? // Specific business use case
+
+  // Business Context
+  businessContext        Json     @default("{}")
+  businessImpact         String   @default("medium") // low, medium, high, critical
+  affectedStakeholders   String[] @default([])
+  regulatoryRequirements String[] @default([])
+  businessRulesApplied   String[] @default([])
+  escalationRequired     Boolean  @default(false)
+
+  // Technical Metadata
+  metadata            Json     @default("{}")
+  modelType           String? // neural_network, decision_tree, etc.
+  algorithmFamily     String? // tree_based, linear, ensemble, etc.
+  trainingDataVersion String?
+  featureCount        Int?
+  processingTimeMs    Int?
+  explanationRequired Boolean  @default(true)
+  auditTrailLevel     String   @default("standard") // basic, standard, comprehensive
+  sensitiveAttributes String[] @default([])
+  fairnessConstraints String[] @default([])
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant            Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  explanations      AIExplanation[]
+  biasAnalyses      AIBiasAnalysis[]
+  complianceRecords AIComplianceRecord[]
+
+  @@index([tenantId, modelId])
+  @@index([decisionTimestamp])
+  @@index([businessImpact])
+  @@index([explanationRequired])
+  @@index([departmentContext])
+  @@index([businessUseCase])
+  @@map("ai_decisions")
+}
+
+// AI Explanations - Generated explanations for decisions
+model AIExplanation {
+  id         String @id @default(cuid())
+  tenantId   String
+  decisionId String
+
+  // Request Information
+  explanationTypes     String[] // FEATURE_IMPORTANCE, DECISION_PATH, etc.
+  audience             String // TECHNICAL_USER, BUSINESS_USER, etc.
+  complianceFrameworks String[] // GDPR, HIPAA, etc.
+  languagePreference   String   @default("en")
+  detailLevel          String   @default("standard") // summary, standard, detailed, comprehensive
+
+  // Generated Explanations
+  explanations           Json    @default("{}") // Map of explanation type to explanation content
+  naturalLanguageSummary String? @db.Text // Human-readable summary
+
+  // Feature Analysis
+  featureImportance Json? // Feature importance analysis
+  decisionPath      Json? // Step-by-step decision path
+  counterfactual    Json? // Counterfactual explanations
+
+  // Confidence and Uncertainty
+  overallConfidence   Float? // Overall explanation confidence
+  uncertaintyAnalysis Json? // Uncertainty quantification
+  calibrationMetrics  Json? // Model calibration assessment
+
+  // Bias and Fairness
+  biasAnalysis    Json? // Bias analysis results
+  fairnessMetrics Json? // Fairness assessment
+
+  // Compliance Documentation
+  complianceDocumentation Json? // Regulatory compliance info
+  auditTrail              Json? // Complete audit trail
+  dataLineage             Json? // Data lineage information
+
+  // Generation Metadata
+  generationTimeMs Int? // Time to generate explanation
+  generationCost   Float? // Cost of generating explanation
+  cacheHit         Boolean @default(false)
+
+  // Quality Metrics
+  completenessScore Float? // How complete the explanation is (0-1)
+  accuracyScore     Float? // Explanation accuracy (0-1)
+  usefulnessScore   Float? // User-reported usefulness (0-1)
+
+  // Custom Parameters
+  customParameters Json @default("{}")
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant   Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  decision AIDecision              @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  feedback AIExplanationFeedback[]
+
+  @@index([tenantId, decisionId])
+  @@index([explanationTypes])
+  @@index([audience])
+  @@index([createdAt])
+  @@index([overallConfidence])
+  @@index([cacheHit])
+  @@map("ai_explanations")
+}
+
+// AI Explanation Feedback - User feedback on explanations
+model AIExplanationFeedback {
+  id            String @id @default(cuid())
+  tenantId      String
+  explanationId String
+
+  // User Information
+  userId         String
+  userRole       String?
+  userDepartment String?
+
+  // Feedback Details
+  feedbackType String // rating, thumbs_up_down, text_feedback, bug_report
+  rating       Int? // 1-5 rating scale
+  thumbsUpDown String? // thumbs_up, thumbs_down
+  comments     String? @db.Text
+
+  // Detailed Feedback
+  usefulnessScore        Float? // How useful was the explanation (0-1)
+  comprehensionLevel     String? // not_understood, partially_understood, fully_understood
+  accuracyAssessment     String? // inaccurate, somewhat_accurate, accurate
+  completenessAssessment String? // incomplete, somewhat_complete, complete
+
+  // Improvement Suggestions
+  improvementSuggestions String?  @db.Text
+  missingInformation     String[] @default([])
+  preferredFormat        String? // text, visual, interactive, etc.
+
+  // Context
+  feedbackContext     Json    @default("{}")
+  userExperienceLevel String? // beginner, intermediate, expert
+  taskContext         String? // What task user was trying to accomplish
+
+  // Processing Status
+  processed    Boolean   @default(false)
+  processedAt  DateTime?
+  actionsTaken String[]  @default([])
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  explanation AIExplanation @relation(fields: [explanationId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, explanationId])
+  @@index([userId])
+  @@index([feedbackType])
+  @@index([rating])
+  @@index([processed])
+  @@index([createdAt])
+  @@map("ai_explanation_feedback")
+}
+
+// AI Bias Analysis - Detailed bias analysis results
+model AIBiasAnalysis {
+  id         String @id @default(cuid())
+  tenantId   String
+  decisionId String
+
+  // Analysis Configuration
+  protectedAttributes String[] // Attributes checked for bias
+  biasTypes           String[] // Types of bias analyzed
+  analysisMethod      String // Method used for bias detection
+
+  // Bias Metrics
+  overallBiasScore  Float // Overall bias score (0-1, where 0 is no bias)
+  biasTypesDetected String[] // Specific types of bias found
+  demographicParity Float? // Demographic parity metric
+  equalizedOdds     Float? // Equalized odds metric
+  calibrationScore  Float? // Calibration bias metric
+  treatmentEquality Float? // Treatment equality metric
+
+  // Fairness Assessment
+  fairnessMetrics    Json     @default("{}")
+  fairnessThresholds Json     @default("{}")
+  fairnessViolations String[] @default([])
+
+  // Protected Group Analysis
+  protectedGroupAnalysis Json  @default("{}")
+  disparateImpact        Json? // Disparate impact analysis
+
+  // Bias Detection Details
+  biasEvidence    Json  @default("{}") // Evidence supporting bias detection
+  confidenceScore Float // Confidence in bias analysis (0-1)
+
+  // Remediation
+  remediationSuggestions String[] @default([])
+  severityLevel          String // low, medium, high, critical
+  requiresAttention      Boolean  @default(false)
+
+  // Analysis Metadata
+  analysisTimeMs  Int? // Time to perform analysis
+  datasetSize     Int? // Size of dataset analyzed
+  analysisVersion String @default("1.0")
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant   Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  decision AIDecision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, decisionId])
+  @@index([overallBiasScore])
+  @@index([severityLevel])
+  @@index([requiresAttention])
+  @@index([createdAt])
+  @@map("ai_bias_analysis")
+}
+
+// AI Compliance Records - Regulatory compliance tracking
+model AIComplianceRecord {
+  id         String @id @default(cuid())
+  tenantId   String
+  decisionId String
+
+  // Compliance Framework
+  framework        String // GDPR, HIPAA, SOX, EU_AI_ACT, etc.
+  frameworkVersion String? // Version of the compliance framework
+
+  // Compliance Assessment
+  complianceStatus   String   @default("pending") // compliant, non_compliant, pending, unknown
+  requirementsMet    String[] @default([])
+  requirementsFailed String[] @default([])
+  complianceScore    Float? // Overall compliance score (0-1)
+
+  // Regulatory Requirements
+  applicableRequirements Json    @default("{}")
+  dataSubjectRights      Json? // GDPR data subject rights
+  lawfulBasis            String? // GDPR lawful basis
+  consentStatus          String? // Consent tracking
+
+  // Documentation
+  complianceDocumentation Json     @default("{}")
+  auditTrail              Json     @default("{}")
+  evidenceDocuments       String[] @default([])
+
+  // Risk Assessment
+  riskLevel         String? // low, medium, high, critical
+  riskFactors       String[] @default([])
+  mitigationActions String[] @default([])
+
+  // Remediation
+  remediationRequired Boolean   @default(false)
+  remediationActions  String[]  @default([])
+  remediationStatus   String? // pending, in_progress, completed, failed
+  remediationDeadline DateTime?
+
+  // Review and Approval
+  reviewStatus   String    @default("pending") // pending, approved, rejected, needs_revision
+  reviewedBy     String? // User who reviewed
+  reviewedAt     DateTime?
+  reviewComments String?   @db.Text
+
+  // Reporting
+  reportingRequired Boolean   @default(false)
+  reportingDeadline DateTime?
+  reportingStatus   String? // pending, submitted, acknowledged
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant   Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  decision AIDecision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, decisionId])
+  @@index([framework])
+  @@index([complianceStatus])
+  @@index([riskLevel])
+  @@index([remediationRequired])
+  @@index([reviewStatus])
+  @@index([reportingRequired])
+  @@index([createdAt])
+  @@map("ai_compliance_records")
+}
+
+// AI Explanation Configuration - Tenant-specific explanation settings
+model AIExplanationConfig {
+  id       String @id @default(cuid())
+  tenantId String @unique
+
+  // Feature Importance Settings
+  featureImportanceThreshold Float   @default(0.05) // Minimum importance to show
+  maxFeaturesToExplain       Int     @default(20) // Limit explanation length
+  includeFeatureInteractions Boolean @default(true) // Show feature combinations
+
+  // Confidence and Uncertainty
+  includeConfidenceIntervals Boolean @default(true) // Statistical confidence
+  uncertaintyQuantification  Boolean @default(true) // Model uncertainty
+  calibrationAssessment      Boolean @default(false) // Prediction calibration
+
+  // Bias and Fairness
+  biasDetectionEnabled Boolean  @default(true) // Enable bias analysis
+  protectedAttributes  String[] @default([]) // Attributes to check
+  fairnessThresholds   Json     @default("{}") // Custom thresholds
+
+  // Compliance and Audit
+  regulatoryComplianceLevel String @default("standard") // basic, standard, strict
+  auditTrailDetail          String @default("standard") // minimal, standard, comprehensive
+  retentionPeriodDays       Int    @default(365) // How long to keep explanations
+
+  // Presentation and Format
+  explanationDepth      String  @default("standard") // summary, standard, detailed, comprehensive
+  includeVisualizations Boolean @default(true) // Generate charts/graphs
+  languagePreference    String  @default("en") // Localization
+  technicalLevel        String  @default("intermediate") // basic, intermediate, advanced
+
+  // Performance Settings
+  enableCaching        Boolean @default(true) // Cache explanations
+  cacheExpirationHours Int     @default(24) // Cache expiration
+  maxGenerationTimeMs  Int     @default(30000) // Max time to generate
+
+  // Custom Rules
+  customExplanationRules     Json @default("{}") // Custom explanation logic
+  departmentSpecificSettings Json @default("{}") // Per-department settings
+
+  // Notification Settings
+  notificationEnabled    Boolean  @default(false) // Enable notifications
+  notificationThresholds Json     @default("{}") // When to notify
+  notificationChannels   String[] @default([]) // slack, email, etc.
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("ai_explanation_configs")
+}
+
+// ============================================================================
+// AI BATCH PROCESSING SYSTEM MODELS
+// ============================================================================
+
+// AI Batch Jobs - Core batch processing jobs
+model AIBatchJob {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // User and Context
+  userId   String?
+  jobType  String // BULK_ANALYSIS, DATA_PROCESSING, etc.
+  status   String  @default("PENDING") // PENDING, QUEUED, PROCESSING, COMPLETED, FAILED, CANCELLED, RETRYING, PARTIALLY_FAILED
+  priority Int     @default(2) // 1=LOW, 2=NORMAL, 3=HIGH, 4=URGENT, 5=CRITICAL
+
+  // Job Data and Configuration
+  jobData       Json // Items to process, source info, etc.
+  configuration Json // Batch size, concurrency, retries, etc.
+  totalItems    Int // Total number of items to process
+
+  // Dependencies and Scheduling
+  dependencies  String[]  @default([]) // Job IDs this job depends on
+  scheduledTime DateTime? // When job should start processing
+  deadline      DateTime? // When job must complete
+  tags          String[]  @default([]) // Searchable tags
+
+  // Progress Tracking
+  processedItems       Int     @default(0)
+  successfulItems      Int     @default(0)
+  failedItems          Int     @default(0)
+  skippedItems         Int     @default(0)
+  currentBatch         Int     @default(0)
+  totalBatches         Int     @default(0)
+  completionPercentage Float   @default(0)
+  currentPhase         String? // Current processing phase
+
+  // Resource Usage
+  resourceUsage           Json      @default("{}")
+  estimatedCompletionTime DateTime?
+  processingRatePerSecond Float     @default(0)
+
+  // Results and Errors
+  results        Json? // Final job results
+  errorInfo      Json? // Error details if job failed
+  costBreakdown  Json? // Cost analysis
+  qualityMetrics Json? // Quality assessment
+
+  // Timing
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  // Custom Data
+  metadata Json @default("{}")
+
+  // Relations
+  tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  jobResults AIBatchJobResult[]
+  jobErrors  AIBatchJobError[]
+
+  @@index([tenantId, status])
+  @@index([jobType])
+  @@index([priority])
+  @@index([status])
+  @@index([scheduledTime])
+  @@index([createdAt])
+  @@index([completedAt])
+  @@index([tags])
+  @@map("ai_batch_jobs")
+}
+
+// AI Batch Job Results - Detailed results for each job
+model AIBatchJobResult {
+  id       String @id @default(cuid())
+  tenantId String
+  jobId    String
+
+  // Result Summary
+  totalProcessed    Int
+  successfulResults Int
+  failedResults     Int
+  skippedResults    Int
+  resultsSummary    Json     @default("{}")
+  outputLocations   String[] @default([])
+
+  // Performance Metrics
+  totalDurationMs             Int?
+  processingDurationMs        Int?
+  queueWaitTimeMs             Int?
+  averageItemProcessingTimeMs Float?
+  throughputItemsPerSecond    Float?
+  peakMemoryUsageMb           Float?
+  cpuUtilizationPercent       Float?
+  networkIoMb                 Float?
+  diskIoMb                    Float?
+
+  // Cost Analysis
+  computeCost   Float  @default(0)
+  storageCost   Float  @default(0)
+  networkCost   Float  @default(0)
+  aiModelCost   Float  @default(0)
+  totalCost     Float  @default(0)
+  costPerItem   Float  @default(0)
+  currency      String @default("USD")
+  billingPeriod String @default("monthly")
+
+  // Quality Metrics
+  accuracyScore     Float?
+  confidenceScore   Float?
+  errorRate         Float  @default(0)
+  dataQualityScore  Float?
+  completenessScore Float?
+  consistencyScore  Float?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  job    AIBatchJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, jobId])
+  @@index([totalCost])
+  @@index([createdAt])
+  @@map("ai_batch_job_results")
+}
+
+// AI Batch Job Errors - Error tracking for failed jobs
+model AIBatchJobError {
+  id       String @id @default(cuid())
+  tenantId String
+  jobId    String
+
+  // Error Details
+  errorType    String // Error classification
+  errorMessage String  @db.Text
+  errorCode    String
+  retryCount   Int     @default(0)
+  isRetryable  Boolean @default(true)
+  phase        String? // Which phase the error occurred in
+
+  // Failed Items
+  failedItemIds   String[] @default([])
+  failedItemCount Int      @default(0)
+
+  // Context
+  errorContext     Json     @default("{}")
+  suggestedActions String[] @default([])
+  severity         String   @default("medium") // low, medium, high, critical
+
+  // Resolution
+  resolved        Boolean   @default(false)
+  resolvedAt      DateTime?
+  resolvedBy      String?
+  resolutionNotes String?   @db.Text
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  job    AIBatchJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, jobId])
+  @@index([errorType])
+  @@index([severity])
+  @@index([resolved])
+  @@index([createdAt])
+  @@map("ai_batch_job_errors")
+}
+
+// AI Batch Schedules - Recurring job schedules
+model AIBatchSchedule {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Schedule Configuration
+  name               String
+  description        String? @db.Text
+  scheduleExpression String // Cron expression
+  timezone           String  @default("UTC")
+  enabled            Boolean @default(true)
+
+  // Job Template
+  jobTemplate Json // Template for creating jobs
+
+  // Execution Tracking
+  nextExecution DateTime
+  lastExecution DateTime?
+  lastJobId     String? // Last created job ID
+
+  // Execution History (stored as JSON for simplicity)
+  executionHistory     Json @default("[]")
+  totalExecutions      Int  @default(0)
+  successfulExecutions Int  @default(0)
+  failedExecutions     Int  @default(0)
+
+  // Configuration
+  maxConcurrentJobs     Int     @default(1)
+  skipIfRunning         Boolean @default(true)
+  retryFailedExecutions Boolean @default(false)
+  maxRetries            Int     @default(3)
+
+  // Monitoring
+  alertOnFailure     Boolean  @default(false)
+  alertChannels      String[] @default([])
+  healthCheckEnabled Boolean  @default(true)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  tags      String[] @default([])
+  metadata  Json     @default("{}")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, enabled])
+  @@index([nextExecution])
+  @@index([enabled])
+  @@index([scheduleExpression])
+  @@index([tags])
+  @@index([createdAt])
+  @@map("ai_batch_schedules")
+}
+
+// AI Batch Metrics - System performance and usage metrics
+model AIBatchMetric {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Metric Classification
+  metricType     String // SYSTEM_PERFORMANCE, QUEUE_HEALTH, COST_TRACKING, etc.
+  metricName     String
+  metricCategory String // performance, cost, quality, usage
+
+  // Metric Data
+  value      Float
+  unit       String // jobs/hour, USD, percentage, etc.
+  tags       Json   @default("{}")
+  dimensions Json   @default("{}")
+
+  // Aggregation Info
+  aggregationType   String    @default("point") // point, sum, average, min, max
+  aggregationPeriod String? // hourly, daily, weekly, monthly
+  periodStart       DateTime?
+  periodEnd         DateTime?
+
+  // Context
+  jobType    String? // If metric is job-type specific
+  department String? // If metric is department specific
+  region     String? // If metric is region specific
+
+  // Quality and Metadata
+  dataQuality Float  @default(1.0) // 0-1 quality score
+  confidence  Float  @default(1.0) // 0-1 confidence score
+  source      String @default("system") // system, manual, estimated
+
+  // Metadata
+  createdAt DateTime @default(now())
+  metadata  Json     @default("{}")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, metricType])
+  @@index([metricType, metricName])
+  @@index([metricCategory])
+  @@index([createdAt])
+  @@index([periodStart, periodEnd])
+  @@index([jobType])
+  @@index([department])
+  @@map("ai_batch_metrics")
+}
+
+// AI Learning Pattern Recognition
+model AILearningPattern {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Pattern Classification
+  patternType     String // INTERACTION_PATTERN, WORKFLOW_PATTERN, SALES_CYCLE_PATTERN, etc.
+  patternCategory String // BEHAVIORAL, BUSINESS, TEMPORAL, CROSS_DEPARTMENT
+
+  // Pattern Definition
+  pattern    Json // Pattern structure and rules
+  confidence Float
+  frequency  Int // How often pattern occurs
+  strength   Float // Pattern strength (0-1)
+
+  // Discovery Information
+  firstSeen DateTime
+  lastSeen  DateTime
+  examples  Json     @default("[]") // Example instances
+
+  // Impact Assessment
+  businessImpact   Json? // Revenue, efficiency, satisfaction impact
+  impactConfidence Float? // Confidence in impact assessment
+
+  // Validation
+  validated   Boolean   @default(false)
+  validatedAt DateTime?
+  validatedBy String?
+
+  // Metadata
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, patternType])
+  @@index([patternCategory])
+  @@index([confidence])
+  @@index([validated])
+  @@index([lastSeen])
+  @@map("ai_learning_patterns")
+}
+
+// AI Learning Models Management
+model AILearningModel {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Model Information
+  name    String
+  version String @default("1.0.0")
+  type    String // CLASSIFICATION, REGRESSION, REINFORCEMENT, etc.
+  status  String @default("TRAINING") // TRAINING, READY, DEPRECATED, FAILED
+
+  // Model Architecture
+  architecture    Json // Model structure definition
+  parameters      Json @default("{}")
+  hyperparameters Json @default("{}")
+
+  // Training Information
+  trainingDatasets String[] // Dataset identifiers
+  lastTraining     DateTime
+  trainingDuration Int? // Training time in seconds
+  trainingCost     Float? // Training cost
+
+  // Performance Metrics
+  performanceMetrics Json @default("{}")
+  validationResults  Json @default("{}")
+  testResults        Json @default("{}")
+
+  // Model Lineage
+  parentModelId String?
+  parentModel   AILearningModel?  @relation("ModelLineage", fields: [parentModelId], references: [id])
+  childModels   AILearningModel[] @relation("ModelLineage")
+
+  // Deployment Information
+  deployedAt       DateTime?
+  deploymentConfig Json?
+  servingEndpoint  String?
+
+  // Metadata
+  description String?  @db.Text
+  tags        String[] @default([])
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  tenant       Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  experiments  AILearningExperiment[]
+  improvements AIModelImprovement[]
+
+  @@index([tenantId, name])
+  @@index([type])
+  @@index([status])
+  @@index([parentModelId])
+  @@index([lastTraining])
+  @@map("ai_learning_models")
+}
+
+// AI Model Improvement History
+model AIModelImprovement {
+  id      String @id @default(cuid())
+  modelId String
+
+  // Improvement Details
+  version         String
+  improvementType String // ACCURACY, SPEED, COST, ROBUSTNESS
+  strategy        String // INCREMENTAL_LEARNING, FINE_TUNING, etc.
+
+  // Improvements Made
+  improvements     String[] // List of improvements
+  performanceGains Json // Quantified performance improvements
+
+  // Validation
+  validationResults Json // A/B test results, metrics
+  significant       Boolean // Statistically significant improvement
+  approvedForDeploy Boolean @default(false)
+
+  // Implementation
+  implementedAt  DateTime?
+  rollbackAt     DateTime?
+  rollbackReason String?
+
+  // Business Impact
+  businessImpact Json? // Revenue, efficiency impact
+  impactMeasured Boolean @default(false)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  model AILearningModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@index([modelId])
+  @@index([improvementType])
+  @@index([significant])
+  @@index([implementedAt])
+  @@map("ai_model_improvements")
+}
+
+// AI Learning Experiments
+model AILearningExperiment {
+  id       String  @id @default(cuid())
+  tenantId String
+  modelId  String?
+
+  // Experiment Information
+  name        String
+  description String @db.Text
+  hypothesis  String @db.Text
+
+  // Experiment Configuration
+  strategy        String // INCREMENTAL_LEARNING, A_B_TESTING, etc.
+  parameters      Json   @default("{}")
+  controlGroup    Json? // Control group configuration
+  treatmentGroups Json? // Treatment groups configuration
+
+  // Status and Timeline
+  status          String    @default("PLANNING") // PLANNING, RUNNING, COMPLETED, FAILED, CANCELLED
+  startDate       DateTime
+  endDate         DateTime?
+  plannedDuration Int? // Planned duration in days
+
+  // Results
+  results     Json? // Experiment results
+  conclusions String[] @default([])
+  nextSteps   String[] @default([])
+
+  // Statistical Analysis
+  sampleSize         Int?
+  significance       Float? // Statistical significance
+  confidenceInterval Json? // Confidence intervals
+
+  // Business Metrics
+  businessMetrics Json? // Business impact metrics
+  roi             Float? // Return on investment
+
+  // Metadata
+  createdBy String?
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  model  AILearningModel? @relation(fields: [modelId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([modelId])
+  @@index([startDate, endDate])
+  @@index([strategy])
+  @@map("ai_learning_experiments")
+}
+
+// AI Knowledge Graphs
+model AIKnowledgeGraph {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Graph Information
+  name        String
+  description String? @db.Text
+  version     String  @default("1.0.0")
+
+  // Graph Structure
+  nodes    Json  @default("[]") // Knowledge nodes
+  edges    Json  @default("[]") // Knowledge relationships
+  ontology Json? // Domain ontology
+
+  // Statistics
+  nodeCount Int @default(0)
+  edgeCount Int @default(0)
+
+  // Metadata
+  sourceData  Json? // Information about source data
+  buildMethod String? // How the graph was constructed
+  quality     Float? // Quality score (0-1)
+
+  // Status
+  status          String   @default("BUILDING") // BUILDING, READY, UPDATING, ERROR
+  lastUpdated     DateTime @default(now())
+  updateFrequency String? // How often to update
+
+  // Access Control
+  visibility  String @default("TENANT") // TENANT, DEPARTMENT, PUBLIC
+  accessRules Json   @default("{}")
+
+  // Metadata
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant  Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  queries AIKnowledgeQuery[]
+
+  @@index([tenantId, name])
+  @@index([status])
+  @@index([visibility])
+  @@index([lastUpdated])
+  @@map("ai_knowledge_graphs")
+}
+
+// AI Knowledge Graph Queries
+model AIKnowledgeQuery {
+  id               String @id @default(cuid())
+  knowledgeGraphId String
+
+  // Query Information
+  queryType String // NODE, EDGE, PATH, PATTERN
+  query     Json // Query parameters
+
+  // Results
+  results       Json // Query results
+  resultCount   Int  @default(0)
+  executionTime Int // Execution time in milliseconds
+
+  // Optimization
+  cached   Boolean @default(false)
+  cacheKey String?
+  hitCount Int     @default(1)
+
+  // Metadata
+  createdAt    DateTime @default(now())
+  lastExecuted DateTime @default(now())
+
+  // Relations
+  knowledgeGraph AIKnowledgeGraph @relation(fields: [knowledgeGraphId], references: [id], onDelete: Cascade)
+
+  @@index([knowledgeGraphId])
+  @@index([queryType])
+  @@index([cached])
+  @@index([lastExecuted])
+  @@map("ai_knowledge_queries")
+}
+
+// AI Learning Insights
+model AILearningInsight {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Insight Classification
+  type     String // PATTERN_DISCOVERY, PERFORMANCE_OPTIMIZATION, etc.
+  category String // OPERATIONAL, STRATEGIC, TACTICAL
+  priority String @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+
+  // Insight Content
+  title       String
+  description String @db.Text
+  evidence    Json   @default("[]") // Supporting evidence
+  confidence  Float // Confidence in insight (0-1)
+
+  // Recommendations
+  recommendations String[] @default([])
+  actionable      Boolean  @default(true)
+
+  // Business Value
+  businessValue            Float? // Estimated business value
+  implementationComplexity String? // LOW, MEDIUM, HIGH
+  timeToValue              Int? // Days to realize value
+  risks                    String[] @default([])
+
+  // Validation
+  validated       Boolean   @default(false)
+  validatedAt     DateTime?
+  validatedBy     String?
+  validationNotes String?   @db.Text
+
+  // Implementation
+  implemented   Boolean   @default(false)
+  implementedAt DateTime?
+  actualValue   Float? // Actual realized value
+
+  // Source Information
+  sourcePatterns String[] @default([]) // Pattern IDs that generated this insight
+  sourceFeedback String[] @default([]) // Feedback IDs that contributed
+  sourceModels   String[] @default([]) // Model IDs involved
+
+  // Metadata
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, type])
+  @@index([priority])
+  @@index([validated])
+  @@index([implemented])
+  @@index([businessValue])
+  @@index([createdAt])
+  @@map("ai_learning_insights")
+}
+
+// AI Learning Analytics
+model AILearningAnalytic {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Metric Information
+  metricName String // learningVelocity, improvementRate, etc.
+  metricType String // VELOCITY, QUALITY, IMPACT, EFFICIENCY
+
+  // Time Period
+  periodStart DateTime
+  periodEnd   DateTime
+
+  // Metric Values
+  value         Float
+  previousValue Float?
+  changeRate    Float? // Rate of change from previous period
+  trend         String? // IMPROVING, DECLINING, STABLE
+
+  // Context
+  department    String?
+  modelId       String?
+  operationType String?
+
+  // Statistical Information
+  sampleSize Int?
+  confidence Float? // Confidence in metric (0-1)
+  variance   Float?
+
+  // Metadata
+  calculationMethod String? // How the metric was calculated
+  metadata          Json     @default("{}")
+  createdAt         DateTime @default(now())
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, metricName, periodStart, periodEnd, department, modelId])
+  @@index([tenantId, metricName])
+  @@index([metricType])
+  @@index([periodStart, periodEnd])
+  @@index([trend])
+  @@map("ai_learning_analytics")
+}
+
+// ==========================================
+// AI Correlation Engine Models
+// ==========================================
+
+model AICorrelation {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Correlation Details
+  sourceType          String // DataSource enum
+  targetType          String // DataSource enum
+  sourceMetric        String
+  targetMetric        String
+  correlationType     String // CorrelationType enum
+  correlationStrength Float
+  correlation         Float
+  confidence          Float
+  pValue              Float
+  sampleSize          Int
+
+  // Temporal Analysis
+  timeLag Int? // In milliseconds
+
+  // Business Context
+  businessImpact  String // HIGH, MEDIUM, LOW
+  actionability   Boolean
+  recommendations String[]
+
+  // Validation
+  lastValidated   DateTime @default(now())
+  validationCount Int      @default(0)
+  isActive        Boolean  @default(true)
+
+  // Metadata
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, sourceType, targetType])
+  @@index([correlationStrength])
+  @@index([businessImpact])
+}
+
+model AICorrelationMatrix {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  dimensions String[] // Array of DataSource enums
+  matrixData Json // Serialized correlation matrix
+
+  // Summary Statistics
+  totalPairs         Int
+  significantPairs   Int
+  averageCorrelation Float
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model AICausalChain {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Root Cause
+  rootSource String
+  rootMetric String
+  rootEvent  String
+
+  // Effects and Chain
+  effectsData       Json // Array of effects
+  intermediateSteps Json // Array of intermediate steps
+
+  // Impact Metrics
+  totalImpact     Float
+  propagationTime Int // In milliseconds
+  confidence      Float
+
+  // Discovery
+  discoveredAt DateTime  @default(now())
+  validatedAt  DateTime?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([confidence])
+}
+
+model AIPatternCluster {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Pattern Details
+  patterns        Json // Array of patterns
+  commonFactors   String[]
+  businessContext String
+  recommendations String[]
+
+  // Metrics
+  patternCount    Int
+  averageStrength Float
+  frequency       Int
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([businessContext])
+}
+
+model AICorrelationStream {
+  id       String @id @default(cuid())
+  streamId String @unique
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Stream Configuration
+  sources              String[] // Array of DataSource enums
+  windowSize           Int // Time window in ms
+  updateInterval       Int // Update frequency
+  correlationThreshold Float
+
+  // State
+  active     Boolean   @default(true)
+  lastUpdate DateTime?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, active])
+  @@index([streamId])
+}
+
+// ==========================================
+// AI Prediction Models
+// ==========================================
+
+model AIPrediction {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Prediction Details
+  requestId      String
+  predictionType String // PredictionType enum
+  modelUsed      String // ModelType enum
+  targetMetric   String
+
+  // Results
+  predictions     Json // Array of PredictedValue
+  confidence      Float
+  confidenceLevel String // ConfidenceLevel enum
+
+  // Optional Results
+  anomalies  Json? // Array of AnomalyPrediction
+  components Json? // Trend, seasonal, residual
+  accuracy   Json? // ModelAccuracy
+
+  // Metadata
+  processingTime Int
+  modelVersion   String
+  generatedAt    DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, targetMetric])
+  @@index([generatedAt])
+  @@index([predictionType])
+}
+
+model AIPredictionModel {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Model Information
+  modelType String // ModelType enum
+  metric    String
+  version   String
+
+  // Model Data
+  parameters Json // Model-specific parameters
+  accuracy   Json // ModelAccuracy metrics
+
+  // Training Information
+  trainingSize  Int?
+  lastTrainedAt DateTime?
+
+  // Status
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, modelType, metric])
+  @@index([active])
+  @@index([metric])
+}
+
+model AIModelPerformance {
+  id       String @id @default(cuid())
+  modelId  String @unique
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Model Reference
+  modelType String // ModelType enum
+  metric    String
+
+  // Performance Metrics
+  accuracy           Json // ModelAccuracy
+  validationAccuracy Json? // Validation set accuracy
+  productionAccuracy Json? // Real-world accuracy
+
+  // Training Information
+  trainingSize  Int
+  trainingTime  Int // In milliseconds
+  lastTrainedAt DateTime
+
+  // Usage Statistics
+  predictionCount Int   @default(0)
+  successRate     Float @default(0)
+
+  // Cross-validation
+  crossValidationScores Float[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([modelType, metric])
+  @@index([successRate])
+}
+
+model AIPredictionStream {
+  id       String @id @default(cuid())
+  streamId String @unique
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Stream Configuration
+  metric         String
+  modelType      String // ModelType enum
+  updateInterval Int // In milliseconds
+  horizon        Int // Prediction horizon
+
+  // State
+  active           Boolean   @default(true)
+  lastPredictionId String?
+  lastUpdate       DateTime?
+
+  // Performance
+  realtimeAccuracy Json? // ModelAccuracy
+  driftDetected    Boolean @default(false)
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, active])
+  @@index([metric])
+}
+
+model AIAnomalyDetection {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Anomaly Details
+  metric    String
+  timestamp DateTime
+  type      String // SPIKE, DIP, LEVEL_SHIFT, etc.
+
+  // Detection Results
+  probability   Float
+  severity      String // HIGH, MEDIUM, LOW
+  expectedValue Float
+  actualValue   Float?
+  expectedRange Json // { lower, upper }
+
+  // Context
+  description     String   @db.Text
+  recommendations String[]
+
+  // Resolution
+  resolved        Boolean   @default(false)
+  resolvedAt      DateTime?
+  resolutionNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, metric, timestamp])
+  @@index([severity])
+  @@index([resolved])
+}
+
+// ============================================================================
+// AI CACHE MANAGEMENT MODELS
+// ============================================================================
+
+// AI Cache Entry - Stores cached AI responses and data
+model AICacheEntry {
+  id              String    @id @default(cuid())
+  key             String    @unique
+  value           Json // Cached data (potentially compressed/encrypted)
+  metadata        Json // Cache metadata including confidence, model info, etc.
+  tenantId        String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  expiresAt       DateTime? // TTL expiration
+  accessedAt      DateTime  @default(now())
+  accessCount     Int       @default(0)
+  sizeBytes       Int       @default(0)
+  compressionType String    @default("NONE") // NONE, GZIP, BROTLI, LZ4
+  encryptionLevel String    @default("NONE") // NONE, BASIC, ADVANCED, ENTERPRISE
+  tags            String[]  @default([]) // For categorization and invalidation
+  dependencies    String[]  @default([]) // For cascade invalidation
+  version         Int       @default(1)
+
+  // Relationships
+  tenant           Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  analytics        AICacheAnalytics[]
+  performances     AICachePerformance[]
+  dependencies_out AICacheDependency[]  @relation("CacheDependencySource")
+  dependencies_in  AICacheDependency[]  @relation("CacheDependencyTarget")
+
+  @@index([tenantId])
+  @@index([key])
+  @@index([tenantId, expiresAt])
+  @@index([tenantId, tags])
+  @@index([accessedAt])
+  @@index([createdAt])
+  @@map("ai_cache_entries")
+}
+
+// AI Cache Analytics - Tracks cache performance and usage patterns
+model AICacheAnalytics {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  cacheEntryId       String?
+  timeWindow         DateTime // Hour/day bucket for analytics
+  hitCount           Int      @default(0)
+  missCount          Int      @default(0)
+  totalRequests      Int      @default(0)
+  hitRate            Float    @default(0.0)
+  averageRetrievalMs Float    @default(0.0)
+  memoryHits         Int      @default(0)
+  redisHits          Int      @default(0)
+  databaseHits       Int      @default(0)
+  fallbackRequests   Int      @default(0)
+  compressionSavings Int      @default(0) // Bytes saved through compression
+  encryptionOverhead Int      @default(0) // Time overhead for encryption
+  invalidations      Int      @default(0)
+  prefetchRequests   Int      @default(0)
+  warmingRequests    Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relationships
+  tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cacheEntry AICacheEntry? @relation(fields: [cacheEntryId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, cacheEntryId, timeWindow])
+  @@index([tenantId])
+  @@index([tenantId, timeWindow])
+  @@index([cacheEntryId])
+  @@map("ai_cache_analytics")
+}
+
+// AI Cache Performance - Detailed performance metrics
+model AICachePerformance {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  cacheEntryId        String?
+  operation           String // GET, STORE, INVALIDATE, WARM, PREFETCH
+  source              String // memory, redis, database, fallback
+  retrievalTimeMs     Float
+  compressionTimeMs   Float?
+  decompressionTimeMs Float?
+  encryptionTimeMs    Float?
+  decryptionTimeMs    Float?
+  networkTimeMs       Float?
+  serializationTimeMs Float?
+  cacheLevel          Int // 1=memory, 2=redis, 3=database
+  compressionRatio    Float?
+  dataSize            Int // Size in bytes
+  hitProbability      Float?
+  businessContext     Json     @default("{}")
+  timestamp           DateTime @default(now())
+
+  // Relationships
+  tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cacheEntry AICacheEntry? @relation(fields: [cacheEntryId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, timestamp])
+  @@index([cacheEntryId])
+  @@index([operation])
+  @@index([source])
+  @@map("ai_cache_performance")
+}
+
+// AI Cache Configuration - Per-tenant cache configuration
+model AICacheConfiguration {
+  id                        String   @id @default(cuid())
+  tenantId                  String   @unique
+  strategy                  String   @default("MULTI_LEVEL") // MEMORY_ONLY, REDIS_ONLY, DATABASE_ONLY, MULTI_LEVEL, HYBRID
+  maxMemorySizeMb           Int      @default(256)
+  maxRedisSizeMb            Int      @default(1024)
+  maxDatabaseEntries        Int      @default(100000)
+  defaultTtlSeconds         Int      @default(3600)
+  maxTtlSeconds             Int      @default(86400)
+  compressionThresholdBytes Int      @default(1024)
+  encryptionRequired        Boolean  @default(false)
+  analyticsEnabled          Boolean  @default(true)
+  prefetchEnabled           Boolean  @default(false)
+  warmingEnabled            Boolean  @default(false)
+  invalidationTypes         String[] @default(["TIME_BASED", "EVENT_BASED"])
+  tenantIsolation           Boolean  @default(true)
+  distributedConsistency    Boolean  @default(false)
+  warmingStrategy           Json     @default("{}")
+  prefetchStrategy          Json     @default("{}")
+  customRules               Json     @default("{}")
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  // Relationships
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("ai_cache_configurations")
+}
+
+// AI Cache Dependency - Tracks cache entry dependencies for cascade invalidation
+model AICacheDependency {
+  id                String   @id @default(cuid())
+  tenantId          String
+  sourceCacheId     String // The cache entry that depends on the target
+  targetCacheId     String // The cache entry that is depended upon
+  dependencyType    String   @default("DATA") // DATA, MODEL, CONTEXT, BUSINESS_RULE
+  strength          Float    @default(1.0) // Strength of dependency (0.0-1.0)
+  cascadeInvalidate Boolean  @default(true)
+  metadata          Json     @default("{}")
+  createdAt         DateTime @default(now())
+
+  // Relationships
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sourceCache AICacheEntry @relation("CacheDependencySource", fields: [sourceCacheId], references: [id], onDelete: Cascade)
+  targetCache AICacheEntry @relation("CacheDependencyTarget", fields: [targetCacheId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceCacheId, targetCacheId, dependencyType])
+  @@index([tenantId])
+  @@index([sourceCacheId])
+  @@index([targetCacheId])
+  @@index([dependencyType])
+  @@map("ai_cache_dependencies")
+}
+
+// ============================================================================
+// AI MODEL VERSIONING MODELS
+// ============================================================================
+
+// AI Model Version - Tracks versions of AI models with configurations
+model AIModelVersion {
+  id                 String    @id @default(cuid())
+  tenantId           String
+  modelName          String
+  version            String // Semantic versioning (e.g., "1.2.3")
+  status             String    @default("DRAFT") // DRAFT, TESTING, STAGED, ACTIVE, DEPRECATED, ARCHIVED
+  provider           String // OpenAI, Anthropic, etc.
+  modelIdentifier    String // e.g., "gpt-4-turbo", "claude-3"
+  configuration      Json // Model parameters and settings
+  performanceMetrics Json // Accuracy, latency, cost metrics
+  deploymentInfo     Json // Deployment strategy and configuration
+  metadata           Json // Description, release notes, tags
+  createdBy          String
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  activatedAt        DateTime?
+  deprecatedAt       DateTime?
+
+  // Relationships
+  tenant        Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  abTestsA      AIABTest[]           @relation("ModelA")
+  abTestsB      AIABTest[]           @relation("ModelB")
+  deployments   AIDeploymentRecord[]
+  rollbacksFrom AIRollbackRecord[]   @relation("RollbackFrom")
+  rollbacksTo   AIRollbackRecord[]   @relation("RollbackTo")
+  metrics       AIVersionMetric[]
+
+  @@unique([tenantId, modelName, version])
+  @@index([tenantId])
+  @@index([tenantId, modelName])
+  @@index([status])
+  @@map("ai_model_versions")
+}
+
+// AI A/B Test - Manages A/B tests between model versions
+model AIABTest {
+  id                String    @id @default(cuid())
+  name              String
+  description       String    @default("")
+  tenantId          String
+  modelAId          String
+  modelBId          String
+  trafficSplit      Json // { model_a_percentage: 50, model_b_percentage: 50 }
+  selectionCriteria String    @default("random") // random, user_based, request_based, custom
+  selectionRules    Json? // Custom selection rules
+  metricsToTrack    String[]  @default(["accuracy", "latency", "cost"])
+  successCriteria   Json // Primary metric, improvement threshold, etc.
+  startDate         DateTime  @default(now())
+  endDate           DateTime?
+  status            String    @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED, CANCELLED
+  results           Json? // Test results including winner, confidence, metrics
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relationships
+  tenant Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  modelA AIModelVersion @relation("ModelA", fields: [modelAId], references: [id])
+  modelB AIModelVersion @relation("ModelB", fields: [modelBId], references: [id])
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([startDate, endDate])
+  @@map("ai_ab_tests")
+}
+
+// AI Deployment Record - Tracks model deployments
+model AIDeploymentRecord {
+  id             String    @id @default(cuid())
+  tenantId       String
+  modelVersionId String
+  strategy       String // IMMEDIATE, CANARY, BLUE_GREEN, GRADUAL_ROLLOUT, A_B_TEST
+  status         String    @default("in_progress") // in_progress, completed, failed, rolled_back
+  configuration  Json // Target percentage, schedule, monitoring config
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  error          String?
+
+  // Relationships
+  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  modelVersion AIModelVersion @relation(fields: [modelVersionId], references: [id])
+
+  @@index([tenantId])
+  @@index([modelVersionId])
+  @@index([status])
+  @@index([startedAt])
+  @@map("ai_deployment_records")
+}
+
+// AI Rollback Record - Tracks model rollbacks
+model AIRollbackRecord {
+  id              String    @id @default(cuid())
+  tenantId        String
+  fromVersionId   String
+  toVersionId     String
+  trigger         String // MANUAL, PERFORMANCE_DEGRADATION, ERROR_THRESHOLD, etc.
+  reason          String
+  automatic       Boolean   @default(false)
+  metricsSnapshot Json? // Performance metrics at time of rollback
+  initiatedAt     DateTime  @default(now())
+  completedAt     DateTime?
+  status          String    @default("in_progress") // in_progress, completed, failed
+  error           String?
+
+  // Relationships
+  tenant      Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  fromVersion AIModelVersion @relation("RollbackFrom", fields: [fromVersionId], references: [id])
+  toVersion   AIModelVersion @relation("RollbackTo", fields: [toVersionId], references: [id])
+
+  @@index([tenantId])
+  @@index([fromVersionId])
+  @@index([toVersionId])
+  @@index([initiatedAt])
+  @@map("ai_rollback_records")
+}
+
+// AI Version Metric - Stores performance metrics for model versions
+model AIVersionMetric {
+  id             String   @id @default(cuid())
+  tenantId       String
+  modelVersionId String
+  metricType     String // accuracy, latency, error_rate, cost, quality
+  metricName     String // Specific metric name
+  value          Float
+  unit           String? // ms, percentage, dollars, etc.
+  metadata       Json? // Additional context
+  collectedAt    DateTime @default(now())
+  timeWindow     DateTime // Hour/day bucket for aggregation
+  sampleSize     Int      @default(1)
+
+  // Relationships
+  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  modelVersion AIModelVersion @relation(fields: [modelVersionId], references: [id])
+
+  @@unique([tenantId, modelVersionId, metricType, metricName, timeWindow])
+  @@index([tenantId])
+  @@index([modelVersionId])
+  @@index([metricType, metricName])
+  @@index([collectedAt])
+  @@index([timeWindow])
+  @@map("ai_version_metrics")
+}
+
+// ============================================================================
+// AI REAL-TIME PROCESSING SYSTEM MODELS
+// ============================================================================
+
+// AI Stream Sources - Defines streaming data sources
+model AIStreamSource {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Source Information
+  name       String
+  sourceType String // DATABASE, API, WEBHOOK, FILE, QUEUE, WEBSOCKET, IOT, CUSTOM
+  status     String  @default("created") // created, active, paused, error, disconnected
+  enabled    Boolean @default(true)
+
+  // Connection Configuration
+  connectionConfig    Json // Database URL, API endpoint, WebSocket URL, etc.
+  filterRules         Json @default("[]") // Rules to filter incoming data
+  transformationRules Json @default("[]") // Transformation to apply to data
+
+  // Processing Configuration
+  processingMode     String @default("STREAM") // STREAM, MICRO_BATCH, HYBRID
+  batchSize          Int? // For micro-batch mode
+  batchWindowMs      Int? // For micro-batch mode
+  maxEventsPerSecond Int? // Rate limiting
+
+  // Monitoring and Health
+  statistics       Json      @default("{}") // Events processed, errors, etc.
+  lastConnected    DateTime?
+  lastDisconnected DateTime?
+  lastError        Json?
+  healthStatus     String    @default("unknown") // healthy, degraded, unhealthy, unknown
+
+  // Metadata
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant   Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  events   AIStreamEvent[]
+  insights AIRealtimeInsight[]
+  actions  AIStreamAction[]
+
+  @@index([tenantId, sourceType])
+  @@index([status])
+  @@index([enabled])
+  @@map("ai_stream_sources")
+}
+
+// AI Stream Events - Individual events from stream sources
+model AIStreamEvent {
+  id       String @id @default(cuid())
+  tenantId String
+  sourceId String
+
+  // Event Information
+  eventType String // DATA, INSIGHT, ANOMALY, PATTERN, ALERT, ACTION, ERROR, METRIC, HEARTBEAT
+  timestamp DateTime @default(now())
+  data      Json // Event payload
+
+  // Event Metadata
+  metadata Json     @default("{}") // Department, user, session, correlation info
+  priority Int      @default(5) // 1-10 scale
+  ttlMs    Int? // Time to live in milliseconds
+  tags     String[] @default([])
+
+  // Processing Information
+  processingMetadata Json? // Processing latency, processors used, etc.
+  processed          Boolean   @default(false)
+  processedAt        DateTime?
+  processingErrors   Json?
+
+  // Relations
+  tenant   Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source   AIStreamSource      @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  insights AIRealtimeInsight[]
+  actions  AIStreamAction[]
+
+  @@index([tenantId, sourceId])
+  @@index([eventType])
+  @@index([timestamp])
+  @@index([processed])
+  @@index([priority])
+  @@map("ai_stream_events")
+}
+
+// AI Real-time Insights - Insights generated from stream processing
+model AIRealtimeInsight {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Insight Information
+  insightType     String // Pattern, trend, anomaly, prediction, etc.
+  title           String
+  description     String @db.Text
+  confidenceScore Float // 0-1 confidence level
+  businessImpact  String // low, medium, high, critical
+
+  // Source Information
+  sourceId     String?
+  sourceEvents String[] @default([]) // Event IDs that generated this insight
+
+  // Business Context
+  affectedEntities      String[] @default([]) // Departments, customers, products affected
+  recommendedActions    Json     @default("[]") // Array of recommended actions
+  crossDepartmentImpact Json? // Impact on other departments
+
+  // Timing
+  timestamp  DateTime  @default(now())
+  validUntil DateTime?
+
+  // Action Tracking
+  actionsTaken    Json      @default("[]") // Actions taken based on this insight
+  dismissed       Boolean   @default(false)
+  dismissedAt     DateTime?
+  dismissedBy     String?
+  dismissalReason String?
+
+  // Metadata
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant  Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source  AIStreamSource?  @relation(fields: [sourceId], references: [id])
+  events  AIStreamEvent[]
+  actions AIStreamAction[]
+
+  @@index([tenantId, insightType])
+  @@index([businessImpact])
+  @@index([timestamp])
+  @@index([dismissed])
+  @@index([confidenceScore])
+  @@map("ai_realtime_insights")
+}
+
+// AI Stream Actions - Actions triggered by real-time processing
+model AIStreamAction {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Action Information
+  actionType   String // NOTIFY, UPDATE, CREATE, DELETE, ESCALATE, TRIGGER_WORKFLOW, etc.
+  actionConfig Json // Configuration for the action
+  priority     Int    @default(5) // 1-10 scale
+
+  // Trigger Information
+  triggerType String // insight, anomaly, event, manual
+  triggerId   String? // ID of the trigger (insight, anomaly, event)
+
+  // Execution Information
+  status      String    @default("pending") // pending, executing, completed, failed, cancelled
+  scheduledAt DateTime?
+  executedAt  DateTime?
+  completedAt DateTime?
+
+  // Results
+  result     Json? // Action execution results
+  error      Json? // Error details if failed
+  retryCount Int   @default(0)
+  maxRetries Int   @default(3)
+
+  // Approval Workflow
+  requiresApproval Boolean   @default(false)
+  approvalStatus   String? // pending, approved, rejected
+  approvedBy       String?
+  approvedAt       DateTime?
+
+  // Metadata
+  metadata  Json     @default("{}")
+  timestamp DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant  Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source  AIStreamSource?    @relation(fields: [sourceId], references: [id])
+  insight AIRealtimeInsight? @relation(fields: [insightId], references: [id])
+  event   AIStreamEvent?     @relation(fields: [eventId], references: [id])
+
+  // Foreign keys
+  sourceId  String?
+  insightId String?
+  anomalyId String?
+  eventId   String?
+
+  @@index([tenantId, actionType])
+  @@index([status])
+  @@index([priority])
+  @@index([triggerType])
+  @@index([timestamp])
+  @@map("ai_stream_actions")
+}
+
+// ============================================================================
+// AI INTELLIGENCE CORE - CROSS-DEPARTMENTAL CORRELATION ENGINE
+// ============================================================================
+
+// Cross-departmental AI correlation tracking - CRITICAL for AI-first architecture
+model CrossDeptCorrelation {
+  id String @id @default(cuid())
+
+  // Source department and action that triggered the correlation
+  sourceDepartment String // "SALES", "ACCOUNTING", "HR", "INVENTORY", "SERVICE"
+  sourceAction     String // "deal_created", "invoice_generated", "service_completed"
+  sourceEntityType String // "deal", "customer", "invoice", "project", "employee"
+  sourceEntityId   String // ID of the source entity
+
+  // Target department and recommended actions
+  targetDepartment String // Department that should receive insights
+  targetAction     String // Recommended action for target department
+  targetEntityType String? // Type of entity in target department
+  targetEntityId   String? // ID of target entity if applicable
+
+  // AI Analysis & Intelligence
+  correlationType String // "PREDICTIVE", "REACTIVE", "PREVENTIVE", "OPTIMIZATION"
+  confidenceScore Float  @default(0.0) // 0-1 AI confidence in correlation
+  aiModel         String // AI model that generated this correlation
+  aiAnalysis      Json // Full AI analysis and reasoning
+
+  // Vector Embeddings for Similarity Matching
+  embedding           Float[] // Vector embedding for semantic similarity
+  embeddingModel      String  @default("text-embedding-ada-002") // Model used for embeddings
+  embeddingDimensions Int     @default(1536) // Dimension count for embeddings
+
+  // Business Impact Prediction
+  impactScore   Float    @default(0.0) // Predicted business impact (0-10)
+  revenueImpact Decimal? @db.Decimal(10, 2) // Predicted revenue impact
+  costImpact    Decimal? @db.Decimal(10, 2) // Predicted cost impact
+  timeImpact    Int? // Predicted time impact in minutes
+
+  // Execution Status
+  status      String    @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  processed   Boolean   @default(false)
+  processedAt DateTime?
+  actionTaken Json? // Actions taken based on correlation
+
+  // Cross-Department Insight Flow
+  insightGenerated  String? // ID of AIInsight generated from this correlation
+  activityGenerated String? // ID of AIActivity generated from this correlation
+  notificationsSent String[] // Departments/users notified
+
+  // Learning and Optimization
+  feedbackScore Float? // User feedback on correlation usefulness (0-5)
+  actualOutcome Json? // Actual business outcome for learning
+  learningData  Json? // Data for AI model improvement
+
+  // Multi-tenancy & Security
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Metadata & Tracking
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, sourceDepartment, targetDepartment])
+  @@index([correlationType, confidenceScore])
+  @@index([status, processed])
+  @@index([sourceDepartment, sourceAction])
+  @@index([targetDepartment, targetAction])
+  @@index([impactScore])
+  @@index([createdAt])
+  @@index([sourceEntityType, sourceEntityId])
+  @@index([targetEntityType, targetEntityId])
+  @@map("cross_dept_correlations")
+}
+
+// ============================================================================
+// INDUSTRY-SPECIFIC MODELS
+// ============================================================================
+
+// Industry Custom Fields - Dynamic fields for different industries
+model IndustryCustomField {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Field Configuration
+  entityType   String // customer, project, deal, invoice, etc.
+  fieldName    String
+  fieldLabel   String
+  fieldType    String // text, number, date, boolean, select, multiselect, file, etc.
+  fieldOptions Json? // For select/multiselect fields
+  isRequired   Boolean @default(false)
+  isVisible    Boolean @default(true)
+  isSearchable Boolean @default(false)
+  isFilterable Boolean @default(false)
+  defaultValue String?
+
+  // Industry-specific configuration
+  industryType    String // hvac, construction, healthcare, etc.
+  industrySubType String? // residential, commercial, etc.
+
+  // Validation and formatting
+  validationRules Json? // Custom validation rules
+  displayFormat   String? // Display formatting
+  helpText        String?
+
+  // Ordering and grouping
+  displayOrder Int     @default(0)
+  fieldGroup   String? // Group fields together in forms
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, entityType, fieldName])
+  @@index([tenantId, entityType])
+  @@index([industryType])
+  @@index([displayOrder])
+  @@map("industry_custom_fields")
+}
+
+// Industry Templates - Document and workflow templates
+model IndustryTemplate {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Template Configuration
+  name            String
+  description     String?
+  templateType    String // contract, proposal, invoice, report, etc.
+  industryType    String // hvac, construction, healthcare, etc.
+  industrySubType String? // residential, commercial, etc.
+
+  // Template Content
+  content   String @db.Text // Template content (HTML, Markdown, etc.)
+  variables Json   @default("{}") // Template variables and placeholders
+  styling   Json? // CSS styling or theme configuration
+
+  // Usage Configuration
+  isActive   Boolean @default(true)
+  isDefault  Boolean @default(false)
+  usageCount Int     @default(0)
+
+  // Versioning
+  version         String  @default("1.0")
+  previousVersion String?
+
+  // Metadata
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, templateType])
+  @@index([industryType])
+  @@index([isActive])
+  @@map("industry_templates")
+}
+
+// Industry Workflows - Industry-specific business processes
+model IndustryWorkflow {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Workflow Configuration
+  name            String
+  description     String?
+  workflowType    String // sales_process, service_delivery, onboarding, etc.
+  industryType    String // hvac, construction, healthcare, etc.
+  industrySubType String? // residential, commercial, etc.
+
+  // Workflow Definition
+  steps         Json // Array of workflow steps
+  conditions    Json @default("{}") // Conditional logic
+  automations   Json @default("{}") // Automated actions
+  notifications Json @default("{}") // Notification rules
+
+  // Status and Usage
+  isActive   Boolean @default(true)
+  isDefault  Boolean @default(false)
+  usageCount Int     @default(0)
+
+  // Versioning
+  version String @default("1.0")
+
+  // Metadata
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, workflowType])
+  @@index([industryType])
+  @@index([isActive])
+  @@map("industry_workflows")
+}
+
+// Industry-specific Customer Intelligence
+model IndustryCustomerIntelligence {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Industry-specific metrics
+  industryType    String // hvac, construction, healthcare, etc.
+  industryMetrics Json   @default("{}") // Industry-specific KPIs and metrics
+
+  // HVAC-specific fields (example)
+  hvacEquipment      Json? // Equipment types, models, installation dates
+  hvacServiceHistory Json? // Service history, maintenance records
+  hvacPreferences    Json? // Temperature preferences, scheduling preferences
+
+  // Construction-specific fields (example)
+  constructionProjects Json? // Project types, sizes, timelines
+  constructionPermits  Json? // Permit information, compliance status
+
+  // Healthcare-specific fields (example)
+  healthcareServices   Json? // Service types, patient demographics
+  healthcareCompliance Json? // HIPAA compliance, certifications
+
+  // Legal-specific fields (example)
+  legalMatters    Json? // Case types, jurisdictions, outcomes
+  legalCompliance Json? // Bar requirements, continuing education
+
+  // Consulting-specific fields (example)
+  consultingEngagements  Json? // Engagement types, client industries
+  consultingDeliverables Json? // Deliverable types, methodologies
+
+  // AI Industry-specific insights
+  aiIndustryInsights    Json? // AI-generated industry-specific insights
+  aiIndustryPredictions Json? // Industry-specific predictions
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, industryType])
+  @@index([tenantId, industryType])
+  @@index([customerId])
+  @@map("industry_customer_intelligence")
+}
+
+// Industry-specific AI Agents
+model IndustryAIAgent {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Agent Configuration
+  name            String
+  agentType       String // sdr, account_executive, customer_success, support
+  industryType    String // hvac, construction, healthcare, etc.
+  industrySubType String? // residential, commercial, etc.
+
+  // Industry-specific capabilities
+  industryKnowledge Json // Industry-specific knowledge base
+  industryScripts   Json // Industry-specific conversation scripts
+  industryTools     Json // Industry-specific tools and integrations
+
+  // Specialization
+  specializations String[] // Specific areas of expertise
+  certifications  String[] // Industry certifications and training
+
+  // Performance tracking
+  industryMetrics Json     @default("{}") // Industry-specific performance metrics
+  successRate     Decimal? @db.Decimal(5, 2)
+
+  // Status
+  isActive   Boolean @default(true)
+  isLearning Boolean @default(true)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, industryType])
+  @@index([agentType])
+  @@index([isActive])
+  @@map("industry_ai_agents")
+}
+
+// Industry-specific Compliance Requirements
+model IndustryCompliance {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Compliance Configuration
+  name           String
+  description    String?
+  industryType   String // hvac, construction, healthcare, etc.
+  complianceType String // regulatory, certification, licensing, etc.
+
+  // Requirements
+  requirements  Json // Array of compliance requirements
+  documentation Json @default("{}") // Required documentation
+  deadlines     Json @default("{}") // Compliance deadlines
+
+  // Status tracking
+  status     String    @default("pending") // pending, in_progress, compliant, non_compliant
+  lastReview DateTime?
+  nextReview DateTime?
+
+  // Audit information
+  auditHistory Json @default("[]") // Audit history
+  violations   Json @default("[]") // Compliance violations
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, industryType])
+  @@index([complianceType])
+  @@index([status])
+  @@map("industry_compliance")
+}
+
+// Industry-specific Integrations
+model IndustryIntegration {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Integration Configuration
+  name            String
+  description     String?
+  industryType    String // hvac, construction, healthcare, etc.
+  integrationType String // software, hardware, service, etc.
+
+  // Connection details
+  provider    String // Integration provider
+  apiEndpoint String?
+  credentials Json    @default("{}") // Encrypted credentials
+  settings    Json    @default("{}") // Integration settings
+
+  // Status and health
+  status        String    @default("inactive") // active, inactive, error, maintenance
+  lastSync      DateTime?
+  syncFrequency String? // How often to sync
+
+  // Usage metrics
+  usageCount Int @default(0)
+  errorCount Int @default(0)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, industryType])
+  @@index([integrationType])
+  @@index([status])
+  @@map("industry_integrations")
+}

@@ -1,0 +1,88 @@
+// Simplified MVP schema for SQLite
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Multi-tenant architecture
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Industry Configuration
+  industryType String? @default("general")
+
+  // Relationships
+  users     User[]
+  customers Customer[]
+  jobs      Job[]
+
+  @@map("tenants")
+}
+
+// User accounts
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  tenantId  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("users")
+}
+
+// Customer management
+model Customer {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  address   String?
+  tenantId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // HVAC-specific fields (JSON for flexibility)
+  hvacData Json? // Equipment, brand, model, etc.
+
+  // Relationships
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  jobs   Job[]
+
+  @@map("customers")
+}
+
+// Job/Service tracking
+model Job {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  status      String    @default("scheduled") // scheduled, in_progress, completed, cancelled
+  customerId  String
+  tenantId    String
+  scheduledAt DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relationships
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("jobs")
+}
