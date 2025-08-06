@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm install:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx prettier:*)",
+      "Bash(npm run build:*)",
+      "Bash(ls:*)",
+      "Bash(npx prisma:*)",
+      "Bash(rg:*)",
+      "Bash(npm run lint)",
+      "Bash(docker:*)",
+      "Bash(pg_config:*)",
+      "Bash(mv:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ],
+    "deny": []
+  }
+}
