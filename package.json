@@ -10,10 +10,14 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "postinstall": "npx prisma generate",
-    "db:deploy": "npx prisma migrate deploy"
+    "db:deploy": "npx prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "engines": {
     "node": ">=18.17.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
