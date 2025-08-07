@@ -1,0 +1,10 @@
+.env.local
+.env.production
+node_modules
+.next
+coverage
+.git
+.gitignore
+README.md
+.eslintcache
+*.log
