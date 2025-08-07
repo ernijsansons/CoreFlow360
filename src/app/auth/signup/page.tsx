@@ -63,7 +63,7 @@ export default function SignUp() {
       } else {
         setError(data.error || "Failed to create account")
       }
-    } catch (error) {
+    } catch {
       setError("Something went wrong. Please try again.")
     } finally {
       setIsLoading(false)

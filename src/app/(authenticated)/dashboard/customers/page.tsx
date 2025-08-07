@@ -4,24 +4,15 @@ import { useState, useEffect } from "react"
 import DashboardLayout from "@/components/layouts/DashboardLayout"
 import { HVACCustomerForm } from "@/components/hvac/HVACCustomerForm"
 import { PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline"
-
-interface Customer {
-  id: string
-  name: string
-  email?: string
-  phone?: string
-  address?: string
-  industryType?: string
-  createdAt: string
-}
+import { HVACCustomerData, FormattedCustomer, CustomerWithTenant } from "@/types/customer"
 
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState<Customer[]>([])
+  const [customers, setCustomers] = useState<FormattedCustomer[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [showAddModal, setShowAddModal] = useState(false)
 
-  const handleAddCustomer = async (customerData: any) => {
+  const handleAddCustomer = async (customerData: HVACCustomerData) => {
     try {
       const response = await fetch("/api/customers", {
         method: "POST",
@@ -71,13 +62,13 @@ export default function CustomersPage() {
       const response = await fetch("/api/customers")
       if (response.ok) {
         const data = await response.json()
-        const formattedCustomers = data.map((customer: Record<string, unknown>) => ({
+        const formattedCustomers = data.map((customer: CustomerWithTenant) => ({
           id: customer.id,
           name: `${customer.firstName} ${customer.lastName}`,
           email: customer.email,
           phone: customer.phone,
           address: customer.address,
-          industryType: (customer.tenant as any)?.industryType || 'general',
+          industryType: customer.tenant?.industryType || 'general',
           createdAt: customer.createdAt
         }))
         setCustomers(formattedCustomers)
