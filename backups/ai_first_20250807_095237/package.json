@@ -1,17 +1,6 @@
 {
-  "name": "coreflow360-ai-erp",
-  "version": "2.0.0",
-  "description": "World's #1 AI-First ERP Platform - The Future of Enterprise Software",
-  "keywords": [
-    "ai-first",
-    "erp",
-    "artificial-intelligence",
-    "agentic-ai",
-    "autonomous-operations",
-    "enterprise-platform",
-    "next-generation",
-    "business-automation"
-  ],
+  "name": "coreflow360",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -22,10 +11,7 @@
     "test:ui": "vitest --ui",
     "postinstall": "npx prisma generate",
     "db:deploy": "npx prisma migrate deploy",
-    "db:seed": "tsx prisma/seed.ts",
-    "ai:train": "tsx scripts/ai/train-models.ts",
-    "ai:deploy": "tsx scripts/ai/deploy-agents.ts",
-    "ai:monitor": "tsx scripts/ai/monitor-performance.ts"
+    "db:seed": "tsx prisma/seed.ts"
   },
   "engines": {
     "node": ">=18.17.0"

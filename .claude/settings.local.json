@@ -29,7 +29,10 @@
       "Bash(gh api:*)",
       "Bash(grep:*)",
       "Bash(curl:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(BACKUP_DIR=\"./backups/ai_first_$(date +%Y%m%d_%H%M%S)\")",
+      "Bash(cp:*)",
+      "Bash(echo \"Backup created at: $BACKUP_DIR\")"
     ],
     "deny": []
   }

@@ -14,23 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CoreFlow360 - World's #1 AI-First ERP Platform",
-  description: "The Future of Enterprise Software. Autonomous AI agents powering every department, predicting every outcome, optimizing every decision. Where traditional ERPs store data, CoreFlow360 thinks with it.",
-  keywords: [
-    "AI-First ERP",
-    "artificial intelligence",
-    "autonomous agents", 
-    "enterprise platform",
-    "business automation",
-    "predictive analytics",
-    "next-generation ERP",
-    "AI-powered business"
-  ],
-  openGraph: {
-    title: "CoreFlow360 - The Future of Enterprise Software",
-    description: "World's #1 AI-First ERP Platform with autonomous agents running every aspect of your business",
-    images: ["/og-image.png"],
-  },
+  title: "CoreFlow360 - AI-First Multi-Industry CRM",
+  description: "World's most advanced AI-first multi-industry ERP platform",
 };
 
 export default function RootLayout({

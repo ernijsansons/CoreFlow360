@@ -5,22 +5,18 @@ import {
   Brain, 
   Cpu, 
   Users, 
-  Bot, 
+  Wrench, 
   Sparkles, 
   ArrowRight, 
   TrendingUp,
   Shield,
-  Zap,
-  BarChart3,
-  Network,
-  Target
+  Zap
 } from 'lucide-react'
 import { GlowingButton } from '@/components/ui/GlowingButton'
 import { TypewriterEffect } from '@/components/ui/TypewriterEffect'
 import { NeuralNetworkBackground } from '@/components/ui/NeuralNetworkBackground'
 import { FeatureCard } from '@/components/ui/FeatureCard'
 import { MetricCard } from '@/components/ui/MetricCard'
-import { AI_CONFIG } from '@/config/ai.config'
 
 export default function Home() {
   return (
@@ -36,45 +32,33 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="max-w-5xl mx-auto text-center"
           >
-            <motion.div
-              className="mb-8"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.1 }}
-            >
-              <div className="inline-flex items-center gap-2 bg-violet-900/30 border border-violet-500/50 px-6 py-3 rounded-full mb-8">
-                <Bot className="w-5 h-5 text-violet-400" />
-                <span className="text-violet-300 font-semibold">{AI_CONFIG.platform.type}</span>
-              </div>
-            </motion.div>
-
             <motion.h1 
               className="heading-hero gradient-text-ai mb-6"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.2 }}
             >
-              CoreFlow360
+              Your Business.
               <br />
               <TypewriterEffect
                 words={[
-                  'AI-First ERP.',
-                  'Autonomous Operations.',
-                  'Intelligent Everything.',
-                  'The Future of Business.'
+                  'Powered by AI.',
+                  'Automated Forever.',
+                  'Scaling Infinitely.',
+                  'Thinking Autonomously.'
                 ]}
                 className="gradient-text-ai"
               />
             </motion.h1>
             
             <motion.p 
-              className="text-body-large text-gray-300 mb-12 max-w-3xl mx-auto"
+              className="text-body-large text-gray-300 mb-12 max-w-3xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              {AI_CONFIG.platform.tagline}. Where autonomous AI agents power every department, 
-              predict every outcome, and optimize every decision. Traditional ERPs store data—CoreFlow360 thinks with it.
+              The world&apos;s first AI-central-nervous-system ERP. Every department thinking. 
+              Every process learning. Every decision optimizing. Welcome to tomorrow.
             </motion.p>
             
             <motion.div 
@@ -84,12 +68,12 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.6 }}
             >
               <GlowingButton href="/demo" size="xl">
-                See AI in Action
-                <Bot className="ml-2 h-5 w-5" />
+                Experience the Future
+                <Sparkles className="ml-2 h-5 w-5" />
               </GlowingButton>
               
               <GlowingButton href="/contact" size="xl" variant="outline">
-                Join the AI Revolution
+                Join the Revolution
                 <ArrowRight className="ml-2 h-5 w-5" />
               </GlowingButton>
             </motion.div>
@@ -111,72 +95,68 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             <h2 className="heading-section text-white mb-6">
-              Autonomous AI Agents. <span className="gradient-text-ai">Everywhere.</span>
+              Every Department. <span className="gradient-text-ai">Thinking.</span>
             </h2>
             <p className="text-body-large text-gray-400 max-w-3xl mx-auto">
-              Meet your AI workforce—specialized agents that never sleep, continuously learn, 
-              and make intelligent decisions across every department of your business.
+              Traditional ERPs store data. CoreFlow360 thinks with it. Watch AI transform 
+              every aspect of your business operations.
             </p>
           </motion.div>
 
           <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
             <FeatureCard
               icon={Brain}
-              title="CRM AI Agent"
-              description="Autonomous customer intelligence that predicts behavior and optimizes relationships"
+              title="AI-Powered CRM"
+              description="Autonomous lead scoring, churn prediction, and deal forecasting with 94% accuracy"
               stats="94% accuracy"
               gradient="violet"
               delay={0.1}
               features={[
                 'Autonomous Lead Scoring',
                 'Churn Prediction Engine',
-                'Customer Lifetime Value',
-                'Personalization AI'
+                'Deal Velocity Optimization'
               ]}
             />
             
             <FeatureCard
-              icon={BarChart3}
-              title="Sales AI Agent"
-              description="Revenue optimization and deal forecasting that thinks like your best salesperson"
-              stats="31% revenue boost"
+              icon={Cpu}
+              title="Intelligent Accounting"
+              description="Real-time fraud detection and automated reconciliation in 0.001s"
+              stats="0.001s processing"
               gradient="blue"
               delay={0.2}
               features={[
-                'Deal Prediction',
-                'Price Optimization',
-                'Territory Planning',
-                'Competitive Analysis'
+                'Real-time Fraud Detection',
+                'Cash Flow Forecasting',
+                'Automated Reconciliation'
               ]}
             />
             
             <FeatureCard
-              icon={Target}
-              title="Finance AI Agent"
-              description="Financial intelligence that sees cash flow patterns and predicts risks"
-              stats="< 100ms insights"
+              icon={Users}
+              title="Predictive HR"
+              description="AI-driven hiring and performance optimization boosting retention by 87%"
+              stats="87% retention boost"
               gradient="emerald"
               delay={0.3}
               features={[
-                'Cash Flow Prediction',
-                'Anomaly Detection',
-                'Budget Forecasting',
-                'Risk Assessment'
+                'Retention AI',
+                'Hiring Optimization',
+                'Performance Projection'
               ]}
             />
             
             <FeatureCard
-              icon={Network}
-              title="Operations AI Agent"
-              description="Operational excellence through predictive maintenance and resource optimization"
+              icon={Wrench}
+              title="Smart Field Service"
+              description="Route optimization and failure prediction for HVAC with 43% efficiency gain"
               stats="43% efficiency gain"
               gradient="orange"
               delay={0.4}
               features={[
-                'Predictive Maintenance',
-                'Resource Optimization',
-                'Quality Assurance',
-                'Performance Monitoring'
+                'Route Optimization',
+                'Failure Prediction',
+                'Smart Scheduling'
               ]}
             />
           </div>
@@ -194,37 +174,36 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             <h2 className="heading-section text-white mb-6">
-              Central AI <span className="gradient-text-ai">Orchestrator.</span>
+              One Platform. <span className="gradient-text-ai">Every Industry.</span>
             </h2>
             <p className="text-body-large text-gray-400 max-w-3xl mx-auto">
-              The master AI that coordinates all your agents, makes strategic decisions, 
-              and ensures every part of your business works in perfect harmony.
+              From HVAC to Healthcare, Construction to Legal - CoreFlow360 adapts to your industry&apos;s unique needs.
             </p>
           </motion.div>
 
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-            <OrchestratorCard
-              icon="🧠"
-              title="Strategic Planning"
-              description="Long-term business strategy and goal coordination"
+            <IndustryCard
+              icon="❄️"
+              title="HVAC Services"
+              description="Equipment tracking, predictive maintenance, emergency dispatch"
               delay={0.1}
             />
-            <OrchestratorCard
-              icon="⚡"
-              title="Task Delegation"
-              description="Intelligent workload distribution across AI agents"
+            <IndustryCard
+              icon="🏗️"
+              title="Construction"
+              description="Project management, resource optimization, safety monitoring"
               delay={0.2}
             />
-            <OrchestratorCard
-              icon="🎯"
-              title="Resource Allocation"
-              description="Optimal resource distribution based on real-time needs"
+            <IndustryCard
+              icon="🏥"
+              title="Healthcare"
+              description="Patient management, compliance tracking, outcome analytics"
               delay={0.3}
             />
-            <OrchestratorCard
-              icon="🔄"
-              title="Decision Making"
-              description="Complex business decisions with multi-factor analysis"
+            <IndustryCard
+              icon="⚖️"
+              title="Legal Services"
+              description="Case management, time tracking, document automation"
               delay={0.4}
             />
           </div>
@@ -242,23 +221,23 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             <h2 className="heading-section text-white mb-6">
-              AI Performance <span className="gradient-text-ai">Beyond Human.</span>
+              Performance That <span className="gradient-text-ai">Defies Logic.</span>
             </h2>
             <p className="text-body-large text-gray-400">
-              When AI runs your business, the impossible becomes inevitable. These aren't just metrics—they're the new standard.
+              Numbers that speak louder than words. Results that redefine possible.
             </p>
           </motion.div>
 
           <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
             <MetricCard
-              value={AI_CONFIG.performance.responseTime}
-              label="AI Agent Response Time"
+              value="0.1s"
+              label="Average AI Response Time"
               icon={Zap}
               gradient="violet"
               delay={0.1}
             />
             <MetricCard
-              value={AI_CONFIG.performance.accuracy}
+              value="94%"
               label="Prediction Accuracy"
               icon={TrendingUp}
               trend={12}
@@ -266,15 +245,15 @@ export default function Home() {
               delay={0.2}
             />
             <MetricCard
-              value="24/7/365"
-              label="AI Agent Availability"
-              icon={Bot}
+              value="∞"
+              label="Scaling Potential"
+              icon={Brain}
               gradient="cyan"
               delay={0.3}
             />
             <MetricCard
-              value={AI_CONFIG.performance.availability}
-              label="Platform Uptime"
+              value="99.99%"
+              label="Uptime Guarantee"
               icon={Shield}
               gradient="orange"
               delay={0.4}
@@ -293,21 +272,20 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             <h2 className="heading-section text-white mb-6">
-              Ready to Let <span className="gradient-text-ai">AI Run Your Business?</span>
+              Ready to <span className="gradient-text-ai">Revolutionize</span> Your Business?
             </h2>
             <p className="text-body-large text-gray-300 mb-12 max-w-2xl mx-auto">
-              Join the AI-first revolution. While your competitors manage data, you'll have autonomous agents 
-              running every aspect of your operations with superhuman intelligence.
+              Join thousands of businesses already using AI to think, learn, and grow faster than ever before.
             </p>
             
             <div className="flex flex-wrap justify-center gap-6">
               <GlowingButton href="/auth/signup" size="xl">
-                Deploy AI Agents
-                <Bot className="ml-2 h-5 w-5" />
+                Start Free Trial
+                <ArrowRight className="ml-2 h-5 w-5" />
               </GlowingButton>
               
               <GlowingButton href="/demo" size="xl" variant="outline">
-                See Autonomous Operations
+                Watch Demo
                 <Sparkles className="ml-2 h-5 w-5" />
               </GlowingButton>
             </div>
@@ -328,7 +306,7 @@ function FloatingMetrics() {
         transition={{ duration: 1, delay: 1 }}
         className="bg-gray-900/80 backdrop-blur-sm border border-gray-800/50 rounded-xl p-4 text-center"
       >
-        <div className="text-2xl font-bold gradient-text-ai">{AI_CONFIG.performance.accuracy}</div>
+        <div className="text-2xl font-bold gradient-text-ai">94%</div>
         <div className="text-xs text-gray-400">AI Accuracy</div>
       </motion.div>
       
@@ -338,7 +316,7 @@ function FloatingMetrics() {
         transition={{ duration: 1, delay: 1.2 }}
         className="bg-gray-900/80 backdrop-blur-sm border border-gray-800/50 rounded-xl p-4 text-center"
       >
-        <div className="text-2xl font-bold gradient-text-ai">{AI_CONFIG.performance.responseTime}</div>
+        <div className="text-2xl font-bold gradient-text-ai">0.1s</div>
         <div className="text-xs text-gray-400">Response Time</div>
       </motion.div>
       
@@ -348,15 +326,15 @@ function FloatingMetrics() {
         transition={{ duration: 1, delay: 1.4 }}
         className="bg-gray-900/80 backdrop-blur-sm border border-gray-800/50 rounded-xl p-4 text-center"
       >
-        <div className="text-2xl font-bold gradient-text-ai">∞</div>
-        <div className="text-xs text-gray-400">AI Agents</div>
+        <div className="text-2xl font-bold gradient-text-ai">10K+</div>
+        <div className="text-xs text-gray-400">Active Users</div>
       </motion.div>
     </div>
   )
 }
 
-// AI Orchestrator Card Component
-function OrchestratorCard({ icon, title, description, delay = 0 }: {
+// Industry Card Component
+function IndustryCard({ icon, title, description, delay = 0 }: {
   icon: string
   title: string
   description: string
@@ -377,11 +355,6 @@ function OrchestratorCard({ icon, title, description, delay = 0 }: {
         <div className="text-4xl mb-4">{icon}</div>
         <h3 className="text-xl font-semibold text-white mb-3">{title}</h3>
         <p className="text-gray-400 text-sm">{description}</p>
-        
-        {/* AI Badge */}
-        <div className="absolute -top-2 -right-2 bg-gradient-to-r from-violet-500 to-cyan-500 text-white text-xs rounded-full w-8 h-8 flex items-center justify-center font-bold">
-          AI
-        </div>
       </div>
     </motion.div>
   )
