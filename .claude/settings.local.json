@@ -24,7 +24,9 @@
       "Bash(npm update:*)",
       "Bash(npm uninstall:*)",
       "Bash(npm test:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(cat:*)",
+      "Bash(gh api:*)"
     ],
     "deny": []
   }

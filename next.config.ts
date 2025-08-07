@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Access-Control-Allow-Origin',
-            value: process.env.NODE_ENV === 'development' ? '*' : 'https://www.coreflow360.com',
+            value: '*',
           },
           {
             key: 'Access-Control-Allow-Methods',
