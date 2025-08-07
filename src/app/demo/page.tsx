@@ -1,460 +1,498 @@
 'use client'
 
 import { useState } from 'react'
-import { IndustryToggle } from '@/components/IndustryToggle'
-import {
-  getIndustryConfig,
-  getIndustryFeatures,
-  getIndustryCustomFields,
-  getIndustryWorkflows,
-  getIndustryAIAgents,
-  getIndustryCompliance,
-  getIndustryIntegrations,
-} from '@/lib/industry-config'
-import {
-  CubeIcon,
-  DocumentTextIcon,
-  CogIcon,
-  SparklesIcon,
-  ShieldCheckIcon,
-  LinkIcon,
-  ChartBarIcon,
-  UserGroupIcon,
-  ClockIcon,
-  CalendarIcon,
-  CurrencyDollarIcon,
-  BuildingOfficeIcon,
-  TruckIcon,
-  WrenchIcon,
-  ScaleIcon,
-  BeakerIcon,
-  UserCircleIcon,
-  ChevronRightIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-} from '@heroicons/react/24/outline'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  MessageSquare, 
+  BarChart3, 
+  Brain,
+  Sparkles,
+  ArrowRight,
+  Activity
+} from 'lucide-react'
+import { GlowingButton } from '@/components/ui/GlowingButton'
+import { MetricCard } from '@/components/ui/MetricCard'
+
+interface Industry {
+  id: string
+  name: string
+  icon: string
+  color: string
+  metrics: Array<{
+    label: string
+    value: string
+    trend?: number
+  }>
+  features: string[]
+}
+
+const industries: Industry[] = [
+  {
+    id: 'hvac',
+    name: 'HVAC Services',
+    icon: '❄️',
+    color: 'blue',
+    metrics: [
+      { label: 'Route Optimization', value: '43%', trend: 12 },
+      { label: 'Response Time', value: '18min', trend: -23 },
+      { label: 'Customer Satisfaction', value: '94%', trend: 8 },
+      { label: 'Energy Savings', value: '$127K', trend: 15 }
+    ],
+    features: [
+      'Predictive maintenance alerts',
+      'Smart route optimization',
+      'Equipment failure prediction',
+      'Customer preference learning'
+    ]
+  },
+  {
+    id: 'construction',
+    name: 'Construction',
+    icon: '🏗️',
+    color: 'orange',
+    metrics: [
+      { label: 'Project Efficiency', value: '67%', trend: 22 },
+      { label: 'Safety Score', value: '98%', trend: 5 },
+      { label: 'Cost Reduction', value: '$2.4M', trend: 18 },
+      { label: 'Timeline Accuracy', value: '91%', trend: 13 }
+    ],
+    features: [
+      'Resource allocation optimization',
+      'Safety risk prediction',
+      'Material demand forecasting',
+      'Progress tracking automation'
+    ]
+  },
+  {
+    id: 'healthcare',
+    name: 'Healthcare',
+    icon: '🏥',
+    color: 'emerald',
+    metrics: [
+      { label: 'Patient Outcomes', value: '89%', trend: 14 },
+      { label: 'Wait Time Reduction', value: '52%', trend: -31 },
+      { label: 'Staff Efficiency', value: '76%', trend: 19 },
+      { label: 'Cost Savings', value: '$890K', trend: 27 }
+    ],
+    features: [
+      'Patient flow optimization',
+      'Treatment outcome prediction',
+      'Staff scheduling automation',
+      'Supply chain intelligence'
+    ]
+  },
+  {
+    id: 'legal',
+    name: 'Legal Services',
+    icon: '⚖️',
+    color: 'violet',
+    metrics: [
+      { label: 'Case Win Rate', value: '84%', trend: 9 },
+      { label: 'Research Efficiency', value: '91%', trend: 33 },
+      { label: 'Client Satisfaction', value: '96%', trend: 7 },
+      { label: 'Billable Hours', value: '+28%', trend: 28 }
+    ],
+    features: [
+      'Case outcome prediction',
+      'Document analysis automation',
+      'Client communication intelligence',
+      'Legal research acceleration'
+    ]
+  }
+]
 
 export default function DemoPage() {
-  const [currentIndustry, setCurrentIndustry] = useState('general')
-  const industryConfig = getIndustryConfig(currentIndustry)
-  const features = getIndustryFeatures(currentIndustry)
-  const customFields = getIndustryCustomFields(currentIndustry)
-  const workflows = getIndustryWorkflows(currentIndustry)
-  const aiAgents = getIndustryAIAgents(currentIndustry)
-  const compliance = getIndustryCompliance(currentIndustry)
-  const integrations = getIndustryIntegrations(currentIndustry)
-
-  const featureIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-    crm: UserGroupIcon,
-    projectManagement: ChartBarIcon,
-    scheduling: CalendarIcon,
-    inventory: CubeIcon,
-    accounting: CurrencyDollarIcon,
-    hr: UserCircleIcon,
-    documentManagement: DocumentTextIcon,
-    compliance: ShieldCheckIcon,
-    analytics: ChartBarIcon,
-    mobileApp: BuildingOfficeIcon,
-    fieldService: TruckIcon,
-    equipment: WrenchIcon,
-    warranty: ShieldCheckIcon,
-    permits: DocumentTextIcon,
-    subcontractors: UserGroupIcon,
-    patients: UserCircleIcon,
-    prescriptions: BeakerIcon,
-    caseManagement: ScaleIcon,
-    timeTracking: ClockIcon,
-    trustAccounting: CurrencyDollarIcon,
-    emergencyDispatch: TruckIcon,
-  }
-
-  const getFieldTypeIcon = (type: string) => {
-    switch (type) {
-      case 'text':
-        return '📝'
-      case 'number':
-        return '🔢'
-      case 'date':
-        return '📅'
-      case 'boolean':
-        return '✅'
-      case 'select':
-        return '📋'
-      case 'multiselect':
-        return '📋'
-      case 'file':
-        return '📎'
-      default:
-        return '📝'
-    }
-  }
+  const [selectedIndustry, setSelectedIndustry] = useState(industries[0])
+  const [chatMessages] = useState([
+    { type: 'ai', message: 'Hello! I\'m your AI business intelligence assistant. What would you like to know about your operations?' }
+  ])
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                CoreFlow360 - Multi-Industry Demo
-              </h1>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                World&apos;s #1 AI-First Multi-Industry ERP Platform
-              </p>
-            </div>
-            <IndustryToggle
-              currentIndustry={currentIndustry}
-              onIndustryChange={setCurrentIndustry}
-            />
-          </div>
+      <section className="py-16 border-b border-gray-800">
+        <div className="container-fluid">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center"
+          >
+            <h1 className="heading-section gradient-text-ai mb-6">
+              Experience CoreFlow360 Intelligence
+            </h1>
+            <p className="text-body-large text-gray-400 max-w-3xl mx-auto">
+              See how AI transforms your industry with real-time intelligence, predictive analytics, and autonomous decision-making.
+            </p>
+          </motion.div>
         </div>
-      </header>
+      </section>
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Industry Overview */}
-        <div className={`mb-8 rounded-lg p-6 ${industryConfig.color} bg-opacity-10`}>
-          <div className="flex items-start gap-4">
-            <span className="text-4xl">{industryConfig.icon}</span>
-            <div className="flex-1">
-              <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
-                {industryConfig.name} Configuration Active
-              </h2>
-              <p className="mb-4 text-gray-600 dark:text-gray-400">{industryConfig.description}</p>
-              {industryConfig.subTypes && (
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Specializations:
-                  </span>
-                  {industryConfig.subTypes.map((subType) => (
-                    <span
-                      key={subType}
-                      className="rounded-full bg-white px-3 py-1 text-sm text-gray-700 shadow-sm dark:bg-gray-800 dark:text-gray-300"
-                    >
-                      {subType}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Features Grid */}
-        <section className="mb-8">
-          <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
-            <CogIcon className="h-6 w-6" />
-            Enabled Features
-          </h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {Object.entries(features).map(([feature, enabled]) => {
-              const Icon = featureIcons[feature] || CogIcon
-              return (
-                <div
-                  key={feature}
-                  className={`rounded-lg border p-4 ${
-                    enabled
-                      ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
-                      : 'border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800'
-                  }`}
+      {/* Industry Toggle System */}
+      <section className="py-12">
+        <div className="container-fluid">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-2xl font-bold text-white mb-8">Select Your Industry</h2>
+            <div className="flex flex-wrap justify-center gap-4">
+              {industries.map((industry) => (
+                <motion.button
+                  key={industry.id}
+                  onClick={() => setSelectedIndustry(industry)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`
+                    relative group px-8 py-4 rounded-2xl border-2 transition-all duration-300
+                    ${selectedIndustry.id === industry.id 
+                      ? 'border-violet-500 bg-violet-500/10' 
+                      : 'border-gray-700 hover:border-gray-600'
+                    }
+                  `}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Icon
-                        className={`h-5 w-5 ${enabled ? 'text-green-600 dark:text-green-400' : 'text-gray-400'}`}
-                      />
-                      <span
-                        className={`font-medium ${
-                          enabled
-                            ? 'text-gray-900 dark:text-white'
-                            : 'text-gray-500 dark:text-gray-400'
-                        }`}
-                      >
-                        {feature.replace(/([A-Z])/g, ' $1').trim()}
-                      </span>
-                    </div>
-                    {enabled ? (
-                      <CheckCircleIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    ) : (
-                      <XCircleIcon className="h-5 w-5 text-gray-400" />
-                    )}
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{industry.icon}</span>
+                    <span className="font-semibold">{industry.name}</span>
+                  </div>
+                  
+                  {selectedIndustry.id === industry.id && (
+                    <motion.div
+                      layoutId="selected-industry"
+                      className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-cyan-500/20 rounded-2xl blur-sm"
+                    />
+                  )}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Live Demonstrations */}
+      <section className="py-16">
+        <div className="container-fluid">
+          <div className="grid gap-12 lg:grid-cols-2">
+            {/* AI Chat Demo */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="relative"
+            >
+              <div className="glass-card p-6 h-[600px] flex flex-col">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 flex items-center justify-center">
+                    <MessageSquare className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">AI Business Intelligence</h3>
+                    <p className="text-gray-400 text-sm">Ask anything about your {selectedIndustry.name.toLowerCase()} operations</p>
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        </section>
 
-        {/* Custom Fields */}
-        <section className="mb-8">
-          <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
-            <DocumentTextIcon className="h-6 w-6" />
-            Industry-Specific Fields ({customFields.length})
-          </h3>
-          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-900">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                      Field
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                      Group
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                      Required
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                  {customFields.map((field) => (
-                    <tr key={field.name} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <span>{getFieldTypeIcon(field.type)}</span>
-                          <div>
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
-                              {field.label}
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {field.name}
-                            </div>
-                          </div>
+                <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+                  <AnimatePresence>
+                    {chatMessages.map((msg, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className={`
+                          max-w-xs px-4 py-3 rounded-2xl
+                          ${msg.type === 'user' 
+                            ? 'bg-violet-600 text-white' 
+                            : 'bg-gray-800 text-gray-100'
+                          }
+                        `}>
+                          {msg.message}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                          {field.type}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                        {field.group || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {field.required ? (
-                          <CheckCircleIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
 
-        {/* Workflows */}
-        <section className="mb-8">
-          <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
-            <CogIcon className="h-6 w-6" />
-            Industry Workflows ({workflows.length})
-          </h3>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {workflows.map((workflow) => (
-              <div
-                key={workflow.id}
-                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
-              >
-                <h4 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-                  {workflow.name}
-                </h4>
-                <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                  {workflow.description}
-                </p>
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Workflow Steps:
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder={`Ask about ${selectedIndustry.name.toLowerCase()} operations...`}
+                    className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
+                  />
+                  <GlowingButton size="md">
+                    <ArrowRight className="w-4 h-4" />
+                  </GlowingButton>
+                </div>
+
+                <div className="mt-4 text-center">
+                  <p className="text-xs text-gray-500">
+                    Try asking: &quot;What&apos;s my {selectedIndustry.name.toLowerCase()} performance this month?&quot;
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Real-time Analytics Dashboard */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="relative"
+            >
+              <div className="glass-card p-6 h-[600px]">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <BarChart3 className="w-5 h-5 text-white" />
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {workflow.steps.map((step, index) => (
-                      <div key={step.id} className="flex items-center">
-                        <span className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                          {step.name}
-                        </span>
-                        {index < workflow.steps.length - 1 && (
-                          <ChevronRightIcon className="mx-1 h-3 w-3 text-gray-400" />
-                        )}
-                      </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">Predictive Analytics</h3>
+                    <p className="text-gray-400 text-sm">Real-time insights for {selectedIndustry.name}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  {selectedIndustry.metrics.map((metric, index) => (
+                    <motion.div
+                      key={metric.label}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <MetricCard
+                        value={metric.value}
+                        label={metric.label}
+                        trend={metric.trend}
+                        size="sm"
+                        gradient={selectedIndustry.color}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* AI Insights */}
+                <div className="bg-gray-900/50 rounded-xl p-4">
+                  <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-violet-400" />
+                    AI Insights
+                  </h4>
+                  <div className="space-y-2">
+                    {selectedIndustry.features.map((feature, index) => (
+                      <motion.div
+                        key={feature}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                        className="flex items-center gap-3 text-sm"
+                      >
+                        <div className="w-2 h-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500" />
+                        <span className="text-gray-300">{feature}</span>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
-        {/* AI Agents */}
-        <section className="mb-8">
-          <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
-            <SparklesIcon className="h-6 w-6" />
-            AI-Powered Agents ({aiAgents.length})
-          </h3>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {aiAgents.map((agent) => (
-              <div
-                key={agent.id}
-                className="rounded-lg border border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 p-6 shadow-sm dark:border-purple-800 dark:from-purple-900/20 dark:to-blue-900/20"
-              >
-                <div className="mb-4 flex items-start justify-between">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {agent.name}
-                    </h4>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {agent.type.replace('_', ' ').toUpperCase()}
-                    </span>
-                  </div>
-                  <SparklesIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                {/* Live Activity Indicator */}
+                <div className="mt-4 flex items-center justify-center gap-2 text-emerald-400">
+                  <Activity className="w-4 h-4 animate-pulse" />
+                  <span className="text-xs">Live AI Processing</span>
                 </div>
-
-                {agent.specializations && agent.specializations.length > 0 && (
-                  <div className="mb-3">
-                    <div className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Specializations:
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {agent.specializations.map((spec) => (
-                        <span
-                          key={spec}
-                          className="rounded bg-purple-100 px-2 py-1 text-xs text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
-                        >
-                          {spec}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {agent.certifications && agent.certifications.length > 0 && (
-                  <div>
-                    <div className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Certifications:
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {agent.certifications.map((cert) => (
-                        <span
-                          key={cert}
-                          className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                        >
-                          {cert}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
-            ))}
+            </motion.div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Compliance */}
-        {compliance.length > 0 && (
-          <section className="mb-8">
-            <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
-              <ShieldCheckIcon className="h-6 w-6" />
-              Compliance Requirements ({compliance.length})
-            </h3>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {compliance.map((comp) => (
-                <div
-                  key={comp.id}
-                  className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
-                >
-                  <div className="mb-4 flex items-start justify-between">
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {comp.name}
-                      </h4>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {comp.type.toUpperCase()}
-                      </span>
-                    </div>
-                    <ShieldCheckIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Requirements:
-                    </div>
-                    <ul className="space-y-1">
-                      {comp.requirements.slice(0, 3).map((req, index) => (
-                        <li
-                          key={index}
-                          className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
-                        >
-                          <span className="mt-0.5 text-green-600 dark:text-green-400">•</span>
-                          {req}
-                        </li>
-                      ))}
-                      {comp.requirements.length > 3 && (
-                        <li className="text-sm text-gray-500 italic dark:text-gray-400">
-                          +{comp.requirements.length - 3} more requirements
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+      {/* ROI Calculator Section */}
+      <ROICalculatorSection selectedIndustry={selectedIndustry} />
 
-        {/* Integrations */}
-        <section className="mb-8">
-          <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
-            <LinkIcon className="h-6 w-6" />
-            Pre-Built Integrations ({integrations.length})
-          </h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {integrations.map((integration) => (
-              <div
-                key={integration.id}
-                className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
-              >
-                <div className="mb-2 flex items-center justify-between">
-                  <h4 className="font-semibold text-gray-900 dark:text-white">
-                    {integration.name}
-                  </h4>
-                  <LinkIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">
-                  by {integration.provider}
-                </p>
-                <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                  {integration.type.replace('_', ' ')}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Call to Action */}
-        <section className="mt-12">
-          <div className="rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-white">
-              Experience the Power of Industry-Specific AI
+      {/* CTA Section */}
+      <section className="py-24 bg-gradient-to-r from-violet-950/30 to-cyan-950/30">
+        <div className="container-fluid text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="heading-section text-white mb-6">
+              Ready to Transform Your <span className="gradient-text-ai">{selectedIndustry.name}</span>?
             </h2>
-            <p className="mx-auto mb-6 max-w-2xl text-lg text-blue-100">
-              CoreFlow360 adapts to your industry with specialized features, workflows, and AI
-              agents that understand your business like no other platform.
+            <p className="text-body-large text-gray-300 mb-12 max-w-2xl mx-auto">
+              See how CoreFlow360 can revolutionize your operations with AI-powered intelligence.
             </p>
-            <div className="flex justify-center gap-4">
-              <button className="rounded-lg bg-white px-6 py-3 font-semibold text-blue-600 transition-colors hover:bg-gray-100">
+            
+            <div className="flex flex-wrap justify-center gap-6">
+              <GlowingButton href="/auth/signup" size="xl">
                 Start Free Trial
-              </button>
-              <button className="rounded-lg bg-blue-700 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-800">
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </GlowingButton>
+              
+              <GlowingButton href="/contact" size="xl" variant="outline">
                 Schedule Demo
-              </button>
+                <Sparkles className="ml-2 h-5 w-5" />
+              </GlowingButton>
             </div>
-          </div>
-        </section>
-      </main>
+          </motion.div>
+        </div>
+      </section>
     </div>
+  )
+}
+
+// ROI Calculator Component
+function ROICalculatorSection({ selectedIndustry }: { selectedIndustry: Industry }) {
+  const [annualRevenue, setAnnualRevenue] = useState(1000000)
+  const [employees, setEmployees] = useState(25)
+
+  const calculateROI = () => {
+    const baseEfficiencyGain = 0.15 // 15% efficiency gain
+    const costSaving = annualRevenue * baseEfficiencyGain
+    const productivityGain = employees * 50000 * 0.12 // 12% productivity gain per employee
+    const totalSavings = costSaving + productivityGain
+    const coreflowCost = Math.max(5988, employees * 200) // $499/month minimum
+    const netROI = totalSavings - coreflowCost
+    
+    return {
+      costSaving: Math.round(costSaving),
+      productivityGain: Math.round(productivityGain),
+      totalSavings: Math.round(totalSavings),
+      coreflowCost: Math.round(coreflowCost),
+      netROI: Math.round(netROI),
+      roiPercentage: Math.round((netROI / coreflowCost) * 100)
+    }
+  }
+
+  const roi = calculateROI()
+
+  return (
+    <section className="py-24 bg-gray-950">
+      <div className="container-fluid">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-16"
+        >
+          <h2 className="heading-section text-white mb-6">
+            Calculate Your <span className="gradient-text-ai">ROI</span>
+          </h2>
+          <p className="text-body-large text-gray-400 max-w-2xl mx-auto">
+            See how much CoreFlow360 can save your {selectedIndustry.name.toLowerCase()} business in the first year.
+          </p>
+        </motion.div>
+
+        <div className="max-w-4xl mx-auto">
+          <div className="grid gap-12 lg:grid-cols-2">
+            {/* Input Controls */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="glass-card p-8"
+            >
+              <h3 className="text-xl font-semibold text-white mb-6">Your Business Details</h3>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Annual Revenue
+                  </label>
+                  <input
+                    type="range"
+                    min="100000"
+                    max="50000000"
+                    step="100000"
+                    value={annualRevenue}
+                    onChange={(e) => setAnnualRevenue(parseInt(e.target.value))}
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-sm text-gray-400 mt-1">
+                    <span>$100K</span>
+                    <span className="font-semibold text-white">
+                      ${(annualRevenue / 1000000).toFixed(1)}M
+                    </span>
+                    <span>$50M</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Number of Employees
+                  </label>
+                  <input
+                    type="range"
+                    min="5"
+                    max="500"
+                    step="5"
+                    value={employees}
+                    onChange={(e) => setEmployees(parseInt(e.target.value))}
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-sm text-gray-400 mt-1">
+                    <span>5</span>
+                    <span className="font-semibold text-white">{employees}</span>
+                    <span>500+</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ROI Results */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="glass-card p-8"
+            >
+              <h3 className="text-xl font-semibold text-white mb-6">Your ROI Projection</h3>
+              
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold gradient-text-ai mb-1">
+                      ${(roi.totalSavings / 1000).toFixed(0)}K
+                    </div>
+                    <div className="text-sm text-gray-400">Total Savings</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold gradient-text-ai mb-1">
+                      {roi.roiPercentage}%
+                    </div>
+                    <div className="text-sm text-gray-400">ROI</div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Cost Savings:</span>
+                    <span className="text-emerald-400 font-semibold">+${(roi.costSaving / 1000).toFixed(0)}K</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Productivity Gain:</span>
+                    <span className="text-emerald-400 font-semibold">+${(roi.productivityGain / 1000).toFixed(0)}K</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">CoreFlow360 Cost:</span>
+                    <span className="text-red-400 font-semibold">-${(roi.coreflowCost / 1000).toFixed(0)}K</span>
+                  </div>
+                  <div className="border-t border-gray-600 pt-3">
+                    <div className="flex justify-between text-lg font-semibold">
+                      <span className="text-white">Net Benefit:</span>
+                      <span className="gradient-text-ai">${(roi.netROI / 1000).toFixed(0)}K</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }
