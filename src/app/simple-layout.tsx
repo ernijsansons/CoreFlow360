@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description: "World's most advanced AI-first multi-industry ERP platform",
 };
 
-export default function RootLayout({
+export default function SimpleLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
