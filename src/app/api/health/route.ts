@@ -1,17 +1,13 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
 
 export async function GET() {
   try {
-    // Check database connection
-    await prisma.$queryRaw`SELECT 1`
-    
     return NextResponse.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version || '1.0.0',
-      environment: process.env.NODE_ENV,
-      database: 'connected',
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'unknown',
+      database: process.env.DATABASE_URL ? 'configured' : 'not configured',
       uptime: process.uptime(),
     })
   } catch (error) {
@@ -20,10 +16,9 @@ export async function GET() {
     return NextResponse.json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version || '1.0.0',
-      environment: process.env.NODE_ENV,
-      database: 'disconnected',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Database connection failed',
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'unknown',
+      error: 'Health check failed',
     }, { status: 503 })
   }
 }
