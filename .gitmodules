@@ -1,0 +1,9 @@
+[submodule "src/modules/nocobase"]
+	path = src/modules/nocobase
+	url = https://github.com/nocobase/nocobase.git
+[submodule "src/modules/bigcapital"]
+	path = src/modules/bigcapital
+	url = https://github.com/bigcapitalhq/bigcapital.git
+[submodule "src/modules/twenty"]
+	path = src/modules/twenty
+	url = https://github.com/twentyhq/twenty.git
