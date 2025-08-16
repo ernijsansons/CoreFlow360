@@ -18,18 +18,18 @@ export function Navbar() {
 
   const navItems = [
     {
-      label: 'Product',
+      label: 'Solutions',
       hasDropdown: true,
       items: [
-        { label: 'AI Orchestrator', href: '/features/ai', description: 'Intelligent automation for every process' },
-        { label: 'Module Library', href: '/modules', description: '8 ERP systems integrated with AI' },
-        { label: 'Industry Solutions', href: '/industries', description: 'Tailored for HVAC, Legal, HR, and more' },
-        { label: 'API & Integrations', href: '/api', description: 'Connect everything with our APIs' }
+        { label: 'Smart Automation', href: '/features/automation', description: 'Automate repetitive tasks and workflows' },
+        { label: 'Business Modules', href: '/modules', description: 'Complete ERP suite for every department' },
+        { label: 'Industry Solutions', href: '/industries', description: 'HVAC, Professional Services, Manufacturing & more' },
+        { label: 'Integrations', href: '/integrations', description: 'Connect with 500+ business tools' }
       ]
     },
-    { label: 'Pricing', href: '#pricing' },
-    { label: 'Demo', href: '/demo/subscription-simulator' },
-    { label: 'Resources', href: '/resources' },
+    { label: 'Pricing', href: '/pricing' },
+    { label: 'Demo', href: '/demo' },
+    { label: 'Success Stories', href: '/customers' },
     { label: 'Contact', href: '/contact' }
   ]
 

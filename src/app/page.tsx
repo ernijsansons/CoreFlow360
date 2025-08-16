@@ -1,8 +1,12 @@
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { HeroSection } from '@/components/home/HeroSection'
+import { SocialProofSection } from '@/components/home/SocialProofSection'
+import { InteractiveROICalculator } from '@/components/home/InteractiveROICalculator'
+import { UrgencySection } from '@/components/home/UrgencySection'
 import { FeaturesGrid } from '@/components/home/FeaturesGrid'
 import { IndustryShowcase } from '@/components/home/IndustryShowcase'
+import { RiskReversalSection } from '@/components/home/RiskReversalSection'
 import { PerformanceMetrics } from '@/components/home/PerformanceMetrics'
 import { PricingSection } from '@/components/home/PricingSection'
 import { TestimonialsSection } from '@/components/sections/TestimonialsSection'
@@ -19,11 +23,23 @@ export default function Home() {
       {/* Hero Section - The Awakening */}
       <HeroSection />
 
+      {/* Social Proof Section - Trust & Credibility */}
+      <SocialProofSection />
+
+      {/* Interactive ROI Calculator - Conversion Machine */}
+      <InteractiveROICalculator />
+
+      {/* Urgency Section - FOMO & Scarcity */}
+      <UrgencySection />
+
       {/* Features Grid - The Capabilities Showcase */}
       <FeaturesGrid />
 
       {/* Industry Showcase */}
       <IndustryShowcase />
+
+      {/* Risk Reversal - Remove All Objections */}
+      <RiskReversalSection />
 
       {/* Performance Metrics */}
       <PerformanceMetrics />
