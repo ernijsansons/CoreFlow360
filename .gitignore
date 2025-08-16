@@ -40,6 +40,31 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.next/
+# temporary files and backups
+temp/
+*.tmp
+*.bak
+.backup_*/
 
-.vercel
+# logs
+logs/
+*.log
+
+# development server files
+dev-server.log
+deployment-*.log
+
+# database files  
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+Thumbs.db
+.DS_Store
