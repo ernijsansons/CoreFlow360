@@ -92,6 +92,11 @@ const config: Config = {
           800: '#065f46',
           900: '#064e3b',
         },
+        // Consciousness theme colors
+        'consciousness-neural': '#2563eb',
+        'consciousness-synaptic': '#7c3aed',
+        'consciousness-autonomous': '#f59e0b',
+        'consciousness-transcendent': '#ffffff',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -136,6 +141,22 @@ const config: Config = {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" },
         },
+        "consciousness-pulse": {
+          "0%, 100%": { 
+            opacity: "0.4", 
+            transform: "scale(1)",
+            boxShadow: "0 0 0 0 rgba(124, 58, 237, 0.7)"
+          },
+          "50%": { 
+            opacity: "1", 
+            transform: "scale(1.05)",
+            boxShadow: "0 0 0 10px rgba(124, 58, 237, 0)"
+          },
+        },
+        "neural-flow": {
+          "0%": { strokeDashoffset: "1000" },
+          "100%": { strokeDashoffset: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -145,6 +166,8 @@ const config: Config = {
         "data-flow": "data-flow 12s linear infinite",
         "consciousness-glow": "consciousness-glow 2s ease-in-out infinite",
         "shimmer": "shimmer 2s linear infinite",
+        "consciousness-pulse": "consciousness-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "neural-flow": "neural-flow 3s ease-in-out infinite",
       },
       backdropBlur: {
         xs: '2px',

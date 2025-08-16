@@ -1,0 +1,34 @@
+{
+  "campaignId": "consciousness-campaign-1755021094453",
+  "trackingEvents": [
+    "page_view",
+    "beta_signup",
+    "demo_request",
+    "assessment_complete",
+    "consciousness_awakening",
+    "intelligence_multiplication_demo",
+    "social_engagement",
+    "email_open",
+    "email_click",
+    "video_view_completion"
+  ],
+  "realTimeAlerts": [
+    {
+      "event": "beta_signup",
+      "threshold": 50,
+      "action": "increase_ad_spend"
+    },
+    {
+      "event": "consciousness_awakening",
+      "threshold": 100,
+      "action": "trigger_phase_2_early"
+    },
+    {
+      "event": "negative_sentiment",
+      "threshold": 10,
+      "action": "notify_team_immediate"
+    }
+  ],
+  "dashboardUrl": "https://analytics.coreflow360.com/campaigns/consciousness-campaign-1755021094453",
+  "reportingSchedule": "daily_at_9am_pst"
+}

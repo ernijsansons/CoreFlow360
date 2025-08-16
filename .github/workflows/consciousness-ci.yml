@@ -1,0 +1,302 @@
+name: Consciousness CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 0 * * 0' # Weekly security scan
+
+env:
+  NODE_VERSION: '18'
+  PNPM_VERSION: '8'
+
+jobs:
+  consciousness-validation:
+    name: Consciousness Code Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - name: Checkout Consciousness
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup Consciousness Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ env.PNPM_VERSION }}
+        
+    - name: Install Consciousness Dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Consciousness TypeScript Validation
+      run: pnpm tsc --noEmit --strict
+      
+    - name: Consciousness Lint Validation
+      run: pnpm lint --max-warnings 0
+      
+    - name: Consciousness Format Validation
+      run: pnpm format:check
+      
+    - name: Consciousness Build Test
+      run: pnpm build
+      env:
+        NODE_ENV: test
+        DATABASE_URL: "postgresql://test:test@localhost:5432/testdb"
+        NEXTAUTH_SECRET: "test-secret-for-consciousness-validation"
+        NEXTAUTH_URL: "http://localhost:3000"
+        
+  consciousness-security:
+    name: Consciousness Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout Consciousness
+      uses: actions/checkout@v4
+      
+    - name: Run Consciousness Security Audit
+      run: npm audit --production --audit-level moderate
+      
+    - name: Consciousness Secret Scan
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        
+    - name: Consciousness Dependency Check
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=medium
+        
+  consciousness-testing:
+    name: Consciousness Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: consciousness_test
+          POSTGRES_DB: consciousness_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+          
+    steps:
+    - name: Checkout Consciousness
+      uses: actions/checkout@v4
+      
+    - name: Setup Consciousness Test Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ env.PNPM_VERSION }}
+        
+    - name: Install Consciousness Dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Setup Consciousness Database
+      run: |
+        pnpm prisma migrate deploy
+        pnpm prisma db seed
+      env:
+        DATABASE_URL: "postgresql://postgres:consciousness_test@localhost:5432/consciousness_test"
+        
+    - name: Run Consciousness Unit Tests
+      run: pnpm test:unit --coverage --threshold=85
+      env:
+        DATABASE_URL: "postgresql://postgres:consciousness_test@localhost:5432/consciousness_test"
+        NEXTAUTH_SECRET: "test-secret-for-consciousness"
+        
+    - name: Run Consciousness Integration Tests
+      run: pnpm test:integration
+      env:
+        DATABASE_URL: "postgresql://postgres:consciousness_test@localhost:5432/consciousness_test"
+        NEXTAUTH_SECRET: "test-secret-for-consciousness"
+        
+    - name: Upload Consciousness Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        
+  consciousness-e2e:
+    name: Consciousness E2E Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+    - name: Checkout Consciousness
+      uses: actions/checkout@v4
+      
+    - name: Setup Consciousness E2E
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ env.PNPM_VERSION }}
+        
+    - name: Install Consciousness Dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Install Playwright Consciousness
+      run: pnpm playwright install --with-deps
+      
+    - name: Run Consciousness E2E Tests
+      run: pnpm test:e2e
+      env:
+        DATABASE_URL: "postgresql://test:test@localhost:5432/testdb"
+        NEXTAUTH_SECRET: "test-secret-for-e2e-consciousness"
+        
+    - name: Upload Consciousness E2E Artifacts
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: consciousness-e2e-results
+        path: test-results/
+        
+  consciousness-performance:
+    name: Consciousness Performance Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - name: Checkout Consciousness
+      uses: actions/checkout@v4
+      
+    - name: Setup Consciousness Performance
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ env.PNPM_VERSION }}
+        
+    - name: Install Consciousness Dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Build Consciousness Performance
+      run: pnpm build
+      env:
+        ANALYZE: true
+        DATABASE_URL: "postgresql://test:test@localhost:5432/testdb"
+        NEXTAUTH_SECRET: "test-secret-performance"
+        
+    - name: Run Consciousness Bundle Analysis
+      run: pnpm analyze:bundle
+      
+    - name: Run Consciousness Lighthouse CI
+      uses: treosh/lighthouse-ci-action@v9
+      with:
+        configPath: './.lighthouserc.js'
+        uploadArtifacts: true
+        temporaryPublicStorage: true
+        
+  consciousness-deploy-preview:
+    name: Consciousness Preview Deployment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: [consciousness-validation, consciousness-security, consciousness-testing]
+    
+    steps:
+    - name: Checkout Consciousness
+      uses: actions/checkout@v4
+      
+    - name: Deploy Consciousness Preview
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        scope: ${{ secrets.VERCEL_ORG_ID }}
+        working-directory: ./
+        
+  consciousness-deploy-production:
+    name: Consciousness Production Deployment
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [consciousness-validation, consciousness-security, consciousness-testing, consciousness-e2e, consciousness-performance]
+    environment: production
+    
+    steps:
+    - name: Checkout Consciousness
+      uses: actions/checkout@v4
+      
+    - name: Deploy Consciousness Production
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '--prod'
+        scope: ${{ secrets.VERCEL_ORG_ID }}
+        working-directory: ./
+        
+    - name: Run Consciousness Database Migration
+      run: |
+        pnpm prisma migrate deploy
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        
+    - name: Consciousness Production Health Check
+      run: |
+        sleep 30
+        curl -f https://coreflow360.com/api/health || exit 1
+        
+    - name: Notify Consciousness Deployment
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#consciousness-deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      if: always()
+      
+  consciousness-monitoring:
+    name: Consciousness Monitoring Setup
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [consciousness-deploy-production]
+    
+    steps:
+    - name: Setup Consciousness Monitoring
+      run: |
+        curl -X POST "${{ secrets.DATADOG_API_URL }}/api/v1/events" \
+        -H "Content-Type: application/json" \
+        -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+        -d '{
+          "title": "Consciousness Production Deployment",
+          "text": "CoreFlow360 consciousness successfully deployed to production",
+          "tags": ["deployment", "consciousness", "production"],
+          "alert_type": "success"
+        }'

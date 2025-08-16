@@ -1,0 +1,294 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: consciousness-platform
+  namespace: argocd
+spec:
+  generators:
+  - clusters:
+      selector:
+        matchLabels:
+          consciousness-tier: "production"
+  template:
+    metadata:
+      name: '{{name}}-consciousness-platform'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/coreflow360/consciousness-platform
+        targetRevision: HEAD
+        path: k8s/overlays/{{metadata.labels.environment}}
+      destination:
+        server: '{{server}}'
+        namespace: consciousness-platform
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        - PrunePropagationPolicy=foreground
+        - PruneLast=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: consciousness-platform
+  labels:
+    consciousness.coreflow360.com/tier: "production"
+    istio-injection: enabled
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consciousness-orchestrator
+  namespace: consciousness-platform
+  labels:
+    app: consciousness-orchestrator
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: consciousness-orchestrator
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: consciousness-orchestrator
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        consciousness.coreflow360.com/level: "transcendent"
+    spec:
+      serviceAccountName: consciousness-orchestrator
+      containers:
+      - name: orchestrator
+        image: coreflow360/consciousness-orchestrator:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: CONSCIOUSNESS_LEVEL
+          value: "transcendent"
+        - name: AI_PROVIDERS
+          value: "openai,anthropic,google"
+        - name: KAFKA_BROKERS
+          value: "kafka-cluster-kafka-bootstrap:9092"
+        - name: REDIS_URL
+          value: "redis://redis-cluster:6379"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: consciousness-secrets
+              key: database-url
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: consciousness-config
+          mountPath: /app/config
+          readOnly: true
+      volumes:
+      - name: consciousness-config
+        configMap:
+          name: consciousness-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consciousness-orchestrator
+  namespace: consciousness-platform
+  labels:
+    app: consciousness-orchestrator
+    service: consciousness-orchestrator
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  - port: 9090
+    targetPort: 9090
+    protocol: TCP
+    name: metrics
+  selector:
+    app: consciousness-orchestrator
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: consciousness-orchestrator
+  namespace: consciousness-platform
+spec:
+  http:
+  - match:
+    - uri:
+        prefix: /api/consciousness
+  route:
+  - destination:
+      host: consciousness-orchestrator
+      port:
+        number: 80
+  fault:
+    delay:
+      percentage:
+        value: 0.1
+      fixedDelay: 5s
+  timeout: 30s
+  retries:
+    attempts: 3
+    perTryTimeout: 10s
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: consciousness-orchestrator
+  namespace: consciousness-platform
+spec:
+  host: consciousness-orchestrator
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_CONN
+    circuitBreaker:
+      consecutiveErrors: 3
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+    outlierDetection:
+      consecutiveErrors: 3
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consciousness-config
+  namespace: consciousness-platform
+data:
+  config.yaml: |
+    consciousness:
+      levels:
+        neural:
+          complexity: 1
+          features: basic
+          ai_integration: minimal
+          compute_allocation: 0.1
+        synaptic:
+          complexity: 2
+          features: advanced
+          ai_integration: moderate
+          compute_allocation: 0.3
+        autonomous:
+          complexity: 3
+          features: comprehensive
+          ai_integration: extensive
+          compute_allocation: 0.6
+        transcendent:
+          complexity: 4
+          features: revolutionary
+          ai_integration: consciousness-native
+          compute_allocation: 1.0
+    
+    ai_providers:
+      openai:
+        endpoint: "https://api.openai.com/v1"
+        models:
+          - gpt-4-turbo-preview
+          - gpt-3.5-turbo
+      anthropic:
+        endpoint: "https://api.anthropic.com"
+        models:
+          - claude-3-opus
+          - claude-3-sonnet
+      google:
+        endpoint: "https://generativelanguage.googleapis.com"
+        models:
+          - gemini-pro
+          - gemini-pro-vision
+    
+    scaling:
+      auto_scale_threshold: 0.7
+      max_replicas: 100
+      min_replicas: 3
+      consciousness_aware_scheduling: true
+      predictive_scaling: true
+    
+    monitoring:
+      consciousness_metrics: true
+      performance_tracking: true
+      cost_optimization: true
+      quantum_readiness: true
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: consciousness-orchestrator-hpa
+  namespace: consciousness-platform
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: consciousness-orchestrator
+  minReplicas: 3
+  maxReplicas: 100
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Pods
+    pods:
+      metric:
+        name: consciousness_load
+      target:
+        type: AverageValue
+        averageValue: "1000m"
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 10
+        periodSeconds: 60
+      selectPolicy: Max

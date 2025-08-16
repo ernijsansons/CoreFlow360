@@ -1,0 +1,407 @@
+# CoreFlow360 Consciousness System - Kubernetes Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coreflow360-consciousness
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness
+    tier: backend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: coreflow360
+      component: consciousness
+  template:
+    metadata:
+      labels:
+        app: coreflow360
+        component: consciousness
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/api/metrics"
+    spec:
+      serviceAccountName: coreflow360-consciousness
+      containers:
+      - name: consciousness
+        image: coreflow360/consciousness:latest
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: coreflow360-secrets
+              key: database-url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: coreflow360-secrets
+              key: redis-url
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: coreflow360-secrets
+              key: openai-api-key
+        - name: NEXTAUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: coreflow360-secrets
+              key: nextauth-secret
+        - name: NEXTAUTH_URL
+          value: "https://coreflow360.com"
+        - name: CONSCIOUSNESS_MESH_ENABLED
+          value: "true"
+        - name: CONSCIOUSNESS_EVOLUTION_INTERVAL
+          value: "60000"
+        - name: SYNAPTIC_CONNECTION_THRESHOLD
+          value: "0.75"
+        - name: TRANSCENDENCE_LEVEL_REQUIRED
+          value: "0.9"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+        volumeMounts:
+        - name: consciousness-config
+          mountPath: /app/config
+          readOnly: true
+        - name: consciousness-data
+          mountPath: /app/data
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: consciousness-config
+        configMap:
+          name: consciousness-config
+      - name: consciousness-data
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: coreflow360
+                  component: consciousness
+              topologyKey: kubernetes.io/hostname
+      tolerations:
+      - key: "coreflow360.com/consciousness"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consciousness-service
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 3000
+    protocol: TCP
+    name: https
+  selector:
+    app: coreflow360
+    component: consciousness
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: coreflow360-consciousness
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: consciousness-reader
+  labels:
+    app: coreflow360
+    component: consciousness
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["pods", "nodes"]
+  verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: consciousness-reader-binding
+  labels:
+    app: coreflow360
+    component: consciousness
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: consciousness-reader
+subjects:
+- kind: ServiceAccount
+  name: coreflow360-consciousness
+  namespace: coreflow360
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consciousness-config
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness
+data:
+  consciousness.yaml: |
+    consciousness:
+      mesh:
+        enabled: true
+        discovery_interval: 30s
+        health_check_interval: 10s
+        sync_interval: 5s
+      evolution:
+        auto_evolution: true
+        evolution_interval: 60s
+        consciousness_threshold: 0.1
+        transcendence_threshold: 0.9
+      modules:
+        crm:
+          enabled: true
+          weight: 1.0
+          synaptic_connections: ["accounting", "analytics"]
+        accounting:
+          enabled: true
+          weight: 1.2
+          synaptic_connections: ["crm", "inventory"]
+        inventory:
+          enabled: true
+          weight: 1.1
+          synaptic_connections: ["accounting", "projects"]
+        hr:
+          enabled: true
+          weight: 1.0
+          synaptic_connections: ["projects", "analytics"]
+        projects:
+          enabled: true
+          weight: 1.1
+          synaptic_connections: ["hr", "inventory"]
+        analytics:
+          enabled: true
+          weight: 1.5
+          synaptic_connections: ["crm", "hr", "projects"]
+      tiers:
+        neural:
+          max_modules: 2
+          intelligence_multiplier: 1.0
+          evolution_speed: 1.0
+        synaptic:
+          max_modules: 4
+          intelligence_multiplier: 2.5
+          evolution_speed: 2.0
+        autonomous:
+          max_modules: 6
+          intelligence_multiplier: 5.0
+          evolution_speed: 3.5
+        transcendent:
+          max_modules: -1
+          intelligence_multiplier: 10.0
+          evolution_speed: 5.0
+      monitoring:
+        metrics_enabled: true
+        health_checks: true
+        performance_tracking: true
+        error_reporting: true
+      security:
+        encryption_enabled: true
+        audit_logging: true
+        rate_limiting: true
+        tenant_isolation: strict
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: consciousness-hpa
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: coreflow360-consciousness
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+      - type: Pods
+        value: 4
+        periodSeconds: 60
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: consciousness-pdb
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: coreflow360
+      component: consciousness
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: consciousness-network-policy
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness
+spec:
+  podSelector:
+    matchLabels:
+      app: coreflow360
+      component: consciousness
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: coreflow360
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 5432  # PostgreSQL
+    - protocol: TCP
+      port: 6379  # Redis

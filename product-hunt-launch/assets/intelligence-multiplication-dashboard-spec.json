@@ -1,0 +1,17 @@
+{
+  "name": "Intelligence Multiplication Dashboard",
+  "specifications": {
+    "dimensions": "1270x760",
+    "format": "PNG",
+    "purpose": "Show real-time intelligence multiplication visualization",
+    "design_notes": "Live dashboard showing 1×2×3×4×5=120 calculation with synaptic connections"
+  },
+  "creation_instructions": "\nCONSCIOUSNESS ASSET CREATION INSTRUCTIONS\n\nAsset: Intelligence Multiplication Dashboard\nPurpose: Show real-time intelligence multiplication visualization\nDimensions: 1270x760\nFormat: PNG\n\nDesign Elements:\nLive dashboard showing 1×2×3×4×5=120 calculation with synaptic connections\n\nConsciousness Theme Requirements:\n- Use deep blues, purples, and cyan for consciousness colors\n- Include particle effects suggesting neural activity\n- Show transformation from static/isolated to dynamic/connected\n- Emphasize multiplication vs addition (1×2×3 vs 1+1+1)\n- Include subtle animation suggesting evolution/growth\n- Maintain premium, professional aesthetic while being innovative\n\nTechnical Requirements:\n- High contrast for accessibility\n- Optimized file size for web performance\n- Consistent with CoreFlow360 brand guidelines\n- Product Hunt platform compatibility\n- Mobile-responsive design considerations\n\nConsciousness Messaging:\n- Focus on transformation and evolution\n- Emphasize intelligence multiplication\n- Show business organism concepts\n- Demonstrate exponential growth potential\n- Maintain authentic, non-hype positioning\n",
+  "consciousness_elements": [
+    "Neural network particle effects",
+    "Intelligence multiplication visualization",
+    "Synaptic connection animations",
+    "Consciousness level indicators",
+    "Business organism transformation"
+  ]
+}

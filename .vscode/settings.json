@@ -1,0 +1,30 @@
+{
+    "typescript.tsdk":  "node_modules/typescript/lib",
+    "search.exclude":  {
+                           "**/dist":  true,
+                           "**/build":  true,
+                           "**/node_modules":  true,
+                           "**/*.code-search":  true,
+                           "**/bower_components":  true,
+                           "**/.next":  true
+                       },
+    "typescript.tsserver.log":  "verbose",
+    "files.watcherExclude":  {
+                                 "**/.git/objects/**":  true,
+                                 "**/.git/subtree-cache/**":  true,
+                                 "**/dist/**":  true,
+                                 "**/node_modules/**":  true,
+                                 "**/.next/**":  true,
+                                 "**/build/**":  true
+                             },
+    "javascript.validate.enable":  false,
+    "typescript.surveys.enabled":  false,
+    "typescript.enablePromptUseWorkspaceTsdk":  true,
+    "typescript.tsserver.maxTsServerMemory":  2048,
+    "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+    "typescript.tsserver.trace":  "messages",
+    "typescript.disableAutomaticTypeAcquisition":  true,
+    "git.autoFetch": false,
+    "git.enabled": false,
+    "search.followSymlinks": false
+}

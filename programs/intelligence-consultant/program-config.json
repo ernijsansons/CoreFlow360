@@ -1,0 +1,260 @@
+{
+  "id": "intelligence-consultant",
+  "name": "Intelligence Certified Consultant",
+  "description": "Elite consultants who guide businesses through consciousness transformation",
+  "benefits": [
+    "30-50% revenue sharing on all referred customers",
+    "Exclusive access to consciousness transformation methodology",
+    "Priority technical support and training",
+    "Co-marketing opportunities and thought leadership",
+    "Early access to new consciousness features",
+    "Certification badge for professional credibility"
+  ],
+  "requirements": [
+    "Minimum 5 years business consulting experience",
+    "Demonstrated expertise in business transformation",
+    "Complete CoreFlow360 Consciousness Certification",
+    "Maintain minimum consciousness level of 7/10",
+    "Commit to 3+ implementations per quarter"
+  ],
+  "certification": {
+    "levels": [
+      {
+        "id": "foundation",
+        "name": "Foundation Consciousness Consultant",
+        "requirements": [
+          "Complete 40-hour consciousness training program",
+          "Pass theoretical assessment (85% minimum)",
+          "Complete 1 supervised consciousness implementation",
+          "Demonstrate consciousness level 3+",
+          "Client testimonial required"
+        ],
+        "benefits": [
+          "30% revenue sharing",
+          "Basic sales materials access",
+          "Community forum access",
+          "Monthly group training calls"
+        ],
+        "cost": 2500,
+        "consciousnessMinimum": 3,
+        "timeToComplete": "6-8 weeks"
+      },
+      {
+        "id": "advanced",
+        "name": "Advanced Consciousness Practitioner",
+        "requirements": [
+          "Hold Foundation certification for 6+ months",
+          "Complete advanced 80-hour training program",
+          "Lead 3+ successful consciousness transformations",
+          "Demonstrate consciousness level 5+",
+          "Peer review by existing Advanced practitioners"
+        ],
+        "benefits": [
+          "40% revenue sharing",
+          "Advanced methodology access",
+          "Co-marketing opportunities",
+          "Weekly expert training sessions",
+          "Client referral network access"
+        ],
+        "cost": 5000,
+        "consciousnessMinimum": 5,
+        "timeToComplete": "12-16 weeks"
+      },
+      {
+        "id": "master",
+        "name": "Master Consciousness Architect",
+        "requirements": [
+          "Hold Advanced certification for 12+ months",
+          "Complete master-level 120-hour program",
+          "Lead 10+ consciousness transformations with measurable ROI",
+          "Demonstrate consciousness level 7+",
+          "Contribute to consciousness methodology development"
+        ],
+        "benefits": [
+          "45% revenue sharing",
+          "Methodology co-development opportunities",
+          "Conference speaking opportunities",
+          "Exclusive executive access program",
+          "Custom consciousness solution development"
+        ],
+        "cost": 10000,
+        "consciousnessMinimum": 7,
+        "timeToComplete": "20-24 weeks"
+      },
+      {
+        "id": "transcendent",
+        "name": "Transcendent Consciousness Guide",
+        "requirements": [
+          "Hold Master certification for 18+ months",
+          "Lead 25+ large-scale consciousness transformations",
+          "Demonstrate consciousness level 9+",
+          "Thought leadership in consciousness business evolution",
+          "Invitation-only based on exceptional results"
+        ],
+        "benefits": [
+          "50% revenue sharing",
+          "Co-founder opportunities in new markets",
+          "Consciousness research collaboration",
+          "Global speaking circuit inclusion",
+          "Next-generation consciousness preview access"
+        ],
+        "cost": 25000,
+        "consciousnessMinimum": 9,
+        "timeToComplete": "30-36 weeks"
+      }
+    ],
+    "assessment": {
+      "theoretical": "Comprehensive consciousness theory exam",
+      "practical": "Live consciousness transformation demonstration",
+      "portfolio": "Case study portfolio with measurable outcomes",
+      "peer_review": "Evaluation by certified consciousness practitioners"
+    },
+    "renewal": {
+      "period": "24 months",
+      "requirements": [
+        "Complete 20 hours continuing education",
+        "Maintain minimum client satisfaction scores",
+        "Demonstrate ongoing consciousness evolution",
+        "Contribute to partner community knowledge base"
+      ],
+      "cost": "$500-2500 based on certification level"
+    },
+    "badge": {
+      "digital": "Verifiable blockchain-based certification",
+      "physical": "Premium consciousness crystal badge",
+      "website": "Embeddable certification widget",
+      "linkedin": "Professional certification display"
+    }
+  },
+  "revenueSharing": {
+    "commissionRate": 0.4,
+    "bonusThresholds": [
+      {
+        "deals": 5,
+        "bonusRate": 0.05,
+        "description": "5% bonus for 5+ deals per quarter"
+      },
+      {
+        "deals": 10,
+        "bonusRate": 0.1,
+        "description": "10% bonus for 10+ deals per quarter"
+      },
+      {
+        "deals": 20,
+        "bonusRate": 0.15,
+        "description": "15% bonus for 20+ deals per quarter"
+      }
+    ],
+    "paymentSchedule": "Monthly recurring based on client MRR",
+    "minimumPayout": 500
+  },
+  "training": {
+    "modules": [
+      {
+        "id": "consciousness-foundations",
+        "name": "Business Consciousness Foundations",
+        "duration": "8 hours",
+        "content": [
+          "The Science of Business Consciousness",
+          "Intelligence Multiplication Theory",
+          "Consciousness Assessment Methodology",
+          "Common Unconscious Business Patterns"
+        ],
+        "practicalExercises": [
+          "Consciousness assessment of real business",
+          "Intelligence gap analysis workshop",
+          "Unconscious pattern identification exercise"
+        ]
+      },
+      {
+        "id": "transformation-methodology",
+        "name": "Consciousness Transformation Methodology",
+        "duration": "12 hours",
+        "content": [
+          "The 7-Phase Consciousness Evolution Process",
+          "Resistance Patterns and Breakthrough Techniques",
+          "Measuring Consciousness Growth",
+          "Stakeholder Alignment for Transformation"
+        ],
+        "practicalExercises": [
+          "Mock transformation planning session",
+          "Resistance handling role-playing",
+          "ROI measurement case studies"
+        ]
+      },
+      {
+        "id": "technical-mastery",
+        "name": "CoreFlow360 Technical Mastery",
+        "duration": "16 hours",
+        "content": [
+          "Platform Architecture and Consciousness Layers",
+          "Module Integration and Synaptic Bridge Configuration",
+          "Advanced Analytics and Consciousness Metrics",
+          "Custom Consciousness Solution Development"
+        ],
+        "practicalExercises": [
+          "Live platform configuration exercise",
+          "Custom module development workshop",
+          "Consciousness metrics interpretation"
+        ]
+      },
+      {
+        "id": "sales-excellence",
+        "name": "Consciousness Sales Excellence",
+        "duration": "8 hours",
+        "content": [
+          "Consciousness-Based Selling Methodology",
+          "ROI Demonstration and Value Articulation",
+          "Objection Handling for Consciousness Adoption",
+          "Executive Consciousness Conversations"
+        ],
+        "practicalExercises": [
+          "Consciousness demo role-playing",
+          "ROI calculation workshop",
+          "Executive presentation practice"
+        ]
+      }
+    ],
+    "duration": "44+ hours core program",
+    "format": "Hybrid: Online theory + Live practical sessions",
+    "certification": true
+  },
+  "tools": {
+    "salesMaterials": [
+      "Consciousness ROI Calculator",
+      "Intelligence Multiplication Demo Scripts",
+      "Executive Presentation Templates",
+      "Case Study Library with Video Testimonials",
+      "Objection Handling Playbook",
+      "Consciousness Assessment Tools"
+    ],
+    "technicalResources": [
+      "Technical Implementation Guides",
+      "Best Practices Documentation",
+      "Troubleshooting Guides",
+      "Integration Templates",
+      "Custom Development Resources",
+      "API Documentation and Examples"
+    ],
+    "marketingAssets": [
+      "Consciousness Transformation Infographics",
+      "Co-branded Marketing Materials",
+      "Social Media Content Templates",
+      "Webinar Presentation Decks",
+      "White Papers and Research Studies",
+      "Video Content Library"
+    ],
+    "supportChannels": [
+      "Dedicated Partner Success Manager",
+      "Private Slack Community",
+      "Weekly Office Hours",
+      "Emergency Technical Support",
+      "Quarterly Business Reviews",
+      "Annual Partner Summit"
+    ]
+  },
+  "deployment_date": "2025-08-12T17:53:55.267Z",
+  "status": "active",
+  "enrollment_url": "https://partners.coreflow360.com/apply/intelligence-consultant",
+  "support_contact": "partners@coreflow360.com"
+}

@@ -1,86 +1,149 @@
+/**
+ * CoreFlow360 - Rate Limiting for Next.js
+ * Token bucket algorithm implementation for API rate limiting
+ */
+
+import { LRUCache } from 'lru-cache'
 import { NextRequest } from 'next/server'
 
-interface RateLimitStore {
-  [key: string]: {
-    count: number
-    resetTime: number
-  }
+export type RateLimitOptions = {
+  uniqueTokenPerInterval?: number
+  interval?: number
 }
 
-class RateLimiter {
-  private store: RateLimitStore = {}
-  private windowMs: number
-  private maxRequests: number
+export type RateLimitResult = {
+  success: boolean
+  limit: number
+  remaining: number
+  reset: number
+}
 
-  constructor(windowMs: number = 60000, maxRequests: number = 100) {
-    this.windowMs = windowMs
-    this.maxRequests = maxRequests
-    
-    // Clean up expired entries every 5 minutes
-    setInterval(() => this.cleanup(), 5 * 60 * 1000)
+// Default rate limit configurations
+export const RATE_LIMITS = {
+  auth: {
+    uniqueTokenPerInterval: 5,
+    interval: 15 * 60 * 1000 // 15 minutes
+  },
+  api: {
+    uniqueTokenPerInterval: 100,
+    interval: 60 * 1000 // 1 minute
+  },
+  public: {
+    uniqueTokenPerInterval: 30,
+    interval: 60 * 1000 // 1 minute
+  },
+  upload: {
+    uniqueTokenPerInterval: 10,
+    interval: 60 * 60 * 1000 // 1 hour
   }
+} as const
 
-  private cleanup() {
-    const now = Date.now()
-    Object.keys(this.store).forEach(key => {
-      if (this.store[key].resetTime < now) {
-        delete this.store[key]
-      }
-    })
-  }
+export function rateLimit(options?: RateLimitOptions) {
+  const tokenCache = new LRUCache<string, number[]>({
+    max: 5000, // Max 5000 unique tokens
+    ttl: options?.interval || 60 * 1000, // Default 1 minute
+  })
 
-  private getIdentifier(request: NextRequest): string {
-    // Use IP address and user agent for identification
-    const ip = request.headers.get('x-forwarded-for') ||
-               request.headers.get('x-real-ip') ||
-               'unknown'
-    const userAgent = request.headers.get('user-agent') || 'unknown'
-    return `${ip}-${userAgent.slice(0, 50)}`
-  }
-
-  async isAllowed(request: NextRequest): Promise<{
-    allowed: boolean
-    limit: number
-    current: number
-    remaining: number
-    resetTime: number
-  }> {
-    const identifier = this.getIdentifier(request)
-    const now = Date.now()
-    
-    if (!this.store[identifier] || this.store[identifier].resetTime < now) {
-      this.store[identifier] = {
-        count: 1,
-        resetTime: now + this.windowMs
+  return {
+    check: async (request: NextRequest, token: string): Promise<RateLimitResult> => {
+      const limit = options?.uniqueTokenPerInterval || 100
+      const interval = options?.interval || 60 * 1000
+      const now = Date.now()
+      
+      // Get the token's request history
+      const timestamps = tokenCache.get(token) || []
+      const validTimestamps = timestamps.filter(
+        timestamp => now - timestamp < interval
+      )
+      
+      // Check if limit exceeded
+      if (validTimestamps.length >= limit) {
+        return {
+          success: false,
+          limit,
+          remaining: 0,
+          reset: Math.min(...validTimestamps) + interval
+        }
       }
       
+      // Add current request timestamp
+      validTimestamps.push(now)
+      tokenCache.set(token, validTimestamps)
+      
       return {
-        allowed: true,
-        limit: this.maxRequests,
-        current: 1,
-        remaining: this.maxRequests - 1,
-        resetTime: this.store[identifier].resetTime
+        success: true,
+        limit,
+        remaining: limit - validTimestamps.length,
+        reset: now + interval
       }
-    }
-
-    this.store[identifier].count++
-    const current = this.store[identifier].count
-    
-    return {
-      allowed: current <= this.maxRequests,
-      limit: this.maxRequests,
-      current,
-      remaining: Math.max(0, this.maxRequests - current),
-      resetTime: this.store[identifier].resetTime
     }
   }
 }
 
-// Create different rate limiters for different endpoints
-export const apiRateLimiter = new RateLimiter(60 * 1000, 100) // 100 requests per minute
-export const authRateLimiter = new RateLimiter(15 * 60 * 1000, 5) // 5 requests per 15 minutes
-export const strictRateLimiter = new RateLimiter(60 * 1000, 10) // 10 requests per minute
+// Helper to get rate limit key from request
+export function getRateLimitKey(request: NextRequest, prefix: string = 'api'): string {
+  // Try to get authenticated user ID from headers (set by middleware)
+  const userId = request.headers.get('x-user-id')
+  if (userId) {
+    const tenantId = request.headers.get('x-tenant-id')
+    return tenantId ? `${prefix}:${tenantId}:${userId}` : `${prefix}:user:${userId}`
+  }
+  
+  // Fall back to IP address
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  const realIp = request.headers.get('x-real-ip')
+  const ip = forwardedFor?.split(',')[0] || realIp || 'unknown'
+  
+  return `${prefix}:ip:${ip}`
+}
 
-export function createRateLimit(windowMs: number, maxRequests: number) {
-  return new RateLimiter(windowMs, maxRequests)
+// Rate limiter instances
+export const authLimiter = rateLimit(RATE_LIMITS.auth)
+export const apiLimiter = rateLimit(RATE_LIMITS.api)
+export const publicLimiter = rateLimit(RATE_LIMITS.public)
+export const uploadLimiter = rateLimit(RATE_LIMITS.upload)
+
+// Helper function to create rate limit response
+export function rateLimitResponse(result: RateLimitResult) {
+  return new Response('Too many requests', {
+    status: 429,
+    headers: {
+      'X-RateLimit-Limit': result.limit.toString(),
+      'X-RateLimit-Remaining': result.remaining.toString(),
+      'X-RateLimit-Reset': new Date(result.reset).toISOString(),
+      'Retry-After': Math.ceil((result.reset - Date.now()) / 1000).toString(),
+      'Content-Type': 'application/json'
+    },
+    // @ts-ignore - Body is valid
+    body: JSON.stringify({
+      error: 'Too many requests',
+      message: 'Rate limit exceeded. Please try again later.',
+      limit: result.limit,
+      remaining: result.remaining,
+      reset: new Date(result.reset).toISOString()
+    })
+  })
+}
+
+// Middleware helper for API routes
+export async function withRateLimit(
+  request: NextRequest,
+  handler: () => Promise<Response>,
+  options?: RateLimitOptions
+): Promise<Response> {
+  const limiter = rateLimit(options || RATE_LIMITS.api)
+  const key = getRateLimitKey(request)
+  const result = await limiter.check(request, key)
+  
+  if (!result.success) {
+    return rateLimitResponse(result)
+  }
+  
+  // Add rate limit headers to successful responses
+  const response = await handler()
+  response.headers.set('X-RateLimit-Limit', result.limit.toString())
+  response.headers.set('X-RateLimit-Remaining', result.remaining.toString())
+  response.headers.set('X-RateLimit-Reset', new Date(result.reset).toISOString())
+  
+  return response
 }

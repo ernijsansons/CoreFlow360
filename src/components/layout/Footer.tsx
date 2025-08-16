@@ -1,0 +1,194 @@
+/**
+ * Professional Footer Component - Free SaaS Template
+ * Inspired by successful SaaS footers with social proof and comprehensive links
+ */
+
+'use client'
+
+import { Bot, Sparkles, Twitter, Github, Linkedin, Mail, ExternalLink } from 'lucide-react'
+import { useTrackEvent } from '@/components/analytics/AnalyticsProvider'
+
+export function Footer() {
+  const { trackEvent } = useTrackEvent()
+
+  const footerSections = [
+    {
+      title: 'Product',
+      links: [
+        { label: 'AI Orchestrator', href: '/features/ai' },
+        { label: 'Module Library', href: '/modules' },
+        { label: 'Integrations', href: '/integrations' },
+        { label: 'API Documentation', href: '/docs/api' },
+        { label: 'Pricing', href: '#pricing' }
+      ]
+    },
+    {
+      title: 'Solutions',
+      links: [
+        { label: 'HVAC & Manufacturing', href: '/industries/hvac' },
+        { label: 'Legal Services', href: '/industries/legal' },
+        { label: 'HR & Workforce', href: '/industries/hr' },
+        { label: 'Financial Services', href: '/industries/finance' },
+        { label: 'Enterprise', href: '/enterprise' }
+      ]
+    },
+    {
+      title: 'Resources',
+      links: [
+        { label: 'Documentation', href: '/docs' },
+        { label: 'Blog', href: '/blog' },
+        { label: 'Case Studies', href: '/case-studies' },
+        { label: 'Webinars', href: '/webinars' },
+        { label: 'Help Center', href: '/help' }
+      ]
+    },
+    {
+      title: 'Company',
+      links: [
+        { label: 'About Us', href: '/about' },
+        { label: 'Careers', href: '/careers' },
+        { label: 'Contact', href: '/contact' },
+        { label: 'Privacy Policy', href: '/privacy' },
+        { label: 'Terms of Service', href: '/terms' }
+      ]
+    }
+  ]
+
+  const socialLinks = [
+    { icon: Twitter, href: 'https://twitter.com/coreflow360', label: 'Twitter' },
+    { icon: Github, href: 'https://github.com/coreflow360', label: 'GitHub' },
+    { icon: Linkedin, href: 'https://linkedin.com/company/coreflow360', label: 'LinkedIn' },
+    { icon: Mail, href: 'mailto:hello@coreflow360.com', label: 'Email' }
+  ]
+
+  return (
+    <footer className="bg-black border-t border-gray-800/50">
+      {/* Social Proof Banner */}
+      <div className="bg-gradient-to-r from-violet-950/30 to-cyan-950/30 border-b border-gray-800/50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Trusted by Forward-Thinking Businesses
+            </h3>
+            <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
+              {/* Placeholder company logos - replace with real ones later */}
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-cyan-500 rounded"></div>
+                <span className="text-gray-400 font-medium">TechCorp</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-blue-500 rounded"></div>
+                <span className="text-gray-400 font-medium">InnovateLtd</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded"></div>
+                <span className="text-gray-400 font-medium">FutureScale</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded"></div>
+                <span className="text-gray-400 font-medium">NextGen</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Footer Content */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+          {/* Brand Column */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="relative">
+                <Bot className="w-8 h-8 text-violet-400" />
+                <Sparkles className="w-3 h-3 text-cyan-400 absolute -top-1 -right-1" />
+              </div>
+              <span className="text-xl font-bold gradient-text-ai">CoreFlow360</span>
+            </div>
+            <p className="text-gray-400 mb-6 max-w-sm">
+              The world's first AI-orchestrated ERP platform. 8 integrated systems, 
+              infinite possibilities, autonomous operations.
+            </p>
+            
+            {/* Newsletter Signup */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-white">Stay Updated</h4>
+              <div className="flex">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="flex-1 bg-gray-900 border border-gray-700 rounded-l-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-violet-500 transition-colors"
+                />
+                <button
+                  className="bg-gradient-to-r from-violet-500 to-cyan-500 text-white px-6 py-2 rounded-r-lg hover:from-violet-600 hover:to-cyan-600 transition-all duration-200"
+                  onClick={() => trackEvent('newsletter_signup_clicked', { location: 'footer' })}
+                >
+                  Subscribe
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Links */}
+          {footerSections.map((section) => (
+            <div key={section.title} className="space-y-4">
+              <h4 className="font-semibold text-white">{section.title}</h4>
+              <ul className="space-y-2">
+                {section.links.map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="text-gray-400 hover:text-white transition-colors duration-200 flex items-center group"
+                      onClick={() => trackEvent('footer_link_clicked', { 
+                        section: section.title, 
+                        link: link.label 
+                      })}
+                    >
+                      {link.label}
+                      {link.href.startsWith('http') && (
+                        <ExternalLink className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      )}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom Section */}
+        <div className="border-t border-gray-800/50 mt-12 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            {/* Copyright */}
+            <div className="text-gray-400 text-sm">
+              © 2024 CoreFlow360. All rights reserved. Built with AI-first principles.
+            </div>
+
+            {/* Social Links */}
+            <div className="flex items-center space-x-6">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  aria-label={social.label}
+                  onClick={() => trackEvent('social_link_clicked', { 
+                    platform: social.label.toLowerCase() 
+                  })}
+                >
+                  <social.icon className="w-5 h-5" />
+                </a>
+              ))}
+            </div>
+
+            {/* Status Badge */}
+            <div className="flex items-center space-x-2 text-sm">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-gray-400">All systems operational</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  )
+}

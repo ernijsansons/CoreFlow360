@@ -1,55 +1,149 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
-import { getToken } from "next-auth/jwt"
+/**
+ * CoreFlow360 - Multi-tenant middleware
+ * Route protection, subdomain detection, and tenant isolation
+ */
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  
-  // Public routes that don't need authentication
-  const publicRoutes = ["/", "/auth/signin", "/auth/signup", "/demo"]
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
-  
-  if (isPublicRoute) {
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { auth } from '@/lib/auth'
+import { apiVersioningMiddleware } from '@/middleware/versioning'
+import { sanitizationMiddleware } from '@/middleware/sanitization'
+
+// Public routes that don't require authentication
+const PUBLIC_ROUTES = [
+  '/',
+  '/pricing',
+  '/demo',
+  '/login',
+  '/register',
+  '/api/auth/register',
+  '/api/health',
+  '/terms',
+  '/privacy',
+  '/auth/error',
+  '/auth/verify-request'
+]
+
+// Treat all API routes as self-managed; middleware should not gate them
+const isApiPath = (pathname: string) => pathname.startsWith('/api')
+
+// Admin-only routes
+const ADMIN_ROUTES = [
+  '/admin',
+  '/super-admin'
+]
+
+export default auth(async (req) => {
+  const { pathname } = req.nextUrl
+  const isPublicRoute = PUBLIC_ROUTES.some(route => 
+    pathname === route || pathname.startsWith(`${route}/`)
+  )
+  const isApiRoute = isApiPath(pathname)
+  const isAdminRoute = ADMIN_ROUTES.some(route => 
+    pathname.startsWith(route)
+  )
+
+  // Handle API routes
+  if (isApiRoute) {
+    // Apply sanitization to API requests with body
+    if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+      const sanitizationResponse = await sanitizationMiddleware(req)
+      if (sanitizationResponse) {
+        req = sanitizationResponse.request || req
+      }
+    }
+    
+    // Apply API versioning
+    const versioningResponse = apiVersioningMiddleware(req)
+    if (versioningResponse) {
+      return versioningResponse
+    }
     return NextResponse.next()
   }
+
+  // Extract subdomain for tenant detection
+  const host = req.headers.get('host') || ''
+  const subdomain = host.split('.')[0]
+  let tenantSlug = null
   
-  // Protected routes - require authentication
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/api/customers")) {
-    const token = await getToken({ 
-      req: request, 
-      secret: process.env.NEXTAUTH_SECRET 
-    })
+  // Check for tenant subdomain (not www, localhost, or staging)
+  if (subdomain && 
+      !['www', 'localhost', '127', '192', 'staging', 'app'].includes(subdomain) &&
+      !host.includes('vercel.app') &&
+      !host.includes('localhost')) {
+    tenantSlug = subdomain
+  }
+
+  // If user is authenticated
+  if (req.auth) {
+    const user = req.auth.user as any
     
-    if (!token) {
-      // Redirect to signin for dashboard routes
-      if (pathname.startsWith("/dashboard")) {
-        return NextResponse.redirect(new URL("/auth/signin", request.url))
+    // Tenant isolation check
+    if (tenantSlug && user.tenantId) {
+      // TODO: Validate that user's tenant matches subdomain
+      // This would require a database lookup, so we'll handle it in the app
+    }
+
+    // Admin route protection
+    if (isAdminRoute) {
+      if (pathname.startsWith('/super-admin') && user.role !== 'SUPER_ADMIN') {
+        return NextResponse.redirect(new URL('/dashboard', req.url))
       }
-      // Return 401 for API routes
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      
+      if (pathname.startsWith('/admin') && 
+          !['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
+        return NextResponse.redirect(new URL('/dashboard', req.url))
+      }
+    }
+
+    // Redirect authenticated users away from auth pages
+    if (['/login', '/register'].includes(pathname)) {
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
+
+    const response = NextResponse.next()
+    
+    // Add security headers
+    response.headers.set('X-Frame-Options', 'DENY')
+    response.headers.set('X-Content-Type-Options', 'nosniff')
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+    
+    // Only add HSTS in production
+    if (process.env.NODE_ENV === 'production') {
+      response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
     }
     
-    // Add tenant info to headers for API routes
-    if (pathname.startsWith("/api/") && token.tenantId) {
-      const requestHeaders = new Headers(request.headers)
-      requestHeaders.set("x-tenant-id", token.tenantId as string)
-      requestHeaders.set("x-user-id", token.sub as string)
-      
-      return NextResponse.next({
-        request: {
-          headers: requestHeaders,
-        },
-      })
-    }
+    return response
+  }
+
+  // User is not authenticated
+  if (!isPublicRoute) {
+    // Store the attempted URL for redirect after login
+    const loginUrl = new URL('/login', req.url)
+    loginUrl.searchParams.set('callbackUrl', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  const response = NextResponse.next()
+  
+  // Add security headers to all responses
+  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+  
+  // Only add HSTS in production
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
   }
   
-  return NextResponse.next()
-}
+  return response
+})
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/api/customers/:path*",
-    "/api/auth/:path*"
+    // Match all paths except static files and images
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
   ]
 }

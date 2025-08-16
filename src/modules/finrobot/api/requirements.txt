@@ -1,0 +1,28 @@
+# CoreFlow360 - FinRobot Multi-Agent Integration Requirements
+# Optimized for multi-agent financial forecasting
+
+# Core async and HTTP libraries
+asyncio>=3.4.3
+aiohttp>=3.8.0
+httpx>=0.25.2
+
+# Data processing and analysis
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Optional: Machine Learning (when using actual FinRobot)
+# torch>=2.0.0
+# transformers>=4.30.0
+# scikit-learn>=1.3.0
+# lightgbm>=4.0.0
+
+# Configuration and environment
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+
+# Logging and monitoring
+structlog>=23.1.0
+
+# Testing
+pytest>=7.4.3
+pytest-asyncio>=0.21.1

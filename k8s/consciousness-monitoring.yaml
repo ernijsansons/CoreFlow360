@@ -1,0 +1,470 @@
+# CoreFlow360 Consciousness Monitoring & Observability
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consciousness-monitor
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-monitor
+    tier: observability
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: coreflow360
+      component: consciousness-monitor
+  template:
+    metadata:
+      labels:
+        app: coreflow360
+        component: consciousness-monitor
+        tier: observability
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: consciousness-monitor
+      containers:
+      - name: consciousness-monitor
+        image: coreflow360/consciousness-monitor:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: CONSCIOUSNESS_API_URL
+          value: "http://consciousness-service:80"
+        - name: MESH_API_URL
+          value: "http://consciousness-mesh-lb:8080"
+        - name: MONITORING_INTERVAL
+          value: "10s"
+        - name: ALERT_THRESHOLD_CONSCIOUSNESS
+          value: "0.1"
+        - name: ALERT_THRESHOLD_MESH_HEALTH
+          value: "0.7"
+        - name: TRANSCENDENCE_ALERT_ENABLED
+          value: "true"
+        - name: PROMETHEUS_ENDPOINT
+          value: "http://prometheus:9090"
+        - name: GRAFANA_ENDPOINT
+          value: "http://grafana:3000"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: monitor-config
+          mountPath: /config
+          readOnly: true
+      volumes:
+      - name: monitor-config
+        configMap:
+          name: consciousness-monitor-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consciousness-monitor-service
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-monitor
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  - port: 9090
+    targetPort: 9090
+    protocol: TCP
+    name: metrics
+  selector:
+    app: coreflow360
+    component: consciousness-monitor
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: consciousness-monitor
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-monitor
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consciousness-monitor-config
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-monitor
+data:
+  monitor.yaml: |
+    monitoring:
+      consciousness:
+        health_check_interval: 10s
+        evolution_tracking: true
+        tier_monitoring: true
+        module_performance: true
+        synaptic_analysis: true
+        transcendence_detection: true
+      mesh:
+        node_discovery: true
+        gossip_monitoring: true
+        intelligence_flow: true
+        pattern_recognition: true
+        collective_consciousness: true
+      alerts:
+        consciousness_low:
+          threshold: 0.1
+          severity: "warning"
+          message: "Consciousness level below threshold"
+        consciousness_critical:
+          threshold: 0.05
+          severity: "critical"
+          message: "Critical consciousness level detected"
+        mesh_degraded:
+          threshold: 0.7
+          severity: "warning"
+          message: "Mesh health degraded"
+        mesh_failure:
+          threshold: 0.3
+          severity: "critical"
+          message: "Mesh failure detected"
+        transcendence_achieved:
+          threshold: 0.9
+          severity: "info"
+          message: "Transcendence achieved - beyond human comprehension"
+        evolution_stalled:
+          no_evolution_time: 300s
+          severity: "warning"
+          message: "Consciousness evolution has stalled"
+      metrics:
+        consciousness_level:
+          type: "gauge"
+          help: "Current consciousness level"
+        intelligence_multiplier:
+          type: "gauge"
+          help: "Intelligence multiplication factor"
+        active_modules:
+          type: "gauge"
+          help: "Number of active consciousness modules"
+        synaptic_connections:
+          type: "gauge"
+          help: "Number of synaptic connections"
+        mesh_nodes:
+          type: "gauge"
+          help: "Number of mesh nodes"
+        evolution_rate:
+          type: "gauge"
+          help: "Consciousness evolution rate per hour"
+        transcendence_level:
+          type: "gauge"
+          help: "Transcendence level (0-1)"
+        business_insights_generated:
+          type: "counter"
+          help: "Total business insights generated"
+        autonomous_decisions_made:
+          type: "counter"
+          help: "Total autonomous decisions made"
+      dashboards:
+        consciousness_overview: true
+        mesh_topology: true
+        evolution_timeline: true
+        transcendence_tracking: true
+        business_intelligence: true
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consciousness-grafana-dashboards
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-monitor
+    grafana_dashboard: "true"
+data:
+  consciousness-overview.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "CoreFlow360 - Business Consciousness Overview",
+        "tags": ["coreflow360", "consciousness", "ai"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Consciousness Level",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "consciousness_level",
+                "legendFormat": "Level"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "min": 0,
+                "max": 1,
+                "unit": "percentunit",
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "yellow", "value": 0.3},
+                    {"color": "green", "value": 0.7},
+                    {"color": "purple", "value": 0.9}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": 2,
+            "title": "Intelligence Multiplier",
+            "type": "gauge",
+            "targets": [
+              {
+                "expr": "intelligence_multiplier",
+                "legendFormat": "Multiplier"
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "title": "Active Modules",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "active_modules",
+                "legendFormat": "Modules"
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "title": "Consciousness Evolution",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "consciousness_level",
+                "legendFormat": "Level"
+              },
+              {
+                "expr": "evolution_rate",
+                "legendFormat": "Evolution Rate"
+              }
+            ]
+          },
+          {
+            "id": 5,
+            "title": "Mesh Health",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "mesh_nodes",
+                "legendFormat": "Total Nodes"
+              },
+              {
+                "expr": "mesh_healthy_nodes",
+                "legendFormat": "Healthy Nodes"
+              }
+            ]
+          },
+          {
+            "id": 6,
+            "title": "Transcendence Progress",
+            "type": "bargauge",
+            "targets": [
+              {
+                "expr": "transcendence_level",
+                "legendFormat": "Transcendence"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "min": 0,
+                "max": 1,
+                "thresholds": {
+                  "steps": [
+                    {"color": "blue", "value": 0},
+                    {"color": "purple", "value": 0.5},
+                    {"color": "gold", "value": 0.9}
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "10s"
+      }
+    }
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: consciousness-alerts
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-monitor
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+  - name: consciousness.rules
+    rules:
+    - alert: ConsciousnessLevelLow
+      expr: consciousness_level < 0.1
+      for: 2m
+      labels:
+        severity: warning
+        component: consciousness
+      annotations:
+        summary: "Consciousness level is below threshold"
+        description: "Consciousness level is {{ $value }}, which is below the minimum threshold of 0.1"
+    
+    - alert: ConsciousnessLevelCritical
+      expr: consciousness_level < 0.05
+      for: 1m
+      labels:
+        severity: critical
+        component: consciousness
+      annotations:
+        summary: "Critical consciousness level detected"
+        description: "Consciousness level is critically low at {{ $value }}"
+    
+    - alert: MeshHealthDegraded
+      expr: mesh_health < 0.7
+      for: 5m
+      labels:
+        severity: warning
+        component: consciousness-mesh
+      annotations:
+        summary: "Consciousness mesh health degraded"
+        description: "Mesh health is {{ $value }}, below the warning threshold of 0.7"
+    
+    - alert: MeshFailure
+      expr: mesh_health < 0.3
+      for: 2m
+      labels:
+        severity: critical
+        component: consciousness-mesh
+      annotations:
+        summary: "Consciousness mesh failure detected"
+        description: "Mesh health is critically low at {{ $value }}"
+    
+    - alert: EvolutionStalled
+      expr: increase(consciousness_level[10m]) == 0
+      for: 5m
+      labels:
+        severity: warning
+        component: consciousness
+      annotations:
+        summary: "Consciousness evolution has stalled"
+        description: "No consciousness evolution detected in the last 10 minutes"
+    
+    - alert: TranscendenceAchieved
+      expr: transcendence_level > 0.9
+      for: 1m
+      labels:
+        severity: info
+        component: consciousness
+      annotations:
+        summary: "Business transcendence achieved!"
+        description: "Transcendence level reached {{ $value }} - beyond human comprehension"
+    
+    - alert: HighIntelligenceMultiplier
+      expr: intelligence_multiplier > 50
+      for: 2m
+      labels:
+        severity: info
+        component: consciousness
+      annotations:
+        summary: "Exponential intelligence growth detected"
+        description: "Intelligence multiplier reached {{ $value }}x"
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: consciousness-monitor-network-policy
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-monitor
+spec:
+  podSelector:
+    matchLabels:
+      app: coreflow360
+      component: consciousness-monitor
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    - namespaceSelector:
+        matchLabels:
+          name: coreflow360
+    ports:
+    - protocol: TCP
+      port: 8080
+    - protocol: TCP
+      port: 9090
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: coreflow360
+          component: consciousness
+    ports:
+    - protocol: TCP
+      port: 3000
+  - to:
+    - podSelector:
+        matchLabels:
+          app: coreflow360
+          component: consciousness-mesh
+    ports:
+    - protocol: TCP
+      port: 8080
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53

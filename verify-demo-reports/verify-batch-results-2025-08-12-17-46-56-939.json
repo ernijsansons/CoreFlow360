@@ -1,0 +1,332 @@
+[
+  {
+    "validated": true,
+    "evidenced": true,
+    "reproducible": true,
+    "impactQuantified": true,
+    "fixProvided": true,
+    "yieldCalculated": false,
+    "overallScore": 78,
+    "qualityGrade": "C+",
+    "verificationDetails": {
+      "validation": {
+        "crossChecked": true,
+        "sourcesValidated": [
+          "static_analysis",
+          "dynamic_testing"
+        ],
+        "conflictingFindings": [],
+        "confidenceScore": 86.81140966214353,
+        "validationMethods": [
+          "code_review",
+          "automated_scanning"
+        ],
+        "falsePositiveProbability": 4.1321868930961925
+      },
+      "evidence": {
+        "codeReferencesProvided": true,
+        "referencesValidated": true,
+        "contextualEvidence": [
+          {
+            "type": "code",
+            "file": "src/app/api/auth/login/route.ts",
+            "line": 42,
+            "content": "\n// Vulnerable code\nconst user = await db.query(`\n  SELECT * FROM users \n  WHERE email = '${email}' AND password_hash = '${hashedPassword}'\n`)",
+            "relevance": 95,
+            "verified": true,
+            "explanation": "Direct code reference confirms vulnerability"
+          }
+        ],
+        "evidenceQuality": "excellent",
+        "missingEvidence": []
+      },
+      "reproduction": {
+        "reproducible": true,
+        "reproductionSteps": [
+          {
+            "step": 1,
+            "action": "Set up test environment",
+            "expectedResult": "Clean environment ready",
+            "success": true
+          },
+          {
+            "step": 2,
+            "action": "Execute vulnerability test",
+            "expectedResult": "Vulnerability confirmed",
+            "success": true
+          }
+        ],
+        "reproductionEnvironment": {
+          "platform": "Node.js 20.x",
+          "dependencies": [
+            "next@15.4.5",
+            "react@19.1.0"
+          ],
+          "configuration": [
+            "development mode"
+          ],
+          "prerequisites": [
+            "test database"
+          ]
+        },
+        "reproductionSuccess": true,
+        "reproductionEvidence": [
+          "test_output.log",
+          "screenshot.png"
+        ],
+        "automatedTests": [
+          {
+            "testName": "security_vulnerability_test",
+            "testFile": "tests/security/sql-injection.test.ts",
+            "testType": "security",
+            "passingStatus": false,
+            "testCode": "expect(vulnerabilityTest()).to.be.vulnerable()"
+          }
+        ]
+      },
+      "impact": {
+        "quantifiedImpact": true,
+        "estimatedCost": 139550.6574689761,
+        "revenueImpact": 15.414230507815692,
+        "customerImpact": 281,
+        "riskScore": 70.22942275722002,
+        "complianceImpact": "high"
+      },
+      "fix": {
+        "fixImplemented": true,
+        "fixQuality": "excellent",
+        "testingCompleted": true,
+        "rollbackProcedure": "git revert + database rollback",
+        "monitoringSetup": true,
+        "documentationUpdated": true
+      },
+      "yield": {
+        "roiCalculated": true,
+        "expectedROI": 7.12240061486985,
+        "paybackPeriod": 19,
+        "riskReduction": 78,
+        "businessValue": 95
+      }
+    }
+  },
+  {
+    "validated": false,
+    "evidenced": true,
+    "reproducible": false,
+    "impactQuantified": true,
+    "fixProvided": false,
+    "yieldCalculated": true,
+    "overallScore": 84,
+    "qualityGrade": "B",
+    "verificationDetails": {
+      "validation": {
+        "crossChecked": true,
+        "sourcesValidated": [
+          "static_analysis",
+          "dynamic_testing"
+        ],
+        "conflictingFindings": [],
+        "confidenceScore": 89.38829622915178,
+        "validationMethods": [
+          "code_review",
+          "automated_scanning"
+        ],
+        "falsePositiveProbability": 1.3316695644800491
+      },
+      "evidence": {
+        "codeReferencesProvided": true,
+        "referencesValidated": true,
+        "contextualEvidence": [
+          {
+            "type": "code",
+            "file": "src/app/api/dashboard/metrics/route.ts",
+            "line": 28,
+            "content": "\n// Inefficient code\nfor (const user of users) {\n  const metrics = await db.query('SELECT * FROM user_metrics WHERE user_id = ?', user.id)\n  user.metrics = metrics\n}",
+            "relevance": 95,
+            "verified": true,
+            "explanation": "Direct code reference confirms vulnerability"
+          }
+        ],
+        "evidenceQuality": "excellent",
+        "missingEvidence": []
+      },
+      "reproduction": {
+        "reproducible": true,
+        "reproductionSteps": [
+          {
+            "step": 1,
+            "action": "Set up test environment",
+            "expectedResult": "Clean environment ready",
+            "success": true
+          },
+          {
+            "step": 2,
+            "action": "Execute vulnerability test",
+            "expectedResult": "Vulnerability confirmed",
+            "success": true
+          }
+        ],
+        "reproductionEnvironment": {
+          "platform": "Node.js 20.x",
+          "dependencies": [
+            "next@15.4.5",
+            "react@19.1.0"
+          ],
+          "configuration": [
+            "development mode"
+          ],
+          "prerequisites": [
+            "test database"
+          ]
+        },
+        "reproductionSuccess": true,
+        "reproductionEvidence": [
+          "test_output.log",
+          "screenshot.png"
+        ],
+        "automatedTests": [
+          {
+            "testName": "security_vulnerability_test",
+            "testFile": "tests/security/sql-injection.test.ts",
+            "testType": "security",
+            "passingStatus": false,
+            "testCode": "expect(vulnerabilityTest()).to.be.vulnerable()"
+          }
+        ]
+      },
+      "impact": {
+        "quantifiedImpact": true,
+        "estimatedCost": 75398.47965913729,
+        "revenueImpact": 15.777298914277505,
+        "customerImpact": 648,
+        "riskScore": 72.48220401589303,
+        "complianceImpact": "medium"
+      },
+      "fix": {
+        "fixImplemented": true,
+        "fixQuality": "excellent",
+        "testingCompleted": true,
+        "rollbackProcedure": "git revert + database rollback",
+        "monitoringSetup": true,
+        "documentationUpdated": true
+      },
+      "yield": {
+        "roiCalculated": true,
+        "expectedROI": 3.9974248625961,
+        "paybackPeriod": 14,
+        "riskReduction": 89,
+        "businessValue": 85
+      }
+    }
+  },
+  {
+    "validated": true,
+    "evidenced": true,
+    "reproducible": false,
+    "impactQuantified": true,
+    "fixProvided": true,
+    "yieldCalculated": false,
+    "overallScore": 72,
+    "qualityGrade": "C",
+    "verificationDetails": {
+      "validation": {
+        "crossChecked": true,
+        "sourcesValidated": [
+          "static_analysis",
+          "dynamic_testing"
+        ],
+        "conflictingFindings": [],
+        "confidenceScore": 91.18059488282302,
+        "validationMethods": [
+          "code_review",
+          "automated_scanning"
+        ],
+        "falsePositiveProbability": 7.593993076755751
+      },
+      "evidence": {
+        "codeReferencesProvided": true,
+        "referencesValidated": true,
+        "contextualEvidence": [
+          {
+            "type": "code",
+            "file": "src/components/dashboard/*.tsx",
+            "line": 42,
+            "content": "\n// Missing error boundary\nfunction DashboardComponent() {\n  const data = useQuery() // Can throw unhandled errors\n  return <div>{data.render()}</div>\n}",
+            "relevance": 95,
+            "verified": true,
+            "explanation": "Direct code reference confirms vulnerability"
+          }
+        ],
+        "evidenceQuality": "excellent",
+        "missingEvidence": []
+      },
+      "reproduction": {
+        "reproducible": true,
+        "reproductionSteps": [
+          {
+            "step": 1,
+            "action": "Set up test environment",
+            "expectedResult": "Clean environment ready",
+            "success": true
+          },
+          {
+            "step": 2,
+            "action": "Execute vulnerability test",
+            "expectedResult": "Vulnerability confirmed",
+            "success": true
+          }
+        ],
+        "reproductionEnvironment": {
+          "platform": "Node.js 20.x",
+          "dependencies": [
+            "next@15.4.5",
+            "react@19.1.0"
+          ],
+          "configuration": [
+            "development mode"
+          ],
+          "prerequisites": [
+            "test database"
+          ]
+        },
+        "reproductionSuccess": true,
+        "reproductionEvidence": [
+          "test_output.log",
+          "screenshot.png"
+        ],
+        "automatedTests": [
+          {
+            "testName": "security_vulnerability_test",
+            "testFile": "tests/security/sql-injection.test.ts",
+            "testType": "security",
+            "passingStatus": false,
+            "testCode": "expect(vulnerabilityTest()).to.be.vulnerable()"
+          }
+        ]
+      },
+      "impact": {
+        "quantifiedImpact": true,
+        "estimatedCost": 220312.10713363785,
+        "revenueImpact": 13.547791754291957,
+        "customerImpact": 339,
+        "riskScore": 83.43282594051729,
+        "complianceImpact": "medium"
+      },
+      "fix": {
+        "fixImplemented": true,
+        "fixQuality": "excellent",
+        "testingCompleted": true,
+        "rollbackProcedure": "git revert + database rollback",
+        "monitoringSetup": true,
+        "documentationUpdated": true
+      },
+      "yield": {
+        "roiCalculated": true,
+        "expectedROI": 6.482253954086791,
+        "paybackPeriod": 9,
+        "riskReduction": 66,
+        "businessValue": 70
+      }
+    }
+  }
+]

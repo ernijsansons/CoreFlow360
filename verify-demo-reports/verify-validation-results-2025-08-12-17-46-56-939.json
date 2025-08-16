@@ -1,0 +1,131 @@
+[
+  {
+    "finding": {
+      "id": "SEC-001",
+      "title": "SQL Injection Vulnerability in User Authentication",
+      "description": "User authentication endpoint vulnerable to SQL injection attacks through unvalidated email parameter",
+      "severity": "critical",
+      "category": "security",
+      "location": "src/app/api/auth/login/route.ts:42-58",
+      "codeReference": "\n// Vulnerable code\nconst user = await db.query(`\n  SELECT * FROM users \n  WHERE email = '${email}' AND password_hash = '${hashedPassword}'\n`)",
+      "impact": {
+        "business": "Data breach, unauthorized access, compliance violations",
+        "technical": "Complete database compromise, data exfiltration",
+        "financial": "Potential $2.5M in breach costs, regulatory fines"
+      },
+      "evidenceChain": [
+        {
+          "type": "code_analysis",
+          "description": "String concatenation in SQL query without parameterization",
+          "confidence": 95,
+          "source": "static_analysis"
+        },
+        {
+          "type": "penetration_test",
+          "description": "Successful SQL injection payload: admin@test.com' OR 1=1 --",
+          "confidence": 100,
+          "source": "manual_testing"
+        }
+      ],
+      "remediationSteps": [
+        {
+          "step": 1,
+          "action": "Replace string concatenation with parameterized queries",
+          "implementation": "\n// Secure implementation\nconst user = await db.query(\n  'SELECT * FROM users WHERE email = $1 AND password_hash = $2',\n  [email, hashedPassword]\n)",
+          "estimatedEffort": 2,
+          "priority": "immediate"
+        }
+      ],
+      "business_value": 95,
+      "implementation_cost": 8,
+      "confidenceScore": 98
+    },
+    "verified": true
+  },
+  {
+    "finding": {
+      "id": "PERF-001",
+      "title": "Unoptimized Database Query in Dashboard API",
+      "description": "Dashboard API performs N+1 queries causing performance degradation",
+      "severity": "high",
+      "category": "performance",
+      "location": "src/app/api/dashboard/metrics/route.ts:28-45",
+      "codeReference": "\n// Inefficient code\nfor (const user of users) {\n  const metrics = await db.query('SELECT * FROM user_metrics WHERE user_id = ?', user.id)\n  user.metrics = metrics\n}",
+      "impact": {
+        "business": "Poor user experience, increased server costs",
+        "technical": "High database load, slow response times",
+        "financial": "Estimated $15K/month in excess infrastructure costs"
+      },
+      "evidenceChain": [
+        {
+          "type": "performance_monitoring",
+          "description": "Dashboard API response time: 3.2s average (target: <500ms)",
+          "confidence": 100,
+          "source": "apm_data"
+        },
+        {
+          "type": "database_analysis",
+          "description": "Query generates 100+ individual SELECT statements",
+          "confidence": 90,
+          "source": "query_profiling"
+        }
+      ],
+      "remediationSteps": [
+        {
+          "step": 1,
+          "action": "Implement query batching with JOIN or IN clause",
+          "implementation": "\n// Optimized implementation\nconst userIds = users.map(u => u.id)\nconst allMetrics = await db.query(\n  'SELECT * FROM user_metrics WHERE user_id IN (?)',\n  [userIds]\n)\nconst metricsMap = groupBy(allMetrics, 'user_id')\nusers.forEach(user => {\n  user.metrics = metricsMap[user.id] || []\n})",
+          "estimatedEffort": 4,
+          "priority": "high"
+        }
+      ],
+      "business_value": 85,
+      "implementation_cost": 12,
+      "confidenceScore": 95
+    },
+    "verified": true
+  },
+  {
+    "finding": {
+      "id": "ARCH-001",
+      "title": "Missing Error Boundaries in React Components",
+      "description": "Critical React components lack error boundaries causing application crashes",
+      "severity": "medium",
+      "category": "architecture",
+      "location": "src/components/dashboard/*.tsx",
+      "codeReference": "\n// Missing error boundary\nfunction DashboardComponent() {\n  const data = useQuery() // Can throw unhandled errors\n  return <div>{data.render()}</div>\n}",
+      "impact": {
+        "business": "Application crashes reduce user satisfaction",
+        "technical": "Unhandled React errors crash entire component trees",
+        "financial": "Estimated 5% user churn due to reliability issues"
+      },
+      "evidenceChain": [
+        {
+          "type": "error_monitoring",
+          "description": "Sentry reports 150+ unhandled React errors per day",
+          "confidence": 100,
+          "source": "error_tracking"
+        },
+        {
+          "type": "code_review",
+          "description": "Manual review found 0 error boundaries in dashboard components",
+          "confidence": 100,
+          "source": "static_analysis"
+        }
+      ],
+      "remediationSteps": [
+        {
+          "step": 1,
+          "action": "Implement error boundaries for critical component trees",
+          "implementation": "\n// Error boundary implementation\nclass DashboardErrorBoundary extends React.Component {\n  constructor(props) {\n    super(props)\n    this.state = { hasError: false }\n  }\n  \n  static getDerivedStateFromError(error) {\n    return { hasError: true }\n  }\n  \n  componentDidCatch(error, errorInfo) {\n    console.error('Dashboard error:', error, errorInfo)\n  }\n  \n  render() {\n    if (this.state.hasError) {\n      return <DashboardErrorFallback />\n    }\n    return this.props.children\n  }\n}",
+          "estimatedEffort": 6,
+          "priority": "medium"
+        }
+      ],
+      "business_value": 70,
+      "implementation_cost": 16,
+      "confidenceScore": 88
+    },
+    "verified": true
+  }
+]

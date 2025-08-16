@@ -7,26 +7,41 @@ import {
   HomeIcon, 
   UsersIcon, 
   BriefcaseIcon,
+  UserPlusIcon,
   Cog6ToothIcon,
   ChartBarIcon,
   SparklesIcon,
+  TrendingUpIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  BoltIcon,
+  WrenchScrewdriverIcon,
+  CreditCardIcon,
+  CubeIcon as Package
 } from "@heroicons/react/24/outline"
-import { IndustryToggle } from "../IndustryToggle"
+import { IndustryToggle } from "@/components/IndustryToggle"
+import PerformanceTicker from "@/components/ui/PerformanceTicker"
 
 interface NavItem {
   name: string
   href: string
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+  badge?: string
 }
 
 const navigation: NavItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
+  { name: "Leads", href: "/dashboard/leads", icon: UserPlusIcon },
   { name: "Customers", href: "/dashboard/customers", icon: UsersIcon },
-  { name: "Jobs", href: "/dashboard/jobs", icon: BriefcaseIcon },
+  { name: "Deals", href: "/dashboard/deals", icon: BriefcaseIcon },
+  { name: "Forecasting", href: "/dashboard/forecasting", icon: TrendingUpIcon },
   { name: "Analytics", href: "/dashboard/analytics", icon: ChartBarIcon },
+  { name: "Workflows", href: "/dashboard/workflows", icon: BoltIcon },
+  { name: "HVAC", href: "/dashboard/hvac", icon: WrenchScrewdriverIcon, badge: "New" },
+  { name: "SaaS", href: "/dashboard/saas", icon: CreditCardIcon, badge: "New" },
   { name: "AI Insights", href: "/dashboard/ai-insights", icon: SparklesIcon },
+  { name: "Marketplace", href: "/dashboard/marketplace", icon: Package },
+  { name: "Subscription", href: "/dashboard/subscription", icon: CreditCardIcon },
   { name: "Settings", href: "/dashboard/settings", icon: Cog6ToothIcon },
 ]
 
@@ -39,7 +54,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname()
 
   return (
-    <div className="h-screen flex overflow-hidden bg-gray-100">
+    <div className="h-screen flex flex-col overflow-hidden bg-gray-100">
+      {/* Performance Ticker */}
+      <PerformanceTicker />
+      
+      <div className="flex flex-1 overflow-hidden">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 flex z-40 md:hidden">
@@ -65,16 +84,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
+                      className={`group flex items-center justify-between px-2 py-2 text-base font-medium rounded-md ${
                         isActive
                           ? "bg-blue-100 text-blue-900"
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       }`}
                     >
-                      <item.icon className={`mr-4 flex-shrink-0 h-6 w-6 ${
-                        isActive ? "text-blue-500" : "text-gray-400 group-hover:text-gray-500"
-                      }`} />
-                      {item.name}
+                      <div className="flex items-center">
+                        <item.icon className={`mr-4 flex-shrink-0 h-6 w-6 ${
+                          isActive ? "text-blue-500" : "text-gray-400 group-hover:text-gray-500"
+                        }`} />
+                        {item.name}
+                      </div>
+                      {item.badge && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {item.badge}
+                        </span>
+                      )}
                     </Link>
                   )
                 })}
@@ -102,16 +128,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                      className={`group flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md ${
                         isActive
                           ? "bg-blue-100 text-blue-900"
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       }`}
                     >
-                      <item.icon className={`mr-3 flex-shrink-0 h-5 w-5 ${
-                        isActive ? "text-blue-500" : "text-gray-400 group-hover:text-gray-500"
-                      }`} />
-                      {item.name}
+                      <div className="flex items-center">
+                        <item.icon className={`mr-3 flex-shrink-0 h-5 w-5 ${
+                          isActive ? "text-blue-500" : "text-gray-400 group-hover:text-gray-500"
+                        }`} />
+                        {item.name}
+                      </div>
+                      {item.badge && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {item.badge}
+                        </span>
+                      )}
                     </Link>
                   )
                 })}
@@ -143,6 +176,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {children}
           </div>
         </main>
+      </div>
       </div>
     </div>
   )

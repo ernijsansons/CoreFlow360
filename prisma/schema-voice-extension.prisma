@@ -1,0 +1,499 @@
+// ===========================================
+// COREFLOW360 VOICE AI SCHEMA EXTENSIONS
+// ===========================================
+// Add these models to your existing schema.prisma file
+
+// ===========================================
+// VOICE CALL MANAGEMENT
+// ===========================================
+
+model CallLog {
+  id                String            @id @default(cuid())
+  
+  // Multi-tenant isolation
+  tenantId          String
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Call identification
+  twilioCallSid     String            @unique  // Twilio Call SID
+  callDirection     CallDirection     @default(OUTBOUND)
+  
+  // Phone numbers (E.164 format)
+  fromNumber        String            // +15551234567
+  toNumber          String            // +15551234567
+  
+  // Customer/Lead relationship
+  customerId        String?
+  customer          Customer?         @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  leadId            String?
+  lead              Lead?             @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  
+  // Call execution details
+  status            CallStatus        @default(INITIATED)
+  startedAt         DateTime          @default(now())
+  answeredAt        DateTime?
+  endedAt           DateTime?
+  duration          Int?              // seconds
+  
+  // AI & Script details
+  scriptId          String?
+  script            IndustryCallScript? @relation(fields: [scriptId], references: [id], onDelete: SetNull)
+  aiAgentId         String?
+  aiAgent           AIAgent?          @relation(fields: [aiAgentId], references: [id], onDelete: SetNull)
+  
+  // Answering Machine Detection
+  amdResult         AMDResult?
+  amdConfidence     Float?            // 0.0 - 1.0
+  
+  // Recording & Transcription
+  recordingUrl      String?           // Twilio recording URL
+  recordingSid      String?           // Twilio recording SID
+  recordingDuration Int?              // seconds
+  transcriptStatus  TranscriptStatus  @default(PENDING)
+  transcript        String?           @db.Text // Encrypted field
+  transcriptConfidence Float?         // 0.0 - 1.0
+  
+  // Call outcome & qualification
+  outcome           CallOutcome?
+  qualificationScore Float?           // 0-100
+  appointmentBooked Boolean           @default(false)
+  followUpRequired  Boolean           @default(false)
+  
+  // Costs & Analytics
+  cost              Decimal?          @db.Decimal(10,4) // $0.1234
+  costCurrency      String            @default("USD")
+  
+  // Compliance & Metadata
+  consentVerified   Boolean           @default(false)
+  metadata          Json?             // Call-specific data
+  tags              String[]          // Searchable tags
+  
+  // Audit trail
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  createdBy         String?           // User who initiated call
+  
+  // Related voice notes from this call
+  voiceNotes        VoiceNote[]
+  
+  // Call consent records
+  consents          CallConsent[]
+  
+  @@unique([tenantId, twilioCallSid])
+  @@index([tenantId, status, startedAt])
+  @@index([tenantId, customerId, startedAt])
+  @@index([tenantId, leadId, startedAt])
+  @@index([tenantId, outcome, startedAt])
+  @@index([fromNumber, toNumber])
+  @@index([status, startedAt])
+  @@index([qualificationScore, startedAt])
+  @@map("call_logs")
+}
+
+// ===========================================
+// VOICE NOTE DICTATIONS
+// ===========================================
+
+model VoiceNote {
+  id                String            @id @default(cuid())
+  
+  // Multi-tenant isolation
+  tenantId          String
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // User & context
+  userId            String
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Associated entities
+  customerId        String?
+  customer          Customer?         @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  leadId            String?
+  lead              Lead?             @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  callLogId         String?
+  callLog           CallLog?          @relation(fields: [callLogId], references: [id], onDelete: SetNull)
+  
+  // Audio & transcription
+  audioUrl          String?           // S3/storage URL
+  audioFormat       String?           // wav, mp3, m4a
+  audioDuration     Int?              // seconds
+  audioSize         Int?              // bytes
+  
+  // STT Processing
+  transcriptionProvider String?       // deepgram, whisper, etc
+  transcript        String            @db.Text // Encrypted field
+  confidence        Float             // 0.0 - 1.0 overall confidence
+  wordConfidences   Json?             // Per-word confidence scores
+  
+  // Content analysis
+  title             String?           // Auto-generated or user-set
+  summary           String?           @db.Text // AI-generated summary
+  keywords          String[]          // Extracted keywords
+  sentiment         Float?            // -1.0 to 1.0
+  priority          NotePriority      @default(MEDIUM)
+  
+  // Categorization
+  category          String?           // Sales, Support, Follow-up, etc
+  tags              String[]          // User-defined tags
+  
+  // Processing status
+  status            ProcessingStatus  @default(PROCESSING)
+  processingError   String?           // Error message if failed
+  
+  // Metadata
+  metadata          Json?             // Additional context
+  
+  // Audit trail
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?         // Soft delete
+  
+  @@unique([tenantId, id])
+  @@index([tenantId, userId, createdAt])
+  @@index([tenantId, customerId, createdAt])
+  @@index([tenantId, leadId, createdAt])
+  @@index([tenantId, category, createdAt])
+  @@index([tenantId, status, createdAt])
+  @@index([confidence, createdAt])
+  @@index([sentiment, createdAt])
+  @@map("voice_notes")
+}
+
+// ===========================================
+// TCPA COMPLIANCE TRACKING
+// ===========================================
+
+model CallConsent {
+  id                String            @id @default(cuid())
+  
+  // Multi-tenant isolation
+  tenantId          String
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Associated call
+  callLogId         String
+  callLog           CallLog           @relation(fields: [callLogId], references: [id], onDelete: Cascade)
+  
+  // Contact information
+  phoneNumber       String            // E.164 format
+  customerId        String?
+  customer          Customer?         @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  leadId            String?
+  lead              Lead?             @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  
+  // Consent details
+  consentType       ConsentType       // OPT_IN, OPT_OUT, EXPRESS, IMPLIED
+  consentMethod     ConsentMethod     // VERBAL, WRITTEN, DIGITAL, INFERRED
+  consentText       String?           @db.Text // Exact consent language used
+  consentGiven      Boolean           // True = consent granted
+  consentVerified   Boolean           @default(false) // Verified by human/AI
+  
+  // Source tracking
+  sourceType        ConsentSourceType @default(VOICE_CALL)
+  sourceUrl         String?           // Form URL, page where consent given
+  sourceMetadata    Json?             // Additional source context
+  
+  // Legal compliance
+  tcpaCompliant     Boolean           @default(false)
+  dncCheckPassed    Boolean           @default(false)
+  dncSource         String?           // DNC list source
+  legalBasis        String?           // Legal justification for call
+  
+  // Geographic compliance
+  jurisdiction      String?           // State/country code
+  regulatoryRules   String[]          // Applied regulatory rules
+  
+  // Consent lifecycle
+  grantedAt         DateTime?         // When consent was given
+  expiresAt         DateTime?         // When consent expires
+  revokedAt         DateTime?         // When consent was revoked
+  verifiedAt        DateTime?         // When consent was verified
+  
+  // Audit trail
+  recordedBy        String?           // AI agent or user who recorded
+  verifiedBy        String?           // User who verified consent
+  ipAddress         String?           // IP address if digital consent
+  userAgent         String?           // Browser if digital consent
+  
+  // Metadata
+  metadata          Json?             // Additional compliance data
+  
+  // Timestamps
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@unique([tenantId, callLogId, consentType])
+  @@index([tenantId, phoneNumber, consentGiven])
+  @@index([tenantId, consentType, grantedAt])
+  @@index([phoneNumber, consentGiven, expiresAt])
+  @@index([tcpaCompliant, dncCheckPassed])
+  @@index([jurisdiction, consentGiven])
+  @@map("call_consents")
+}
+
+// ===========================================
+// INDUSTRY CALL SCRIPTS
+// ===========================================
+
+model IndustryCallScript {
+  id                String            @id @default(cuid())
+  
+  // Multi-tenant isolation
+  tenantId          String
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Script identification
+  name              String            // "HVAC Emergency Response"
+  slug              String            // "hvac-emergency"
+  version           String            @default("1.0")
+  
+  // Industry & use case
+  industry          String            // HVAC, Insurance, Legal, etc
+  useCase           String            // Lead Qualification, Appointment, Support
+  scriptType        ScriptType        @default(QUALIFICATION)
+  
+  // Script content
+  instructions      String            @db.Text // AI system instructions
+  openingMessage    String            @db.Text // First thing AI says
+  closingMessage    String            @db.Text // How AI ends call
+  
+  // Conversation flow
+  qualificationQuestions Json          // Array of questions to ask
+  objectionHandling Json              // Common objections & responses
+  keywords          String[]          // Keywords to listen for
+  triggers          Json?             // Conversation triggers & responses
+  
+  // AI configuration
+  aiModel           String            @default("gpt-4o-realtime-preview")
+  voice             String            @default("alloy") // OpenAI voice
+  temperature       Float             @default(0.7)
+  maxTokens         Int?              @default(4096)
+  
+  // Function tools
+  tools             Json?             // Available function calls
+  integrations      Json?             // External system integrations
+  
+  // Performance tracking
+  usage             ScriptUsage       @default(ACTIVE)
+  successRate       Float?            // 0-100 success rate
+  avgCallDuration   Int?              // Average call duration in seconds
+  conversionRate    Float?            // 0-100 conversion rate
+  
+  // Compliance settings
+  consentRequired   Boolean           @default(true)
+  recordingEnabled  Boolean           @default(true)
+  dncCheckRequired  Boolean           @default(true)
+  
+  // Customization & variants
+  isDefault         Boolean           @default(false)
+  parentScriptId    String?           // If this is a variant
+  parentScript      IndustryCallScript? @relation("ScriptVariants", fields: [parentScriptId], references: [id], onDelete: SetNull)
+  variants          IndustryCallScript[] @relation("ScriptVariants")
+  
+  // Metadata & settings
+  metadata          Json?             // Additional script data
+  settings          Json?             // Script-specific settings
+  
+  // Audit trail
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  createdBy         String?           // User who created script
+  lastModifiedBy    String?           // User who last modified
+  
+  // Usage tracking
+  callLogs          CallLog[]
+  
+  @@unique([tenantId, slug, version])
+  @@index([tenantId, industry, usage])
+  @@index([tenantId, scriptType, usage])
+  @@index([industry, useCase, isDefault])
+  @@index([successRate, conversionRate])
+  @@index([usage, createdAt])
+  @@map("industry_call_scripts")
+}
+
+// ===========================================
+// ENUMS FOR VOICE FEATURES
+// ===========================================
+
+enum CallDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum CallStatus {
+  INITIATED     // Call initiated but not yet connected
+  RINGING       // Phone is ringing
+  ANSWERED      // Call was answered
+  IN_PROGRESS   // Call is active
+  COMPLETED     // Call ended successfully
+  FAILED        // Call failed to connect
+  BUSY          // Number was busy
+  NO_ANSWER     // No one answered
+  CANCELLED     // Call was cancelled
+  QUEUED        // Call is queued for retry
+}
+
+enum AMDResult {
+  HUMAN               // Human answered
+  MACHINE_START       // Answering machine detected at start
+  MACHINE_END_BEEP    // Machine detected, beep found
+  MACHINE_END_SILENCE // Machine detected, silence found
+  FAX                 // Fax machine detected
+  UNKNOWN             // Could not determine
+}
+
+enum TranscriptStatus {
+  PENDING       // Not yet processed
+  PROCESSING    // Being transcribed
+  COMPLETED     // Transcription complete
+  FAILED        // Transcription failed
+  PARTIAL       // Partial transcription available
+}
+
+enum CallOutcome {
+  QUALIFIED     // Lead was qualified
+  NOT_QUALIFIED // Lead did not qualify
+  APPOINTMENT   // Appointment scheduled
+  CALLBACK      // Callback requested
+  NOT_INTERESTED // Explicitly not interested
+  WRONG_NUMBER  // Wrong number reached
+  NO_ANSWER     // No one answered
+  BUSY          // Line was busy
+  ERROR         // Technical error occurred
+}
+
+enum NotePriority {
+  LOW
+  MEDIUM  
+  HIGH
+  URGENT
+}
+
+enum ProcessingStatus {
+  PENDING       // Waiting to process
+  PROCESSING    // Currently processing
+  COMPLETED     // Processing complete
+  FAILED        // Processing failed
+  RETRY         // Needs retry
+}
+
+enum ConsentType {
+  EXPRESS       // Express written consent
+  IMPLIED       // Implied consent (existing relationship)
+  OPT_IN        // Explicit opt-in
+  OPT_OUT       // Opt-out recorded
+}
+
+enum ConsentMethod {
+  VERBAL        // Verbal consent during call
+  WRITTEN       // Written consent (form, email)
+  DIGITAL       // Digital consent (checkbox, etc)
+  INFERRED      // Inferred from relationship
+  SMS           // SMS opt-in
+  EMAIL         // Email opt-in
+}
+
+enum ConsentSourceType {
+  VOICE_CALL    // Consent given during voice call
+  WEB_FORM      // Website form submission
+  EMAIL         // Email opt-in
+  SMS           // SMS opt-in  
+  IN_PERSON     // In-person consent
+  EXISTING      // Pre-existing relationship
+}
+
+enum ScriptType {
+  QUALIFICATION // Lead qualification
+  APPOINTMENT   // Appointment scheduling
+  SUPPORT       // Customer support
+  SURVEY        // Survey/feedback
+  SALES         // Sales pitch
+  FOLLOW_UP     // Follow-up call
+}
+
+enum ScriptUsage {
+  ACTIVE        // Currently in use
+  INACTIVE      // Temporarily disabled
+  ARCHIVED      // Archived (historical)
+  DRAFT         // Work in progress
+  TESTING       // Being tested
+}
+
+// ===========================================
+// EXTEND EXISTING MODELS
+// ===========================================
+
+// Add to existing Customer model
+model Customer {
+  // ... existing fields ...
+  
+  // Voice-related relationships
+  callLogs          CallLog[]
+  voiceNotes        VoiceNote[]
+  callConsents      CallConsent[]
+  
+  // Voice preferences
+  preferredCallTime String?           // "09:00-17:00"
+  timezone          String?           // "America/New_York"
+  voiceOptOut       Boolean           @default(false)
+  lastCallAt        DateTime?
+  
+  // TCPA compliance flags
+  tcpaConsent       Boolean           @default(false)
+  consentDate       DateTime?
+  dncStatus         Boolean           @default(false)
+}
+
+// Add to existing Lead model  
+model Lead {
+  // ... existing fields ...
+  
+  // Voice-related relationships
+  callLogs          CallLog[]
+  voiceNotes        VoiceNote[]
+  callConsents      CallConsent[]
+  
+  // Lead qualification via voice
+  voiceQualified    Boolean           @default(false)
+  qualificationCall String?           // Call SID that qualified lead
+  voiceScore        Float?            // 0-100 voice qualification score
+}
+
+// Add to existing AIAgent model
+model AIAgent {
+  // ... existing fields ...
+  
+  // Voice capabilities
+  voiceEnabled      Boolean           @default(false)
+  voiceModel        String?           // OpenAI voice model
+  voiceName         String?           // alloy, echo, fable, etc
+  
+  // Voice-related relationships
+  callLogs          CallLog[]
+}
+
+// Add to existing Tenant model
+model Tenant {
+  // ... existing fields ...
+  
+  // Voice feature relationships
+  callLogs          CallLog[]
+  voiceNotes        VoiceNote[]
+  callConsents      CallConsent[]
+  industryScripts   IndustryCallScript[]
+  
+  // Voice feature settings
+  voiceFeaturesEnabled Boolean        @default(false)
+  dailyCallLimit    Int?              @default(1000)
+  monthlyBudget     Decimal?          @db.Decimal(10,2)
+  
+  // Twilio configuration
+  twilioAccountSid  String?
+  twilioPhoneNumber String?
+  
+  // Compliance settings
+  tcpaEnabled       Boolean           @default(true)
+  recordingEnabled  Boolean           @default(true)
+  consentRequired   Boolean           @default(true)
+}

@@ -1,0 +1,32 @@
+{
+  "commission_structure": {
+    "base_rate": 0.4,
+    "tier_bonuses": {
+      "foundation": 0.3,
+      "advanced": 0.4,
+      "master": 0.45,
+      "transcendent": 0.5
+    },
+    "performance_bonuses": [
+      {
+        "threshold": 5,
+        "bonus": 0.05
+      },
+      {
+        "threshold": 10,
+        "bonus": 0.1
+      },
+      {
+        "threshold": 20,
+        "bonus": 0.15
+      }
+    ]
+  },
+  "payout_schedule": "monthly",
+  "minimum_payout": 500,
+  "tracking": {
+    "attribution_window": "90_days",
+    "recurring_commission": true,
+    "commission_duration": "12_months_or_until_churn"
+  }
+}

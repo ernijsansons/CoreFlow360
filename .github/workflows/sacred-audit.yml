@@ -1,0 +1,307 @@
+name: SACRED Security & Performance Audit
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - develop
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      audit_type:
+        description: 'Type of audit to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - security
+          - performance
+          - architecture
+          - business_logic
+
+jobs:
+  sacred-audit:
+    name: SACRED Audit Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+      security-events: write
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better analysis
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g tsx
+          
+      - name: Create audit directories
+        run: |
+          mkdir -p audit-reports
+          mkdir -p .audit-baseline
+          
+      - name: Download baseline (main branch only)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/download-artifact@v3
+        with:
+          name: audit-baseline
+          path: .audit-baseline
+        continue-on-error: true
+        
+      - name: Run SACRED Security Audit
+        id: security_audit
+        if: github.event.inputs.audit_type == 'all' || github.event.inputs.audit_type == 'security'
+        run: |
+          echo "Running comprehensive security audit..."
+          npm run audit:sacred -- \
+            --type security \
+            --scope authentication,authorization,input_validation,data_protection \
+            --output audit-reports/security-audit.json \
+            --format json \
+            --min-severity medium
+        continue-on-error: true
+        
+      - name: Run SACRED Performance Audit  
+        id: performance_audit
+        if: github.event.inputs.audit_type == 'all' || github.event.inputs.audit_type == 'performance'
+        run: |
+          echo "Running performance optimization audit..."
+          npm run audit:sacred -- \
+            --type performance \
+            --scope database_queries,api_optimization,frontend_bundle,caching \
+            --output audit-reports/performance-audit.json \
+            --format json
+        continue-on-error: true
+        
+      - name: Run SACRED Architecture Audit
+        id: architecture_audit  
+        if: github.event.inputs.audit_type == 'all' || github.event.inputs.audit_type == 'architecture'
+        run: |
+          echo "Running architecture review audit..."
+          npm run audit:sacred -- \
+            --type architecture \
+            --scope patterns,dependencies,modularity,scalability \
+            --output audit-reports/architecture-audit.json \
+            --format json
+        continue-on-error: true
+        
+      - name: Run CI Integration
+        id: ci_audit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_AUDIT_WEBHOOK }}
+        run: |
+          cat > ci-audit-config.json << EOF
+          {
+            "enabled": true,
+            "failOnCritical": true,
+            "failOnHighSeverity": ${{ github.event_name == 'pull_request' && 'false' || 'true' }},
+            "maxAllowedFindings": {
+              "critical": 0,
+              "high": ${{ github.event_name == 'pull_request' && '3' || '0' }},
+              "medium": 10,
+              "low": 50
+            },
+            "scopes": {
+              "security": ["authentication", "authorization", "input_validation"],
+              "performance": ["database_queries", "api_optimization"],
+              "architecture": ["patterns", "dependencies"],
+              "business_logic": []
+            },
+            "baselinePath": ".audit-baseline/baseline.json",
+            "reportPath": "audit-reports",
+            "githubToken": "${{ secrets.GITHUB_TOKEN }}",
+            "slackWebhook": "${{ secrets.SLACK_AUDIT_WEBHOOK }}"
+          }
+          EOF
+          
+          # Run the CI audit integration
+          tsx scripts/run-ci-audit.ts --config ci-audit-config.json
+          
+      - name: Generate HTML Report
+        if: always()
+        run: |
+          echo "Generating comprehensive HTML report..."
+          npm run audit:report -- \
+            --input audit-reports \
+            --output audit-reports/summary.html
+            
+      - name: Upload audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: audit-reports-${{ github.run_id }}
+          path: audit-reports/
+          retention-days: 30
+          
+      - name: Update baseline (main branch only)
+        if: github.ref == 'refs/heads/main' && success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: audit-baseline
+          path: .audit-baseline/
+          retention-days: 90
+          
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            
+            // Read the CI audit result
+            let auditPassed = false;
+            let prComment = 'Audit results not available';
+            
+            try {
+              const ciResult = JSON.parse(fs.readFileSync('audit-reports/ci-result.json', 'utf8'));
+              auditPassed = ciResult.passed;
+              prComment = ciResult.prComment || 'No PR comment generated';
+            } catch (error) {
+              console.error('Failed to read CI result:', error);
+            }
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('CoreFlow360 Audit:')
+            );
+            
+            // Update or create comment
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: prComment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: prComment
+              });
+            }
+            
+            // Set check status
+            if (!auditPassed) {
+              core.setFailed('Audit failed - critical issues found');
+            }
+            
+      - name: Upload to Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: audit-reports/security-sarif.json
+        continue-on-error: true
+        
+      - name: Create issues for critical findings
+        if: github.ref == 'refs/heads/main' && failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            
+            try {
+              // Read all audit results
+              const files = fs.readdirSync('audit-reports')
+                .filter(f => f.endsWith('-audit.json'));
+                
+              for (const file of files) {
+                const audit = JSON.parse(fs.readFileSync(`audit-reports/${file}`, 'utf8'));
+                
+                // Create issues for critical findings
+                const criticalFindings = audit.findings.filter(f => f.severity === 'critical');
+                
+                for (const finding of criticalFindings.slice(0, 5)) { // Limit to 5 issues
+                  const issueBody = `
+## 🚨 Critical Security Finding
+
+**Title:** ${finding.title}
+**Location:** \`${finding.location}\`
+**Category:** ${finding.category}
+**Confidence:** ${finding.confidenceScore}%
+
+### Impact
+${finding.impact}
+
+### Evidence
+${finding.evidenceChain.map(e => `- ${e.explanation}`).join('\n')}
+
+### Remediation Steps
+${finding.remediationSteps.map(s => `${s.order}. ${s.action}\n   - ${s.implementation}`).join('\n')}
+
+### Verification Criteria
+${finding.verificationCriteria.map(c => `- ${c}`).join('\n')}
+
+---
+*Generated by [CoreFlow360 SACRED Audit](https://coreflow360.com/docs/audit) on ${new Date().toISOString()}*
+`;
+                  
+                  await github.rest.issues.create({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    title: `[SECURITY] ${finding.title}`,
+                    body: issueBody,
+                    labels: ['security', 'critical', 'audit-finding'],
+                    assignees: ['security-team']
+                  });
+                }
+              }
+            } catch (error) {
+              console.error('Failed to create issues:', error);
+            }
+            
+      - name: Summary
+        if: always()
+        run: |
+          echo "### SACRED Audit Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "audit-reports/ci-result.json" ]; then
+            TOTAL=$(jq -r '.totalFindings' audit-reports/ci-result.json)
+            CRITICAL=$(jq -r '.criticalFindings' audit-reports/ci-result.json)
+            HIGH=$(jq -r '.highFindings' audit-reports/ci-result.json)
+            NEW=$(jq -r '.newFindings' audit-reports/ci-result.json)
+            FIXED=$(jq -r '.fixedFindings' audit-reports/ci-result.json)
+            
+            echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Total Findings | $TOTAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+            echo "| New Issues | $NEW |" >> $GITHUB_STEP_SUMMARY
+            echo "| Fixed Issues | $FIXED |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Audit results not available" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[View Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY

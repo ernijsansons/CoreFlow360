@@ -1,0 +1,27 @@
+# CoreFlow360 - FinGPT Integration Requirements
+# Optimized for financial AI processing
+
+# Core async and HTTP libraries
+asyncio>=3.4.3
+aiohttp>=3.8.0
+httpx>=0.25.2
+
+# Data processing
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Optional: Machine Learning (when using actual FinGPT)
+# torch>=2.0.0
+# transformers>=4.30.0
+# scikit-learn>=1.3.0
+
+# Configuration and environment
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+
+# Logging and monitoring
+structlog>=23.1.0
+
+# Testing
+pytest>=7.4.3
+pytest-asyncio>=0.21.1

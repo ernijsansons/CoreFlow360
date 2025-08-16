@@ -1,144 +1,144 @@
 /**
  * CoreFlow360 - AI Configuration
- * WORLD'S #1 AI-FIRST ERP PLATFORM
+ * Your Business's Second Brain
  * 
- * Central nervous system for ALL business operations
+ * Thinks about your business so you don't have to
  */
 
 export const AI_CONFIG = {
   // Platform Identity
   platform: {
     name: 'CoreFlow360',
-    tagline: 'The Future of Enterprise Software',
+    tagline: 'Your Business Partner That Never Sleeps',
     version: '2.0.0',
-    type: 'World\'s #1 AI-First ERP'
+    type: 'AI Business Partner'
   },
 
-  // AI Capabilities
+  // What AI Can Do For You
   capabilities: {
-    autonomous: true,
-    multiAgent: true,
-    selfLearning: true,
-    predictive: true,
-    prescriptive: true,
-    conversational: true,
-    multiModal: true,
-    realTime: true
+    autonomous: 'Works without you telling it what to do',
+    multiAgent: 'Like having multiple expert employees',
+    selfLearning: 'Gets smarter every day',
+    predictive: 'Sees problems before they happen',
+    prescriptive: 'Tells you exactly what to do',
+    conversational: 'You can talk to it like a person',
+    multiModal: 'Understands text, numbers, and images',
+    realTime: 'Answers instantly'
   },
 
-  // Agent Architecture
+  // Your AI Employees
   agents: {
     orchestrator: {
-      name: 'Central AI Orchestrator',
-      role: 'Master coordinator of all AI agents and business processes',
+      name: 'Your AI Business Manager',
+      role: 'Coordinates all your other AI employees and makes sure everything works together',
       capabilities: [
-        'task-delegation', 
-        'cross-department-optimization', 
-        'strategic-planning',
-        'resource-allocation',
-        'decision-making'
+        'Assigns tasks to the right AI employee',
+        'Makes sure departments work together',
+        'Plans your business strategy',
+        'Manages your resources',
+        'Makes important decisions'
       ]
     },
     departmental: {
       crm: {
-        name: 'CRM AI Agent',
-        role: 'Customer relationship optimization and intelligence',
+        name: 'Your AI Sales Expert',
+        role: 'Knows your customers better than they know themselves',
         capabilities: [
-          'lead-scoring', 
-          'churn-prediction', 
-          'sentiment-analysis', 
-          'next-best-action',
-          'customer-lifetime-value',
-          'personalization'
+          'Tells you who to call right now',
+          'Warns you before customers leave',
+          'Reads customer emotions',
+          'Suggests the perfect next step',
+          'Calculates customer lifetime value',
+          'Personalizes every interaction'
         ]
       },
       sales: {
-        name: 'Sales AI Agent',
-        role: 'Revenue optimization and forecasting',
+        name: 'Your AI Revenue Generator',
+        role: 'Finds money you\'re leaving on the table',
         capabilities: [
-          'deal-prediction', 
-          'price-optimization', 
-          'territory-planning', 
-          'commission-calculation',
-          'quota-planning',
-          'competitive-analysis'
+          'Predicts which deals will close',
+          'Sets the perfect prices',
+          'Plans sales territories',
+          'Calculates commissions automatically',
+          'Sets realistic quotas',
+          'Analyzes your competition'
         ]
       },
       finance: {
-        name: 'Finance AI Agent',
-        role: 'Financial intelligence and automation',
+        name: 'Your AI Money Detective',
+        role: 'Finds hidden cash and prevents financial disasters',
         capabilities: [
-          'cashflow-prediction', 
-          'anomaly-detection', 
-          'expense-optimization', 
-          'compliance-monitoring',
-          'budget-forecasting',
-          'risk-assessment'
+          'Predicts cash flow problems',
+          'Spots unusual expenses',
+          'Cuts unnecessary costs',
+          'Keeps you compliant',
+          'Forecasts your budget',
+          'Assesses financial risks'
         ]
       },
       operations: {
-        name: 'Operations AI Agent',
-        role: 'Operational excellence and efficiency',
+        name: 'Your AI Operations Expert',
+        role: 'Makes everything run smoother and faster',
         capabilities: [
-          'resource-optimization', 
-          'workflow-automation', 
-          'predictive-maintenance', 
-          'supply-chain-optimization',
-          'quality-assurance',
-          'performance-monitoring'
+          'Optimizes your resources',
+          'Automates boring tasks',
+          'Predicts when things will break',
+          'Optimizes your supply chain',
+          'Ensures perfect quality',
+          'Monitors performance 24/7'
         ]
       },
       hr: {
-        name: 'HR AI Agent',
-        role: 'Human capital optimization',
+        name: 'Your AI People Person',
+        role: 'Keeps your best people happy and finds great new ones',
         capabilities: [
-          'talent-matching', 
-          'performance-prediction', 
-          'retention-analysis', 
-          'compensation-optimization',
-          'skill-gap-analysis',
-          'succession-planning'
+          'Matches perfect candidates to jobs',
+          'Predicts top performers',
+          'Prevents good people from leaving',
+          'Sets fair compensation',
+          'Identifies skill gaps',
+          'Plans leadership succession'
         ]
       },
       analytics: {
-        name: 'Analytics AI Agent',
-        role: 'Business intelligence and insights generation',
+        name: 'Your AI Crystal Ball',
+        role: 'Shows you the future of your business',
         capabilities: [
-          'pattern-recognition',
-          'trend-analysis',
-          'predictive-modeling',
-          'anomaly-detection',
-          'report-generation',
-          'kpi-optimization'
+          'Spots hidden patterns',
+          'Identifies trends before competitors',
+          'Builds prediction models',
+          'Catches unusual activity',
+          'Creates beautiful reports',
+          'Optimizes your KPIs'
         ]
       }
     }
   },
 
-  // AI Performance Metrics
+  // How Fast and Smart Your AI Is
   performance: {
-    responseTime: '< 100ms',
-    accuracy: '> 94%',
-    availability: '99.99%',
-    learningRate: 'Continuous',
-    scalability: 'Infinite'
+    responseTime: 'Instant',
+    accuracy: '19 out of 20 times',
+    availability: 'Never sleeps',
+    learningRate: 'Gets smarter every day',
+    scalability: 'Grows with you forever'
   },
 
-  // Integration Points
+  // What Powers Your AI
   integrations: {
     models: {
-      primary: 'GPT-4 Turbo',
-      backup: 'Claude-3 Opus',
-      specialized: 'Custom Domain Models'
+      primary: 'Latest AI brain (GPT-4)',
+      backup: 'Backup AI brain (Claude-3)',
+      specialized: 'Custom AI for your industry'
     },
     data: {
-      sources: ['CRM', 'ERP', 'External APIs', 'Real-time Feeds'],
-      processing: 'Real-time + Batch',
-      storage: 'Vector Database + Traditional'
+      sources: ['Your CRM', 'Your books', 'External data', 'Live updates'],
+      processing: 'Instant analysis',
+      storage: 'Smart memory system'
     }
   },
 
-  // Original provider config (preserved)
+  // Technical config (preserved for functionality)
   providers: {
     openai: {
       apiKey: process.env.OPENAI_API_KEY!,

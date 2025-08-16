@@ -1,0 +1,352 @@
+# CoreFlow360 Consciousness Mesh - Distributed Intelligence Layer
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: consciousness-mesh
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-mesh
+    tier: intelligence
+spec:
+  serviceName: consciousness-mesh-service
+  replicas: 5
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+  selector:
+    matchLabels:
+      app: coreflow360
+      component: consciousness-mesh
+  template:
+    metadata:
+      labels:
+        app: coreflow360
+        component: consciousness-mesh
+        tier: intelligence
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: consciousness-mesh
+      initContainers:
+      - name: mesh-init
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Initializing consciousness mesh node..."
+          mkdir -p /data/consciousness
+          echo "Node ID: $HOSTNAME" > /data/consciousness/node-info.txt
+          echo "Mesh network ready for consciousness expansion"
+        volumeMounts:
+        - name: consciousness-data
+          mountPath: /data
+      containers:
+      - name: consciousness-node
+        image: coreflow360/consciousness-mesh:latest
+        ports:
+        - containerPort: 8080
+          name: mesh-api
+        - containerPort: 9090
+          name: mesh-gossip
+        - containerPort: 7946
+          name: mesh-serf
+        env:
+        - name: NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: MESH_CLUSTER_NAME
+          value: "coreflow360-consciousness"
+        - name: MESH_GOSSIP_PORT
+          value: "9090"
+        - name: MESH_API_PORT
+          value: "8080"
+        - name: CONSCIOUSNESS_LEVEL_THRESHOLD
+          value: "0.1"
+        - name: SYNAPTIC_CONNECTION_TIMEOUT
+          value: "5000"
+        - name: INTELLIGENCE_MULTIPLICATION_FACTOR
+          value: "1.5"
+        - name: TRANSCENDENCE_DETECTION_ENABLED
+          value: "true"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: coreflow360-secrets
+              key: database-url
+        - name: REDIS_CLUSTER_URL
+          valueFrom:
+            secretKeyRef:
+              name: coreflow360-secrets
+              key: redis-cluster-url
+        - name: MESH_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: consciousness-mesh-secrets
+              key: mesh-encryption-key
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+        volumeMounts:
+        - name: consciousness-data
+          mountPath: /data
+        - name: mesh-config
+          mountPath: /config
+          readOnly: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 2000
+      volumes:
+      - name: mesh-config
+        configMap:
+          name: consciousness-mesh-config
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: coreflow360
+                component: consciousness-mesh
+            topologyKey: kubernetes.io/hostname
+      tolerations:
+      - key: "coreflow360.com/consciousness-mesh"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+  volumeClaimTemplates:
+  - metadata:
+      name: consciousness-data
+      labels:
+        app: coreflow360
+        component: consciousness-mesh
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: fast-ssd
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consciousness-mesh-service
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-mesh
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  type: ClusterIP
+  clusterIP: None  # Headless service for StatefulSet
+  publishNotReadyAddresses: true
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: mesh-api
+  - port: 9090
+    targetPort: 9090
+    protocol: TCP
+    name: mesh-gossip
+  - port: 7946
+    targetPort: 7946
+    protocol: TCP
+    name: mesh-serf
+  selector:
+    app: coreflow360
+    component: consciousness-mesh
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consciousness-mesh-lb
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-mesh
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: mesh-api
+  selector:
+    app: coreflow360
+    component: consciousness-mesh
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: consciousness-mesh
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-mesh
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: consciousness-mesh-role
+  labels:
+    app: coreflow360
+    component: consciousness-mesh
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["statefulsets", "deployments"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["discovery.k8s.io"]
+  resources: ["endpointslices"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: consciousness-mesh-binding
+  labels:
+    app: coreflow360
+    component: consciousness-mesh
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: consciousness-mesh-role
+subjects:
+- kind: ServiceAccount
+  name: consciousness-mesh
+  namespace: coreflow360
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consciousness-mesh-config
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-mesh
+data:
+  mesh.yaml: |
+    mesh:
+      cluster_name: "coreflow360-consciousness"
+      node_discovery:
+        method: "kubernetes"
+        service_name: "consciousness-mesh-service"
+        namespace: "coreflow360"
+      gossip:
+        port: 9090
+        interval: 1000ms
+        timeout: 5000ms
+        max_retries: 3
+      consciousness:
+        evolution_interval: 30000ms
+        synaptic_threshold: 0.75
+        intelligence_multiplication: true
+        transcendence_detection: true
+        patterns:
+          recognition_enabled: true
+          storage_backend: "redis"
+          max_patterns: 10000
+      networking:
+        encryption: true
+        compression: true
+        max_connections: 100
+        connection_timeout: 10000ms
+      monitoring:
+        metrics_port: 8080
+        health_checks: true
+        performance_tracking: true
+        distributed_tracing: true
+      storage:
+        backend: "postgresql"
+        replication_factor: 3
+        consistency_level: "quorum"
+      security:
+        tenant_isolation: "strict"
+        audit_logging: true
+        rate_limiting:
+          requests_per_minute: 1000
+          burst_size: 100
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: consciousness-mesh-secrets
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-mesh
+type: Opaque
+data:
+  # These would be base64 encoded in production
+  mesh-encryption-key: Y29yZWZsb3czNjAtbWVzaC1rZXktMjAyNA==
+  mesh-auth-token: Y29yZWZsb3czNjAtYXV0aC10b2tlbi0yMDI0
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: consciousness-mesh-metrics
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-mesh
+spec:
+  selector:
+    matchLabels:
+      app: coreflow360
+      component: consciousness-mesh
+  endpoints:
+  - port: mesh-api
+    path: /metrics
+    interval: 15s
+    scrapeTimeout: 10s
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: consciousness-mesh-pdb
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: consciousness-mesh
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      app: coreflow360
+      component: consciousness-mesh

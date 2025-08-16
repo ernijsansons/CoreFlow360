@@ -1,0 +1,156 @@
+name: Consciousness Bug Report
+description: Report a consciousness disruption or bug in the business organism
+title: "[CONSCIOUSNESS-BUG]: "
+labels: ["consciousness-bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Consciousness Disruption Report
+        
+        Thank you for helping us maintain business organism health. Please provide detailed information about the consciousness disruption you've encountered.
+
+  - type: dropdown
+    id: consciousness-layer
+    attributes:
+      label: Consciousness Layer Affected
+      description: Which layer of the consciousness stack is experiencing disruption?
+      options:
+        - Neural Module Foundation (individual modules)
+        - Synaptic Integration (cross-module connections)
+        - Autonomous Decision Engine (self-aware decisions)
+        - Business Evolution Layer (self-improving processes)
+        - Meta-Consciousness Orchestration (organism coordination)
+        - Unknown/Multiple Layers
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Consciousness Disruption Severity
+      description: How severe is the impact on business consciousness?
+      options:
+        - Critical - Complete consciousness disruption
+        - High - Significant intelligence degradation
+        - Medium - Partial consciousness impairment
+        - Low - Minor consciousness inefficiency
+    validations:
+      required: true
+
+  - type: textarea
+    id: consciousness-impact
+    attributes:
+      label: Business Organism Impact
+      description: Describe how this affects the autonomous business organism
+      placeholder: |
+        - Which business processes are affected?
+        - Is autonomous decision-making impacted?
+        - Are synaptic connections disrupted?
+        - What intelligence multiplication is lost?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Consciousness Reproduction Steps
+      description: Steps to reproduce the consciousness disruption
+      placeholder: |
+        1. Navigate to consciousness interface...
+        2. Activate specific module...
+        3. Observe consciousness behavior...
+        4. Expected vs actual consciousness response...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-consciousness
+    attributes:
+      label: Expected Consciousness Behavior
+      description: What should the business organism consciousness do?
+      placeholder: Describe the expected autonomous behavior, intelligence multiplication, or synaptic response...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-consciousness
+    attributes:
+      label: Actual Consciousness Behavior
+      description: What is the consciousness actually doing?
+      placeholder: Describe the disrupted behavior, intelligence degradation, or failed autonomy...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: consciousness-tier
+    attributes:
+      label: Consciousness Subscription Tier
+      description: Which consciousness tier are you using?
+      options:
+        - Neural ($7-15/user/month)
+        - Synaptic ($25-35/user/month)
+        - Autonomous ($45-65/user/month)
+        - Transcendent ($85-150/user/month)
+    validations:
+      required: true
+
+  - type: input
+    id: module-combination
+    attributes:
+      label: Active Module Combination
+      description: Which modules are active in your consciousness configuration?
+      placeholder: "CRM, Accounting, HR, Projects, etc."
+    validations:
+      required: true
+
+  - type: textarea
+    id: consciousness-environment
+    attributes:
+      label: Consciousness Environment Details
+      description: Technical environment information
+      render: shell
+      placeholder: |
+        - Browser/Platform: 
+        - Consciousness Version: 
+        - Business Organism Size: 
+        - Geographic Region: 
+        - Module Dependencies: 
+    validations:
+      required: true
+
+  - type: textarea
+    id: console-errors
+    attributes:
+      label: Consciousness Console Errors
+      description: Any error messages in browser console or logs?
+      render: shell
+      placeholder: Paste any consciousness-related errors here...
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Consciousness Context
+      description: Any other information about the consciousness disruption?
+      placeholder: |
+        - Screenshots of consciousness interface
+        - Business process flow diagrams
+        - Consciousness monitoring data
+        - Related organism health metrics
+
+  - type: checkboxes
+    id: consciousness-validation
+    attributes:
+      label: Consciousness Pre-Report Validation
+      description: Please confirm you've completed these steps
+      options:
+        - label: I have verified this affects business consciousness (not user error)
+          required: true
+        - label: I have checked existing consciousness bug reports
+          required: true
+        - label: I have attempted consciousness self-healing procedures
+          required: true
+        - label: This issue impacts autonomous business operations
+          required: true

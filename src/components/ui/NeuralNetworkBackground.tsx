@@ -35,7 +35,7 @@ export function NeuralNetworkBackground() {
 
     // Initialize particles with better distribution
     const particleCount = Math.min(100, Math.floor((window.innerWidth * window.innerHeight) / 12000))
-    particlesRef.current = Array.from({ length: particleCount }, (_, i) => ({
+    particlesRef.current = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       vx: (Math.random() - 0.5) * 0.7,

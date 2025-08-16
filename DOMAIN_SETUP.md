@@ -75,7 +75,7 @@ curl https://coreflow360.vercel.app/api/health
 In **Vercel Dashboard** → **Settings** → **Environment Variables**:
 
 ```bash
-DATABASE_URL="postgresql://postgres:Ernijs121291!@db.hoopabvygbofvptnlyzj.supabase.co:5432/postgres"
+DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.hoopabvygbofvptnlyzj.supabase.co:5432/postgres"
 NEXTAUTH_URL="https://coreflow360.vercel.app"
 NEXTAUTH_SECRET="[your-generated-secret]"
 NODE_ENV="production"

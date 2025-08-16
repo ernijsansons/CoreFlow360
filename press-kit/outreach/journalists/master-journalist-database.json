@@ -1,0 +1,53 @@
+[
+  {
+    "name": "Alex Thompson",
+    "publication": "TechCrunch",
+    "beat": [
+      "Enterprise software",
+      "AI/ML platforms",
+      "B2B technology"
+    ],
+    "email": "alex.thompson@techcrunch.com",
+    "twitter": "@AlexTechCrunch",
+    "recent_articles": [
+      "The Future of Business AI",
+      "Enterprise Automation Trends",
+      "B2B Platform Disruption"
+    ],
+    "pitch_preferences": "Data-driven stories with clear market disruption angles"
+  },
+  {
+    "name": "Maria Rodriguez",
+    "publication": "Wall Street Journal",
+    "beat": [
+      "Business transformation",
+      "Enterprise technology",
+      "Innovation"
+    ],
+    "email": "maria.rodriguez@wsj.com",
+    "twitter": "@MariaWSJTech",
+    "recent_articles": [
+      "Digital Transformation ROI",
+      "Enterprise Software Evolution",
+      "Business Innovation Trends"
+    ],
+    "pitch_preferences": "Executive interviews with measurable business impact data"
+  },
+  {
+    "name": "David Chen",
+    "publication": "Forbes",
+    "beat": [
+      "AI and automation",
+      "Future of work",
+      "Business innovation"
+    ],
+    "email": "david.chen@forbes.com",
+    "twitter": "@DavidForbesAI",
+    "recent_articles": [
+      "AI Business Applications",
+      "Automation Impact Studies",
+      "Innovation Leadership"
+    ],
+    "pitch_preferences": "Thought leadership with practical business applications"
+  }
+]

@@ -1,0 +1,30 @@
+# CoreFlow360 Consciousness Architecture Code Ownership
+# Global ownership - all changes require consciousness validation
+* @coreflow360/consciousness-architects
+
+# Critical consciousness systems
+/src/ai/ @coreflow360/consciousness-architects @coreflow360/ai-engineers
+/src/lib/consciousness/ @coreflow360/consciousness-architects
+/src/modules/ @coreflow360/consciousness-architects @coreflow360/module-engineers
+
+# Business organism architecture  
+/prisma/ @coreflow360/consciousness-architects @coreflow360/database-engineers
+/src/lib/auth.ts @coreflow360/consciousness-architects @coreflow360/security-engineers
+/src/middleware/ @coreflow360/consciousness-architects @coreflow360/security-engineers
+
+# Infrastructure and operational systems
+/.github/ @coreflow360/consciousness-architects @coreflow360/devops-engineers
+/scripts/ @coreflow360/consciousness-architects @coreflow360/devops-engineers
+/next.config.js @coreflow360/consciousness-architects @coreflow360/frontend-engineers
+
+# Documentation and consciousness evolution
+/*.md @coreflow360/consciousness-architects @coreflow360/documentation-team
+/docs/ @coreflow360/consciousness-architects @coreflow360/documentation-team
+
+# Payment and subscription consciousness
+/src/lib/stripe/ @coreflow360/consciousness-architects @coreflow360/billing-engineers
+/src/app/api/stripe/ @coreflow360/consciousness-architects @coreflow360/billing-engineers
+
+# Security and compliance
+/src/lib/security/ @coreflow360/consciousness-architects @coreflow360/security-engineers
+/src/__tests__/security/ @coreflow360/consciousness-architects @coreflow360/security-engineers
