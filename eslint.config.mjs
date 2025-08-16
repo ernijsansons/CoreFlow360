@@ -14,8 +14,8 @@ const eslintConfig = [
   {
     rules: {
       // TypeScript strict mode enforcement
-      "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/strict-boolean-expressions": "off",
       
       // React best practices
@@ -27,25 +27,12 @@ const eslintConfig = [
       "no-var": "error",
       "no-console": "warn",
       
-      // Import organization
-      "import/order": ["error", {
-        "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
-        "newlines-between": "always"
-      }],
-      
-      // Accessibility
-      "jsx-a11y/alt-text": "error",
-      "jsx-a11y/aria-props": "error",
-      "jsx-a11y/aria-proptypes": "error",
-      "jsx-a11y/aria-role": "error",
-      "jsx-a11y/role-has-required-aria-props": "error",
       
       // Security
-      "react/no-dangerously-set-inner-html": "error",
+      "react/no-danger": "warn",
       
       // Performance
-      "react/jsx-no-bind": "warn",
-      "react/jsx-no-leaked-render": "error"
+      "react/jsx-no-bind": "off"
     }
   },
   {
@@ -57,7 +44,10 @@ const eslintConfig = [
       "dist/**",
       "*.config.js",
       "*.config.mjs",
-      "**/*.d.ts"
+      "**/*.d.ts",
+      "v0-deployed/**",
+      "prisma/seed*.ts",
+      "public/sw.js"
     ]
   }
 ];

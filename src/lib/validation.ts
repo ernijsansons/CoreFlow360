@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod'
-import { sanitizeString, sanitizeHtml } from '@/utils/security/sanitization'
+import { sanitizeString, sanitizeHtml } from '../utils/security/sanitization'
 
 // Common validation patterns
 export const VALIDATION_PATTERNS = {
@@ -176,9 +176,9 @@ export class ValidationUtils {
     for (const { field, schema, value } of validations) {
       const result = this.validateInput(schema, value, field)
       
-      if (result.success) {
+      if ('data' in result && result.success) {
         results[field] = result.data
-      } else {
+      } else if ('errors' in result && !result.success) {
         errors[field] = result.errors
       }
     }
@@ -324,6 +324,8 @@ export const CommonSchemas = {
     })).optional().default([])
   })
 }
+
+
 
 
 

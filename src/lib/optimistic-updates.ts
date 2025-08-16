@@ -12,7 +12,7 @@ export interface OptimisticUpdate<T = any> {
   rollback?: () => void
 }
 
-export interface OptimisticUpdateOptions {
+export interface OptimisticUpdateOptions<T = any> {
   timeout?: number
   retryAttempts?: number
   retryDelay?: number
@@ -32,7 +32,7 @@ export class OptimisticUpdateManager<T = any> {
     id: string,
     data: T,
     serverUpdate: () => Promise<T>,
-    options: OptimisticUpdateOptions = {}
+    options: OptimisticUpdateOptions<T> = {}
   ): Promise<T> {
     const {
       timeout = 10000,
@@ -141,9 +141,9 @@ export class OptimisticUpdateManager<T = any> {
   /**
    * Rollback an update to original data
    */
-  rollbackUpdate(id: string, originalData: T): void {
+  rollbackUpdate(id: string, originalData: T | undefined): void {
     const update = this.updates.get(id)
-    if (update) {
+    if (update && originalData !== undefined) {
       update.data = originalData
       update.status = 'pending'
       update.error = undefined
@@ -156,7 +156,7 @@ export class OptimisticUpdateManager<T = any> {
    * Clear completed updates
    */
   clearCompletedUpdates(): void {
-    for (const [id, update] of this.updates.entries()) {
+    for (const [id, update] of Array.from(this.updates.entries())) {
       if (update.status !== 'pending') {
         this.updates.delete(id)
       }
@@ -199,7 +199,7 @@ export function useOptimisticUpdates<T = any>() {
     id: string,
     data: T,
     serverUpdate: () => Promise<T>,
-    options: OptimisticUpdateOptions = {}
+    options: OptimisticUpdateOptions<T> = {}
   ) => {
     return manager.createUpdate(id, data, serverUpdate, options)
   }
@@ -243,7 +243,7 @@ export class BatchOptimisticUpdates<T = any> {
     id: string
     data: T
     serverUpdate: () => Promise<T>
-    options?: OptimisticUpdateOptions
+    options?: OptimisticUpdateOptions<T>
   }> = []
 
   /**
@@ -253,7 +253,7 @@ export class BatchOptimisticUpdates<T = any> {
     id: string,
     data: T,
     serverUpdate: () => Promise<T>,
-    options?: OptimisticUpdateOptions
+    options?: OptimisticUpdateOptions<T>
   ): void {
     this.batch.push({ id, data, serverUpdate, options })
   }
@@ -304,6 +304,8 @@ export class BatchOptimisticUpdates<T = any> {
     return this.batch.length
   }
 }
+
+
 
 
 

@@ -194,16 +194,19 @@ export function sanitizeErrorMessage(error: unknown): string {
     return 'An unknown error occurred'
   }
 
+  // Type guard to check if error has a code property
+  const errorWithCode = error as { code?: string; message?: string }
+
   // Never expose stack traces in production
   if (process.env.NODE_ENV === 'production') {
     // Generic error messages for production
-    if (error.code === 'ECONNREFUSED') {
+    if (errorWithCode.code === 'ECONNREFUSED') {
       return 'Service temporarily unavailable'
     }
-    if (error.code === 'ETIMEDOUT') {
+    if (errorWithCode.code === 'ETIMEDOUT') {
       return 'Request timed out'
     }
-    if (error.code === 'ENOTFOUND') {
+    if (errorWithCode.code === 'ENOTFOUND') {
       return 'Service not found'
     }
     
@@ -211,6 +214,7 @@ export function sanitizeErrorMessage(error: unknown): string {
   }
 
   // In development, provide more details but still sanitize
-  const message = error.message || error.toString()
-  return sanitizeObject({ message }).message
+  const message = errorWithCode.message || String(error)
+  const sanitized = sanitizeObject({ message })
+  return sanitized.message as string
 }

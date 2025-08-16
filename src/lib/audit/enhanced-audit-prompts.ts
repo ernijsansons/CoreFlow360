@@ -347,15 +347,15 @@ export class SecurityAuditPrompts {
             {"userId": "123", "role": "admin"}
           </attack_vector>
           <proof_of_concept>
-            ```bash
-            curl -X POST 'https://api.example.com/admin/users' \
-              -H 'Authorization: Bearer user_token' \
+            \`\`\`bash
+            curl -X POST 'https://api.example.com/admin/users' \\
+              -H 'Authorization: Bearer user_token' \\
               -d '{"userId": "attacker_id", "role": "admin"}'
-            ```
+            \`\`\`
           </proof_of_concept>
           <fix>
             <immediate>
-              ```typescript
+              \`\`\`typescript
               // src/api/admin/users.ts:45
               // BEFORE (vulnerable)
               const updateUser = async (req: Request) => {
@@ -397,7 +397,7 @@ export class SecurityAuditPrompts {
                   timestamp: new Date()
                 });
               };
-              ```
+              \`\`\`
             </immediate>
             <long_term>
               - Implement role-based access control (RBAC) middleware
@@ -848,7 +848,7 @@ export class PerformanceAuditPrompts {
           
           <solution>
             <immediate>
-              ```javascript
+              \`\`\`javascript
               // 1. Replace moment.js with date-fns
               // Before
               import moment from 'moment';
@@ -872,11 +872,11 @@ export class PerformanceAuditPrompts {
                 placeholder="blur"
                 blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ..."
               />
-              ```
+              \`\`\`
             </immediate>
             
             <configuration>
-              ```javascript
+              \`\`\`javascript
               // next.config.js optimizations
               module.exports = {
                 experimental: {
@@ -901,7 +901,7 @@ export class PerformanceAuditPrompts {
                   return config;
                 },
               };
-              ```
+              \`\`\`
             </configuration>
           </solution>
           
@@ -946,7 +946,7 @@ export class PerformanceAuditPrompts {
           </issue>
           
           <solution>
-            ```typescript
+            \`\`\`typescript
             // Before (N+1 problem)
             const users = await prisma.user.findMany();
             for (const user of users) {
@@ -980,7 +980,7 @@ export class PerformanceAuditPrompts {
               @@index([userId, status])
               @@index([createdAt])
             }
-            ```
+            \`\`\`
           </solution>
           
           <expected_improvement>
@@ -1095,7 +1095,7 @@ export class ArchitectureAuditPrompts {
           <recommendation>
             Implement Repository pattern with dependency injection:
             
-            ```typescript
+            \`\`\`typescript
             // Define interface
             interface UserRepository {
               findById(id: string): Promise<User | null>;
@@ -1121,7 +1121,7 @@ export class ArchitectureAuditPrompts {
                 return user;
               }
             }
-            ```
+            \`\`\`
           </recommendation>
           <effort>12 story points</effort>
         </finding>

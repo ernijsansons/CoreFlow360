@@ -3,7 +3,7 @@
  * Generates and validates CSRF tokens for secure state-changing operations
  */
 
-import crypto from 'crypto'
+import * as crypto from 'crypto'
 import { cookies } from 'next/headers'
 
 const CSRF_TOKEN_LENGTH = 32
@@ -60,8 +60,8 @@ export function validateCSRFToken(
 /**
  * Set CSRF cookie with secure options
  */
-export function setCSRFCookie(cookieValue: string) {
-  const cookieStore = cookies()
+export async function setCSRFCookie(cookieValue: string) {
+  const cookieStore = await cookies()
   
   cookieStore.set(CSRF_COOKIE_NAME, cookieValue, {
     httpOnly: true,
@@ -79,8 +79,8 @@ export function setCSRFCookie(cookieValue: string) {
 /**
  * Get CSRF cookie value
  */
-export function getCSRFCookie(): string | null {
-  const cookieStore = cookies()
+export async function getCSRFCookie(): Promise<string | null> {
+  const cookieStore = await cookies()
   return cookieStore.get(CSRF_COOKIE_NAME)?.value || null
 }
 
@@ -104,7 +104,7 @@ export async function validateCSRFMiddleware(
   }
   
   const token = getCSRFTokenFromHeaders(request.headers)
-  const cookieValue = getCSRFCookie()
+  const cookieValue = await getCSRFCookie()
   
   return validateCSRFToken(token, cookieValue, secret)
 }
@@ -112,13 +112,15 @@ export async function validateCSRFMiddleware(
 /**
  * Generate and set a new CSRF token for a session
  */
-export function initializeCSRFProtection(
+export async function initializeCSRFProtection(
   secret: string = process.env.API_KEY_SECRET || 'default-secret'
-): string {
+): Promise<string> {
   const { token, cookieValue } = createCSRFTokenPair(secret)
-  setCSRFCookie(cookieValue)
+  await setCSRFCookie(cookieValue)
   return token
 }
+
+
 
 
 
