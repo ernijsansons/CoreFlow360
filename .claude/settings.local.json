@@ -85,7 +85,8 @@
       "Bash(git gc:*)",
       "Bash(git branch:*)",
       "Bash(git remote set-url:*)",
-      "Bash(git ls-tree:*)"
+      "Bash(git ls-tree:*)",
+      "WebFetch(domain:v0.dev)"
     ],
     "deny": []
   }

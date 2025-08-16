@@ -10,9 +10,11 @@ import { RiskReversalSection } from '@/components/home/RiskReversalSection'
 import { PerformanceMetrics } from '@/components/home/PerformanceMetrics'
 import { PricingSection } from '@/components/home/PricingSection'
 import { TestimonialsSection } from '@/components/sections/TestimonialsSection'
+import { VideoTestimonials } from '@/components/testimonials/VideoTestimonials'
 import { FAQSection } from '@/components/sections/FAQSection'
 import { BetaCTA } from '@/components/marketing/BetaCTA'
 import { CTASection } from '@/components/home/CTASection'
+import { LiveChat } from '@/components/chat/LiveChat'
 
 export default function Home() {
   return (
@@ -50,6 +52,9 @@ export default function Home() {
       {/* Testimonials Section */}
       <TestimonialsSection />
 
+      {/* Video Testimonials */}
+      <VideoTestimonials />
+
       {/* FAQ Section */}
       <FAQSection />
 
@@ -65,6 +70,9 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
+      
+      {/* Live Chat Widget */}
+      <LiveChat />
     </div>
   )
 }

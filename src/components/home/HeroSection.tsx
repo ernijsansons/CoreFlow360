@@ -6,11 +6,18 @@ import { GlowingButton } from '@/components/ui/GlowingButton'
 import { NeuralNetworkBackground } from '@/components/ui/NeuralNetworkBackground'
 import { useTrackEvent } from '@/components/analytics/AnalyticsProvider'
 import { useState, useEffect } from 'react'
+import { useABTest } from '@/hooks/useABTest'
 
 export function HeroSection() {
   const { trackEvent } = useTrackEvent()
   const [liveUsers, setLiveUsers] = useState(2847)
   const [timeLeft, setTimeLeft] = useState('47:23:15')
+  
+  // A/B Tests
+  const headlineTest = useABTest('hero-headline-test')
+  const ctaTest = useABTest('cta-button-test')
+  const socialProofTest = useABTest('social-proof-test')
+  const urgencyTest = useABTest('urgency-element-test')
   
   // Simulate live user counter
   useEffect(() => {
@@ -40,7 +47,7 @@ export function HeroSection() {
   }, [])
   
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-16">
+    <section className="relative min-h-screen flex items-center justify-center pt-16" data-section="hero">
       <NeuralNetworkBackground />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -58,8 +65,17 @@ export function HeroSection() {
             transition={{ duration: 1, delay: 0.1 }}
           >
             <div className="inline-flex items-center gap-2 bg-violet-900/30 border border-violet-500/50 px-6 py-3 rounded-full mb-4">
-              <Users className="w-5 h-5 text-violet-400" />
-              <span className="text-violet-300 font-semibold">{liveUsers.toLocaleString()}+ businesses transformed</span>
+              {socialProofTest.config.type === 'revenue_stats' ? (
+                <>
+                  <DollarSign className="w-5 h-5 text-violet-400" />
+                  <span className="text-violet-300 font-semibold">{socialProofTest.config.display}</span>
+                </>
+              ) : (
+                <>
+                  <Users className="w-5 h-5 text-violet-400" />
+                  <span className="text-violet-300 font-semibold">{liveUsers.toLocaleString()}+ businesses transformed</span>
+                </>
+              )}
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
@@ -75,13 +91,13 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            <span className="text-white">Turn Your Business Into a</span>
+            <span className="text-white">{headlineTest.config.headline || 'Turn Your Business Into a'}</span>
             <br />
             <span className="bg-gradient-to-r from-violet-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-              Revenue Machine
+              {headlineTest.variant?.id === 'variant-a' ? '10X Business Growth' : 'Revenue Machine'}
             </span>
             <br />
-            <span className="text-white text-4xl md:text-5xl lg:text-6xl">That Runs Itself</span>
+            <span className="text-white text-4xl md:text-5xl lg:text-6xl">{headlineTest.config.subheadline || 'That Runs Itself'}</span>
           </motion.h1>
 
           {/* Power Subtitle */}
@@ -121,22 +137,36 @@ export function HeroSection() {
           </motion.div>
 
           {/* Limited Time Offer */}
-          <motion.div
-            className="bg-gradient-to-r from-red-900/40 to-orange-900/40 border border-red-500/50 rounded-2xl p-6 mb-8 max-w-2xl mx-auto"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.5 }}
-          >
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Timer className="w-5 h-5 text-red-400" />
-              <span className="text-red-400 font-bold">LIMITED TIME: Early Access Pricing</span>
-            </div>
-            <div className="text-2xl font-bold text-white mb-2">
-              Save $500/month • Lock in 40% OFF forever
-            </div>
-            <div className="text-red-300 font-mono text-lg">{timeLeft}</div>
-            <div className="text-sm text-gray-400 mt-2">Only 47 spots remaining</div>
-          </motion.div>
+          {urgencyTest.config.type !== 'none' && (
+            <motion.div
+              className="bg-gradient-to-r from-red-900/40 to-orange-900/40 border border-red-500/50 rounded-2xl p-6 mb-8 max-w-2xl mx-auto"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.5 }}
+            >
+              {urgencyTest.config.type === 'countdown' ? (
+                <>
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <Timer className="w-5 h-5 text-red-400" />
+                    <span className="text-red-400 font-bold">{urgencyTest.config.message}</span>
+                  </div>
+                  <div className="text-2xl font-bold text-white mb-2">
+                    Save $500/month • Lock in 40% OFF forever
+                  </div>
+                  <div className="text-red-300 font-mono text-lg">{timeLeft}</div>
+                  <div className="text-sm text-gray-400 mt-2">Only 47 spots remaining</div>
+                </>
+              ) : urgencyTest.config.type === 'spots' ? (
+                <>
+                  <div className="text-2xl font-bold text-white mb-2">
+                    Early Access Pricing Available
+                  </div>
+                  <div className="text-red-400 font-bold text-lg">{urgencyTest.config.message}</div>
+                  <div className="text-sm text-gray-400 mt-2">Lock in 40% OFF forever</div>
+                </>
+              ) : null}
+            </motion.div>
+          )}
 
           {/* CTA Buttons */}
           <motion.div
@@ -149,18 +179,24 @@ export function HeroSection() {
               href="/demo/subscription-simulator" 
               size="lg"
               className="text-lg px-8 py-4"
-              onClick={() => trackEvent('hero_primary_cta_clicked')}
+              onClick={() => {
+                trackEvent('hero_primary_cta_clicked')
+                ctaTest.trackConversion('primary_cta_click')
+              }}
             >
               <span className="flex items-center gap-2">
-                Start Free 30-Day Trial
+                {ctaTest.config.primaryCTA || 'Start Free 30-Day Trial'}
                 <ArrowRight className="w-5 h-5" />
               </span>
             </GlowingButton>
             <button 
               className="text-lg px-8 py-4 border border-gray-600 rounded-xl hover:border-violet-500 transition-colors text-gray-300 hover:text-white"
-              onClick={() => trackEvent('hero_secondary_cta_clicked')}
+              onClick={() => {
+                trackEvent('hero_secondary_cta_clicked')
+                ctaTest.trackConversion('secondary_cta_click')
+              }}
             >
-              Watch 3-Min Demo
+              {ctaTest.config.secondaryCTA || 'Watch 3-Min Demo'}
             </button>
           </motion.div>
 
