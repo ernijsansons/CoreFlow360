@@ -75,7 +75,11 @@
       "Bash(npm cache clean:*)",
       "Bash(sed:*)",
       "WebFetch(domain:www.odoo.com)",
-      "WebFetch(domain:www.zoho.com)"
+      "WebFetch(domain:www.zoho.com)",
+      "Bash(NODE_OPTIONS='--max-old-space-size=8192' npm run build)",
+      "Bash(NODE_OPTIONS='--max-old-space-size=8192' npm run build:production)",
+      "Bash(NODE_OPTIONS='--max-old-space-size=8192' npm run build 2 >& 1)",
+      "Bash(git check-ignore:*)"
     ],
     "deny": []
   }

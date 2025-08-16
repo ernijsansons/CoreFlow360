@@ -20,7 +20,7 @@ import {
   PlayIcon,
   PauseIcon,
   StopIcon,
-  CompassIcon as NavigationIcon,
+  MapIcon as NavigationIcon,
   SignalIcon,
   Battery100Icon as BatteryIcon,
   CloudIcon,

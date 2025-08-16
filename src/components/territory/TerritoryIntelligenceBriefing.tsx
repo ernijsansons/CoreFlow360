@@ -7,7 +7,7 @@ import {
   LightBulbIcon,
   UserGroupIcon,
   BuildingOfficeIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon as TrendingUpIcon,
   ExclamationTriangleIcon,
   ClockIcon,
   MapPinIcon,

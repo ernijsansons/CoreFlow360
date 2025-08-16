@@ -316,13 +316,13 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
 export const businessConsciousness = new BusinessConsciousnessOrchestrator();
 
 // Export types
-export {
+export type {
   ConsciousnessTier,
   ConsciousnessCapability,
   SubscriptionState
 } from './subscription/consciousness-tier-manager';
 
-export {
+export type {
   ConsciousnessState,
   ConsciousnessMetrics,
   ConsciousnessInsight
