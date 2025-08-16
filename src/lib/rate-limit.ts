@@ -5,6 +5,12 @@
 
 import { LRUCache } from 'lru-cache'
 import { NextRequest } from 'next/server'
+import { 
+  enhancedRateLimiter, 
+  withEnhancedRateLimit, 
+  ENHANCED_RATE_LIMITS,
+  EnhancedRateLimitConfig 
+} from './security/enhanced-rate-limit'
 
 export type RateLimitOptions = {
   uniqueTokenPerInterval?: number
@@ -125,12 +131,32 @@ export function rateLimitResponse(result: RateLimitResult) {
   })
 }
 
-// Middleware helper for API routes
+// Middleware helper for API routes (enhanced version)
 export async function withRateLimit(
   request: NextRequest,
   handler: () => Promise<Response>,
   options?: RateLimitOptions
 ): Promise<Response> {
+  // Check if Redis is available for enhanced rate limiting
+  if (process.env.REDIS_URL || process.env.REDIS_CLUSTER_NODES) {
+    // Use enhanced rate limiting with Redis
+    const enhancedConfig: EnhancedRateLimitConfig = {
+      strategy: 'sliding-window',
+      limit: options?.uniqueTokenPerInterval || RATE_LIMITS.api.uniqueTokenPerInterval,
+      window: options?.interval || RATE_LIMITS.api.interval,
+    }
+    
+    // Extract tenant context if available
+    const tenantId = request.headers.get('x-tenant-id') || undefined
+    const tenantTier = request.headers.get('x-tenant-tier') || undefined
+    
+    return withEnhancedRateLimit(request, handler, enhancedConfig, {
+      tenantId,
+      tenantTier
+    })
+  }
+  
+  // Fallback to local rate limiting
   const limiter = rateLimit(options || RATE_LIMITS.api)
   const key = getRateLimitKey(request)
   const result = await limiter.check(request, key)

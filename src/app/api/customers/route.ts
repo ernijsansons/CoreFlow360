@@ -10,6 +10,11 @@ import { createCustomerSchema, customerQuerySchema } from "@/lib/schemas"
 import { redis } from "@/lib/redis"
 import { invalidateCustomerCache } from "@/lib/cache/cache-invalidation"
 import { withAPIVersioning, responseTransformers } from "@/lib/api/with-versioning"
+import { withIdempotency } from "@/middleware/idempotency"
+import { createCustomerTransaction } from "@/lib/db/transaction-manager"
+import { eventStore } from "@/lib/events/event-store"
+import { EVENT_TYPES } from "@/lib/events/domain-events"
+import { traceDatabaseOperation, traceBusinessOperation, trackUserActivity, trackError, apiTelemetryMiddleware } from "@/middleware/telemetry"
 
 async function getHandler(request: NextRequest) {
   return withRateLimit(request, async () => {
@@ -67,45 +72,78 @@ async function getHandler(request: NextRequest) {
       ]
     }
 
-    // Get total count for pagination
-    const totalCount = await prisma.customer.count({ where })
+    // Get total count for pagination with tracing
+    const totalCount = await traceDatabaseOperation(
+      'customers.count',
+      () => prisma.customer.count({ where }),
+      {
+        table: 'customer',
+        operation_type: 'select',
+        tenantId: session.user.tenantId
+      }
+    )
 
-    // Get customers with pagination
-    const customers = await prisma.customer.findMany({
-      where,
-      orderBy: { [validSortBy]: sortOrder },
-      skip: (page - 1) * limit,
-      take: limit,
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        phone: true,
-        address: true,
-        company: true,
-        industry: true,
-        status: true,
-        source: true,
-        totalRevenue: true,
-        createdAt: true,
-        updatedAt: true,
-        aiScore: true,
-        aiChurnRisk: true,
-        aiLifetimeValue: true,
-        assignee: {
-          select: {
-            id: true,
-            name: true,
-            email: true
+    // Get customers with pagination with tracing
+    const customers = await traceDatabaseOperation(
+      'customers.findMany',
+      () => prisma.customer.findMany({
+        where,
+        orderBy: { [validSortBy]: sortOrder },
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+          address: true,
+          company: true,
+          industry: true,
+          status: true,
+          source: true,
+          totalRevenue: true,
+          createdAt: true,
+          updatedAt: true,
+          aiScore: true,
+          aiChurnRisk: true,
+          aiLifetimeValue: true,
+          assignee: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
           }
         }
+      }),
+      {
+        table: 'customer',
+        operation_type: 'select',
+        tenantId: session.user.tenantId
       }
+    )
+
+    // Track user activity
+    trackUserActivity('customers_listed', session.user.id, session.user.tenantId, {
+      page,
+      limit,
+      search: search || null,
+      resultsCount: customers.length
     })
 
     return paginatedResponse(customers, { page, limit, totalCount })
 
     } catch (error) {
+      // Track error with telemetry
+      trackError(error, {
+        operation: 'customers_list',
+        entityType: 'customer',
+        userId: context.userId,
+        tenantId: context.tenantId,
+        endpoint: '/api/customers'
+      })
+      
       return handleError(error, context)
     }
   }, RATE_LIMITS.api)
@@ -122,134 +160,116 @@ async function postHandler(request: NextRequest) {
     }
 
     try {
-    const session = await auth()
-    if (!session?.user?.tenantId) {
-      return authErrorResponse("Authentication required")
-    }
+      const session = await auth()
+      if (!session?.user?.tenantId) {
+        return authErrorResponse("Authentication required")
+      }
 
-    context.userId = session.user.id
-    context.tenantId = session.user.tenantId
+      context.userId = session.user.id
+      context.tenantId = session.user.tenantId
 
-    const body = await request.json()
-    
-    // Validate input (sanitization is done by middleware)
-    const validationResult = createCustomerSchema.safeParse(body)
-    if (!validationResult.success) {
-      return validationErrorResponse(validationResult.error.errors, "Invalid customer data")
-    }
+      const body = await request.json()
+      
+      // Validate input (sanitization is done by middleware)
+      const validationResult = createCustomerSchema.safeParse(body)
+      if (!validationResult.success) {
+        return validationErrorResponse(validationResult.error.errors, "Invalid customer data")
+      }
 
-    const customerData = validationResult.data
+      const customerData = validationResult.data
 
-    // Check if customer with same email already exists (if email provided)
-    if (customerData.email) {
-      const existingCustomer = await prisma.customer.findFirst({
-        where: {
-          email: customerData.email,
-          tenantId: session.user.tenantId
+      // Use transactional customer creation with tracing
+      const customer = await traceBusinessOperation(
+        'customer.create',
+        () => createCustomerTransaction(
+          customerData,
+          session.user.tenantId,
+          session.user.id
+        ),
+        {
+          entityType: 'customer',
+          operationType: 'create',
+          tenantId: session.user.tenantId,
+          userId: session.user.id
         }
+      )
+
+      // Invalidate cache for customer lists
+      await invalidateCustomerCache(customer.id, { 
+        tenantId: session.user.tenantId,
+        userId: session.user.id 
       })
 
-      if (existingCustomer) {
-        return validationErrorResponse(
-          [{ message: "Customer with this email already exists", path: ["email"] }],
-          "Email already in use"
-        )
-      }
-    }
+      // Track successful customer creation
+      trackUserActivity('customer_created', session.user.id, session.user.tenantId, {
+        customerId: customer.id,
+        customerName: `${customerData.firstName} ${customerData.lastName}`,
+        customerEmail: customerData.email
+      })
 
-    // Create customer
-    const customer = await prisma.customer.create({
-      data: {
-        ...customerData,
-        tenantId: session.user.tenantId,
-        industryData: customerData.industryData ? JSON.stringify(customerData.industryData) : undefined
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        phone: true,
-        address: true,
-        company: true,
-        industry: true,
-        status: true,
-        source: true,
-        totalRevenue: true,
-        createdAt: true,
-        updatedAt: true,
-        aiScore: true,
-        aiChurnRisk: true,
-        aiLifetimeValue: true,
-        assignee: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
-        }
-      }
-    })
-
-    // Log the creation
-    await prisma.auditLog.create({
-      data: {
-        action: 'CREATE',
-        entityType: 'CUSTOMER',
-        entityId: customer.id,
-        oldValues: null,
-        newValues: JSON.stringify(customer),
-        metadata: JSON.stringify({
-          createdBy: session.user.id,
-          customerName: `${customer.firstName} ${customer.lastName}`
-        }),
-        tenantId: session.user.tenantId,
-        userId: session.user.id
-      }
-    })
-
-    // Invalidate cache for customer lists
-    await invalidateCustomerCache(customer.id, { 
-      tenantId: session.user.tenantId,
-      userId: session.user.id 
-    })
-
-    return createdResponse(customer, "Customer created successfully")
+      return createdResponse(customer, "Customer created successfully")
 
     } catch (error) {
+      // Track error with telemetry
+      trackError(error, {
+        operation: 'customer_create',
+        entityType: 'customer',
+        userId: context.userId,
+        tenantId: context.tenantId,
+        endpoint: '/api/customers'
+      })
+      
       return handleError(error, context)
     }
   }, RATE_LIMITS.api)
 }
 
-// Export versioned handlers
-export const GET = withAPIVersioning(getHandler, {
-  supportedVersions: ['v1', 'v2'],
-  currentVersion: 'v2',
-  transformResponse: (data, fromVersion, toVersion) => {
-    // Transform v2 responses to v1 format for backward compatibility
-    if (fromVersion === 'v2' && toVersion === 'v1') {
-      if (data.data && Array.isArray(data.data)) {
-        return {
-          ...data,
-          data: responseTransformers.customerV2ToV1(data.data),
-          pagination: data.meta ? responseTransformers.paginationV2ToV1(data).pagination : undefined,
-          meta: undefined
+// Export versioned handlers with telemetry
+export const GET = apiTelemetryMiddleware(
+  withAPIVersioning(getHandler, {
+    supportedVersions: ['v1', 'v2'],
+    currentVersion: 'v2',
+    transformResponse: (data, fromVersion, toVersion) => {
+      // Transform v2 responses to v1 format for backward compatibility
+      if (fromVersion === 'v2' && toVersion === 'v1') {
+        if (data.data && Array.isArray(data.data)) {
+          return {
+            ...data,
+            data: responseTransformers.customerV2ToV1(data.data),
+            pagination: data.meta ? responseTransformers.paginationV2ToV1(data).pagination : undefined,
+            meta: undefined
+          }
         }
+        return responseTransformers.customerV2ToV1(data)
       }
-      return responseTransformers.customerV2ToV1(data)
+      return data
     }
-    return data
+  }),
+  {
+    traceRequests: true,
+    collectMetrics: true
   }
-})
+)
 
-export const POST = withAPIVersioning(postHandler, {
-  supportedVersions: ['v1', 'v2'],
-  currentVersion: 'v2',
-  transformResponse: (data, fromVersion, toVersion) => {
-    if (fromVersion === 'v2' && toVersion === 'v1') {
-      return responseTransformers.customerV2ToV1(data)
+export const POST = apiTelemetryMiddleware(
+  withAPIVersioning(
+    withIdempotency(postHandler, {
+      ttlMinutes: 60,
+      methods: ['POST']
+    }), 
+    {
+      supportedVersions: ['v1', 'v2'],
+      currentVersion: 'v2',
+      transformResponse: (data, fromVersion, toVersion) => {
+        if (fromVersion === 'v2' && toVersion === 'v1') {
+          return responseTransformers.customerV2ToV1(data)
+        }
+        return data
+      }
     }
-    return data
+  ),
+  {
+    traceRequests: true,
+    collectMetrics: true
   }
-})
+)

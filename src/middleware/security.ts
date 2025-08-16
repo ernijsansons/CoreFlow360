@@ -118,9 +118,8 @@ export async function securityMiddleware(request: NextRequest) {
     response.headers.set(key, value)
   })
 
-  // Enhanced CSRF Protection for mutations (skip in development for easier local testing)
-  const isDevelopment = process.env.NODE_ENV === 'development'
-  if (!isDevelopment && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
+  // Enhanced CSRF Protection for mutations
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
     const csrfToken = request.headers.get('x-csrf-token')
     const sessionToken = request.cookies.get('csrf-token')?.value
     const isWebhook = request.nextUrl.pathname.includes('/webhook')
@@ -264,7 +263,10 @@ export function validateApiKey(apiKey: string): { valid: boolean; tenantId?: str
     }
     
     // Verify signature with timing-safe comparison
-    const secret = process.env.API_KEY_SECRET || 'default-secret'
+    const secret = process.env.API_KEY_SECRET
+    if (!secret) {
+      return { valid: false }
+    }
     const expectedSignature = crypto
       .createHmac('sha256', secret)
       .update(`${prefix}_${tenantId}_${random}`)
@@ -360,15 +362,20 @@ async function checkRateLimitRedis(
   config: RateLimitConfig
 ): Promise<{ allowed: boolean; message: string; retryAfter: number; resetTime: number }> {
   try {
-    const multi = redisClient.multi()
-    multi.get(key)
-    multi.ttl(key)
+    // Atomic rate limiting using Redis pipeline
+    const pipeline = redisClient.pipeline()
+    pipeline.incr(key)
+    pipeline.expire(key, Math.floor(config.windowMs / 1000))
+    pipeline.get(key)
     
-    const [countStr, ttl] = await multi.exec()
-    const count = parseInt(countStr || '0')
+    const results = await pipeline.exec()
+    const newCount = results[0][1] as number
+    const currentCount = results[2][1] as number || newCount
     
-    if (count >= config.maxRequests) {
+    if (currentCount > config.maxRequests) {
+      const ttl = await redisClient.ttl(key)
       const retryAfter = ttl > 0 ? ttl * 1000 : config.windowMs
+      
       return {
         allowed: false,
         message: config.message,
@@ -376,12 +383,6 @@ async function checkRateLimitRedis(
         resetTime: now + retryAfter
       }
     }
-    
-    // Increment counter
-    await redisClient.multi()
-      .incr(key)
-      .expire(key, Math.floor(config.windowMs / 1000))
-      .exec()
     
     return {
       allowed: true,

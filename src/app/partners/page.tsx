@@ -12,8 +12,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   PartnerPortalDashboard,
   IntelligenceCertificationProgram,
-  PartnerResourceLibrary,
-  PartnerTrainingAcademy,
+  // PartnerResourceLibrary, // Disabled - missing dependency
+  // PartnerTrainingAcademy, // Disabled - missing dependency
   PartnerCommunityHub
 } from '../../components/partners'
 
@@ -147,14 +147,18 @@ const PartnerPortalPage: React.FC = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <PartnerResourceLibrary
+              {/* <PartnerResourceLibrary
                 partnerId={partnerData.id}
                 certificationLevel={partnerData.certificationLevel}
                 onResourceOpen={(resource) => {
                   console.log('Opening resource:', resource)
                   // Handle resource open
                 }}
-              />
+              /> */}
+              <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl p-12 text-center">
+                <h2 className="text-2xl font-bold text-white mb-4">Resource Library</h2>
+                <p className="text-gray-400">Resource library temporarily disabled - missing dependencies</p>
+              </div>
             </motion.div>
           )}
 
@@ -166,7 +170,7 @@ const PartnerPortalPage: React.FC = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <PartnerTrainingAcademy
+              {/* <PartnerTrainingAcademy
                 partnerId={partnerData.id}
                 certificationLevel={partnerData.certificationLevel}
                 onCourseEnroll={(course) => {
@@ -177,7 +181,11 @@ const PartnerPortalPage: React.FC = () => {
                   console.log('Registering for session:', session)
                   // Handle session registration
                 }}
-              />
+              /> */}
+              <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl p-12 text-center">
+                <h2 className="text-2xl font-bold text-white mb-4">Training Academy</h2>
+                <p className="text-gray-400">Training academy temporarily disabled - missing dependencies</p>
+              </div>
             </motion.div>
           )}
 

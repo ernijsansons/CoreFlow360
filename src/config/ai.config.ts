@@ -141,12 +141,12 @@ export const AI_CONFIG = {
   // Technical config (preserved for functionality)
   providers: {
     openai: {
-      apiKey: process.env.OPENAI_API_KEY!,
+      // API key loaded securely from credential manager
       defaultModel: 'gpt-4-turbo-preview',
       temperature: 0.7,
     },
     anthropic: {
-      apiKey: process.env.ANTHROPIC_API_KEY!,
+      // API key loaded securely from credential manager
       defaultModel: 'claude-3-opus-20240229',
     },
   },

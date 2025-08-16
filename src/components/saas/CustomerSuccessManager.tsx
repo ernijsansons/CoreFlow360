@@ -12,7 +12,7 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
   ClockIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon as TrendingUpIcon,
   TrendingDownIcon,
   UserGroupIcon,
   StarIcon,

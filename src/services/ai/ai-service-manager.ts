@@ -10,6 +10,7 @@ import { AIModelType } from '@prisma/client'
 import { executeSecureOperation, SecureOperationContext } from '@/services/security/secure-operations'
 import { withPerformanceTracking } from '@/utils/performance/performance-tracking'
 import { AuditLogger } from '@/services/security/audit-logging'
+import { getOpenAIKey } from '@/lib/security/credential-manager'
 
 // AI Service Configuration
 const AI_SERVICE_CONFIG = {
@@ -114,20 +115,37 @@ class AIServiceManager {
   private anthropicClient?: unknown // Would import proper Anthropic client
   private serviceHealth: Map<string, ServiceHealth> = new Map()
   private rateLimitCounters: Map<string, { count: number; resetTime: number }> = new Map()
+  private initialized = false
   
   constructor() {
-    this.initializeServices()
     this.startHealthMonitoring()
   }
 
-  private initializeServices(): void {
+  static async create(): Promise<AIServiceManager> {
+    const instance = new AIServiceManager()
+    await instance.initializeServices()
+    return instance
+  }
+
+  async ensureInitialized(): Promise<void> {
+    if (!this.initialized) {
+      await this.initializeServices()
+    }
+  }
+
+  private async initializeServices(): Promise<void> {
     // Initialize OpenAI (skip in test environment)
-    if (process.env.OPENAI_API_KEY && process.env.NODE_ENV !== 'test') {
-      this.openaiClient = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-        timeout: AI_SERVICE_CONFIG.openai.timeout,
-        maxRetries: AI_SERVICE_CONFIG.openai.maxRetries
-      })
+    if (process.env.NODE_ENV !== 'test') {
+      try {
+        const apiKey = await getOpenAIKey()
+        this.openaiClient = new OpenAI({
+          apiKey,
+          timeout: AI_SERVICE_CONFIG.openai.timeout,
+          maxRetries: AI_SERVICE_CONFIG.openai.maxRetries
+        })
+      } catch (error) {
+        console.warn('OpenAI API key not available:', error)
+      }
     }
 
     // Initialize Anthropic (placeholder - would use actual client)
@@ -156,6 +174,8 @@ class AIServiceManager {
       costEfficiency: 1.0,
       availability: 1.0
     })
+
+    this.initialized = true
   }
 
   /**
@@ -166,6 +186,8 @@ class AIServiceManager {
     context: AIServiceContext,
     request: AIServiceRequest
   ): Promise<AIServiceResponse> {
+    // Ensure services are initialized
+    await this.ensureInitialized()
     const secureContext: SecureOperationContext = {
       tenantId: context.tenantId,
       userId: context.userId,

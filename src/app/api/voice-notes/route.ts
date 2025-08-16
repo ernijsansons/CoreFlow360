@@ -17,6 +17,7 @@ import {
   decryptTranscriptMiddleware 
 } from '@/middleware/audio-encryption.middleware'
 import { audioEncryption } from '@/lib/security/audio-encryption'
+import { TenantSecureDatabase } from '@/lib/security/tenant-isolation'
 
 /**
  * GET /api/voice-notes
@@ -272,25 +273,45 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Update customer/lead activity
+    // Update customer/lead activity with tenant security
     if (customerId) {
-      await db.customer.update({
-        where: { id: customerId },
-        data: { 
-          lastActivityAt: new Date(),
-          updatedAt: new Date()
+      await TenantSecureDatabase.update(
+        db.customer,
+        {
+          where: { id: customerId },
+          data: { 
+            lastActivityAt: new Date(),
+            updatedAt: new Date()
+          }
+        },
+        {
+          tenantId: session.user.tenantId,
+          userId: session.user.id,
+          operation: 'UPDATE',
+          entityType: 'customer',
+          entityId: customerId
         }
-      })
+      )
     }
 
     if (leadId) {
-      await db.lead.update({
-        where: { id: leadId },
-        data: { 
-          lastActivityAt: new Date(),
-          updatedAt: new Date()
+      await TenantSecureDatabase.update(
+        db.lead,
+        {
+          where: { id: leadId },
+          data: { 
+            lastActivityAt: new Date(),
+            updatedAt: new Date()
+          }
+        },
+        {
+          tenantId: session.user.tenantId,
+          userId: session.user.id,
+          operation: 'UPDATE',
+          entityType: 'lead',
+          entityId: leadId
         }
-      })
+      )
     }
 
     // Return sanitized voice note
@@ -368,13 +389,32 @@ export async function PATCH(request: NextRequest) {
     if (data.category !== undefined) updateData.category = data.category
     if (data.tags !== undefined) updateData.tags = data.tags
 
-    const updatedNote = await db.voiceNote.update({
-      where: { id },
-      data: {
-        ...updateData,
-        updatedAt: new Date()
+    const updateResult = await TenantSecureDatabase.update(
+      db.voiceNote,
+      {
+        where: { id },
+        data: {
+          ...updateData,
+          updatedAt: new Date()
+        }
+      },
+      {
+        tenantId: session.user.tenantId,
+        userId: session.user.id,
+        operation: 'UPDATE',
+        entityType: 'voiceNote',
+        entityId: id
       }
-    })
+    )
+
+    if (!updateResult.success) {
+      if (updateResult.securityViolation) {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+      }
+      return NextResponse.json({ error: 'Failed to update note' }, { status: 500 })
+    }
+
+    const updatedNote = updateResult.data
 
     return NextResponse.json({
       id: updatedNote.id,
@@ -425,11 +465,28 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Note not found' }, { status: 404 })
     }
 
-    // Soft delete
-    await db.voiceNote.update({
-      where: { id },
-      data: { deletedAt: new Date() }
-    })
+    // Soft delete with tenant security
+    const deleteResult = await TenantSecureDatabase.softDelete(
+      db.voiceNote,
+      {
+        where: { id },
+        data: { deletedAt: new Date() }
+      },
+      {
+        tenantId: session.user.tenantId,
+        userId: session.user.id,
+        operation: 'DELETE',
+        entityType: 'voiceNote',
+        entityId: id
+      }
+    )
+
+    if (!deleteResult.success) {
+      if (deleteResult.securityViolation) {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+      }
+      return NextResponse.json({ error: 'Failed to delete note' }, { status: 500 })
+    }
 
     return NextResponse.json({ success: true })
 

@@ -11,7 +11,7 @@ import {
   Cog6ToothIcon,
   ChartBarIcon,
   SparklesIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon as TrendingUpIcon,
   Bars3Icon,
   XMarkIcon,
   BoltIcon,

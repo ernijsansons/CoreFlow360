@@ -8,11 +8,12 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Float, Text3D } from '@react-three/drei'
+// TODO: Re-enable Three.js when peer dependencies are resolved
+// import { Canvas, useFrame } from '@react-three/fiber'
+// import { Float, Text3D } from '@react-three/drei'
 import { motion, AnimatePresence } from 'framer-motion'
-import * as THREE from 'three'
-import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
+// import * as THREE from 'three'
+// import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
 
 interface TeaserCampaignProps {
   phase: 'awakening' | 'revelation' | 'transformation' | 'emergence'

@@ -429,4 +429,24 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
   }
 }
 
+// Missing interfaces for exports
+export interface ConsciousnessMetrics {
+  consciousnessLevel: number;
+  awarenessScore: number;
+  intelligenceMultiplier: number;
+  synapticConnections: number;
+  evolutionProgress: number;
+  timestamp: Date;
+}
+
+export interface ConsciousnessInsight {
+  id: string;
+  type: string;
+  message: string;
+  confidence: number;
+  actionable: boolean;
+  moduleId: string;
+  timestamp: Date;
+}
+
 export default BaseConsciousnessModule;

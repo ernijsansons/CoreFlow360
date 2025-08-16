@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-15T19:18:54.553Z",
+  "timestamp": "2025-08-15T21:05:07.619Z",
   "summary": {
     "total": 13,
     "successful": 0,
@@ -12,7 +12,7 @@
       "filename": "consciousness-ui-components.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     },
     {
@@ -20,7 +20,7 @@
       "filename": "01-consciousness-awakening.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     },
     {
@@ -28,7 +28,7 @@
       "filename": "02-revelation-business-sleeping.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     },
     {
@@ -36,7 +36,7 @@
       "filename": "03-mirror-current-vs-future.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     },
     {
@@ -44,7 +44,7 @@
       "filename": "04-oracle-department-intelligence.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     },
     {
@@ -52,7 +52,7 @@
       "filename": "05-multiplication-chamber.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     },
     {
@@ -60,7 +60,7 @@
       "filename": "06-competition-graveyard.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     },
     {
@@ -68,7 +68,7 @@
       "filename": "07-intelligence-factory.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     },
     {
@@ -76,7 +76,7 @@
       "filename": "08-roi-singularity.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     },
     {
@@ -84,7 +84,7 @@
       "filename": "09-time-machine.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     },
     {
@@ -92,7 +92,7 @@
       "filename": "10-neural-command-center.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     },
     {
@@ -100,7 +100,7 @@
       "filename": "11-dream-versus-reality.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     },
     {
@@ -108,7 +108,7 @@
       "filename": "12-commitment-threshold.md",
       "success": false,
       "url": null,
-      "error": "The \"data\" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined",
+      "error": "HTTP 401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid bearer token\"}}",
       "tokens": null
     }
   ]

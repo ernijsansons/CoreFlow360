@@ -54,6 +54,18 @@ variable "consciousness_zones" {
   default     = ["us-west-2a", "us-west-2b", "us-west-2c"]
 }
 
+variable "admin_allowed_ips" {
+  description = "List of IP addresses allowed to access admin endpoints"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]  # CHANGE THIS IN PRODUCTION
+}
+
+variable "waf_rate_limit" {
+  description = "Rate limit for WAF rules (requests per 5 minutes)"
+  type        = number
+  default     = 2000
+}
+
 # Provider configurations
 provider "aws" {
   region = var.region
@@ -500,7 +512,7 @@ resource "cloudflare_ruleset" "consciousness_waf" {
   
   rules {
     action = "block"
-    expression = "(http.request.uri.path contains \"/api/admin\" and not ip.src in {1.2.3.4})"
+    expression = "(http.request.uri.path contains \"/api/admin\" and not ip.src in {${join(" ", var.admin_allowed_ips)}})"
     description = "Block admin access from non-whitelisted IPs"
     enabled = true
   }

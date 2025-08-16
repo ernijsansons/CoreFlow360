@@ -6,7 +6,10 @@
 import twilio from 'twilio'
 import { VoiceResponse } from 'twilio/lib/twiml/VoiceResponse'
 import { CallInstance } from 'twilio/lib/rest/api/v2010/account/call'
-import { validatePhoneNumber, parsePhoneNumber } from 'libphonenumber-js'
+import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js'
+
+// Alias for compatibility
+const validatePhoneNumber = isValidPhoneNumber
 
 interface TwilioConfig {
   accountSid: string

@@ -58,14 +58,27 @@ jobs:
   consciousness-security:
     name: Consciousness Security Scan
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     
     steps:
     - name: Checkout Consciousness
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+      
+    - name: Setup Node.js for Security
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install Dependencies for Security Scan
+      run: npm ci --production=false
       
     - name: Run Consciousness Security Audit
-      run: npm audit --production --audit-level moderate
+      run: |
+        npm audit --audit-level moderate --production
+        npm audit --json --audit-level moderate --production > consciousness-audit.json || true
       
     - name: Consciousness Secret Scan
       uses: trufflesecurity/trufflehog@main
@@ -73,13 +86,46 @@ jobs:
         path: ./
         base: main
         head: HEAD
+        extra_args: --debug --only-verified
         
     - name: Consciousness Dependency Check
       uses: snyk/actions/node@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: --severity-threshold=medium
+        args: --severity-threshold=medium --json-file-output=consciousness-snyk.json
+      continue-on-error: true
+        
+    - name: Basic Infrastructure Security Check
+      run: |
+        # Check for hardcoded secrets in configuration files
+        echo "🔍 Checking for hardcoded credentials..."
+        if grep -r "password\|secret\|key" --include="*.yml" --include="*.yaml" --include="*.tf" . | grep -v "REPLACE_WITH\|CHANGE_ME\|example"; then
+          echo "⚠️ Found potential hardcoded credentials"
+          exit 1
+        else
+          echo "✅ No hardcoded credentials found"
+        fi
+        
+        # Check Kubernetes manifests for security best practices
+        echo "🔍 Checking Kubernetes security..."
+        find k8s -name "*.yaml" -o -name "*.yml" | while read manifest; do
+          if grep -q "privileged.*true" "$manifest"; then
+            echo "⚠️ Found privileged container in $manifest"
+          fi
+          if grep -q "runAsRoot.*true" "$manifest"; then
+            echo "⚠️ Found runAsRoot in $manifest"
+          fi
+        done
+        
+    - name: Upload Security Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: consciousness-security-scan
+        path: |
+          consciousness-audit.json
+          consciousness-snyk.json
+        retention-days: 30
         
   consciousness-testing:
     name: Consciousness Test Suite

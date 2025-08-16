@@ -9,7 +9,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import TeaserCampaignAssets from './TeaserCampaignAssets'
+// import TeaserCampaignAssets from './TeaserCampaignAssets' // Disabled - missing dependency
 import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
 
 interface LaunchPhase {
@@ -414,12 +414,15 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
               
               {/* Mini Asset Preview */}
               <div className="bg-black/50 rounded-lg p-3">
-                <TeaserCampaignAssets
+                {/* <TeaserCampaignAssets
                   phase={activePhase.id as any}
                   variant={asset.variant as any}
                   showInteractive={false}
                   className="h-24"
-                />
+                /> */}
+                <div className="h-24 flex items-center justify-center text-gray-500">
+                  <span className="text-xs">Asset Preview Disabled</span>
+                </div>
               </div>
               
               <div className="flex items-center justify-between mt-3 text-xs">
@@ -503,7 +506,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
                   </div>
                 </div>
                 <div className="p-0">
-                  <TeaserCampaignAssets
+                  {/* <TeaserCampaignAssets
                     phase={activePhase.id as any}
                     variant={selectedAsset.variant as any}
                     showInteractive={true}
@@ -511,7 +514,10 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
                       consciousnessAudio.playConsciousnessEmergence()
                       setSelectedAsset(null)
                     }}
-                  />
+                  /> */}
+                  <div className="h-96 flex items-center justify-center bg-gray-800">
+                    <p className="text-gray-400">Asset Preview Temporarily Disabled</p>
+                  </div>
                 </div>
               </div>
             </motion.div>

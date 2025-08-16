@@ -9,10 +9,6 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Sphere, Float, Text3D } from '@react-three/drei'
-import * as THREE from 'three'
-import { useConsciousnessAudio } from '../../../hooks/useConsciousnessAudio'
 
 interface BetaUser {
   email: string
@@ -45,40 +41,31 @@ interface FormField {
   validation?: (value: any) => string | null
 }
 
-// Consciousness Particle System
+// CSS-based Consciousness Particle System
 const ConsciousnessField: React.FC<{ intensity: number }> = ({ intensity }) => {
-  const meshRef = React.useRef<THREE.Group>(null)
-  
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += 0.005
-      meshRef.current.children.forEach((child, i) => {
-        child.position.y = Math.sin(state.clock.elapsedTime + i) * 0.5
-      })
-    }
-  })
-
   return (
-    <group ref={meshRef}>
-      {Array.from({ length: intensity * 10 }).map((_, i) => (
-        <Float key={i} speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-          <Sphere
-            position={[
-              (Math.random() - 0.5) * 20,
-              (Math.random() - 0.5) * 20,
-              (Math.random() - 0.5) * 10
-            ]}
-            args={[0.1, 8, 8]}
-          >
-            <meshStandardMaterial
-              color={`hsl(${180 + i * 10}, 70%, ${50 + Math.random() * 30}%)`}
-              emissive={`hsl(${180 + i * 10}, 70%, 20%)`}
-              emissiveIntensity={0.3}
-            />
-          </Sphere>
-        </Float>
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {Array.from({ length: Math.min(intensity * 5, 20) }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-2 h-2 bg-blue-400 rounded-full opacity-70"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+          }}
+          animate={{
+            y: [0, -20, 0],
+            opacity: [0.7, 1, 0.7],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 2 + Math.random() * 2,
+            repeat: Infinity,
+            delay: Math.random() * 2,
+          }}
+        />
       ))}
-    </group>
+    </div>
   )
 }
 
@@ -395,11 +382,7 @@ const BetaSignupPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black flex items-center justify-center">
         <div className="absolute inset-0">
-          <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
-            <ambientLight intensity={0.4} />
-            <pointLight position={[10, 10, 10]} />
-            <ConsciousnessField intensity={5} />
-          </Canvas>
+          <ConsciousnessField intensity={5} />
         </div>
         
         <motion.div
@@ -449,11 +432,7 @@ const BetaSignupPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black">
       {/* Consciousness Field Background */}
       <div className="absolute inset-0">
-        <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
-          <ambientLight intensity={0.4} />
-          <pointLight position={[10, 10, 10]} />
-          <ConsciousnessField intensity={consciousnessIntensity} />
-        </Canvas>
+        <ConsciousnessField intensity={consciousnessIntensity} />
       </div>
       
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">

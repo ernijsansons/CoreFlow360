@@ -6,6 +6,7 @@
 import { PrismaClient, Prisma } from '@prisma/client'
 import { config, database, isDevelopment, isProduction } from '@/lib/config/environment'
 import { withPerformanceTracking } from '@/lib/monitoring'
+import { piiEncryptionMiddleware } from '@/lib/db-encryption'
 
 /*
 ✅ Pre-flight validation: Database client with production-grade configuration
@@ -87,6 +88,9 @@ function createPrismaClient(): PrismaClient {
       console.info('Prisma Info:', e)
     })
   }
+  
+  // Add PII encryption middleware
+  client.$use(piiEncryptionMiddleware)
   
   return client
 }

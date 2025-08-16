@@ -21,7 +21,7 @@ import {
   XCircleIcon,
   ArrowPathIcon,
   FireIcon,
-  SnowflakeIcon,
+  StarIcon as SnowflakeIcon,
   SunIcon,
   EyeIcon,
   PencilIcon,

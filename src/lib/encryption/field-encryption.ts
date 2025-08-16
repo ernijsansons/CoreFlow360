@@ -87,8 +87,8 @@ export class FieldEncryption {
       // Derive key from master key and salt
       const key = this.deriveKey(salt)
       
-      // Create cipher
-      const cipher = crypto.createCipher(ALGORITHM, key, { iv })
+      // Create cipher with IV
+      const cipher = crypto.createCipheriv(ALGORITHM, key, iv)
       
       // Encrypt data
       let encrypted = cipher.update(plaintext, 'utf8', 'base64')
@@ -146,8 +146,8 @@ export class FieldEncryption {
       // Derive key from master key and salt
       const key = this.deriveKey(salt)
       
-      // Create decipher
-      const decipher = crypto.createDecipher(ALGORITHM, key, { iv })
+      // Create decipher with IV
+      const decipher = crypto.createDecipheriv(ALGORITHM, key, iv)
       decipher.setAuthTag(tag)
       
       // Decrypt data

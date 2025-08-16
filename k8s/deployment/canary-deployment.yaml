@@ -1,0 +1,425 @@
+# CoreFlow360 Canary Deployment Configuration
+# Progressive traffic shifting for risk mitigation
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: coreflow360-canary
+  labels:
+    environment: production
+    deployment-strategy: canary
+---
+# Stable Deployment (Current Production)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coreflow360-stable
+  namespace: coreflow360-canary
+  labels:
+    app: coreflow360
+    version: stable
+    deployment-strategy: canary
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: coreflow360
+      version: stable
+  template:
+    metadata:
+      labels:
+        app: coreflow360
+        version: stable
+        deployment-strategy: canary
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/api/metrics"
+    spec:
+      serviceAccountName: coreflow360-canary
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+      containers:
+      - name: coreflow360
+        image: coreflow360/app:stable-latest
+        ports:
+        - containerPort: 3000
+          name: http
+        - containerPort: 8080
+          name: metrics
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DEPLOYMENT_TYPE
+          value: "stable"
+        - name: CANARY_TRAFFIC_PERCENTAGE
+          value: "0"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop: ["ALL"]
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /api/ready
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+---
+# Canary Deployment (New Version)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coreflow360-canary
+  namespace: coreflow360-canary
+  labels:
+    app: coreflow360
+    version: canary
+    deployment-strategy: canary
+spec:
+  replicas: 1  # Start with 1 replica for 20% traffic
+  selector:
+    matchLabels:
+      app: coreflow360
+      version: canary
+  template:
+    metadata:
+      labels:
+        app: coreflow360
+        version: canary
+        deployment-strategy: canary
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/api/metrics"
+    spec:
+      serviceAccountName: coreflow360-canary
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+      containers:
+      - name: coreflow360
+        image: coreflow360/app:canary-latest
+        ports:
+        - containerPort: 3000
+          name: http
+        - containerPort: 8080
+          name: metrics
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DEPLOYMENT_TYPE
+          value: "canary"
+        - name: CANARY_TRAFFIC_PERCENTAGE
+          value: "20"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop: ["ALL"]
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /api/ready
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+---
+# Main Service (Load balances between stable and canary)
+apiVersion: v1
+kind: Service
+metadata:
+  name: coreflow360-main
+  namespace: coreflow360-canary
+  labels:
+    app: coreflow360
+    service-type: main
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: coreflow360
+---
+# Stable Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: coreflow360-stable
+  namespace: coreflow360-canary
+  labels:
+    app: coreflow360
+    service-type: stable
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: coreflow360
+    version: stable
+---
+# Canary Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: coreflow360-canary
+  namespace: coreflow360-canary
+  labels:
+    app: coreflow360
+    service-type: canary
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: coreflow360
+    version: canary
+---
+# Istio VirtualService for Traffic Splitting
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: coreflow360-canary-traffic
+  namespace: coreflow360-canary
+spec:
+  hosts:
+  - coreflow360-main
+  http:
+  - match:
+    - headers:
+        canary:
+          exact: "true"
+    route:
+    - destination:
+        host: coreflow360-canary
+        port:
+          number: 80
+  - route:
+    - destination:
+        host: coreflow360-stable
+        port:
+          number: 80
+      weight: 80
+    - destination:
+        host: coreflow360-canary
+        port:
+          number: 80
+      weight: 20
+---
+# Istio DestinationRule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: coreflow360-canary-destination
+  namespace: coreflow360-canary
+spec:
+  host: coreflow360-main
+  subsets:
+  - name: stable
+    labels:
+      version: stable
+  - name: canary
+    labels:
+      version: canary
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 50
+        maxRequestsPerConnection: 10
+    circuitBreaker:
+      consecutiveErrors: 3
+      interval: 30s
+      baseEjectionTime: 30s
+---
+# Service Account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: coreflow360-canary
+  namespace: coreflow360-canary
+---
+# Canary Analysis Template (Flagger)
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: coreflow360-canary-analysis
+  namespace: coreflow360-canary
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: coreflow360-canary
+  progressDeadlineSeconds: 600
+  service:
+    port: 80
+    targetPort: 3000
+    gateways:
+    - coreflow360-gateway
+    hosts:
+    - app.coreflow360.com
+  analysis:
+    interval: 1m
+    threshold: 5
+    maxWeight: 100
+    stepWeight: 20
+    metrics:
+    - name: request-success-rate
+      thresholdRange:
+        min: 99
+      interval: 1m
+    - name: request-duration
+      thresholdRange:
+        max: 500
+      interval: 1m
+    - name: error-rate
+      thresholdRange:
+        max: 1
+      interval: 1m
+    webhooks:
+    - name: acceptance-test
+      type: pre-rollout
+      url: http://flagger-loadtester.test/
+      timeout: 30s
+      metadata:
+        type: bash
+        cmd: "curl -sd 'test' http://coreflow360-canary/api/health"
+    - name: load-test
+      url: http://flagger-loadtester.test/
+      timeout: 5s
+      metadata:
+        cmd: "hey -z 1m -q 10 -c 2 http://coreflow360-canary/"
+---
+# HorizontalPodAutoscaler for Stable
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: coreflow360-stable-hpa
+  namespace: coreflow360-canary
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: coreflow360-stable
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+---
+# HorizontalPodAutoscaler for Canary
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: coreflow360-canary-hpa
+  namespace: coreflow360-canary
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: coreflow360-canary
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+---
+# Pod Disruption Budget for Stable
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: coreflow360-stable-pdb
+  namespace: coreflow360-canary
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: coreflow360
+      version: stable
+---
+# Pod Disruption Budget for Canary
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: coreflow360-canary-pdb
+  namespace: coreflow360-canary
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: coreflow360
+      version: canary

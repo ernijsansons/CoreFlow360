@@ -4,6 +4,7 @@
  */
 
 import { redis } from './unified-redis'
+import { tenantCache, TenantCacheUtils } from '@/lib/security/tenant-cache'
 
 export interface CacheInvalidationOptions {
   tenantId: string
@@ -19,7 +20,12 @@ export async function invalidateCustomerCache(
 ) {
   const promises: Promise<any>[] = []
   
-  // Invalidate customer list caches
+  // Use secure tenant cache for invalidation
+  promises.push(
+    TenantCacheUtils.invalidateEntityCache(options.tenantId, 'customer', customerId || undefined)
+  )
+  
+  // Legacy Redis invalidation for backward compatibility
   promises.push(
     redis.invalidatePattern(`customers:${options.tenantId}:*`),
     redis.del(`customers:count:${options.tenantId}`)
@@ -150,6 +156,10 @@ export async function invalidateUserCache(
  * Invalidate all cache entries for a tenant
  */
 export async function invalidateTenantCache(tenantId: string) {
+  // Use secure tenant cache invalidation
+  await tenantCache.invalidateTenant(tenantId)
+  
+  // Legacy Redis invalidation for backward compatibility  
   await redis.invalidateTenant(tenantId)
 }
 

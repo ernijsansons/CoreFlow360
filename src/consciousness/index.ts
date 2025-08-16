@@ -5,8 +5,8 @@
 
 import { EventEmitter } from 'events';
 import ConsciousnessTierManager from './subscription/consciousness-tier-manager';
-import { ConsciousnessMesh } from '@/infrastructure/consciousness-mesh';
-import { ConsciousnessDashboardEngine } from '@/monitoring/consciousness-dashboard';
+// import { ConsciousnessMesh } from '@/infrastructure/consciousness-mesh'; // Not implemented yet
+// import { ConsciousnessDashboardEngine } from '@/monitoring/consciousness-dashboard'; // Not implemented yet
 
 export interface BusinessConsciousnessConfig {
   tenantId: string;
@@ -37,8 +37,8 @@ export interface ConsciousnessStatus {
 
 export class BusinessConsciousnessOrchestrator extends EventEmitter {
   private tierManager: ConsciousnessTierManager;
-  private consciousnessMesh: ConsciousnessMesh;
-  private dashboardEngine: ConsciousnessDashboardEngine;
+  // private consciousnessMesh: ConsciousnessMesh; // Not implemented yet
+  // private dashboardEngine: ConsciousnessDashboardEngine; // Not implemented yet
   private isInitialized: boolean = false;
   private config?: BusinessConsciousnessConfig;
 
@@ -67,8 +67,8 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
 
     // Initialize core components
     this.tierManager = new ConsciousnessTierManager();
-    this.consciousnessMesh = new ConsciousnessMesh();
-    this.dashboardEngine = new ConsciousnessDashboardEngine();
+    // this.consciousnessMesh = new ConsciousnessMesh(); // Not implemented yet
+    // this.dashboardEngine = new ConsciousnessDashboardEngine(); // Not implemented yet
 
     // Create subscription with consciousness
     const subscription = await this.tierManager.createSubscription(
@@ -121,41 +121,42 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
       this.emit('upgrade-available', data);
     });
 
-    // Consciousness mesh events
-    this.consciousnessMesh.on('node-joined', (node) => {
-      console.log(`🌐 New consciousness node: ${node.id}`);
-    });
+    // Consciousness mesh events (disabled)
+    // this.consciousnessMesh.on('node-joined', (node) => {
+    //   console.log(`🌐 New consciousness node: ${node.id}`);
+    // });
 
-    this.consciousnessMesh.on('consciousness-evolution', (data) => {
-      console.log(`🧬 Mesh evolution: ${data.nodeId} level ${data.newLevel}`);
-    });
+    // this.consciousnessMesh.on('consciousness-evolution', (data) => {
+    //   console.log(`🧬 Mesh evolution: ${data.nodeId} level ${data.newLevel}`);
+    // });
   }
 
   /**
    * Start monitoring consciousness health and evolution
    */
   private startConsciousnessMonitoring(): void {
-    setInterval(async () => {
-      const metrics = await this.dashboardEngine.getConsciousnessMetrics();
-      const insights = await this.dashboardEngine.generateConsciousnessInsights();
+    // Temporarily disabled monitoring
+    // setInterval(async () => {
+    //   const metrics = await this.dashboardEngine.getConsciousnessMetrics();
+    //   const insights = await this.dashboardEngine.generateConsciousnessInsights();
 
-      if (insights.length > 0) {
-        console.log(`💡 ${insights.length} new consciousness insights generated`);
+    //   if (insights.length > 0) {
+    //     console.log(`💡 ${insights.length} new consciousness insights generated`);
         
-        for (const insight of insights) {
-          this.emit('consciousness-insight', insight);
-        }
-      }
+    //     for (const insight of insights) {
+    //       this.emit('consciousness-insight', insight);
+    //     }
+    //   }
 
-      // Check consciousness health
-      if (metrics.systemConsciousnessLevel < 0.5) {
-        console.warn('⚠️ Low consciousness level detected');
-        this.emit('consciousness-warning', {
-          level: metrics.systemConsciousnessLevel,
-          message: 'Consciousness below optimal threshold'
-        });
-      }
-    }, 60000); // Every minute
+    //   // Check consciousness health
+    //   if (metrics.systemConsciousnessLevel < 0.5) {
+    //     console.warn('⚠️ Low consciousness level detected');
+    //     this.emit('consciousness-warning', {
+    //       level: metrics.systemConsciousnessLevel,
+    //       message: 'Consciousness below optimal threshold'
+    //     });
+    //   }
+    // }, 60000); // Every minute
   }
 
   /**
@@ -208,7 +209,8 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
    * Get consciousness insights
    */
   async getInsights(): Promise<any[]> {
-    return await this.dashboardEngine.generateConsciousnessInsights();
+    // Temporarily return empty insights until dashboard engine is implemented
+    return [];
   }
 
   /**
@@ -220,8 +222,9 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
     }
 
     const tierMetrics = this.tierManager.getConsciousnessMetrics(this.config.userId);
-    const dashboardMetrics = await this.dashboardEngine.getConsciousnessMetrics();
-    const meshStatus = this.consciousnessMesh.getConsciousnessMeshStatus();
+    // Temporarily return basic metrics until dashboard engine is implemented
+    const dashboardMetrics = { systemConsciousnessLevel: 0.5 };
+    const meshStatus = { status: 'disabled' };
 
     return {
       subscription: tierMetrics,

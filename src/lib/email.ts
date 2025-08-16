@@ -1,6 +1,7 @@
 /**
- * CoreFlow360 - Email Service
+ * CoreFlow360 - Production Email Service
  * Email sending functionality for workflows and notifications
+ * Supports SendGrid and Resend providers
  */
 
 export interface EmailOptions {
@@ -15,40 +16,135 @@ export interface EmailOptions {
     content: Buffer | string
     contentType?: string
   }>
+  priority?: 'high' | 'normal' | 'low'
+  trackingEnabled?: boolean
+}
+
+export interface EmailConfig {
+  provider: 'sendgrid' | 'resend' | 'development'
+  apiKey?: string
+  fromEmail: string
+  fromName: string
+  trackingEnabled: boolean
+}
+
+/**
+ * Get email configuration
+ */
+function getEmailConfig(): EmailConfig {
+  const provider = process.env.EMAIL_PROVIDER as 'sendgrid' | 'resend' || 'development'
+  
+  return {
+    provider,
+    apiKey: process.env.SENDGRID_API_KEY || process.env.RESEND_API_KEY,
+    fromEmail: process.env.EMAIL_FROM || 'noreply@coreflow360.com',
+    fromName: process.env.EMAIL_FROM_NAME || 'CoreFlow360',
+    trackingEnabled: process.env.EMAIL_TRACKING_ENABLED === 'true'
+  }
 }
 
 /**
  * Send email using configured email provider
- * In production, this would integrate with SendGrid, AWS SES, or similar
  */
 export async function sendEmail(options: EmailOptions): Promise<void> {
+  const config = getEmailConfig()
+  
   try {
-    // Log email for development
-    console.log('Sending email:', {
+    console.log(`Sending email via ${config.provider}:`, {
       to: options.to,
       subject: options.subject,
-      preview: options.html.substring(0, 100) + '...'
+      provider: config.provider
     })
-    
-    // In production, integrate with email service provider
-    // Example with SendGrid:
-    // const sgMail = require('@sendgrid/mail')
-    // sgMail.setApiKey(process.env.SENDGRID_API_KEY)
-    // await sgMail.send({
-    //   to: options.to,
-    //   from: process.env.EMAIL_FROM,
-    //   subject: options.subject,
-    //   html: options.html,
-    //   text: options.text
-    // })
-    
-    // Simulate email sent
-    await new Promise(resolve => setTimeout(resolve, 100))
+
+    if (config.provider === 'sendgrid') {
+      await sendEmailViaSendGrid(options, config)
+    } else if (config.provider === 'resend') {
+      await sendEmailViaResend(options, config)
+    } else {
+      // Development mode - log email
+      console.log('📧 EMAIL (Development Mode):', {
+        to: options.to,
+        cc: options.cc,
+        bcc: options.bcc,
+        subject: options.subject,
+        preview: options.html.substring(0, 200) + '...',
+        timestamp: new Date().toISOString()
+      })
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
     
   } catch (error) {
     console.error('Email sending error:', error)
-    throw new Error('Failed to send email')
+    throw new Error(`Failed to send email: ${error.message}`)
   }
+}
+
+/**
+ * Send email via SendGrid
+ */
+async function sendEmailViaSendGrid(options: EmailOptions, config: EmailConfig): Promise<void> {
+  if (!config.apiKey) {
+    throw new Error('SendGrid API key not configured')
+  }
+
+  const sgMail = require('@sendgrid/mail')
+  sgMail.setApiKey(config.apiKey)
+
+  const message = {
+    to: options.to,
+    cc: options.cc,
+    bcc: options.bcc,
+    from: {
+      email: config.fromEmail,
+      name: config.fromName
+    },
+    subject: options.subject,
+    html: options.html,
+    text: options.text,
+    attachments: options.attachments?.map(att => ({
+      filename: att.filename,
+      content: Buffer.isBuffer(att.content) ? att.content.toString('base64') : att.content,
+      type: att.contentType || 'application/octet-stream'
+    })),
+    trackingSettings: {
+      clickTracking: {
+        enable: config.trackingEnabled && (options.trackingEnabled ?? true)
+      },
+      openTracking: {
+        enable: config.trackingEnabled && (options.trackingEnabled ?? true)
+      }
+    }
+  }
+
+  await sgMail.send(message)
+}
+
+/**
+ * Send email via Resend
+ */
+async function sendEmailViaResend(options: EmailOptions, config: EmailConfig): Promise<void> {
+  if (!config.apiKey) {
+    throw new Error('Resend API key not configured')
+  }
+
+  const { Resend } = require('resend')
+  const resend = new Resend(config.apiKey)
+
+  const message = {
+    from: `${config.fromName} <${config.fromEmail}>`,
+    to: options.to,
+    cc: options.cc,
+    bcc: options.bcc,
+    subject: options.subject,
+    html: options.html,
+    text: options.text,
+    attachments: options.attachments?.map(att => ({
+      filename: att.filename,
+      content: att.content
+    }))
+  }
+
+  await resend.emails.send(message)
 }
 
 /**

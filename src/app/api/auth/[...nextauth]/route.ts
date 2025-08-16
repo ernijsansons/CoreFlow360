@@ -3,7 +3,7 @@
  * Secure authentication endpoint with comprehensive error handling
  */
 
-export { handlers as GET, handlers as POST } from '@/lib/auth/config'
+export { handlers as GET, handlers as POST } from '@/lib/auth'
 
 /*
 ✅ Pre-flight validation: NextAuth route handler with proper exports

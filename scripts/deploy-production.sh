@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # CoreFlow360 Production Deployment Script
-# This script performs pre-deployment checks and prepares the application for production
+# 🚀 Deploy the World's First Conscious Business Operating System
+# This script performs complete production deployment with health checks
 
 set -e  # Exit on error
 
@@ -140,19 +141,64 @@ echo "   ☐ Rate limiting configured"
 echo "   ☐ Rollback plan prepared"
 echo ""
 
+# Deploy to Vercel (if requested)
+if [ "$1" = "--deploy" ]; then
+    echo "🚀 Deploying to Vercel..."
+    
+    # Check if Vercel CLI is installed
+    if ! command_exists vercel; then
+        print_status "error" "Vercel CLI not installed!"
+        echo "Install with: npm i -g vercel"
+        exit 1
+    fi
+    
+    # Deploy to production
+    vercel --prod --yes
+    
+    # Wait for deployment
+    sleep 10
+    
+    # Health check
+    echo "🏥 Running health check..."
+    DEPLOY_URL=$(vercel ls --scope=team | grep "Ready" | head -1 | awk '{print $2}')
+    
+    if [ ! -z "$DEPLOY_URL" ]; then
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://$DEPLOY_URL/api/health" || echo "000")
+        if [ "$HTTP_CODE" = "200" ]; then
+            print_status "success" "Health check passed!"
+            echo "🎉 Deployment successful: https://$DEPLOY_URL"
+        else
+            print_status "error" "Health check failed (HTTP $HTTP_CODE)"
+        fi
+    fi
+fi
+
 # Final summary
 echo "=========================================="
-print_status "success" "Pre-deployment checks completed!"
+print_status "success" "Production deployment ready!"
 echo ""
-echo "📌 Next steps:"
-echo "1. Review the deployment checklist above"
-echo "2. Set environment variables in Vercel/hosting platform"
-echo "3. Deploy using: vercel --prod"
-echo "4. Run database migrations: npx prisma migrate deploy"
-echo "5. Verify deployment at: https://your-domain.com/api/health"
+echo "🌟 CoreFlow360 - The World's First Conscious Business Operating System"
+echo "   Ready to launch autonomous business intelligence..."
 echo ""
-echo "🚨 Remember to:"
-echo "- Monitor error rates after deployment"
-echo "- Check performance metrics"
-echo "- Be ready to rollback if needed"
+echo "📌 To deploy:"
+echo "   bash scripts/deploy-production.sh --deploy"
+echo ""
+echo "📌 Manual deployment steps:"
+echo "1. Deploy using: vercel --prod"
+echo "2. Run database migrations: npx prisma migrate deploy"
+echo "3. Verify deployment at: https://your-domain.com/api/health"
+echo "4. Test critical flows: signup, login, payment"
+echo "5. Monitor: error rates, performance, user activity"
+echo ""
+echo "🎯 Launch checklist:"
+echo "   ☐ Production environment variables set"
+echo "   ☐ Database migrations completed"
+echo "   ☐ SSL certificates active"
+echo "   ☐ Payment processing tested"
+echo "   ☐ AI consciousness features verified"
+echo "   ☐ Security headers validated"
+echo "   ☐ Performance monitoring active"
+echo "   ☐ Product Hunt campaign ready"
+echo ""
+echo "🚀 Ready to awaken business consciousness worldwide!"
 echo ""

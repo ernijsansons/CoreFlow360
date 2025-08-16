@@ -9,9 +9,10 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Text3D, Float } from '@react-three/drei'
-import * as THREE from 'three'
+// TODO: Re-enable Three.js when peer dependencies are resolved
+// import { Canvas, useFrame } from '@react-three/fiber'
+// import { Text3D, Float } from '@react-three/drei'
+// import * as THREE from 'three'
 
 interface Resource {
   id: string
@@ -197,39 +198,29 @@ const ResourceVisualization: React.FC<{
   resourceCount: number 
   color: string 
 }> = ({ category, resourceCount, color }) => {
-  const meshRef = React.useRef<THREE.Mesh>(null)
+  // TODO: Re-enable when Three.js is available
+  // const meshRef = React.useRef<THREE.Mesh>(null)
   
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1
-      meshRef.current.rotation.z = Math.cos(state.clock.elapsedTime * 0.3) * 0.05
-    }
-  })
+  // useFrame((state) => {
+  //   if (meshRef.current) {
+  //     meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1
+  //     meshRef.current.rotation.z = Math.cos(state.clock.elapsedTime * 0.3) * 0.05
+  //   }
+  // })
 
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-      <group>
-        <mesh ref={meshRef} position={[0, 0, 0]}>
-          <icosahedronGeometry args={[1, 1]} />
-          <meshStandardMaterial
-            color={color}
-            emissive={color}
-            emissiveIntensity={0.3}
-            metalness={0.8}
-            roughness={0.2}
-          />
-        </mesh>
-        <Text3D
-          font="/fonts/inter-bold.json"
-          size={0.3}
-          height={0.1}
-          position={[0, -1.5, 0]}
-          material-color="#ffffff"
-        >
-          {resourceCount}
-        </Text3D>
-      </group>
-    </Float>
+    // TODO: Re-enable 3D visualization when Three.js is available
+    <div className="w-24 h-24 mx-auto relative">
+      <div
+        className="w-full h-full rounded-lg flex items-center justify-center text-white font-bold text-xl"
+        style={{ backgroundColor: color }}
+      >
+        {resourceCount}
+      </div>
+      <div className="absolute -bottom-6 left-0 right-0 text-center text-sm text-gray-600">
+        {category}
+      </div>
+    </div>
   )
 }
 

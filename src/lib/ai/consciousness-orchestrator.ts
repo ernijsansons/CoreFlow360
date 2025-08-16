@@ -9,6 +9,7 @@
 import { OpenAI } from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { getOpenAIKey } from '@/lib/security/credential-manager'
 
 export type ConsciousnessLevel = 'neural' | 'synaptic' | 'autonomous' | 'transcendent'
 export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure'
@@ -70,16 +71,33 @@ export class ConsciousnessOrchestrator {
   private consciousness_configs: Map<ConsciousnessLevel, ConsciousnessConfig>
   private request_history: AIRequest[] = []
   private performance_metrics: Map<string, any> = new Map()
+  private initialized = false
 
   constructor() {
-    this.initializeProviders()
     this.initializeConsciousnessConfigs()
+  }
+
+  static async create(): Promise<ConsciousnessOrchestrator> {
+    const instance = new ConsciousnessOrchestrator()
+    await instance.initializeProviders()
+    instance.initialized = true
+    return instance
+  }
+
+  async ensureInitialized(): Promise<void> {
+    if (!this.initialized) {
+      await this.initializeProviders()
+      this.initialized = true
+    }
   }
 
   /**
    * Main orchestration method - routes AI requests based on consciousness requirements
    */
   async orchestrateIntelligence(request: AIRequest): Promise<AIResponse> {
+    // Ensure providers are initialized
+    await this.ensureInitialized()
+    
     // Analyze request consciousness requirements
     const consciousness_config = this.consciousness_configs.get(request.consciousness_requirement)
     if (!consciousness_config) {
@@ -204,13 +222,14 @@ export class ConsciousnessOrchestrator {
 
   // Private implementation methods
 
-  private initializeProviders(): void {
+  private async initializeProviders(): Promise<void> {
     // OpenAI Configuration
-    if (process.env.OPENAI_API_KEY) {
+    try {
+      const openaiKey = await getOpenAIKey()
       this.providers.set('openai', {
         name: 'openai',
         client: new OpenAI({
-          apiKey: process.env.OPENAI_API_KEY
+          apiKey: openaiKey
         }),
         models: {
           simple: 'gpt-3.5-turbo',
@@ -226,6 +245,8 @@ export class ConsciousnessOrchestrator {
         supports_streaming: true,
         consciousness_affinity: ['neural', 'synaptic', 'autonomous']
       })
+    } catch (error) {
+      console.warn('OpenAI provider initialization failed:', error)
     }
 
     // Anthropic Configuration
@@ -564,7 +585,19 @@ export class ConsciousnessOrchestrator {
   }
 }
 
-// Export singleton instance
+// Export a function to get the singleton instance (async initialization)
+let orchestratorInstance: ConsciousnessOrchestrator | null = null
+
+export const getConsciousnessOrchestrator = async (): Promise<ConsciousnessOrchestrator> => {
+  if (!orchestratorInstance) {
+    orchestratorInstance = await ConsciousnessOrchestrator.create()
+  } else {
+    await orchestratorInstance.ensureInitialized()
+  }
+  return orchestratorInstance
+}
+
+// For backward compatibility - lazy initialization
 export const consciousnessOrchestrator = new ConsciousnessOrchestrator()
 
 // Integration helpers for Next.js

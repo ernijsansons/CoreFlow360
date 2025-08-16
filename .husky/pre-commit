@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Run linting
+echo "📋 Running ESLint..."
+npm run lint
+
+# Check TypeScript compilation
+echo "🔧 Checking TypeScript..."
+npx tsc --noEmit
+
+# Run tests for staged files
+echo "🧪 Running relevant tests..."
+npm run test:ui:components
+
+# Check for console.log statements (warn only)
+echo "🚨 Checking for console.log statements..."
+git diff --cached --name-only | grep -E '\.(ts|tsx|js|jsx)$' | xargs grep -l 'console\.' || true
+
+echo "✅ Pre-commit checks complete!"

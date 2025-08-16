@@ -1,8 +1,26 @@
 "use client"
 
+import { Suspense, lazy } from "react"
 import DashboardLayout from "@/components/layouts/DashboardLayout"
-import CRMDashboard from "@/components/crm/CRMDashboard"
 import { ErrorBoundary } from "@/components/error/ErrorBoundary"
+
+// Dynamic import with loading fallback
+const CRMDashboard = lazy(() => import("@/components/crm/CRMDashboard").then(module => ({
+  default: module.default
+})))
+
+// Loading skeleton component
+const CRMDashboardSkeleton = () => (
+  <div className="space-y-6">
+    <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="h-32 bg-gray-200 rounded animate-pulse"></div>
+      ))}
+    </div>
+    <div className="h-96 bg-gray-200 rounded animate-pulse"></div>
+  </div>
+)
 
 export default function CustomersPage() {
   return (
@@ -13,7 +31,9 @@ export default function CustomersPage() {
             console.error('CRM Dashboard Error:', error, errorInfo)
           }}
         >
-          <CRMDashboard />
+          <Suspense fallback={<CRMDashboardSkeleton />}>
+            <CRMDashboard />
+          </Suspense>
         </ErrorBoundary>
       </div>
     </DashboardLayout>

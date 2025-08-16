@@ -110,36 +110,84 @@ class V0DeploymentSystem {
     }
   }
   
-  async deployToV0(prompt) {
+  async deployToV0(prompt, retryCount = 0) {
+    const maxRetries = 2
     const spinner = ora(`Deploying ${prompt.title}...`).start()
     
     try {
-      // Prepare the request payload in OpenAI format
+      // Prepare the request payload for Claude API
       const payload = {
-        model: 'v0-1.5-md',
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 4000,
         messages: [
           {
-            role: 'system',
-            content: 'You are an expert React/Next.js developer creating immersive 3D experiences with Three.js and React Three Fiber. Generate complete, production-ready components.'
-          },
-          {
             role: 'user',
-            content: prompt.content
+            content: `You are an expert React/Next.js developer creating immersive 3D business components with Three.js and React Three Fiber. Generate complete, production-ready components based on this prompt:
+
+${prompt.content}
+
+Requirements:
+- Use Next.js 15.4.5 with TypeScript
+- Use Tailwind CSS for styling
+- Include Three.js/React Three Fiber for 3D elements
+- Make components business-friendly and professional
+- Focus on efficiency and automation, not just "AI"
+- Export as default component
+- Include proper imports
+
+Generate ONLY the React component code, no explanations.`
           }
-        ],
-        max_completion_tokens: 4000
+        ]
       }
       
-      // Make API request to v0.dev
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-          'User-Agent': 'CoreFlow360-Deploy/1.0'
-        },
-        body: JSON.stringify(payload)
-      })
+      // Use Claude API if available, fallback to V0.dev
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 120000) // 2 minute timeout
+      
+      const useClaudeAPI = process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_API_KEY.includes('your_anthropic_api_key')
+      
+      if (useClaudeAPI) {
+        var response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.ANTHROPIC_API_KEY}`,
+            'Content-Type': 'application/json',
+            'anthropic-version': '2023-06-01',
+            'User-Agent': 'CoreFlow360-Deploy/1.0'
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        })
+      } else {
+        // Fallback to V0.dev API with OpenAI format
+        const v0Payload = {
+          model: 'v0-1.5-md',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert React/Next.js developer creating immersive 3D business components with Three.js and React Three Fiber. Generate complete, production-ready components that are business-friendly and professional.'
+            },
+            {
+              role: 'user',
+              content: prompt.content
+            }
+          ],
+          max_completion_tokens: 4000
+        }
+        
+        var response = await fetch(`${this.baseUrl}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
+            'User-Agent': 'CoreFlow360-Deploy/1.0'
+          },
+          body: JSON.stringify(v0Payload),
+          signal: controller.signal
+        })
+      }
+      
+      clearTimeout(timeoutId)
       
       if (!response.ok) {
         const errorData = await response.text()
@@ -150,8 +198,8 @@ class V0DeploymentSystem {
       
       spinner.succeed(chalk.green(`✅ ${prompt.title} deployed successfully`))
       
-      // Extract the generated code from OpenAI format response
-      const generatedContent = result.choices?.[0]?.message?.content || result.content || result.code || ''
+      // Extract the generated code from Claude API response
+      const generatedContent = result.content?.[0]?.text || result.choices?.[0]?.message?.content || result.content || ''
       
       if (!generatedContent) {
         throw new Error('No content received from API')
@@ -177,13 +225,21 @@ class V0DeploymentSystem {
       }
       
     } catch (error) {
-      spinner.fail(chalk.red(`❌ Failed to deploy ${prompt.title}`))
+      spinner.fail(chalk.red(`❌ Failed to deploy ${prompt.title} (attempt ${retryCount + 1})`))
       console.error(chalk.red(`   Error: ${error.message}`))
+      
+      // Retry logic
+      if (retryCount < maxRetries && !error.message.includes('401') && !error.message.includes('403')) {
+        console.log(chalk.yellow(`   🔄 Retrying in 3 seconds... (${retryCount + 1}/${maxRetries})`))
+        await new Promise(resolve => setTimeout(resolve, 3000))
+        return this.deployToV0(prompt, retryCount + 1)
+      }
       
       return {
         prompt: prompt,
         error: error.message,
-        success: false
+        success: false,
+        retries: retryCount
       }
     }
   }
@@ -300,31 +356,32 @@ class V0DeploymentSystem {
       return false
     }
     
-    // Test API connectivity
+    // Test Claude API connectivity
     try {
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'Authorization': `Bearer ${process.env.ANTHROPIC_API_KEY}`,
           'Content-Type': 'application/json',
+          'anthropic-version': '2023-06-01',
           'User-Agent': 'CoreFlow360-Deploy/1.0'
         },
         body: JSON.stringify({
-          model: 'v0-1.5-md',
-          messages: [{ role: 'user', content: 'test' }],
-          max_completion_tokens: 1
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'test' }]
         })
       })
       
       if (response.ok) {
-        console.log(chalk.green('   ✅ V0.dev API connectivity confirmed'))
+        console.log(chalk.green('   ✅ Claude API connectivity confirmed'))
         return true
       } else {
-        console.log(chalk.red(`   ❌ V0.dev API error: ${response.status}`))
+        console.log(chalk.red(`   ❌ Claude API error: ${response.status}`))
         return false
       }
     } catch (error) {
-      console.log(chalk.red(`   ❌ V0.dev API unreachable: ${error.message}`))
+      console.log(chalk.red(`   ❌ Claude API unreachable: ${error.message}`))
       return false
     }
   }

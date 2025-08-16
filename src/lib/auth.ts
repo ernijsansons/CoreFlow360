@@ -7,11 +7,18 @@ import { prisma } from "./db"
 import { z } from "zod"
 import { initializeCSRFProtection } from "./csrf"
 
-// Login schema
+// Enhanced login schema with security validations
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  tenantId: z.string().optional()
+  email: z.string()
+    .email('Invalid email format')
+    .max(255, 'Email too long')
+    .transform(val => val.toLowerCase().trim()),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(128, 'Password too long')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
+           'Password must contain uppercase, lowercase, number, and special character'),
+  tenantId: z.string().uuid('Invalid tenant ID format').optional()
 })
 
 // Extended session type
@@ -34,8 +41,39 @@ export const {
 } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { 
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    strategy: "database",
+    maxAge: 8 * 60 * 60, // 8 hours for security
+    updateAge: 60 * 60, // Update session every hour
+  },
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production' ? `__Host-next-auth.session-token` : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'strict',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        domain: process.env.NODE_ENV === 'production' ? process.env.NEXTAUTH_URL?.replace(/https?:\/\//, '') : undefined
+      }
+    },
+    callbackUrl: {
+      name: process.env.NODE_ENV === 'production' ? `__Host-next-auth.callback-url` : 'next-auth.callback-url',
+      options: {
+        httpOnly: true,
+        sameSite: 'strict',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production'
+      }
+    },
+    csrfToken: {
+      name: process.env.NODE_ENV === 'production' ? `__Host-next-auth.csrf-token` : 'next-auth.csrf-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'strict',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production'
+      }
+    }
   },
   pages: {
     signIn: "/login",
@@ -70,25 +108,22 @@ export const {
           })
 
           if (!user || !user.password) {
-            console.error('User not found or no password set')
+            // Don't log sensitive information - use structured logging
             return null
           }
 
           // Check if user is active
           if (user.status !== 'ACTIVE') {
-            console.error('User account is not active')
             return null
           }
 
           // Check if tenant is active
           if (!user.tenant || !user.tenant.isActive) {
-            console.error('Tenant is not active or not found')
             return null
           }
 
           // Check if account is locked
           if (user.lockoutUntil && user.lockoutUntil > new Date()) {
-            console.error('Account is locked')
             return null
           }
 
@@ -105,7 +140,6 @@ export const {
                 })
               }
             })
-            console.error('Invalid password')
             return null
           }
 
@@ -137,7 +171,10 @@ export const {
             })()
           }
         } catch (error) {
-          console.error('Authorization error:', error)
+          // Log error without sensitive data
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Authorization error:', error instanceof Error ? error.message : 'Unknown error')
+          }
           return null
         }
       }
@@ -172,7 +209,6 @@ export const {
 
         // Check if tenant is active
         if (!existingUser.tenant || !existingUser.tenant.isActive) {
-          console.error('Tenant is not active or not found')
           return false
         }
 
@@ -232,7 +268,11 @@ export const {
       }
 
       // Generate CSRF token for the session
-      const csrfToken = initializeCSRFProtection(process.env.API_KEY_SECRET!)
+      const secret = process.env.API_KEY_SECRET || process.env.NEXTAUTH_SECRET
+      if (!secret) {
+        throw new Error('No secret available for CSRF token generation')
+      }
+      const csrfToken = initializeCSRFProtection(secret)
       return {
         ...session,
         csrfToken
@@ -282,7 +322,7 @@ export const {
       }
     }
   },
-  debug: process.env.NODE_ENV === 'development'
+  debug: false // Disable debug in all environments for security
 })
 
 /**

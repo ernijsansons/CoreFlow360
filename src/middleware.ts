@@ -8,6 +8,10 @@ import type { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { apiVersioningMiddleware } from '@/middleware/versioning'
 import { sanitizationMiddleware } from '@/middleware/sanitization'
+import { requestSignatureMiddleware } from '@/middleware/request-signature'
+import { TenantValidator, TenantValidationContext } from '@/middleware/tenant-validation'
+import { ddosProtectionMiddleware } from '@/lib/security/ddos-protection'
+import { prisma } from '@/lib/db'
 
 // Public routes that don't require authentication
 const PUBLIC_ROUTES = [
@@ -33,6 +37,23 @@ const ADMIN_ROUTES = [
   '/super-admin'
 ]
 
+// Validate that user's tenant matches the subdomain
+async function validateUserTenantAccess(userTenantId: string, tenantSlug: string): Promise<boolean> {
+  try {
+    const tenant = await prisma.tenant.findUnique({
+      where: { 
+        id: userTenantId,
+        slug: tenantSlug,
+        isActive: true
+      }
+    })
+    return !!tenant
+  } catch (error) {
+    console.error('Tenant validation error:', error)
+    return false
+  }
+}
+
 export default auth(async (req) => {
   const { pathname } = req.nextUrl
   const isPublicRoute = PUBLIC_ROUTES.some(route => 
@@ -43,8 +64,20 @@ export default auth(async (req) => {
     pathname.startsWith(route)
   )
 
+  // Apply DDoS protection first (before auth)
+  const ddosResponse = await ddosProtectionMiddleware(req)
+  if (ddosResponse) {
+    return ddosResponse
+  }
+
   // Handle API routes
   if (isApiRoute) {
+    // Apply request signature validation first (for critical endpoints)
+    const signatureResponse = await requestSignatureMiddleware(req)
+    if (signatureResponse) {
+      return signatureResponse
+    }
+    
     // Apply sanitization to API requests with body
     if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
       const sanitizationResponse = await sanitizationMiddleware(req)
@@ -78,10 +111,27 @@ export default auth(async (req) => {
   if (req.auth) {
     const user = req.auth.user as any
     
-    // Tenant isolation check
-    if (tenantSlug && user.tenantId) {
-      // TODO: Validate that user's tenant matches subdomain
-      // This would require a database lookup, so we'll handle it in the app
+    // Enhanced tenant validation with security monitoring
+    const tenantContext: TenantValidationContext = {
+      userTenantId: user.tenantId,
+      requestedTenantSlug: tenantSlug || undefined,
+      userId: user.id,
+      userRole: user.role,
+      ip: req.ip || req.headers.get('x-forwarded-for')?.split(',')[0],
+      userAgent: req.headers.get('user-agent') || undefined,
+      pathname,
+      method: req.method || 'GET'
+    }
+
+    const validationResult = await TenantValidator.validateTenantAccess(tenantContext)
+    if (!validationResult.isValid) {
+      if (validationResult.securityViolation) {
+        return NextResponse.redirect(new URL('/unauthorized', req.url))
+      }
+      if (validationResult.reason?.includes('subscription')) {
+        return NextResponse.redirect(new URL('/subscription-required', req.url))
+      }
+      return NextResponse.redirect(new URL('/unauthorized', req.url))
     }
 
     // Admin route protection
@@ -102,6 +152,12 @@ export default auth(async (req) => {
     }
 
     const response = NextResponse.next()
+    
+    // Add tenant context to response headers for downstream use
+    if (validationResult.tenant) {
+      response.headers.set('x-tenant-id', validationResult.tenant.id)
+      response.headers.set('x-tenant-slug', validationResult.tenant.slug)
+    }
     
     // Add security headers
     response.headers.set('X-Frame-Options', 'DENY')

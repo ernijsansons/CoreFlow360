@@ -13,7 +13,7 @@ import {
   EnvelopeIcon, 
   MapPinIcon,
   CalendarIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon as TrendingUpIcon,
   TrendingDownIcon,
   SparklesIcon,
   ExclamationTriangleIcon,

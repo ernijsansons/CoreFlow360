@@ -5,7 +5,7 @@
  * business consciousness potential and provides personalized transformation paths.
  */
 
-export { default as IntelligenceAssessmentTool } from './IntelligenceAssessmentTool'
+export { default as IntelligenceAssessmentTool } from './IntelligenceAssessmentToolSimple'
 export { default as IntelligenceProfileCard } from './IntelligenceProfileCard'  
 export { default as IntelligenceRecommendationEngine } from './IntelligenceRecommendationEngine'
 

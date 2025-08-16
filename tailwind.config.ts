@@ -8,6 +8,21 @@ const config: Config = {
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
   ],
+  // Optimize for tree shaking by explicitly defining what to purge
+  safelist: [
+    // Keep dynamic consciousness colors
+    'bg-consciousness-neural',
+    'bg-consciousness-synaptic', 
+    'bg-consciousness-autonomous',
+    'bg-consciousness-transcendent',
+    // Keep animation classes that might be applied dynamically
+    'animate-consciousness-pulse',
+    'animate-neural-flow',
+    'animate-consciousness-glow',
+    // Keep status color variations that are applied dynamically
+    'bg-gray-500', 'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-yellow-500', 'bg-red-500',
+    'text-gray-700', 'text-blue-700', 'text-green-700', 'text-purple-700', 'text-yellow-700', 'text-red-700'
+  ],
   prefix: "",
   theme: {
     container: {

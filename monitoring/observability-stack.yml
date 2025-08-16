@@ -34,7 +34,7 @@ services:
     ports:
       - "3001:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=consciousness_admin_2024!
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-change_me_in_production}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel
     volumes:
@@ -151,7 +151,7 @@ services:
     ports:
       - "9187:9187"
     environment:
-      - DATA_SOURCE_NAME=postgresql://username:password@postgres:5432/consciousness?sslmode=disable
+      - DATA_SOURCE_NAME=${POSTGRES_EXPORTER_DSN:-postgresql://username:password@postgres:5432/consciousness?sslmode=disable}
     networks:
       - consciousness_monitoring
 
@@ -163,8 +163,8 @@ services:
     ports:
       - "9121:9121"
     environment:
-      - REDIS_ADDR=redis://redis:6379
-      - REDIS_PASSWORD=consciousness_cache_password
+      - REDIS_ADDR=${REDIS_ADDR:-redis://redis:6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     networks:
       - consciousness_monitoring
 
@@ -188,10 +188,10 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://glitchtip:password@postgres:5432/glitchtip
-      - SECRET_KEY=consciousness_glitchtip_secret_key_2024
-      - EMAIL_URL=smtp://smtp.example.com:587
-      - GLITCHTIP_DOMAIN=http://localhost:8000
+      - DATABASE_URL=${GLITCHTIP_DATABASE_URL:-postgresql://glitchtip:password@postgres:5432/glitchtip}
+      - SECRET_KEY=${GLITCHTIP_SECRET_KEY}
+      - EMAIL_URL=${GLITCHTIP_EMAIL_URL:-smtp://smtp.example.com:587}
+      - GLITCHTIP_DOMAIN=${GLITCHTIP_DOMAIN:-http://localhost:8000}
     volumes:
       - consciousness_glitchtip_data:/code/uploads
     networks:

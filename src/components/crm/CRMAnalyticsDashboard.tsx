@@ -5,12 +5,12 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { motion } from 'framer-motion'
 import { 
   ChartBarIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon as TrendingUpIcon,
+  ArrowTrendingDownIcon as TrendingDownIcon,
   UsersIcon,
   CurrencyDollarIcon,
   FunnelIcon,
@@ -95,7 +95,7 @@ interface CRMAnalyticsDashboardProps {
   onExportReport?: () => void
 }
 
-export default function CRMAnalyticsDashboard({ 
+const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({ 
   timeframe = 'month',
   onMetricClick,
   onExportReport 
@@ -119,7 +119,7 @@ export default function CRMAnalyticsDashboard({
     return () => clearInterval(interval)
   }, [selectedTimeframe])
 
-  const loadAnalyticsData = async () => {
+  const loadAnalyticsData = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -209,27 +209,27 @@ export default function CRMAnalyticsDashboard({
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedTimeframe])
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = useCallback((amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount)
-  }
+  }, [])
 
-  const formatNumber = (num: number) => {
+  const formatNumber = useCallback((num: number) => {
     if (num >= 1000000) {
       return (num / 1000000).toFixed(1) + 'M'
     } else if (num >= 1000) {
       return (num / 1000).toFixed(1) + 'K'
     }
     return num.toString()
-  }
+  }, [])
 
-  const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
+  const getTrendIcon = useCallback((trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
       case 'up':
         return <TrendingUpIcon className="h-4 w-4 text-green-500" />
@@ -238,7 +238,7 @@ export default function CRMAnalyticsDashboard({
       default:
         return <ArrowPathIcon className="h-4 w-4 text-gray-500" />
     }
-  }
+  }, [])
 
   if (loading) {
     return (
@@ -581,4 +581,6 @@ export default function CRMAnalyticsDashboard({
       </motion.div>
     </div>
   )
-}
+})
+
+export default CRMAnalyticsDashboard

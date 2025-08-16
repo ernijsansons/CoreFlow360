@@ -577,3 +577,11 @@ export class ConsciousnessTierManager extends EventEmitter {
 }
 
 export default ConsciousnessTierManager;
+
+// Explicit exports for interfaces that are being imported
+export type {
+  ConsciousnessTier,
+  ConsciousnessCapability,
+  SubscriptionState,
+  EvolutionEvent
+};

@@ -16,7 +16,7 @@ import {
   Mail,
   Lock,
   User,
-  Industry,
+  Factory,
   ArrowRight,
   CheckCircle
 } from 'lucide-react'
@@ -327,10 +327,10 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Industry
+                Factory
               </label>
               <div className="relative">
-                <Industry className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Factory className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <select
                   name="industryType"
                   value={formData.industryType}

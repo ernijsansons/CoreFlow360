@@ -5,7 +5,7 @@
  * through awakening stages rather than traditional sales funnels.
  */
 
-export { default as TeaserCampaignAssets } from './TeaserCampaignAssets'
+export { default as TeaserCampaignAssets } from './TeaserCampaignAssetsSimple' // Simplified version without Three.js
 export { default as LaunchSequenceOrchestrator } from './LaunchSequenceOrchestrator'
 export { default as ConsciousnessMarketingFramework } from './ConsciousnessMarketingFramework'
 

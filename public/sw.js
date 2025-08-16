@@ -3,9 +3,12 @@
  * Provides offline functionality and caching strategies for PWA
  */
 
-const CACHE_NAME = 'coreflow360-v1.0.0'
-const STATIC_CACHE_NAME = 'coreflow360-static-v1.0.0'
-const DYNAMIC_CACHE_NAME = 'coreflow360-dynamic-v1.0.0'
+// Auto-versioning based on build hash - updated during build process
+const BUILD_HASH = 'BUILD_HASH_PLACEHOLDER' // Will be replaced by build script
+const VERSION_TIMESTAMP = Date.now()
+const CACHE_NAME = `coreflow360-v${BUILD_HASH || '1.0.0'}`
+const STATIC_CACHE_NAME = `coreflow360-static-v${BUILD_HASH || '1.0.0'}`
+const DYNAMIC_CACHE_NAME = `coreflow360-dynamic-v${BUILD_HASH || '1.0.0'}`
 
 // Assets to cache for offline functionality
 const STATIC_ASSETS = [

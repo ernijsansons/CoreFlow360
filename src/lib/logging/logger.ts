@@ -551,7 +551,7 @@ class CoreFlowLogger {
 export const logger = new CoreFlowLogger()
 
 // Convenience exports
-export { LogLevel, LogCategory }
+// LogLevel and LogCategory are already exported above with enum declarations
 export type { 
   LogContext, 
   SecurityLogData, 

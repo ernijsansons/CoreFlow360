@@ -39,6 +39,16 @@ enum AIModelType {
   EMBEDDING
 }
 
+enum CostAuditType {
+  UTILITY_OPTIMIZER
+  LOCK_IN_ASSESSOR
+  PRICING_MODELER
+  FINOPS_PROCESSOR
+  TRANSFER_MINIMIZER
+  TCO_AGGREGATOR
+  COMPREHENSIVE_AUDIT
+}
+
 enum ConsciousnessTier {
   NEURAL
   SYNAPTIC
@@ -225,6 +235,10 @@ model Tenant {
   leadAssignmentRules LeadTerritoryAssignment[]
   leads               Lead[]
 
+  // Cost Management Relations
+  costAudits CostAudit[]
+
+
   @@map("tenants")
 }
 
@@ -340,6 +354,9 @@ model Customer {
   aiChurnRisk     Float? @default(0)
   aiLifetimeValue Float? @default(0)
   totalRevenue    Float  @default(0)
+  
+  // Optimistic locking
+  version         Int    @default(1)
   
   // Assignee relation
   assigneeId String?
@@ -618,6 +635,9 @@ model TenantSubscription {
   lastBilledAt         DateTime?
   nextBillingDate      DateTime?
 
+  // Optimistic locking
+  version     Int       @default(1)
+
   // Timestamps
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -673,6 +693,9 @@ model Subscription {
   usage               String  @default("{}")
   customLimits        String? // Override bundle limits
   additionalResources String? // Extra resources purchased
+  
+  // Optimistic locking
+  version             Int     @default(1)
 
   // Timestamps
   createdAt   DateTime  @default(now())
@@ -2346,3 +2369,256 @@ model TerritoryAnalytics {
   @@index([periodType, periodStart])
   @@map("territory_analytics")
 }
+
+// ===========================================  
+// RELIABILITY & IDEMPOTENCY MODELS
+// ===========================================
+
+// Idempotency tracking for ensuring request reliability
+model IdempotencyKey {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  tenantId  String?
+  
+  // Request details
+  method    String
+  endpoint  String
+  userId    String?
+  
+  // Response tracking
+  responseStatus Int?
+  responseBody   String?
+  responseHeaders String? @default("{}")
+  
+  // Processing state
+  isProcessing Boolean @default(true)
+  processedAt  DateTime?
+  expiresAt    DateTime
+  
+  // Error handling
+  attemptCount Int @default(1)
+  lastError    String?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([key])
+  @@index([tenantId, endpoint])
+  @@index([expiresAt])
+  @@index([isProcessing])
+  @@map("idempotency_keys")
+}
+
+// Transaction coordination and saga pattern support
+model TransactionLog {
+  id             String   @id @default(cuid())
+  transactionId  String   @unique
+  tenantId       String?
+  
+  // Transaction details
+  transactionType String // customer_creation, subscription_checkout, payment_processing
+  entityType      String
+  entityId        String?
+  
+  // State management
+  status         String   @default("started") // started, committed, rolled_back, failed
+  steps          Json     @default("[]") // Array of transaction steps
+  currentStep    Int      @default(0)
+  
+  // Compensation handling
+  compensationActions Json @default("[]")
+  rollbackReason     String?
+  
+  // Context data
+  transactionData Json     @default("{}")
+  metadata       Json     @default("{}")
+  
+  // Timestamps
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([transactionId])
+  @@index([tenantId, status])
+  @@index([entityType, entityId])
+  @@index([status, startedAt])
+  @@map("transaction_logs")
+}
+
+// ===========================================  
+// COST MANAGEMENT AUDIT MODELS
+// ===========================================
+
+model CostAudit {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Audit Configuration
+  auditType         CostAuditType
+  auditScope        String   @default("comprehensive") // comprehensive, targeted, specific
+  initiatedBy       String? // User ID who initiated the audit
+  automatedRun      Boolean  @default(false)
+
+  // Audit Results
+  findings             Json     @default("{}")
+  recommendations      String[] @default([])
+  potentialSavings     Float    @default(0.0)
+  criticalIssues       String[] @default([])
+  auditScore           Float?   @default(0.0) // Overall audit score 0-100
+  complianceLevel      String?  @default("unknown") // high, medium, low, unknown
+
+  // Cost Breakdown
+  currentCosts         Json     @default("{}")
+  optimizedCosts       Json     @default("{}")
+  costBreakdown        Json     @default("{}")
+  savingsBreakdown     Json     @default("{}")
+
+  // Benchmarking
+  industryBenchmark    Float?
+  benchmarkVariance    Float?   @default(0.0)
+  benchmarkSource      String?
+
+  // Risk Assessment
+  lockInRisk           String   @default("unknown") // critical, high, medium, low, unknown
+  migrationComplexity  Int?     @default(0) // 1-10 scale
+  vendorDependencies   String[] @default([])
+
+  // Performance Metrics
+  utilizationEfficiency Float?  @default(0.0) // 0-1 scale
+  resourceWaste        Float?   @default(0.0)
+  costTrends           Json     @default("{}")
+  forecastAccuracy     Float?   @default(0.0)
+
+  // Status & Lifecycle
+  status          String    @default("completed") // pending, running, completed, failed
+  auditDuration   Int?      @default(0) // minutes
+  dataQuality     String    @default("unknown") // high, medium, low, unknown
+  lastValidated   DateTime?
+  nextAuditDue    DateTime?
+
+  // Timestamps
+  auditStarted DateTime  @default(now())
+  auditEnded   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  auditDetails CostAuditDetail[]
+  auditActions CostAuditAction[]
+
+  @@index([tenantId, auditType])
+  @@index([auditStarted])
+  @@index([status, auditType])
+  @@index([potentialSavings])
+  @@map("cost_audits")
+}
+
+model CostAuditDetail {
+  id          String    @id @default(cuid())
+  costAuditId String
+  costAudit   CostAudit @relation(fields: [costAuditId], references: [id], onDelete: Cascade)
+
+  // Detail Configuration
+  category        String // infrastructure, software, personnel, support, transfer, etc.
+  subcategory     String? // specific service or resource type
+  resourceId      String? // external resource identifier
+  resourceName    String
+  
+  // Cost Analysis
+  currentCost     Float   @default(0.0)
+  optimizedCost   Float   @default(0.0)
+  potentialSaving Float   @default(0.0)
+  utilizationRate Float?  @default(0.0) // 0-1 scale
+  
+  // Recommendations
+  recommendation  String?
+  priority        String  @default("medium") // critical, high, medium, low
+  implementationEffort String @default("unknown") // easy, medium, hard, complex
+  riskLevel       String  @default("low") // critical, high, medium, low
+  
+  // Timeline
+  quickWin        Boolean @default(false)
+  timeToImplement Int?    @default(0) // days
+  
+  // Metadata
+  metadata        Json    @default("{}")
+  
+  @@index([costAuditId, category])
+  @@index([potentialSaving])
+  @@index([priority, riskLevel])
+  @@map("cost_audit_details")
+}
+
+model CostAuditAction {
+  id          String    @id @default(cuid())
+  costAuditId String
+  costAudit   CostAudit @relation(fields: [costAuditId], references: [id], onDelete: Cascade)
+
+  // Action Configuration
+  actionType    String // optimize, migrate, consolidate, eliminate, renegotiate
+  title         String
+  description   String?
+  priority      String  @default("medium") // critical, high, medium, low
+  
+  // Implementation
+  status            String    @default("pending") // pending, in_progress, completed, cancelled
+  assignedTo        String? // User ID
+  estimatedSavings  Float     @default(0.0)
+  actualSavings     Float?    @default(0.0)
+  implementationCost Float?   @default(0.0)
+  
+  // Timeline
+  dueDate     DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+  
+  // Tracking
+  progress    Int       @default(0) // 0-100 percentage
+  notes       String?
+  blockers    String[]  @default([])
+  
+  // Metadata
+  metadata    Json      @default("{}")
+  
+  @@index([costAuditId, status])
+  @@index([priority, dueDate])
+  @@index([assignedTo])
+  @@map("cost_audit_actions")
+}
+
+// Dead Letter Queue for webhook failures
+model WebhookFailure {
+  id               String    @id
+  eventType        String
+  sourceProvider   String
+  payload          Json
+  originalHeaders  Json
+  failureReason    String
+  stackTrace       String?
+  attemptCount     Int       @default(1)
+  maxRetries       Int       @default(5)
+  status           String    @default("pending") // pending, processing, recovered, abandoned
+  priority         String    @default("medium") // low, medium, high, critical
+  tenantId         String
+  impactLevel      String    @default("low") // low, medium, high, critical
+  businessImpact   String
+  technicalNotes   String?
+  lastAttemptAt    DateTime  @default(now())
+  scheduledRetryAt DateTime?
+  recoveredAt      DateTime?
+  abandonedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([status])
+  @@index([tenantId])
+  @@index([sourceProvider])
+  @@index([priority])
+  @@index([createdAt])
+  @@index([scheduledRetryAt])
+  @@index([status, priority, scheduledRetryAt])
+  @@map("webhook_failures")
+}
+

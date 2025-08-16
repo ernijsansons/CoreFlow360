@@ -5,6 +5,7 @@
 
 import WebSocket from 'ws'
 import { EventEmitter } from 'events'
+import { getOpenAIKey } from '@/lib/security/credential-manager'
 
 interface RealtimeConfig {
   apiKey: string
@@ -62,7 +63,7 @@ export class OpenAIRealtimeClient extends EventEmitter {
     super()
     
     this.config = {
-      apiKey: process.env.OPENAI_API_KEY!,
+      apiKey: '', // Will be loaded from secure storage
       model: process.env.OPENAI_REALTIME_MODEL || 'gpt-4o-realtime-preview',
       voice: (process.env.OPENAI_REALTIME_VOICE as any) || 'alloy',
       instructions: 'You are a helpful AI assistant for CoreFlow360, a CRM platform. Be professional, friendly, and concise.',
@@ -94,6 +95,15 @@ export class OpenAIRealtimeClient extends EventEmitter {
    * Connect to OpenAI Realtime API
    */
   async connect(): Promise<void> {
+    // Load API key from secure storage
+    if (!this.config.apiKey) {
+      try {
+        this.config.apiKey = await getOpenAIKey()
+      } catch (error) {
+        throw new Error('OpenAI API key not available in secure storage')
+      }
+    }
+
     return new Promise((resolve, reject) => {
       try {
         this.ws = new WebSocket('wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview', {

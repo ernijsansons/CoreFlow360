@@ -1,0 +1,349 @@
+# CoreFlow360 SIEM Integration Configuration
+# Security Information and Event Management integration
+
+version: '3.8'
+
+services:
+  # Elasticsearch for log storage and analysis
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: coreflow360-elasticsearch
+    environment:
+      - node.name=coreflow360-es-node
+      - cluster.name=coreflow360-security-cluster
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - xpack.security.enabled=true
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      - ./elasticsearch/config:/usr/share/elasticsearch/config:ro
+      - ./certs:/usr/share/elasticsearch/config/certs:ro
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - coreflow360_security
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=60s"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    restart: unless-stopped
+
+  # Kibana for visualization and analysis
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: coreflow360-kibana
+    environment:
+      - SERVERNAME=coreflow360-kibana
+      - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/kibana/config/certs/ca.crt
+      - XPACK_SECURITY_ENABLED=true
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+      - XPACK_REPORTING_ENCRYPTIONKEY=${KIBANA_REPORTING_KEY}
+      - XPACK_SECURITY_ENCRYPTIONKEY=${KIBANA_SECURITY_KEY}
+    ports:
+      - "5601:5601"
+    volumes:
+      - ./kibana/config:/usr/share/kibana/config:ro
+      - ./certs:/usr/share/kibana/config/certs:ro
+    networks:
+      - coreflow360_security
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Logstash for log processing and enrichment
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    container_name: coreflow360-logstash
+    environment:
+      - XPACK_MONITORING_ENABLED=true
+      - XPACK_MONITORING_ELASTICSEARCH_HOSTS=https://elasticsearch:9200
+      - XPACK_MONITORING_ELASTICSEARCH_USERNAME=elastic
+      - XPACK_MONITORING_ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+    volumes:
+      - ./logstash/config:/usr/share/logstash/config:ro
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./certs:/usr/share/logstash/config/certs:ro
+      - /var/log:/var/log:ro
+    ports:
+      - "5044:5044"  # Beats input
+      - "5000:5000"  # TCP input
+      - "9600:9600"  # API
+    networks:
+      - coreflow360_security
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Filebeat for log shipping
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.11.0
+    container_name: coreflow360-filebeat
+    user: root
+    environment:
+      - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_HOST=http://kibana:5601
+    volumes:
+      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log:/var/log:ro
+      - ./certs:/usr/share/filebeat/certs:ro
+    command: ["--strict.perms=false"]
+    networks:
+      - coreflow360_security
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Metricbeat for metrics collection
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:8.11.0
+    container_name: coreflow360-metricbeat
+    user: root
+    environment:
+      - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_HOST=http://kibana:5601
+    volumes:
+      - ./metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /proc:/hostfs/proc:ro
+      - /:/hostfs:ro
+      - ./certs:/usr/share/metricbeat/certs:ro
+    command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
+    networks:
+      - coreflow360_security
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Wazuh Manager for security monitoring
+  wazuh-manager:
+    image: wazuh/wazuh-manager:4.6.0
+    container_name: coreflow360-wazuh-manager
+    hostname: wazuh-manager
+    environment:
+      - INDEXER_URL=https://wazuh-indexer:9200
+      - INDEXER_USERNAME=admin
+      - INDEXER_PASSWORD=${WAZUH_PASSWORD}
+      - FILEBEAT_SSL_VERIFICATION_MODE=full
+      - SSL_CERTIFICATE_AUTHORITIES=/etc/ssl/root-ca.pem
+      - SSL_CERTIFICATE=/etc/ssl/filebeat.pem
+      - SSL_KEY=/etc/ssl/filebeat.key
+      - API_USERNAME=wazuh-wui
+      - API_PASSWORD=${WAZUH_API_PASSWORD}
+    volumes:
+      - wazuh_api_configuration:/var/ossec/api/configuration
+      - wazuh_etc:/var/ossec/etc
+      - wazuh_logs:/var/ossec/logs
+      - wazuh_queue:/var/ossec/queue
+      - wazuh_var_multigroups:/var/ossec/var/multigroups
+      - wazuh_integrations:/var/ossec/integrations
+      - wazuh_active_response:/var/ossec/active-response/bin
+      - wazuh_agentless:/var/ossec/agentless
+      - wazuh_wodles:/var/ossec/wodles
+      - filebeat_etc:/etc/filebeat
+      - filebeat_var:/var/lib/filebeat
+      - ./wazuh/config:/wazuh-config-mount:ro
+      - ./certs:/etc/ssl:ro
+    ports:
+      - "1514:1514"
+      - "1515:1515"
+      - "514:514/udp"
+      - "55000:55000"
+    networks:
+      - coreflow360_security
+    restart: unless-stopped
+
+  # Security Orchestration, Automation and Response (SOAR)
+  thehive:
+    image: strangebee/thehive:5.2
+    container_name: coreflow360-thehive
+    environment:
+      - TH_NO_CONFIG_SECRET=1
+      - TH_SECRET_KEY=${THEHIVE_SECRET_KEY}
+      - TH_JVM_OPTS=-Xms1g -Xmx3g
+    volumes:
+      - ./thehive/config:/opt/thp/thehive/conf:ro
+      - thehive_data:/opt/thp/thehive/data
+      - thehive_index:/opt/thp/thehive/index
+    ports:
+      - "9000:9000"
+    networks:
+      - coreflow360_security
+    restart: unless-stopped
+
+  # Cortex for automated analysis
+  cortex:
+    image: thehiveproject/cortex:3.1.7
+    container_name: coreflow360-cortex
+    environment:
+      - JVM_OPTS=-Xms1g -Xmx3g
+    volumes:
+      - ./cortex/config:/opt/cortex/conf:ro
+      - cortex_data:/opt/cortex/data
+    ports:
+      - "9001:9001"
+    networks:
+      - coreflow360_security
+    restart: unless-stopped
+
+  # MISP for threat intelligence
+  misp:
+    image: coolacid/misp-docker:core-latest
+    container_name: coreflow360-misp
+    environment:
+      - MYSQL_HOST=misp-db
+      - MYSQL_DATABASE=misp
+      - MYSQL_USER=misp
+      - MYSQL_PASSWORD=${MISP_DB_PASSWORD}
+      - MISP_ADMIN_EMAIL=admin@coreflow360.com
+      - MISP_ADMIN_PASSPHRASE=${MISP_ADMIN_PASSWORD}
+      - MISP_BASEURL=https://misp.coreflow360.com
+      - POSTFIX_RELAY_HOST=smtp.coreflow360.com
+      - REDIS_FQDN=misp-redis
+    volumes:
+      - misp_data:/var/www/MISP
+      - misp_mysql:/var/lib/mysql
+    ports:
+      - "443:443"
+      - "80:80"
+    networks:
+      - coreflow360_security
+    depends_on:
+      - misp-db
+      - misp-redis
+    restart: unless-stopped
+
+  # MISP Database
+  misp-db:
+    image: mysql:8.0
+    container_name: coreflow360-misp-db
+    environment:
+      - MYSQL_DATABASE=misp
+      - MYSQL_USER=misp
+      - MYSQL_PASSWORD=${MISP_DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MISP_DB_ROOT_PASSWORD}
+    volumes:
+      - misp_mysql:/var/lib/mysql
+    networks:
+      - coreflow360_security
+    restart: unless-stopped
+
+  # MISP Redis
+  misp-redis:
+    image: redis:7-alpine
+    container_name: coreflow360-misp-redis
+    volumes:
+      - misp_redis:/data
+    networks:
+      - coreflow360_security
+    restart: unless-stopped
+
+  # Security analytics and ML
+  security-analytics:
+    image: coreflow360/security-analytics:latest
+    container_name: coreflow360-security-analytics
+    environment:
+      - ELASTICSEARCH_URL=https://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+      - ML_MODEL_PATH=/models
+      - ANOMALY_DETECTION_ENABLED=true
+      - THREAT_HUNTING_ENABLED=true
+    volumes:
+      - ./security-analytics/config:/config:ro
+      - ./security-analytics/models:/models:ro
+      - security_analytics_data:/data
+    ports:
+      - "8080:8080"
+    networks:
+      - coreflow360_security
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Incident response automation
+  incident-response:
+    image: coreflow360/incident-response:latest
+    container_name: coreflow360-incident-response
+    environment:
+      - THEHIVE_URL=http://thehive:9000
+      - THEHIVE_API_KEY=${THEHIVE_API_KEY}
+      - CORTEX_URL=http://cortex:9001
+      - CORTEX_API_KEY=${CORTEX_API_KEY}
+      - SLACK_WEBHOOK=${SLACK_SECURITY_WEBHOOK}
+      - PAGERDUTY_KEY=${PAGERDUTY_INTEGRATION_KEY}
+    volumes:
+      - ./incident-response/config:/config:ro
+      - ./incident-response/playbooks:/playbooks:ro
+    networks:
+      - coreflow360_security
+    depends_on:
+      - thehive
+      - cortex
+    restart: unless-stopped
+
+volumes:
+  elasticsearch_data:
+    driver: local
+  wazuh_api_configuration:
+    driver: local
+  wazuh_etc:
+    driver: local
+  wazuh_logs:
+    driver: local
+  wazuh_queue:
+    driver: local
+  wazuh_var_multigroups:
+    driver: local
+  wazuh_integrations:
+    driver: local
+  wazuh_active_response:
+    driver: local
+  wazuh_agentless:
+    driver: local
+  wazuh_wodles:
+    driver: local
+  filebeat_etc:
+    driver: local
+  filebeat_var:
+    driver: local
+  thehive_data:
+    driver: local
+  thehive_index:
+    driver: local
+  cortex_data:
+    driver: local
+  misp_data:
+    driver: local
+  misp_mysql:
+    driver: local
+  misp_redis:
+    driver: local
+  security_analytics_data:
+    driver: local
+
+networks:
+  coreflow360_security:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16

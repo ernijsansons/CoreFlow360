@@ -9,8 +9,8 @@ import {
   ExclamationTriangleIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline'
-import OpenStreetMapComponent from './OpenStreetMapComponent'
-import GoogleMapsComponent from './GoogleMapsComponent'
+// import OpenStreetMapComponent from './OpenStreetMapComponent' // Disabled - missing dependency
+// import GoogleMapsComponent from './GoogleMapsComponent' // Disabled - missing dependency
 import { CustomerLocation, TenantMappingConfig } from '@/types/mapping'
 
 interface HybridMapComponentProps {
@@ -247,13 +247,19 @@ export default function HybridMapComponent({
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
             >
-              <OpenStreetMapComponent
+              {/* <OpenStreetMapComponent
                 locations={locations}
                 center={formatCenter() as [number, number]}
                 zoom={zoom}
                 height={height}
                 onLocationClick={onLocationClick}
-              />
+              /> */}
+              <div className="flex items-center justify-center bg-gray-100 rounded-lg text-gray-500" style={{ height }}>
+                <div className="text-center">
+                  <MapIcon className="h-12 w-12 mx-auto mb-2" />
+                  <p>OpenStreetMap temporarily disabled</p>
+                </div>
+              </div>
             </motion.div>
           ) : (
             <motion.div
@@ -263,7 +269,7 @@ export default function HybridMapComponent({
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
             >
-              <GoogleMapsComponent
+              {/* <GoogleMapsComponent
                 locations={locations}
                 center={formatCenter() as { lat: number; lng: number }}
                 zoom={zoom}
@@ -276,7 +282,13 @@ export default function HybridMapComponent({
                   satellite: isPremium,
                   streetView: isPremium
                 }}
-              />
+              /> */}
+              <div className="flex items-center justify-center bg-gray-100 rounded-lg text-gray-500" style={{ height }}>
+                <div className="text-center">
+                  <MapIcon className="h-12 w-12 mx-auto mb-2" />
+                  <p>Google Maps temporarily disabled</p>
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

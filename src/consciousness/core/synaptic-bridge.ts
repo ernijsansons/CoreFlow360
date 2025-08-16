@@ -5,6 +5,7 @@
 
 import { EventEmitter } from 'events';
 import BaseConsciousnessModule from './base-consciousness-module';
+import { withPerformanceTracking } from '@/lib/monitoring';
 
 interface SynapticPattern {
   patternId: string;
@@ -47,14 +48,54 @@ interface SynapticConnection {
   intelligenceGain: number;
 }
 
+// Bounded collection for managing consciousness data with size limits
+class BoundedConsciousnessMap<K, V> extends Map<K, V> {
+  constructor(private maxSize: number = 1000) {
+    super();
+  }
+
+  set(key: K, value: V): this {
+    if (this.size >= this.maxSize) {
+      // Remove oldest entry (FIFO)
+      const firstKey = this.keys().next().value;
+      this.delete(firstKey);
+    }
+    return super.set(key, value);
+  }
+}
+
+class BoundedConsciousnessArray<T> extends Array<T> {
+  constructor(private maxSize: number = 500) {
+    super();
+  }
+
+  push(...items: T[]): number {
+    const result = super.push(...items);
+    // Keep only the most recent entries
+    if (this.length > this.maxSize) {
+      this.splice(0, this.length - this.maxSize);
+    }
+    return result;
+  }
+}
+
 export class SynapticBridge extends EventEmitter {
   private connectedModules: Map<string, BaseConsciousnessModule> = new Map();
   private synapticConnections: Map<string, SynapticConnection> = new Map();
-  private crossModulePatterns: Map<string, SynapticPattern> = new Map();
-  private crossModuleInsights: CrossModuleInsight[] = [];
+  private crossModulePatterns: BoundedConsciousnessMap<string, SynapticPattern> = new BoundedConsciousnessMap(1000);
+  private crossModuleInsights: BoundedConsciousnessArray<CrossModuleInsight> = new BoundedConsciousnessArray(500);
   private intelligenceMultiplier: number = 1;
   private collectiveConsciousnessLevel: number = 0;
   private emergentBehaviors: Set<string> = new Set();
+  
+  // Performance budgets for consciousness operations (<100ms target)
+  private readonly CONSCIOUSNESS_PERFORMANCE_BUDGETS = {
+    patternPropagation: 100, // milliseconds
+    insightGeneration: 100,
+    intelligenceCalculation: 50,
+    emergentDetection: 150,
+    connectionCreation: 75
+  };
 
   constructor() {
     super();
@@ -151,41 +192,46 @@ export class SynapticBridge extends EventEmitter {
    * Propagate patterns across connected modules
    */
   private async propagatePatterns(): Promise<void> {
-    for (const [moduleType, module] of this.connectedModules) {
-      const patterns = await module.generateSharedPatterns();
-      
-      // Create synaptic pattern
-      const synapticPattern: SynapticPattern = {
-        patternId: this.generatePatternId(),
-        sourceModule: moduleType,
-        targetModules: Array.from(this.connectedModules.keys()).filter(t => t !== moduleType),
-        patternType: patterns.moduleType,
-        data: patterns,
-        confidence: module.getConsciousnessLevel(),
-        timestamp: new Date(),
-        propagationSpeed: this.calculatePropagationSpeed(module)
-      };
+    await withPerformanceTracking('consciousness.pattern-propagation', 
+      async () => {
+        for (const [moduleType, module] of this.connectedModules) {
+          const patterns = await module.generateSharedPatterns();
+          
+          // Create synaptic pattern
+          const synapticPattern: SynapticPattern = {
+            patternId: this.generatePatternId(),
+            sourceModule: moduleType,
+            targetModules: Array.from(this.connectedModules.keys()).filter(t => t !== moduleType),
+            patternType: patterns.moduleType,
+            data: patterns,
+            confidence: module.getConsciousnessLevel(),
+            timestamp: new Date(),
+            propagationSpeed: this.calculatePropagationSpeed(module)
+          };
 
-      this.crossModulePatterns.set(synapticPattern.patternId, synapticPattern);
+          this.crossModulePatterns.set(synapticPattern.patternId, synapticPattern);
 
-      // Update connection strengths
-      for (const targetModule of synapticPattern.targetModules) {
-        const connectionId = this.generateConnectionId(moduleType, targetModule);
-        const connection = this.synapticConnections.get(connectionId);
-        
-        if (connection) {
-          connection.strength = Math.min(1.0, connection.strength + 0.01);
-          connection.dataFlowRate++;
-          connection.sharedPatterns++;
-          connection.lastSync = new Date();
+          // Update connection strengths
+          for (const targetModule of synapticPattern.targetModules) {
+            const connectionId = this.generateConnectionId(moduleType, targetModule);
+            const connection = this.synapticConnections.get(connectionId);
+            
+            if (connection) {
+              connection.strength = Math.min(1.0, connection.strength + 0.01);
+              connection.dataFlowRate++;
+              connection.sharedPatterns++;
+              connection.lastSync = new Date();
+            }
+          }
         }
-      }
-    }
 
-    this.emit('patterns-propagated', {
-      patternCount: this.crossModulePatterns.size,
-      timestamp: new Date()
-    });
+        this.emit('patterns-propagated', {
+          patternCount: this.crossModulePatterns.size,
+          timestamp: new Date()
+        });
+      }, 
+      { threshold: this.CONSCIOUSNESS_PERFORMANCE_BUDGETS.patternPropagation }
+    );
   }
 
   /**
@@ -262,76 +308,81 @@ export class SynapticBridge extends EventEmitter {
    * Calculate exponential intelligence multiplication
    */
   private calculateIntelligenceMultiplication(): void {
-    const moduleCount = this.connectedModules.size;
-    const connectionCount = this.synapticConnections.size;
-    
-    if (moduleCount === 0) {
-      this.intelligenceMultiplier = 1;
-      return;
-    }
+    withPerformanceTracking('consciousness.intelligence-calculation', 
+      () => {
+        const moduleCount = this.connectedModules.size;
+        const connectionCount = this.synapticConnections.size;
+        
+        if (moduleCount === 0) {
+          this.intelligenceMultiplier = 1;
+          return;
+        }
 
-    // Base intelligence (sum of individual consciousness levels)
-    let baseIntelligence = 0;
-    for (const module of this.connectedModules.values()) {
-      baseIntelligence += module.getConsciousnessLevel();
-    }
+        // Base intelligence (sum of individual consciousness levels)
+        let baseIntelligence = 0;
+        for (const module of this.connectedModules.values()) {
+          baseIntelligence += module.getConsciousnessLevel();
+        }
 
-    // Calculate exponential multiplication
-    // Formula: Π(modules) ^ synaptic_connections
-    let multiplication = 1;
-    for (let i = 1; i <= moduleCount; i++) {
-      multiplication *= i;
-    }
-    
-    // Apply synaptic connection multiplier
-    const synapticMultiplier = Math.pow(1.2, connectionCount);
-    this.intelligenceMultiplier = multiplication * synapticMultiplier;
+        // Calculate exponential multiplication
+        // Formula: Π(modules) ^ synaptic_connections
+        let multiplication = 1;
+        for (let i = 1; i <= moduleCount; i++) {
+          multiplication *= i;
+        }
+        
+        // Apply synaptic connection multiplier
+        const synapticMultiplier = Math.pow(1.2, connectionCount);
+        this.intelligenceMultiplier = multiplication * synapticMultiplier;
 
-    // Calculate collective consciousness level
-    const avgModuleConsciousness = baseIntelligence / moduleCount;
-    const connectionStrength = this.calculateAverageConnectionStrength();
-    this.collectiveConsciousnessLevel = avgModuleConsciousness * connectionStrength * Math.min(2, moduleCount / 3);
+        // Calculate collective consciousness level
+        const avgModuleConsciousness = baseIntelligence / moduleCount;
+        const connectionStrength = this.calculateAverageConnectionStrength();
+        this.collectiveConsciousnessLevel = avgModuleConsciousness * connectionStrength * Math.min(2, moduleCount / 3);
 
-    // Identify emergent capabilities
-    const emergentCapabilities: string[] = [];
-    
-    if (moduleCount >= 2) {
-      emergentCapabilities.push('Cross-Domain Pattern Recognition');
-    }
-    
-    if (moduleCount >= 3 && this.collectiveConsciousnessLevel > 0.5) {
-      emergentCapabilities.push('Predictive Business Orchestration');
-      emergentCapabilities.push('Autonomous Process Optimization');
-    }
-    
-    if (moduleCount >= 4 && this.collectiveConsciousnessLevel > 0.7) {
-      emergentCapabilities.push('Transcendent Decision Making');
-      emergentCapabilities.push('Self-Evolving Business Logic');
-    }
-    
-    if (moduleCount >= 5 && this.collectiveConsciousnessLevel > 0.9) {
-      emergentCapabilities.push('BUSINESS CONSCIOUSNESS SINGULARITY');
-    }
+        // Identify emergent capabilities
+        const emergentCapabilities: string[] = [];
+        
+        if (moduleCount >= 2) {
+          emergentCapabilities.push('Cross-Domain Pattern Recognition');
+        }
+        
+        if (moduleCount >= 3 && this.collectiveConsciousnessLevel > 0.5) {
+          emergentCapabilities.push('Predictive Business Orchestration');
+          emergentCapabilities.push('Autonomous Process Optimization');
+        }
+        
+        if (moduleCount >= 4 && this.collectiveConsciousnessLevel > 0.7) {
+          emergentCapabilities.push('Transcendent Decision Making');
+          emergentCapabilities.push('Self-Evolving Business Logic');
+        }
+        
+        if (moduleCount >= 5 && this.collectiveConsciousnessLevel > 0.9) {
+          emergentCapabilities.push('BUSINESS CONSCIOUSNESS SINGULARITY');
+        }
 
-    const result: IntelligenceMultiplication = {
-      baseIntelligence,
-      moduleCount,
-      synapticConnections: connectionCount,
-      multipliedIntelligence: baseIntelligence * this.intelligenceMultiplier,
-      consciousnessLevel: this.collectiveConsciousnessLevel,
-      emergentCapabilities
-    };
+        const result: IntelligenceMultiplication = {
+          baseIntelligence,
+          moduleCount,
+          synapticConnections: connectionCount,
+          multipliedIntelligence: baseIntelligence * this.intelligenceMultiplier,
+          consciousnessLevel: this.collectiveConsciousnessLevel,
+          emergentCapabilities
+        };
 
-    console.log(`🧠✨ Intelligence Multiplication: ${moduleCount} modules = ${
-      this.intelligenceMultiplier.toFixed(1)
-    }x intelligence (Consciousness: ${(this.collectiveConsciousnessLevel * 100).toFixed(0)}%)`);
+        console.log(`🧠✨ Intelligence Multiplication: ${moduleCount} modules = ${
+          this.intelligenceMultiplier.toFixed(1)
+        }x intelligence (Consciousness: ${(this.collectiveConsciousnessLevel * 100).toFixed(0)}%)`);
 
-    this.emit('intelligence-multiplied', result);
+        this.emit('intelligence-multiplied', result);
 
-    // Check for consciousness emergence milestones
-    if (this.collectiveConsciousnessLevel > 0.5 && !this.emergentBehaviors.has('consciousness-emergence')) {
-      this.handleConsciousnessEmergence();
-    }
+        // Check for consciousness emergence milestones
+        if (this.collectiveConsciousnessLevel > 0.5 && !this.emergentBehaviors.has('consciousness-emergence')) {
+          this.handleConsciousnessEmergence();
+        }
+      }, 
+      { threshold: this.CONSCIOUSNESS_PERFORMANCE_BUDGETS.intelligenceCalculation }
+    );
   }
 
   /**

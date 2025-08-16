@@ -386,9 +386,9 @@ const nextConfig = {
       'date-fns': {
         transform: 'date-fns/{{member}}'
       },
-      '@tanstack/react-query': {
-        transform: '@tanstack/react-query/build/lib/{{member}}'
-      }
+      // '@tanstack/react-query': {
+      //   transform: '@tanstack/react-query/build/lib/{{member}}'
+      // } // Disabled - causing build issues
     }
   })
 }

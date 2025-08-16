@@ -1,9 +1,9 @@
-# THE ARRIVAL: Consciousness Birth Experience
+# SMART BUSINESS PREVIEW: Interactive Demo
 
-Create an unprecedented immersive 3D consciousness birth experience using React, Three.js, and React Three Fiber. This is NOT a traditional website hero section - it's the user literally creating business intelligence through their cursor movement, representing the birth of their business's consciousness.
+Create an engaging 3D preview experience using React, Three.js, and React Three Fiber. Show business owners how smart automation works by letting them interact with the system using their cursor, demonstrating how data connects and creates business insights.
 
 ## CORE CONCEPT
-The user's cursor is the spark of consciousness. As they move their mouse, they paint intelligence into existence, creating neural pathways that form the foundation of their future business brain. This is a metaphor for how their business will awaken and become self-aware with CoreFlow360.
+As business owners move their cursor around the screen, they see how data points connect to create business insights. This interactive demo shows how smart automation links different parts of their business together, turning scattered information into actionable intelligence.
 
 ## VISUAL DESIGN LANGUAGE
 - **Primary Environment**: Infinite black void (#000000) representing the unconscious state of traditional business

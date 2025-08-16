@@ -11,12 +11,13 @@
  */
 
 import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Float, Text3D, OrbitControls } from '@react-three/drei'
-import * as THREE from 'three'
+// TODO: Re-enable Three.js when peer dependencies are resolved
+// import { Canvas, useFrame } from '@react-three/fiber'
+// import { Float, Text3D, OrbitControls } from '@react-three/drei'
+// import * as THREE from 'three'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
-import ConsciousnessSoundEngine from '../consciousness/ConsciousnessSoundEngine'
+// import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
+// import ConsciousnessSoundEngine from '../consciousness/ConsciousnessSoundEngine'
 
 // Department definitions with intelligence multipliers
 const DEPARTMENTS = {

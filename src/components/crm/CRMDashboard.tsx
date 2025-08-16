@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { motion } from 'framer-motion'
 import { useDebounce } from '@/hooks/useDebounce'
 import { 
@@ -78,6 +78,151 @@ const lifecycleStages = [
   { id: 'CHURNED', name: 'Churned', color: 'bg-red-500', textColor: 'text-red-700' }
 ]
 
+// Memoized customer row component to prevent unnecessary re-renders
+const CustomerRow = memo(({ 
+  customer, 
+  index, 
+  onView, 
+  onDelete, 
+  isDeleting,
+  formatCurrency,
+  formatDate,
+  getStatusColor
+}: {
+  customer: Customer
+  index: number
+  onView: (id: string) => void
+  onDelete: (id: string) => void
+  isDeleting: boolean
+  formatCurrency: (amount: number) => string
+  formatDate: (dateString: string) => string
+  getStatusColor: (status: string) => string
+}) => (
+  <motion.div
+    key={customer.id}
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: index * 0.05 }}
+    className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
+  >
+    <div className="flex items-center justify-between">
+      <div className="flex items-center space-x-4">
+        <div className="flex-shrink-0">
+          <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
+            <span className="text-sm font-medium text-gray-700">
+              {getSafeInitials(customer.firstName, customer.lastName)}
+            </span>
+          </div>
+        </div>
+        
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center space-x-3">
+            <SafeText className="text-sm font-medium text-gray-900 truncate">
+              {getSafeCustomerName(customer)}
+            </SafeText>
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${getStatusColor(customer.status)}`}>
+              {lifecycleStages.find(s => s.id === customer.status)?.name}
+            </span>
+            <div className="flex items-center">
+              <SparklesIcon className="h-4 w-4 text-purple-500 mr-1" />
+              <span className="text-sm text-gray-500">{customer.aiScore}</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-4 mt-1">
+            {customer.company && (
+              <SafeText className="text-sm text-gray-500">
+                {customer.company}
+              </SafeText>
+            )}
+            <p className="text-sm text-gray-500">{formatCurrency(customer.aiLifetimeValue)} LTV</p>
+            {customer.lastInteraction && (
+              <p className="text-xs text-gray-400">
+                Last contact: {formatDate(customer.lastInteraction)}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-6">
+        {/* Contact Actions */}
+        <div className="flex items-center space-x-2">
+          {customer.phone && (
+            <button className="text-gray-400 hover:text-blue-600">
+              <PhoneIcon className="h-4 w-4" />
+            </button>
+          )}
+          {customer.email && (
+            <button className="text-gray-400 hover:text-blue-600">
+              <EnvelopeIcon className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
+        {/* AI Insights */}
+        <div className="flex items-center space-x-4 text-sm">
+          <div className="text-center">
+            <p className="text-xs text-gray-500">Revenue</p>
+            <p className="font-medium text-gray-900">
+              {formatCurrency(customer.totalRevenue)}
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-xs text-gray-500">Churn Risk</p>
+            <p className={`font-medium ${
+              customer.aiChurnRisk > 50 
+                ? 'text-red-600' 
+                : customer.aiChurnRisk > 25 
+                  ? 'text-yellow-600' 
+                  : 'text-green-600'
+            }`}>
+              {customer.aiChurnRisk}%
+            </p>
+          </div>
+        </div>
+
+        {/* Assignee */}
+        {customer.assignee && (
+          <div className="flex items-center space-x-2">
+            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-gray-300"></div>
+            <span className="text-sm text-gray-500">{customer.assignee.name}</span>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => onView(customer.id)}
+            className="text-gray-400 hover:text-blue-600"
+            title="View Details"
+          >
+            <EyeIcon className="h-4 w-4" />
+          </button>
+          <button
+            className="text-gray-400 hover:text-blue-600"
+            title="Edit"
+          >
+            <PencilIcon className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => {
+              if (confirm('Are you sure you want to delete this customer?')) {
+                onDelete(customer.id)
+              }
+            }}
+            disabled={isDeleting}
+            className="text-gray-400 hover:text-red-600 disabled:opacity-50"
+            title="Delete"
+          >
+            <TrashIcon className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+))
+
 export default function CRMDashboard() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('ALL')
@@ -120,41 +265,42 @@ export default function CRMDashboard() {
     }
   })
 
-  // Calculate metrics from customers
-  const metrics = calculateMetricsFromCustomers(customers)
+  // Calculate metrics from customers (memoized to prevent recalculation)
+  const metrics = useMemo(() => calculateMetricsFromCustomers(customers), [customers])
 
-  // Generate locations from customers (temporary until mapping API is ready)
-  const locations: CustomerLocation[] = customers
-    .filter(customer => customer.address)
-    .map(customer => ({
-      id: customer.id,
-      customerId: customer.id,
-      customer: {
+  // Generate locations from customers (memoized to prevent recalculation)
+  const locations: CustomerLocation[] = useMemo(() => 
+    customers
+      .filter(customer => customer.address)
+      .map(customer => ({
         id: customer.id,
-        name: `${customer.firstName} ${customer.lastName}${customer.company ? ` - ${customer.company}` : ''}`,
-        email: customer.email || ''
-      },
-      address: customer.address || '',
-      city: 'Unknown', // TODO: Parse from address
-      state: 'Unknown',
-      zipCode: 'Unknown',
-      country: 'US',
-      latitude: 0, // TODO: Geocode addresses
-      longitude: 0,
-      locationType: 'primary',
-      isVerified: false,
-      territory: 'Unassigned',
-      salesRep: customer.assignee?.name || 'Unassigned',
-      createdAt: customer.createdAt,
-      updatedAt: customer.updatedAt
-    }))
+        customerId: customer.id,
+        customer: {
+          id: customer.id,
+          name: `${customer.firstName} ${customer.lastName}${customer.company ? ` - ${customer.company}` : ''}`,
+          email: customer.email || ''
+        },
+        address: customer.address || '',
+        city: 'Unknown', // TODO: Parse from address
+        state: 'Unknown',
+        zipCode: 'Unknown',
+        country: 'US',
+        latitude: 0, // TODO: Geocode addresses
+        longitude: 0,
+        locationType: 'primary',
+        isVerified: false,
+        territory: 'Unassigned',
+        salesRep: customer.assignee?.name || 'Unassigned',
+        createdAt: customer.createdAt,
+        updatedAt: customer.updatedAt
+      })), [customers])
 
-  // Mock tenant config until we implement mapping endpoints
-  const mockTenantConfig: TenantMappingConfig = {
+  // Mock tenant config until we implement mapping endpoints (memoized)
+  const mockTenantConfig: TenantMappingConfig = useMemo(() => ({
     mappingTier: 'free',
     googleMapsEnabled: false,
     monthlyMapCredits: 0
-  }
+  }), [])
 
   // Update locations when customers change
   useEffect(() => {
@@ -166,8 +312,8 @@ export default function CRMDashboard() {
     setTenantConfig(mockTenantConfig)
   }, [])
   
-  // Calculate metrics from customer data
-  const calculateMetricsFromCustomers = (customersList: Customer[]): CRMMetrics => {
+  // Calculate metrics from customer data (memoized function)
+  const calculateMetricsFromCustomers = useCallback((customersList: Customer[]): CRMMetrics => {
     // Group customers by status
     const statusCounts = customersList.reduce((acc, customer) => {
       acc[customer.status] = (acc[customer.status] || 0) + 1
@@ -202,44 +348,70 @@ export default function CRMDashboard() {
       activeDeals: statusCounts.PROSPECT || 0,
       churnRisk: Math.round(churnRisk)
     }
-  }
+  }, [])
 
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = useCallback((status: string) => {
     const stage = lifecycleStages.find(s => s.id === status)
     return stage?.color || 'bg-gray-500'
-  }
+  }, [])
 
-  const getStatusTextColor = (status: string) => {
+  const getStatusTextColor = useCallback((status: string) => {
     const stage = lifecycleStages.find(s => s.id === status)
     return stage?.textColor || 'text-gray-700'
-  }
+  }, [])
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = useCallback((amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount)
-  }
+  }, [])
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric'
     })
-  }
+  }, [])
 
-  const handleCustomerView = (customerId: string) => {
+  const handleCustomerView = useCallback((customerId: string) => {
     setSelectedCustomer(customerId)
     setViewMode('detail')
-  }
+  }, [])
 
-  const handleBackToList = () => {
+  const handleBackToList = useCallback(() => {
     setSelectedCustomer(null)
     setViewMode('list')
-  }
+  }, [])
+
+  // Memoized delete handler to prevent unnecessary re-renders
+  const handleDeleteCustomer = useCallback((customerId: string) => {
+    deleteCustomerMutation.mutate(customerId, {
+      onSuccess: () => {
+        console.log('Customer deleted successfully')
+      },
+      onError: (error) => {
+        console.error('Failed to delete customer:', error)
+        alert('Failed to delete customer. Please try again.')
+      }
+    })
+  }, [deleteCustomerMutation])
+
+  // Memoized pagination pages to prevent unnecessary recalculation
+  const paginationPages = useMemo(() => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1)
+    } else if (currentPage <= 3) {
+      return Array.from({ length: 5 }, (_, i) => i + 1)
+    } else if (currentPage >= totalPages - 2) {
+      return Array.from({ length: 5 }, (_, i) => totalPages - 4 + i)
+    } else {
+      return Array.from({ length: 5 }, (_, i) => currentPage - 2 + i)
+    }
+  }, [totalPages, currentPage])
 
   if (isLoading) {
     return (
@@ -419,43 +591,45 @@ export default function CRMDashboard() {
 
       {/* Filters and Search */}
       {viewMode === 'list' && (
-      <div className="bg-white p-4 rounded-lg shadow">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="relative flex-1 max-w-md">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Search customers..."
+              />
             </div>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Search customers..."
-            />
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
-            >
-              <option value="ALL">All Statuses</option>
-              {lifecycleStages.map((stage) => (
-                <option key={stage.id} value={stage.id}>{stage.name}</option>
-              ))}
-            </select>
             
-            <button className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-              <FunnelIcon className="h-4 w-4 mr-2" />
-              More Filters
-            </button>
+            <div className="flex items-center space-x-3">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
+              >
+                <option value="ALL">All Statuses</option>
+                {lifecycleStages.map((stage) => (
+                  <option key={stage.id} value={stage.id}>{stage.name}</option>
+                ))}
+              </select>
+              
+              <button className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                <FunnelIcon className="h-4 w-4 mr-2" />
+                More Filters
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Customer List */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      {viewMode === 'list' && (
+        <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="px-4 py-5 sm:p-6">
           {/* Customer Count */}
           <div className="mb-4 flex items-center justify-between">
@@ -483,139 +657,17 @@ export default function CRMDashboard() {
                 ) : (
                   <div className="space-y-4">
                     {customers.map((customer, index) => (
-                      <motion.div
+                      <CustomerRow
                         key={customer.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="flex-shrink-0">
-                              <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
-                                <span className="text-sm font-medium text-gray-700">
-                                  {getSafeInitials(customer.firstName, customer.lastName)}
-                                </span>
-                              </div>
-                            </div>
-                            
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center space-x-3">
-                                <SafeText className="text-sm font-medium text-gray-900 truncate">
-                                  {getSafeCustomerName(customer)}
-                                </SafeText>
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${getStatusColor(customer.status)}`}>
-                                  {lifecycleStages.find(s => s.id === customer.status)?.name}
-                                </span>
-                                <div className="flex items-center">
-                                  <SparklesIcon className="h-4 w-4 text-purple-500 mr-1" />
-                                  <span className="text-sm text-gray-500">{customer.aiScore}</span>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center space-x-4 mt-1">
-                                {customer.company && (
-                                  <SafeText className="text-sm text-gray-500">
-                                    {customer.company}
-                                  </SafeText>
-                                )}
-                                <p className="text-sm text-gray-500">{formatCurrency(customer.aiLifetimeValue)} LTV</p>
-                                {customer.lastInteraction && (
-                                  <p className="text-xs text-gray-400">
-                                    Last contact: {formatDate(customer.lastInteraction)}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center space-x-6">
-                            {/* Contact Actions */}
-                            <div className="flex items-center space-x-2">
-                              {customer.phone && (
-                                <button className="text-gray-400 hover:text-blue-600">
-                                  <PhoneIcon className="h-4 w-4" />
-                                </button>
-                              )}
-                              {customer.email && (
-                                <button className="text-gray-400 hover:text-blue-600">
-                                  <EnvelopeIcon className="h-4 w-4" />
-                                </button>
-                              )}
-                            </div>
-
-                            {/* AI Insights */}
-                            <div className="flex items-center space-x-4 text-sm">
-                              <div className="text-center">
-                                <p className="text-xs text-gray-500">Revenue</p>
-                                <p className="font-medium text-gray-900">
-                                  {formatCurrency(customer.totalRevenue)}
-                                </p>
-                              </div>
-                              <div className="text-center">
-                                <p className="text-xs text-gray-500">Churn Risk</p>
-                                <p className={`font-medium ${
-                                  customer.aiChurnRisk > 50 
-                                    ? 'text-red-600' 
-                                    : customer.aiChurnRisk > 25 
-                                      ? 'text-yellow-600' 
-                                      : 'text-green-600'
-                                }`}>
-                                  {customer.aiChurnRisk}%
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Assignee */}
-                            {customer.assignee && (
-                              <div className="flex items-center space-x-2">
-                                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-gray-300"></div>
-                                <span className="text-sm text-gray-500">{customer.assignee.name}</span>
-                              </div>
-                            )}
-
-                            {/* Actions */}
-                            <div className="flex items-center space-x-2">
-                              <button
-                                onClick={() => handleCustomerView(customer.id)}
-                                className="text-gray-400 hover:text-blue-600"
-                                title="View Details"
-                              >
-                                <EyeIcon className="h-4 w-4" />
-                              </button>
-                              <button
-                                className="text-gray-400 hover:text-blue-600"
-                                title="Edit"
-                              >
-                                <PencilIcon className="h-4 w-4" />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  if (confirm('Are you sure you want to delete this customer?')) {
-                                    deleteCustomerMutation.mutate(customer.id, {
-                                      onSuccess: () => {
-                                        // Show success message (could add toast notification here)
-                                        console.log('Customer deleted successfully')
-                                      },
-                                      onError: (error) => {
-                                        // Show error message (could add toast notification here)
-                                        console.error('Failed to delete customer:', error)
-                                        alert('Failed to delete customer. Please try again.')
-                                      }
-                                    })
-                                  }
-                                }}
-                                disabled={deleteCustomerMutation.isPending}
-                                className="text-gray-400 hover:text-red-600 disabled:opacity-50"
-                                title="Delete"
-                              >
-                                <TrashIcon className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
+                        customer={customer}
+                        index={index}
+                        onView={handleCustomerView}
+                        onDelete={handleDeleteCustomer}
+                        isDeleting={deleteCustomerMutation.isPending}
+                        formatCurrency={formatCurrency}
+                        formatDate={formatDate}
+                        getStatusColor={getStatusColor}
+                      />
                     ))}
                   </div>
                 )}
@@ -640,32 +692,19 @@ export default function CRMDashboard() {
               
               <div className="flex items-center space-x-2">
                 {/* Page numbers */}
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum
-                  if (totalPages <= 5) {
-                    pageNum = i + 1
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i
-                  } else {
-                    pageNum = currentPage - 2 + i
-                  }
-                  
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-2 text-sm font-medium rounded-md ${
-                        currentPage === pageNum
-                          ? 'bg-blue-600 text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  )
-                })}
+                {paginationPages.map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`px-3 py-2 text-sm font-medium rounded-md ${
+                      currentPage === pageNum
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
               </div>
               
               <button

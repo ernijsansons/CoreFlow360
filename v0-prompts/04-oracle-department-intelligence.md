@@ -1,22 +1,22 @@
-# THE ORACLE: Department Intelligence Experiences
+# SMART DEPARTMENTS: Interactive Business Intelligence
 
-Create five revolutionary department-specific intelligence experiences that let business owners physically explore and interact with their future intelligent departments. Each department should be a unique 3D environment that demonstrates its specific intelligence capabilities.
+Create five practical department-specific experiences that let business owners explore how smart automation transforms each area of their business. Each department shows clear, measurable improvements and cost savings through intelligent automation.
 
 ## CORE CONCEPT
-Transform abstract department functions into immersive 3D spaces where users can see, touch, and experience how intelligence transforms each aspect of their business. Each department is a room in their future business, alive with data, predictions, and autonomous operations.
+Show business owners exactly how smart automation saves time and money in each department. Instead of managing spreadsheets and manual processes, they see real-time dashboards, automated workflows, and predictive insights that prevent problems before they happen.
 
 ## TECHNICAL FOUNDATION
 Use React, Three.js, React Three Fiber, and Drei for all 3D experiences. Implement shared navigation between departments with smooth transitions. Each room should feel connected yet distinct.
 
 ---
 
-## 1. SALES INTELLIGENCE: The Prediction Chamber
+## 1. SALES INTELLIGENCE: Customer Pipeline Dashboard
 
 ### Visual Design
-- **Environment**: Futuristic circular room with floor-to-ceiling screens showing customer data streams
-- **Center**: Holographic globe showing real-time customer locations and intent signals
-- **Color Scheme**: Deep blues (#001840) with golden opportunity highlights (#FFD700)
-- **Ambience**: Subtle hum of data processing, occasional "ping" of new opportunities
+- **Environment**: Clean, modern dashboard showing your sales pipeline and customer data
+- **Center**: Interactive map showing customer locations and deal status
+- **Color Scheme**: High contrast - Navy blue (#1a365d) background with bright white (#ffffff) text and green (#22c55e) success indicators
+- **Purpose**: Show exactly which customers will buy, when, and for how much
 
 ### Implementation
 ```tsx
@@ -137,22 +137,22 @@ const CustomerParticle = ({ position, intent, value, onClick }) => {
 4. **Revenue Streams**: Golden flows showing money coming from each customer
 5. **AI Coaching Whispers**: Floating text suggestions for each opportunity
 
-### Key Features to Demonstrate
-- **Predictive Lead Scoring**: See exactly who will buy and when
-- **Lifetime Value Calculation**: Watch customer value grow over time
-- **Next Best Action**: AI suggests optimal engagement for each lead
-- **Churn Prevention**: Red alerts before customers consider leaving
-- **Cross-sell Opportunities**: Golden connections between customers and products
+### Key Business Benefits
+- **Sales Forecasting**: See exactly which deals will close this month/quarter
+- **Customer Value Tracking**: Know which customers are worth the most over time
+- **Smart Recommendations**: Get specific actions to take with each lead
+- **Early Warning System**: Prevent customer churn before it happens
+- **Upsell Opportunities**: Identify which customers are ready to buy more
 
 ---
 
-## 2. FINANCIAL INTELLIGENCE: The Money Mind Palace
+## 2. FINANCIAL INTELLIGENCE: Smart Financial Dashboard
 
 ### Visual Design
-- **Environment**: Crystal cathedral with flowing streams of money as light
-- **Center**: Massive holographic balance sheet that updates in real-time
-- **Color Scheme**: Gold (#FFD700) streams, emerald (#50C878) profits, ruby (#DC143C) warnings
-- **Ambience**: Gentle chimes for positive cash flow, subtle warnings for risks
+- **Environment**: Clean financial dashboard showing cash flow, expenses, and profitability
+- **Center**: Real-time financial health meter with key metrics
+- **Color Scheme**: High contrast - Dark gray (#374151) background, white (#ffffff) text, green (#16a34a) for profits, red (#dc2626) for losses
+- **Purpose**: Track every dollar and optimize financial performance automatically
 
 ### Implementation
 ```tsx
@@ -253,13 +253,13 @@ const MoneyFlowSystem = ({ flows }) => {
 
 ---
 
-## 3. OPERATIONS INTELLIGENCE: The Autonomous Factory
+## 3. OPERATIONS INTELLIGENCE: Process Optimization Center
 
 ### Visual Design
-- **Environment**: Vast warehouse with self-organizing processes as mechanical flows
-- **Center**: Giant gear system that optimizes itself
-- **Color Scheme**: Industrial silver (#C0C0C0), efficiency green (#00FF00), warning orange (#FF8C00)
-- **Ambience**: Rhythmic mechanical sounds that sync perfectly
+- **Environment**: Modern workflow visualization showing business processes and bottlenecks
+- **Center**: Process efficiency monitor with optimization suggestions
+- **Color Scheme**: High contrast - Slate blue (#475569) background, white (#ffffff) text, green (#059669) for efficient processes, orange (#ea580c) for bottlenecks
+- **Purpose**: Eliminate waste, speed up processes, and reduce operational costs
 
 ### Implementation
 ```tsx
@@ -317,13 +317,13 @@ const ProcessFlowSystem = () => {
 
 ---
 
-## 4. HR INTELLIGENCE: The Human Potential Observatory
+## 4. HR INTELLIGENCE: Team Performance Dashboard
 
 ### Visual Design
-- **Environment**: Serene space with constellation of employee connections
-- **Center**: Talent tree growing and evolving
-- **Color Scheme**: Warm amber (#FFBF00), growth green (#7CFC00), harmony blue (#4169E1)
-- **Ambience**: Heartbeat rhythms, occasional inspiration chimes
+- **Environment**: Professional HR dashboard showing team performance and satisfaction
+- **Center**: Employee engagement and performance metrics
+- **Color Scheme**: High contrast - Deep purple (#581c87) background, white (#ffffff) text, green (#16a34a) for high performance, yellow (#ca8a04) for attention needed
+- **Purpose**: Optimize team performance, reduce turnover, and identify top talent
 
 ### Implementation
 ```tsx
@@ -372,13 +372,13 @@ const EmployeeNetwork = ({ employees, connections }) => {
 
 ---
 
-## 5. MARKETING INTELLIGENCE: The Influence Amplifier
+## 5. MARKETING INTELLIGENCE: Campaign Performance Center
 
 ### Visual Design
-- **Environment**: Stadium-like space with campaign effects rippling outward
-- **Center**: Giant sphere showing brand perception in real-time
-- **Color Scheme**: Electric purple (#9D00FF), viral pink (#FF1493), impact white (#FFFFFF)
-- **Ambience**: Crowd murmurs, viral notification sounds
+- **Environment**: Marketing analytics dashboard showing campaign performance and ROI
+- **Center**: Campaign effectiveness monitor with audience insights
+- **Color Scheme**: High contrast - Dark teal (#134e4a) background, white (#ffffff) text, green (#10b981) for successful campaigns, red (#dc2626) for underperforming
+- **Purpose**: Maximize marketing ROI and identify the most effective channels
 
 ### Implementation
 ```tsx
@@ -446,11 +446,11 @@ const CampaignRipples = () => {
 ```tsx
 const DepartmentNavigator = ({ currentDepartment, onSwitch }) => {
   const departments = [
-    { id: 'sales', name: 'Sales Intelligence', icon: '🎯' },
-    { id: 'finance', name: 'Financial Intelligence', icon: '💰' },
-    { id: 'operations', name: 'Operations Intelligence', icon: '⚙️' },
-    { id: 'hr', name: 'HR Intelligence', icon: '👥' },
-    { id: 'marketing', name: 'Marketing Intelligence', icon: '📣' }
+    { id: 'sales', name: 'Sales Dashboard', icon: '📊' },
+    { id: 'finance', name: 'Financial Dashboard', icon: '💰' },
+    { id: 'operations', name: 'Operations Dashboard', icon: '⚙️' },
+    { id: 'hr', name: 'HR Dashboard', icon: '👥' },
+    { id: 'marketing', name: 'Marketing Dashboard', icon: '📈' }
   ]
   
   return (
@@ -571,9 +571,9 @@ const departmentSounds = {
 ## SUCCESS METRICS
 
 - Users explore average of 3.5 departments per session
-- 85% interact with at least one predictive element
+- 85% interact with at least one dashboard element
 - Average time in experience: 5+ minutes
-- 90% report "feeling the intelligence"
-- High social sharing of department screenshots
+- 90% understand the business value proposition
+- High conversion rate to demo requests
 
-This Oracle experience transforms abstract business departments into tangible, explorable intelligences that users can see, touch, and command, making the promise of business intelligence viscerally real.
+This dashboard experience shows business owners exactly how smart automation transforms each department, making the value proposition clear and measurable.

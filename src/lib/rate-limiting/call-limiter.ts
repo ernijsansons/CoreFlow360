@@ -410,3 +410,6 @@ export class CallRateLimiter {
 
 // Export singleton instance
 export const callRateLimiter = new CallRateLimiter()
+
+// Alias for compatibility
+export const rateLimiter = callRateLimiter

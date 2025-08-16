@@ -9,11 +9,12 @@
  */
 
 import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Float, Text3D, OrbitControls, Sphere } from '@react-three/drei'
+// TODO: Re-enable Three.js when dependencies are resolved
+// import { Canvas, useFrame } from '@react-three/fiber'
+// import { Float, Text3D, OrbitControls, Sphere } from '@react-three/drei'
 import { motion, AnimatePresence } from 'framer-motion'
-import * as THREE from 'three'
-import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
+// import * as THREE from 'three'
+// import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
 
 // Intelligence assessment categories
 const INTELLIGENCE_DIMENSIONS = {

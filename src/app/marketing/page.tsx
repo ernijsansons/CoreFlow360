@@ -10,7 +10,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  TeaserCampaignAssets,
+  // TeaserCampaignAssets, // Disabled - missing dependency
   LaunchSequenceOrchestrator,
   ConsciousnessMarketingFramework,
   type CampaignPhase
@@ -166,13 +166,16 @@ const MarketingPage: React.FC = () => {
                       <h3 className="text-lg font-semibold text-cyan-400">
                         {variant.charAt(0).toUpperCase() + variant.slice(1)} Variant
                       </h3>
-                      <TeaserCampaignAssets
+                      {/* <TeaserCampaignAssets
                         phase={selectedPhase}
                         variant={variant}
                         showInteractive={true}
                         onCTAClick={() => console.log(`CTA clicked for ${variant} ${selectedPhase}`)}
                         className="border border-gray-700 rounded-xl overflow-hidden"
-                      />
+                      /> */}
+                      <div className="border border-gray-700 rounded-xl overflow-hidden p-8 bg-gray-800">
+                        <p className="text-gray-400 text-center">Teaser Campaign Assets temporarily disabled</p>
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -1,0 +1,286 @@
+# CoreFlow360 Security Alerting Rules
+# Comprehensive security monitoring and alerting configuration
+
+groups:
+- name: security.critical
+  interval: 30s
+  rules:
+  
+  # Critical Security Incidents
+  - alert: SecurityIncidentCritical
+    expr: increase(security_incidents_total{severity="critical"}[5m]) > 0
+    for: 0m
+    labels:
+      severity: critical
+      category: security
+    annotations:
+      summary: "Critical security incident detected"
+      description: "Critical security incident in namespace {{ $labels.namespace }}: {{ $labels.incident_type }}"
+      runbook_url: "https://docs.coreflow360.com/security/incidents/critical"
+      
+  - alert: MultipleFailedAuthAttempts
+    expr: increase(auth_failed_attempts_total[5m]) > 10
+    for: 2m
+    labels:
+      severity: critical
+      category: authentication
+    annotations:
+      summary: "Multiple failed authentication attempts detected"
+      description: "{{ $value }} failed authentication attempts in the last 5 minutes from {{ $labels.source_ip }}"
+      runbook_url: "https://docs.coreflow360.com/security/auth-failures"
+      
+  - alert: RootContainerDetected
+    expr: kube_pod_container_status_running{container!=""} and on(pod, namespace) kube_pod_spec_containers{security_context_run_as_user="0"}
+    for: 0m
+    labels:
+      severity: critical
+      category: container_security
+    annotations:
+      summary: "Container running as root detected"
+      description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has container {{ $labels.container }} running as root"
+      runbook_url: "https://docs.coreflow360.com/security/root-containers"
+      
+  - alert: PrivilegedContainerDetected
+    expr: kube_pod_spec_containers{security_context_privileged="true"}
+    for: 0m
+    labels:
+      severity: critical
+      category: container_security
+    annotations:
+      summary: "Privileged container detected"
+      description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has privileged container {{ $labels.container }}"
+      runbook_url: "https://docs.coreflow360.com/security/privileged-containers"
+
+- name: security.high
+  interval: 60s
+  rules:
+  
+  # High Priority Security Issues
+  - alert: CertificateExpiringSoon
+    expr: (ssl_certificate_expiry_seconds - time()) / 86400 < 7
+    for: 0m
+    labels:
+      severity: warning
+      category: certificates
+    annotations:
+      summary: "SSL certificate expiring soon"
+      description: "SSL certificate for {{ $labels.domain }} expires in {{ $value }} days"
+      runbook_url: "https://docs.coreflow360.com/security/certificate-renewal"
+      
+  - alert: UnauthorizedAPIAccess
+    expr: increase(nginx_ingress_controller_requests_total{status="403"}[10m]) > 5
+    for: 5m
+    labels:
+      severity: warning
+      category: authorization
+    annotations:
+      summary: "Multiple unauthorized API access attempts"
+      description: "{{ $value }} unauthorized access attempts to {{ $labels.path }} in the last 10 minutes"
+      runbook_url: "https://docs.coreflow360.com/security/unauthorized-access"
+      
+  - alert: PodSecurityPolicyViolation
+    expr: increase(pod_security_policy_violations_total[15m]) > 0
+    for: 0m
+    labels:
+      severity: warning
+      category: pod_security
+    annotations:
+      summary: "Pod Security Policy violation detected"
+      description: "PSP violation in namespace {{ $labels.namespace }}: {{ $labels.violation_type }}"
+      runbook_url: "https://docs.coreflow360.com/security/psp-violations"
+      
+  - alert: NetworkPolicyBlocked
+    expr: increase(network_policy_blocked_connections_total[15m]) > 20
+    for: 5m
+    labels:
+      severity: warning
+      category: network_security
+    annotations:
+      summary: "High number of blocked network connections"
+      description: "{{ $value }} connections blocked by network policies from {{ $labels.source_namespace }}/{{ $labels.source_pod }}"
+      runbook_url: "https://docs.coreflow360.com/security/network-policies"
+      
+  - alert: VulnerabilityFound
+    expr: container_vulnerabilities{severity=~"high|critical"} > 0
+    for: 0m
+    labels:
+      severity: warning
+      category: vulnerabilities
+    annotations:
+      summary: "High/Critical vulnerability found in container"
+      description: "{{ $labels.severity }} vulnerability {{ $labels.vulnerability_id }} found in {{ $labels.image }}"
+      runbook_url: "https://docs.coreflow360.com/security/vulnerability-management"
+
+- name: security.medium
+  interval: 300s
+  rules:
+  
+  # Medium Priority Security Issues
+  - alert: SecretsNotRotated
+    expr: (time() - secret_last_rotation_timestamp) / 86400 > 60
+    for: 0m
+    labels:
+      severity: warning
+      category: secrets_management
+    annotations:
+      summary: "Secret not rotated recently"
+      description: "Secret {{ $labels.secret_name }} hasn't been rotated for {{ $value }} days"
+      runbook_url: "https://docs.coreflow360.com/security/secret-rotation"
+      
+  - alert: SecurityComplianceScore
+    expr: security_compliance_score < 80
+    for: 10m
+    labels:
+      severity: warning
+      category: compliance
+    annotations:
+      summary: "Security compliance score below threshold"
+      description: "Security compliance score is {{ $value }}%, below the required 80%"
+      runbook_url: "https://docs.coreflow360.com/security/compliance"
+      
+  - alert: AnomalousAPITraffic
+    expr: rate(api_requests_total[5m]) > (avg_over_time(rate(api_requests_total[5m])[1h:5m]) * 3)
+    for: 10m
+    labels:
+      severity: info
+      category: traffic_anomaly
+    annotations:
+      summary: "Anomalous API traffic detected"
+      description: "API traffic is {{ $value }}x higher than normal for endpoint {{ $labels.endpoint }}"
+      runbook_url: "https://docs.coreflow360.com/security/traffic-analysis"
+      
+  - alert: ServiceMeshTLSFailures
+    expr: rate(istio_request_total{security_policy!="mtls"}[5m]) > 0.1
+    for: 5m
+    labels:
+      severity: warning
+      category: service_mesh
+    annotations:
+      summary: "Service mesh TLS failures detected"
+      description: "{{ $value }} requests/sec are not using mTLS between {{ $labels.source_app }} and {{ $labels.destination_service_name }}"
+      runbook_url: "https://docs.coreflow360.com/security/service-mesh-tls"
+
+- name: security.audit
+  interval: 600s
+  rules:
+  
+  # Audit and Compliance Rules
+  - alert: AuditLogMissing
+    expr: absent_over_time(audit_log_events_total[30m])
+    for: 30m
+    labels:
+      severity: warning
+      category: audit
+    annotations:
+      summary: "Audit logs missing"
+      description: "No audit log events received in the last 30 minutes"
+      runbook_url: "https://docs.coreflow360.com/security/audit-logging"
+      
+  - alert: UnauthorizedSecretAccess
+    expr: increase(kube_audit_total{verb="get",objectRef_resource="secrets",user_username!~"system:.*"}[1h]) > 10
+    for: 0m
+    labels:
+      severity: warning
+      category: secret_access
+    annotations:
+      summary: "Unusual secret access pattern detected"
+      description: "User {{ $labels.user_username }} accessed {{ $value }} secrets in the last hour"
+      runbook_url: "https://docs.coreflow360.com/security/secret-access-audit"
+      
+  - alert: PrivilegeEscalationAttempt
+    expr: increase(kube_audit_total{verb="create",objectRef_resource="pods",requestObject_spec_securityContext_privileged="true"}[1h]) > 0
+    for: 0m
+    labels:
+      severity: critical
+      category: privilege_escalation
+    annotations:
+      summary: "Privilege escalation attempt detected"
+      description: "User {{ $labels.user_username }} attempted to create privileged pod"
+      runbook_url: "https://docs.coreflow360.com/security/privilege-escalation"
+      
+  - alert: ConfigMapDataExfiltration
+    expr: increase(kube_audit_total{verb="get",objectRef_resource="configmaps",user_username!~"system:.*"}[1h]) > 50
+    for: 0m
+    labels:
+      severity: warning
+      category: data_exfiltration
+    annotations:
+      summary: "Potential ConfigMap data exfiltration"
+      description: "User {{ $labels.user_username }} accessed {{ $value }} ConfigMaps in the last hour"
+      runbook_url: "https://docs.coreflow360.com/security/data-exfiltration"
+
+- name: security.external
+  interval: 300s
+  rules:
+  
+  # External Security Threats
+  - alert: MaliciousIPAccess
+    expr: increase(nginx_ingress_controller_requests_total{client_ip=~"(.*threat_intelligence_ips.*)"}[10m]) > 0
+    for: 0m
+    labels:
+      severity: critical
+      category: threat_intelligence
+    annotations:
+      summary: "Access from known malicious IP"
+      description: "{{ $value }} requests from known malicious IP {{ $labels.client_ip }}"
+      runbook_url: "https://docs.coreflow360.com/security/threat-intelligence"
+      
+  - alert: GeoLocationAnomalyDetected
+    expr: increase(nginx_ingress_controller_requests_total{geo_country!~"(US|CA|UK|DE|FR)"}[1h]) > 100
+    for: 0m
+    labels:
+      severity: info
+      category: geo_anomaly
+    annotations:
+      summary: "Unusual geographic access pattern"
+      description: "{{ $value }} requests from {{ $labels.geo_country }} in the last hour"
+      runbook_url: "https://docs.coreflow360.com/security/geo-monitoring"
+      
+  - alert: RateLimitExceeded
+    expr: increase(api_rate_limit_exceeded_total[5m]) > 10
+    for: 2m
+    labels:
+      severity: warning
+      category: rate_limiting
+    annotations:
+      summary: "API rate limit frequently exceeded"
+      description: "Rate limit exceeded {{ $value }} times for {{ $labels.endpoint }} from {{ $labels.client_ip }}"
+      runbook_url: "https://docs.coreflow360.com/security/rate-limiting"
+
+- name: security.performance
+  interval: 300s
+  rules:
+  
+  # Security Performance Monitoring
+  - alert: SecurityScannerDown
+    expr: up{job="security-scanner"} == 0
+    for: 5m
+    labels:
+      severity: critical
+      category: security_tools
+    annotations:
+      summary: "Security scanner is down"
+      description: "Security scanner {{ $labels.instance }} has been down for more than 5 minutes"
+      runbook_url: "https://docs.coreflow360.com/security/scanner-maintenance"
+      
+  - alert: AuditLogBacklog
+    expr: audit_log_queue_size > 1000
+    for: 10m
+    labels:
+      severity: warning
+      category: audit_performance
+    annotations:
+      summary: "Audit log processing backlog"
+      description: "Audit log queue has {{ $value }} pending events"
+      runbook_url: "https://docs.coreflow360.com/security/audit-performance"
+      
+  - alert: SecurityMetricsStale
+    expr: time() - security_metrics_last_update_timestamp > 600
+    for: 5m
+    labels:
+      severity: warning
+      category: monitoring
+    annotations:
+      summary: "Security metrics are stale"
+      description: "Security metrics haven't been updated for {{ $value }} seconds"
+      runbook_url: "https://docs.coreflow360.com/security/metrics-troubleshooting"

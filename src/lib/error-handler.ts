@@ -612,6 +612,9 @@ export const handleAuthzError = (error: unknown, context?: ErrorContext) => {
   return errorHandler.handleAuthzError(error, context)
 }
 
+// Alias for compatibility
+export const handleAuthorizationError = handleAuthzError
+
 export const handleNotFoundError = (resource: string, context?: ErrorContext) =>
   errorHandler.handleNotFoundError(resource, context)
 

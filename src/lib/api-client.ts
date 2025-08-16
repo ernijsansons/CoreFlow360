@@ -3,7 +3,7 @@
  * Centralized fetch wrapper with authentication, CSRF protection, and error handling
  */
 
-import { ClientCSRF } from '@/lib/csrf'
+import { ClientCSRF } from '@/lib/csrf-client'
 
 export class ApiError extends Error {
   constructor(

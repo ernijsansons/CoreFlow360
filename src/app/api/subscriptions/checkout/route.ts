@@ -10,6 +10,8 @@ import { createOrGetCustomer, createCheckoutSession } from '@/lib/stripe/stripe'
 import { PricingCalculator } from '@/lib/pricing/calculator'
 import { handleError, handleAuthError, handleValidationError, ErrorContext } from '@/lib/error-handler'
 import { withRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { withIdempotency } from '@/middleware/idempotency'
+import { transactionManager } from '@/lib/db/transaction-manager'
 import { z } from 'zod'
 
 const checkoutRequestSchema = z.object({
@@ -19,7 +21,7 @@ const checkoutRequestSchema = z.object({
   billingCycle: z.enum(['monthly', 'annual']).default('monthly')
 })
 
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
   return withRateLimit(request, async () => {
     const context: ErrorContext = {
       endpoint: '/api/subscriptions/checkout',
@@ -82,58 +84,22 @@ export async function POST(request: NextRequest) {
         billingCycle === 'annual' ? 'ANNUAL' : 'MONTHLY'
       )
 
-      // Create or get bundle in database
-      const bundleId = await getOrCreateBundle(tier, bundles[0], pricing)
-
-      // Create or get Stripe customer
-      const stripeCustomer = await createOrGetCustomer(
-        session.user.tenantId,
-        adminUser.email,
-        adminUser.name || undefined
-      )
-
-      // Create Stripe price if needed
-      const stripePriceId = await getOrCreateStripePrice(
-        tier,
-        pricing.totalMonthly * 100, // Convert to cents
-        billingCycle
-      )
-
-      // Create checkout session
-      const checkoutSession = await createCheckoutSession({
-        customerId: stripeCustomer.id,
-        priceId: stripePriceId,
-        quantity: users,
-        successUrl: `${process.env.NEXTAUTH_URL}/dashboard/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${process.env.NEXTAUTH_URL}/dashboard/subscription?canceled=true`,
-        metadata: {
-          tenantId: session.user.tenantId,
-          bundleId,
-          tier,
-          users: users.toString(),
-          bundles: bundles.join(','),
-          billingCycle
-        }
-      })
-
-      // Create pending subscription in database
-      await createPendingSubscription({
+      // Use transactional checkout process
+      const checkoutResult = await createSubscriptionCheckoutTransaction({
         tenantId: session.user.tenantId,
-        bundleId,
+        adminUser,
         tier,
         users,
         bundles,
         billingCycle,
-        pricing,
-        stripeCustomerId: stripeCustomer.id,
-        checkoutSessionId: checkoutSession.id
+        pricing
       })
 
       return NextResponse.json({
         success: true,
         data: {
-          checkoutUrl: checkoutSession.url,
-          sessionId: checkoutSession.id
+          checkoutUrl: checkoutResult.checkoutSession.url,
+          sessionId: checkoutResult.checkoutSession.id
         }
       })
 
@@ -198,7 +164,164 @@ async function getOrCreateStripePrice(
 }
 
 /**
- * Create pending subscription
+ * Create subscription checkout with transaction
+ */
+async function createSubscriptionCheckoutTransaction({
+  tenantId,
+  adminUser,
+  tier,
+  users,
+  bundles,
+  billingCycle,
+  pricing
+}: {
+  tenantId: string
+  adminUser: any
+  tier: string
+  users: number
+  bundles: string[]
+  billingCycle: string
+  pricing: any
+}) {
+  let bundleId: string
+  let stripeCustomer: any
+  let stripePriceId: string
+  let checkoutSession: any
+
+  const result = await transactionManager.executeSaga({
+    transactionType: 'subscription_checkout',
+    tenantId,
+    entityType: 'subscription',
+    steps: [
+      {
+        stepId: 'create_bundle',
+        stepType: 'database_write',
+        operation: async () => {
+          bundleId = await getOrCreateBundle(tier, bundles[0], pricing)
+          return { bundleId }
+        }
+      },
+      {
+        stepId: 'create_stripe_customer',
+        stepType: 'external_service',
+        operation: async () => {
+          stripeCustomer = await createOrGetCustomer(
+            tenantId,
+            adminUser.email,
+            adminUser.name || undefined
+          )
+          return stripeCustomer
+        }
+      },
+      {
+        stepId: 'create_stripe_price',
+        stepType: 'external_service',
+        operation: async () => {
+          stripePriceId = await getOrCreateStripePrice(
+            tier,
+            pricing.totalMonthly * 100, // Convert to cents
+            billingCycle
+          )
+          return { stripePriceId }
+        }
+      },
+      {
+        stepId: 'create_checkout_session',
+        stepType: 'external_service',
+        operation: async () => {
+          checkoutSession = await createCheckoutSession({
+            customerId: stripeCustomer.id,
+            priceId: stripePriceId,
+            quantity: users,
+            successUrl: `${process.env.NEXTAUTH_URL}/dashboard/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancelUrl: `${process.env.NEXTAUTH_URL}/dashboard/subscription?canceled=true`,
+            metadata: {
+              tenantId,
+              bundleId,
+              tier,
+              users: users.toString(),
+              bundles: bundles.join(','),
+              billingCycle
+            }
+          })
+          return checkoutSession
+        }
+      },
+      {
+        stepId: 'cancel_existing_pending',
+        stepType: 'database_write',
+        operation: async () => {
+          await prisma.tenantSubscription.updateMany({
+            where: {
+              tenantId,
+              status: 'PENDING'
+            },
+            data: {
+              status: 'CANCELLED',
+              cancelledAt: new Date(),
+              version: { increment: 1 }
+            }
+          })
+          return { cancelled: true }
+        }
+      },
+      {
+        stepId: 'create_pending_subscription',
+        stepType: 'database_write',
+        operation: async () => {
+          return prisma.tenantSubscription.create({
+            data: {
+              tenantId,
+              bundleId,
+              users,
+              price: pricing.totalMonthly,
+              status: 'PENDING',
+              startDate: new Date(),
+              endDate: new Date(Date.now() + (billingCycle === 'annual' ? 365 : 30) * 24 * 60 * 60 * 1000),
+              billingCycle: billingCycle === 'annual' ? 'ANNUAL' : 'MONTHLY',
+              stripeCustomerId: stripeCustomer.id,
+              enabledFeatures: JSON.stringify(bundles),
+              customLimits: JSON.stringify({
+                checkoutSessionId: checkoutSession.id,
+                tier,
+                originalRequest: { tier, users, bundles, billingCycle }
+              }),
+              version: 1
+            }
+          })
+        },
+        compensation: async () => {
+          // Cancel the pending subscription if transaction fails
+          if (checkoutSession?.id) {
+            await prisma.tenantSubscription.updateMany({
+              where: {
+                tenantId,
+                customLimits: {
+                  contains: checkoutSession.id
+                }
+              },
+              data: {
+                status: 'CANCELLED',
+                cancelledAt: new Date()
+              }
+            })
+          }
+        }
+      }
+    ]
+  })
+
+  return {
+    bundleId,
+    stripeCustomer,
+    stripePriceId,
+    checkoutSession,
+    subscription: result
+  }
+}
+
+/**
+ * Create pending subscription (legacy function for compatibility)
  */
 async function createPendingSubscription({
   tenantId,
@@ -254,3 +377,9 @@ async function createPendingSubscription({
     }
   })
 }
+
+// Export with idempotency protection
+export const POST = withIdempotency(postHandler, {
+  ttlMinutes: 120, // 2 hours for checkout sessions
+  methods: ['POST']
+})

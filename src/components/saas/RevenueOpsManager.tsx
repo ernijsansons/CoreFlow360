@@ -9,8 +9,8 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
   CurrencyDollarIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon as TrendingUpIcon,
+  ArrowTrendingDownIcon as TrendingDownIcon,
   ChartBarIcon,
   UsersIcon,
   CalendarIcon,

@@ -9,9 +9,10 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Sphere, Box, Text3D } from '@react-three/drei'
-import * as THREE from 'three'
+// TODO: Re-enable Three.js when peer dependencies are resolved
+// import { Canvas, useFrame } from '@react-three/fiber'
+// import { Sphere, Box, Text3D } from '@react-three/drei'
+// import * as THREE from 'three'
 
 interface Course {
   id: string
@@ -232,16 +233,17 @@ const LIVE_SESSIONS: LiveSession[] = [
   }
 ]
 
-// 3D Course Visualization
+// Simplified Course Visualization (CSS-based)
 const CourseVisualization: React.FC<{ progress: number; level: string }> = ({ progress, level }) => {
-  const meshRef = React.useRef<THREE.Mesh>(null)
+  // TODO: Re-enable 3D when Three.js is available
+  // const meshRef = React.useRef<THREE.Mesh>(null)
   
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += 0.01
-      meshRef.current.scale.setScalar(1 + Math.sin(state.clock.elapsedTime * 2) * 0.05)
-    }
-  })
+  // useFrame((state) => {
+  //   if (meshRef.current) {
+  //     meshRef.current.rotation.y += 0.01
+  //     meshRef.current.scale.setScalar(1 + Math.sin(state.clock.elapsedTime * 2) * 0.05)
+  //   }
+  // })
 
   const getColor = () => {
     switch (level) {
@@ -254,27 +256,24 @@ const CourseVisualization: React.FC<{ progress: number; level: string }> = ({ pr
   }
 
   return (
-    <group>
-      <mesh ref={meshRef}>
-        <torusGeometry args={[1, 0.4, 16, 32]} />
-        <meshStandardMaterial
-          color={getColor()}
-          emissive={getColor()}
-          emissiveIntensity={0.3}
-          metalness={0.8}
-          roughness={0.2}
-        />
-      </mesh>
+    <div className="w-24 h-24 mx-auto relative">
+      <motion.div
+        className="w-full h-full rounded-full border-4 flex items-center justify-center text-white font-bold text-xl"
+        style={{ backgroundColor: getColor(), borderColor: getColor() }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+      >
+        {Math.round(progress)}%
+      </motion.div>
       {/* Progress Ring */}
-      <mesh rotation-x={Math.PI / 2}>
-        <ringGeometry args={[1.2, 1.4, 32, 1, 0, (progress / 100) * Math.PI * 2]} />
-        <meshStandardMaterial
-          color="#06B6D4"
-          emissive="#06B6D4"
-          emissiveIntensity={0.5}
-        />
-      </mesh>
-    </group>
+      <div
+        className="absolute inset-0 rounded-full border-4 border-cyan-400"
+        style={{
+          background: `conic-gradient(from 0deg, #06B6D4 ${progress * 3.6}deg, transparent ${progress * 3.6}deg)`,
+          borderImage: `conic-gradient(from 0deg, #06B6D4 ${progress * 3.6}deg, transparent ${progress * 3.6}deg) 1`
+        }}
+      />
+    </div>
   )
 }
 

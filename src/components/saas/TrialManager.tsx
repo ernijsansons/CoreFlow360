@@ -11,7 +11,7 @@ import {
   BeakerIcon,
   ClockIcon,
   UserPlusIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon as TrendingUpIcon,
   TrendingDownIcon,
   CheckCircleIcon,
   XCircleIcon,

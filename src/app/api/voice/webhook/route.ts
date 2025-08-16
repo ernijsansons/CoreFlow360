@@ -9,6 +9,7 @@ import { twilioClient } from '@/lib/voice/twilio-client'
 import { scriptManager } from '@/lib/voice/industry-scripts'
 import { db } from '@/lib/db/client'
 import { validatePhoneNumber } from 'libphonenumber-js'
+import { withSignatureValidation } from '@/middleware/request-signature'
 
 interface CallData {
   CallSid: string
@@ -23,7 +24,7 @@ interface CallData {
  * POST /api/voice/webhook
  * Handle incoming Twilio webhook events
  */
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
   try {
     const formData = await request.formData()
     const callData: CallData = {
@@ -420,3 +421,9 @@ async function updateCallRecord(
     console.error('Error updating call record:', error)
   }
 }
+
+// Apply high security signature validation to critical voice webhook
+export const POST = withSignatureValidation(postHandler, { 
+  highSecurity: true,
+  skipInDevelopment: false // Always require signatures for voice webhooks
+});

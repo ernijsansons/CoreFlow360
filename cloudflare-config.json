@@ -1,0 +1,217 @@
+{
+  "name": "coreflow360-ddos-protection",
+  "description": "CoreFlow360 DDoS Protection Configuration for Cloudflare",
+  "zone_settings": {
+    "security_level": "high",
+    "challenge_ttl": 3600,
+    "browser_check": "on",
+    "always_use_https": "on",
+    "ssl": "full",
+    "min_tls_version": "1.2",
+    "opportunistic_encryption": "on",
+    "automatic_https_rewrites": "on",
+    "security_header": {
+      "strict_transport_security": {
+        "enabled": true,
+        "max_age": 31536000,
+        "include_subdomains": true,
+        "preload": true
+      }
+    }
+  },
+  "firewall_rules": [
+    {
+      "name": "Block High Threat Score",
+      "expression": "(cf.threat_score gt 90)",
+      "action": "block",
+      "priority": 1,
+      "description": "Block requests with threat score > 90"
+    },
+    {
+      "name": "Challenge Medium Threat Score",
+      "expression": "(cf.threat_score gt 60 and cf.threat_score le 90)",
+      "action": "managed_challenge",
+      "priority": 2,
+      "description": "Challenge requests with threat score 60-90"
+    },
+    {
+      "name": "JS Challenge Suspicious Traffic",
+      "expression": "(cf.threat_score gt 30 and cf.threat_score le 60)",
+      "action": "js_challenge",
+      "priority": 3,
+      "description": "JavaScript challenge for threat score 30-60"
+    },
+    {
+      "name": "Block Known Bots",
+      "expression": "(cf.bot_score lt 30 and not cf.bot_management.verified_bot)",
+      "action": "block",
+      "priority": 4,
+      "description": "Block unverified bots with low scores"
+    },
+    {
+      "name": "Rate Limit API Endpoints",
+      "expression": "(http.request.uri.path matches \"^/api/\")",
+      "action": "rate_limit",
+      "priority": 5,
+      "rate_limit": {
+        "threshold": 100,
+        "period": 60,
+        "action": "challenge"
+      },
+      "description": "Rate limit API endpoints to 100 req/min"
+    },
+    {
+      "name": "Geo-blocking High Risk Countries",
+      "expression": "(ip.geoip.country in {\"CN\" \"RU\" \"KP\"})",
+      "action": "block",
+      "priority": 6,
+      "description": "Block traffic from high-risk countries"
+    }
+  ],
+  "rate_limiting_rules": [
+    {
+      "name": "Global Rate Limit",
+      "threshold": 1000,
+      "period": 60,
+      "match": {
+        "request": {
+          "url": "/*"
+        }
+      },
+      "action": {
+        "mode": "challenge",
+        "timeout": 3600
+      }
+    },
+    {
+      "name": "API Burst Protection",
+      "threshold": 50,
+      "period": 10,
+      "match": {
+        "request": {
+          "url": "/api/*"
+        }
+      },
+      "action": {
+        "mode": "simulate",
+        "timeout": 60
+      }
+    },
+    {
+      "name": "Authentication Endpoint Protection",
+      "threshold": 5,
+      "period": 60,
+      "match": {
+        "request": {
+          "url": "/api/auth/*"
+        }
+      },
+      "action": {
+        "mode": "ban",
+        "timeout": 3600
+      }
+    }
+  ],
+  "page_rules": [
+    {
+      "targets": [
+        {
+          "target": "url",
+          "constraint": {
+            "operator": "matches",
+            "value": "api/*"
+          }
+        }
+      ],
+      "actions": [
+        {
+          "id": "cache_level",
+          "value": "bypass"
+        },
+        {
+          "id": "security_level",
+          "value": "high"
+        }
+      ],
+      "priority": 1
+    },
+    {
+      "targets": [
+        {
+          "target": "url",
+          "constraint": {
+            "operator": "matches",
+            "value": "_next/static/*"
+          }
+        }
+      ],
+      "actions": [
+        {
+          "id": "cache_level",
+          "value": "cache_everything"
+        },
+        {
+          "id": "edge_cache_ttl",
+          "value": 2678400
+        }
+      ],
+      "priority": 2
+    }
+  ],
+  "workers": {
+    "routes": [
+      {
+        "pattern": "*.coreflow360.com/*",
+        "script": "ddos-protection-worker"
+      }
+    ]
+  },
+  "bot_management": {
+    "enable_js_detection": true,
+    "fight_mode": true,
+    "verified_bots": {
+      "good_bots": ["googlebot", "bingbot", "slurp", "duckduckbot"],
+      "skip_verification": false
+    }
+  },
+  "waf": {
+    "packages": [
+      "OWASP_CRS",
+      "CloudflareManaged"
+    ],
+    "custom_rules": [
+      {
+        "name": "SQL Injection Protection",
+        "expression": "(http.request.uri.query contains \"union\" and http.request.uri.query contains \"select\") or (http.request.body contains \"' or\" and http.request.body contains \"=\")",
+        "action": "block"
+      },
+      {
+        "name": "XSS Protection",
+        "expression": "(http.request.uri.query contains \"<script\" or http.request.body contains \"<script\" or http.request.headers[\"referer\"][0] contains \"javascript:\")",
+        "action": "block"
+      }
+    ]
+  },
+  "analytics": {
+    "web_analytics": true,
+    "rum": true,
+    "logs": {
+      "enabled": true,
+      "fields": [
+        "ClientIP",
+        "ClientRequestHost",
+        "ClientRequestMethod",
+        "ClientRequestURI",
+        "EdgeResponseStatus",
+        "EdgeStartTimestamp",
+        "RayID",
+        "SecurityLevel",
+        "WAFAction",
+        "WAFProfile",
+        "WAFRuleID",
+        "WorkerStatus",
+        "ZoneName"
+      ]
+    }
+  }
+}

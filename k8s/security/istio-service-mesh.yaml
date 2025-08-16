@@ -1,0 +1,401 @@
+# CoreFlow360 Istio Service Mesh Configuration
+# Comprehensive service mesh security with mTLS and traffic policies
+
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: coreflow360-istio-control-plane
+  namespace: istio-system
+  labels:
+    app: coreflow360
+    component: service-mesh
+spec:
+  values:
+    global:
+      meshID: coreflow360-mesh
+      network: coreflow360-network
+      meshConfig:
+        defaultConfig:
+          proxyStatsMatcher:
+            inclusionRegexps:
+            - ".*circuit_breakers.*"
+            - ".*upstream_rq_retry.*"
+            - ".*upstream_rq_pending.*"
+            - ".*_cx_.*"
+        extensionProviders:
+        - name: prometheus
+          prometheus:
+            configOverride:
+              disable_host_header_fallback: true
+    pilot:
+      env:
+        ENABLE_WORKLOAD_ENTRY_AUTOREGISTRATION: true
+        PILOT_ENABLE_CROSS_CLUSTER_WORKLOAD_ENTRY: true
+        EXTERNAL_ISTIOD: true
+
+---
+# Peer Authentication - Enforce mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: coreflow360-default-mtls
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: service-mesh-security
+spec:
+  mtls:
+    mode: STRICT
+
+---
+# Destination Rule - Configure TLS settings
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: coreflow360-consciousness-tls
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: service-mesh
+spec:
+  host: consciousness-service.coreflow360.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 10
+        maxRetries: 3
+        consecutiveGatewayErrors: 5
+        interval: 30s
+        baseEjectionTime: 30s
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+
+---
+# Virtual Service - Traffic routing and security
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: coreflow360-consciousness-routing
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: service-mesh
+spec:
+  hosts:
+  - consciousness-service.coreflow360.svc.cluster.local
+  - coreflow360.com
+  http:
+  - match:
+    - uri:
+        prefix: "/api/admin"
+    fault:
+      abort:
+        percentage:
+          value: 0.1  # 0.1% fault injection for testing
+        httpStatus: 503
+    route:
+    - destination:
+        host: consciousness-service.coreflow360.svc.cluster.local
+        port:
+          number: 80
+    timeout: 10s
+    retries:
+      attempts: 3
+      perTryTimeout: 3s
+  - match:
+    - uri:
+        prefix: "/api/health"
+    route:
+    - destination:
+        host: consciousness-service.coreflow360.svc.cluster.local
+        port:
+          number: 80
+    timeout: 5s
+  - match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: consciousness-service.coreflow360.svc.cluster.local
+        port:
+          number: 80
+    timeout: 30s
+    retries:
+      attempts: 2
+      perTryTimeout: 15s
+
+---
+# Authorization Policy - Fine-grained access control
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: coreflow360-consciousness-authz
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: service-mesh-security
+spec:
+  selector:
+    matchLabels:
+      app: coreflow360
+      component: consciousness
+  rules:
+  # Allow health checks
+  - to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/api/health", "/api/ready", "/api/metrics"]
+  # Allow authenticated API access
+  - to:
+    - operation:
+        methods: ["GET", "POST", "PUT", "DELETE"]
+        paths: ["/api/*"]
+    when:
+    - key: request.headers[authorization]
+      values: ["Bearer *"]
+  # Allow public routes
+  - to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/", "/login", "/register", "/pricing", "/demo"]
+  # Block admin routes from unauthorized sources
+  - to:
+    - operation:
+        methods: ["*"]
+        paths: ["/api/admin/*"]
+    when:
+    - key: source.namespace
+      values: ["admin-tools"]
+    - key: request.headers[x-admin-token]
+      values: ["admin-*"]
+
+---
+# Request Authentication - JWT validation
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: coreflow360-jwt-auth
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: service-mesh-security
+spec:
+  selector:
+    matchLabels:
+      app: coreflow360
+      component: consciousness
+  jwtRules:
+  - issuer: "https://coreflow360.com"
+    jwksUri: "https://coreflow360.com/.well-known/jwks.json"
+    audiences:
+    - "coreflow360-api"
+    forwardOriginalToken: true
+
+---
+# Service Entry - External services
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: coreflow360-external-apis
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: service-mesh
+spec:
+  hosts:
+  - api.openai.com
+  - api.anthropic.com
+  - api.stripe.com
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+
+---
+# Gateway - Ingress configuration
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: coreflow360-gateway
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: service-mesh
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: coreflow360-tls-cert
+    hosts:
+    - coreflow360.com
+    - "*.coreflow360.com"
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - coreflow360.com
+    - "*.coreflow360.com"
+    tls:
+      httpsRedirect: true
+
+---
+# EnvoyFilter - Additional security headers
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: coreflow360-security-headers
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: service-mesh-security
+spec:
+  workloadSelector:
+    labels:
+      app: coreflow360
+      component: consciousness
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.filters.http.lua
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+          inline_code: |
+            function envoy_on_response(response_handle)
+              response_handle:headers():add("X-Content-Type-Options", "nosniff")
+              response_handle:headers():add("X-Frame-Options", "DENY")
+              response_handle:headers():add("X-XSS-Protection", "1; mode=block")
+              response_handle:headers():add("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+              response_handle:headers():add("Referrer-Policy", "strict-origin-when-cross-origin")
+              response_handle:headers():add("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+            end
+
+---
+# Telemetry v2 configuration
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: coreflow360-metrics
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: service-mesh-observability
+spec:
+  metrics:
+  - providers:
+    - name: prometheus
+  - overrides:
+    - match:
+        metric: ALL_METRICS
+      tagOverrides:
+        source_app:
+          value: "coreflow360"
+        destination_service_name:
+          value: "consciousness-service"
+
+---
+# Workload Entry for external services
+apiVersion: networking.istio.io/v1beta1
+kind: WorkloadEntry
+metadata:
+  name: coreflow360-external-database
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: service-mesh
+spec:
+  address: postgres.coreflow360.com
+  ports:
+    postgres: 5432
+  labels:
+    app: postgres
+    version: "15"
+
+---
+# Sidecar configuration - Resource optimization
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: coreflow360-consciousness-sidecar
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: service-mesh
+spec:
+  workloadSelector:
+    labels:
+      app: coreflow360
+      component: consciousness
+  egress:
+  - hosts:
+    - "./*"
+    - "istio-system/*"
+    - "kube-system/kube-dns"
+  - hosts:
+    - "./postgres.coreflow360.com"
+    - "./redis.coreflow360.com"
+  - hosts:
+    - "api.openai.com"
+    - "api.anthropic.com"
+    - "api.stripe.com"
+
+---
+# Proxy Config - Fine-tune Envoy
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coreflow360-proxy-config
+  namespace: coreflow360
+  labels:
+    app: coreflow360
+    component: service-mesh
+data:
+  custom_bootstrap.json: |
+    {
+      "static_resources": {
+        "clusters": [
+          {
+            "name": "consciousness_cluster",
+            "connect_timeout": "5s",
+            "type": "STRICT_DNS",
+            "lb_policy": "ROUND_ROBIN",
+            "circuit_breakers": {
+              "thresholds": [
+                {
+                  "priority": "DEFAULT",
+                  "max_connections": 100,
+                  "max_pending_requests": 50,
+                  "max_requests": 100,
+                  "max_retries": 3
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }

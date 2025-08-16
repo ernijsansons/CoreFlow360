@@ -4,9 +4,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { handleError, ErrorContext } from '@/lib/error-handler';
+import { withAuth, AuthenticatedSession } from '@/lib/auth/withAuth';
+import { createErrorContextWithUser } from '@/lib/error-handler/createErrorContext';
+import { handleError } from '@/lib/error-handler';
 import { businessConsciousness } from '@/consciousness';
 import { prisma } from '@/lib/prisma';
 
@@ -91,24 +91,22 @@ interface ConsciousnessStatusResponse {
   };
 }
 
-export async function GET(request: NextRequest): Promise<NextResponse<ConsciousnessStatusResponse | { error: string }>> {
-  const context: ErrorContext = {
-    endpoint: '/api/consciousness/status',
-    method: 'GET',
-    userAgent: request.headers.get('user-agent') || undefined,
-    ip: request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || undefined,
-    requestId: request.headers.get('x-request-id') || undefined
-  };
+async function getConsciousnessStatus(
+  request: NextRequest,
+  session: AuthenticatedSession
+): Promise<NextResponse<ConsciousnessStatusResponse | { error: string }>> {
+  const context = createErrorContextWithUser(
+    request,
+    '/api/consciousness/status',
+    {
+      id: session.user.id,
+      role: session.user.role,
+      tenantId: session.user.tenantId,
+      permissions: session.user.permissions
+    }
+  );
 
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
 
     // Get user details
     const user = await prisma.user.findUnique({
@@ -294,24 +292,22 @@ export async function GET(request: NextRequest): Promise<NextResponse<Consciousn
 /**
  * Update consciousness settings
  */
-export async function PUT(request: NextRequest): Promise<NextResponse> {
-  const context: ErrorContext = {
-    endpoint: '/api/consciousness/status',
-    method: 'PUT',
-    userAgent: request.headers.get('user-agent') || undefined,
-    ip: request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || undefined,
-    requestId: request.headers.get('x-request-id') || undefined
-  };
+async function updateConsciousnessSettings(
+  request: NextRequest,
+  session: AuthenticatedSession
+): Promise<NextResponse> {
+  const context = createErrorContextWithUser(
+    request,
+    '/api/consciousness/status',
+    {
+      id: session.user.id,
+      role: session.user.role,
+      tenantId: session.user.tenantId,
+      permissions: session.user.permissions
+    }
+  );
 
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
 
     const body = await request.json();
     const { autoEvolution, goals } = body;
@@ -444,3 +440,12 @@ function estimateEvolutionTime(progress: number): string {
     return `${Math.ceil(daysEstimate / 30)} months`;
   }
 }
+
+// Export the wrapped handlers
+export const GET = withAuth(getConsciousnessStatus, {
+  requirePermissions: ['consciousness:read']
+});
+
+export const PUT = withAuth(updateConsciousnessSettings, {
+  requirePermissions: ['consciousness:write']
+});

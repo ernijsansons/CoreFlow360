@@ -8,6 +8,7 @@ import { withRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 import { successResponse, notFoundResponse, authErrorResponse, validationErrorResponse } from "@/lib/api-response"
 import { updateCustomerSchema } from "@/lib/schemas"
 import { withAPIVersioning, responseTransformers } from "@/lib/api/with-versioning"
+import { TenantSecureDatabase } from "@/lib/security/tenant-isolation"
 
 async function getHandler(
   request: NextRequest,
@@ -120,36 +121,55 @@ async function putHandler(
         return notFoundResponse("Customer not found")
       }
 
-      // Update customer
-      const customer = await prisma.customer.update({
-        where: { id: id },
-        data: updateData,
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-          phone: true,
-          address: true,
-          company: true,
-          industry: true,
-          status: true,
-          source: true,
-          totalRevenue: true,
-          createdAt: true,
-          updatedAt: true,
-          aiScore: true,
-          aiChurnRisk: true,
-          aiLifetimeValue: true,
-          assignee: {
-            select: {
-              id: true,
-              name: true,
-              email: true
+      // Update customer using secure tenant-isolated operation
+      const updateResult = await TenantSecureDatabase.update(
+        prisma.customer,
+        { 
+          where: { id: id },
+          data: updateData,
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+            address: true,
+            company: true,
+            industry: true,
+            status: true,
+            source: true,
+            totalRevenue: true,
+            createdAt: true,
+            updatedAt: true,
+            aiScore: true,
+            aiChurnRisk: true,
+            aiLifetimeValue: true,
+            assignee: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
             }
           }
+        },
+        {
+          tenantId: session.user.tenantId,
+          userId: session.user.id,
+          operation: 'UPDATE',
+          entityType: 'customer',
+          entityId: id
         }
-      })
+      )
+
+      if (!updateResult.success) {
+        if (updateResult.securityViolation) {
+          return authErrorResponse(updateResult.error || "Access denied")
+        }
+        throw new Error(updateResult.error || "Failed to update customer")
+      }
+
+      const customer = updateResult.data
 
       // Log the update
       await prisma.auditLog.create({
@@ -216,10 +236,25 @@ async function deleteHandler(
         return notFoundResponse("Customer not found")
       }
 
-      // Delete customer
-      await prisma.customer.delete({
-        where: { id: id }
-      })
+      // Delete customer using secure tenant-isolated operation
+      const deleteResult = await TenantSecureDatabase.delete(
+        prisma.customer,
+        { where: { id: id } },
+        {
+          tenantId: session.user.tenantId,
+          userId: session.user.id,
+          operation: 'DELETE',
+          entityType: 'customer',
+          entityId: id
+        }
+      )
+
+      if (!deleteResult.success) {
+        if (deleteResult.securityViolation) {
+          return authErrorResponse(deleteResult.error || "Access denied")
+        }
+        throw new Error(deleteResult.error || "Failed to delete customer")
+      }
 
       // Log the deletion
       await prisma.auditLog.create({

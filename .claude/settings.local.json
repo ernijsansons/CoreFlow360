@@ -69,7 +69,13 @@
       "WebFetch(domain:coreflow360-h1agt6grx-ernijsansons-projects.vercel.app)",
       "WebFetch(domain:v0.app)",
       "Bash(./list-v0-prompts.sh:*)",
-      "WebFetch(domain:vercel.com)"
+      "WebFetch(domain:vercel.com)",
+      "Bash(git rm:*)",
+      "Bash(timeout:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(sed:*)",
+      "WebFetch(domain:www.odoo.com)",
+      "WebFetch(domain:www.zoho.com)"
     ],
     "deny": []
   }

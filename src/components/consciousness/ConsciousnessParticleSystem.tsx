@@ -11,19 +11,20 @@
  */
 
 import React, { useRef, useMemo, useEffect, useState, useCallback } from 'react'
-import { Canvas, useFrame, useThree, extend } from '@react-three/fiber'
-import { 
-  OrbitControls, 
-  Float, 
-  Text3D, 
-  Trail, 
-  Sparkles, 
-  Environment,
-  EffectComposer,
-  Bloom,
-  ChromaticAberration
-} from '@react-three/drei'
-import * as THREE from 'three'
+// TODO: Re-enable Three.js when peer dependencies are resolved
+// import { Canvas, useFrame, useThree, extend } from '@react-three/fiber'
+// import { 
+//   OrbitControls, 
+//   Float, 
+//   Text3D, 
+//   Trail, 
+//   Sparkles, 
+//   Environment,
+//   EffectComposer,
+//   Bloom,
+//   ChromaticAberration
+// } from '@react-three/drei'
+// import * as THREE from 'three'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Custom shader materials for consciousness effects

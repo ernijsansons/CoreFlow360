@@ -9,6 +9,9 @@ import { Request, Response } from 'express';
 import { Client as TemporalClient } from '@temporalio/client';
 import { v4 as uuidv4 } from 'uuid';
 import { performance } from 'perf_hooks';
+import { deadLetterQueue } from '@/lib/webhook-dlq/dead-letter-queue';
+import { createWebhookValidator, WEBHOOK_CONFIGS } from '@/lib/security/webhook-security';
+import { webhookAnalytics } from '@/lib/monitoring/webhook-analytics';
 
 export interface WebhookEvent {
   id: string;
@@ -43,13 +46,16 @@ export class EnhancedWebhookHandler {
   private temporalClient?: TemporalClient;
   private circuitBreakers: Map<string, CircuitBreakerState> = new Map();
   private processingQueue: Map<string, WebhookEvent[]> = new Map();
+  private vapiValidator = createWebhookValidator(WEBHOOK_CONFIGS.vapi);
+  private twilioValidator = createWebhookValidator(WEBHOOK_CONFIGS.twilio);
   private metrics = {
     totalRequests: 0,
     successfulRequests: 0,
     failedRequests: 0,
     averageProcessingTime: 0,
     temporalWorkflowsStarted: 0,
-    circuitBreakerTrips: 0
+    circuitBreakerTrips: 0,
+    securityValidationFailures: 0
   };
   
   constructor() {
@@ -57,7 +63,7 @@ export class EnhancedWebhookHandler {
     this.startHealthMonitoring();
     this.startQueueProcessor();
     
-    console.log('🎣 Enhanced Webhook Handler initialized');
+    console.log('🎣 Enhanced Webhook Handler initialized with security validation');
   }
 
   private async initializeTemporalClient(): Promise<void> {
@@ -92,6 +98,27 @@ export class EnhancedWebhookHandler {
     let result: ProcessingResult;
 
     try {
+      // Enhanced security validation first
+      const securityResult = await this.validateWebhookSecurity(req);
+      if (!securityResult.isValid) {
+        this.metrics.securityValidationFailures++;
+        console.warn('Voice webhook security validation failed:', {
+          error: securityResult.error,
+          metadata: securityResult.metadata,
+          userAgent: req.headers['user-agent'],
+          ip: req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown'
+        });
+        
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Security validation failed',
+          details: securityResult.error
+        }), { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
       // Parse and validate webhook
       webhookEvent = await this.parseWebhook(req);
       console.log(`📨 Webhook received: ${webhookEvent.type} for call ${webhookEvent.callId}`);
@@ -111,6 +138,24 @@ export class EnhancedWebhookHandler {
 
       // Reset circuit breaker on success
       this.resetCircuitBreaker(webhookEvent.tenantId);
+
+      // Record analytics for successful request
+      webhookAnalytics.recordEvent({
+        provider: webhookEvent.provider,
+        endpoint: req.url || '/webhook',
+        method: req.method || 'POST',
+        statusCode: 200,
+        latency: performance.now() - startTime,
+        success: true,
+        tenantId: webhookEvent.tenantId,
+        callId: webhookEvent.callId,
+        retryCount: webhookEvent.retryCount || 0,
+        metadata: {
+          eventType: webhookEvent.type,
+          workflowId: result.workflowId,
+          actions: result.actions
+        }
+      });
 
       console.log(`✅ Webhook processed successfully in ${result.duration.toFixed(2)}ms`);
       
@@ -136,7 +181,43 @@ export class EnhancedWebhookHandler {
         callId: webhookEvent?.callId || 'unknown'
       });
 
-      // Queue for retry if it's a transient error
+      // Record analytics for failed request
+      if (webhookEvent) {
+        webhookAnalytics.recordEvent({
+          provider: webhookEvent.provider,
+          endpoint: req.url || '/webhook',
+          method: req.method || 'POST',
+          statusCode: 500,
+          latency: duration,
+          success: false,
+          errorType: error.constructor.name,
+          tenantId: webhookEvent.tenantId,
+          callId: webhookEvent.callId,
+          retryCount: webhookEvent.retryCount || 0,
+          metadata: {
+            eventType: webhookEvent.type,
+            errorMessage: error.message,
+            circuitBreakerOpen: !this.isCircuitClosed(webhookEvent.tenantId)
+          }
+        });
+      }
+
+      // Add to Dead Letter Queue for comprehensive failure handling
+      if (webhookEvent) {
+        await deadLetterQueue.addFailedEvent({
+          eventType: webhookEvent.type,
+          sourceProvider: webhookEvent.provider,
+          payload: webhookEvent.data,
+          originalHeaders: Object.fromEntries(req.headers.entries()),
+          failureReason: error.message,
+          stackTrace: error.stack,
+          tenantId: webhookEvent.tenantId,
+          priority: this.determinePriority(webhookEvent.type),
+          maxRetries: 5
+        });
+      }
+
+      // Queue for retry if it's a transient error (legacy system)
       if (this.isTransientError(error as Error) && webhookEvent) {
         await this.queueForRetry(webhookEvent);
       }
@@ -150,6 +231,58 @@ export class EnhancedWebhookHandler {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
+    }
+  }
+
+  /**
+   * Enhanced security validation for voice webhooks
+   */
+  private async validateWebhookSecurity(req: Request): Promise<{
+    isValid: boolean
+    error?: string
+    metadata?: any
+  }> {
+    try {
+      const body = await req.text();
+      const headers = Object.fromEntries(req.headers.entries());
+      const provider = this.detectProviderFromHeaders(headers);
+
+      const payload = {
+        body,
+        headers,
+        method: req.method,
+        url: req.url
+      };
+
+      let validator;
+      switch (provider) {
+        case 'vapi':
+          validator = this.vapiValidator;
+          break;
+        case 'twilio':
+          validator = this.twilioValidator;
+          break;
+        default:
+          // For unknown providers, use basic validation
+          return {
+            isValid: true,
+            metadata: { provider: 'unknown', validated: false }
+          };
+      }
+
+      const result = await validator.validateWebhook(payload);
+      return {
+        isValid: result.isValid,
+        error: result.error,
+        metadata: { ...result.metadata, provider }
+      };
+
+    } catch (error) {
+      return {
+        isValid: false,
+        error: `Security validation error: ${error.message}`,
+        metadata: { error: true }
+      };
     }
   }
 
@@ -220,6 +353,12 @@ export class EnhancedWebhookHandler {
         raw: body
       }
     };
+  }
+
+  private detectProviderFromHeaders(headers: Record<string, string>): 'vapi' | 'twilio' | 'unknown' {
+    if (headers['x-vapi-signature'] || headers['x-vapi-timestamp']) return 'vapi';
+    if (headers['x-twilio-signature']) return 'twilio';
+    return 'unknown';
   }
 
   private detectProvider(headers: Record<string, string>, body: any): 'vapi' | 'twilio' {
@@ -616,7 +755,8 @@ export class EnhancedWebhookHandler {
         successRate: `${successRate.toFixed(2)}%`,
         averageProcessingTime: `${this.metrics.averageProcessingTime.toFixed(2)}ms`,
         temporalWorkflows: this.metrics.temporalWorkflowsStarted,
-        circuitBreakerTrips: this.metrics.circuitBreakerTrips
+        circuitBreakerTrips: this.metrics.circuitBreakerTrips,
+        securityValidationFailures: this.metrics.securityValidationFailures
       });
     }, 60000); // Report every minute
   }
@@ -640,6 +780,38 @@ export class EnhancedWebhookHandler {
   private async recordCallFailure(params: any): Promise<void> { }
   private shouldRetryCall(error: string): boolean { return false; }
   private async scheduleCallRetry(callId: string, tenantId: string): Promise<void> { }
+
+  /**
+   * Determine event priority for Dead Letter Queue processing
+   * Critical events get highest priority for recovery
+   */
+  private determinePriority(eventType: string): 'critical' | 'high' | 'medium' | 'low' {
+    const priorityMap: Record<string, 'critical' | 'high' | 'medium' | 'low'> = {
+      // Critical business events - immediate attention required
+      'call-start': 'critical',
+      'call_started': 'critical',
+      'call-end': 'critical', 
+      'call_ended': 'critical',
+      'completed': 'critical',
+      
+      // High priority - important for operations
+      'call-failed': 'high',
+      'failed': 'high',
+      'function-call': 'high',
+      'tool-calls': 'high',
+      
+      // Medium priority - valuable but not urgent
+      'transcript': 'medium',
+      'utterance': 'medium',
+      
+      // Low priority - informational events
+      'status-update': 'low',
+      'heartbeat': 'low',
+      'ping': 'low'
+    };
+
+    return priorityMap[eventType] || 'medium';
+  }
 
   // Public methods for monitoring
   public getMetrics() {

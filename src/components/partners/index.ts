@@ -7,8 +7,8 @@
 
 export { default as PartnerPortalDashboard } from './PartnerPortalDashboard'
 export { default as IntelligenceCertificationProgram } from './IntelligenceCertificationProgram'
-export { default as PartnerResourceLibrary } from './PartnerResourceLibrary'
-export { default as PartnerTrainingAcademy } from './PartnerTrainingAcademy'
+// export { default as PartnerResourceLibrary } from './PartnerResourceLibrary' // Disabled - missing @react-three/fiber
+// export { default as PartnerTrainingAcademy } from './PartnerTrainingAcademy' // Disabled - missing @react-three/fiber
 export { default as PartnerCommunityHub } from './PartnerCommunityHub'
 
 // Partner types
