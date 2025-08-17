@@ -116,7 +116,11 @@ const ConfigSchema = z.object({
   
   // Performance settings  
   MAX_FILE_SIZE: z.string().transform(val => parseInt(val || '10485760', 10)).default('10485760'), // 10MB
-  RATE_LIMIT_WINDOW: z.string().transform(val => parseInt(val || '60000', 10)).default('60000'), // 1 minute  
+  RATE_LIMIT_WINDOW: z.string().transform(val => {
+    const parsed = parseInt(val || '60000', 10)
+    if (parsed > 3600000) throw new Error('RATE_LIMIT_WINDOW must be less than or equal to 3600000 milliseconds')
+    return parsed
+  }).default('60000'), // 1 minute  
   RATE_LIMIT_MAX_REQUESTS: z.string().transform(val => parseInt(val || '100', 10)).default('100'),
   
   // Server configuration

@@ -5,7 +5,17 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { wsServer } from '@/server/websocket-server'
+
+// Dynamic import to avoid build-time issues
+const getWsServer = async () => {
+  try {
+    const { wsServer } = await import('@/server/websocket-server')
+    return wsServer
+  } catch (error) {
+    console.warn('WebSocket server not available:', error.message)
+    return null
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,6 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get WebSocket server status
+    const wsServer = await getWsServer()
     const status = {
       serverRunning: !!wsServer,
       timestamp: new Date().toISOString(),
@@ -75,6 +86,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action, data } = body
 
+    const wsServer = await getWsServer()
     if (!wsServer) {
       return NextResponse.json(
         { error: 'WebSocket server not available' },

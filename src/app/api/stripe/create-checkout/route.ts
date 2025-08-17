@@ -5,14 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import Stripe from 'stripe'
-import { PrismaClient } from '@prisma/client'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20'
-})
-
-const prisma = new PrismaClient()
+import { stripe } from '@/lib/stripe/stripe'
+import { db } from '@/lib/db'
 
 const CheckoutRequestSchema = z.object({
   tenantId: z.string().min(1, "Tenant ID is required"),
@@ -325,7 +319,7 @@ async function storePendingSubscription(data: {
 }): Promise<void> {
   try {
     // Store in database for webhook processing
-    await prisma.subscriptionEvent.create({
+    await db.subscriptionEvent.create({
       data: {
         // We'll need to create a temporary subscription record or use a different approach
         tenantSubscriptionId: 'pending', // Placeholder - will be updated by webhook
