@@ -35,7 +35,7 @@ jobs:
       env:
         DATABASE_URL: postgresql://user:pass@localhost:5432/test
         NEXTAUTH_URL: http://localhost:3000
-        NEXTAUTH_SECRET: test-secret-for-ci-only
+        NEXTAUTH_SECRET: test-secret-32-chars-minimum-for-ci-testing-only
         NODE_ENV: test
 
     - name: Build application
