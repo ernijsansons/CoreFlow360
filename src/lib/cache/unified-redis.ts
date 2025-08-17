@@ -163,6 +163,12 @@ export class UnifiedRedisCache {
   }
 
   private async init() {
+    // Skip initialization during build
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+      console.log('Skipping Redis initialization during build')
+      return
+    }
+    
     // Start stats reset interval if not already started
     if (!this.statsResetInterval) {
       this.statsResetInterval = setInterval(() => {
@@ -203,7 +209,10 @@ export class UnifiedRedisCache {
         this.connected = false
       })
 
-      await this.redisClient.connect()
+      // Only connect in runtime, not during build
+      if (!process.env.VERCEL && !process.env.CI && !process.env.NEXT_PHASE) {
+        await this.redisClient.connect()
+      }
     } catch (error) {
       console.error('Redis initialization error:', error)
       this.connected = false
@@ -252,6 +261,11 @@ export class UnifiedRedisCache {
    * Get a value from cache with automatic fallback
    */
   async get<T = any>(key: string, options?: CacheOptions): Promise<T | null> {
+    // Skip during build
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+      return null
+    }
+    
     // Ensure initialization on first use
     if (!this.redisClient && !this.connected) {
       await this.init()
@@ -291,6 +305,11 @@ export class UnifiedRedisCache {
    * Set a value in cache with automatic fallback
    */
   async set(key: string, value: any, options?: CacheOptions): Promise<boolean> {
+    // Skip during build
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+      return true
+    }
+    
     return withPerformanceTracking('cache.set', async () => {
       const cacheKey = this.buildKey(key, options)
       const ttl = options?.ttl || 3600
@@ -533,9 +552,19 @@ export function getUnifiedCache(): UnifiedRedisCache {
   return _unifiedCache
 }
 
-// Export proxy for backward compatibility
+// Export proxy for backward compatibility with build-time safety
 export const unifiedCache = new Proxy({} as UnifiedRedisCache, {
   get(_target, prop) {
+    // During build, return no-op functions
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+      const noOpMethods = ['get', 'set', 'del', 'exists', 'invalidate', 'invalidatePattern', 'invalidateTags', 'clear', 'getStats', 'cache', 'connect', 'disconnect']
+      if (noOpMethods.includes(prop as string)) {
+        return async () => {
+          console.log(`Cache operation ${prop} skipped during build`)
+          return prop === 'get' ? null : prop === 'exists' ? false : prop === 'getStats' ? {} : true
+        }
+      }
+    }
     const cache = getUnifiedCache()
     return cache[prop as keyof UnifiedRedisCache]
   }

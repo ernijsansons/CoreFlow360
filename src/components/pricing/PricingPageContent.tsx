@@ -166,13 +166,13 @@ export default function PricingPageContent() {
                 '@type': 'FAQPage',
                 mainEntity: faqData.map(faq => ({
                   '@type': 'Question',
-                  name: faq.question,
+                  name: faq.question.replace(/[<>'"]/g, ''),
                   acceptedAnswer: {
                     '@type': 'Answer',
-                    text: faq.answer
+                    text: faq.answer.replace(/[<>'"]/g, '')
                   }
                 }))
-              })
+              }).replace(/[<>]/g, '') // Additional sanitization
             }}
           />
         </motion.div>

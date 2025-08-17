@@ -28,6 +28,12 @@ let redisClient: Redis | null = null
  * Get or create Redis client instance
  */
 export function getRedisClient(): Redis | null {
+  // Skip Redis entirely during build
+  const isBuildTime = process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV
+  if (isBuildTime) {
+    return null
+  }
+  
   if (!process.env.REDIS_URL && !process.env.REDIS_HOST) {
     console.warn('Redis not configured - caching disabled')
     return null
@@ -116,6 +122,11 @@ export const redis = {
    * Get value with automatic JSON parsing
    */
   async get<T = any>(key: string): Promise<T | null> {
+    // Skip during build
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+      return null
+    }
+    
     const client = getRedisClient()
     if (!client) return null
     
@@ -139,6 +150,11 @@ export const redis = {
    * Set value with automatic JSON stringification
    */
   async set(key: string, value: any, ttl?: number): Promise<boolean> {
+    // Skip during build
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+      return true
+    }
+    
     const client = getRedisClient()
     if (!client) return false
     

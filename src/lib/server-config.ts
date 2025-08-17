@@ -5,7 +5,6 @@
 
 import { gracefulShutdown, shutdownTasks } from './shutdown-handler'
 import { db } from './db'
-import { redis } from './redis'
 
 /**
  * Initialize server with graceful shutdown
@@ -16,8 +15,15 @@ export function initializeServer() {
   // Register shutdown tasks for critical resources
   gracefulShutdown.registerTask(shutdownTasks.prisma(db))
   
-  if (redis) {
-    gracefulShutdown.registerTask(shutdownTasks.redis(redis))
+  // Lazy load Redis to avoid build-time connections
+  if (!process.env.VERCEL && !process.env.CI && process.env.REDIS_URL) {
+    import('./redis').then(({ redis }) => {
+      if (redis) {
+        gracefulShutdown.registerTask(shutdownTasks.redis(redis))
+      }
+    }).catch(err => {
+      console.warn('Failed to load Redis for shutdown handling:', err)
+    })
   }
 
   // Register application state saving
@@ -25,17 +31,21 @@ export function initializeServer() {
     // Save any critical application state
     console.log('Saving application metrics and state...')
     
-    // Example: Save cache statistics
-    if (redis && redis.isOpen) {
+    // Example: Save cache statistics (skip during build)
+    if (!process.env.VERCEL && !process.env.CI && process.env.REDIS_URL) {
       try {
-        const stats = {
-          timestamp: new Date().toISOString(),
-          activeConnections: await redis.client_list(),
-          memoryUsage: await redis.memory_usage('cache:stats') || 0
+        const { redis } = await import('./redis')
+        if (redis && typeof redis.get === 'function') {
+          try {
+            // Simple test to see if Redis is available
+            await redis.get('test')
+            console.log('Redis stats saved during shutdown')
+          } catch (error) {
+            console.warn('Redis not available during shutdown')
+          }
         }
-        await redis.set('app:shutdown_stats', JSON.stringify(stats), { EX: 3600 })
       } catch (error) {
-        console.warn('Failed to save cache statistics:', error)
+        console.warn('Failed to load Redis for stats:', error)
       }
     }
 

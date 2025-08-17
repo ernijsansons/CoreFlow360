@@ -157,7 +157,7 @@ export default async function RootLayout({
                 'https://twitter.com/CoreFlow360',
                 'https://linkedin.com/company/coreflow360'
               ]
-            })
+            }).replace(/[<>]/g, '') // Additional sanitization for extra security
           }}
         />
       </head>

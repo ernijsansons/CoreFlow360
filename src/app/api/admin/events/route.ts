@@ -327,7 +327,7 @@ async function handleCreateSnapshot(data: any) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: `Failed to create snapshot: ${error.message}` },
+      { error: `Failed to create snapshot: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
       { status: 400 }
     );
   }

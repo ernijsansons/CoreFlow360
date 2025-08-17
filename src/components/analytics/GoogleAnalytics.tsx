@@ -27,7 +27,7 @@ export default function GoogleAnalytics() {
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
 
-            gtag('config', '${GA_TRACKING_ID}', {
+            gtag('config', '${GA_TRACKING_ID.replace(/[<>'"]/g, '')}', {
               page_path: window.location.pathname,
               send_page_view: true,
               // Enhanced ecommerce for subscription tracking
@@ -39,7 +39,7 @@ export default function GoogleAnalytics() {
             });
 
             // Enhanced ecommerce configuration
-            gtag('config', '${GA_TRACKING_ID}', {
+            gtag('config', '${GA_TRACKING_ID.replace(/[<>'"]/g, '')}', {
               // Track subscription events as purchases
               enhanced_ecommerce: true,
               // Custom events for SaaS metrics
