@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-08-17T16:49:18.842Z",
-  "totalIssues": 6287,
+  "timestamp": "2025-08-17T17:02:05.731Z",
+  "totalIssues": 6284,
   "criticalIssues": 0,
   "highIssues": 36,
   "mediumIssues": 361,
-  "lowIssues": 5890,
+  "lowIssues": 5887,
   "categories": {
     "security": {
       "issues": [
@@ -168,19 +168,19 @@
           "type": "SQL Injection Patterns",
           "file": "src/app/api/admin/events/route.ts",
           "severity": "high",
-          "pattern": "create snapshot: ${error.message}` }..."
+          "pattern": "create snapshot: ${error.message?.replace(/[<>'\"]/..."
         },
         {
           "type": "SQL Injection Patterns",
           "file": "src/app/api/admin/ot/route.ts",
           "severity": "high",
-          "pattern": "create document: ${error.message}` }..."
+          "pattern": "create document: ${error.message?.replace(/[<>'\"]/..."
         },
         {
           "type": "SQL Injection Patterns",
           "file": "src/app/api/conversion/analytics/route.ts",
           "severity": "high",
-          "pattern": "drop off at ${worstStep.stepName}..."
+          "pattern": "drop off at ${worstStep.stepName?.replace(/[<>'\"]/..."
         },
         {
           "type": "SQL Injection Patterns",
@@ -192,7 +192,7 @@
           "type": "SQL Injection Patterns",
           "file": "src/app/api/health/circuit-breakers/route.ts",
           "severity": "high",
-          "pattern": "update simulation for '${service}..."
+          "pattern": "update simulation for '${service?.replace(/[<>'\"]/..."
         },
         {
           "type": "XSS Vulnerabilities",
@@ -216,7 +216,7 @@
           "type": "SQL Injection Patterns",
           "file": "src/components/admin/APIKeyManagement.tsx",
           "severity": "high",
-          "pattern": "delete the API key \"${apiKey.name}..."
+          "pattern": "delete the API key \"${apiKey.name?.replace(/[<>'\"]..."
         },
         {
           "type": "XSS Vulnerabilities",
@@ -14521,11 +14521,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/lib/cache/unified-redis.ts(233,11): error TS2393: Duplicate function implementation."
+          "message": "src/lib/cache/unified-redis.ts(242,11): error TS2393: Duplicate function implementation."
         },
         {
           "type": "typescript",
-          "message": "src/lib/cache/unified-redis.ts(508,3): error TS2393: Duplicate function implementation."
+          "message": "src/lib/cache/unified-redis.ts(527,3): error TS2393: Duplicate function implementation."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/cache/unified-redis.ts(563,42): error TS2731: Implicit conversion of a 'symbol' to a 'string' will fail at runtime. Consider wrapping this expression in 'String(...)'."
         },
         {
           "type": "typescript",
@@ -16805,23 +16809,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/lib/server-config.ts(20,55): error TS2345: Argument of type 'UnifiedRedisCache' is not assignable to parameter of type 'RedisClientType'."
-        },
-        {
-          "type": "typescript",
-          "message": "src/lib/server-config.ts(29,24): error TS2339: Property 'isOpen' does not exist on type 'UnifiedRedisCache'."
-        },
-        {
-          "type": "typescript",
-          "message": "src/lib/server-config.ts(33,42): error TS2339: Property 'client_list' does not exist on type 'UnifiedRedisCache'."
-        },
-        {
-          "type": "typescript",
-          "message": "src/lib/server-config.ts(34,36): error TS2339: Property 'memory_usage' does not exist on type 'UnifiedRedisCache'."
-        },
-        {
-          "type": "typescript",
-          "message": "src/lib/server-config.ts(36,72): error TS2353: Object literal may only specify known properties, and 'EX' does not exist in type 'CacheOptions'."
+          "message": "src/lib/server-config.ts(22,59): error TS2345: Argument of type 'UnifiedRedisCache' is not assignable to parameter of type 'RedisClientType'."
         },
         {
           "type": "typescript",
@@ -26994,7 +26982,7 @@
           "type": "Error Handling",
           "file": "src/lib/server-config.ts",
           "description": "Error handling patterns",
-          "count": 10
+          "count": 13
         },
         {
           "type": "Error Handling",

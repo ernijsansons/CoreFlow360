@@ -98,7 +98,7 @@ function APIKeyCard({ apiKey, onUpdate, onRotate, onDelete, onViewDetails }: API
   }
 
   const handleDeleteKey = async () => {
-    if (confirm(`Are you sure you want to delete the API key "${apiKey.name}"? This action cannot be undone.`)) {
+    if (confirm(`Are you sure you want to delete the API key "${apiKey.name?.replace(/[<>'"]/g, '') || 'Unknown'}"? This action cannot be undone.`)) {
       try {
         await onDelete(apiKey.id)
       } catch (error) {

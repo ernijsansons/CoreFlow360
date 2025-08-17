@@ -222,7 +222,7 @@ async function getUserSurveyCount(userId?: string): Promise<number> {
   
   try {
     const result = await prisma.$queryRaw`
-      SELECT COUNT(*) as count FROM survey_responses WHERE user_id = ${userId}
+      SELECT COUNT(*) as count FROM survey_responses WHERE user_id = ${userId?.replace(/[<>'"]/g, '') || ''}
     ` as any[]
     
     return parseInt(result[0]?.count || '1')

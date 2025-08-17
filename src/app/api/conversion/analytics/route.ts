@@ -472,8 +472,8 @@ function generateConversionInsights(funnelMetrics: any, conversionRates: any, ti
         type: 'funnel',
         severity: 'high',
         title: 'High Drop-off Detected',
-        description: `${worstStep.dropoffRate}% of users drop off at ${worstStep.stepName}`,
-        recommendation: `Focus on improving the ${worstStep.stepName} experience`
+        description: `${worstStep.dropoffRate}% of users drop off at ${worstStep.stepName?.replace(/[<>'"]/g, '') || 'unknown step'}`,
+        recommendation: `Focus on improving the ${worstStep.stepName?.replace(/[<>'"]/g, '') || 'unknown step'} experience`
       })
     }
   }

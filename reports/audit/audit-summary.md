@@ -1,14 +1,14 @@
 # CoreFlow360 Code Audit Report
 
-**Generated:** 8/17/2025, 11:49:18 AM
+**Generated:** 8/17/2025, 12:02:05 PM
 
 ## 📊 Executive Summary
 
-- **Total Issues:** 6287
+- **Total Issues:** 6284
 - **Critical Issues:** 0 🔴
 - **High Issues:** 36 🟠
 - **Medium Issues:** 361 🟡
-- **Low Issues:** 5890 🟢
+- **Low Issues:** 5887 🟢
 
 ## Security Issues
 
@@ -58,7 +58,7 @@
 
 ## Quality Issues
 
-**Total:** 4942
+**Total:** 4939
 
 - **typescript**: .next/types/app/api/admin/api-keys/[id]/rotate/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
 
@@ -80,7 +80,7 @@
 
 - **typescript**: .next/types/app/api/intelligence/business/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/intelligence/business/route"), "config" | "generateStaticParams" | "revalidate" | "dynamic" | ... 11 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
 
-*... and 4932 more issues*
+*... and 4929 more issues*
 
 ## Compliance Issues
 

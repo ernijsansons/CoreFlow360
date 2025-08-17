@@ -296,7 +296,7 @@ async function handleAppendEvent(data: any) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: `Failed to append event: ${error.message}` },
+      { error: `Failed to append event: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
       { status: 400 }
     );
   }
@@ -349,7 +349,7 @@ async function handleRebuildProjections(data: any) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: `Failed to start projection rebuild: ${error.message}` },
+      { error: `Failed to start projection rebuild: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
       { status: 400 }
     );
   }

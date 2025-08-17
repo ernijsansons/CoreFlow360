@@ -278,7 +278,7 @@ async function handleCreateDocument(data: any) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: `Failed to create document: ${error.message}` },
+      { error: `Failed to create document: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
       { status: 400 }
     );
   }
@@ -304,7 +304,7 @@ async function handleJoinDocument(data: any) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: `Failed to join document: ${error.message}` },
+      { error: `Failed to join document: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
       { status: 400 }
     );
   }
@@ -329,7 +329,7 @@ async function handleLeaveDocument(data: any) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: `Failed to leave document: ${error.message}` },
+      { error: `Failed to leave document: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
       { status: 400 }
     );
   }
@@ -355,7 +355,7 @@ async function handleResolveConflict(data: any) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: `Failed to resolve conflicts: ${error.message}` },
+      { error: `Failed to resolve conflicts: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
       { status: 400 }
     );
   }
