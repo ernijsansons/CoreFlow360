@@ -285,4 +285,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 [Get Started](https://coreflow360.com/signup) | [Book a Demo](https://coreflow360.com/demo) | [View Pricing](https://coreflow360.com/pricing)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyour-org%2Fcoreflow360&env=DATABASE_URL,NEXTAUTH_SECRET,STRIPE_SECRET_KEY,OPENAI_API_KEY&envDescription=API%20keys%20and%20database%20connection%20required&envLink=https%3A%2F%2Fgithub.com%2Fyour-org%2Fcoreflow360%2Fblob%2Fmain%2F.env.example)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyour-org%2Fcoreflow360&env=DATABASE_URL,NEXTAUTH_SECRET,STRIPE_SECRET_KEY,OPENAI_API_KEY&envDescription=API%20keys%20and%20database%20connection%20required&envLink=https%3A%2F%2Fgithub.com%2Fyour-org%2Fcoreflow360%2Fblob%2Fmain%2F.env.example)#   D e p l o y m e n t   t r i g g e r   0 8 / 1 6 / 2 0 2 5   2 1 : 4 3 : 1 5  
+ 
