@@ -93,7 +93,8 @@
       "WebFetch(domain:coreflow360.com)",
       "Bash(git checkout:*)",
       "Bash(git restore:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(./check-deployment.sh)"
     ],
     "deny": []
   }
