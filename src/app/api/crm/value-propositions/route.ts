@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import ValuePropositionEngine, { ValueProposition, ValuePropCategory } from '@/lib/crm/value-proposition-engine'
 

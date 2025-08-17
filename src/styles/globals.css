@@ -124,7 +124,9 @@ body {
 /* Component Base Classes */
 @layer components {
   .glass-card {
-    @apply bg-gray-900/80 backdrop-blur-xl border border-gray-800/50 rounded-2xl shadow-2xl;
+    background-color: rgba(17, 24, 39, 0.8); /* gray-900 with 80% opacity */
+    border-color: rgba(31, 41, 55, 0.5); /* gray-800 with 50% opacity */
+    @apply backdrop-blur-xl border rounded-2xl shadow-2xl;
   }
 }
 

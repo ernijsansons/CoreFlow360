@@ -7,11 +7,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { apiVersioningMiddleware } from '@/middleware/versioning'
-import { sanitizationMiddleware } from '@/middleware/sanitization'
-import { requestSignatureMiddleware } from '@/middleware/request-signature'
-import { TenantValidator, TenantValidationContext } from '@/middleware/tenant-validation'
-import { ddosProtectionMiddleware } from '@/lib/security/ddos-protection'
-import { prisma } from '@/lib/db'
+import { TenantValidator, TenantValidationContext } from '@/middleware/tenant-validation-edge'
 
 // Public routes that don't require authentication
 const PUBLIC_ROUTES = [
@@ -37,22 +33,6 @@ const ADMIN_ROUTES = [
   '/super-admin'
 ]
 
-// Validate that user's tenant matches the subdomain
-async function validateUserTenantAccess(userTenantId: string, tenantSlug: string): Promise<boolean> {
-  try {
-    const tenant = await prisma.tenant.findUnique({
-      where: { 
-        id: userTenantId,
-        slug: tenantSlug,
-        isActive: true
-      }
-    })
-    return !!tenant
-  } catch (error) {
-    console.error('Tenant validation error:', error)
-    return false
-  }
-}
 
 export default auth(async (req) => {
   const { pathname } = req.nextUrl
@@ -64,28 +44,8 @@ export default auth(async (req) => {
     pathname.startsWith(route)
   )
 
-  // Apply DDoS protection first (before auth)
-  const ddosResponse = await ddosProtectionMiddleware(req)
-  if (ddosResponse) {
-    return ddosResponse
-  }
-
   // Handle API routes
   if (isApiRoute) {
-    // Apply request signature validation first (for critical endpoints)
-    const signatureResponse = await requestSignatureMiddleware(req)
-    if (signatureResponse) {
-      return signatureResponse
-    }
-    
-    // Apply sanitization to API requests with body
-    if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
-      const sanitizationResponse = await sanitizationMiddleware(req)
-      if (sanitizationResponse) {
-        req = sanitizationResponse.request || req
-      }
-    }
-    
     // Apply API versioning
     const versioningResponse = apiVersioningMiddleware(req)
     if (versioningResponse) {

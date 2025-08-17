@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from '@/lib/auth';
 import { handleError, ErrorContext } from '@/lib/error-handler';
 import { businessConsciousness } from '@/consciousness';
 import { ConsciousnessTierManager } from '@/consciousness/subscription/consciousness-tier-manager';
@@ -268,7 +267,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<TierRespon
 
   try {
     // Check authentication
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -353,7 +352,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   try {
     // Check authentication
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },

@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { getServerSession } from '@/lib/auth'
 import { getPerformanceStats } from '@/middleware/performance-monitoring'
 import { api } from '@/lib/api-response'
 import { sanitizeInput } from '@/middleware/sanitization'
@@ -13,7 +12,7 @@ import { sanitizeInput } from '@/middleware/sanitization'
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user) {
       return api.unauthorized('Authentication required')
     }

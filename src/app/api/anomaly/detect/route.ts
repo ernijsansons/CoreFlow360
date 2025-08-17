@@ -6,8 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { AdvancedAnomalyDetector, DataPointSchema } from '@/lib/anomaly/advanced-anomaly-detector'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getServerSession } from '@/lib/auth'
 import { eventTracker } from '@/lib/events/enhanced-event-tracker'
 
 const DetectionRequestSchema = z.object({
@@ -26,7 +25,7 @@ const DetectionRequestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user?.tenantId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -98,7 +97,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user?.tenantId) {
       return NextResponse.json(
         { error: 'Unauthorized' },

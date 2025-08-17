@@ -637,3 +637,10 @@ export const handleTenantError = (message?: string, context?: ErrorContext) =>
 
 export const handleError = (error: unknown, context?: ErrorContext, type?: ErrorType) =>
   errorHandler.handleError(error, context, type)
+
+// Additional exports for backward compatibility
+export const createValidationError = (message: string, details?: any) => 
+  new ValidationError(message, details)
+
+export const createAuthzError = (message: string, details?: any) => 
+  new AuthorizationError(message, details)

@@ -7,7 +7,6 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { createHash } from 'crypto'
 
 // Cache for tenant validation results
 const tenantValidationCache = new Map<string, {
@@ -325,9 +324,9 @@ export class TenantValidator {
    * Cache management for tenant validation
    */
   private static generateCacheKey(type: string, identifier: string): string {
-    return createHash('sha256')
-      .update(`${type}:${identifier}`)
-      .digest('hex')
+    // Use simple string concatenation for cache keys in Edge Runtime
+    // This is safe as it's only used for internal caching, not security
+    return `${type}:${identifier}`
   }
 
   private static getCachedResult(key: string): { isValid: boolean; tenantData?: any } | null {

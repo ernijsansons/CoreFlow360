@@ -5,8 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getServerSession } from '@/lib/auth'
 import { BusinessAnomalyMonitor } from '@/lib/anomaly/business-anomaly-monitor'
 
 const AlertActionSchema = z.object({
@@ -28,7 +27,7 @@ function getMonitor(): BusinessAnomalyMonitor {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user?.tenantId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -95,7 +94,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user?.tenantId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -161,7 +160,7 @@ export async function POST(request: NextRequest) {
 // Get alert details
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user?.tenantId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
