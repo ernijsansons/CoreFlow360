@@ -7,9 +7,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { moduleManager } from '@/services/subscription/module-manager'
 import { eventBus } from '@/services/events/subscription-aware-event-bus'
 import { workflowEngine } from '@/services/workflows/cross-module-workflows'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/db'
 
 describe('Module Combinations Test Suite', () => {
   const testTenantId = 'test-tenant-combinations'

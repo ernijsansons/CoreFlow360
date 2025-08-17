@@ -3,9 +3,10 @@
  * Combines the best features of both Redis implementations with fallback support
  */
 
-import Redis from 'ioredis'
 import { handleError } from '../error-handler'
 import { withPerformanceTracking } from '../monitoring'
+import { getRedis } from '@/lib/redis/client'
+import type { Redis } from 'ioredis'
 
 export interface CacheOptions {
   ttl?: number // Time to live in seconds
@@ -142,7 +143,6 @@ class MemoryCache {
 
 // Main unified Redis cache implementation
 export class UnifiedRedisCache {
-  private redisClient: Redis | null = null
   private memoryCache = new MemoryCache()
   private connected = false
   private stats: CacheStats = {
@@ -162,60 +162,25 @@ export class UnifiedRedisCache {
     // Stats reset interval will be started on first init
   }
 
-  private async init() {
-    // Skip initialization during build
-    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
-      console.log('Skipping Redis initialization during build')
-      return
+  /**
+   * Get Redis client lazily
+   */
+  private getRedisClient(): Redis | null {
+    const client = getRedis()
+    if (client && 'status' in client && client.status === 'ready') {
+      this.connected = true
+      return client as Redis
     }
-    
+    this.connected = false
+    return null
+  }
+
+  private async init() {
     // Start stats reset interval if not already started
     if (!this.statsResetInterval) {
       this.statsResetInterval = setInterval(() => {
         this.resetStats()
       }, 60 * 60 * 1000)
-    }
-    
-    try {
-      if (!process.env.REDIS_URL) {
-        console.warn('Redis URL not provided, using memory cache only')
-        return
-      }
-
-      this.redisClient = new Redis(process.env.REDIS_URL, {
-        maxRetriesPerRequest: 3,
-        enableReadyCheck: true,
-        reconnectOnError: () => true,
-        retryStrategy: (times: number) => {
-          const delay = Math.min(times * 100, 3000)
-          return delay
-        },
-        lazyConnect: true
-      })
-
-      this.redisClient.on('connect', () => {
-        console.log('Redis connected successfully')
-        this.connected = true
-      })
-
-      this.redisClient.on('error', (error) => {
-        console.error('Redis connection error:', error)
-        this.stats.errors++
-        this.connected = false
-      })
-
-      this.redisClient.on('close', () => {
-        console.log('Redis connection closed')
-        this.connected = false
-      })
-
-      // Only connect in runtime, not during build
-      if (!process.env.VERCEL && !process.env.CI && !process.env.NEXT_PHASE && process.env.VERCEL_ENV !== 'preview') {
-        await this.redisClient.connect()
-      }
-    } catch (error) {
-      console.error('Redis initialization error:', error)
-      this.connected = false
     }
   }
 
@@ -240,7 +205,7 @@ export class UnifiedRedisCache {
   }
 
   private isAvailable(): boolean {
-    return this.connected && this.redisClient !== null
+    return this.getRedisClient() !== null
   }
 
   private resetStats() {
@@ -267,7 +232,8 @@ export class UnifiedRedisCache {
     }
     
     // Ensure initialization on first use
-    if (!this.redisClient && !this.connected) {
+    const redisClient = this.getRedisClient()
+    if (!redisClient) {
       await this.init()
     }
     
@@ -277,7 +243,7 @@ export class UnifiedRedisCache {
       // Try Redis first if available
       if (this.isAvailable()) {
         try {
-          const value = await this.redisClient!.get(cacheKey)
+          const value = await redisClient!.get(cacheKey)
           if (value) {
             this.stats.hits++
             return JSON.parse(value)
@@ -316,10 +282,11 @@ export class UnifiedRedisCache {
       let success = false
 
       // Try Redis first if available
-      if (this.isAvailable()) {
+      const redisClient = this.getRedisClient()
+      if (redisClient) {
         try {
           const serialized = JSON.stringify(value)
-          await this.redisClient!.setex(cacheKey, ttl, serialized)
+          await redisClient.setex(cacheKey, ttl, serialized)
           this.stats.sets++
           success = true
         } catch (error) {
@@ -347,9 +314,10 @@ export class UnifiedRedisCache {
       let success = false
 
       // Try Redis first if available
-      if (this.isAvailable()) {
+      const redisClient = this.getRedisClient()
+      if (redisClient) {
         try {
-          await this.redisClient!.del(cacheKey)
+          await redisClient.del(cacheKey)
           this.stats.deletes++
           success = true
         } catch (error) {
@@ -377,11 +345,12 @@ export class UnifiedRedisCache {
       let count = 0
 
       // Invalidate in Redis if available
-      if (this.isAvailable()) {
+      const redisClient = this.getRedisClient()
+      if (redisClient) {
         try {
-          const keys = await this.redisClient!.keys(keyPattern)
+          const keys = await redisClient.keys(keyPattern)
           if (keys.length > 0) {
-            count = await this.redisClient!.del(...keys)
+            count = await redisClient.del(...keys)
             this.stats.deletes += count
           }
         } catch (error) {
@@ -435,7 +404,8 @@ export class UnifiedRedisCache {
     operation: () => Promise<T>,
     options: { ttl?: number; timeout?: number } = {}
   ): Promise<T> {
-    if (!this.isAvailable()) {
+    const redisClient = this.getRedisClient()
+    if (!redisClient) {
       // If Redis unavailable, execute without lock
       return await operation()
     }
@@ -448,7 +418,7 @@ export class UnifiedRedisCache {
     while (Date.now() - startTime < timeout) {
       try {
         // Try to acquire lock
-        const acquired = await this.redisClient!.set(
+        const acquired = await redisClient.set(
           fullLockKey,
           lockValue,
           'PX',
@@ -461,7 +431,7 @@ export class UnifiedRedisCache {
             return await operation()
           } finally {
             // Release lock using Lua script for atomicity
-            await this.redisClient!.eval(
+            await redisClient.eval(
               `
               if redis.call('get', KEYS[1]) == ARGV[1] then
                 return redis.call('del', KEYS[1])
@@ -491,9 +461,10 @@ export class UnifiedRedisCache {
    * Clear all cache (use with caution)
    */
   async clear(): Promise<void> {
-    if (this.isAvailable()) {
+    const redisClient = this.getRedisClient()
+    if (redisClient) {
       try {
-        await this.redisClient!.flushdb()
+        await redisClient.flushdb()
       } catch (error) {
         console.error('Redis clear error:', error)
       }
@@ -525,7 +496,7 @@ export class UnifiedRedisCache {
    * Check if cache is available
    */
   isAvailable(): boolean {
-    return this.connected && this.redisClient !== null
+    return this.getRedisClient() !== null
   }
 
   /**
@@ -536,8 +507,9 @@ export class UnifiedRedisCache {
       clearInterval(this.statsResetInterval)
     }
 
-    if (this.redisClient) {
-      await this.redisClient.quit()
+    const redisClient = this.getRedisClient()
+    if (redisClient) {
+      await redisClient.quit()
     }
   }
 }

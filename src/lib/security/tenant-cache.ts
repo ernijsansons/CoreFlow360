@@ -34,19 +34,41 @@ export interface TenantCacheContext {
 export class TenantSecureCache {
   private redis: Redis | null = null
   private cacheSecret: string
+  private initialized = false
 
   constructor() {
-    // Initialize Redis connection if available
-    if (process.env.REDIS_URL) {
+    // Get cache encryption secret
+    this.cacheSecret = process.env.CACHE_ENCRYPTION_SECRET || 'default-cache-secret-change-in-production'
+  }
+
+  private async initializeRedis() {
+    // Skip during build
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+      return
+    }
+    
+    if (this.initialized || !process.env.REDIS_URL) {
+      return
+    }
+    
+    try {
       this.redis = new Redis(process.env.REDIS_URL, {
         retryDelayOnFailover: 100,
         enableReadyCheck: false,
         maxRetriesPerRequest: 3,
+        lazyConnect: true
       })
+      this.initialized = true
+    } catch (error) {
+      console.error('Failed to initialize Redis for tenant cache:', error)
     }
-    
-    // Get cache encryption secret
-    this.cacheSecret = process.env.CACHE_ENCRYPTION_SECRET || 'default-cache-secret-change-in-production'
+  }
+
+  private async getRedis(): Promise<Redis | null> {
+    if (!this.initialized) {
+      await this.initializeRedis()
+    }
+    return this.redis
   }
 
   /**
@@ -143,8 +165,9 @@ export class TenantSecureCache {
       
       let cachedValue: string | null = null
       
-      if (this.redis) {
-        cachedValue = await this.redis.get(secureKey)
+      const redis = await this.getRedis()
+      if (redis) {
+        cachedValue = await redis.get(secureKey)
       } else {
         // Fallback to in-memory cache for development
         cachedValue = this.getFromMemoryCache(secureKey)
@@ -182,8 +205,9 @@ export class TenantSecureCache {
       // Serialize value
       const serializedValue = JSON.stringify(value)
       
-      if (this.redis) {
-        await this.redis.setex(secureKey, ttl, serializedValue)
+      const redis = await this.getRedis()
+      if (redis) {
+        await redis.setex(secureKey, ttl, serializedValue)
       } else {
         // Fallback to in-memory cache
         this.setInMemoryCache(secureKey, serializedValue, ttl)
@@ -212,8 +236,9 @@ export class TenantSecureCache {
     try {
       const secureKey = this.generateSecureCacheKey(key, context)
       
-      if (this.redis) {
-        const result = await this.redis.del(secureKey)
+      const redis = await this.getRedis()
+      if (redis) {
+        const result = await redis.del(secureKey)
         return result > 0
       } else {
         return this.deleteFromMemoryCache(secureKey)
@@ -231,10 +256,11 @@ export class TenantSecureCache {
     try {
       const pattern = `${CACHE_KEY_PREFIX}${tenantId}:*`
       
-      if (this.redis) {
-        const keys = await this.redis.keys(pattern)
+      const redis = await this.getRedis()
+      if (redis) {
+        const keys = await redis.keys(pattern)
         if (keys.length > 0) {
-          const result = await this.redis.del(...keys)
+          const result = await redis.del(...keys)
           return result
         }
         return 0
@@ -258,14 +284,15 @@ export class TenantSecureCache {
     try {
       const pattern = `${CACHE_KEY_PREFIX}${tenantId}:*`
       
-      if (this.redis) {
-        const keys = await this.redis.keys(pattern)
+      const redis = await this.getRedis()
+      if (redis) {
+        const keys = await redis.keys(pattern)
         const keyCount = keys.length
         
         // Get approximate size (Redis doesn't provide exact size easily)
         let totalSize = 0
         for (const key of keys.slice(0, 10)) { // Sample first 10 keys
-          const value = await this.redis.get(key)
+          const value = await redis.get(key)
           if (value) {
             totalSize += value.length
           }

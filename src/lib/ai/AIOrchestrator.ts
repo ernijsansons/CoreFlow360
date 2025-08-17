@@ -1045,7 +1045,9 @@ export class AIOrchestrator extends EventEmitter {
    */
   async cleanup(): Promise<void> {
     // Cleanup resources
-    await this.redis.quit()
+    if (this.redis) {
+      await this.redis.quit()
+    }
     console.log('✅ AI Orchestrator cleanup completed')
   }
 }

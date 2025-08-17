@@ -186,7 +186,7 @@ export interface IntelligentDashboard {
 
 export class BusinessIntelligenceEngine extends EventEmitter {
   private config: BusinessIntelligenceConfig
-  private redis: Redis
+  private redis: Redis | null = null
   private metrics: Map<string, BusinessMetric[]>
   private forecasts: Map<string, PredictiveForecast>
   private insights: Map<string, BusinessInsight>
@@ -203,7 +203,10 @@ export class BusinessIntelligenceEngine extends EventEmitter {
     this.processingQueue = new Set()
     this.analyticsCache = new Map()
     
-    this.initialize()
+    // Skip initialization during build
+    if (!process.env.VERCEL && !process.env.CI && process.env.NEXT_PHASE !== 'phase-production-build' && process.env.VERCEL_ENV !== 'preview') {
+      this.initialize()
+    }
   }
 
   /**
@@ -489,11 +492,19 @@ export class BusinessIntelligenceEngine extends EventEmitter {
   // Private methods
   private async initialize(): Promise<void> {
     try {
+      // Skip during build
+      if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+        console.log('⏭️ Skipping Business Intelligence Engine initialization during build')
+        return
+      }
+      
       // Initialize Redis connection
       this.redis = new Redis({
         host: this.config.redis.host,
         port: this.config.redis.port,
-        password: this.config.redis.password
+        password: this.config.redis.password,
+        lazyConnect: true,
+        enableOfflineQueue: false
       })
       
       // Load cached data
@@ -902,6 +913,8 @@ export class BusinessIntelligenceEngine extends EventEmitter {
 
   private async cacheMetric(metric: BusinessMetric): Promise<void> {
     try {
+      if (!this.redis) return
+      
       await this.redis.setex(
         `metric_${metric.id}`,
         3600,
@@ -914,6 +927,8 @@ export class BusinessIntelligenceEngine extends EventEmitter {
 
   private async cacheForecast(forecast: PredictiveForecast): Promise<void> {
     try {
+      if (!this.redis) return
+      
       await this.redis.setex(
         `forecast_${forecast.id}`,
         86400,
@@ -1076,7 +1091,9 @@ export class BusinessIntelligenceEngine extends EventEmitter {
    * Cleanup and shutdown
    */
   async cleanup(): Promise<void> {
-    await this.redis.quit()
+    if (this.redis) {
+      await this.redis.quit()
+    }
     console.log('✅ Business Intelligence Engine cleanup completed')
   }
 }

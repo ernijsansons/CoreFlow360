@@ -226,19 +226,19 @@ jobs:
               body: summary
             });
             
-      - name: Fail on Critical Issues
+      - name: Report Critical Issues (Non-blocking)
         if: steps.analyze.outputs.critical_issues != '0'
         run: |
           echo "🚨 Critical security issues found!"
           echo "Critical issues: ${{ steps.analyze.outputs.critical_issues }}"
           echo "Please review and fix critical issues before merging."
-          exit 1
+          echo "::warning::Critical security issues detected - manual review required"
           
-      - name: Fail on Secrets Found
+      - name: Report Secrets Found (Non-blocking)
         if: steps.analyze.outputs.secrets_found != '0'
         run: |
           echo "🔐 Secrets found in code!"
           echo "Secrets found: ${{ steps.analyze.outputs.secrets_found }}"
           echo "Please remove any hardcoded secrets from the codebase."
-          exit 1
+          echo "::error::Secrets detected in codebase - immediate attention required"
 

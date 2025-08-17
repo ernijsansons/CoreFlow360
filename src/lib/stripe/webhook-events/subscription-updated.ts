@@ -3,12 +3,12 @@
  */
 
 import Stripe from 'stripe'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/db'
 import { moduleManager } from '@/services/subscription/module-manager'
 import { publishModuleEvent } from '@/services/events/subscription-aware-event-bus'
 import { extractTenantId } from '../webhook-signature'
 
-const prisma = new PrismaClient()
+
 
 export async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   try {

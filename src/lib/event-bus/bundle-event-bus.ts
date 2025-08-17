@@ -98,6 +98,12 @@ export class BundleEventBus extends EventEmitter {
   constructor(redisUrl?: string) {
     super({ captureRejections: true })
     
+    // Skip Redis during build
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+      this.redis = new InMemoryRedis()
+      return
+    }
+    
     const url = redisUrl || process.env.REDIS_URL
     if (url) {
       this.redis = new Redis(url, {

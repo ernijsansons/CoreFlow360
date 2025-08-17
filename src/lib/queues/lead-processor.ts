@@ -369,9 +369,22 @@ const leadWorker = getLeadWorker()
 /**
  * Call status monitoring worker
  */
-const callStatusWorker = isBuildTime ? null : new Worker(
-  'call-status', 
-  async (job: Job<CallStatusJobData>) => {
+let _callStatusWorker: Worker | null = null
+
+function getCallStatusWorker(): Worker | null {
+  if (isBuildTime()) {
+    return null
+  }
+  
+  if (!_callStatusWorker) {
+    const connection = getRedisConnection()
+    if (!connection) {
+      return null
+    }
+    
+    _callStatusWorker = new Worker(
+      'call-status', 
+      async (job: Job<CallStatusJobData>) => {
     console.log(`📊 Monitoring call status: ${job.data.callSid}`)
     
     try {
@@ -412,18 +425,37 @@ const callStatusWorker = isBuildTime ? null : new Worker(
       throw error
     }
   },
-  {
-    connection: redis,
-    concurrency: 20
+      {
+        connection,
+        concurrency: 20
+      }
+    )
   }
-)
+  
+  return _callStatusWorker
+}
+
+const callStatusWorker = getCallStatusWorker()
 
 /**
  * Retry processing worker with intelligent retry logic
  */
-const retryWorker = isBuildTime ? null : new Worker(
-  'call-retry',
-  async (job: Job<RetryJobData>) => {
+let _retryWorker: Worker | null = null
+
+function getRetryWorker(): Worker | null {
+  if (isBuildTime()) {
+    return null
+  }
+  
+  if (!_retryWorker) {
+    const connection = getRedisConnection()
+    if (!connection) {
+      return null
+    }
+    
+    _retryWorker = new Worker(
+      'call-retry',
+      async (job: Job<RetryJobData>) => {
     console.log(`🔄 Processing retry job ${job.id} for lead ${job.data.originalJobData.leadId}`)
     
     try {
@@ -458,11 +490,17 @@ const retryWorker = isBuildTime ? null : new Worker(
       throw error
     }
   },
-  {
-    connection: redis,
-    concurrency: 5
+      {
+        connection,
+        concurrency: 5
+      }
+    )
   }
-)
+  
+  return _retryWorker
+}
+
+const retryWorker = getRetryWorker()
 
 /**
  * Determine retry strategy based on error type and job history
@@ -583,11 +621,28 @@ async function processCallCompletion(callSid: string, status: string, leadId: st
  */
 export const queueMonitor = {
   async getStats() {
+    if (isBuildTime()) {
+      return {
+        leadQueue: { waiting: 0, active: 0, completed: 0, failed: 0 },
+        redis: { status: 'unavailable', memory: 0 }
+      }
+    }
+    
+    const queue = getLeadQueue()
+    const connection = getRedisConnection()
+    
+    if (!queue || !connection) {
+      return {
+        leadQueue: { waiting: 0, active: 0, completed: 0, failed: 0 },
+        redis: { status: 'unavailable', memory: 0 }
+      }
+    }
+    
     const [waiting, active, completed, failed] = await Promise.all([
-      leadQueue.getWaiting(),
-      leadQueue.getActive(), 
-      leadQueue.getCompleted(),
-      leadQueue.getFailed()
+      queue.getWaiting(),
+      queue.getActive(), 
+      queue.getCompleted(),
+      queue.getFailed()
     ])
     
     return {
@@ -598,62 +653,76 @@ export const queueMonitor = {
         failed: failed.length
       },
       redis: {
-        status: redis.status,
-        memory: await redis.memory('usage')
+        status: connection.status,
+        memory: await connection.memory('usage')
       }
     }
   },
   
   async pauseQueues() {
+    if (isBuildTime()) return
+    
     await Promise.all([
-      leadQueue.pause(),
-      callStatusQueue.pause(),
-      retryQueue.pause()
-    ])
+      getLeadQueue()?.pause(),
+      getCallStatusQueue()?.pause(),
+      getRetryQueue()?.pause()
+    ].filter(Boolean))
   },
   
   async resumeQueues() {
+    if (isBuildTime()) return
+    
     await Promise.all([
-      leadQueue.resume(),
-      callStatusQueue.resume(), 
-      retryQueue.resume()
-    ])
+      getLeadQueue()?.resume(),
+      getCallStatusQueue()?.resume(), 
+      getRetryQueue()?.resume()
+    ].filter(Boolean))
   },
   
   async cleanupJobs() {
-    await Promise.all([
-      leadQueue.clean(24 * 60 * 60 * 1000, 100, 'completed'),
-      leadQueue.clean(7 * 24 * 60 * 60 * 1000, 50, 'failed')
-    ])
+    if (isBuildTime()) return
+    
+    const queue = getLeadQueue()
+    if (queue) {
+      await Promise.all([
+        queue.clean(24 * 60 * 60 * 1000, 100, 'completed'),
+        queue.clean(7 * 24 * 60 * 60 * 1000, 50, 'failed')
+      ])
+    }
   }
 }
 
 // Event listeners for monitoring
-if (!isBuildTime && queueEvents) {
-  queueEvents.on('completed', (jobId, returnvalue) => {
-    console.log(`✅ Job ${jobId} completed:`, returnvalue)
-  })
+if (!isBuildTime() && typeof process !== 'undefined') {
+  const events = getQueueEvents()
+  if (events) {
+    events.on('completed', (jobId, returnvalue) => {
+      console.log(`✅ Job ${jobId} completed:`, returnvalue)
+    })
 
-  queueEvents.on('failed', (jobId, failedReason) => {
-    console.error(`❌ Job ${jobId} failed:`, failedReason)
-  })
+    events.on('failed', (jobId, failedReason) => {
+      console.error(`❌ Job ${jobId} failed:`, failedReason)
+    })
 
-  queueEvents.on('stalled', (jobId) => {
-    console.warn(`⚠️ Job ${jobId} stalled`)
-  })
+    events.on('stalled', (jobId) => {
+      console.warn(`⚠️ Job ${jobId} stalled`)
+    })
+  }
 }
 
 // Graceful shutdown
-if (!isBuildTime && typeof process !== 'undefined' && typeof process.on === 'function') {
+if (!isBuildTime() && typeof process !== 'undefined' && typeof process.on === 'function') {
   process.on('SIGTERM', async () => {
     console.log('🛑 Shutting down queue workers...')
-    if (leadWorker && callStatusWorker && retryWorker && redis) {
-      await Promise.all([
-        leadWorker.close(),
-        callStatusWorker.close(),
-        retryWorker.close()
-      ])
-      await redis.disconnect()
+    const workers = [getLeadWorker(), getCallStatusWorker(), getRetryWorker()].filter(Boolean)
+    const connection = getRedisConnection()
+    
+    if (workers.length > 0) {
+      await Promise.all(workers.map(worker => worker!.close()))
+    }
+    
+    if (connection) {
+      await connection.disconnect()
     }
   })
 }

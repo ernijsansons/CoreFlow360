@@ -3,10 +3,10 @@
  */
 
 import Stripe from 'stripe'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/db'
 import { extractTenantId } from '../webhook-signature'
 
-const prisma = new PrismaClient()
+
 
 export async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   try {

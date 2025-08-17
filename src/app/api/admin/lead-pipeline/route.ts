@@ -10,11 +10,27 @@ import { LeadPipelineErrorHandler } from '@/lib/error-handling/lead-pipeline-err
 import { db } from '@/lib/db'
 import { Redis } from 'ioredis'
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD
-})
+// Lazy Redis connection
+let redis: Redis | null = null
+
+function getRedis(): Redis | null {
+  // Skip during build
+  if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+    return null
+  }
+  
+  if (!redis) {
+    redis = new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      lazyConnect: true,
+      enableOfflineQueue: false
+    })
+  }
+  
+  return redis
+}
 
 /**
  * GET /api/admin/lead-pipeline
@@ -167,7 +183,8 @@ async function getErrorStats(timeWindow: number) {
   const stats = await LeadPipelineErrorHandler.getErrorStats(timeWindow)
   
   // Get recent critical errors
-  const escalations = await redis.lrange('escalation_queue', 0, 9) // Last 10 escalations
+  const connection = getRedis()
+  const escalations = connection ? await connection.lrange('escalation_queue', 0, 9) : [] // Last 10 escalations
   const recentEscalations = escalations.map(e => JSON.parse(e))
   
   return {
@@ -357,13 +374,15 @@ async function getComprehensiveMetrics(timeWindow: number, tenantId?: string) {
  */
 async function calculateThroughput(): Promise<number> {
   // Get processed jobs in last hour
-  const processed = await redis.get('metrics:jobs_processed:hour') || '0'
+  const connection = getRedis()
+  const processed = connection ? await connection.get('metrics:jobs_processed:hour') || '0' : '0'
   return parseInt(processed)
 }
 
 async function getAverageProcessingTime(): Promise<number> {
   // Get average processing time from last 100 jobs
-  const times = await redis.lrange('metrics:processing_times', 0, 99)
+  const connection = getRedis()
+  const times = connection ? await connection.lrange('metrics:processing_times', 0, 99) : []
   if (times.length === 0) return 0
   
   const avg = times.reduce((sum, time) => sum + parseInt(time), 0) / times.length
@@ -371,9 +390,10 @@ async function getAverageProcessingTime(): Promise<number> {
 }
 
 async function getQueueSuccessRate(): Promise<number> {
+  const connection = getRedis()
   const [successful, total] = await Promise.all([
-    redis.get('metrics:successful_jobs:day') || '0',
-    redis.get('metrics:total_jobs:day') || '0'
+    connection ? connection.get('metrics:successful_jobs:day') || '0' : Promise.resolve('0'),
+    connection ? connection.get('metrics:total_jobs:day') || '0' : Promise.resolve('0')
   ])
   
   const successCount = parseInt(successful)
@@ -386,10 +406,11 @@ async function getErrorTrends(timeWindow: number): Promise<any> {
   // Simple hourly error count trend
   const hours = Math.ceil(timeWindow / 3600000)
   const trends = []
+  const connection = getRedis()
   
   for (let i = 0; i < Math.min(hours, 24); i++) {
     const hourKey = `error_count:${Date.now() - (i * 3600000)}`
-    const count = await redis.get(hourKey) || '0'
+    const count = connection ? await connection.get(hourKey) || '0' : '0'
     trends.unshift({ hour: i, errors: parseInt(count) })
   }
   
@@ -398,11 +419,16 @@ async function getErrorTrends(timeWindow: number): Promise<any> {
 
 async function checkRedisHealth(): Promise<{ healthy: boolean; latency?: number; memory?: number }> {
   try {
+    const connection = getRedis()
+    if (!connection) {
+      return { healthy: false }
+    }
+    
     const start = Date.now()
-    await redis.ping()
+    await connection.ping()
     const latency = Date.now() - start
     
-    const memory = await redis.memory('usage')
+    const memory = await connection.memory('usage')
     
     return {
       healthy: latency < 100, // Consider healthy if latency < 100ms
@@ -430,9 +456,10 @@ async function checkDatabaseHealth(): Promise<{ healthy: boolean; latency?: numb
 }
 
 async function calculateErrorRate(): Promise<number> {
+  const connection = getRedis()
   const [errors, total] = await Promise.all([
-    redis.get('metrics:errors:hour') || '0',
-    redis.get('metrics:requests:hour') || '0'
+    connection ? connection.get('metrics:errors:hour') || '0' : Promise.resolve('0'),
+    connection ? connection.get('metrics:requests:hour') || '0' : Promise.resolve('0')
   ])
   
   const errorCount = parseInt(errors)

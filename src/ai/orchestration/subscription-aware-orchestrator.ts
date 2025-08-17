@@ -5,9 +5,8 @@
 
 import { AIAgentOrchestrator, AIAgentConfig, AITask, TaskType, AgentType, AgentCapability } from './ai-agent-orchestrator'
 import { moduleManager } from '@/services/subscription/module-manager'
-import { PrismaClient, AIModelType } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { AIModelType } from '@prisma/client'
+import { prisma } from '@/lib/db'
 
 export interface SubscriptionAwareOrchestrationRequest {
   tenantId: string

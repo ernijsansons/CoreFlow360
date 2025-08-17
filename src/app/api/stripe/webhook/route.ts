@@ -3,6 +3,10 @@
  * Process Stripe subscription events and update module activations
  */
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const revalidate = 0
+
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
@@ -19,18 +23,27 @@ import { withIdempotency, extractStripeIdempotencyKey } from '@/middleware/idemp
 import { createWebhookValidator, WEBHOOK_CONFIGS } from '@/lib/security/webhook-security'
 import { withSignatureValidation } from '@/middleware/request-signature'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16'
-})
-
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
-
 // Create webhook security validator
 const webhookValidator = createWebhookValidator(WEBHOOK_CONFIGS.stripe)
 
 // Webhook handler with enhanced security and idempotency protection
 async function handleWebhook(request: NextRequest): Promise<NextResponse> {
   try {
+    // Initialize Stripe client
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
+    
+    if (!stripeSecretKey || !endpointSecret) {
+      return NextResponse.json(
+        { error: 'Stripe webhook not configured' },
+        { status: 500 }
+      )
+    }
+    
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: '2023-10-16'
+    })
+    
     const body = await request.text()
     const headersList = headers()
     const signature = headersList.get('stripe-signature')!

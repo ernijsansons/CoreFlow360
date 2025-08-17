@@ -5,15 +5,31 @@
 
 import { Redis } from 'ioredis'
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  db: parseInt(process.env.REDIS_CALL_LIMIT_DB || '2'),
-  maxRetriesPerRequest: 3,
-  retryDelayOnFailover: 50,
-  lazyConnect: true
-})
+// Skip initialization during build
+const isBuildTime = () => process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview'
+
+// Lazy Redis connection
+let redis: Redis | null = null
+
+function getRedisConnection(): Redis | null {
+  if (isBuildTime()) {
+    return null
+  }
+  
+  if (!redis) {
+    redis = new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      db: parseInt(process.env.REDIS_CALL_LIMIT_DB || '2'),
+      maxRetriesPerRequest: 3,
+      retryDelayOnFailover: 50,
+      lazyConnect: true
+    })
+  }
+  
+  return redis
+}
 
 interface CallRateLimitResult {
   allowed: boolean
@@ -37,6 +53,9 @@ interface CallLimitConfig {
  * Call rate limiter with cost controls and intelligent throttling
  */
 export class CallRateLimiter {
+  private getRedis() {
+    return getRedisConnection()
+  }
   private defaultConfig: CallLimitConfig = {
     maxCallsPerMinute: parseInt(process.env.VOICE_CALLS_PER_MINUTE || '10'),
     maxCallsPerHour: parseInt(process.env.VOICE_CALLS_PER_HOUR || '100'),
@@ -129,7 +148,17 @@ export class CallRateLimiter {
     // Priority adjustment - high priority gets 20% more capacity
     const adjustedMax = priority <= 2 ? Math.floor(maxCalls * 1.2) : maxCalls
 
-    const pipeline = redis.pipeline()
+    const connection = this.getRedis()
+    if (!connection) {
+      return {
+        allowed: true,
+        remaining: maxCalls,
+        resetTime: now + windowMs,
+        retryAfter: 0
+      }
+    }
+    
+    const pipeline = connection.pipeline()
     
     // Remove expired entries
     pipeline.zremrangebyscore(key, 0, windowStart)
@@ -171,8 +200,19 @@ export class CallRateLimiter {
     const dayStart = new Date().setHours(0, 0, 0, 0)
     const dayEnd = dayStart + (24 * 60 * 60 * 1000)
 
+    const connection = this.getRedis()
+    if (!connection) {
+      return {
+        allowed: true,
+        remaining: 100,
+        resetTime: dayEnd,
+        retryAfter: 0,
+        costRemaining: maxDailyCost
+      }
+    }
+    
     // Get current daily spend
-    const currentSpend = await redis.get(key)
+    const currentSpend = await connection.get(key)
     const dailySpend = parseFloat(currentSpend || '0')
     
     // Check if adding this call would exceed budget
@@ -181,7 +221,7 @@ export class CallRateLimiter {
 
     if (allowed) {
       // Reserve cost for this call
-      await redis.setex(key, Math.ceil((dayEnd - now) / 1000), projectedSpend.toString())
+      await connection.setex(key, Math.ceil((dayEnd - now) / 1000), projectedSpend.toString())
     }
 
     return {
@@ -202,7 +242,18 @@ export class CallRateLimiter {
     maxConcurrent: number
   ): Promise<CallRateLimitResult> {
     const key = `active_calls:${tenantId}`
-    const activeCount = await redis.scard(key)
+    
+    const connection = this.getRedis()
+    if (!connection) {
+      return {
+        allowed: true,
+        remaining: maxConcurrent,
+        resetTime: Date.now() + 300000,
+        retryAfter: 0
+      }
+    }
+    
+    const activeCount = await connection.scard(key)
     
     const allowed = activeCount < maxConcurrent
 
@@ -219,8 +270,18 @@ export class CallRateLimiter {
    * Check system-wide health
    */
   private async checkSystemHealth(): Promise<CallRateLimitResult> {
+    const connection = this.getRedis()
+    if (!connection) {
+      return {
+        allowed: true,
+        remaining: 100,
+        resetTime: Date.now() + 60000,
+        retryAfter: 0
+      }
+    }
+    
     // Check if emergency mode is enabled
-    const emergencyMode = await redis.get('system:emergency_mode')
+    const emergencyMode = await connection.get('system:emergency_mode')
     if (emergencyMode) {
       const data = JSON.parse(emergencyMode)
       return {
@@ -233,7 +294,7 @@ export class CallRateLimiter {
     }
 
     // Check total system load
-    const totalActiveCalls = await redis.eval(`
+    const totalActiveCalls = await connection.eval(`
       local total = 0
       for i, key in ipairs(redis.call('KEYS', 'active_calls:*')) do
         total = total + redis.call('SCARD', key)
@@ -257,7 +318,10 @@ export class CallRateLimiter {
    * Record call start
    */
   async recordCallStart(tenantId: string, callSid: string, cost: number = 0): Promise<void> {
-    const pipeline = redis.pipeline()
+    const connection = this.getRedis()
+    if (!connection) return
+    
+    const pipeline = connection.pipeline()
     
     // Track active call
     pipeline.sadd(`active_calls:${tenantId}`, callSid)
@@ -286,7 +350,10 @@ export class CallRateLimiter {
     actualCost: number = 0,
     success: boolean = true
   ): Promise<void> {
-    const pipeline = redis.pipeline()
+    const connection = this.getRedis()
+    if (!connection) return
+    
+    const pipeline = connection.pipeline()
     
     // Remove from active calls
     pipeline.srem(`active_calls:${tenantId}`, callSid)
@@ -321,6 +388,19 @@ export class CallRateLimiter {
   }> {
     const now = Date.now()
     
+    const connection = this.getRedis()
+    if (!connection) {
+      const defaultStatus = {
+        minute: { current: 0, limit: this.defaultConfig.maxCallsPerMinute, remaining: this.defaultConfig.maxCallsPerMinute },
+        hour: { current: 0, limit: this.defaultConfig.maxCallsPerHour, remaining: this.defaultConfig.maxCallsPerHour },
+        day: { current: 0, limit: this.defaultConfig.maxDailyCalls, remaining: this.defaultConfig.maxDailyCalls },
+        cost: { spent: 0, limit: this.defaultConfig.maxDailyCost, remaining: this.defaultConfig.maxDailyCost },
+        concurrent: { active: 0, limit: this.defaultConfig.maxConcurrentCalls, remaining: this.defaultConfig.maxConcurrentCalls },
+        success: { rate: 1.0, recent: 0 }
+      }
+      return defaultStatus
+    }
+    
     const [
       minuteCount,
       hourCount,
@@ -329,12 +409,12 @@ export class CallRateLimiter {
       activeCount,
       successMetrics
     ] = await Promise.all([
-      redis.zcount(`call_limit:${tenantId}:minute`, now - 60000, now),
-      redis.zcount(`call_limit:${tenantId}:hour`, now - 3600000, now),
-      redis.zcount(`call_limit:${tenantId}:day`, now - 86400000, now),
-      redis.get(`call_cost:${tenantId}:daily`),
-      redis.scard(`active_calls:${tenantId}`),
-      redis.hmget(`call_success:${tenantId}`, 'successful', 'total')
+      connection.zcount(`call_limit:${tenantId}:minute`, now - 60000, now),
+      connection.zcount(`call_limit:${tenantId}:hour`, now - 3600000, now),
+      connection.zcount(`call_limit:${tenantId}:day`, now - 86400000, now),
+      connection.get(`call_cost:${tenantId}:daily`),
+      connection.scard(`active_calls:${tenantId}`),
+      connection.hmget(`call_success:${tenantId}`, 'successful', 'total')
     ])
 
     const spent = parseFloat(dailyCost || '0')
@@ -379,8 +459,11 @@ export class CallRateLimiter {
    * Emergency brake - pause all calling for tenant
    */
   async pauseCalling(tenantId: string, reason: string, duration: number = 300): Promise<void> {
+    const connection = this.getRedis()
+    if (!connection) return
+    
     const key = `call_pause:${tenantId}`
-    await redis.setex(key, duration, JSON.stringify({
+    await connection.setex(key, duration, JSON.stringify({
       paused: true,
       reason,
       pausedAt: Date.now()
@@ -393,8 +476,11 @@ export class CallRateLimiter {
    * Check if calling is paused for tenant
    */
   async isCallingPaused(tenantId: string): Promise<boolean> {
+    const connection = this.getRedis()
+    if (!connection) return false
+    
     const key = `call_pause:${tenantId}`
-    const result = await redis.get(key)
+    const result = await connection.get(key)
     return !!result
   }
 
@@ -402,8 +488,11 @@ export class CallRateLimiter {
    * Resume calling for tenant
    */
   async resumeCalling(tenantId: string): Promise<void> {
+    const connection = this.getRedis()
+    if (!connection) return
+    
     const key = `call_pause:${tenantId}`
-    await redis.del(key)
+    await connection.del(key)
     console.log(`▶️ Calling resumed for tenant ${tenantId}`)
   }
 }

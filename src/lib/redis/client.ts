@@ -1,91 +1,271 @@
 /**
  * CoreFlow360 - Redis Client Configuration
- * Centralized Redis connection and utilities
+ * Centralized Redis connection with build-time safety and mock support
  */
 
-import { Redis } from 'ioredis'
+import Redis from 'ioredis'
+import { EventEmitter } from 'events'
 
-// Redis connection options
-const redisOptions = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  db: parseInt(process.env.REDIS_DB || '0'),
-  retryStrategy: (times: number) => {
-    // Exponential backoff with max 3 seconds
-    return Math.min(times * 50, 3000)
-  },
-  maxRetriesPerRequest: 3,
-  enableReadyCheck: true,
-  connectTimeout: 10000,
-  lazyConnect: true // Don't connect until first command
+// Build-time detection
+const isBuildTime = 
+  process.env.VERCEL === '1' ||
+  process.env.CI === 'true' ||
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.NODE_ENV === 'test' ||
+  process.env.BUILDING === 'true'
+
+// Singleton instances
+let _redisClient: Redis | null = null
+let _mockClient: any | null = null
+
+/**
+ * In-memory mock Redis client for build time and environments without Redis
+ */
+class MockRedisClient extends EventEmitter {
+  private store = new Map<string, string>()
+  private lists = new Map<string, string[]>()
+  private sets = new Map<string, Set<string>>()
+  private hashes = new Map<string, Map<string, string>>()
+  private pubsubChannels = new Map<string, Set<Function>>()
+
+  // Basic operations
+  async get(key: string): Promise<string | null> {
+    return this.store.get(key) ?? null
+  }
+
+  async set(key: string, value: string, mode?: string, duration?: number): Promise<'OK'> {
+    this.store.set(key, value)
+    if (mode === 'EX' && duration) {
+      setTimeout(() => this.store.delete(key), duration * 1000)
+    }
+    return 'OK'
+  }
+
+  async setex(key: string, seconds: number, value: string): Promise<'OK'> {
+    this.store.set(key, value)
+    setTimeout(() => this.store.delete(key), seconds * 1000)
+    return 'OK'
+  }
+
+  async del(...keys: string[]): Promise<number> {
+    let deleted = 0
+    for (const key of keys) {
+      if (this.store.delete(key)) deleted++
+      if (this.lists.delete(key)) deleted++
+      if (this.sets.delete(key)) deleted++
+      if (this.hashes.delete(key)) deleted++
+    }
+    return deleted
+  }
+
+  async exists(...keys: string[]): Promise<number> {
+    let count = 0
+    for (const key of keys) {
+      if (this.store.has(key) || this.lists.has(key) || 
+          this.sets.has(key) || this.hashes.has(key)) {
+        count++
+      }
+    }
+    return count
+  }
+
+  async expire(key: string, seconds: number): Promise<number> {
+    if (this.store.has(key)) {
+      setTimeout(() => this.store.delete(key), seconds * 1000)
+      return 1
+    }
+    return 0
+  }
+
+  async incr(key: string): Promise<number> {
+    const val = parseInt(this.store.get(key) || '0')
+    const newVal = val + 1
+    this.store.set(key, newVal.toString())
+    return newVal
+  }
+
+  // List operations
+  async lpush(key: string, ...values: string[]): Promise<number> {
+    const list = this.lists.get(key) || []
+    list.unshift(...values)
+    this.lists.set(key, list)
+    return list.length
+  }
+
+  async rpush(key: string, ...values: string[]): Promise<number> {
+    const list = this.lists.get(key) || []
+    list.push(...values)
+    this.lists.set(key, list)
+    return list.length
+  }
+
+  async lrange(key: string, start: number, stop: number): Promise<string[]> {
+    const list = this.lists.get(key) || []
+    return list.slice(start, stop + 1)
+  }
+
+  async brpop(timeout: number, ...keys: string[]): Promise<[string, string] | null> {
+    return null // Mock timeout
+  }
+
+  // Set operations
+  async sadd(key: string, ...members: string[]): Promise<number> {
+    const set = this.sets.get(key) || new Set()
+    let added = 0
+    for (const member of members) {
+      if (!set.has(member)) {
+        set.add(member)
+        added++
+      }
+    }
+    this.sets.set(key, set)
+    return added
+  }
+
+  async smembers(key: string): Promise<string[]> {
+    const set = this.sets.get(key)
+    return set ? Array.from(set) : []
+  }
+
+  // Hash operations
+  async hset(key: string, field: string, value: string): Promise<number> {
+    const hash = this.hashes.get(key) || new Map()
+    const isNew = !hash.has(field)
+    hash.set(field, value)
+    this.hashes.set(key, hash)
+    return isNew ? 1 : 0
+  }
+
+  async hget(key: string, field: string): Promise<string | null> {
+    return this.hashes.get(key)?.get(field) ?? null
+  }
+
+  async hgetall(key: string): Promise<Record<string, string>> {
+    const hash = this.hashes.get(key)
+    if (!hash) return {}
+    const result: Record<string, string> = {}
+    hash.forEach((value, field) => {
+      result[field] = value
+    })
+    return result
+  }
+
+  // Pub/Sub operations
+  async publish(channel: string, message: string): Promise<number> {
+    const subscribers = this.pubsubChannels.get(channel)
+    if (subscribers) {
+      subscribers.forEach(callback => callback(message))
+      return subscribers.size
+    }
+    return 0
+  }
+
+  subscribe(channel: string, callback?: Function): void {
+    if (!this.pubsubChannels.has(channel)) {
+      this.pubsubChannels.set(channel, new Set())
+    }
+    if (callback) {
+      this.pubsubChannels.get(channel)!.add(callback)
+    }
+    this.emit('subscribe', channel, 1)
+  }
+
+  // Connection methods
+  async ping(): Promise<'PONG'> {
+    return 'PONG'
+  }
+  
+  async connect(): Promise<void> {}
+  async disconnect(): Promise<void> {}
+  async quit(): Promise<'OK'> { return 'OK' }
+  
+  status = 'ready'
 }
-
-// Create singleton Redis client
-let redisClient: Redis | null = null
 
 /**
  * Get or create Redis client instance
  */
-export function getRedisClient(): Redis | null {
-  // Skip Redis entirely during build
-  const isBuildTime = process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview'
+export function getRedisClient(): Redis | MockRedisClient | null {
+  // During build time, always return mock
   if (isBuildTime) {
-    console.log('Skipping Redis client creation during build')
-    return null
+    if (!_mockClient) {
+      _mockClient = new MockRedisClient()
+    }
+    return _mockClient
   }
   
-  if (!process.env.REDIS_URL && !process.env.REDIS_HOST) {
-    console.warn('Redis not configured - caching disabled')
-    return null
+  const redisUrl = process.env.REDIS_URL
+  
+  // No Redis URL - return mock
+  if (!redisUrl) {
+    if (!_mockClient) {
+      _mockClient = new MockRedisClient()
+    }
+    return _mockClient
   }
   
-  if (!redisClient) {
+  // Create real Redis client
+  if (!_redisClient) {
     try {
-      if (process.env.REDIS_URL) {
-        redisClient = new Redis(process.env.REDIS_URL)
-      } else {
-        redisClient = new Redis(redisOptions)
-      }
-      
-      // Event handlers
-      redisClient.on('connect', () => {
-        console.log('Redis client connected')
+      _redisClient = new Redis(redisUrl, {
+        lazyConnect: true,
+        maxRetriesPerRequest: 3,
+        retryStrategy: (times) => {
+          if (times > 3) return null
+          return Math.min(times * 100, 3000)
+        },
+        reconnectOnError: (err) => {
+          const targetErrors = ['READONLY', 'ECONNREFUSED', 'ETIMEDOUT']
+          return targetErrors.some(e => err.message.includes(e))
+        }
       })
-      
-      redisClient.on('error', (error) => {
-        console.error('Redis client error:', error)
+
+      _redisClient.on('error', (error) => {
+        console.error('[Redis] Connection error:', error.message)
       })
-      
-      redisClient.on('close', () => {
-        console.log('Redis client connection closed')
+
+      _redisClient.on('connect', () => {
+        console.log('[Redis] Connected successfully')
       })
-      
-      // Only ping in runtime, not during build
-      const isRuntimeEnvironment = !process.env.VERCEL && !process.env.CI && process.env.NEXT_PHASE !== 'phase-production-build' && process.env.VERCEL_ENV !== 'preview'
-      if (isRuntimeEnvironment) {
-        // Ping to verify connection in runtime only
-        redisClient.ping().catch((error) => {
-          console.error('Redis ping failed:', error)
-          redisClient = null
-        })
-      }
+
+      // Attempt connection but don't fail if it doesn't work
+      _redisClient.connect().catch((error) => {
+        console.error('[Redis] Failed to connect:', error.message)
+      })
     } catch (error) {
-      console.error('Failed to create Redis client:', error)
-      return null
+      console.error('[Redis] Failed to create client:', error)
+      // Fall back to mock
+      if (!_mockClient) {
+        _mockClient = new MockRedisClient()
+      }
+      return _mockClient
     }
   }
   
-  return redisClient
+  return _redisClient
+}
+
+/**
+ * Get Redis client (convenience alias)
+ */
+export function getRedis(): Redis | MockRedisClient | null {
+  return getRedisClient()
+}
+
+/**
+ * Check if Redis is available (not mock)
+ */
+export function isRedisAvailable(): boolean {
+  return !isBuildTime && !!process.env.REDIS_URL && !!_redisClient
 }
 
 /**
  * Close Redis connection
  */
 export async function closeRedis() {
-  if (redisClient) {
-    await redisClient.quit()
-    redisClient = null
+  if (_redisClient) {
+    await _redisClient.quit()
+    _redisClient = null
   }
 }
 
@@ -123,11 +303,6 @@ export const redis = {
    * Get value with automatic JSON parsing
    */
   async get<T = any>(key: string): Promise<T | null> {
-    // Skip during build
-    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
-      return null
-    }
-    
     const client = getRedisClient()
     if (!client) return null
     
@@ -151,11 +326,6 @@ export const redis = {
    * Set value with automatic JSON stringification
    */
   async set(key: string, value: any, ttl?: number): Promise<boolean> {
-    // Skip during build
-    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
-      return true
-    }
-    
     const client = getRedisClient()
     if (!client) return false
     

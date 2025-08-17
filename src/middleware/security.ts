@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import crypto from 'crypto'
+import { getRedis } from '@/lib/redis/client'
 
 // Security headers configuration
 const securityHeaders = {
@@ -77,52 +78,9 @@ interface RateLimitEntry {
 
 const rateLimitStore = new Map<string, RateLimitEntry>()
 
-// Redis client for production (fallback to in-memory for development)
-let redisClient: any = null
-
-// Lazy Redis initialization function
+// Use centralized Redis client
 function getRedisClient() {
-  // Skip during build
-  if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
-    return null
-  }
-  
-  // Return existing client if already initialized
-  if (redisClient !== null) {
-    return redisClient
-  }
-  
-  // Initialize Redis client only when REDIS_URL is explicitly provided
-  if (process.env.REDIS_URL && typeof process.env.REDIS_URL === 'string' && process.env.REDIS_URL.length > 0) {
-    try {
-      const Redis = require('ioredis')
-      // Avoid noisy retries in development; fall back to memory on failure
-      redisClient = new Redis(process.env.REDIS_URL, {
-        lazyConnect: true,
-        retryStrategy: () => null,
-        maxRetriesPerRequest: 0,
-      })
-
-      // Attempt a one-time connect; on failure, disable Redis usage
-      redisClient.connect().catch((err: any) => {
-        console.warn('Redis connection failed, using in-memory rate limiting:', err?.message || err)
-        try { redisClient.disconnect() } catch {}
-        redisClient = null
-      })
-
-      // If runtime error occurs later, disable Redis usage
-      redisClient.on('error', (err: any) => {
-        console.warn('Redis error, switching to in-memory rate limiting:', err?.message || err)
-        try { redisClient.disconnect() } catch {}
-        redisClient = null
-      })
-    } catch (error) {
-      console.warn('Redis client unavailable, using in-memory rate limiting')
-      redisClient = null
-    }
-  }
-  
-  return redisClient
+  return getRedis()
 }
 
 export async function securityMiddleware(request: NextRequest) {

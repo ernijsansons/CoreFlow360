@@ -1,14 +1,14 @@
 # CoreFlow360 Code Audit Report
 
-**Generated:** 8/17/2025, 2:10:49 PM
+**Generated:** 8/17/2025, 2:25:36 PM
 
 ## 📊 Executive Summary
 
-- **Total Issues:** 1339
+- **Total Issues:** 6271
 - **Critical Issues:** 0 🔴
 - **High Issues:** 36 🟠
 - **Medium Issues:** 364 🟡
-- **Low Issues:** 939 🟢
+- **Low Issues:** 5871 🟢
 
 ## Security Issues
 
@@ -58,11 +58,29 @@
 
 ## Quality Issues
 
-**Total:** 2
+**Total:** 4934
 
-- **typescript**: src/lib/queues/lead-processor.ts(653,2): error TS1005: '}' expected.
+- **typescript**: .next/types/app/api/admin/api-keys/[id]/rotate/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
 
-- **typescript**: src/middleware.ts(122,1): error TS1128: Declaration or statement expected.
+- **typescript**: .next/types/app/api/admin/api-keys/[id]/rotate/route.ts(166,7): error TS2344: Type '{ __tag__: "POST"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+
+- **typescript**: .next/types/app/api/admin/api-keys/[id]/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+
+- **typescript**: .next/types/app/api/admin/api-keys/[id]/route.ts(205,7): error TS2344: Type '{ __tag__: "PUT"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+
+- **typescript**: .next/types/app/api/admin/api-keys/[id]/route.ts(244,7): error TS2344: Type '{ __tag__: "DELETE"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+
+- **typescript**: .next/types/app/api/ai/intelligence/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/ai/intelligence/route"), "config" | "generateStaticParams" | "revalidate" | "dynamic" | "dynamicParams" | ... 10 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+
+- **typescript**: .next/types/app/api/auth/saml/metadata/[tenantId]/[idpName]/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { tenantId: string; idpName: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+
+- **typescript**: .next/types/app/api/billing/anomalies/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/billing/anomalies/route"), "config" | "generateStaticParams" | "revalidate" | "dynamic" | ... 11 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+
+- **typescript**: .next/types/app/api/events/batch/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/events/batch/route"), "config" | "generateStaticParams" | "revalidate" | "dynamic" | "dynamicParams" | ... 10 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+
+- **typescript**: .next/types/app/api/intelligence/business/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/intelligence/business/route"), "config" | "generateStaticParams" | "revalidate" | "dynamic" | ... 11 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+
+*... and 4924 more issues*
 
 ## Compliance Issues
 

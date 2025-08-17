@@ -7,20 +7,58 @@ import { Queue, Job } from 'bullmq'
 import { Redis } from 'ioredis'
 import { db } from '@/lib/db'
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  db: parseInt(process.env.REDIS_ERROR_DB || '3')
-})
+// Skip initialization during build
+const isBuildTime = () => process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview'
 
-// Dead letter queue for failed jobs
-export const deadLetterQueue = new Queue('dead-letters', {
-  connection: redis,
-  defaultJobOptions: {
-    removeOnComplete: 1000,
-    removeOnFail: false, // Keep all failed jobs for analysis
-    attempts: 1 // Dead letter queue doesn't retry
+// Lazy Redis connection
+let redis: Redis | null = null
+function getRedisConnection(): Redis | null {
+  if (isBuildTime()) {
+    return null
+  }
+  
+  if (!redis) {
+    redis = new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      db: parseInt(process.env.REDIS_ERROR_DB || '3')
+    })
+  }
+  
+  return redis
+}
+
+// Lazy dead letter queue initialization
+let _deadLetterQueue: Queue | null = null
+
+function getDeadLetterQueue(): Queue {
+  if (isBuildTime()) {
+    return {} as Queue
+  }
+  
+  if (!_deadLetterQueue) {
+    const connection = getRedisConnection()
+    if (connection) {
+      _deadLetterQueue = new Queue('dead-letters', {
+        connection,
+        defaultJobOptions: {
+          removeOnComplete: 1000,
+          removeOnFail: false, // Keep all failed jobs for analysis
+          attempts: 1 // Dead letter queue doesn't retry
+        }
+      })
+    }
+  }
+  
+  return _deadLetterQueue || ({} as Queue)
+}
+
+// Export with lazy loading
+export const deadLetterQueue = new Proxy({} as Queue, {
+  get(_target, prop) {
+    const queue = getDeadLetterQueue()
+    return queue[prop as keyof Queue]
   }
 })
 
@@ -246,22 +284,25 @@ export class LeadPipelineErrorHandler {
    */
   private static async storeError(errorRecord: LeadPipelineError): Promise<void> {
     try {
-      // Store in Redis for immediate access
-      const key = `error:${errorRecord.id}`
-      await redis.setex(key, 86400, JSON.stringify(errorRecord)) // 24 hour TTL
+      const connection = getRedisConnection()
+      if (connection) {
+        // Store in Redis for immediate access
+        const key = `error:${errorRecord.id}`
+        await connection.setex(key, 86400, JSON.stringify(errorRecord)) // 24 hour TTL
 
-      // Add to error log for analytics
-      await redis.lpush('error_log', JSON.stringify({
-        id: errorRecord.id,
-        type: errorRecord.errorType,
-        severity: errorRecord.errorSeverity,
-        timestamp: errorRecord.timestamp,
-        jobId: errorRecord.jobId,
-        tenantId: errorRecord.tenantId
-      }))
+        // Add to error log for analytics
+        await connection.lpush('error_log', JSON.stringify({
+          id: errorRecord.id,
+          type: errorRecord.errorType,
+          severity: errorRecord.errorSeverity,
+          timestamp: errorRecord.timestamp,
+          jobId: errorRecord.jobId,
+          tenantId: errorRecord.tenantId
+        }))
 
-      // Keep only last 10000 error log entries
-      await redis.ltrim('error_log', 0, 9999)
+        // Keep only last 10000 error log entries
+        await connection.ltrim('error_log', 0, 9999)
+      }
 
       // Store in database for long-term analysis (if table exists)
       try {
@@ -333,26 +374,29 @@ export class LeadPipelineErrorHandler {
    */
   private static async escalateError(errorRecord: LeadPipelineError): Promise<void> {
     try {
-      // Store escalation flag
-      await redis.setex(
-        `escalation:${errorRecord.id}`,
-        3600, // 1 hour
-        JSON.stringify({
-          errorId: errorRecord.id,
-          escalatedAt: new Date(),
-          severity: errorRecord.errorSeverity,
-          type: errorRecord.errorType,
-          tenantId: errorRecord.tenantId,
-          message: errorRecord.message
-        })
-      )
+      const connection = getRedisConnection()
+      if (connection) {
+        // Store escalation flag
+        await connection.setex(
+          `escalation:${errorRecord.id}`,
+          3600, // 1 hour
+          JSON.stringify({
+            errorId: errorRecord.id,
+            escalatedAt: new Date(),
+            severity: errorRecord.errorSeverity,
+            type: errorRecord.errorType,
+            tenantId: errorRecord.tenantId,
+            message: errorRecord.message
+          })
+        )
 
-      // Add to escalation queue (could trigger alerts, notifications, etc.)
-      await redis.lpush('escalation_queue', JSON.stringify({
-        errorId: errorRecord.id,
-        priority: errorRecord.errorSeverity,
-        escalatedAt: new Date()
-      }))
+        // Add to escalation queue (could trigger alerts, notifications, etc.)
+        await connection.lpush('escalation_queue', JSON.stringify({
+          errorId: errorRecord.id,
+          priority: errorRecord.errorSeverity,
+          escalatedAt: new Date()
+        }))
+      }
 
       console.error(`🚨 ERROR ESCALATED: ${errorRecord.errorType} - ${errorRecord.message}`)
 
@@ -377,7 +421,18 @@ export class LeadPipelineErrorHandler {
     escalationRate: number
   }> {
     try {
-      const errors = await redis.lrange('error_log', 0, -1)
+      const connection = getRedisConnection()
+      if (!connection) {
+        return {
+          total: 0,
+          byType: {},
+          bySeverity: {},
+          retryRate: 0,
+          escalationRate: 0
+        }
+      }
+      
+      const errors = await connection.lrange('error_log', 0, -1)
       const parsedErrors = errors.map(e => JSON.parse(e))
       const recentErrors = parsedErrors.filter(
         e => new Date(e.timestamp).getTime() > Date.now() - timeWindow
@@ -396,7 +451,7 @@ export class LeadPipelineErrorHandler {
       }
 
       // Count escalations
-      const escalations = await redis.lrange('escalation_queue', 0, -1)
+      const escalations = await connection.lrange('escalation_queue', 0, -1)
       escalatedCount = escalations.filter(e => {
         const escalation = JSON.parse(e)
         return new Date(escalation.escalatedAt).getTime() > Date.now() - timeWindow
@@ -427,8 +482,14 @@ export class LeadPipelineErrorHandler {
    */
   static async resolveError(errorId: string, resolvedBy: string): Promise<void> {
     try {
+      const connection = getRedisConnection()
+      if (!connection) {
+        console.warn('Cannot resolve error - Redis unavailable')
+        return
+      }
+      
       const key = `error:${errorId}`
-      const errorData = await redis.get(key)
+      const errorData = await connection.get(key)
       
       if (errorData) {
         const error = JSON.parse(errorData)
@@ -436,7 +497,7 @@ export class LeadPipelineErrorHandler {
         error.resolvedAt = new Date()
         error.resolvedBy = resolvedBy
         
-        await redis.setex(key, 86400, JSON.stringify(error))
+        await connection.setex(key, 86400, JSON.stringify(error))
         console.log(`✅ Error ${errorId} marked as resolved by ${resolvedBy}`)
       }
       
@@ -454,14 +515,19 @@ export class DeadLetterQueueProcessor {
    * Get failed jobs for manual review
    */
   static async getFailedJobs(limit: number = 50): Promise<any[]> {
-    const jobs = await deadLetterQueue.getJobs(['completed', 'failed'], 0, limit)
-    return jobs.map(job => ({
-      id: job.id,
-      data: job.data,
-      failedAt: job.data.failedAt,
-      error: job.data.error,
-      retryCount: job.data.retryCount
-    }))
+    try {
+      const jobs = await deadLetterQueue.getJobs(['completed', 'failed'], 0, limit)
+      return jobs.map(job => ({
+        id: job.id,
+        data: job.data,
+        failedAt: job.data?.failedAt,
+        error: job.data?.error,
+        retryCount: job.data?.retryCount
+      }))
+    } catch (error) {
+      console.error('Failed to get failed jobs:', error)
+      return []
+    }
   }
 
   /**

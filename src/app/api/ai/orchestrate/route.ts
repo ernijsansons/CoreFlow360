@@ -10,9 +10,7 @@ import crypto from 'crypto'
 // import { TaskType, TaskPriority } from '@/ai/orchestration/ai-agent-orchestrator'
 import { withTenant, withRateLimit, ApiContext } from '@/lib/api-wrapper'
 import { redis, aiCache, cacheKey } from '@/lib/redis'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/db'
 
 // Mock implementations for services that aren't fully implemented yet
 const mockLangChainManager = { /* LangChain integration */ }

@@ -3,10 +3,10 @@
  */
 
 import Stripe from 'stripe'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/db'
 import { publishModuleEvent } from '@/services/events/subscription-aware-event-bus'
 
-const prisma = new PrismaClient()
+
 
 export async function handlePaymentFailed(invoice: Stripe.Invoice) {
   try {

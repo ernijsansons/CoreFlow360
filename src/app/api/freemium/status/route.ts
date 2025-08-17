@@ -4,12 +4,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/db'
 import { withCache } from '@/middleware/cache'
 import { subscriptionCache } from '@/lib/cache/session-cache'
 import { queryCache } from '@/lib/cache/query-cache'
 
-const prisma = new PrismaClient()
+
 
 async function getFreemiumStatus(request: NextRequest) {
   try {

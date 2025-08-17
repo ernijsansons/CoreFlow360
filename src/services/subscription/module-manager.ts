@@ -3,9 +3,7 @@
  * Dynamic activation/deactivation of modules based on subscriptions
  */
 
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/db'
 
 export interface ModuleManager {
   activateModule(tenantId: string, moduleKey: string): Promise<void>

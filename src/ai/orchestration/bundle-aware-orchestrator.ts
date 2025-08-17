@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/db'
 import type { 
   BundleDefinition, 
   AICapability, 
@@ -18,8 +18,6 @@ import type {
 import { AI_CAPABILITIES, BUNDLE_PRESETS } from '@/types/bundles'
 import { redis } from '@/lib/redis'
 import { performance } from 'perf_hooks'
-
-const prisma = new PrismaClient()
 
 export interface AIFlowContext {
   tenantId: string

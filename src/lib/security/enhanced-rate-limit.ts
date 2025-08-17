@@ -5,9 +5,10 @@
  * and adaptive throttling based on system load.
  */
 
-import { Redis, Cluster } from 'ioredis'
 import { NextRequest } from 'next/server'
 import { createHash } from 'crypto'
+import { getRedis } from '@/lib/redis/client'
+import type { Redis } from 'ioredis'
 
 // Rate limit strategies
 export type RateLimitStrategy = 'sliding-window' | 'token-bucket' | 'leaky-bucket' | 'adaptive'
@@ -86,58 +87,13 @@ export const ENHANCED_RATE_LIMITS = {
  * Enhanced rate limiter with Redis cluster support
  */
 export class EnhancedRateLimiter {
-  private redis: Redis | Cluster | null = null
   private localCache = new Map<string, { count: number; reset: number }>()
   
-  constructor() {
-    this.initializeRedis()
-  }
-  
   /**
-   * Initialize Redis connection
+   * Get Redis client lazily
    */
-  private initializeRedis() {
-    // Skip Redis initialization during build
-    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
-      console.log('Skipping Redis initialization for rate limiting during build')
-      return
-    }
-    
-    try {
-      if (process.env.REDIS_CLUSTER_NODES) {
-        // Redis Cluster mode
-        const nodes = process.env.REDIS_CLUSTER_NODES.split(',').map(node => {
-          const [host, port] = node.split(':')
-          return { host, port: parseInt(port) }
-        })
-        
-        this.redis = new Cluster(nodes, {
-          redisOptions: {
-            password: process.env.REDIS_PASSWORD,
-            tls: process.env.NODE_ENV === 'production' ? {} : undefined
-          },
-          enableReadyCheck: true,
-          maxRetriesPerRequest: 3,
-          retryDelayOnClusterDown: 100,
-        })
-      } else if (process.env.REDIS_URL) {
-        // Single Redis instance
-        this.redis = new Redis(process.env.REDIS_URL, {
-          retryStrategy: (times) => Math.min(times * 50, 2000),
-          enableReadyCheck: false,
-          maxRetriesPerRequest: 3,
-        })
-      }
-      
-      // Set up error handling
-      if (this.redis) {
-        this.redis.on('error', (err) => {
-          console.error('Redis rate limit error:', err)
-        })
-      }
-    } catch (error) {
-      console.error('Failed to initialize Redis for rate limiting:', error)
-    }
+  private getRedisClient(): Redis | null {
+    return getRedis() as Redis | null
   }
   
   /**
@@ -203,9 +159,10 @@ export class EnhancedRateLimiter {
     const now = Date.now()
     const windowStart = now - window
     
-    if (this.redis) {
+    const redis = this.getRedisClient()
+    if (redis) {
       // Check if blocked
-      const blockedUntil = await this.redis.get(`block:${key}`)
+      const blockedUntil = await redis.get(`block:${key}`)
       if (blockedUntil && parseInt(blockedUntil) > now) {
         return {
           allowed: false,
@@ -218,7 +175,7 @@ export class EnhancedRateLimiter {
       }
       
       // Use Redis sorted set for sliding window
-      const pipe = this.redis.pipeline()
+      const pipe = redis.pipeline()
       
       // Remove old entries
       pipe.zremrangebyscore(key, '-inf', windowStart)
@@ -238,7 +195,7 @@ export class EnhancedRateLimiter {
       if (count >= limit) {
         // Block if configured
         if (blockDuration) {
-          await this.redis.setex(`block:${key}`, Math.ceil(blockDuration / 1000), now + blockDuration)
+          await redis.setex(`block:${key}`, Math.ceil(blockDuration / 1000), now + blockDuration)
         }
         
         return {
@@ -274,11 +231,12 @@ export class EnhancedRateLimiter {
     const now = Date.now()
     const refillRate = limit / window // tokens per millisecond
     
-    if (this.redis) {
+    const redis = this.getRedisClient()
+    if (redis) {
       const bucketKey = `bucket:${key}`
       
       // Get current bucket state
-      const bucketData = await this.redis.get(bucketKey)
+      const bucketData = await redis.get(bucketKey)
       let tokens = burst
       let lastRefill = now
       
@@ -308,7 +266,7 @@ export class EnhancedRateLimiter {
       tokens -= 1
       
       // Save bucket state
-      await this.redis.setex(
+      await redis.setex(
         bucketKey,
         Math.ceil(window / 1000),
         JSON.stringify({ tokens, lastRefill: now })
@@ -337,11 +295,12 @@ export class EnhancedRateLimiter {
     const now = Date.now()
     const leakRate = limit / window // requests leaked per millisecond
     
-    if (this.redis) {
+    const redis = this.getRedisClient()
+    if (redis) {
       const bucketKey = `leaky:${key}`
       
       // Get current bucket state
-      const bucketData = await this.redis.get(bucketKey)
+      const bucketData = await redis.get(bucketKey)
       let volume = 0
       let lastLeak = now
       
@@ -371,7 +330,7 @@ export class EnhancedRateLimiter {
       volume += 1
       
       // Save bucket state
-      await this.redis.setex(
+      await redis.setex(
         bucketKey,
         Math.ceil(window / 1000),
         JSON.stringify({ volume, lastLeak: now })
@@ -496,8 +455,9 @@ export class EnhancedRateLimiter {
    * Reset rate limit for a key
    */
   async reset(key: string): Promise<void> {
-    if (this.redis) {
-      await this.redis.del(key, `bucket:${key}`, `leaky:${key}`, `block:${key}`)
+    const redis = this.getRedisClient()
+    if (redis) {
+      await redis.del(key, `bucket:${key}`, `leaky:${key}`, `block:${key}`)
     }
     this.localCache.delete(key)
   }
@@ -506,9 +466,10 @@ export class EnhancedRateLimiter {
    * Get current usage for a key
    */
   async getUsage(key: string, window: number): Promise<number> {
-    if (this.redis) {
+    const redis = this.getRedisClient()
+    if (redis) {
       const windowStart = Date.now() - window
-      const count = await this.redis.zcount(key, windowStart, '+inf')
+      const count = await redis.zcount(key, windowStart, '+inf')
       return count
     }
     

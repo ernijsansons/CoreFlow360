@@ -3,16 +3,14 @@
  * Report usage-based billing metrics to Stripe
  */
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const revalidate = 0
+
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { PrismaClient } from '@prisma/client'
 import { z } from 'zod'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20'
-})
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/db'
 
 const UsageReportSchema = z.object({
   tenantId: z.string().min(1, "Tenant ID is required"),
@@ -24,6 +22,19 @@ const UsageReportSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Initialize Stripe client
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+    if (!stripeSecretKey) {
+      return NextResponse.json(
+        { error: 'Stripe not configured' },
+        { status: 500 }
+      )
+    }
+    
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: '2024-06-20'
+    })
+    
     const body = await request.json()
     const validatedData = UsageReportSchema.parse(body)
     

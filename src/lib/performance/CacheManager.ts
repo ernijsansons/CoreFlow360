@@ -74,7 +74,7 @@ export interface CacheStrategy {
 }
 
 export class CacheManager extends EventEmitter {
-  private redis: Redis | Cluster
+  private redis: Redis | Cluster | null = null
   private memoryCache: LRUCache<string, CacheEntry>
   private config: CacheConfig
   private metrics: CacheMetrics
@@ -88,7 +88,10 @@ export class CacheManager extends EventEmitter {
     this.strategies = new Map()
     this.refreshQueue = new Map()
     
-    this.initializeRedis()
+    // Skip Redis initialization during build
+    if (!process.env.VERCEL && !process.env.CI && process.env.NEXT_PHASE !== 'phase-production-build' && process.env.VERCEL_ENV !== 'preview') {
+      this.initializeRedis()
+    }
     this.initializeMemoryCache()
     this.initializeMetrics()
     this.initializeStrategies()
@@ -500,6 +503,12 @@ export class CacheManager extends EventEmitter {
 
   // Private methods
   private initializeRedis(): void {
+    // Skip during build
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+      console.log('⏭️ Skipping Redis cache initialization during build')
+      return
+    }
+    
     if (this.config.redis.cluster) {
       // Redis Cluster setup
       this.redis = new Cluster([{
@@ -508,7 +517,8 @@ export class CacheManager extends EventEmitter {
       }], {
         maxRetriesPerRequest: this.config.redis.maxRetriesPerRequest,
         retryDelayOnFailover: this.config.redis.retryDelayOnFailover,
-        enableOfflineQueue: this.config.redis.enableOfflineQueue
+        enableOfflineQueue: this.config.redis.enableOfflineQueue,
+        lazyConnect: true
       })
     } else {
       // Single Redis instance
@@ -518,19 +528,22 @@ export class CacheManager extends EventEmitter {
         password: this.config.redis.password,
         maxRetriesPerRequest: this.config.redis.maxRetriesPerRequest,
         retryDelayOnFailover: this.config.redis.retryDelayOnFailover,
-        enableOfflineQueue: this.config.redis.enableOfflineQueue
+        enableOfflineQueue: this.config.redis.enableOfflineQueue,
+        lazyConnect: true
       })
     }
     
-    this.redis.on('connect', () => {
-      this.isConnected = true
-      console.log('✅ Redis cache connected')
-    })
-    
-    this.redis.on('error', (error) => {
-      console.error('❌ Redis cache error:', error)
-      this.emit('redisError', error)
-    })
+    if (this.redis) {
+      this.redis.on('connect', () => {
+        this.isConnected = true
+        console.log('✅ Redis cache connected')
+      })
+      
+      this.redis.on('error', (error) => {
+        console.error('❌ Redis cache error:', error)
+        this.emit('redisError', error)
+      })
+    }
   }
 
   private initializeMemoryCache(): void {
@@ -662,7 +675,7 @@ export class CacheManager extends EventEmitter {
 
   private async deleteRedis(keys: string[]): Promise<void> {
     try {
-      if (keys.length > 0) {
+      if (keys.length > 0 && this.redis) {
         await this.redis.del(...keys)
       }
     } catch (error) {

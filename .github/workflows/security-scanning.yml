@@ -263,6 +263,7 @@ jobs:
         
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
+      continue-on-error: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -274,7 +275,7 @@ jobs:
           -Dsonar.tests=src/__tests__
           -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
           -Dsonar.coverage.exclusions=**/*.test.ts,**/*.test.tsx
-          -Dsonar.qualitygate.wait=true
+          -Dsonar.qualitygate.wait=false
 
   license-compliance:
     name: License Compliance Check

@@ -439,8 +439,8 @@ ${companyData.name} represents a typical success story in the ${companyData.indu
     const biggestWin = performanceMetrics.improvements[0]
 
     const content = {
-      title: `${companyData.name} AI Transformation Results`,
-      body: `🚀 Exciting update from ${companyData.name}!
+      title: `${companyData.name?.replace(/[<>'"]/g, '') || 'Company'} AI Transformation Results`,
+      body: `🚀 Exciting update from ${companyData.name?.replace(/[<>'"]/g, '') || 'our company'}!
 
 Our AI transformation journey has delivered incredible results:
 

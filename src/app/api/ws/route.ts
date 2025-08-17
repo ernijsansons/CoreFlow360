@@ -6,9 +6,9 @@
 import { NextRequest } from 'next/server'
 import { Server } from 'socket.io'
 import { createServer } from 'http'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/db'
 
-const prisma = new PrismaClient()
+
 
 // Note: Next.js doesn't support WebSocket in App Router directly
 // This is a placeholder for WebSocket implementation
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 /*
 import { Server } from 'socket.io'
 import { createServer } from 'http'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/db'
 
 const httpServer = createServer()
 const io = new Server(httpServer, {
@@ -45,7 +45,7 @@ const io = new Server(httpServer, {
   }
 })
 
-const prisma = new PrismaClient()
+
 
 // Connection management
 const connections = new Map<string, any>()

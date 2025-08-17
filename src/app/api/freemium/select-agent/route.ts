@@ -4,11 +4,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/db'
 import { parseValidatedData } from '@/middleware/validation'
 import { z } from 'zod'
 
-const prisma = new PrismaClient()
+
 
 // Updated schema with proper naming
 const selectAgentBodySchema = z.object({

@@ -81,7 +81,7 @@ export interface OptimizationRecommendation {
 
 export class PerformanceOrchestrator extends EventEmitter {
   private config: PerformanceConfig
-  private redis: Redis
+  private redis: Redis | null = null
   private queryOptimizer: QueryOptimizer
   private poolManager: ConnectionPoolManager
   private cacheManager: CacheManager
@@ -98,7 +98,10 @@ export class PerformanceOrchestrator extends EventEmitter {
     this.alerts = []
     this.recommendations = []
     
-    this.initialize()
+    // Skip initialization during build
+    if (!process.env.VERCEL && !process.env.CI && process.env.NEXT_PHASE !== 'phase-production-build' && process.env.VERCEL_ENV !== 'preview') {
+      this.initialize()
+    }
   }
 
   /**
@@ -360,11 +363,19 @@ export class PerformanceOrchestrator extends EventEmitter {
   // Private methods
   private async initialize(): Promise<void> {
     try {
+      // Skip during build
+      if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+        console.log('⏭️ Skipping Performance Orchestrator initialization during build')
+        return
+      }
+      
       // Initialize Redis connection
       this.redis = new Redis({
         host: this.config.redis.host,
         port: this.config.redis.port,
-        password: this.config.redis.password
+        password: this.config.redis.password,
+        lazyConnect: true,
+        enableOfflineQueue: false
       })
       
       // Initialize subsystems
@@ -768,7 +779,9 @@ export class PerformanceOrchestrator extends EventEmitter {
     }
     
     // Disconnect Redis
-    await this.redis.quit()
+    if (this.redis) {
+      await this.redis.quit()
+    }
     
     console.log('✅ Performance Orchestrator cleanup completed')
   }
