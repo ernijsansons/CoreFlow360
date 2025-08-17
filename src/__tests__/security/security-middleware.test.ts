@@ -103,7 +103,7 @@ describe('Security Middleware', () => {
     })
 
     it('should allow mutations with valid CSRF token', async () => {
-      const validToken = 'valid-csrf-token'
+      const validToken = process.env.TEST_CSRF_TOKEN || 'test-csrf-token'
       mockRequest.method = 'POST'
       mockRequest.headers.set('x-csrf-token', validToken)
       mockRequest.cookies.get = vi.fn().mockReturnValue({ value: validToken })
@@ -174,7 +174,7 @@ describe('API Key Validation', () => {
   const originalEnv = process.env
 
   beforeEach(() => {
-    process.env = { ...originalEnv, API_KEY_SECRET: 'test-secret' }
+    process.env = { ...originalEnv, API_KEY_SECRET: process.env.TEST_API_SECRET || 'test-secret' }
   })
 
   afterEach(() => {
@@ -189,7 +189,7 @@ describe('API Key Validation', () => {
     const prefix = 'cf360'
     
     const signature = crypto
-      .createHmac('sha256', 'test-secret')
+      .createHmac('sha256', process.env.TEST_API_SECRET || 'test-secret')
       .update(`${prefix}_${tenantId}_${random}`)
       .digest('hex')
       .substring(0, 16)
@@ -241,7 +241,7 @@ describe('SQL Injection Prevention', () => {
 describe('Webhook Signature Validation', () => {
   it('should validate correct webhook signatures', () => {
     const payload = JSON.stringify({ event: 'test' })
-    const secret = 'webhook-secret'
+    const secret = process.env.TEST_WEBHOOK_SECRET || 'test-webhook-secret'
     const crypto = require('crypto')
     
     const signature = crypto
@@ -255,7 +255,7 @@ describe('Webhook Signature Validation', () => {
 
   it('should reject invalid webhook signatures', () => {
     const payload = JSON.stringify({ event: 'test' })
-    const secret = 'webhook-secret'
+    const secret = process.env.TEST_WEBHOOK_SECRET || 'test-webhook-secret'
     const invalidSignature = 'invalid-signature'
     
     const isValid = validateWebhookSignature(payload, invalidSignature, secret)
@@ -265,7 +265,7 @@ describe('Webhook Signature Validation', () => {
   it('should use timing-safe comparison', () => {
     // This test ensures the function doesn't return early on first mismatch
     const payload = JSON.stringify({ event: 'test' })
-    const secret = 'webhook-secret'
+    const secret = process.env.TEST_WEBHOOK_SECRET || 'test-webhook-secret'
     
     const startTime = Date.now()
     validateWebhookSignature(payload, 'a'.repeat(64), secret)

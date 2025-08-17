@@ -97,6 +97,12 @@ export class EnhancedRateLimiter {
    * Initialize Redis connection
    */
   private initializeRedis() {
+    // Skip Redis initialization during build
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+      console.log('Skipping Redis initialization for rate limiting during build')
+      return
+    }
+    
     try {
       if (process.env.REDIS_CLUSTER_NODES) {
         // Redis Cluster mode
@@ -511,8 +517,39 @@ export class EnhancedRateLimiter {
   }
 }
 
-// Global rate limiter instance
-export const enhancedRateLimiter = new EnhancedRateLimiter()
+// Global rate limiter instance with lazy initialization
+let _enhancedRateLimiter: EnhancedRateLimiter | null = null
+
+// Lazy-loaded rate limiter to prevent build-time Redis connections
+export function getEnhancedRateLimiter(): EnhancedRateLimiter {
+  // Skip initialization during build
+  if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+    // Return a mock during build
+    return {
+      check: async () => ({
+        allowed: true,
+        limit: 1000,
+        remaining: 1000,
+        reset: Date.now() + 60000
+      }),
+      reset: async () => {},
+      getUsage: async () => 0
+    } as any
+  }
+  
+  if (!_enhancedRateLimiter) {
+    _enhancedRateLimiter = new EnhancedRateLimiter()
+  }
+  return _enhancedRateLimiter
+}
+
+// Export for backward compatibility
+export const enhancedRateLimiter = new Proxy({} as EnhancedRateLimiter, {
+  get(_target, prop) {
+    const limiter = getEnhancedRateLimiter()
+    return limiter[prop as keyof EnhancedRateLimiter]
+  }
+})
 
 /**
  * Middleware helper for enhanced rate limiting

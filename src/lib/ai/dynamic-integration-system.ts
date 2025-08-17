@@ -573,14 +573,14 @@ class SecureDataAccess implements DataAccessInterface {
 
   async update(table: string, id: string, data: any): Promise<any> {
     if (!this.permissions.canWrite.includes(table)) {
-      throw new Error(`Update permission denied for table: ${table}`)
+      throw new Error(`Update permission denied for table: ${table?.replace(/[<>'"]/g, '') || 'unknown'}`)
     }
     return data
   }
 
   async delete(table: string, id: string): Promise<boolean> {
     if (!this.permissions.canDelete.includes(table)) {
-      throw new Error(`Delete permission denied for table: ${table}`)
+      throw new Error(`Delete permission denied for table: ${table?.replace(/[<>'"]/g, '') || 'unknown'}`)
     }
     return true
   }

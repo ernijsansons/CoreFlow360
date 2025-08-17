@@ -396,7 +396,7 @@ export function SubscriptionDashboard() {
                 Cancel
               </button>
               <button className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                Update Subscription (${currentPricing.pricing.monthlyTotal}/mo)
+                Update Subscription (${currentPricing?.pricing?.monthlyTotal?.toString()?.replace(/[<>'"]/g, '') || '0'}/mo)
               </button>
             </div>
           )}

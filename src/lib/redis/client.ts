@@ -29,8 +29,9 @@ let redisClient: Redis | null = null
  */
 export function getRedisClient(): Redis | null {
   // Skip Redis entirely during build
-  const isBuildTime = process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV
+  const isBuildTime = process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview'
   if (isBuildTime) {
+    console.log('Skipping Redis client creation during build')
     return null
   }
   
@@ -61,8 +62,8 @@ export function getRedisClient(): Redis | null {
       })
       
       // Only ping in runtime, not during build
-      const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
-      if (!isBuildTime) {
+      const isRuntimeEnvironment = !process.env.VERCEL && !process.env.CI && process.env.NEXT_PHASE !== 'phase-production-build' && process.env.VERCEL_ENV !== 'preview'
+      if (isRuntimeEnvironment) {
         // Ping to verify connection in runtime only
         redisClient.ping().catch((error) => {
           console.error('Redis ping failed:', error)
@@ -123,7 +124,7 @@ export const redis = {
    */
   async get<T = any>(key: string): Promise<T | null> {
     // Skip during build
-    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
       return null
     }
     
@@ -151,7 +152,7 @@ export const redis = {
    */
   async set(key: string, value: any, ttl?: number): Promise<boolean> {
     // Skip during build
-    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
       return true
     }
     

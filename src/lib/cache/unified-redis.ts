@@ -164,7 +164,7 @@ export class UnifiedRedisCache {
 
   private async init() {
     // Skip initialization during build
-    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
       console.log('Skipping Redis initialization during build')
       return
     }
@@ -210,7 +210,7 @@ export class UnifiedRedisCache {
       })
 
       // Only connect in runtime, not during build
-      if (!process.env.VERCEL && !process.env.CI && !process.env.NEXT_PHASE) {
+      if (!process.env.VERCEL && !process.env.CI && !process.env.NEXT_PHASE && process.env.VERCEL_ENV !== 'preview') {
         await this.redisClient.connect()
       }
     } catch (error) {
@@ -262,7 +262,7 @@ export class UnifiedRedisCache {
    */
   async get<T = any>(key: string, options?: CacheOptions): Promise<T | null> {
     // Skip during build
-    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
       return null
     }
     
@@ -306,7 +306,7 @@ export class UnifiedRedisCache {
    */
   async set(key: string, value: any, options?: CacheOptions): Promise<boolean> {
     // Skip during build
-    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
       return true
     }
     
@@ -556,12 +556,12 @@ export function getUnifiedCache(): UnifiedRedisCache {
 export const unifiedCache = new Proxy({} as UnifiedRedisCache, {
   get(_target, prop) {
     // During build, return no-op functions
-    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
-      const noOpMethods = ['get', 'set', 'del', 'exists', 'invalidate', 'invalidatePattern', 'invalidateTags', 'clear', 'getStats', 'cache', 'connect', 'disconnect']
+    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+      const noOpMethods = ['get', 'set', 'del', 'exists', 'invalidate', 'invalidatePattern', 'invalidateTags', 'clear', 'getStats', 'cache', 'connect', 'disconnect', 'withLock', 'invalidateTenant', 'shutdown', 'getHitRate', 'isAvailable']
       if (noOpMethods.includes(prop as string)) {
         return async () => {
           console.log(`Cache operation ${prop} skipped during build`)
-          return prop === 'get' ? null : prop === 'exists' ? false : prop === 'getStats' ? {} : true
+          return prop === 'get' ? null : prop === 'exists' ? false : prop === 'getStats' ? {} : prop === 'isAvailable' ? false : prop === 'getHitRate' ? 0 : true
         }
       }
     }

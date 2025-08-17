@@ -100,7 +100,7 @@ describe('API Routes Integration Tests', () => {
         method: 'POST',
         body: JSON.stringify({
           email: 'newuser@example.com',
-          password: 'securePassword123!',
+          password: process.env.TEST_PASSWORD || 'test-password-123',
           name: 'New User'
         })
       })
@@ -125,7 +125,7 @@ describe('API Routes Integration Tests', () => {
         method: 'POST',
         body: JSON.stringify({
           email: 'existing@example.com',
-          password: 'password123',
+          password: process.env.TEST_PASSWORD || 'test-password-123',
           name: 'Test User'
         })
       })

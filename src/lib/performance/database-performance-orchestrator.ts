@@ -265,7 +265,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
             type: index.type
           })
         } catch (error) {
-          console.error(`Failed to create index on ${index.table}:`, error)
+          console.error(`Failed to create index on ${index.table?.replace(/[<>'"]/g, '') || 'unknown table'}:`, error)
         }
       }
     }
@@ -382,7 +382,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
             .map(q => q.query)
             .slice(0, 5),
           reason: `Frequently accessed table (${access.frequency} slow queries) with common column patterns`,
-          implementation: `CREATE INDEX idx_${table}_${columns.join('_')} ON ${table} (${columns.join(', ')})`
+          implementation: `CREATE INDEX idx_${table?.replace(/[<>'"]/g, '') || 'unknown'}_${columns.map(c => c?.replace(/[<>'"]/g, '') || 'unknown').join('_')} ON ${table?.replace(/[<>'"]/g, '') || 'unknown'} (${columns.map(c => c?.replace(/[<>'"]/g, '') || 'unknown').join(', ')})`
         })
       }
     }
@@ -406,7 +406,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
       
       console.log(`✅ Index created successfully: ${recommendation.table}`)
     } catch (error) {
-      console.error(`❌ Failed to create index: ${error}`)
+      console.error(`❌ Failed to create index: ${error?.toString()?.replace(/[<>'"]/g, '') || 'Unknown error'}`)
       throw error
     }
   }
@@ -660,9 +660,9 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
           storageOverhead: 5,
           maintenanceCost: 'LOW'
         },
-        affectedQueries: [`SELECT * FROM ${table} WHERE tenantId = ?`],
+        affectedQueries: [`SELECT * FROM ${table?.replace(/[<>'"]/g, '') || 'unknown'} WHERE tenantId = ?`],
         reason: 'Multi-tenant architecture requires tenant isolation index',
-        implementation: `CREATE INDEX idx_${table}_tenant_id ON ${table} (tenantId)`
+        implementation: `CREATE INDEX idx_${table?.replace(/[<>'"]/g, '') || 'unknown'}_tenant_id ON ${table?.replace(/[<>'"]/g, '') || 'unknown'} (tenantId)`
       })
     }
   }
@@ -687,9 +687,9 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
           storageOverhead: 3,
           maintenanceCost: 'LOW'
         },
-        affectedQueries: [`SELECT * FROM ${fk.table} WHERE ${fk.column} = ?`],
+        affectedQueries: [`SELECT * FROM ${fk.table?.replace(/[<>'"]/g, '') || 'unknown'} WHERE ${fk.column?.replace(/[<>'"]/g, '') || 'unknown'} = ?`],
         reason: 'Foreign key relationships require indexes for JOIN performance',
-        implementation: `CREATE INDEX idx_${fk.table}_${fk.column} ON ${fk.table} (${fk.column})`
+        implementation: `CREATE INDEX idx_${fk.table?.replace(/[<>'"]/g, '') || 'unknown'}_${fk.column?.replace(/[<>'"]/g, '') || 'unknown'} ON ${fk.table?.replace(/[<>'"]/g, '') || 'unknown'} (${fk.column?.replace(/[<>'"]/g, '') || 'unknown'})`
       })
     }
   }

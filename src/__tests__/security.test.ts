@@ -174,10 +174,10 @@ describe('Input Sanitization', () => {
 
 describe('API Key Validation', () => {
   it('should validate correct API key format', () => {
-    const apiKey = 'cf360_tenant123_random456_signature789'
+    const apiKey = process.env.TEST_API_KEY || 'cf360_test123_random456_signature789'
     const result = validateApiKey(apiKey)
     expect(result.valid).toBe(true)
-    expect(result.tenantId).toBe('tenant123')
+    expect(result.tenantId).toBe('test123')
   })
 
   it('should reject invalid API key format', () => {
@@ -196,7 +196,7 @@ describe('API Key Validation', () => {
   })
 
   it('should reject API keys with invalid tenant ID format', () => {
-    const apiKey = 'cf360_tenant@123_random456_signature789'
+    const apiKey = process.env.TEST_INVALID_API_KEY || 'cf360_test@123_random456_signature789'
     const result = validateApiKey(apiKey)
     expect(result.valid).toBe(false)
   })
@@ -204,7 +204,7 @@ describe('API Key Validation', () => {
 
 describe('CSRF Token Validation', () => {
   it('should validate matching tokens', () => {
-    const token = 'valid-token-123'
+    const token = process.env.TEST_CSRF_TOKEN || 'test-token-123'
     const result = validateCsrfToken(token, token)
     expect(result).toBe(true)
   })

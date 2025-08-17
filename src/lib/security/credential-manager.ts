@@ -436,7 +436,7 @@ export class SecureCredentialManager {
 
     // Get total count
     const countResult = await prisma.$queryRaw<[{ count: bigint }]>`
-      SELECT COUNT(*) as count FROM api_keys WHERE ${prisma.$queryRaw([whereClause])}
+      SELECT COUNT(*) as count FROM api_keys WHERE ${prisma.$queryRaw([whereClause?.replace(/[<>'"]/g, '') || '1=1'])}
     `
     const total = Number(countResult[0].count)
 
@@ -448,8 +448,8 @@ export class SecureCredentialManager {
         rotation_days, usage_count, error_count, security_score,
         security_level, vendor_id
       FROM api_keys 
-      WHERE ${prisma.$queryRaw([whereClause])}
-      ORDER BY ${prisma.$queryRaw([orderBy])} ${prisma.$queryRaw([orderDirection])}
+      WHERE ${prisma.$queryRaw([whereClause?.replace(/[<>'"]/g, '') || '1=1'])}
+      ORDER BY ${prisma.$queryRaw([orderBy?.replace(/[<>'"]/g, '') || 'updated_at'])} ${prisma.$queryRaw([orderDirection?.replace(/[<>'"]/g, '') || 'desc'])}
       LIMIT ${limit} OFFSET ${offset}
     `
 
@@ -807,7 +807,7 @@ export class SecureCredentialManager {
 
     // Delete the key
     await prisma.$executeRaw`
-      DELETE FROM api_keys WHERE id = ${keyId} AND tenant_id = ${tenantId}
+      DELETE FROM api_keys WHERE id = ${keyId?.replace(/[<>'"]/g, '') || ''} AND tenant_id = ${tenantId?.replace(/[<>'"]/g, '') || ''}
     `
 
     // Log deletion

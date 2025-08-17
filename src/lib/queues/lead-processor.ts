@@ -11,48 +11,141 @@ import { db } from '@/lib/db'
 import { rateLimiter } from '@/lib/rate-limiting/call-limiter'
 
 // Skip Redis initialization during build time
-const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+const isBuildTime = () => process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview'
 
-// Redis connection with clustering support
-const redis = isBuildTime ? null : new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  maxRetriesPerRequest: null, // Required by BullMQ
-  retryDelayOnFailover: 100,
-  enableOfflineQueue: false,
-  lazyConnect: true,
-  // Connection pooling for high throughput
-  family: 4,
-  keepAlive: 30000,
-  db: parseInt(process.env.REDIS_DB || '0')
-})
+// Lazy Redis connection factory
+let redis: Redis | null = null
+function getRedisConnection(): Redis | null {
+  if (isBuildTime()) {
+    return null
+  }
+  
+  if (!redis) {
+    redis = new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      maxRetriesPerRequest: null, // Required by BullMQ
+      retryDelayOnFailover: 100,
+      enableOfflineQueue: false,
+      lazyConnect: true,
+      // Connection pooling for high throughput
+      family: 4,
+      keepAlive: 30000,
+      db: parseInt(process.env.REDIS_DB || '0')
+    })
+  }
+  
+  return redis
+}
 
-// Queue configuration for optimal performance
-const queueConfig = isBuildTime ? {} : {
-  connection: redis as Redis,
-  defaultJobOptions: {
-    removeOnComplete: 100,  // Keep last 100 completed jobs
-    removeOnFail: 50,       // Keep last 50 failed jobs
-    attempts: 3,
-    backoff: {
-      type: 'exponential' as const,
-      delay: 10000
+// Lazy queue configuration
+function getQueueConfig() {
+  if (isBuildTime()) {
+    return {}
+  }
+  
+  const connection = getRedisConnection()
+  if (!connection) {
+    return {}
+  }
+  
+  return {
+    connection,
+    defaultJobOptions: {
+      removeOnComplete: 100,  // Keep last 100 completed jobs
+      removeOnFail: 50,       // Keep last 50 failed jobs
+      attempts: 3,
+      backoff: {
+        type: 'exponential' as const,
+        delay: 10000
+      }
     }
   }
 }
 
+// Lazy queue initialization
+let _leadQueue: Queue | null = null
+let _callStatusQueue: Queue | null = null
+
 // Lead processing queue - handles call initiation
-export const leadQueue = isBuildTime ? ({} as Queue) : new Queue('lead-processor', queueConfig)
+export function getLeadQueue(): Queue {
+  if (isBuildTime()) {
+    return {} as Queue
+  }
+  
+  if (!_leadQueue) {
+    _leadQueue = new Queue('lead-processor', getQueueConfig())
+  }
+  return _leadQueue
+}
 
 // Call status queue - handles call lifecycle events  
-export const callStatusQueue = isBuildTime ? ({} as Queue) : new Queue('call-status', queueConfig)
+export function getCallStatusQueue(): Queue {
+  if (isBuildTime()) {
+    return {} as Queue
+  }
+  
+  if (!_callStatusQueue) {
+    _callStatusQueue = new Queue('call-status', getQueueConfig())
+  }
+  return _callStatusQueue
+}
+
+// Export for backward compatibility with lazy loading
+export const leadQueue = new Proxy({} as Queue, {
+  get(_target, prop) {
+    const queue = getLeadQueue()
+    return queue[prop as keyof Queue]
+  }
+})
+
+export const callStatusQueue = new Proxy({} as Queue, {
+  get(_target, prop) {
+    const queue = getCallStatusQueue()
+    return queue[prop as keyof Queue]
+  }
+})
 
 // Retry queue - handles failed calls with intelligent retry logic
-export const retryQueue = isBuildTime ? ({} as Queue) : new Queue('call-retry', queueConfig)
+let _retryQueue: Queue | null = null
+
+export function getRetryQueue(): Queue {
+  if (isBuildTime()) {
+    return {} as Queue
+  }
+  
+  if (!_retryQueue) {
+    _retryQueue = new Queue('call-retry', getQueueConfig())
+  }
+  return _retryQueue
+}
+
+export const retryQueue = new Proxy({} as Queue, {
+  get(_target, prop) {
+    const queue = getRetryQueue()
+    return queue[prop as keyof Queue]
+  }
+})
 
 // Queue events for monitoring
-const queueEvents = isBuildTime ? null : new QueueEvents('lead-processor', { connection: redis as Redis })
+let _queueEvents: QueueEvents | null = null
+
+function getQueueEvents(): QueueEvents | null {
+  if (isBuildTime()) {
+    return null
+  }
+  
+  if (!_queueEvents) {
+    const connection = getRedisConnection()
+    if (connection) {
+      _queueEvents = new QueueEvents('lead-processor', { connection })
+    }
+  }
+  return _queueEvents
+}
+
+const queueEvents = getQueueEvents()
 
 interface LeadJobData {
   leadId: string
@@ -91,9 +184,22 @@ interface RetryJobData {
 /**
  * Lead processing worker - processes incoming leads for voice calls
  */
-const leadWorker = isBuildTime ? null : new Worker(
-  'lead-processor',
-  async (job: Job<LeadJobData>) => {
+let _leadWorker: Worker | null = null
+
+function getLeadWorker(): Worker | null {
+  if (isBuildTime()) {
+    return null
+  }
+  
+  if (!_leadWorker) {
+    const connection = getRedisConnection()
+    if (!connection) {
+      return null
+    }
+    
+    _leadWorker = new Worker(
+      'lead-processor',
+      async (job: Job<LeadJobData>) => {
     const startTime = Date.now()
     console.log(`🔄 Processing lead job ${job.id}:`, job.data.leadId)
     
@@ -244,15 +350,21 @@ const leadWorker = isBuildTime ? null : new Worker(
       throw error
     }
   },
-  {
-    connection: redis,
-    concurrency: parseInt(process.env.QUEUE_CONCURRENCY || '10'),
-    limiter: {
-      max: 100,      // Max 100 jobs per window
-      duration: 60000 // 1 minute window
-    }
+      {
+        connection,
+        concurrency: parseInt(process.env.QUEUE_CONCURRENCY || '10'),
+        limiter: {
+          max: 100,      // Max 100 jobs per window
+          duration: 60000 // 1 minute window
+        }
+      }
+    )
   }
-)
+  
+  return _leadWorker
+}
+
+const leadWorker = getLeadWorker()
 
 /**
  * Call status monitoring worker

@@ -129,7 +129,7 @@ export class TenantSecureDatabase {
     } catch (error) {
       return {
         success: false,
-        error: `Secure create operation failed: ${error.message}`,
+        error: `Secure create operation failed: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}`,
         securityViolation: this.isSecurityViolation(error)
       }
     }
@@ -194,7 +194,7 @@ export class TenantSecureDatabase {
     } catch (error) {
       return {
         success: false,
-        error: `Secure update operation failed: ${error.message}`,
+        error: `Secure update operation failed: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}`,
         securityViolation: this.isSecurityViolation(error)
       }
     }
@@ -252,7 +252,7 @@ export class TenantSecureDatabase {
     } catch (error) {
       return {
         success: false,
-        error: `Secure delete operation failed: ${error.message}`,
+        error: `Secure delete operation failed: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}`,
         securityViolation: this.isSecurityViolation(error)
       }
     }

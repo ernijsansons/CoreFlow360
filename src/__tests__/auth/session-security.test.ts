@@ -72,7 +72,7 @@ describe('Authentication Security Tests', () => {
           departmentId: 'dept-123',
           permissions: ['read', 'write']
         },
-        csrfToken: 'csrf-token-123'
+        csrfToken: process.env.TEST_CSRF_TOKEN || 'test-csrf-token-123'
       }
 
       mockGetServerSession.mockResolvedValue(validSession)

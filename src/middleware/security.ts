@@ -80,34 +80,49 @@ const rateLimitStore = new Map<string, RateLimitEntry>()
 // Redis client for production (fallback to in-memory for development)
 let redisClient: any = null
 
-// Initialize Redis client only when REDIS_URL is explicitly provided
-if (process.env.REDIS_URL && typeof process.env.REDIS_URL === 'string' && process.env.REDIS_URL.length > 0) {
-  try {
-    const Redis = require('ioredis')
-    // Avoid noisy retries in development; fall back to memory on failure
-    redisClient = new Redis(process.env.REDIS_URL, {
-      lazyConnect: true,
-      retryStrategy: () => null,
-      maxRetriesPerRequest: 0,
-    })
-
-    // Attempt a one-time connect; on failure, disable Redis usage
-    redisClient.connect().catch((err: any) => {
-      console.warn('Redis connection failed, using in-memory rate limiting:', err?.message || err)
-      try { redisClient.disconnect() } catch {}
-      redisClient = null
-    })
-
-    // If runtime error occurs later, disable Redis usage
-    redisClient.on('error', (err: any) => {
-      console.warn('Redis error, switching to in-memory rate limiting:', err?.message || err)
-      try { redisClient.disconnect() } catch {}
-      redisClient = null
-    })
-  } catch (error) {
-    console.warn('Redis client unavailable, using in-memory rate limiting')
-    redisClient = null
+// Lazy Redis initialization function
+function getRedisClient() {
+  // Skip during build
+  if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+    return null
   }
+  
+  // Return existing client if already initialized
+  if (redisClient !== null) {
+    return redisClient
+  }
+  
+  // Initialize Redis client only when REDIS_URL is explicitly provided
+  if (process.env.REDIS_URL && typeof process.env.REDIS_URL === 'string' && process.env.REDIS_URL.length > 0) {
+    try {
+      const Redis = require('ioredis')
+      // Avoid noisy retries in development; fall back to memory on failure
+      redisClient = new Redis(process.env.REDIS_URL, {
+        lazyConnect: true,
+        retryStrategy: () => null,
+        maxRetriesPerRequest: 0,
+      })
+
+      // Attempt a one-time connect; on failure, disable Redis usage
+      redisClient.connect().catch((err: any) => {
+        console.warn('Redis connection failed, using in-memory rate limiting:', err?.message || err)
+        try { redisClient.disconnect() } catch {}
+        redisClient = null
+      })
+
+      // If runtime error occurs later, disable Redis usage
+      redisClient.on('error', (err: any) => {
+        console.warn('Redis error, switching to in-memory rate limiting:', err?.message || err)
+        try { redisClient.disconnect() } catch {}
+        redisClient = null
+      })
+    } catch (error) {
+      console.warn('Redis client unavailable, using in-memory rate limiting')
+      redisClient = null
+    }
+  }
+  
+  return redisClient
 }
 
 export async function securityMiddleware(request: NextRequest) {
@@ -347,7 +362,8 @@ async function checkRateLimit(
   const key = `${ip}:${path}`
   const now = Date.now()
   
-  if (redisClient && redisClient.status === 'ready') {
+  const client = getRedisClient()
+  if (client && client.status === 'ready') {
     // Use Redis for production
     return await checkRateLimitRedis(key, now, config)
   } else {
@@ -361,9 +377,15 @@ async function checkRateLimitRedis(
   now: number, 
   config: RateLimitConfig
 ): Promise<{ allowed: boolean; message: string; retryAfter: number; resetTime: number }> {
+  const client = getRedisClient()
+  if (!client) {
+    // Fallback to memory if Redis not available
+    return checkRateLimitMemory(key, now, config)
+  }
+  
   try {
     // Atomic rate limiting using Redis pipeline
-    const pipeline = redisClient.pipeline()
+    const pipeline = client.pipeline()
     pipeline.incr(key)
     pipeline.expire(key, Math.floor(config.windowMs / 1000))
     pipeline.get(key)
@@ -373,7 +395,7 @@ async function checkRateLimitRedis(
     const currentCount = results[2][1] as number || newCount
     
     if (currentCount > config.maxRequests) {
-      const ttl = await redisClient.ttl(key)
+      const ttl = await client.ttl(key)
       const retryAfter = ttl > 0 ? ttl * 1000 : config.windowMs
       
       return {

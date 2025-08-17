@@ -241,3 +241,4 @@ jobs:
           echo "Secrets found: ${{ steps.analyze.outputs.secrets_found }}"
           echo "Please remove any hardcoded secrets from the codebase."
           exit 1
+

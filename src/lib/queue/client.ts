@@ -37,8 +37,9 @@ export function getQueue(name: keyof typeof QUEUE_NAMES): Queue {
   const queueName = QUEUE_NAMES[name]
   
   // Skip queue creation during build time
-  const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+  const isBuildTime = process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview'
   if (isBuildTime) {
+    console.log(`Skipping queue creation for ${queueName} during build`)
     // Return a mock queue during build
     return {} as Queue
   }

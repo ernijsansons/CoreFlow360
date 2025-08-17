@@ -84,3 +84,4 @@ echo "🔧 If deployment fails, check:"
 echo "   - Vercel build logs"
 echo "   - Environment variable configuration"
 echo "   - Branch settings (should be 'main')"
+

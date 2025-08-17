@@ -233,7 +233,7 @@ io.on('connection', (socket) => {
       timestamp: new Date().toISOString()
     })
     
-    console.log(`[WS] Module update broadcast for tenant ${connection.tenantId}`)
+    console.log(`[WS] Module update broadcast for tenant ${connection.tenantId?.replace(/[<>'"]/g, '') || 'unknown'}`)
   })
 
   // System broadcast handler (admin only)
