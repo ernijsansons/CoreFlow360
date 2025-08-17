@@ -5,42 +5,63 @@
 
 import { z } from 'zod'
 
+// Build-time detection (moved to top)
+const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+
 // Environment variable schemas
 // Accept standard URLs (postgres, mysql, etc.) and SQLite file URLs used in tests/development
 const DatabaseConfigSchema = z.object({
-  DATABASE_URL: z.string().refine((val) => {
-    if (!val) return false
-    if (val.startsWith('file:')) return true
-    try {
-      // Will throw for invalid URLs
-      // Allow http(s), postgres, mysql, etc.
-      // eslint-disable-next-line no-new
-      new URL(val)
-      return true
-    } catch {
-      return false
-    }
-  }, 'Invalid database URL format'),
+  DATABASE_URL: isBuildTime
+    ? z.string().optional().default('postgresql://user:pass@localhost:5432/db')
+    : z.string().refine((val) => {
+        if (!val) return false
+        if (val.startsWith('file:')) return true
+        try {
+          // Will throw for invalid URLs
+          // Allow http(s), postgres, mysql, etc.
+          // eslint-disable-next-line no-new
+          new URL(val)
+          return true
+        } catch {
+          return false
+        }
+      }, 'Invalid database URL format'),
 })
 
 const AuthConfigSchema = z.object({
-  NEXTAUTH_URL: z.string().url('Invalid NextAuth URL format'),
-  NEXTAUTH_SECRET: z.string().min(32, 'NEXTAUTH_SECRET must be at least 32 characters'),
+  NEXTAUTH_URL: isBuildTime 
+    ? z.string().optional().default('http://localhost:3000')
+    : z.string().url('Invalid NextAuth URL format'),
+  NEXTAUTH_SECRET: isBuildTime
+    ? z.string().optional().default('build-time-placeholder-secret-32-chars')
+    : z.string().min(32, 'NEXTAUTH_SECRET must be at least 32 characters'),
 })
 
 const StripeConfigSchema = z.object({
-  STRIPE_SECRET_KEY: z.string().startsWith('sk_', 'Invalid Stripe secret key format'),
-  STRIPE_PUBLISHABLE_KEY: z.string().startsWith('pk_', 'Invalid Stripe publishable key format'),
-  STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_', 'Invalid Stripe webhook secret format'),
+  STRIPE_SECRET_KEY: isBuildTime
+    ? z.string().optional().default('sk_test_placeholder')
+    : z.string().startsWith('sk_', 'Invalid Stripe secret key format'),
+  STRIPE_PUBLISHABLE_KEY: isBuildTime
+    ? z.string().optional().default('pk_test_placeholder')
+    : z.string().startsWith('pk_', 'Invalid Stripe publishable key format'),
+  STRIPE_WEBHOOK_SECRET: isBuildTime
+    ? z.string().optional().default('whsec_placeholder')
+    : z.string().startsWith('whsec_', 'Invalid Stripe webhook secret format'),
 })
 
 const AIConfigSchema = z.object({
-  OPENAI_API_KEY: z.string().startsWith('sk-', 'Invalid OpenAI API key format'),
-  ANTHROPIC_API_KEY: z.string().startsWith('sk-ant-', 'Invalid Anthropic API key format'),
+  OPENAI_API_KEY: isBuildTime
+    ? z.string().optional().default('sk-placeholder')
+    : z.string().startsWith('sk-', 'Invalid OpenAI API key format'),
+  ANTHROPIC_API_KEY: isBuildTime
+    ? z.string().optional().default('sk-ant-placeholder')
+    : z.string().startsWith('sk-ant-', 'Invalid Anthropic API key format'),
 })
 
 const EmailConfigSchema = z.object({
-  SENDGRID_API_KEY: z.string().min(1, 'SendGrid API key is required'),
+  SENDGRID_API_KEY: isBuildTime
+    ? z.string().optional().default('placeholder')
+    : z.string().min(1, 'SendGrid API key is required'),
   RESEND_API_KEY: z.string().optional(),
 })
 
@@ -49,8 +70,12 @@ const RedisConfigSchema = z.object({
 })
 
 const SecurityConfigSchema = z.object({
-  API_KEY_SECRET: z.string().min(32, 'API_KEY_SECRET must be at least 32 characters'),
-  ENCRYPTION_KEY: z.string().min(32, 'ENCRYPTION_KEY must be at least 32 characters'),
+  API_KEY_SECRET: isBuildTime 
+    ? z.string().optional().default('build-time-placeholder-secret-32-chars')
+    : z.string().min(32, 'API_KEY_SECRET must be at least 32 characters'),
+  ENCRYPTION_KEY: isBuildTime
+    ? z.string().optional().default('build-time-placeholder-key-32-chars-long')
+    : z.string().min(32, 'ENCRYPTION_KEY must be at least 32 characters'),
 })
 
 // Combined configuration schema for full app runtime

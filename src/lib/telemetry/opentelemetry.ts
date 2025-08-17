@@ -30,11 +30,15 @@ import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 
 // Optional Redis instrumentation - not critical for build
-let RedisInstrumentation: any;
-try {
-  RedisInstrumentation = require('@opentelemetry/instrumentation-redis-4').RedisInstrumentation;
-} catch (e) {
-  console.warn('Redis instrumentation not available, continuing without it');
+let RedisInstrumentation: any = null;
+// Only try to load Redis instrumentation at runtime, not during build
+if (typeof window === 'undefined' && process.env.NODE_ENV !== 'production') {
+  try {
+    // Use eval to prevent webpack from trying to bundle this
+    RedisInstrumentation = eval(`require('@opentelemetry/instrumentation-redis-4').RedisInstrumentation`);
+  } catch (e) {
+    console.warn('Redis instrumentation not available, continuing without it');
+  }
 }
 
 export interface TraceContext {
