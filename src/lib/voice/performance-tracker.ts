@@ -623,5 +623,12 @@ export class PerformanceTracker {
   }
 }
 
-// Export singleton instance
-export const performanceTracker = new PerformanceTracker();
+// Lazy initialize performance tracker
+let performanceTrackerInstance: PerformanceTracker | null = null;
+
+export const getVoicePerformanceTracker = (): PerformanceTracker => {
+  if (!performanceTrackerInstance) {
+    performanceTrackerInstance = new PerformanceTracker();
+  }
+  return performanceTrackerInstance;
+};

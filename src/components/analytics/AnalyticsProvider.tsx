@@ -8,7 +8,7 @@
 import { createContext, useContext, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { analytics, trackWebVitals } from '@/lib/analytics'
-import { sessionTracker, performanceTracker } from '@/lib/monitoring'
+import { getSessionTracker, getPerformanceTracker } from '@/lib/monitoring'
 
 interface AnalyticsContextType {
   track: (eventName: string, properties?: Record<string, any>) => void
@@ -36,7 +36,10 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
   // Track page views on route changes
   useEffect(() => {
     analytics.pageView(pathname)
-    sessionTracker.trackPageView()
+    const tracker = getSessionTracker()
+    if (tracker) {
+      tracker.trackPageView()
+    }
   }, [pathname])
 
   // Track web vitals for performance monitoring

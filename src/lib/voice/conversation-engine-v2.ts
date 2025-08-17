@@ -10,7 +10,7 @@ import { EmotionDetector } from './analyzers/emotion-detector';
 import { ObjectionHandler } from './analyzers/objection-handler';
 import { IndustryKnowledge } from './knowledge/industry-knowledge';
 import { VapiClient } from '@vapi-ai/server-sdk';
-import { performanceTracker } from './performance-tracker';
+import { getVoicePerformanceTracker } from './performance-tracker';
 import { prisma } from '../prisma';
 
 export interface CallParams {
@@ -173,7 +173,7 @@ export class ConversationEngineV2 {
       await this.startRealtimeMonitoring(callId, params);
       
       // Record performance metrics
-      performanceTracker.startCallTracking(callId, {
+      getVoicePerformanceTracker().startCallTracking(callId, {
         tenantId: params.tenantId,
         provider: 'vapi',
         industry: params.industry
@@ -517,7 +517,7 @@ Success probability: ${this.calculateSuccessProbability(context)}%`;
     }
     
     // Record performance data
-    performanceTracker.recordAIConfidence(event.callId, event.confidence || 0);
+    getVoicePerformanceTracker().recordAIConfidence(event.callId, event.confidence || 0);
     
     if (event.speaker === 'customer') {
       conversation.customerWordCount += event.text.split(' ').length;
@@ -624,7 +624,7 @@ Success probability: ${this.calculateSuccessProbability(context)}%`;
     this.activeConversations.set(callId, conversationState);
     
     // Start performance tracking
-    performanceTracker.startCallTracking(callId, {
+    getVoicePerformanceTracker().startCallTracking(callId, {
       tenantId: params.tenantId,
       provider: 'vapi',
       industry: params.industry

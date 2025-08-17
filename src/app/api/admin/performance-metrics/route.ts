@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { performanceTracker } from '@/lib/monitoring'
+import { getPerformanceTracker } from '@/lib/monitoring'
 import { z } from 'zod'
 
 /*
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     if (body.action === 'set_threshold') {
       const { operation, maxDuration, maxMemoryDelta, alertSeverity } = body
       
-      performanceTracker.setThreshold({
+      getPerformanceTracker().setThreshold({
         operation,
         maxDuration,
         maxMemoryDelta,
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     }
     
     if (body.action === 'cleanup') {
-      performanceTracker.cleanup()
+      getPerformanceTracker().cleanup()
       
       return NextResponse.json({
         success: true,

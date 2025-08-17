@@ -46,15 +46,18 @@ export class TwilioVoiceClient {
   private config: TwilioConfig
   
   constructor(config?: Partial<TwilioConfig>) {
+    // Build-time detection
+    const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+    
     this.config = {
-      accountSid: process.env.TWILIO_ACCOUNT_SID!,
-      authToken: process.env.TWILIO_AUTH_TOKEN!,
-      phoneNumber: process.env.TWILIO_PHONE_NUMBER!,
-      webhookUrl: process.env.TWILIO_WEBHOOK_URL!,
+      accountSid: process.env.TWILIO_ACCOUNT_SID || (isBuildTime ? 'build-placeholder' : ''),
+      authToken: process.env.TWILIO_AUTH_TOKEN || (isBuildTime ? 'build-placeholder' : ''),
+      phoneNumber: process.env.TWILIO_PHONE_NUMBER || (isBuildTime ? '+1234567890' : ''),
+      webhookUrl: process.env.TWILIO_WEBHOOK_URL || (isBuildTime ? 'https://example.com' : ''),
       ...config
     }
     
-    if (!this.config.accountSid || !this.config.authToken) {
+    if (!isBuildTime && (!this.config.accountSid || !this.config.authToken)) {
       throw new Error('Twilio credentials not configured')
     }
     

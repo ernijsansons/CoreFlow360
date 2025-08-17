@@ -258,8 +258,14 @@ export class PerformanceTracker {
   }
 }
 
-// Initialize performance tracking
-export const performanceTracker = PerformanceTracker.getInstance()
+// Lazy initialize performance tracking
+let performanceTrackerInstance: PerformanceTracker | null = null
+export const getPerformanceTracker = () => {
+  if (!performanceTrackerInstance) {
+    performanceTrackerInstance = PerformanceTracker.getInstance()
+  }
+  return performanceTrackerInstance
+}
 
 // Health check utilities
 export class HealthCheck {
@@ -271,7 +277,7 @@ export class HealthCheck {
       })
       return response.ok
     } catch (error) {
-      performanceTracker.logError(error as Error, { feature: 'health_check' })
+      getPerformanceTracker().logError(error as Error, { feature: 'health_check' })
       return false
     }
   }
@@ -284,7 +290,7 @@ export class HealthCheck {
       })
       return response.ok
     } catch (error) {
-      performanceTracker.logError(error as Error, { feature: 'database_health' })
+      getPerformanceTracker().logError(error as Error, { feature: 'database_health' })
       return false
     }
   }
@@ -302,7 +308,7 @@ export class HealthCheck {
     const overall = api && database
 
     // Track health check results
-    performanceTracker.trackBusinessMetric({
+    getPerformanceTracker().trackBusinessMetric({
       name: 'health_check',
       value: overall ? 1 : 0,
       category: 'system',
@@ -337,7 +343,7 @@ export class SessionTracker {
   trackSessionEnd() {
     const sessionDuration = Date.now() - this.sessionStart
     
-    performanceTracker.trackBusinessMetric({
+    getPerformanceTracker().trackBusinessMetric({
       name: 'session_completed',
       value: sessionDuration,
       category: 'engagement',
@@ -351,7 +357,7 @@ export class SessionTracker {
 
   private trackSession() {
     // Track session start
-    performanceTracker.trackBusinessMetric({
+    getPerformanceTracker().trackBusinessMetric({
       name: 'session_started',
       value: 1,
       category: 'engagement'
@@ -371,7 +377,7 @@ export class SessionTracker {
   private trackSessionMetric() {
     const sessionDuration = Date.now() - this.sessionStart
     
-    performanceTracker.trackBusinessMetric({
+    getPerformanceTracker().trackBusinessMetric({
       name: 'session_active',
       value: sessionDuration,
       category: 'engagement',
@@ -409,7 +415,7 @@ export class RealUserMonitoring {
       online: navigator.onLine
     }
 
-    performanceTracker.trackBusinessMetric({
+    getPerformanceTracker().trackBusinessMetric({
       name: 'device_info',
       value: 1,
       category: 'rum',
@@ -421,7 +427,7 @@ export class RealUserMonitoring {
     if ('connection' in navigator) {
       const connection = (navigator as any).connection
       
-      performanceTracker.trackBusinessMetric({
+      getPerformanceTracker().trackBusinessMetric({
         name: 'connection_info',
         value: 1,
         category: 'rum',
@@ -446,7 +452,7 @@ export class RealUserMonitoring {
       performance_observer: 'PerformanceObserver' in window
     }
 
-    performanceTracker.trackBusinessMetric({
+    getPerformanceTracker().trackBusinessMetric({
       name: 'browser_features',
       value: 1,
       category: 'rum',
@@ -455,12 +461,18 @@ export class RealUserMonitoring {
   }
 }
 
-// Export singleton instance
-export const sessionTracker = new SessionTracker()
+// Lazy initialize session tracker
+let sessionTrackerInstance: SessionTracker | null = null
+export const getSessionTracker = () => {
+  if (!sessionTrackerInstance && typeof window !== 'undefined') {
+    sessionTrackerInstance = new SessionTracker()
+  }
+  return sessionTrackerInstance
+}
 
 // Initialize monitoring in client
 if (typeof window !== 'undefined') {
-  performanceTracker.init()
+  getPerformanceTracker().init()
   RealUserMonitoring.init()
 }
 
@@ -494,7 +506,7 @@ export async function withPerformanceTracking<T>(
     const memoryAfter = process.memoryUsage ? process.memoryUsage() : null
 
     // Track the performance metric
-    performanceTracker.trackBusinessMetric({
+    getPerformanceTracker().trackBusinessMetric({
       name: `operation.${operation}`,
       value: duration,
       category: 'performance',
@@ -513,7 +525,7 @@ export async function withPerformanceTracking<T>(
 
     // Log slow operations
     if (duration > 1000) {
-      performanceTracker.logError(
+      getPerformanceTracker().logError(
         new Error(`Slow operation: ${operation} took ${duration}ms`),
         {
           feature: 'performance',

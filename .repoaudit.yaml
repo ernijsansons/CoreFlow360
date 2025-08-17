@@ -1,0 +1,339 @@
+# RepoAudit Configuration for CoreFlow360
+# Comprehensive security and compliance auditing
+
+version: "1.0"
+project:
+  name: "CoreFlow360"
+  description: "World's #1 AI-First ERP Platform"
+  type: "web-application"
+  framework: "nextjs"
+  language: "typescript"
+
+# Audit Configuration
+audit:
+  # Enable all audit types
+  security: true
+  compliance: true
+  code_quality: true
+  dependencies: true
+  secrets: true
+  infrastructure: true
+  documentation: true
+  
+  # Audit frequency
+  schedule: "daily"
+  auto_fix: false
+  report_format: ["html", "json", "markdown"]
+  
+  # Severity levels to include
+  severity_levels:
+    - "critical"
+    - "high"
+    - "medium"
+    - "low"
+    - "info"
+
+# Security Auditing
+security:
+  # Vulnerability scanning
+  vulnerability_scanning: true
+  dependency_scanning: true
+  secret_scanning: true
+  code_injection_scanning: true
+  
+  # Authentication & Authorization
+  auth_audit: true
+  session_management: true
+  access_control: true
+  
+  # Data Protection
+  data_encryption: true
+  pii_detection: true
+  data_flow_analysis: true
+  
+  # API Security
+  api_security: true
+  input_validation: true
+  output_encoding: true
+  
+  # Infrastructure Security
+  infrastructure_security: true
+  network_security: true
+  container_security: true
+
+# Compliance Auditing
+compliance:
+  # Standards to check against
+  standards:
+    - "OWASP Top 10"
+    - "CWE/SANS Top 25"
+    - "NIST Cybersecurity Framework"
+    - "ISO 27001"
+    - "SOC 2"
+    - "GDPR"
+    - "CCPA"
+    - "HIPAA"
+    - "PCI DSS"
+  
+  # Industry-specific compliance
+  industry:
+    - "healthcare"
+    - "finance"
+    - "ecommerce"
+    - "saas"
+  
+  # Regional compliance
+  regional:
+    - "EU"
+    - "US"
+    - "Canada"
+    - "Australia"
+
+# Code Quality Auditing
+code_quality:
+  # Static analysis
+  static_analysis: true
+  complexity_analysis: true
+  maintainability_index: true
+  
+  # Code standards
+  coding_standards: true
+  best_practices: true
+  design_patterns: true
+  
+  # Performance
+  performance_analysis: true
+  memory_leaks: true
+  resource_usage: true
+  
+  # Testing
+  test_coverage: true
+  test_quality: true
+  integration_tests: true
+
+# Dependency Auditing
+dependencies:
+  # Package analysis
+  package_analysis: true
+  license_compliance: true
+  version_analysis: true
+  
+  # Security vulnerabilities
+  vulnerability_scanning: true
+  outdated_packages: true
+  malicious_packages: true
+  
+  # Dependency graph
+  dependency_graph: true
+  circular_dependencies: true
+  unused_dependencies: true
+
+# Secrets Auditing
+secrets:
+  # Secret detection
+  secret_detection: true
+  hardcoded_secrets: true
+  api_keys: true
+  passwords: true
+  tokens: true
+  
+  # Secret management
+  secret_rotation: true
+  secret_storage: true
+  secret_access: true
+  
+  # Environment variables
+  env_var_analysis: true
+  sensitive_env_vars: true
+
+# Infrastructure Auditing
+infrastructure:
+  # Cloud security
+  cloud_security: true
+  iam_analysis: true
+  network_configuration: true
+  
+  # Container security
+  container_security: true
+  image_scanning: true
+  runtime_security: true
+  
+  # CI/CD security
+  cicd_security: true
+  pipeline_analysis: true
+  deployment_security: true
+
+# Documentation Auditing
+documentation:
+  # Documentation coverage
+  coverage_analysis: true
+  api_documentation: true
+  security_documentation: true
+  
+  # Documentation quality
+  quality_analysis: true
+  link_validation: true
+  content_analysis: true
+
+# Custom Rules
+custom_rules:
+  # AI-specific rules
+  - name: "AI Model Security"
+    pattern: "src/ai/**"
+    checks:
+      - "model_safety"
+      - "bias_detection"
+      - "prompt_injection"
+      - "data_privacy"
+  
+  # ERP-specific rules
+  - name: "Business Logic Security"
+    pattern: "src/lib/business/**"
+    checks:
+      - "data_integrity"
+      - "audit_trails"
+      - "access_controls"
+      - "business_rules"
+  
+  # Database security
+  - name: "Database Security"
+    pattern: "prisma/**"
+    checks:
+      - "sql_injection"
+      - "data_validation"
+      - "migration_security"
+      - "backup_strategy"
+  
+  # API security
+  - name: "API Security"
+    pattern: "src/app/api/**"
+    checks:
+      - "input_validation"
+      - "authentication"
+      - "authorization"
+      - "rate_limiting"
+      - "error_handling"
+
+# File Patterns
+file_patterns:
+  include:
+    - "src/**/*.{ts,tsx,js,jsx}"
+    - "prisma/**/*.{prisma,sql}"
+    - "scripts/**/*.{sh,js,ts}"
+    - "*.{json,yaml,yml,md}"
+    - "package.json"
+    - "package-lock.json"
+    - "vercel.json"
+    - "next.config.ts"
+    - ".env*"
+  
+  exclude:
+    - "node_modules/**"
+    - ".next/**"
+    - "dist/**"
+    - "build/**"
+    - "coverage/**"
+    - ".git/**"
+    - "*.log"
+    - "*.lock"
+
+# Reporting Configuration
+reporting:
+  # Report formats
+  formats:
+    - "html"
+    - "json"
+    - "markdown"
+    - "sarif"
+  
+  # Report location
+  output_dir: "reports/audit"
+  
+  # Report retention
+  retention_days: 30
+  
+  # Notification settings
+  notifications:
+    email: false
+    slack: false
+    webhook: false
+
+# Integration Settings
+integrations:
+  # GitHub integration
+  github:
+    enabled: true
+    pr_comments: true
+    issue_creation: true
+    status_checks: true
+  
+  # CI/CD integration
+  cicd:
+    github_actions: true
+    vercel: true
+    circleci: false
+    jenkins: false
+  
+  # Security tools integration
+  security_tools:
+    sonarqube: false
+    snyk: false
+    dependabot: true
+    codeql: true
+
+# Remediation Settings
+remediation:
+  # Auto-fix settings
+  auto_fix:
+    enabled: false
+    severity_threshold: "medium"
+    file_types:
+      - "package.json"
+      - "*.md"
+      - "*.yaml"
+      - "*.yml"
+  
+  # Manual remediation
+  manual_remediation:
+    enabled: true
+    tracking: true
+    deadlines: true
+
+# Thresholds and Limits
+thresholds:
+  # Security thresholds
+  security:
+    critical_vulnerabilities: 0
+    high_vulnerabilities: 2
+    medium_vulnerabilities: 10
+    low_vulnerabilities: 50
+  
+  # Quality thresholds
+  quality:
+    test_coverage: 80
+    maintainability_index: 70
+    complexity_score: 10
+  
+  # Compliance thresholds
+  compliance:
+    gdpr_compliance: 100
+    security_standards: 95
+    documentation_coverage: 90
+
+# Advanced Settings
+advanced:
+  # Performance settings
+  performance:
+    max_file_size: "10MB"
+    max_scan_time: "30m"
+    parallel_scanning: true
+  
+  # Custom scanners
+  custom_scanners:
+    enabled: false
+    scanner_path: "./custom-scanners"
+  
+  # Plugin system
+  plugins:
+    enabled: false
+    plugin_dir: "./plugins"

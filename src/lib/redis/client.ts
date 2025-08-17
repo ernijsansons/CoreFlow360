@@ -54,11 +54,15 @@ export function getRedisClient(): Redis | null {
         console.log('Redis client connection closed')
       })
       
-      // Ping to verify connection
-      redisClient.ping().catch((error) => {
-        console.error('Redis ping failed:', error)
-        redisClient = null
-      })
+      // Only ping in runtime, not during build
+      const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+      if (!isBuildTime) {
+        // Ping to verify connection in runtime only
+        redisClient.ping().catch((error) => {
+          console.error('Redis ping failed:', error)
+          redisClient = null
+        })
+      }
     } catch (error) {
       console.error('Failed to create Redis client:', error)
       return null

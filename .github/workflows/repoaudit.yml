@@ -1,0 +1,243 @@
+name: RepoAudit Security & Compliance
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      audit_type:
+        description: 'Type of audit to run'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - security
+          - compliance
+          - dependencies
+          - secrets
+
+jobs:
+  repoaudit:
+    name: RepoAudit Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Install RepoAudit
+        run: |
+          # Install RepoAudit CLI
+          npm install -g @repoaudit/cli
+          
+          # Or install locally if preferred
+          npm install --save-dev @repoaudit/cli
+          
+      - name: Create reports directory
+        run: mkdir -p reports/audit
+        
+      - name: Run RepoAudit Security Scan
+        if: github.event.inputs.audit_type == 'security' || github.event.inputs.audit_type == 'full' || github.event.inputs.audit_type == null
+        run: |
+          repoaudit security \
+            --config .repoaudit.yaml \
+            --output reports/audit/security-report.json \
+            --format json
+        continue-on-error: true
+        
+      - name: Run RepoAudit Compliance Scan
+        if: github.event.inputs.audit_type == 'compliance' || github.event.inputs.audit_type == 'full' || github.event.inputs.audit_type == null
+        run: |
+          repoaudit compliance \
+            --config .repoaudit.yaml \
+            --output reports/audit/compliance-report.json \
+            --format json
+        continue-on-error: true
+        
+      - name: Run RepoAudit Dependency Scan
+        if: github.event.inputs.audit_type == 'dependencies' || github.event.inputs.audit_type == 'full' || github.event.inputs.audit_type == null
+        run: |
+          repoaudit dependencies \
+            --config .repoaudit.yaml \
+            --output reports/audit/dependencies-report.json \
+            --format json
+        continue-on-error: true
+        
+      - name: Run RepoAudit Secrets Scan
+        if: github.event.inputs.audit_type == 'secrets' || github.event.inputs.audit_type == 'full' || github.event.inputs.audit_type == null
+        run: |
+          repoaudit secrets \
+            --config .repoaudit.yaml \
+            --output reports/audit/secrets-report.json \
+            --format json
+        continue-on-error: true
+        
+      - name: Run RepoAudit Code Quality Scan
+        if: github.event.inputs.audit_type == 'full' || github.event.inputs.audit_type == null
+        run: |
+          repoaudit quality \
+            --config .repoaudit.yaml \
+            --output reports/audit/quality-report.json \
+            --format json
+        continue-on-error: true
+        
+      - name: Run RepoAudit Infrastructure Scan
+        if: github.event.inputs.audit_type == 'full' || github.event.inputs.audit_type == null
+        run: |
+          repoaudit infrastructure \
+            --config .repoaudit.yaml \
+            --output reports/audit/infrastructure-report.json \
+            --format json
+        continue-on-error: true
+        
+      - name: Generate HTML Reports
+        run: |
+          # Convert JSON reports to HTML
+          repoaudit report \
+            --input reports/audit/*.json \
+            --output reports/audit/audit-report.html \
+            --format html
+            
+          # Generate markdown summary
+          repoaudit report \
+            --input reports/audit/*.json \
+            --output reports/audit/audit-summary.md \
+            --format markdown
+        continue-on-error: true
+        
+      - name: Upload Audit Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: repoaudit-reports
+          path: reports/audit/
+          retention-days: 30
+          
+      - name: Parse and Analyze Results
+        id: analyze
+        run: |
+          # Parse results and set outputs
+          if [ -f "reports/audit/security-report.json" ]; then
+            CRITICAL_ISSUES=$(jq '.issues[] | select(.severity == "critical") | .id' reports/audit/security-report.json | wc -l)
+            HIGH_ISSUES=$(jq '.issues[] | select(.severity == "high") | .id' reports/audit/security-report.json | wc -l)
+            echo "critical_issues=$CRITICAL_ISSUES" >> $GITHUB_OUTPUT
+            echo "high_issues=$HIGH_ISSUES" >> $GITHUB_OUTPUT
+          else
+            echo "critical_issues=0" >> $GITHUB_OUTPUT
+            echo "high_issues=0" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check for secrets
+          if [ -f "reports/audit/secrets-report.json" ]; then
+            SECRETS_FOUND=$(jq '.issues | length' reports/audit/secrets-report.json)
+            echo "secrets_found=$SECRETS_FOUND" >> $GITHUB_OUTPUT
+          else
+            echo "secrets_found=0" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            let summary = '## 🔍 RepoAudit Security & Compliance Report\n\n';
+            
+            // Read reports if they exist
+            const reports = ['security', 'compliance', 'dependencies', 'secrets', 'quality', 'infrastructure'];
+            let totalIssues = 0;
+            let criticalIssues = 0;
+            let highIssues = 0;
+            
+            for (const report of reports) {
+              const reportPath = `reports/audit/${report}-report.json`;
+              if (fs.existsSync(reportPath)) {
+                try {
+                  const data = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+                  const issues = data.issues || [];
+                  const critical = issues.filter(i => i.severity === 'critical').length;
+                  const high = issues.filter(i => i.severity === 'high').length;
+                  const medium = issues.filter(i => i.severity === 'medium').length;
+                  const low = issues.filter(i => i.severity === 'low').length;
+                  
+                  totalIssues += issues.length;
+                  criticalIssues += critical;
+                  highIssues += high;
+                  
+                  summary += `### ${report.charAt(0).toUpperCase() + report.slice(1)} Audit\n`;
+                  summary += `- **Total Issues:** ${issues.length}\n`;
+                  summary += `- **Critical:** ${critical} 🔴\n`;
+                  summary += `- **High:** ${high} 🟠\n`;
+                  summary += `- **Medium:** ${medium} 🟡\n`;
+                  summary += `- **Low:** ${low} 🟢\n\n`;
+                  
+                  if (issues.length > 0) {
+                    summary += '**Top Issues:**\n';
+                    issues.slice(0, 3).forEach(issue => {
+                      summary += `- ${issue.severity.toUpperCase()}: ${issue.title}\n`;
+                    });
+                    summary += '\n';
+                  }
+                } catch (error) {
+                  summary += `### ${report.charAt(0).toUpperCase() + report.slice(1)} Audit\n`;
+                  summary += `- **Status:** ⚠️ Report parsing failed\n\n`;
+                }
+              }
+            }
+            
+            summary += `### 📊 Summary\n`;
+            summary += `- **Total Issues Found:** ${totalIssues}\n`;
+            summary += `- **Critical Issues:** ${criticalIssues} 🔴\n`;
+            summary += `- **High Issues:** ${highIssues} 🟠\n\n`;
+            
+            if (criticalIssues > 0) {
+              summary += '🚨 **Critical issues found! Please review and fix before merging.**\n\n';
+            } else if (highIssues > 0) {
+              summary += '⚠️ **High priority issues found. Consider addressing these issues.**\n\n';
+            } else {
+              summary += '✅ **No critical or high priority issues found.**\n\n';
+            }
+            
+            summary += '📋 **Full reports available in the workflow artifacts.**\n';
+            summary += '🔧 **To fix issues, check the detailed reports and follow the remediation guidance.**\n\n';
+            summary += '---\n*Generated by RepoAudit Security & Compliance Scanner*';
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: summary
+            });
+            
+      - name: Fail on Critical Issues
+        if: steps.analyze.outputs.critical_issues != '0'
+        run: |
+          echo "🚨 Critical security issues found!"
+          echo "Critical issues: ${{ steps.analyze.outputs.critical_issues }}"
+          echo "Please review and fix critical issues before merging."
+          exit 1
+          
+      - name: Fail on Secrets Found
+        if: steps.analyze.outputs.secrets_found != '0'
+        run: |
+          echo "🔐 Secrets found in code!"
+          echo "Secrets found: ${{ steps.analyze.outputs.secrets_found }}"
+          echo "Please remove any hardcoded secrets from the codebase."
+          exit 1
