@@ -89,7 +89,11 @@
       "WebFetch(domain:v0.dev)",
       "Bash(git config:*)",
       "Bash(./fix-auth-imports.sh)",
-      "Bash(gh auth:*)"
+      "Bash(gh auth:*)",
+      "WebFetch(domain:coreflow360.com)",
+      "Bash(git checkout:*)",
+      "Bash(git restore:*)",
+      "Bash(git pull:*)"
     ],
     "deny": []
   }

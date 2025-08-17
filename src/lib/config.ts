@@ -74,7 +74,7 @@ const SecurityConfigSchema = z.object({
     ? z.string().optional().default('build-time-placeholder-secret-32-chars')
     : z.string().min(32, 'API_KEY_SECRET must be at least 32 characters'),
   ENCRYPTION_KEY: isBuildTime
-    ? z.string().optional().default('build-time-placeholder-key-32-chars-long')
+    ? z.string().optional().default('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
     : z.string().min(32, 'ENCRYPTION_KEY must be at least 32 characters'),
 })
 

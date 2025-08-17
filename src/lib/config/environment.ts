@@ -238,7 +238,7 @@ export const config = process.env.VERCEL_ENV || process.env.CI
           JWT_EXPIRATION: 86400,
           CORS_ALLOWED_ORIGINS: [],
           CORS_ORIGINS: '',
-          ENCRYPTION_KEY: 'build-placeholder-key',
+          ENCRYPTION_KEY: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
           SESSION_SECRET: 'build-placeholder-secret',
           DISABLE_SECURITY: false,
           MAX_REQUEST_SIZE: 10485760,
