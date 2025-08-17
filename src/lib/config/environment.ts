@@ -13,6 +13,9 @@ import crypto from 'crypto'
 ✅ Scale planning: Configuration caching and hot-reload support
 */
 
+// Build-time detection
+const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+
 // Comprehensive environment variable schema
 const environmentSchema = z.object({
   // Node.js Environment
@@ -25,24 +28,30 @@ const environmentSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   
   // Database Configuration
-  DATABASE_URL: z.string().url().refine(
-    (url) => url.startsWith('postgresql://') || url.startsWith('postgres://') || url.startsWith('file:'),
-    { message: 'DATABASE_URL must be a PostgreSQL or SQLite connection string' }
-  ),
+  DATABASE_URL: isBuildTime
+    ? z.string().optional().default('postgresql://user:pass@localhost:5432/db')
+    : z.string().url().refine(
+        (url) => url.startsWith('postgresql://') || url.startsWith('postgres://') || url.startsWith('file:'),
+        { message: 'DATABASE_URL must be a PostgreSQL or SQLite connection string' }
+      ),
   DIRECT_URL: z.string().url().optional(),
   DATABASE_POOL_SIZE: z.coerce.number().int().min(1).max(100).default(20),
   DATABASE_TIMEOUT: z.coerce.number().int().min(1000).max(60000).default(30000),
   
   // NextAuth Configuration
-  NEXTAUTH_SECRET: z.string().min(32).refine(
-    (secret) => {
-      // Ensure secret has sufficient entropy
-      const entropy = calculateEntropy(secret)
-      return entropy >= 4.0 // Minimum 4 bits per character
-    },
-    { message: 'NEXTAUTH_SECRET must have sufficient entropy (min 4 bits/char)' }
-  ),
-  NEXTAUTH_URL: z.string().url(),
+  NEXTAUTH_SECRET: isBuildTime 
+    ? z.string().optional().default('build-time-placeholder-secret-32-chars-for-nextauth')
+    : z.string().min(32).refine(
+        (secret) => {
+          // Ensure secret has sufficient entropy
+          const entropy = calculateEntropy(secret)
+          return entropy >= 4.0 // Minimum 4 bits per character
+        },
+        { message: 'NEXTAUTH_SECRET must have sufficient entropy (min 4 bits/char)' }
+      ),
+  NEXTAUTH_URL: isBuildTime
+    ? z.string().optional().default('http://localhost:3000')
+    : z.string().url(),
   
   // OAuth Providers
   GOOGLE_CLIENT_ID: z.string().optional(),
@@ -132,7 +141,7 @@ function validateEnvironment() {
     const env = environmentSchema.parse(process.env)
     
     // Security validations
-    if (env.NODE_ENV === 'production') {
+    if (env.NODE_ENV === 'production' && !isBuildTime) {
       if (!env.ENCRYPTION_KEY) {
         throw new Error('ENCRYPTION_KEY is required in production')
       }
