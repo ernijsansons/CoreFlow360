@@ -9,7 +9,7 @@ import crypto from 'crypto'
 import { db } from '@/lib/db'
 import { leadQueue } from '@/lib/queues/lead-processor'
 import { rateLimiter } from '@/lib/rate-limiting/lead-limiter'
-import { validatePhoneNumber } from 'libphonenumber-js'
+import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js'
 
 interface LeadSource {
   id: string
@@ -230,8 +230,15 @@ function validateLeadData(lead: ParsedLead): { valid: boolean; errors: string[] 
   
   if (!lead.phone?.trim()) {
     errors.push('Phone number is required')
-  } else if (!validatePhoneNumber(lead.phone, 'US')) {
-    errors.push('Invalid phone number format')
+  } else {
+    try {
+      const phoneNumber = parsePhoneNumber(lead.phone, 'US')
+      if (!isValidPhoneNumber(lead.phone, 'US')) {
+        errors.push('Invalid phone number format')
+      }
+    } catch (error) {
+      errors.push('Invalid phone number format')
+    }
   }
   
   if (!lead.source) {
