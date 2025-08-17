@@ -4,7 +4,7 @@
   "framework": "nextjs",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
-  "ignoreCommand": "exit 1",
+  "ignoreCommand": "git log -1 --format=%s | grep -q '\\[skip\\-deploy\\]' && exit 0 || exit 1",
   "functions": {
     "src/pages/api/**/*.ts": {
       "maxDuration": 30
