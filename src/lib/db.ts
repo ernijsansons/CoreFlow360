@@ -61,36 +61,41 @@ const prismaConfig: Prisma.PrismaClientOptions = {
 function createPrismaClient(): PrismaClient {
   const client = new PrismaClient(prismaConfig)
   
-  // Enhanced logging with performance tracking
-  if (isDevelopment) {
-    client.$on('query', async (e) => {
-      console.log(`Query: ${e.query}`)
-      console.log(`Duration: ${e.duration}ms`)
-      if (e.duration > 1000) {
-        console.warn(`Slow query detected: ${e.duration}ms`)
-      }
+  // Skip middleware and event handlers during build time
+  const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+  
+  if (!isBuildTime) {
+    // Enhanced logging with performance tracking
+    if (isDevelopment) {
+      client.$on('query', async (e) => {
+        console.log(`Query: ${e.query}`)
+        console.log(`Duration: ${e.duration}ms`)
+        if (e.duration > 1000) {
+          console.warn(`Slow query detected: ${e.duration}ms`)
+        }
+      })
+    }
+    
+    // Error event logging
+    client.$on('error', (e) => {
+      console.error('Prisma Error:', e)
     })
-  }
-  
-  // Error event logging
-  client.$on('error', (e) => {
-    console.error('Prisma Error:', e)
-  })
-  
-  // Warning event logging
-  client.$on('warn', (e) => {
-    console.warn('Prisma Warning:', e)
-  })
-  
-  // Info event logging (development only)
-  if (isDevelopment) {
-    client.$on('info', (e) => {
-      console.info('Prisma Info:', e)
+    
+    // Warning event logging
+    client.$on('warn', (e) => {
+      console.warn('Prisma Warning:', e)
     })
+    
+    // Info event logging (development only)
+    if (isDevelopment) {
+      client.$on('info', (e) => {
+        console.info('Prisma Info:', e)
+      })
+    }
+    
+    // Add PII encryption middleware
+    client.$use(piiEncryptionMiddleware)
   }
-  
-  // Add PII encryption middleware
-  client.$use(piiEncryptionMiddleware)
   
   return client
 }

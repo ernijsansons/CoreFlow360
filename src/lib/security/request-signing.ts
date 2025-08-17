@@ -41,8 +41,11 @@ export class RequestSigner {
   private cleanupInterval: NodeJS.Timeout;
 
   constructor(config: Partial<SigningConfig> = {}) {
+    // During build time, use a placeholder configuration
+    const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build';
+    
     this.config = {
-      secretKey: process.env.API_SIGNING_SECRET || '',
+      secretKey: process.env.API_SIGNING_SECRET || (isBuildTime ? 'build-time-placeholder-secret' : ''),
       algorithm: 'sha256',
       timestampTolerance: 300, // 5 minutes
       includeBody: true,
@@ -51,14 +54,17 @@ export class RequestSigner {
       ...config
     };
 
-    if (!this.config.secretKey) {
+    if (!this.config.secretKey && !isBuildTime) {
       throw new Error('API signing secret key is required');
     }
 
-    // Clean up old nonces every hour
-    this.cleanupInterval = setInterval(() => {
-      this.nonceCache.clear();
-    }, 3600000);
+    // Skip interval setup during build time
+    if (!isBuildTime && typeof setInterval !== 'undefined') {
+      // Clean up old nonces every hour
+      this.cleanupInterval = setInterval(() => {
+        this.nonceCache.clear();
+      }, 3600000);
+    }
   }
 
   /**

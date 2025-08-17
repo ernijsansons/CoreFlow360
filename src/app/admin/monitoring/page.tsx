@@ -4,8 +4,7 @@
  */
 
 import { Metadata } from 'next'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import MonitoringDashboard from '@/components/admin/MonitoringDashboard'
 
@@ -16,7 +15,7 @@ export const metadata: Metadata = {
 }
 
 export default async function MonitoringPage() {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   
   // Check if user is authenticated and has admin role
   if (!session?.user) {

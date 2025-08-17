@@ -84,6 +84,8 @@ const environmentSchema = z.object({
   // Security Configuration
   ENCRYPTION_KEY: z.string().optional(),
   SESSION_SECRET: z.string().min(32).optional(),
+  API_KEY_SECRET: z.string().min(32).optional(),
+  API_SIGNING_SECRET: z.string().min(32).optional(),
   CORS_ORIGINS: z.string().default('*'),
   
   // Monitoring & Logging
@@ -249,6 +251,8 @@ export const config = process.env.VERCEL_ENV || process.env.CI
           CORS_ORIGINS: '',
           ENCRYPTION_KEY: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
           SESSION_SECRET: 'build-placeholder-secret',
+          API_KEY_SECRET: 'build-placeholder-api-key-secret-min-32-chars',
+          API_SIGNING_SECRET: 'build-placeholder-api-signing-secret-min-32-chars',
           DISABLE_SECURITY: false,
           MAX_REQUEST_SIZE: 10485760,
           REQUEST_TIMEOUT: 30000,
@@ -288,6 +292,8 @@ export const security = {
   nextAuthSecret: config.NEXTAUTH_SECRET,
   encryptionKey: config.ENCRYPTION_KEY,
   sessionSecret: config.SESSION_SECRET,
+  apiKeySecret: config.API_KEY_SECRET,
+  apiSigningSecret: config.API_SIGNING_SECRET,
   corsOrigins: config.CORS_ORIGINS?.split(',').map(o => o.trim()) || [],
   disabled: config.DISABLE_SECURITY
 } as const

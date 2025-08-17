@@ -12,6 +12,7 @@ const connection: ConnectionOptions = {
   port: parseInt(process.env.REDIS_PORT || '6379'),
   password: process.env.REDIS_PASSWORD,
   db: parseInt(process.env.REDIS_QUEUE_DB || '1'), // Use different DB for queues
+  maxRetriesPerRequest: null, // Required by BullMQ
 }
 
 // Queue names
@@ -34,6 +35,13 @@ const queues: Map<string, Queue> = new Map()
  */
 export function getQueue(name: keyof typeof QUEUE_NAMES): Queue {
   const queueName = QUEUE_NAMES[name]
+  
+  // Skip queue creation during build time
+  const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+  if (isBuildTime) {
+    // Return a mock queue during build
+    return {} as Queue
+  }
   
   if (!queues.has(queueName)) {
     const queue = new Queue(queueName, {

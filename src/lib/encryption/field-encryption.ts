@@ -32,9 +32,17 @@ export class FieldEncryption {
   private keyCache = new Map<string, Buffer>()
   
   constructor() {
-    this.masterKey = config.ENCRYPTION_KEY || this.generateSecureKey()
-    if (!this.masterKey || this.masterKey.length !== 64) {
-      throw new Error('Invalid encryption key: must be 64 character hex string')
+    // During build time, use a placeholder key
+    const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+    
+    if (isBuildTime) {
+      // Use a valid placeholder key during build
+      this.masterKey = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+    } else {
+      this.masterKey = config.ENCRYPTION_KEY || this.generateSecureKey()
+      if (!this.masterKey || this.masterKey.length !== 64) {
+        throw new Error('Invalid encryption key: must be 64 character hex string')
+      }
     }
   }
   
@@ -239,8 +247,31 @@ export class FieldEncryption {
   }
 }
 
-// Export singleton instance
-export const fieldEncryption = new FieldEncryption()
+// Export singleton instance with lazy initialization
+let _fieldEncryption: FieldEncryption | null = null
+
+export const fieldEncryption = (() => {
+  // During build time, create a mock instance
+  const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+  
+  if (isBuildTime) {
+    // Return a proxy that will create the real instance when first used
+    return new Proxy({} as FieldEncryption, {
+      get(target, prop) {
+        if (!_fieldEncryption) {
+          _fieldEncryption = new FieldEncryption()
+        }
+        return (_fieldEncryption as any)[prop]
+      }
+    })
+  }
+  
+  // For runtime, create immediately
+  if (!_fieldEncryption) {
+    _fieldEncryption = new FieldEncryption()
+  }
+  return _fieldEncryption
+})()
 
 // Utility functions for common use cases
 export const encryptSensitiveData = (data: string): string => {

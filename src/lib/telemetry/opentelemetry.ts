@@ -89,6 +89,13 @@ class TelemetryManager {
       return;
     }
 
+    // Skip initialization during build time
+    const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build';
+    if (isBuildTime) {
+      console.log('📊 Skipping OpenTelemetry initialization during build');
+      return;
+    }
+
     try {
       // Configure resource attributes
       const resource = new Resource({
@@ -144,14 +151,19 @@ class TelemetryManager {
       exporters.push(new ConsoleSpanExporter());
     }
 
-    // Jaeger exporter
-    if (process.env.JAEGER_ENDPOINT) {
-      exporters.push(new JaegerExporter({
-        endpoint: process.env.JAEGER_ENDPOINT,
-        headers: {
-          'x-api-key': process.env.JAEGER_API_KEY || ''
-        }
-      }));
+    // Jaeger exporter - skip during build time due to file loading issues
+    const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build';
+    if (process.env.JAEGER_ENDPOINT && !isBuildTime) {
+      try {
+        exporters.push(new JaegerExporter({
+          endpoint: process.env.JAEGER_ENDPOINT,
+          headers: {
+            'x-api-key': process.env.JAEGER_API_KEY || ''
+          }
+        }));
+      } catch (error) {
+        console.warn('Failed to initialize Jaeger exporter:', error);
+      }
     }
 
     // OTLP exporter (for services like Honeycomb, Lightstep, etc.)
@@ -702,18 +714,24 @@ class TelemetryManager {
 // Global telemetry instance
 export const telemetry = new TelemetryManager();
 
-// Auto-initialize if not in test environment
-if (process.env.NODE_ENV !== 'test') {
+// Skip auto-initialization and process handlers during build time
+const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build';
+const isEdgeRuntime = typeof (globalThis as any).EdgeRuntime !== 'undefined';
+
+// Auto-initialize if not in test environment or build time
+if (process.env.NODE_ENV !== 'test' && !isBuildTime && !isEdgeRuntime) {
   telemetry.initialize();
 }
 
-// Graceful shutdown handler
-process.on('SIGTERM', async () => {
-  console.log('📊 Shutting down OpenTelemetry...');
-  await telemetry.shutdown();
-});
+// Graceful shutdown handler - only in Node.js runtime
+if (typeof process !== 'undefined' && typeof process.on === 'function' && !isBuildTime && !isEdgeRuntime) {
+  process.on('SIGTERM', async () => {
+    console.log('📊 Shutting down OpenTelemetry...');
+    await telemetry.shutdown();
+  });
 
-process.on('SIGINT', async () => {
-  console.log('📊 Shutting down OpenTelemetry...');
-  await telemetry.shutdown();
-});
+  process.on('SIGINT', async () => {
+    console.log('📊 Shutting down OpenTelemetry...');
+    await telemetry.shutdown();
+  });
+}

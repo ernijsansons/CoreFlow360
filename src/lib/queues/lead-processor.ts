@@ -10,12 +10,15 @@ import { scriptManager } from '@/lib/voice/industry-scripts'
 import { db } from '@/lib/db'
 import { rateLimiter } from '@/lib/rate-limiting/call-limiter'
 
+// Skip Redis initialization during build time
+const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+
 // Redis connection with clustering support
-const redis = new Redis({
+const redis = isBuildTime ? null : new Redis({
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
   password: process.env.REDIS_PASSWORD,
-  maxRetriesPerRequest: 3,
+  maxRetriesPerRequest: null, // Required by BullMQ
   retryDelayOnFailover: 100,
   enableOfflineQueue: false,
   lazyConnect: true,
@@ -26,8 +29,8 @@ const redis = new Redis({
 })
 
 // Queue configuration for optimal performance
-const queueConfig = {
-  connection: redis,
+const queueConfig = isBuildTime ? {} : {
+  connection: redis as Redis,
   defaultJobOptions: {
     removeOnComplete: 100,  // Keep last 100 completed jobs
     removeOnFail: 50,       // Keep last 50 failed jobs
@@ -40,16 +43,16 @@ const queueConfig = {
 }
 
 // Lead processing queue - handles call initiation
-export const leadQueue = new Queue('lead-processor', queueConfig)
+export const leadQueue = isBuildTime ? ({} as Queue) : new Queue('lead-processor', queueConfig)
 
 // Call status queue - handles call lifecycle events  
-export const callStatusQueue = new Queue('call-status', queueConfig)
+export const callStatusQueue = isBuildTime ? ({} as Queue) : new Queue('call-status', queueConfig)
 
 // Retry queue - handles failed calls with intelligent retry logic
-export const retryQueue = new Queue('call-retry', queueConfig)
+export const retryQueue = isBuildTime ? ({} as Queue) : new Queue('call-retry', queueConfig)
 
 // Queue events for monitoring
-const queueEvents = new QueueEvents('lead-processor', { connection: redis })
+const queueEvents = isBuildTime ? null : new QueueEvents('lead-processor', { connection: redis as Redis })
 
 interface LeadJobData {
   leadId: string
@@ -88,7 +91,7 @@ interface RetryJobData {
 /**
  * Lead processing worker - processes incoming leads for voice calls
  */
-const leadWorker = new Worker(
+const leadWorker = isBuildTime ? null : new Worker(
   'lead-processor',
   async (job: Job<LeadJobData>) => {
     const startTime = Date.now()
@@ -254,7 +257,7 @@ const leadWorker = new Worker(
 /**
  * Call status monitoring worker
  */
-const callStatusWorker = new Worker(
+const callStatusWorker = isBuildTime ? null : new Worker(
   'call-status', 
   async (job: Job<CallStatusJobData>) => {
     console.log(`📊 Monitoring call status: ${job.data.callSid}`)
@@ -306,7 +309,7 @@ const callStatusWorker = new Worker(
 /**
  * Retry processing worker with intelligent retry logic
  */
-const retryWorker = new Worker(
+const retryWorker = isBuildTime ? null : new Worker(
   'call-retry',
   async (job: Job<RetryJobData>) => {
     console.log(`🔄 Processing retry job ${job.id} for lead ${job.data.originalJobData.leadId}`)
@@ -514,25 +517,31 @@ export const queueMonitor = {
 }
 
 // Event listeners for monitoring
-queueEvents.on('completed', (jobId, returnvalue) => {
-  console.log(`✅ Job ${jobId} completed:`, returnvalue)
-})
+if (!isBuildTime && queueEvents) {
+  queueEvents.on('completed', (jobId, returnvalue) => {
+    console.log(`✅ Job ${jobId} completed:`, returnvalue)
+  })
 
-queueEvents.on('failed', (jobId, failedReason) => {
-  console.error(`❌ Job ${jobId} failed:`, failedReason)
-})
+  queueEvents.on('failed', (jobId, failedReason) => {
+    console.error(`❌ Job ${jobId} failed:`, failedReason)
+  })
 
-queueEvents.on('stalled', (jobId) => {
-  console.warn(`⚠️ Job ${jobId} stalled`)
-})
+  queueEvents.on('stalled', (jobId) => {
+    console.warn(`⚠️ Job ${jobId} stalled`)
+  })
+}
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
-  console.log('🛑 Shutting down queue workers...')
-  await Promise.all([
-    leadWorker.close(),
-    callStatusWorker.close(),
-    retryWorker.close()
-  ])
-  await redis.disconnect()
-})
+if (!isBuildTime && typeof process !== 'undefined' && typeof process.on === 'function') {
+  process.on('SIGTERM', async () => {
+    console.log('🛑 Shutting down queue workers...')
+    if (leadWorker && callStatusWorker && retryWorker && redis) {
+      await Promise.all([
+        leadWorker.close(),
+        callStatusWorker.close(),
+        retryWorker.close()
+      ])
+      await redis.disconnect()
+    }
+  })
+}
