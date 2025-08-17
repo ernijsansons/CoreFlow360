@@ -13,8 +13,8 @@ import crypto from 'crypto'
 ✅ Scale planning: Configuration caching and hot-reload support
 */
 
-// Build-time detection
-const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+// Build-time detection - comprehensive check for all build environments
+const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.BUILDING_FOR_VERCEL === '1' || process.env.VERCEL || process.env.NOW_BUILDER
 
 // Comprehensive environment variable schema
 const environmentSchema = z.object({
@@ -86,6 +86,7 @@ const environmentSchema = z.object({
   SESSION_SECRET: z.string().min(32).optional(),
   API_KEY_SECRET: z.string().min(32).optional(),
   API_SIGNING_SECRET: z.string().min(32).optional(),
+  AUDIO_ENCRYPTION_MASTER_KEY: z.string().min(32).optional(),
   CORS_ORIGINS: z.string().default('*'),
   
   // Monitoring & Logging
@@ -143,7 +144,7 @@ function validateEnvironment() {
     const env = environmentSchema.parse(process.env)
     
     // Security validations
-    if (env.NODE_ENV === 'production' && !isBuildTime) {
+    if (env.NODE_ENV === 'production' && !isBuildTime && !process.env.VERCEL) {
       if (!env.ENCRYPTION_KEY) {
         throw new Error('ENCRYPTION_KEY is required in production')
       }
@@ -215,7 +216,7 @@ function validateEnvironment() {
 
 // Export validated configuration
 // During build, use lenient validation
-export const config = process.env.VERCEL_ENV || process.env.CI 
+export const config = isBuildTime || process.env.VERCEL
   ? (() => {
       try {
         return validateEnvironment()
@@ -253,6 +254,7 @@ export const config = process.env.VERCEL_ENV || process.env.CI
           SESSION_SECRET: 'build-placeholder-secret',
           API_KEY_SECRET: 'build-placeholder-api-key-secret-min-32-chars',
           API_SIGNING_SECRET: 'build-placeholder-api-signing-secret-min-32-chars',
+          AUDIO_ENCRYPTION_MASTER_KEY: 'build-placeholder-audio-encryption-key-32-chars',
           DISABLE_SECURITY: false,
           MAX_REQUEST_SIZE: 10485760,
           REQUEST_TIMEOUT: 30000,

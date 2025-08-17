@@ -17,7 +17,8 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
+// JaegerExporter causes build issues with file loading
+// import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-otlp-http';
 import { BatchSpanProcessor, ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base';
 import { Context, trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
@@ -151,20 +152,21 @@ class TelemetryManager {
       exporters.push(new ConsoleSpanExporter());
     }
 
-    // Jaeger exporter - skip during build time due to file loading issues
-    const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build';
-    if (process.env.JAEGER_ENDPOINT && !isBuildTime) {
-      try {
-        exporters.push(new JaegerExporter({
-          endpoint: process.env.JAEGER_ENDPOINT,
-          headers: {
-            'x-api-key': process.env.JAEGER_API_KEY || ''
-          }
-        }));
-      } catch (error) {
-        console.warn('Failed to initialize Jaeger exporter:', error);
-      }
-    }
+    // Jaeger exporter disabled due to build issues with file loading
+    // Will be replaced with OTLP exporter which is more compatible
+    // const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build';
+    // if (process.env.JAEGER_ENDPOINT && !isBuildTime) {
+    //   try {
+    //     exporters.push(new JaegerExporter({
+    //       endpoint: process.env.JAEGER_ENDPOINT,
+    //       headers: {
+    //         'x-api-key': process.env.JAEGER_API_KEY || ''
+    //       }
+    //     }));
+    //   } catch (error) {
+    //     console.warn('Failed to initialize Jaeger exporter:', error);
+    //   }
+    // }
 
     // OTLP exporter (for services like Honeycomb, Lightstep, etc.)
     if (process.env.OTLP_ENDPOINT) {

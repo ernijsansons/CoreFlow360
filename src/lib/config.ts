@@ -5,8 +5,8 @@
 
 import { z } from 'zod'
 
-// Build-time detection (moved to top)
-const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+// Build-time detection (moved to top) - comprehensive check for all build environments
+const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.BUILDING_FOR_VERCEL === '1' || process.env.VERCEL || process.env.NOW_BUILDER
 
 // Environment variable schemas
 // Accept standard URLs (postgres, mysql, etc.) and SQLite file URLs used in tests/development

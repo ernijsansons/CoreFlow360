@@ -1,35 +1,98 @@
-.env.local
-.env.production
-node_modules
-.next
-coverage
-.git
+# Vercel ignore file - optimize build by excluding unnecessary files
+
+# Git
+.git/
 .gitignore
-README.md
-.eslintcache
+.github/
+
+# Dependencies
+node_modules/
+
+# Testing
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+__tests__/
+coverage/
+.nyc_output/
+tests/
+k6-tests/
+
+# Development files
+.env.local
+.env.development
+.env.test
+.env.production
 *.log
-src/modules
-backups
-.backup_*
-docs
-reports
-scripts
-tests
-k6-tests
-monitoring
-campaigns
-infrastructure
-terraform
-training
-v0-prompts
-v0-generated
-press-kit
-product-hunt-launch
-programs
-verify-demo-reports
-temp
-logs
+.DS_Store
+
+# Documentation
+docs/
 *.md
 !README.md
-.vscode
-.github
+training/
+press-kit/
+product-hunt-launch/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+.next/
+out/
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+logs/
+
+# Cache
+.eslintcache
+.cache/
+
+# Backups
+backups/
+*.backup
+.backup_*
+
+# Scripts that aren't needed for build
+scripts/
+verify-demo-reports/
+
+# Large files
+*.zip
+*.tar.gz
+*.rar
+
+# Database files
+*.db
+*.sqlite
+prisma/seed.ts
+
+# Local configuration
+.claude/
+CLAUDE.md
+
+# V0 development files
+v0-prompts/
+v0-generated/
+
+# Infrastructure
+infrastructure/
+terraform/
+monitoring/
+campaigns/
+reports/
+
+# Modules not needed for build
+src/modules/
+
+# Programs
+programs/

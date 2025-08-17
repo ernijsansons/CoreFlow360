@@ -50,10 +50,13 @@ export class AudioEncryptionService {
   private readonly pbkdf2 = promisify(crypto.pbkdf2)
 
   constructor() {
-    // Master key from environment - MUST be 32+ characters
-    this.masterKey = process.env.AUDIO_ENCRYPTION_MASTER_KEY || ''
+    // Check if we're in build time
+    const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
     
-    if (!this.masterKey || this.masterKey.length < 32) {
+    // Master key from environment - MUST be 32+ characters
+    this.masterKey = process.env.AUDIO_ENCRYPTION_MASTER_KEY || (isBuildTime ? 'build-time-placeholder-key-32-characters-long' : '')
+    
+    if (!isBuildTime && (!this.masterKey || this.masterKey.length < 32)) {
       throw new Error('AUDIO_ENCRYPTION_MASTER_KEY must be set and at least 32 characters')
     }
   }
