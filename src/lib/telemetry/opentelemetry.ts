@@ -26,9 +26,16 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Custom instrumentations
 import { PrismaInstrumentation } from '@prisma/instrumentation';
-import { RedisInstrumentation } from '@opentelemetry/instrumentation-redis-4';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
+
+// Optional Redis instrumentation - not critical for build
+let RedisInstrumentation: any;
+try {
+  RedisInstrumentation = require('@opentelemetry/instrumentation-redis-4').RedisInstrumentation;
+} catch (e) {
+  console.warn('Redis instrumentation not available, continuing without it');
+}
 
 export interface TraceContext {
   traceId: string;
@@ -201,7 +208,7 @@ class TelemetryManager {
       
       // Custom instrumentations
       new PrismaInstrumentation(),
-      new RedisInstrumentation(),
+      ...(RedisInstrumentation ? [new RedisInstrumentation()] : []),
       new HttpInstrumentation({
         requestHook: this.httpRequestHook.bind(this),
         responseHook: this.httpResponseHook.bind(this)
