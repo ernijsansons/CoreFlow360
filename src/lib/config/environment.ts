@@ -237,6 +237,13 @@ export const config = process.env.VERCEL_ENV || process.env.CI
           RATE_LIMIT_MAX_REQUESTS: 100,
           JWT_EXPIRATION: 86400,
           CORS_ALLOWED_ORIGINS: [],
+          CORS_ORIGINS: '',
+          ENCRYPTION_KEY: 'build-placeholder-key',
+          SESSION_SECRET: 'build-placeholder-secret',
+          DISABLE_SECURITY: false,
+          MAX_REQUEST_SIZE: 10485760,
+          REQUEST_TIMEOUT: 30000,
+          RATE_LIMIT_REQUESTS: 100,
         }
       }
     })()
@@ -272,7 +279,7 @@ export const security = {
   nextAuthSecret: config.NEXTAUTH_SECRET,
   encryptionKey: config.ENCRYPTION_KEY,
   sessionSecret: config.SESSION_SECRET,
-  corsOrigins: config.CORS_ORIGINS.split(',').map(o => o.trim()),
+  corsOrigins: config.CORS_ORIGINS?.split(',').map(o => o.trim()) || [],
   disabled: config.DISABLE_SECURITY
 } as const
 
