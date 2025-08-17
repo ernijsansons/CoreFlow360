@@ -32,6 +32,11 @@ jobs:
     - name: Run tests
       run: npm test
       continue-on-error: true
+      env:
+        DATABASE_URL: postgresql://user:pass@localhost:5432/test
+        NEXTAUTH_URL: http://localhost:3000
+        NEXTAUTH_SECRET: test-secret-for-ci-only
+        NODE_ENV: test
 
     - name: Build application
       run: npm run build
