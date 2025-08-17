@@ -245,7 +245,7 @@ jobs:
 ## 🚨 Critical Security Finding
 
 **Title:** ${finding.title}
-**Location:** \`${finding.location}\`
+**Location:** \\\`${finding.location}\\\`
 **Category:** ${finding.category}
 **Confidence:** ${finding.confidenceScore}%
 
