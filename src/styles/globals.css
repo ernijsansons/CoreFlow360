@@ -124,9 +124,12 @@ body {
 /* Component Base Classes */
 @layer components {
   .glass-card {
-    background-color: rgba(17, 24, 39, 0.8); /* gray-900 with 80% opacity */
-    border-color: rgba(31, 41, 55, 0.5); /* gray-800 with 50% opacity */
-    @apply backdrop-blur-xl border rounded-2xl shadow-2xl;
+    background-color: rgba(17, 24, 39, 0.8);
+    border: 1px solid rgba(31, 41, 55, 0.5);
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
   }
 }
 
