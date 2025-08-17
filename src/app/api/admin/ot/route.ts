@@ -277,8 +277,9 @@ async function handleCreateDocument(data: any) {
       message: 'Document created successfully'
     });
   } catch (error) {
+    console.error('Failed to create document:', error);
     return NextResponse.json(
-      { error: `Failed to create document: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
+      { error: 'Failed to create document', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 400 }
     );
   }
@@ -303,8 +304,9 @@ async function handleJoinDocument(data: any) {
       message: 'Joined document successfully'
     });
   } catch (error) {
+    console.error('Failed to join document:', error);
     return NextResponse.json(
-      { error: `Failed to join document: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
+      { error: 'Failed to join document', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 400 }
     );
   }
@@ -328,8 +330,9 @@ async function handleLeaveDocument(data: any) {
       message: 'Left document successfully'
     });
   } catch (error) {
+    console.error('Failed to leave document:', error);
     return NextResponse.json(
-      { error: `Failed to leave document: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
+      { error: 'Failed to leave document', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 400 }
     );
   }
@@ -354,8 +357,9 @@ async function handleResolveConflict(data: any) {
       message: 'Conflicts processed successfully'
     });
   } catch (error) {
+    console.error('Failed to resolve conflicts:', error);
     return NextResponse.json(
-      { error: `Failed to resolve conflicts: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
+      { error: 'Failed to resolve conflicts', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 400 }
     );
   }

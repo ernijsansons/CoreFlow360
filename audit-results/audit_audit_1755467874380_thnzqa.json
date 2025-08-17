@@ -1,0 +1,25 @@
+{
+  "audit_id": "audit_1755467874380_thnzqa",
+  "audit_name": "codebase_structure_audit",
+  "execution_time": 1,
+  "findings": [],
+  "metrics": {
+    "issues_found": 0,
+    "critical_issues": 0,
+    "technical_debt_score": 0,
+    "maintainability_score": 100,
+    "security_score": 100,
+    "performance_score": 100
+  },
+  "chain_of_thought": [
+    "Loading audit template: codebase_structure_audit",
+    "Context loaded: ctx_1755467874376_rmx88",
+    "Analyzing: code, configuration, patterns",
+    "Analyzing codebase structure patterns...",
+    "Directory structure analyzed: 3 directories found",
+    "Circular dependencies check: 0 issues found",
+    "Calculated metrics: 6 metrics",
+    "Confidence score: 18%"
+  ],
+  "confidence_score": 18
+}

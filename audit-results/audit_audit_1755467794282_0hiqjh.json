@@ -1,0 +1,23 @@
+{
+  "audit_id": "audit_1755467794282_0hiqjh",
+  "audit_name": "documentation_audit",
+  "execution_time": 17,
+  "findings": [],
+  "metrics": {
+    "issues_found": 0,
+    "critical_issues": 0,
+    "technical_debt_score": 0,
+    "maintainability_score": 100,
+    "security_score": 100,
+    "performance_score": 100
+  },
+  "chain_of_thought": [
+    "Loading audit template: documentation_audit",
+    "Context loaded: ctx_1755467794014_wyn2rp",
+    "Analyzing: code, configuration, patterns",
+    "Executing generic audit: documentation_audit",
+    "Calculated metrics: 6 metrics",
+    "Confidence score: 13%"
+  ],
+  "confidence_score": 13
+}

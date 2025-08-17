@@ -135,31 +135,31 @@ export default async function RootLayout({
         <meta name="msapplication-config" content="/browserconfig.xml" />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Organization',
-              name: 'CoreFlow360',
-              description: 'Business automation software that transforms operations and increases profitability',
-              url: 'https://coreflow360.com',
-              logo: 'https://coreflow360.com/logo.png',
-              foundingDate: '2024',
-              address: {
-                '@type': 'PostalAddress',
-                addressCountry: 'US'
-              },
-              contactPoint: {
-                '@type': 'ContactPoint',
-                contactType: 'customer service',
-                availableLanguage: 'English'
-              },
-              sameAs: [
-                'https://twitter.com/CoreFlow360',
-                'https://linkedin.com/company/coreflow360'
-              ]
-            }).replace(/[<>]/g, '') // Additional sanitization for extra security
-          }}
-        />
+          suppressHydrationWarning
+        >
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'CoreFlow360',
+            description: 'Business automation software that transforms operations and increases profitability',
+            url: 'https://coreflow360.com',
+            logo: 'https://coreflow360.com/logo.png',
+            foundingDate: '2024',
+            address: {
+              '@type': 'PostalAddress',
+              addressCountry: 'US'
+            },
+            contactPoint: {
+              '@type': 'ContactPoint',
+              contactType: 'customer service',
+              availableLanguage: 'English'
+            },
+            sameAs: [
+              'https://twitter.com/CoreFlow360',
+              'https://linkedin.com/company/coreflow360'
+            ]
+          })}
+        </script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ErrorBoundary>

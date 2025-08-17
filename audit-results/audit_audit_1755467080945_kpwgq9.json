@@ -1,0 +1,23 @@
+{
+  "audit_id": "audit_1755467080945_kpwgq9",
+  "audit_name": "performance_frontend_audit",
+  "execution_time": 0,
+  "findings": [],
+  "metrics": {
+    "issues_found": 0,
+    "critical_issues": 0,
+    "technical_debt_score": 0,
+    "maintainability_score": 100,
+    "security_score": 100,
+    "performance_score": 100
+  },
+  "chain_of_thought": [
+    "Loading audit template: performance_frontend_audit",
+    "Context loaded: ctx_1755467080918_8l56cp",
+    "Analyzing: code, configuration, patterns",
+    "Executing generic audit: performance_frontend_audit",
+    "Calculated metrics: 6 metrics",
+    "Confidence score: 13%"
+  ],
+  "confidence_score": 13
+}

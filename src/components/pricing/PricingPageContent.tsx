@@ -160,21 +160,21 @@ export default function PricingPageContent() {
           {/* Add structured data for FAQ */}
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                '@context': 'https://schema.org',
-                '@type': 'FAQPage',
-                mainEntity: faqData.map(faq => ({
-                  '@type': 'Question',
-                  name: faq.question.replace(/[<>'"]/g, ''),
-                  acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: faq.answer.replace(/[<>'"]/g, '')
-                  }
-                }))
-              }).replace(/[<>]/g, '') // Additional sanitization
-            }}
-          />
+            suppressHydrationWarning
+          >
+            {JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: faqData.map(faq => ({
+                '@type': 'Question',
+                name: faq.question,
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: faq.answer
+                }
+              }))
+            })}
+          </script>
         </motion.div>
       )}
 

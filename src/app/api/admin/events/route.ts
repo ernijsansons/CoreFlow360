@@ -295,8 +295,9 @@ async function handleAppendEvent(data: any) {
       message: 'Event appended successfully'
     });
   } catch (error) {
+    console.error('Failed to append event:', error);
     return NextResponse.json(
-      { error: `Failed to append event: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
+      { error: 'Failed to append event', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 400 }
     );
   }
@@ -326,8 +327,9 @@ async function handleCreateSnapshot(data: any) {
       message: 'Snapshot created successfully'
     });
   } catch (error) {
+    console.error('Failed to create snapshot:', error);
     return NextResponse.json(
-      { error: `Failed to create snapshot: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
+      { error: 'Failed to create snapshot', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 400 }
     );
   }
@@ -348,8 +350,9 @@ async function handleRebuildProjections(data: any) {
       fromDate: startDate?.toISOString() || 'beginning'
     });
   } catch (error) {
+    console.error('Failed to start projection rebuild:', error);
     return NextResponse.json(
-      { error: `Failed to start projection rebuild: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}` },
+      { error: 'Failed to start projection rebuild', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 400 }
     );
   }

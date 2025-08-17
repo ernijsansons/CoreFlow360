@@ -8,16 +8,19 @@ export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_TRACKING_ID
 
 // Google Analytics events
 export const gtag = (...args: any[]) => {
-  if (typeof window !== 'undefined' && window.gtag) {
+  if (typeof window !== 'undefined' && window.gtag && GA_TRACKING_ID && /^G-[A-Z0-9]+$/.test(GA_TRACKING_ID)) {
     window.gtag(...args)
   }
 }
 
 // Page view tracking
 export const pageview = (url: string) => {
-  gtag('config', GA_TRACKING_ID, {
-    page_path: url,
-  })
+  // Validate URL to prevent injection
+  if (url && typeof url === 'string') {
+    gtag('config', GA_TRACKING_ID, {
+      page_path: url,
+    })
+  }
 }
 
 // Custom event tracking

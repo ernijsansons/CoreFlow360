@@ -104,11 +104,11 @@ export function createERPNextService(): ERPNextService {
             severity: severity > 0.7 ? 3 : severity > 0.4 ? 2 : 1
           })
           
-          recommendations.push(`Review and update ${regulation?.replace(/[<>'"]/g, '') || 'unknown regulation'} compliance procedures`)
+          recommendations.push(`Review and update ${regulation || 'unknown regulation'} compliance procedures`)
           
           if (severity > 0.7) {
             requiredActions.push({
-              action: `Immediate ${regulation?.replace(/[<>'"]/g, '') || 'unknown regulation'} compliance audit required`,
+              action: `Immediate ${regulation || 'unknown regulation'} compliance audit required`,
               deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
             })
           }

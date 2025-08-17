@@ -34,7 +34,7 @@ export class AutomationExecutor {
       })
 
       if (!createResponse.ok) {
-        throw new Error(`Failed to create n8n workflow: ${createResponse.statusText?.replace(/[<>'"]/g, '') || 'Unknown error'}`)
+        throw new Error(`Failed to create n8n workflow: ${createResponse.statusText || 'Unknown error'}`)
       }
 
       const createdWorkflow = await createResponse.json()
@@ -49,7 +49,7 @@ export class AutomationExecutor {
       })
 
       if (!activateResponse.ok) {
-        throw new Error(`Failed to activate workflow: ${activateResponse.statusText?.replace(/[<>'"]/g, '') || 'Unknown error'}`)
+        throw new Error(`Failed to activate workflow: ${activateResponse.statusText || 'Unknown error'}`)
       }
 
       return { success: true, n8nWorkflowId }

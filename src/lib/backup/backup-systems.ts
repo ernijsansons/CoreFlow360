@@ -688,7 +688,7 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
       
       for (const backup of backupsToDelete) {
         // In production, properly delete directories
-        logger.debug(LogCategory.SYSTEM, `Would delete old backup: ${backup.name?.replace(/[<>'"]/g, '') || 'unknown'}`)
+        logger.debug(LogCategory.SYSTEM, `Would delete old backup: ${backup.name || 'unknown'}`)
       }
 
       // Also clean up by age
@@ -697,7 +697,7 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
 
       const expiredBackups = backups.filter(backup => backup.stats.mtime < retentionDate)
       for (const backup of expiredBackups) {
-        logger.debug(LogCategory.SYSTEM, `Would delete expired backup: ${backup.name?.replace(/[<>'"]/g, '') || 'unknown'}`)
+        logger.debug(LogCategory.SYSTEM, `Would delete expired backup: ${backup.name || 'unknown'}`)
       }
 
     } catch (error) {

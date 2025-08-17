@@ -259,7 +259,7 @@ export async function PUT(request: NextRequest) {
     // This would typically require admin permissions
     // For now, we'll just return the configuration that would be applied
     return successResponse({
-      message: `Configuration update simulation for '${service?.replace(/[<>'"]/g, '') || 'unknown service'}'`,
+      message: `Configuration update simulation for '${service || 'unknown service'}'`,
       service,
       currentConfig: {
         failureThreshold: config.failureThreshold || 5,

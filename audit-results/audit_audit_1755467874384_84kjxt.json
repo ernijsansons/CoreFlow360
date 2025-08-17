@@ -1,0 +1,23 @@
+{
+  "audit_id": "audit_1755467874384_84kjxt",
+  "audit_name": "configuration_audit",
+  "execution_time": 0,
+  "findings": [],
+  "metrics": {
+    "issues_found": 0,
+    "critical_issues": 0,
+    "technical_debt_score": 0,
+    "maintainability_score": 100,
+    "security_score": 100,
+    "performance_score": 100
+  },
+  "chain_of_thought": [
+    "Loading audit template: configuration_audit",
+    "Context loaded: ctx_1755467874376_rmx88",
+    "Analyzing: code, configuration, patterns",
+    "Executing generic audit: configuration_audit",
+    "Calculated metrics: 6 metrics",
+    "Confidence score: 13%"
+  ],
+  "confidence_score": 13
+}

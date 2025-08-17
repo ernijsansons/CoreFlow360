@@ -7,7 +7,8 @@ import Script from 'next/script'
 import { GA_TRACKING_ID } from '@/lib/analytics'
 
 export default function GoogleAnalytics() {
-  if (!GA_TRACKING_ID) {
+  // Validate GA_TRACKING_ID format to prevent injection
+  if (!GA_TRACKING_ID || !/^G-[A-Z0-9]+$/.test(GA_TRACKING_ID)) {
     return null
   }
 
@@ -21,49 +22,51 @@ export default function GoogleAnalytics() {
       <Script
         id="google-analytics"
         strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
+      >
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
 
-            gtag('config', '${GA_TRACKING_ID.replace(/[<>'"]/g, '')}', {
-              page_path: window.location.pathname,
-              send_page_view: true,
-              // Enhanced ecommerce for subscription tracking
-              custom_map: {'custom_parameter': 'subscription_tier'},
-              // Privacy-friendly settings
-              anonymize_ip: true,
-              allow_google_signals: false,
-              allow_ad_personalization_signals: false
-            });
+          gtag('config', '${GA_TRACKING_ID}', {
+            page_path: window.location.pathname,
+            send_page_view: true,
+            // Enhanced ecommerce for subscription tracking
+            custom_map: {'custom_parameter': 'subscription_tier'},
+            // Privacy-friendly settings
+            anonymize_ip: true,
+            allow_google_signals: false,
+            allow_ad_personalization_signals: false
+          });
 
-            // Enhanced ecommerce configuration
-            gtag('config', '${GA_TRACKING_ID.replace(/[<>'"]/g, '')}', {
-              // Track subscription events as purchases
-              enhanced_ecommerce: true,
-              // Custom events for SaaS metrics
-              custom_parameters: {
-                subscription_tier: 'basic',
-                module_count: 0,
-                user_type: 'trial'
-              }
-            });
-          `,
-        }}
-      />
+          // Enhanced ecommerce configuration
+          gtag('config', '${GA_TRACKING_ID}', {
+            // Track subscription events as purchases
+            enhanced_ecommerce: true,
+            // Custom events for SaaS metrics
+            custom_parameters: {
+              subscription_tier: 'basic',
+              module_count: 0,
+              user_type: 'trial'
+            }
+          });
+        `}
+      </Script>
     </>
   )
 }
 
 // Hook for tracking page views in App Router
 export function usePageTracking() {
-  if (typeof window !== 'undefined' && window.gtag) {
+  if (typeof window !== 'undefined' && window.gtag && GA_TRACKING_ID && /^G-[A-Z0-9]+$/.test(GA_TRACKING_ID)) {
     // Track route changes
     const handleRouteChange = (url: string) => {
-      window.gtag('config', GA_TRACKING_ID, {
-        page_path: url,
-      })
+      // Validate URL to prevent injection
+      if (url && typeof url === 'string') {
+        window.gtag('config', GA_TRACKING_ID, {
+          page_path: url,
+        })
+      }
     }
 
     return handleRouteChange
