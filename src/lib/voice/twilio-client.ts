@@ -333,5 +333,14 @@ export class TwilioVoiceClient {
   }
 }
 
-// Export singleton instance
-export const twilioClient = new TwilioVoiceClient()
+// Export lazy-loaded singleton instance
+let twilioClientInstance: TwilioVoiceClient | null = null
+
+export const twilioClient = {
+  getInstance(): TwilioVoiceClient {
+    if (!twilioClientInstance) {
+      twilioClientInstance = new TwilioVoiceClient()
+    }
+    return twilioClientInstance
+  }
+}

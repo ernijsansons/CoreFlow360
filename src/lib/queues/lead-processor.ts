@@ -147,7 +147,7 @@ const leadWorker = isBuildTime ? null : new Worker(
       })
 
       // Initiate Twilio call
-      const callResult = await twilioClient.initiateCall({
+      const callResult = await twilioClient.getInstance().initiateCall({
         to: job.data.leadData.phone,
         from: process.env.TWILIO_PHONE_NUMBER!,
         script: script.id,
@@ -264,7 +264,7 @@ const callStatusWorker = isBuildTime ? null : new Worker(
     
     try {
       // Get current call status from Twilio
-      const call = await twilioClient.getCallStatus(job.data.callSid)
+      const call = await twilioClient.getInstance().getCallStatus(job.data.callSid)
       
       // Update call record
       await db.callLog.update({
