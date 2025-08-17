@@ -561,8 +561,23 @@ class AIServiceManager {
   }
 }
 
-// Singleton instance
-export const aiServiceManager = new AIServiceManager()
+// Lazy-loaded singleton instance
+let _aiServiceManager: AIServiceManager | null = null
+
+export function getAIServiceManager(): AIServiceManager {
+  if (!_aiServiceManager) {
+    _aiServiceManager = new AIServiceManager()
+  }
+  return _aiServiceManager
+}
+
+// Export a proxy for backward compatibility
+export const aiServiceManager = new Proxy({} as AIServiceManager, {
+  get(_target, prop) {
+    const manager = getAIServiceManager()
+    return manager[prop as keyof AIServiceManager]
+  }
+})
 
 export { AIServiceManager }
 export type { AIServiceRequest, AIServiceResponse, AIServiceContext }

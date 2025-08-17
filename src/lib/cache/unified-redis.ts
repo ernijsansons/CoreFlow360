@@ -158,14 +158,18 @@ export class UnifiedRedisCache {
   private statsResetInterval: NodeJS.Timeout | null = null
 
   constructor() {
-    this.init()
-    // Reset stats every hour
-    this.statsResetInterval = setInterval(() => {
-      this.resetStats()
-    }, 60 * 60 * 1000)
+    // Don't initialize immediately - wait for first use
+    // Stats reset interval will be started on first init
   }
 
   private async init() {
+    // Start stats reset interval if not already started
+    if (!this.statsResetInterval) {
+      this.statsResetInterval = setInterval(() => {
+        this.resetStats()
+      }, 60 * 60 * 1000)
+    }
+    
     try {
       if (!process.env.REDIS_URL) {
         console.warn('Redis URL not provided, using memory cache only')
@@ -248,6 +252,11 @@ export class UnifiedRedisCache {
    * Get a value from cache with automatic fallback
    */
   async get<T = any>(key: string, options?: CacheOptions): Promise<T | null> {
+    // Ensure initialization on first use
+    if (!this.redisClient && !this.connected) {
+      await this.init()
+    }
+    
     return withPerformanceTracking('cache.get', async () => {
       const cacheKey = this.buildKey(key, options)
 
@@ -514,8 +523,23 @@ export class UnifiedRedisCache {
   }
 }
 
-// Export singleton instance
-export const unifiedCache = new UnifiedRedisCache()
+// Lazy-loaded singleton instance
+let _unifiedCache: UnifiedRedisCache | null = null
+
+export function getUnifiedCache(): UnifiedRedisCache {
+  if (!_unifiedCache) {
+    _unifiedCache = new UnifiedRedisCache()
+  }
+  return _unifiedCache
+}
+
+// Export proxy for backward compatibility
+export const unifiedCache = new Proxy({} as UnifiedRedisCache, {
+  get(_target, prop) {
+    const cache = getUnifiedCache()
+    return cache[prop as keyof UnifiedRedisCache]
+  }
+})
 
 // Re-export for backward compatibility
 export const redis = unifiedCache

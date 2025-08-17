@@ -87,8 +87,9 @@ async function sendEmailViaSendGrid(options: EmailOptions, config: EmailConfig):
     throw new Error('SendGrid API key not configured')
   }
 
-  const sgMail = require('@sendgrid/mail')
-  sgMail.setApiKey(config.apiKey)
+  try {
+    const sgMail = require('@sendgrid/mail')
+    sgMail.setApiKey(config.apiKey)
 
   const message = {
     to: options.to,
@@ -117,6 +118,11 @@ async function sendEmailViaSendGrid(options: EmailOptions, config: EmailConfig):
   }
 
   await sgMail.send(message)
+  } catch (error) {
+    // If SendGrid module is not installed or other errors occur
+    console.error('SendGrid email error:', error)
+    throw new Error(`Failed to send email via SendGrid: ${error.message}`)
+  }
 }
 
 /**
@@ -127,8 +133,9 @@ async function sendEmailViaResend(options: EmailOptions, config: EmailConfig): P
     throw new Error('Resend API key not configured')
   }
 
-  const { Resend } = require('resend')
-  const resend = new Resend(config.apiKey)
+  try {
+    const { Resend } = require('resend')
+    const resend = new Resend(config.apiKey)
 
   const message = {
     from: `${config.fromName} <${config.fromEmail}>`,
@@ -145,6 +152,11 @@ async function sendEmailViaResend(options: EmailOptions, config: EmailConfig): P
   }
 
   await resend.emails.send(message)
+  } catch (error) {
+    // If Resend module is not installed or other errors occur
+    console.error('Resend email error:', error)
+    throw new Error(`Failed to send email via Resend: ${error.message}`)
+  }
 }
 
 /**

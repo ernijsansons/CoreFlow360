@@ -46,6 +46,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:modules": "tsx prisma/seed-modules.ts",
     "db:seed:production": "tsx prisma/seed-production.ts",
+    "validate:env": "tsx scripts/validate-deployment.ts",
+    "validate:deployment": "tsx scripts/validate-deployment.ts",
     "ai:train": "tsx scripts/ai/train-models.ts",
     "ai:deploy": "tsx scripts/ai/deploy-agents.ts",
     "ai:monitor": "tsx scripts/ai/monitor-performance.ts",

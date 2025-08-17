@@ -200,30 +200,44 @@ class DeploymentValidator {
   }
 
   private async checkEnvironmentVariables(): Promise<void> {
+    // Core required variables - absolutely necessary
     const requiredVars = [
       'DATABASE_URL',
       'NEXTAUTH_URL',
-      'NEXTAUTH_SECRET',
+      'NEXTAUTH_SECRET'
+    ];
+
+    // Optional but recommended for full functionality
+    const optionalVars = [
       'API_KEY_SECRET',
       'STRIPE_SECRET_KEY',
       'STRIPE_WEBHOOK_SECRET',
       'OPENAI_API_KEY',
-      'EMAIL_FROM'
+      'REDIS_URL',
+      'EMAIL_FROM',
+      'ENCRYPTION_KEY'
     ];
 
-    const missingVars = requiredVars.filter(varName => !process.env[varName]);
+    const missingRequired = requiredVars.filter(varName => !process.env[varName]);
+    const missingOptional = optionalVars.filter(varName => !process.env[varName]);
 
     this.results.push({
       name: 'Environment Variables',
-      status: missingVars.length === 0 ? 'pass' : 'fail',
-      message: missingVars.length > 0
-        ? `Missing: ${missingVars.join(', ')}`
-        : 'All required variables set',
-      details: { requiredVars, missingVars }
+      status: missingRequired.length === 0 ? (missingOptional.length > 0 ? 'warning' : 'pass') : 'fail',
+      message: missingRequired.length > 0
+        ? `Missing required: ${missingRequired.join(', ')}`
+        : missingOptional.length > 0
+        ? `Missing optional: ${missingOptional.join(', ')}`
+        : 'All variables set',
+      details: { requiredVars, optionalVars, missingRequired, missingOptional }
     });
 
-    if (missingVars.length > 0) {
-      this.errors.push(`Missing environment variables: ${missingVars.join(', ')}`);
+    if (missingRequired.length > 0) {
+      this.errors.push(`Missing required environment variables: ${missingRequired.join(', ')}`);
+    }
+
+    if (missingOptional.length > 0) {
+      this.warnings.push(`Missing optional environment variables (some features disabled): ${missingOptional.join(', ')}`);
     }
 
     // Check for production values

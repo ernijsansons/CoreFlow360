@@ -14,7 +14,16 @@ import crypto from 'crypto'
 */
 
 // Build-time detection - comprehensive check for all build environments
-const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.BUILDING_FOR_VERCEL === '1' || process.env.VERCEL || process.env.NOW_BUILDER
+const isBuildTime = !!(
+  process.env.VERCEL_ENV || 
+  process.env.CI || 
+  process.env.NEXT_PHASE === 'phase-production-build' || 
+  process.env.BUILDING_FOR_VERCEL === '1' || 
+  process.env.VERCEL || 
+  process.env.NOW_BUILDER ||
+  process.env.VERCEL_GIT_COMMIT_SHA || // Additional Vercel build indicator
+  typeof window === 'undefined' && !process.env.DATABASE_URL // Build without DB
+)
 
 // Comprehensive environment variable schema
 const environmentSchema = z.object({
