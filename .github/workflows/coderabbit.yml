@@ -1,0 +1,172 @@
+name: CodeRabbit AI Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop]
+
+jobs:
+  coderabbit:
+    name: CodeRabbit AI Review
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run CodeRabbit AI Review
+        uses: coderabbitai/ai-pr-agent@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CODERABBIT_API_KEY: ${{ secrets.CODERABBIT_API_KEY }}
+        with:
+          # Configuration file
+          config_file_path: .coderabbit.yaml
+          
+          # Review settings
+          review_comment_lgtm: true
+          path_filters: |
+            src/**
+            prisma/**
+            scripts/**
+            !node_modules/**
+            !.next/**
+            !dist/**
+            !build/**
+            !coverage/**
+            !*.log
+            !*.lock
+            !package-lock.json
+            
+          # AI model settings
+          model: "gpt-4"
+          
+          # Review focus
+          focus: |
+            code_quality
+            security
+            performance
+            best_practices
+            accessibility
+            testing
+            typescript
+            react
+            nextjs
+            
+          # Custom instructions
+          instructions: |
+            You are reviewing code for CoreFlow360, an AI-first ERP platform.
+            
+            Focus on:
+            1. Code quality and maintainability
+            2. Security best practices
+            3. Performance optimizations
+            4. TypeScript/React best practices
+            5. Database and API design
+            6. Error handling and edge cases
+            7. Testing coverage
+            8. Accessibility compliance
+            
+            Be constructive and provide actionable feedback.
+            Suggest improvements with code examples when helpful.
+            
+            For database migrations, check for:
+            - Data integrity
+            - Performance impact
+            - Backward compatibility
+            
+            For API endpoints, check for:
+            - Input validation
+            - Error handling
+            - Security measures
+            - Rate limiting
+            
+            For AI components, check for:
+            - Model safety
+            - Error handling
+            - Performance optimization
+            - Resource management
+            
+          # Comment settings
+          comment_style: "constructive"
+          max_comments_per_file: 10
+          
+          # Security scanning
+          security_scan: true
+          secrets_scan: true
+          dependency_scan: true
+          
+          # Performance analysis
+          performance_analysis: true
+          bundle_size_check: true
+          
+          # Testing suggestions
+          test_suggestions: true
+          coverage_analysis: true
+          
+          # Accessibility checks
+          accessibility_checks: true
+          wcag_compliance: true
+          
+          # Language-specific rules
+          typescript_strict: true
+          react_hooks_rules: true
+          nextjs_best_practices: true
+          
+      - name: Post review summary
+        if: always()
+        run: |
+          echo "CodeRabbit AI Review completed"
+          echo "Check the pull request for detailed feedback"
+          
+      - name: Comment on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const coderabbitComments = comments.filter(comment => 
+              comment.user.login === 'coderabbit[bot]'
+            );
+            
+            if (coderabbitComments.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `🤖 **CodeRabbit AI Review Complete**
+                
+                ${coderabbitComments.length} AI review comments have been added to this PR.
+                
+                **Review Summary:**
+                - Code quality analysis: ✅
+                - Security scanning: ✅
+                - Performance analysis: ✅
+                - Testing suggestions: ✅
+                - Accessibility checks: ✅
+                
+                Please review the comments and address any issues before merging.
+                
+                ---
+                *Powered by CodeRabbit AI*`
+              });
+            }

@@ -1,0 +1,211 @@
+# CodeRabbit Configuration
+# This file configures AI-powered code review for CoreFlow360
+
+# Repository settings
+repository:
+  name: "CoreFlow360"
+  description: "World's #1 AI-First ERP Platform"
+
+# Review settings
+review:
+  # Enable AI code review
+  enabled: true
+  
+  # Review all pull requests
+  auto_review: true
+  
+  # Review frequency
+  frequency: "on_pr"
+  
+  # Review scope
+  scope:
+    # Include all files
+    include: ["**/*"]
+    # Exclude certain directories
+    exclude:
+      - "node_modules/**"
+      - ".next/**"
+      - "dist/**"
+      - "build/**"
+      - "coverage/**"
+      - ".git/**"
+      - "*.log"
+      - "*.lock"
+      - "package-lock.json"
+      - "yarn.lock"
+      - "pnpm-lock.yaml"
+
+# AI settings
+ai:
+  # Model to use for code review
+  model: "gpt-4"
+  
+  # Review focus areas
+  focus:
+    - "code_quality"
+    - "security"
+    - "performance"
+    - "best_practices"
+    - "accessibility"
+    - "testing"
+  
+  # Custom instructions for the AI
+  instructions: |
+    You are reviewing code for CoreFlow360, an AI-first ERP platform.
+    
+    Focus on:
+    1. Code quality and maintainability
+    2. Security best practices
+    3. Performance optimizations
+    4. TypeScript/React best practices
+    5. Database and API design
+    6. Error handling and edge cases
+    7. Testing coverage
+    8. Accessibility compliance
+    
+    Be constructive and provide actionable feedback.
+    Suggest improvements with code examples when helpful.
+
+# Comment settings
+comments:
+  # Enable inline comments
+  inline: true
+  
+  # Enable summary comments
+  summary: true
+  
+  # Comment style
+  style: "constructive"
+  
+  # Maximum comments per file
+  max_per_file: 10
+
+# Security settings
+security:
+  # Enable security scanning
+  enabled: true
+  
+  # Scan for common vulnerabilities
+  vulnerabilities: true
+  
+  # Check for secrets in code
+  secrets: true
+  
+  # Dependency scanning
+  dependencies: true
+
+# Performance settings
+performance:
+  # Enable performance analysis
+  enabled: true
+  
+  # Check for performance anti-patterns
+  anti_patterns: true
+  
+  # Analyze bundle size impact
+  bundle_size: true
+
+# Testing settings
+testing:
+  # Encourage test coverage
+  coverage: true
+  
+  # Suggest test improvements
+  suggestions: true
+  
+  # Check for missing tests
+  missing_tests: true
+
+# Accessibility settings
+accessibility:
+  # Enable accessibility checks
+  enabled: true
+  
+  # WCAG compliance
+  wcag: true
+  
+  # Screen reader compatibility
+  screen_reader: true
+
+# Language-specific settings
+languages:
+  typescript:
+    # TypeScript-specific rules
+    strict: true
+    no_any: true
+    explicit_returns: true
+  
+  react:
+    # React-specific rules
+    hooks_rules: true
+    component_structure: true
+    prop_types: true
+  
+  nextjs:
+    # Next.js-specific rules
+    app_router: true
+    server_components: true
+    api_routes: true
+
+# Custom rules
+custom_rules:
+  - name: "Database migrations"
+    pattern: "prisma/migrations/**"
+    instructions: "Review database schema changes for data integrity and performance"
+  
+  - name: "API endpoints"
+    pattern: "src/app/api/**"
+    instructions: "Review API endpoints for security, validation, and error handling"
+  
+  - name: "AI components"
+    pattern: "src/ai/**"
+    instructions: "Review AI-related code for model safety, error handling, and performance"
+  
+  - name: "Business logic"
+    pattern: "src/lib/business/**"
+    instructions: "Review business logic for correctness, edge cases, and maintainability"
+
+# Integration settings
+integrations:
+  # GitHub integration
+  github:
+    # Enable status checks
+    status_checks: true
+    
+    # Require review approval
+    require_approval: false
+    
+    # Auto-merge settings
+    auto_merge: false
+  
+  # Slack integration (if configured)
+  slack:
+    enabled: false
+    
+  # Discord integration (if configured)
+  discord:
+    enabled: false
+
+# Notification settings
+notifications:
+  # Email notifications
+  email: false
+  
+  # GitHub notifications
+  github: true
+  
+  # Custom webhooks
+  webhooks: []
+
+# Advanced settings
+advanced:
+  # Debug mode
+  debug: false
+  
+  # Verbose logging
+  verbose: false
+  
+  # Custom environment variables
+  env:
+    NODE_ENV: "production"
+    REVIEW_MODE: "comprehensive"
