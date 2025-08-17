@@ -104,7 +104,7 @@ const environmentSchema = z.object({
   MAX_REQUEST_SIZE: z.string().default('10mb'),
   REQUEST_TIMEOUT: z.coerce.number().int().min(1000).max(300000).default(30000),
   RATE_LIMIT_REQUESTS: z.coerce.number().int().min(1).max(10000).default(1000),
-  RATE_LIMIT_WINDOW: z.coerce.number().int().min(1).max(3600).default(60),
+  RATE_LIMIT_WINDOW: z.coerce.number().int().min(1).max(3600000).default(60000), // milliseconds
   
   // Development & Testing
   DISABLE_SECURITY: z.coerce.boolean().default(false),
