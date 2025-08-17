@@ -463,3 +463,65 @@ if (typeof window !== 'undefined') {
   performanceTracker.init()
   RealUserMonitoring.init()
 }
+
+/**
+ * Performance tracking wrapper function
+ * Wraps async operations with performance monitoring
+ */
+export async function withPerformanceTracking<T>(
+  operation: string,
+  fn: () => Promise<T>,
+  options?: { 
+    tenantId?: string
+    userId?: string
+    metadata?: Record<string, any>
+  }
+): Promise<T> {
+  const start = performance.now()
+  const memoryBefore = process.memoryUsage ? process.memoryUsage() : null
+  let success = true
+  let error: Error | null = null
+
+  try {
+    const result = await fn()
+    return result
+  } catch (err) {
+    success = false
+    error = err as Error
+    throw err
+  } finally {
+    const duration = performance.now() - start
+    const memoryAfter = process.memoryUsage ? process.memoryUsage() : null
+
+    // Track the performance metric
+    performanceTracker.trackBusinessMetric({
+      name: `operation.${operation}`,
+      value: duration,
+      category: 'performance',
+      properties: {
+        success,
+        error: error?.message,
+        memoryDelta: memoryBefore && memoryAfter ? {
+          heapUsed: memoryAfter.heapUsed - memoryBefore.heapUsed,
+          external: memoryAfter.external - memoryBefore.external
+        } : null,
+        ...options?.metadata,
+        tenantId: options?.tenantId,
+        userId: options?.userId
+      }
+    })
+
+    // Log slow operations
+    if (duration > 1000) {
+      performanceTracker.logError(
+        new Error(`Slow operation: ${operation} took ${duration}ms`),
+        {
+          feature: 'performance',
+          operation,
+          duration,
+          ...options
+        }
+      )
+    }
+  }
+}

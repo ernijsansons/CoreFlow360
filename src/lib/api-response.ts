@@ -220,3 +220,19 @@ export function rateLimitResponse(
     timestamp: new Date().toISOString()
   }, { status: 429, headers })
 }
+
+/**
+ * Grouped API response methods for convenient access
+ */
+export const api = {
+  success: successResponse,
+  error: errorResponse,
+  paginated: paginatedResponse,
+  created: createdResponse,
+  noContent: noContentResponse,
+  validationError: validationErrorResponse,
+  unauthorized: authErrorResponse,
+  forbidden: forbiddenResponse,
+  notFound: notFoundResponse,
+  rateLimit: rateLimitResponse
+}

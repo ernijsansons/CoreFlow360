@@ -333,6 +333,9 @@ export async function applyRateLimit(
   return rateLimiter.checkLimit(request, rateLimitConfig)
 }
 
+// Export alias for backward compatibility
+export const rateLimit = applyRateLimit
+
 /*
 // Simulated Validations:
 // tsc: 0 errors

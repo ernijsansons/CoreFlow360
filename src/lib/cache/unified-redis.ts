@@ -519,3 +519,25 @@ export const unifiedCache = new UnifiedRedisCache()
 
 // Re-export for backward compatibility
 export const redis = unifiedCache
+
+// Cache key generator helper
+export function cacheKey(...parts: (string | number | undefined)[]): string {
+  return parts
+    .filter(part => part !== undefined && part !== null)
+    .map(part => String(part))
+    .join(':')
+}
+
+// AI-specific cache instance with custom configuration
+export const aiCache = {
+  get: (key: string, options?: CacheOptions) => 
+    unifiedCache.get(key, { ...options, namespace: 'ai' }),
+  set: (key: string, value: any, options?: CacheOptions) => 
+    unifiedCache.set(key, value, { ...options, namespace: 'ai', ttl: options?.ttl || 300 }),
+  del: (key: string, options?: CacheOptions) => 
+    unifiedCache.del(key, { ...options, namespace: 'ai' }),
+  invalidatePattern: (pattern: string, options?: CacheOptions) => 
+    unifiedCache.invalidatePattern(pattern, { ...options, namespace: 'ai' }),
+  cache: <T>(key: string, factory: () => Promise<T>, options?: CacheOptions) => 
+    unifiedCache.cache(key, factory, { ...options, namespace: 'ai', ttl: options?.ttl || 300 })
+}
