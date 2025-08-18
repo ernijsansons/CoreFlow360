@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-08-18T01:04:31.741Z",
-  "totalIssues": 6285,
+  "timestamp": "2025-08-18T01:24:14.456Z",
+  "totalIssues": 6293,
   "criticalIssues": 0,
   "highIssues": 30,
   "mediumIssues": 390,
-  "lowIssues": 5865,
+  "lowIssues": 5873,
   "categories": {
     "security": {
       "issues": [
@@ -2559,7 +2559,7 @@
         },
         {
           "type": "typescript",
-          "message": ".next/types/app/api/ai/intelligence/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import(\"C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/ai/intelligence/route\"), \"config\" | \"generateStaticParams\" | \"revalidate\" | \"dynamic\" | \"dynamicParams\" | ... 10 more ... | \"PATCH\", \"\">' does not satisfy the constraint '{ [x: string]: never; }'."
+          "message": ".next/types/app/api/ai/intelligence/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import(\"C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/ai/intelligence/route\"), \"GET\" | \"POST\" | \"DELETE\" | \"PUT\" | \"config\" | \"PATCH\" | \"HEAD\" | \"revalidate\" | ... 7 more ... | \"OPTIONS\", \"\">' does not satisfy the constraint '{ [x: string]: never; }'."
         },
         {
           "type": "typescript",
@@ -2575,7 +2575,7 @@
         },
         {
           "type": "typescript",
-          "message": ".next/types/app/api/intelligence/business/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import(\"C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/intelligence/business/route\"), \"config\" | \"generateStaticParams\" | \"revalidate\" | \"dynamic\" | ... 11 more ... | \"PATCH\", \"\">' does not satisfy the constraint '{ [x: string]: never; }'."
+          "message": ".next/types/app/api/intelligence/business/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import(\"C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/intelligence/business/route\"), \"GET\" | \"POST\" | \"DELETE\" | \"PUT\" | \"config\" | \"PATCH\" | \"HEAD\" | ... 8 more ... | \"OPTIONS\", \"\">' does not satisfy the constraint '{ [x: string]: never; }'."
         },
         {
           "type": "typescript",
@@ -3047,7 +3047,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/api/api-routes.integration.test.ts(46,31): error TS2345: Argument of type '{ headers: { 'Content-Type': string; } | { length: number; toString(): string; toLocaleString(): string; toLocaleString(locales: string | string[], options?: Intl.NumberFormatOptions & Intl.DateTimeFormatOptions): string; ... 38 more ...; 'Content-Type': string; } | { ...; } | { ...; }; ... 13 more ...; next?: NextF...' is not assignable to parameter of type 'RequestInit'."
+          "message": "src/__tests__/api/api-routes.integration.test.ts(46,31): error TS2345: Argument of type '{ headers: { 'Content-Type': string; } | { 'Content-Type': string; } | { length: number; toString(): string; toLocaleString(): string; toLocaleString(locales: string | string[], options?: Intl.NumberFormatOptions & Intl.DateTimeFormatOptions): string; ... 38 more ...; 'Content-Type': string; } | { ...; }; ... 13 mor...' is not assignable to parameter of type 'RequestInit'."
         },
         {
           "type": "typescript",
@@ -4623,23 +4623,23 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/integration/auth-flow.test.ts(55,11): error TS2353: Object literal may only specify known properties, and 'domain' does not exist in type '(Without<TenantCreateInput, TenantUncheckedCreateInput> & TenantUncheckedCreateInput) | (Without<...> & TenantCreateInput)'."
+          "message": "src/__tests__/integration/auth-flow.test.ts(56,11): error TS2353: Object literal may only specify known properties, and 'domain' does not exist in type '(Without<TenantCreateInput, TenantUncheckedCreateInput> & TenantUncheckedCreateInput) | (Without<...> & TenantCreateInput)'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/integration/auth-flow.test.ts(66,11): error TS2353: Object literal may only specify known properties, and 'code' does not exist in type 'Without<DepartmentCreateInput, DepartmentUncheckedCreateInput> & DepartmentUncheckedCreateInput'."
+          "message": "src/__tests__/integration/auth-flow.test.ts(67,11): error TS2353: Object literal may only specify known properties, and 'code' does not exist in type 'Without<DepartmentCreateInput, DepartmentUncheckedCreateInput> & DepartmentUncheckedCreateInput'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/integration/auth-flow.test.ts(90,16): error TS2551: Property 'legacyTenantSubscription' does not exist on type 'Omit<PrismaClient<PrismaClientOptions, never, DefaultArgs>, \"$connect\" | \"$disconnect\" | \"$on\" | \"$transaction\" | \"$extends\">'. Did you mean 'tenantSubscription'?"
+          "message": "src/__tests__/integration/auth-flow.test.ts(91,16): error TS2551: Property 'legacyTenantSubscription' does not exist on type 'Omit<PrismaClient<PrismaClientOptions, never, DefaultArgs>, \"$extends\" | \"$transaction\" | \"$disconnect\" | \"$connect\" | \"$on\">'. Did you mean 'tenantSubscription'?"
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/integration/auth-flow.test.ts(136,45): error TS2551: Property 'legacyTenantSubscription' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'. Did you mean 'tenantSubscription'?"
+          "message": "src/__tests__/integration/auth-flow.test.ts(137,45): error TS2551: Property 'legacyTenantSubscription' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'. Did you mean 'tenantSubscription'?"
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/integration/auth-flow.test.ts(226,22): error TS2339: Property 'entityType' does not exist on type '{ id: string; createdAt: Date; tenantId: string; action: AuditAction; resourceType: string; resourceId: string | null; details: string | null; userId: string | null; }'."
+          "message": "src/__tests__/integration/auth-flow.test.ts(227,22): error TS2339: Property 'entityType' does not exist on type '{ tenantId: string; id: string; createdAt: Date; action: AuditAction; resourceType: string; resourceId: string | null; details: string | null; userId: string | null; }'."
         },
         {
           "type": "typescript",
@@ -6695,19 +6695,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(11,1): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(12,1): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(14,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(15,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(20,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
-        },
-        {
-          "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(36,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(21,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
@@ -6719,11 +6715,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(41,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(39,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(56,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(42,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
@@ -6731,11 +6727,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(60,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(58,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(76,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(61,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
@@ -6743,15 +6739,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(80,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(78,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(97,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(81,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(101,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(98,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
@@ -6759,15 +6755,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(106,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(103,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(112,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(107,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(128,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(113,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
@@ -6775,11 +6771,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(132,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(130,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(147,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(133,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
@@ -6787,15 +6783,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(152,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(149,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(158,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(153,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(175,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(159,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
@@ -6803,11 +6799,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(179,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(177,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(194,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(180,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
@@ -6815,23 +6811,23 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(199,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(196,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(206,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(200,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(224,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(207,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(227,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(225,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(231,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(228,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
@@ -6843,15 +6839,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(237,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(234,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(243,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(238,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(259,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(244,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
@@ -6863,15 +6859,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(265,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(262,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(271,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(266,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(286,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(272,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
@@ -6879,15 +6875,19 @@
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(290,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
+          "message": "src/__tests__/security/webhook-security.test.ts(288,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
-          "message": "src/__tests__/security/webhook-security.test.ts(305,7): error TS2304: Cannot find name 'expect'."
+          "message": "src/__tests__/security/webhook-security.test.ts(291,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`."
         },
         {
           "type": "typescript",
           "message": "src/__tests__/security/webhook-security.test.ts(306,7): error TS2304: Cannot find name 'expect'."
+        },
+        {
+          "type": "typescript",
+          "message": "src/__tests__/security/webhook-security.test.ts(307,7): error TS2304: Cannot find name 'expect'."
         },
         {
           "type": "typescript",
@@ -8355,7 +8355,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/ai/orchestration/subscription-aware-orchestrator.ts(209,44): error TS2339: Property 'subscriptionTier' does not exist on type '{ status: SubscriptionStatus; id: string; createdAt: Date; updatedAt: Date; tenantId: string; version: number; startDate: Date; endDate: Date; ... 12 more ...; cancelledAt: Date | null; }'."
+          "message": "src/ai/orchestration/subscription-aware-orchestrator.ts(209,44): error TS2339: Property 'subscriptionTier' does not exist on type '{ status: SubscriptionStatus; tenantId: string; id: string; createdAt: Date; updatedAt: Date; users: number; billingCycle: BillingCycle; bundleId: string; ... 12 more ...; cancelledAt: Date | null; }'."
         },
         {
           "type": "typescript",
@@ -8911,47 +8911,47 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(61,20): error TS2339: Property 'domain' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(61,20): error TS2339: Property 'domain' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(64,32): error TS2339: Property 'subscriptionStatus' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(64,32): error TS2339: Property 'subscriptionStatus' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(66,23): error TS2339: Property '_count' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(66,23): error TS2339: Property '_count' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(67,29): error TS2339: Property '_count' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(67,29): error TS2339: Property '_count' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(68,26): error TS2339: Property 'subscription' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(68,26): error TS2339: Property 'subscription' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(69,20): error TS2339: Property 'subscription' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(69,20): error TS2339: Property 'subscription' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(70,22): error TS2339: Property 'subscription' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(70,22): error TS2339: Property 'subscription' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(71,40): error TS2339: Property 'subscription' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(71,40): error TS2339: Property 'subscription' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(72,25): error TS2339: Property 'subscription' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(72,25): error TS2339: Property 'subscription' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(73,27): error TS2339: Property 'subscription' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(73,27): error TS2339: Property 'subscription' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(74,25): error TS2339: Property 'subscription' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(74,25): error TS2339: Property 'subscription' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
@@ -8991,11 +8991,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(224,44): error TS2339: Property 'subscriptionStatus' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(224,44): error TS2339: Property 'subscriptionStatus' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(229,43): error TS2339: Property 'subscriptionStatus' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(229,43): error TS2339: Property 'subscriptionStatus' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
@@ -9015,7 +9015,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(291,44): error TS2339: Property 'subscriptionStatus' does not exist on type '{ users: { status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }[]; } & { ...; }'."
+          "message": "src/app/api/admin/tenants/route.ts(291,44): error TS2339: Property 'subscriptionStatus' does not exist on type '{ users: { email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; ... 6 more ...; avatar: string | null; }[]; } & { ...; }'."
         },
         {
           "type": "typescript",
@@ -9047,11 +9047,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(348,19): error TS2339: Property 'user' does not exist on type '{ id: string; tenantId: string; createdAt: Date; action: AuditAction; userId: string | null; resourceType: string; resourceId: string | null; details: string | null; }'."
+          "message": "src/app/api/admin/tenants/route.ts(348,19): error TS2339: Property 'user' does not exist on type '{ tenantId: string; id: string; createdAt: Date; action: AuditAction; resourceType: string; resourceId: string | null; details: string | null; userId: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/tenants/route.ts(349,21): error TS2551: Property 'tenant' does not exist on type '{ id: string; tenantId: string; createdAt: Date; action: AuditAction; userId: string | null; resourceType: string; resourceId: string | null; details: string | null; }'. Did you mean 'tenantId'?"
+          "message": "src/app/api/admin/tenants/route.ts(349,21): error TS2551: Property 'tenant' does not exist on type '{ tenantId: string; id: string; createdAt: Date; action: AuditAction; resourceType: string; resourceId: string | null; details: string | null; userId: string | null; }'. Did you mean 'tenantId'?"
         },
         {
           "type": "typescript",
@@ -9067,7 +9067,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/admin/users/route.ts(63,22): error TS2551: Property 'department' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'. Did you mean 'departmentId'?"
+          "message": "src/app/api/admin/users/route.ts(63,22): error TS2551: Property 'department' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'. Did you mean 'departmentId'?"
         },
         {
           "type": "typescript",
@@ -9183,11 +9183,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/anomaly/detect/route.ts(40,50): error TS2345: Argument of type '{ sensitivity?: number | undefined; algorithms?: string[] | undefined; businessContext?: { industry?: string | undefined; seasonality?: string[] | undefined; businessModel?: string | undefined; } | undefined; } | undefined' is not assignable to parameter of type 'Partial<{ sensitivity: number; lookbackPeriod: number; minimumDataPoints: number; algorithms: (\"lstm\" | \"statistical\" | \"isolation_forest\" | \"ensemble\")[]; businessContext: { seasonality: string[]; expectedPatterns: string[]; industry?: string | undefined; businessModel?: string | undefined; }; }> | undefined'."
+          "message": "src/app/api/anomaly/detect/route.ts(40,50): error TS2345: Argument of type '{ sensitivity?: number | undefined; algorithms?: string[] | undefined; businessContext?: { industry?: string | undefined; businessModel?: string | undefined; seasonality?: string[] | undefined; } | undefined; } | undefined' is not assignable to parameter of type 'Partial<{ sensitivity: number; algorithms: (\"lstm\" | \"statistical\" | \"isolation_forest\" | \"ensemble\")[]; businessContext: { seasonality: string[]; expectedPatterns: string[]; industry?: string | undefined; businessModel?: string | undefined; }; lookbackPeriod: number; minimumDataPoints: number; }> | undefined'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/anomaly/detect/route.ts(59,7): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type 'Partial<{ eventType: \"ai_interaction\" | \"user_journey\" | \"payment_flow\" | \"business_process\" | \"enterprise_usage\" | \"attribution\" | \"error_recovery\" | \"conversion_funnel\"; sessionId: string; ... 6 more ...; userId?: string | undefined; }>'."
+          "message": "src/app/api/anomaly/detect/route.ts(59,7): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type 'Partial<{ eventType: \"user_journey\" | \"payment_flow\" | \"ai_interaction\" | \"business_process\" | \"enterprise_usage\" | \"attribution\" | \"error_recovery\" | \"conversion_funnel\"; sessionId: string; ... 6 more ...; userId?: string | undefined; }>'."
         },
         {
           "type": "typescript",
@@ -9419,11 +9419,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/insights/route.ts(109,24): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/insights/route.ts(109,24): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/insights/route.ts(117,32): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/insights/route.ts(117,32): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9451,15 +9451,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(121,29): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(121,29): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(122,25): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(122,25): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(125,34): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(125,34): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9471,7 +9471,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(136,31): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(136,31): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9479,11 +9479,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(143,24): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(143,24): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(169,61): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(169,61): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9499,15 +9499,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(254,24): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(254,24): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(281,40): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(281,40): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(282,32): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(282,32): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9515,7 +9515,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(286,35): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(286,35): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9523,11 +9523,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(298,91): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(298,91): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(314,34): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(314,34): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9543,7 +9543,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(353,35): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(353,35): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9551,7 +9551,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/modules/route.ts(365,35): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/modules/route.ts(365,35): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9575,7 +9575,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/status/route.ts(168,36): error TS2339: Property 'subscription' does not exist on type '{ status: string; name: string | null; role: UserRole; permissions: string; tenantId: string; id: string; createdAt: Date; isActive: boolean; updatedAt: Date; email: string; ... 5 more ...; departmentId: string | null; }'."
+          "message": "src/app/api/consciousness/status/route.ts(168,36): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9583,7 +9583,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/status/route.ts(237,27): error TS2339: Property 'subscription' does not exist on type '{ status: string; name: string | null; role: UserRole; permissions: string; tenantId: string; id: string; createdAt: Date; isActive: boolean; updatedAt: Date; email: string; ... 5 more ...; departmentId: string | null; }'."
+          "message": "src/app/api/consciousness/status/route.ts(237,27): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9603,15 +9603,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/tiers/route.ts(307,14): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/tiers/route.ts(307,14): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/tiers/route.ts(309,31): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/tiers/route.ts(309,31): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/tiers/route.ts(317,25): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/tiers/route.ts(317,25): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9619,15 +9619,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/tiers/route.ts(322,32): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/tiers/route.ts(322,32): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/tiers/route.ts(323,33): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/tiers/route.ts(323,33): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/tiers/route.ts(329,16): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/tiers/route.ts(329,16): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9647,7 +9647,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/tiers/route.ts(395,15): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/tiers/route.ts(395,15): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9667,7 +9667,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/tiers/route.ts(445,31): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/tiers/route.ts(445,31): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9675,11 +9675,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/tiers/route.ts(471,14): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/tiers/route.ts(471,14): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/tiers/route.ts(477,27): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/tiers/route.ts(477,27): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -9691,7 +9691,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/consciousness/tiers/route.ts(494,20): error TS2339: Property 'subscription' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/consciousness/tiers/route.ts(494,20): error TS2339: Property 'subscription' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -10611,7 +10611,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/intelligence/business/route.ts(274,50): error TS2345: Argument of type '{ tenantId: string; metadata: { source: string; confidence: number; quality: \"low\" | \"medium\" | \"high\"; calculation: string; }; name: string; value: number; dimensions: Record<string, string>; category: \"performance\" | ... 5 more ... | \"satisfaction\"; unit: string; timestamp?: Date | undefined; targets?: { ...; } | ...' is not assignable to parameter of type 'Omit<BusinessMetric, \"id\" | \"trends\">'."
+          "message": "src/app/api/intelligence/business/route.ts(274,50): error TS2345: Argument of type '{ tenantId: string; value: number; name: string; metadata: { confidence: number; source: string; quality: \"medium\" | \"high\" | \"low\"; calculation: string; }; dimensions: Record<string, string>; category: \"performance\" | ... 5 more ... | \"satisfaction\"; unit: string; timestamp?: Date | undefined; targets?: { ...; } | ...' is not assignable to parameter of type 'Omit<BusinessMetric, \"id\" | \"trends\">'."
         },
         {
           "type": "typescript",
@@ -10627,7 +10627,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/intelligence/companies/monitor/route.ts(169,9): error TS2322: Type '{ monitoringConfiguration: { sources: (\"SOCIAL_MEDIA\" | \"NEWS_ARTICLE\" | \"FINANCIAL_REPORT\" | \"JOB_POSTING\" | \"REGULATORY_FILING\" | \"COMPETITOR_INTELLIGENCE\" | \"INDUSTRY_REPORT\" | \"TECHNOLOGY_CHANGE\")[]; frequency: \"DAILY\" | ... 1 more ... | \"HOURLY\"; depth: \"SURFACE\" | ... 2 more ... | \"COMPREHENSIVE\"; }; }' is not assignable to type 'string'."
+          "message": "src/app/api/intelligence/companies/monitor/route.ts(169,9): error TS2322: Type '{ monitoringConfiguration: { sources: (\"SOCIAL_MEDIA\" | \"NEWS_ARTICLE\" | \"FINANCIAL_REPORT\" | \"JOB_POSTING\" | \"REGULATORY_FILING\" | \"COMPETITOR_INTELLIGENCE\" | \"INDUSTRY_REPORT\" | \"TECHNOLOGY_CHANGE\")[]; frequency: \"REAL_TIME\" | ... 1 more ... | \"HOURLY\"; depth: \"SURFACE\" | ... 2 more ... | \"COMPREHENSIVE\"; }; }' is not assignable to type 'string'."
         },
         {
           "type": "typescript",
@@ -10999,15 +10999,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/pricing/quote/route.ts(114,44): error TS2339: Property 'moduleDefinition' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'."
+          "message": "src/app/api/pricing/quote/route.ts(112,44): error TS2339: Property 'moduleDefinition' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/pricing/quote/route.ts(124,39): error TS2339: Property 'bundleDefinition' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'."
+          "message": "src/app/api/pricing/quote/route.ts(122,39): error TS2339: Property 'bundleDefinition' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/privacy/route.ts(165,35): error TS2345: Argument of type '{ tenantId: string; userId: string; severity: \"critical\" | \"low\" | \"medium\" | \"high\"; description: string; eventType: \"data_export\" | \"data_access\" | \"consent_change\" | \"data_deletion\" | \"consent_violation\" | \"policy_update\" | \"breach_detection\"; complianceImpact: \"none\" | ... 2 more ... | \"minor\"; autoResolved: boo...' is not assignable to parameter of type 'Omit<PrivacyEvent, \"id\" | \"timestamp\">'."
+          "message": "src/app/api/privacy/route.ts(165,35): error TS2345: Argument of type '{ tenantId: string; userId: string; description: string; eventType: \"consent_change\" | \"data_access\" | \"data_export\" | \"data_deletion\" | \"consent_violation\" | \"policy_update\" | \"breach_detection\"; ... 4 more ...; metadata?: Record<...> | undefined; }' is not assignable to parameter of type 'Omit<PrivacyEvent, \"id\" | \"timestamp\">'."
         },
         {
           "type": "typescript",
@@ -11291,7 +11291,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/sustainability/metrics/route.ts(100,33): error TS2339: Property 'tier' does not exist on type '{ status: string; id: string; tenantId: string; createdAt: Date; updatedAt: Date; usage: string; version: number; billingCycle: string; stripeSubscriptionId: string | null; bundleId: string; ... 6 more ...; currentPeriodEnd: Date; }'."
+          "message": "src/app/api/sustainability/metrics/route.ts(100,33): error TS2339: Property 'tier' does not exist on type '{ status: string; tenantId: string; id: string; createdAt: Date; updatedAt: Date; billingCycle: string; bundleId: string; trialEndsAt: Date | null; customLimits: string | null; ... 7 more ...; currentPeriodEnd: Date; }'."
         },
         {
           "type": "typescript",
@@ -11307,15 +11307,15 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/sustainability/metrics/route.ts(148,54): error TS2339: Property 'bundleSize' does not exist on type '{ id: string; tenantId: string | null; endpoint: string | null; userCount: number | null; metricType: string; metricValue: number; metricUnit: string | null; systemHealth: string | null; recordedAt: Date; }'."
+          "message": "src/app/api/sustainability/metrics/route.ts(148,54): error TS2339: Property 'bundleSize' does not exist on type '{ tenantId: string | null; id: string; userCount: number | null; endpoint: string | null; metricType: string; metricValue: number; metricUnit: string | null; systemHealth: string | null; recordedAt: Date; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/sustainability/metrics/route.ts(152,54): error TS2339: Property 'loadTime' does not exist on type '{ id: string; tenantId: string | null; endpoint: string | null; userCount: number | null; metricType: string; metricValue: number; metricUnit: string | null; systemHealth: string | null; recordedAt: Date; }'."
+          "message": "src/app/api/sustainability/metrics/route.ts(152,54): error TS2339: Property 'loadTime' does not exist on type '{ tenantId: string | null; id: string; userCount: number | null; endpoint: string | null; metricType: string; metricValue: number; metricUnit: string | null; systemHealth: string | null; recordedAt: Date; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/sustainability/metrics/route.ts(156,54): error TS2339: Property 'renderTime' does not exist on type '{ id: string; tenantId: string | null; endpoint: string | null; userCount: number | null; metricType: string; metricValue: number; metricUnit: string | null; systemHealth: string | null; recordedAt: Date; }'."
+          "message": "src/app/api/sustainability/metrics/route.ts(156,54): error TS2339: Property 'renderTime' does not exist on type '{ tenantId: string | null; id: string; userCount: number | null; endpoint: string | null; metricType: string; metricValue: number; metricUnit: string | null; systemHealth: string | null; recordedAt: Date; }'."
         },
         {
           "type": "typescript",
@@ -11331,27 +11331,27 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/sustainability/metrics/route.ts(176,7): error TS2339: Property 'themePreferences' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/sustainability/metrics/route.ts(176,7): error TS2339: Property 'themePreferences' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/sustainability/metrics/route.ts(177,8): error TS2339: Property 'themePreferences' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/sustainability/metrics/route.ts(177,8): error TS2339: Property 'themePreferences' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/sustainability/metrics/route.ts(178,8): error TS2339: Property 'themePreferences' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/sustainability/metrics/route.ts(178,8): error TS2339: Property 'themePreferences' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/sustainability/metrics/route.ts(182,7): error TS2339: Property 'themePreferences' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/sustainability/metrics/route.ts(182,7): error TS2339: Property 'themePreferences' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/sustainability/metrics/route.ts(183,8): error TS2339: Property 'themePreferences' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/sustainability/metrics/route.ts(183,8): error TS2339: Property 'themePreferences' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/sustainability/metrics/route.ts(184,9): error TS2339: Property 'themePreferences' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/sustainability/metrics/route.ts(184,9): error TS2339: Property 'themePreferences' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -11363,11 +11363,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/user/theme-preferences/route.ts(55,24): error TS2339: Property 'themePreferences' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/user/theme-preferences/route.ts(55,24): error TS2339: Property 'themePreferences' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/app/api/user/theme-preferences/route.ts(59,35): error TS2339: Property 'themePreferences' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'."
+          "message": "src/app/api/user/theme-preferences/route.ts(59,35): error TS2339: Property 'themePreferences' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'."
         },
         {
           "type": "typescript",
@@ -11379,7 +11379,7 @@
         },
         {
           "type": "typescript",
-          "message": "src/app/api/user/theme-preferences/route.ts(97,9): error TS2322: Type '{ previousTheme: string; newTheme: \"system\" | \"light\" | \"dark\"; consciousnessTheme: \"neural\" | \"synaptic\" | \"autonomous\" | \"transcendent\"; accessibilityMode: \"standard\" | \"reduced-motion\" | \"high-contrast\" | \"enhanced-focus\"; }' is not assignable to type 'string'."
+          "message": "src/app/api/user/theme-preferences/route.ts(97,9): error TS2322: Type '{ previousTheme: string; newTheme: \"system\" | \"dark\" | \"light\"; consciousnessTheme: \"transcendent\" | \"neural\" | \"synaptic\" | \"autonomous\"; accessibilityMode: \"standard\" | \"reduced-motion\" | \"high-contrast\" | \"enhanced-focus\"; }' is not assignable to type 'string'."
         },
         {
           "type": "typescript",
@@ -14247,43 +14247,91 @@
         },
         {
           "type": "typescript",
-          "message": "src/lib/auth.ts(229,27): error TS2339: Property 'role' does not exist on type 'User | AdapterUser'."
+          "message": "src/lib/auth.ts(198,20): error TS7031: Binding element 'user' implicitly has an 'any' type."
         },
         {
           "type": "typescript",
-          "message": "src/lib/auth.ts(230,35): error TS2339: Property 'departmentId' does not exist on type 'User | AdapterUser'."
+          "message": "src/lib/auth.ts(198,26): error TS7031: Binding element 'account' implicitly has an 'any' type."
         },
         {
           "type": "typescript",
-          "message": "src/lib/auth.ts(231,34): error TS2339: Property 'permissions' does not exist on type 'User | AdapterUser'."
+          "message": "src/lib/auth.ts(198,35): error TS7031: Binding element 'profile' implicitly has an 'any' type."
         },
         {
           "type": "typescript",
-          "message": "src/lib/auth.ts(265,22): error TS2339: Property 'role' does not exist on type 'AdapterUser & { id: string; tenantId: string; } & User'."
+          "message": "src/lib/auth.ts(198,44): error TS7031: Binding element 'email' implicitly has an 'any' type."
         },
         {
           "type": "typescript",
-          "message": "src/lib/auth.ts(266,22): error TS2339: Property 'departmentId' does not exist on type 'AdapterUser & { id: string; tenantId: string; } & User'."
+          "message": "src/lib/auth.ts(198,51): error TS7031: Binding element 'credentials' implicitly has an 'any' type."
         },
         {
           "type": "typescript",
-          "message": "src/lib/auth.ts(267,22): error TS2339: Property 'permissions' does not exist on type 'AdapterUser & { id: string; tenantId: string; } & User'."
+          "message": "src/lib/auth.ts(225,17): error TS7031: Binding element 'token' implicitly has an 'any' type."
         },
         {
           "type": "typescript",
-          "message": "src/lib/auth.ts(276,14): error TS2352: Conversion of type '{ csrfToken: Promise<string>; user: AdapterUser & { id: string; tenantId: string; } & User; sessionToken: string; userId: string; expires: Date & string; }' to type 'ExtendedSession' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first."
+          "message": "src/lib/auth.ts(225,24): error TS7031: Binding element 'user' implicitly has an 'any' type."
         },
         {
           "type": "typescript",
-          "message": "src/lib/auth.ts(300,13): error TS2353: Object literal may only specify known properties, and 'entityType' does not exist in type 'Without<AuditLogCreateInput, AuditLogUncheckedCreateInput> & AuditLogUncheckedCreateInput'."
+          "message": "src/lib/auth.ts(225,30): error TS7031: Binding element 'account' implicitly has an 'any' type."
         },
         {
           "type": "typescript",
-          "message": "src/lib/auth.ts(310,21): error TS2339: Property 'token' does not exist on type '{ session: void | AdapterSession | null | undefined; } | { token: JWT | null; }'."
+          "message": "src/lib/auth.ts(225,39): error TS7031: Binding element 'trigger' implicitly has an 'any' type."
         },
         {
           "type": "typescript",
-          "message": "src/lib/auth.ts(318,13): error TS2353: Object literal may only specify known properties, and 'entityType' does not exist in type 'Without<AuditLogCreateInput, AuditLogUncheckedCreateInput> & AuditLogUncheckedCreateInput'."
+          "message": "src/lib/auth.ts(225,48): error TS7031: Binding element 'session' implicitly has an 'any' type."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/auth.ts(262,21): error TS7031: Binding element 'session' implicitly has an 'any' type."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/auth.ts(262,30): error TS7031: Binding element 'token' implicitly has an 'any' type."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/auth.ts(282,22): error TS7031: Binding element 'url' implicitly has an 'any' type."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/auth.ts(282,27): error TS7031: Binding element 'baseUrl' implicitly has an 'any' type."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/auth.ts(293,20): error TS7031: Binding element 'user' implicitly has an 'any' type."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/auth.ts(293,26): error TS7031: Binding element 'account' implicitly has an 'any' type."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/auth.ts(293,35): error TS7031: Binding element 'profile' implicitly has an 'any' type."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/auth.ts(293,44): error TS7031: Binding element 'isNewUser' implicitly has an 'any' type."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/auth.ts(301,13): error TS2353: Object literal may only specify known properties, and 'entityType' does not exist in type '(Without<AuditLogCreateInput, AuditLogUncheckedCreateInput> & AuditLogUncheckedCreateInput) | (Without<...> & AuditLogCreateInput)'."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/auth.ts(311,21): error TS7031: Binding element 'token' implicitly has an 'any' type."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/auth.ts(319,13): error TS2353: Object literal may only specify known properties, and 'entityType' does not exist in type 'Without<AuditLogCreateInput, AuditLogUncheckedCreateInput> & AuditLogUncheckedCreateInput'."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/auth.ts(336,14): error TS2345: Argument of type '{ adapter: Adapter; session: { strategy: string; maxAge: number; updateAge: number; }; cookies: { sessionToken: { name: string; options: { httpOnly: boolean; sameSite: string; path: string; secure: boolean; domain: string | undefined; }; }; callbackUrl: { ...; }; csrfToken: { ...; }; }; ... 4 more ...; debug: boolea...' is not assignable to parameter of type 'NextAuthConfig | ((request: NextRequest | undefined) => Awaitable<NextAuthConfig>)'."
         },
         {
           "type": "typescript",
@@ -15579,11 +15627,19 @@
         },
         {
           "type": "typescript",
-          "message": "src/lib/external-services/service-manager.ts(344,17): error TS2339: Property 'hincrby' does not exist on type 'UnifiedRedisCache'."
+          "message": "src/lib/external-services/service-manager.ts(342,17): error TS2339: Property 'hincrby' does not exist on type 'UnifiedRedisCache'."
         },
         {
           "type": "typescript",
-          "message": "src/lib/external-services/service-manager.ts(345,17): error TS2339: Property 'expire' does not exist on type 'UnifiedRedisCache'."
+          "message": "src/lib/external-services/service-manager.ts(343,17): error TS2339: Property 'expire' does not exist on type 'UnifiedRedisCache'."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/external-services/service-manager.ts(365,7): error TS1361: 'ExternalResource' cannot be used as a value because it was imported using 'import type'."
+        },
+        {
+          "type": "typescript",
+          "message": "src/lib/external-services/service-manager.ts(366,7): error TS1361: 'ExternalResource' cannot be used as a value because it was imported using 'import type'."
         },
         {
           "type": "typescript",
@@ -15599,19 +15655,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/lib/external-services/service-manager.ts(370,7): error TS1361: 'ExternalResource' cannot be used as a value because it was imported using 'import type'."
+          "message": "src/lib/external-services/service-manager.ts(387,8): error TS1361: 'ExternalResource' cannot be used as a value because it was imported using 'import type'."
         },
         {
           "type": "typescript",
-          "message": "src/lib/external-services/service-manager.ts(371,7): error TS1361: 'ExternalResource' cannot be used as a value because it was imported using 'import type'."
-        },
-        {
-          "type": "typescript",
-          "message": "src/lib/external-services/service-manager.ts(389,8): error TS1361: 'ExternalResource' cannot be used as a value because it was imported using 'import type'."
-        },
-        {
-          "type": "typescript",
-          "message": "src/lib/external-services/service-manager.ts(411,8): error TS1361: 'ExternalResource' cannot be used as a value because it was imported using 'import type'."
+          "message": "src/lib/external-services/service-manager.ts(409,8): error TS1361: 'ExternalResource' cannot be used as a value because it was imported using 'import type'."
         },
         {
           "type": "typescript",
@@ -15875,23 +15923,23 @@
         },
         {
           "type": "typescript",
-          "message": "src/lib/middleware/freemium-access.ts(65,60): error TS2322: Type '\"BUSINESS\"' is not assignable to type 'SubscriptionStatus'."
+          "message": "src/lib/middleware/freemium-access.ts(63,60): error TS2322: Type '\"BUSINESS\"' is not assignable to type 'SubscriptionStatus'."
         },
         {
           "type": "typescript",
-          "message": "src/lib/middleware/freemium-access.ts(65,72): error TS2322: Type '\"ENTERPRISE\"' is not assignable to type 'SubscriptionStatus'."
+          "message": "src/lib/middleware/freemium-access.ts(63,72): error TS2322: Type '\"ENTERPRISE\"' is not assignable to type 'SubscriptionStatus'."
         },
         {
           "type": "typescript",
-          "message": "src/lib/middleware/freemium-access.ts(74,26): error TS2551: Property 'tenant' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'. Did you mean 'tenantId'?"
+          "message": "src/lib/middleware/freemium-access.ts(72,26): error TS2551: Property 'tenant' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'. Did you mean 'tenantId'?"
         },
         {
           "type": "typescript",
-          "message": "src/lib/middleware/freemium-access.ts(83,33): error TS2551: Property 'tenant' does not exist on type '{ status: string; id: string; email: string; name: string | null; password: string | null; role: UserRole; isActive: boolean; lastLoginAt: Date | null; loginAttempts: number; ... 6 more ...; updatedAt: Date; }'. Did you mean 'tenantId'?"
+          "message": "src/lib/middleware/freemium-access.ts(81,33): error TS2551: Property 'tenant' does not exist on type '{ email: string; status: string; password: string | null; tenantId: string; id: string; name: string | null; createdAt: Date; updatedAt: Date; role: UserRole; departmentId: string | null; ... 5 more ...; avatar: string | null; }'. Did you mean 'tenantId'?"
         },
         {
           "type": "typescript",
-          "message": "src/lib/middleware/freemium-access.ts(168,95): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string | undefined'."
+          "message": "src/lib/middleware/freemium-access.ts(166,95): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string | undefined'."
         },
         {
           "type": "typescript",
@@ -18571,11 +18619,11 @@
         },
         {
           "type": "typescript",
-          "message": "src/services/security/secure-operations.ts(193,14): error TS2339: Property 'subscriptionStatus' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/services/security/secure-operations.ts(193,14): error TS2339: Property 'subscriptionStatus' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
-          "message": "src/services/security/secure-operations.ts(193,58): error TS2339: Property 'subscriptionStatus' does not exist on type '{ metadata: string; id: string; name: string; isActive: boolean; createdAt: Date; updatedAt: Date; slug: string; industryType: IndustryType; customDomain: string | null; ... 5 more ...; mapUsageResetDate: Date | null; }'."
+          "message": "src/services/security/secure-operations.ts(193,58): error TS2339: Property 'subscriptionStatus' does not exist on type '{ id: string; name: string; createdAt: Date; updatedAt: Date; isActive: boolean; slug: string; industryType: IndustryType; customDomain: string | null; settings: string; ... 5 more ...; mapUsageResetDate: Date | null; }'."
         },
         {
           "type": "typescript",
@@ -27762,30 +27810,6 @@
           "file": "src/__tests__/auth/session-security.test.ts",
           "pattern": "Secrets/Tokens",
           "match": "Token = 'test-csrf-token-123'..."
-        },
-        {
-          "type": "hardcoded_secret",
-          "file": "src/__tests__/e2e/ai-orchestration.spec.ts",
-          "pattern": "Passwords",
-          "match": "password: 'TestPassword123!'..."
-        },
-        {
-          "type": "hardcoded_secret",
-          "file": "src/__tests__/e2e/auth-flow.spec.ts",
-          "pattern": "Passwords",
-          "match": "password: 'TestPassword123!'..."
-        },
-        {
-          "type": "hardcoded_secret",
-          "file": "src/__tests__/integration/api-flow.test.ts",
-          "pattern": "Passwords",
-          "match": "password: 'TestPassword123!'..."
-        },
-        {
-          "type": "hardcoded_secret",
-          "file": "src/__tests__/integration/auth-flow.test.ts",
-          "pattern": "Passwords",
-          "match": "Password = 'testpassword123'..."
         },
         {
           "type": "hardcoded_secret",

@@ -1,0 +1,94 @@
+{
+  "name": "CoreFlow360 Auto-Approval Configuration",
+  "version": "1.0.0",
+  "description": "Global configuration for automatic approval of operations",
+  "environments": {
+    "development": {
+      "auto_approve_all": false,
+      "auto_approve_database": false,
+      "auto_approve_application": false,
+      "auto_approve_deployment": false,
+      "confirmation_delay_seconds": 0,
+      "require_explicit_confirmation": true
+    },
+    "staging": {
+      "auto_approve_all": false,
+      "auto_approve_database": true,
+      "auto_approve_application": true,
+      "auto_approve_deployment": true,
+      "confirmation_delay_seconds": 3,
+      "require_explicit_confirmation": false
+    },
+    "production": {
+      "auto_approve_all": false,
+      "auto_approve_database": false,
+      "auto_approve_application": false,
+      "auto_approve_deployment": false,
+      "confirmation_delay_seconds": 10,
+      "require_explicit_confirmation": true
+    },
+    "ci": {
+      "auto_approve_all": true,
+      "auto_approve_database": true,
+      "auto_approve_application": true,
+      "auto_approve_deployment": true,
+      "confirmation_delay_seconds": 0,
+      "require_explicit_confirmation": false
+    }
+  },
+  "operations": {
+    "disaster_recovery": {
+      "assess": {
+        "requires_approval": false,
+        "destructive": false
+      },
+      "recover_db": {
+        "requires_approval": true,
+        "destructive": true,
+        "backup_required": true
+      },
+      "recover_app": {
+        "requires_approval": true,
+        "destructive": false
+      },
+      "full_recovery": {
+        "requires_approval": true,
+        "destructive": true,
+        "backup_required": true,
+        "confirmation_text": "RECOVER"
+      },
+      "verify": {
+        "requires_approval": false,
+        "destructive": false
+      }
+    },
+    "deployment": {
+      "build": {
+        "requires_approval": false,
+        "destructive": false
+      },
+      "deploy_staging": {
+        "requires_approval": true,
+        "destructive": false
+      },
+      "deploy_production": {
+        "requires_approval": true,
+        "destructive": false
+      }
+    }
+  },
+  "safety": {
+    "enable_rollback": true,
+    "log_all_operations": true,
+    "require_backup_before_destructive": true,
+    "max_auto_approvals_per_day": 50,
+    "notification_channels": ["email", "slack"],
+    "emergency_contact": "admin@coreflow360.com"
+  },
+  "audit": {
+    "log_file": "logs/auto-approval-audit.log",
+    "retention_days": 90,
+    "include_full_context": true,
+    "alert_on_auto_approval": true
+  }
+}

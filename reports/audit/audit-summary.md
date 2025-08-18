@@ -1,14 +1,14 @@
 # CoreFlow360 Code Audit Report
 
-**Generated:** 8/17/2025, 8:04:31 PM
+**Generated:** 8/17/2025, 8:24:14 PM
 
 ## 📊 Executive Summary
 
-- **Total Issues:** 6285
+- **Total Issues:** 6293
 - **Critical Issues:** 0 🔴
 - **High Issues:** 30 🟠
 - **Medium Issues:** 390 🟡
-- **Low Issues:** 5865 🟢
+- **Low Issues:** 5873 🟢
 
 ## Security Issues
 
@@ -58,7 +58,7 @@
 
 ## Quality Issues
 
-**Total:** 4933
+**Total:** 4945
 
 - **typescript**: .next/types/app/api/admin/api-keys/[id]/rotate/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
 
@@ -70,7 +70,7 @@
 
 - **typescript**: .next/types/app/api/admin/api-keys/[id]/route.ts(244,7): error TS2344: Type '{ __tag__: "DELETE"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
 
-- **typescript**: .next/types/app/api/ai/intelligence/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/ai/intelligence/route"), "config" | "generateStaticParams" | "revalidate" | "dynamic" | "dynamicParams" | ... 10 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+- **typescript**: .next/types/app/api/ai/intelligence/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/ai/intelligence/route"), "GET" | "POST" | "DELETE" | "PUT" | "config" | "PATCH" | "HEAD" | "revalidate" | ... 7 more ... | "OPTIONS", "">' does not satisfy the constraint '{ [x: string]: never; }'.
 
 - **typescript**: .next/types/app/api/auth/saml/metadata/[tenantId]/[idpName]/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { tenantId: string; idpName: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
 
@@ -78,9 +78,9 @@
 
 - **typescript**: .next/types/app/api/events/batch/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/events/batch/route"), "DELETE" | "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "config" | ... 7 more ... | "maxDuration", "">' does not satisfy the constraint '{ [x: string]: never; }'.
 
-- **typescript**: .next/types/app/api/intelligence/business/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/intelligence/business/route"), "config" | "generateStaticParams" | "revalidate" | "dynamic" | ... 11 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+- **typescript**: .next/types/app/api/intelligence/business/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/intelligence/business/route"), "GET" | "POST" | "DELETE" | "PUT" | "config" | "PATCH" | "HEAD" | ... 8 more ... | "OPTIONS", "">' does not satisfy the constraint '{ [x: string]: never; }'.
 
-*... and 4923 more issues*
+*... and 4935 more issues*
 
 ## Compliance Issues
 
@@ -120,22 +120,10 @@
 
 ## Secrets Issues
 
-**Total:** 19
+**Total:** 15
 
 - **hardcoded_secret**: No description
   - File: `src/__tests__/auth/session-security.test.ts`
-
-- **hardcoded_secret**: No description
-  - File: `src/__tests__/e2e/ai-orchestration.spec.ts`
-
-- **hardcoded_secret**: No description
-  - File: `src/__tests__/e2e/auth-flow.spec.ts`
-
-- **hardcoded_secret**: No description
-  - File: `src/__tests__/integration/api-flow.test.ts`
-
-- **hardcoded_secret**: No description
-  - File: `src/__tests__/integration/auth-flow.test.ts`
 
 - **hardcoded_secret**: No description
   - File: `src/__tests__/stripe/subscription-lifecycle.test.ts`
@@ -152,7 +140,19 @@
 - **hardcoded_secret**: No description
   - File: `src/integrations/inventory/inventory-management-plugin.ts`
 
-*... and 9 more issues*
+- **hardcoded_secret**: No description
+  - File: `src/lib/config/environment-build.ts`
+
+- **hardcoded_secret**: No description
+  - File: `src/lib/config/environment.ts`
+
+- **hardcoded_secret**: No description
+  - File: `src/lib/config/environment.ts`
+
+- **hardcoded_secret**: No description
+  - File: `src/lib/config/environment.ts`
+
+*... and 5 more issues*
 
 ## 🚀 Recommendations
 

@@ -16,17 +16,18 @@ const eslintConfig = [
       // TypeScript strict mode enforcement
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-this-alias": "error",
       "@typescript-eslint/strict-boolean-expressions": "off",
       
       // React best practices
       "react-hooks/exhaustive-deps": "warn",
       "react-hooks/rules-of-hooks": "error",
+      "react/display-name": "off",
       
       // Code quality
       "prefer-const": "error",
       "no-var": "error",
       "no-console": "warn",
-      
       
       // Security
       "react/no-danger": "warn",

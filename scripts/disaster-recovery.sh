@@ -19,6 +19,18 @@ elif [[ -f "$PROJECT_ROOT/.env" ]]; then
     source "$PROJECT_ROOT/.env"
 fi
 
+# Auto-approval environment variables
+# COREFLOW_AUTO_APPROVE=1 - Enable auto-approval for all operations
+# COREFLOW_AUTO_APPROVE_DB=1 - Enable auto-approval for database operations only
+# COREFLOW_AUTO_APPROVE_APP=1 - Enable auto-approval for application operations only
+# CI=1 - Automatically enable auto-approval in CI environments
+# AUTO_CONFIRM=1 - Legacy variable for backward compatibility
+
+# Check for auto-approval environment variables
+if [[ "${COREFLOW_AUTO_APPROVE:-}" == "1" ]] || [[ "${CI:-}" == "true" ]] || [[ "${AUTO_CONFIRM:-}" == "1" ]]; then
+    export AUTO_CONFIRM="1"
+fi
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -41,6 +53,26 @@ warn() { log "WARN" "${YELLOW}$@${NC}"; }
 error() { log "ERROR" "${RED}$@${NC}"; }
 success() { log "SUCCESS" "${GREEN}$@${NC}"; }
 critical() { log "CRITICAL" "${PURPLE}$@${NC}"; }
+
+# Auto-approval audit logging
+log_auto_approval() {
+    local operation="$1"
+    local context="$2"
+    local audit_file="${PROJECT_ROOT}/logs/auto-approval-audit.log"
+    
+    # Create logs directory if it doesn't exist
+    mkdir -p "$(dirname "$audit_file")"
+    
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local user="${USER:-unknown}"
+    local environment="${NODE_ENV:-development}"
+    local session_id="$$"
+    
+    echo "[$timestamp] AUTO_APPROVAL: operation=$operation, user=$user, env=$environment, session=$session_id, context=$context" >> "$audit_file"
+    
+    # Also log to main log
+    log "AUDIT" "AUTO_APPROVAL: $operation ($context)"
+}
 
 # Cleanup function
 cleanup() {
@@ -66,7 +98,7 @@ send_notification() {
         curl -s -X POST "$NOTIFICATION_WEBHOOK" \
             -H "Content-Type: application/json" \
             -d "{
-                \"text\": \"=¨ CoreFlow360 Disaster Recovery $status\",
+                \"text\": \"=ï¿½ CoreFlow360 Disaster Recovery $status\",
                 \"attachments\": [{
                     \"color\": \"$color\",
                     \"fields\": [{
@@ -94,7 +126,7 @@ send_notification() {
     if [[ $priority == "critical" ]]; then
         # Email alert (if configured)
         if [[ -n "${ALERT_EMAIL:-}" ]] && command -v mail &> /dev/null; then
-            echo "$message" | mail -s "=¨ CRITICAL: CoreFlow360 Disaster Recovery $status" "$ALERT_EMAIL" || warn "Failed to send email alert"
+            echo "$message" | mail -s "=ï¿½ CRITICAL: CoreFlow360 Disaster Recovery $status" "$ALERT_EMAIL" || warn "Failed to send email alert"
         fi
         
         # SMS alert (if configured)
@@ -125,8 +157,8 @@ assess_system_status() {
             ((issues++))
         fi
     else
-        warn "  DATABASE_URL not configured"
-        status_report+="\n  Database: NOT CONFIGURED"
+        warn "ï¿½ DATABASE_URL not configured"
+        status_report+="\nï¿½ Database: NOT CONFIGURED"
         ((issues++))
     fi
     
@@ -142,8 +174,8 @@ assess_system_status() {
             ((issues++))
         fi
     else
-        warn "  REDIS_URL not configured"
-        status_report+="\n  Redis: NOT CONFIGURED"
+        warn "ï¿½ REDIS_URL not configured"
+        status_report+="\nï¿½ Redis: NOT CONFIGURED"
     fi
     
     # Check file system
@@ -183,15 +215,15 @@ assess_system_status() {
     
     # Overall assessment
     if [[ $issues -eq 0 ]]; then
-        success "<¯ System Status: HEALTHY - No immediate recovery needed"
+        success "<ï¿½ System Status: HEALTHY - No immediate recovery needed"
         send_notification "SYSTEM HEALTHY" "All systems operational. No immediate recovery actions required." "normal"
         return 0
     elif [[ $issues -le 2 ]]; then
-        warn "  System Status: DEGRADED - Partial recovery may be needed"
+        warn "ï¿½ System Status: DEGRADED - Partial recovery may be needed"
         send_notification "SYSTEM DEGRADED" "System partially operational. $issues issues detected:$status_report" "high"
         return 1
     else
-        critical "=¨ System Status: CRITICAL - Full disaster recovery required"
+        critical "=ï¿½ System Status: CRITICAL - Full disaster recovery required"
         send_notification "SYSTEM CRITICAL" "System in critical state. $issues major issues detected:$status_report" "critical"
         return 2
     fi
@@ -201,7 +233,7 @@ assess_system_status() {
 recover_database() {
     local backup_file=${1:-""}
     
-    critical "${BLUE}=¾ DISASTER RECOVERY: Database Recovery${NC}"
+    critical "${BLUE}=ï¿½ DISASTER RECOVERY: Database Recovery${NC}"
     
     if [[ -z "$backup_file" ]]; then
         info "Finding latest backup..."
@@ -275,7 +307,7 @@ recover_database() {
     critical "= Performing database restoration..."
     
     # Drop and recreate database (DESTRUCTIVE OPERATION)
-    warn "  DESTRUCTIVE OPERATION: Dropping existing database"
+    warn "ï¿½ DESTRUCTIVE OPERATION: Dropping existing database"
     PGPASSWORD="$DB_PASSWORD" psql \
         --host="$DB_HOST" --port="$DB_PORT" --username="$DB_USER" --dbname="postgres" \
         -c "DROP DATABASE IF EXISTS \"$DB_NAME\";" || error "Failed to drop database"
@@ -392,7 +424,7 @@ recover_application() {
 
 # Full system recovery
 full_disaster_recovery() {
-    critical "${PURPLE}=¨ FULL DISASTER RECOVERY INITIATED${NC}"
+    critical "${PURPLE}=ï¿½ FULL DISASTER RECOVERY INITIATED${NC}"
     send_notification "DISASTER RECOVERY STARTED" "Full disaster recovery procedure initiated. This may take several minutes." "critical"
     
     local start_time=$(date +%s)
@@ -433,12 +465,12 @@ full_disaster_recovery() {
     local duration=$((end_time - start_time))
     
     if [[ $failed_steps -eq 0 ]]; then
-        critical "${GREEN}<‰ DISASTER RECOVERY SUCCESSFUL${NC}"
+        critical "${GREEN}<ï¿½ DISASTER RECOVERY SUCCESSFUL${NC}"
         success "All recovery steps completed in ${duration} seconds"
         send_notification "DISASTER RECOVERY SUCCESSFUL" "All systems recovered successfully in ${duration}s. Application is fully operational." "normal"
         return 0
     else
-        critical "${RED}=¨ DISASTER RECOVERY PARTIAL/FAILED${NC}"
+        critical "${RED}=ï¿½ DISASTER RECOVERY PARTIAL/FAILED${NC}"
         error "$failed_steps out of 3 recovery steps failed"
         send_notification "DISASTER RECOVERY PARTIAL" "$recovery_steps/3 recovery steps completed. $failed_steps steps failed. Manual intervention required." "critical"
         return 1
@@ -547,14 +579,62 @@ ENVIRONMENT VARIABLES:
     ALERT_EMAIL           Email for critical alerts
     ALERT_SMS_WEBHOOK     SMS webhook for critical alerts
 
-   WARNING: This script performs destructive operations.
+ï¿½  WARNING: This script performs destructive operations.
     Always ensure you have recent backups before proceeding.
 
 EOF
 }
 
+# Parse command line arguments
+AUTO_CONFIRM=""
+BACKUP_FILE=""
+NO_NOTIFICATIONS=""
+COMMAND=""
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --auto-confirm)
+            AUTO_CONFIRM="1"
+            export AUTO_CONFIRM
+            info "Auto-confirm mode enabled - skipping all interactive prompts"
+            shift
+            ;;
+        --backup-file)
+            BACKUP_FILE="$2"
+            shift 2
+            ;;
+        --no-notifications)
+            NO_NOTIFICATIONS="1"
+            shift
+            ;;
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        assess|recover-db|recover-app|full-recovery|verify)
+            COMMAND="$1"
+            shift
+            # Handle additional arguments for specific commands
+            if [[ "$COMMAND" == "recover-db" && $# -gt 0 && ! "$1" =~ ^-- ]]; then
+                BACKUP_FILE="$1"
+                shift
+            fi
+            break
+            ;;
+        *)
+            error "Unknown option: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+done
+
+# Set default command if none provided
+COMMAND="${COMMAND:-assess}"
+
 # Main command handling
-case "${1:-assess}" in
+case "$COMMAND" in
     assess)
         info "Starting system assessment..."
         assess_system_status
@@ -568,30 +648,40 @@ case "${1:-assess}" in
         ;;
     
     recover-db)
-        backup_file="${2:-}"
-        if [[ -z "${AUTO_CONFIRM:-}" ]]; then
-            warn "  This will replace your current database with backup data!"
+        backup_file="$BACKUP_FILE"
+        if [[ -z "${AUTO_CONFIRM:-}" ]] && [[ -z "${COREFLOW_AUTO_APPROVE_DB:-}" ]]; then
+            warn "ï¿½ This will replace your current database with backup data!"
             read -p "Are you sure you want to continue? (yes/no): " confirm
             [[ "$confirm" != "yes" ]] && { info "Recovery cancelled"; exit 0; }
+        else
+            log_auto_approval "recover-db" "backup_file=$backup_file"
+            info "Auto-approval enabled for database recovery - proceeding without confirmation"
         fi
         recover_database "$backup_file"
         ;;
     
     recover-app)
-        if [[ -z "${AUTO_CONFIRM:-}" ]]; then
-            warn "  This will restart your application and may cause downtime!"
+        if [[ -z "${AUTO_CONFIRM:-}" ]] && [[ -z "${COREFLOW_AUTO_APPROVE_APP:-}" ]]; then
+            warn "ï¿½ This will restart your application and may cause downtime!"
             read -p "Are you sure you want to continue? (yes/no): " confirm
             [[ "$confirm" != "yes" ]] && { info "Recovery cancelled"; exit 0; }
+        else
+            log_auto_approval "recover-app" "application_restart"
+            info "Auto-approval enabled for application recovery - proceeding without confirmation"
         fi
         recover_application
         ;;
     
     full-recovery)
         if [[ -z "${AUTO_CONFIRM:-}" ]]; then
-            critical "  This will perform FULL DISASTER RECOVERY including database replacement!"
+            critical "ï¿½ This will perform FULL DISASTER RECOVERY including database replacement!"
             warn "This is a destructive operation that may cause data loss!"
             read -p "Type 'RECOVER' to confirm full disaster recovery: " confirm
             [[ "$confirm" != "RECOVER" ]] && { info "Recovery cancelled"; exit 0; }
+        else
+            log_auto_approval "full-recovery" "DESTRUCTIVE_OPERATION"
+            critical "Auto-approval enabled for FULL DISASTER RECOVERY - proceeding without confirmation"
+            warn "This is a destructive operation that may cause data loss!"
         fi
         full_disaster_recovery
         ;;

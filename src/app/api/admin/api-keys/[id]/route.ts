@@ -11,9 +11,9 @@ import { updateAPIKeySchema } from '@/lib/api-keys/validation'
 import { UpdateAPIKeyRequest } from '@/types/api-keys'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 /**
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Require super admin permission
     const session = await requirePermission('system:manage')
     
-    const keyId = params.id
+    const { id: keyId } = await params
     
     if (!keyId) {
       return NextResponse.json(
@@ -73,7 +73,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Require super admin permission
     const session = await requirePermission('system:manage')
     
-    const keyId = params.id
+    const { id: keyId } = await params
     
     if (!keyId) {
       return NextResponse.json(
@@ -163,7 +163,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Require super admin permission
     const session = await requirePermission('system:manage')
     
-    const keyId = params.id
+    const { id: keyId } = await params
     
     if (!keyId) {
       return NextResponse.json(

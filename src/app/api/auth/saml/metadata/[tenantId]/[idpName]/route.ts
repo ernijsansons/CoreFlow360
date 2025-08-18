@@ -15,11 +15,12 @@ const paramsSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { tenantId: string; idpName: string } }
+  { params }: { params: Promise<{ tenantId: string; idpName: string }> }
 ) {
   try {
-    // Validate parameters
-    const validation = paramsSchema.safeParse(params);
+    // Await and validate parameters
+    const resolvedParams = await params;
+    const validation = paramsSchema.safeParse(resolvedParams);
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Invalid parameters' },
