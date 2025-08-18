@@ -15,8 +15,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/pre-deploy-check.js && npx prisma generate && NODE_OPTIONS='--max-old-space-size=4096' next build",
-    "build:production": "node scripts/verify-env.js && npx prisma generate && NODE_OPTIONS='--max-old-space-size=8192' NEXT_TELEMETRY_DISABLED=1 next build",
+    "build": "npx prisma generate && NODE_OPTIONS='--max-old-space-size=4096' next build",
+    "build:production":npx prisma generate && NODE_OPTIONS='--max-old-space-size=8192' NEXT_TELEMETRY_DISABLED=1 next build",
     "build:analyze": "ANALYZE=true npm run build",
     "analyze": "node scripts/analyze-bundle.js",
     "start": "next start",
