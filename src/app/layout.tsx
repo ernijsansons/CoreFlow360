@@ -108,7 +108,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth()
+  // Safely handle auth - prevent 500 errors during build/SSR
+  let session = null;
+  try {
+    session = await auth();
+  } catch (error) {
+    console.error('Auth error in layout:', error);
+    // Continue with null session rather than crashing
+  }
   
   return (
     <html lang="en">
