@@ -1,0 +1,53 @@
+name: Vercel Deployment Check
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  build-check:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install Dependencies
+      run: npm ci
+      
+    - name: Generate Prisma Client
+      run: npx prisma generate
+      
+    - name: Build Application
+      run: npm run build
+      env:
+        NEXT_TELEMETRY_DISABLED: 1
+        NODE_OPTIONS: '--max-old-space-size=8192'
+        DATABASE_URL: 'postgresql://user:pass@localhost:5432/test'
+        NEXTAUTH_URL: 'https://coreflow360.com'
+        NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'test-secret-for-build-only' }}
+        BUILDING_FOR_VERCEL: '1'
+        
+    - name: Build Success Notification
+      if: success()
+      run: |
+        echo "✅ Build completed successfully!"
+        echo "Vercel will automatically deploy from this push."
+        
+    - name: Build Failure Notification
+      if: failure()
+      run: |
+        echo "❌ Build failed! Check logs above for errors."
+        exit 1

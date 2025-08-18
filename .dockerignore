@@ -1,0 +1,11 @@
+# This project uses Vercel for deployment, not Docker
+# This file exists for CI/CD compatibility only
+
+node_modules
+.next
+.git
+.env*
+*.log
+coverage
+.vscode
+.idea
