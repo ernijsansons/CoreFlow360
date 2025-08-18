@@ -324,11 +324,11 @@ export const config = getIsBuildTime() || process.env.VERCEL
 // Type-safe environment access
 export type Environment = z.infer<typeof environmentSchema>
 
-// Runtime environment checks
-export const isDevelopment = config.NODE_ENV === 'development'
-export const isProduction = config.NODE_ENV === 'production'
-export const isTesting = config.NODE_ENV === 'test'
-export const isStaging = config.NODE_ENV === 'staging'
+// Runtime environment checks - use functions to avoid module-level access
+export const isDevelopment = () => config.NODE_ENV === 'development'
+export const isProduction = () => config.NODE_ENV === 'production'
+export const isTesting = () => config.NODE_ENV === 'test'
+export const isStaging = () => config.NODE_ENV === 'staging'
 
 // Feature flags
 export const features = {
@@ -368,8 +368,8 @@ export const performance = {
 } as const
 
 // Validate configuration on import
-console.info(`CoreFlow360 configured for ${config.NODE_ENV} environment`)
-console.info(`Features enabled: ${Object.entries(features).filter(([,enabled]) => enabled).map(([name]) => name).join(', ')}`)
+// console.info(`CoreFlow360 configured for ${config.NODE_ENV} environment`)
+// console.info(`Features enabled: ${Object.entries(features).filter(([,enabled]) => enabled).map(([name]) => name).join(', ')}`)
 
 /*
 // Simulated Validations:
