@@ -5,7 +5,7 @@ import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider'
 import { FeedbackWidget } from '@/components/feedback/FeedbackWidget'
 import AuthProvider from '@/providers/SessionProvider'
-import { auth } from '@/lib/auth'
+import { getSession } from '@/lib/auth-wrapper'
 import { AIAssistant } from '@/components/ai/AIAssistant'
 import { ErrorBoundary } from '@/components/error/ErrorBoundary'
 import { AuthErrorBoundary } from '@/components/error/AuthErrorBoundary'
@@ -109,20 +109,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Safely handle auth - prevent 500 errors during build/SSR
-  let session = null;
-  
-  // Skip auth during build time
-  const isBuildTime = process.env.VERCEL || process.env.BUILDING_FOR_VERCEL === '1' || 
-                      process.env.CI || process.env.NEXT_PHASE === 'phase-production-build';
-  
-  if (!isBuildTime) {
-    try {
-      session = await auth();
-    } catch (error) {
-      console.error('Auth error in layout:', error);
-      // Continue with null session rather than crashing
-    }
-  }
+  const session = await getSession();
   
   return (
     <html lang="en">

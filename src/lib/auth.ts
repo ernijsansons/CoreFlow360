@@ -340,13 +340,25 @@ const authConfig = () => {
 // Create NextAuth instance with proper error handling
 const createAuth = () => {
   try {
+    // Check if we're in build time
+    const isBuildTime = process.env.VERCEL || process.env.CI || 
+                        process.env.NEXT_PHASE === 'phase-production-build' ||
+                        process.env.BUILDING_FOR_VERCEL === '1';
+    
     // Ensure NEXTAUTH_SECRET is available
-    if (!process.env.NEXTAUTH_SECRET && process.env.NODE_ENV === 'production') {
-      console.error('NEXTAUTH_SECRET is not set in production')
-      // Use a fallback for build time only
-      if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+    if (!process.env.NEXTAUTH_SECRET) {
+      if (isBuildTime) {
         process.env.NEXTAUTH_SECRET = 'build-time-placeholder-this-is-not-secure-and-only-for-build'
+      } else if (process.env.NODE_ENV === 'production') {
+        console.error('NEXTAUTH_SECRET is not set in production')
       }
+    }
+    
+    // Ensure NEXTAUTH_URL is available
+    if (!process.env.NEXTAUTH_URL && isBuildTime) {
+      process.env.NEXTAUTH_URL = process.env.VERCEL_URL 
+        ? `https://${process.env.VERCEL_URL}`
+        : 'https://coreflow360.vercel.app'
     }
     
     return NextAuth(authConfig())
