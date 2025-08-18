@@ -144,7 +144,12 @@ Features:
 
 ## 🧪 Testing
 
+### Test Environment Setup
 ```bash
+# Set up test environment variables
+cp .env.test.example .env.test
+# Edit .env.test with test-specific values
+
 # Run all tests
 npm run test
 
@@ -155,6 +160,10 @@ npm run test:ui             # Component tests
 
 # Coverage report
 npm run test:coverage
+
+# E2E tests
+npm run test:e2e            # Run Playwright E2E tests
+npm run test:e2e:headed     # Run E2E tests with browser UI
 ```
 
 ## 🔐 Security Features
