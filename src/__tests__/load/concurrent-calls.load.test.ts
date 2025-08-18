@@ -43,8 +43,8 @@ interface LoadTestResults {
 describe('10K Concurrent Calls Load Test', () => {
   let metrics: CallMetrics[] = []
   let testStartTime: number
-  let workers: Worker[] = []
-  let wsConnections: WebSocket[] = []
+  const workers: Worker[] = []
+  const wsConnections: WebSocket[] = []
   let eventEmitter: EventEmitter
 
   beforeAll(async () => {

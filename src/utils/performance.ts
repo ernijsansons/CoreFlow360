@@ -418,7 +418,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     const isLeading = !timeout && leading
     
     lastArgs = args
-    lastThis = this
+    const currentThis = this
 
     if (timeout) {
       clearTimeout(timeout)

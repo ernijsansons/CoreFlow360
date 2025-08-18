@@ -110,8 +110,8 @@ describe('Module Combinations Test Suite', () => {
     bundles.forEach(bundle => {
       it(`should activate ${bundle.name} with all modules`, async () => {
         // Activate all modules in bundle
-        for (const module of bundle.modules) {
-          await moduleManager.activateModule(testTenantId, module)
+        for (const moduleName of bundle.modules) {
+          await moduleManager.activateModule(testTenantId, moduleName)
         }
         
         const activeModules = await moduleManager.getActiveModules(testTenantId)

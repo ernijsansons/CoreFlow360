@@ -33,7 +33,7 @@ interface BenchmarkResult {
 }
 
 describe('Voice Features Performance Benchmarks', () => {
-  let benchmarkResults: BenchmarkResult[] = []
+  const benchmarkResults: BenchmarkResult[] = []
 
   beforeAll(async () => {
     console.log('🚀 Starting Performance Benchmarks')

@@ -183,7 +183,7 @@ describe('API Key Validation', () => {
 
   it('should validate correctly formatted API keys', () => {
     // Generate a valid API key for testing
-    const crypto = require('crypto')
+    const crypto = await import('crypto')
     const tenantId = 'tenant123'
     const random = 'random456'
     const prefix = 'cf360'
@@ -242,7 +242,7 @@ describe('Webhook Signature Validation', () => {
   it('should validate correct webhook signatures', () => {
     const payload = JSON.stringify({ event: 'test' })
     const secret = process.env.TEST_WEBHOOK_SECRET || 'test-webhook-secret'
-    const crypto = require('crypto')
+    const crypto = await import('crypto')
     
     const signature = crypto
       .createHmac('sha256', secret)

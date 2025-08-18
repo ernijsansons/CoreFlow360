@@ -5,13 +5,13 @@
 
 import { z } from 'zod'
 
-// Build-time detection (moved to top) - comprehensive check for all build environments
-const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.BUILDING_FOR_VERCEL === '1' || process.env.VERCEL || process.env.NOW_BUILDER
+// Build-time detection function - comprehensive check for all build environments
+const getIsBuildTime = () => process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.BUILDING_FOR_VERCEL === '1' || process.env.VERCEL || process.env.NOW_BUILDER
 
 // Environment variable schemas
 // Accept standard URLs (postgres, mysql, etc.) and SQLite file URLs used in tests/development
 const DatabaseConfigSchema = z.object({
-  DATABASE_URL: isBuildTime
+  DATABASE_URL: getIsBuildTime()
     ? z.string().optional().default('postgresql://user:pass@localhost:5432/db')
     : z.string().refine((val) => {
         if (!val) return false
@@ -29,37 +29,37 @@ const DatabaseConfigSchema = z.object({
 })
 
 const AuthConfigSchema = z.object({
-  NEXTAUTH_URL: isBuildTime 
+  NEXTAUTH_URL: getIsBuildTime()
     ? z.string().optional().default('http://localhost:3000')
     : z.string().url('Invalid NextAuth URL format'),
-  NEXTAUTH_SECRET: isBuildTime
+  NEXTAUTH_SECRET: getIsBuildTime()
     ? z.string().optional().default('build-time-placeholder-secret-32-chars')
     : z.string().min(32, 'NEXTAUTH_SECRET must be at least 32 characters'),
 })
 
 const StripeConfigSchema = z.object({
-  STRIPE_SECRET_KEY: isBuildTime
+  STRIPE_SECRET_KEY: getIsBuildTime()
     ? z.string().optional().default('sk_test_placeholder')
     : z.string().startsWith('sk_', 'Invalid Stripe secret key format'),
-  STRIPE_PUBLISHABLE_KEY: isBuildTime
+  STRIPE_PUBLISHABLE_KEY: getIsBuildTime()
     ? z.string().optional().default('pk_test_placeholder')
     : z.string().startsWith('pk_', 'Invalid Stripe publishable key format'),
-  STRIPE_WEBHOOK_SECRET: isBuildTime
+  STRIPE_WEBHOOK_SECRET: getIsBuildTime()
     ? z.string().optional().default('whsec_placeholder')
     : z.string().startsWith('whsec_', 'Invalid Stripe webhook secret format'),
 })
 
 const AIConfigSchema = z.object({
-  OPENAI_API_KEY: isBuildTime
+  OPENAI_API_KEY: getIsBuildTime()
     ? z.string().optional().default('sk-placeholder')
     : z.string().startsWith('sk-', 'Invalid OpenAI API key format'),
-  ANTHROPIC_API_KEY: isBuildTime
+  ANTHROPIC_API_KEY: getIsBuildTime()
     ? z.string().optional().default('sk-ant-placeholder')
     : z.string().startsWith('sk-ant-', 'Invalid Anthropic API key format'),
 })
 
 const EmailConfigSchema = z.object({
-  SENDGRID_API_KEY: isBuildTime
+  SENDGRID_API_KEY: getIsBuildTime()
     ? z.string().optional().default('placeholder')
     : z.string().min(1, 'SendGrid API key is required'),
   RESEND_API_KEY: z.string().optional(),
@@ -70,10 +70,10 @@ const RedisConfigSchema = z.object({
 })
 
 const SecurityConfigSchema = z.object({
-  API_KEY_SECRET: isBuildTime 
+  API_KEY_SECRET: getIsBuildTime() 
     ? z.string().optional().default('build-time-placeholder-secret-32-chars')
     : z.string().min(32, 'API_KEY_SECRET must be at least 32 characters'),
-  ENCRYPTION_KEY: isBuildTime
+  ENCRYPTION_KEY: getIsBuildTime()
     ? z.string().optional().default('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
     : z.string().min(32, 'ENCRYPTION_KEY must be at least 32 characters'),
 })
