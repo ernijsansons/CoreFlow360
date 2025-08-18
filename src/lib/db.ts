@@ -29,37 +29,44 @@ const globalForPrisma = globalThis as unknown as {
   isConnected: boolean
 }
 
-// Enhanced Prisma client configuration
-const prismaConfig: Prisma.PrismaClientOptions = {
-  // Comprehensive logging configuration
-  log: isDevelopment 
-    ? [
-        { emit: 'event', level: 'query' },
-        { emit: 'event', level: 'error' },
-        { emit: 'event', level: 'warn' },
-        { emit: 'event', level: 'info' }
-      ]
-    : [
-        { emit: 'event', level: 'error' },
-        { emit: 'event', level: 'warn' }
-      ],
+// Enhanced Prisma client configuration - lazy evaluated to prevent build-time crashes
+function getPrismaConfig(): Prisma.PrismaClientOptions {
+  // Get database config safely
+  const dbUrl = database?.url || process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/db'
+  const poolSize = database?.poolSize || 20
+  const timeout = database?.timeout || 30000
   
-  // Error formatting for better debugging
-  errorFormat: isDevelopment ? 'pretty' : 'minimal',
-  
-  // Datasource configuration with connection pooling
-  datasources: {
-    db: {
-      url: database.url.includes('postgresql://') 
-        ? `${database.url}?connection_limit=${database.poolSize}&pool_timeout=${Math.floor(database.timeout / 1000)}&sslmode=require`
-        : database.url
+  return {
+    // Comprehensive logging configuration
+    log: isDevelopment 
+      ? [
+          { emit: 'event', level: 'query' },
+          { emit: 'event', level: 'error' },
+          { emit: 'event', level: 'warn' },
+          { emit: 'event', level: 'info' }
+        ]
+      : [
+          { emit: 'event', level: 'error' },
+          { emit: 'event', level: 'warn' }
+        ],
+    
+    // Error formatting for better debugging
+    errorFormat: isDevelopment ? 'pretty' : 'minimal',
+    
+    // Datasource configuration with connection pooling
+    datasources: {
+      db: {
+        url: dbUrl.includes('postgresql://') 
+          ? `${dbUrl}?connection_limit=${poolSize}&pool_timeout=${Math.floor(timeout / 1000)}&sslmode=require`
+          : dbUrl
+      }
     }
   }
 }
 
 // Create Prisma client instance
 function createPrismaClient(): PrismaClient {
-  const client = new PrismaClient(prismaConfig)
+  const client = new PrismaClient(getPrismaConfig())
   
   // Skip middleware and event handlers during build time
   const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
