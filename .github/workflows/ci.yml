@@ -38,13 +38,9 @@ jobs:
         NODE_ENV: test
 
     - name: Build application
-      run: npm run build
+      run: npm run build:ci
       env:
-        DATABASE_URL: postgresql://user:pass@localhost:5432/test
-        NEXTAUTH_URL: http://localhost:3000
-        NEXTAUTH_SECRET: test-secret-32-chars-minimum-for-ci-testing-only
-        CI: true
-        VERCEL_ENV: true
+        CI: 'true'
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4

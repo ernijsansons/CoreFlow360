@@ -30,9 +30,10 @@ jobs:
     - name: Generate Prisma Client
       run: npx prisma generate
       
-    - name: Build Application
-      run: npm run build
+    - name: Build application
+      run: npm run build:ci
       env:
+        CI: 'true'
         NEXT_TELEMETRY_DISABLED: 1
         NODE_OPTIONS: '--max-old-space-size=8192'
         DATABASE_URL: 'postgresql://user:pass@localhost:5432/test'
