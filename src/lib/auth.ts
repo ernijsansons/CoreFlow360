@@ -5,7 +5,7 @@
 
 import NextAuth from "next-auth"
 import type { Session } from "next-auth"
-import { authConfig, isBuildTime } from "./auth-config"
+import { createAuthConfig, isBuildPhase } from "./auth-build-safe"
 
 // Extended session type
 export interface ExtendedSession extends Session {
@@ -23,9 +23,23 @@ export interface ExtendedSession extends Session {
 let authInstance: ReturnType<typeof NextAuth> | null = null
 
 function getAuthInstance() {
+  if (isBuildPhase()) {
+    // Return mock for build time
+    return {
+      auth: async () => null,
+      handlers: {
+        GET: async () => new Response('Build time', { status: 200 }),
+        POST: async () => new Response('Build time', { status: 200 })
+      },
+      signIn: async () => { throw new Error('Build time') },
+      signOut: async () => { throw new Error('Build time') }
+    } as any
+  }
+  
   if (!authInstance) {
     try {
-      authInstance = NextAuth(authConfig)
+      const config = createAuthConfig()
+      authInstance = NextAuth(config)
     } catch (error) {
       console.error('[Auth] Failed to create NextAuth instance:', error)
       // Return a mock instance that always returns null/error
@@ -45,7 +59,7 @@ function getAuthInstance() {
 
 // Export auth method with complete error handling
 export const auth = async (): Promise<Session | null> => {
-  if (isBuildTime()) {
+  if (isBuildPhase()) {
     return null
   }
   
@@ -101,7 +115,7 @@ export const handlers = {
 
 // Export auth actions with error handling
 export const signIn = async (...args: any[]) => {
-  if (isBuildTime()) {
+  if (isBuildPhase()) {
     throw new Error('Cannot sign in during build time')
   }
   
@@ -115,7 +129,7 @@ export const signIn = async (...args: any[]) => {
 }
 
 export const signOut = async (...args: any[]) => {
-  if (isBuildTime()) {
+  if (isBuildPhase()) {
     throw new Error('Cannot sign out during build time')
   }
   
@@ -133,7 +147,7 @@ export const { GET, POST } = handlers
 
 // Helper functions
 export async function getServerSession(): Promise<ExtendedSession | null> {
-  if (isBuildTime()) {
+  if (isBuildPhase()) {
     return null
   }
   
@@ -181,7 +195,7 @@ export async function requirePermission(permission: string): Promise<ExtendedSes
 
 // Password utilities with lazy loading
 export async function hashPassword(password: string): Promise<string> {
-  if (isBuildTime()) {
+  if (isBuildPhase()) {
     return 'build-time-hash'
   }
   const bcryptjs = await import("bcryptjs")
@@ -189,7 +203,7 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  if (isBuildTime()) {
+  if (isBuildPhase()) {
     return false
   }
   const bcryptjs = await import("bcryptjs")

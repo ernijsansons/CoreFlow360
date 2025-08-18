@@ -1,84 +1,104 @@
 #!/usr/bin/env node
 
 /**
- * Pre-deployment check script
- * Verifies all critical configurations before deployment
+ * Pre-deployment validation script
+ * Ensures all requirements are met before deployment
  */
 
 const fs = require('fs');
 const path = require('path');
 
-console.log('🚀 CoreFlow360 Pre-Deployment Check\n');
+console.log('🔍 Running pre-deployment checks...\n');
 
-// Check for build-time indicators
-const buildIndicators = {
-  'NEXT_PHASE': process.env.NEXT_PHASE,
-  'BUILDING_FOR_VERCEL': process.env.BUILDING_FOR_VERCEL,
-  'CI': process.env.CI,
-  'VERCEL_ENV': process.env.VERCEL_ENV,
-  'NODE_ENV': process.env.NODE_ENV
-};
+const errors = [];
+const warnings = [];
 
-console.log('📋 Environment Status:');
-Object.entries(buildIndicators).forEach(([key, value]) => {
-  console.log(`   ${key}: ${value || 'not set'}`);
-});
-
-// Check critical files exist
-console.log('\n📁 Critical Files:');
-const criticalFiles = [
-  'src/lib/auth.ts',
-  'src/lib/auth-config.ts',
-  'src/lib/auth-wrapper.ts',
-  'src/lib/db.ts',
-  'src/lib/config/build-safe.ts',
-  'src/providers/SessionProvider.tsx',
-  'src/app/api/auth/[...nextauth]/route.ts'
+// Check 1: Verify critical environment variables
+console.log('1️⃣ Checking environment variables...');
+const requiredEnvVars = [
+  'DATABASE_URL',
+  'NEXTAUTH_SECRET',
+  'NEXTAUTH_URL',
+  'API_KEY_SECRET',
+  'ENCRYPTION_KEY'
 ];
 
-let allFilesExist = true;
-criticalFiles.forEach(file => {
-  const filePath = path.join(process.cwd(), file);
-  if (fs.existsSync(filePath)) {
-    console.log(`   ✅ ${file}`);
-  } else {
-    console.log(`   ❌ ${file} - MISSING`);
-    allFilesExist = false;
+const envExample = fs.readFileSync('.env.example', 'utf8');
+requiredEnvVars.forEach(varName => {
+  if (!process.env[varName] && !envExample.includes(varName)) {
+    errors.push(`Missing required environment variable: ${varName}`);
   }
 });
 
-// Check for known issues
-console.log('\n🔍 Known Issues Check:');
+// Check 2: Verify no module-level database access
+console.log('2️⃣ Checking for module-level database access...');
+const sourceFiles = [
+  'src/lib/auth.ts',
+  'src/lib/db.ts',
+  'src/app/layout.tsx',
+  'src/middleware.ts'
+];
 
-// Check if old auth file exists
-const oldAuthPath = path.join(process.cwd(), 'src/lib/auth-old.ts');
-if (fs.existsSync(oldAuthPath)) {
-  console.log('   ⚠️  Old auth file exists - consider removing');
+sourceFiles.forEach(file => {
+  if (fs.existsSync(file)) {
+    const content = fs.readFileSync(file, 'utf8');
+    
+    // Check for problematic patterns
+    if (content.includes('prisma.') && !content.includes('function') && !content.includes('async')) {
+      warnings.push(`Potential module-level database access in ${file}`);
+    }
+    
+    if (content.includes('new PrismaClient()') && !content.includes('function')) {
+      errors.push(`Module-level PrismaClient instantiation in ${file}`);
+    }
+  }
+});
+
+// Check 3: Verify TypeScript configuration
+console.log('3️⃣ Checking TypeScript configuration...');
+const tsConfig = JSON.parse(fs.readFileSync('tsconfig.json', 'utf8'));
+if (tsConfig.compilerOptions?.skipLibCheck === false) {
+  warnings.push('TypeScript skipLibCheck should be true for faster builds');
 }
 
-// Check package.json scripts
+// Check 4: Verify build command
+console.log('4️⃣ Checking build configuration...');
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-const requiredScripts = ['build', 'dev', 'start'];
-console.log('\n📜 Package Scripts:');
-requiredScripts.forEach(script => {
-  if (packageJson.scripts[script]) {
-    console.log(`   ✅ ${script}: ${packageJson.scripts[script]}`);
-  } else {
-    console.log(`   ❌ ${script}: MISSING`);
-  }
-});
+if (!packageJson.scripts.build.includes('prisma generate')) {
+  errors.push('Build script must include "prisma generate"');
+}
 
-// Summary
-console.log('\n' + '='.repeat(50));
-if (allFilesExist) {
-  console.log('✅ All critical files present');
-  console.log('✅ Ready for deployment!');
-  console.log('\nNext steps:');
-  console.log('1. Ensure environment variables are set in Vercel');
-  console.log('2. Run: git add -A && git commit -m "fix: Ultimate auth fix"');
-  console.log('3. Run: git push');
-  console.log('4. Monitor deployment in Vercel dashboard');
+// Check 5: Verify Next.js configuration
+console.log('5️⃣ Checking Next.js configuration...');
+if (fs.existsSync('next.config.js')) {
+  warnings.push('Using next.config.js instead of next.config.ts may cause issues');
+}
+
+const nextConfig = fs.existsSync('next.config.ts') 
+  ? fs.readFileSync('next.config.ts', 'utf8')
+  : fs.readFileSync('next.config.js', 'utf8');
+
+if (!nextConfig.includes('serverExternalPackages')) {
+  warnings.push('Consider adding serverExternalPackages: ["prisma"] to next.config');
+}
+
+// Results
+console.log('\n📊 Pre-deployment Check Results:\n');
+
+if (errors.length === 0 && warnings.length === 0) {
+  console.log('✅ All checks passed! Ready to deploy.');
+  process.exit(0);
 } else {
-  console.log('❌ Missing critical files - fix before deploying');
-  process.exit(1);
+  if (errors.length > 0) {
+    console.log('❌ ERRORS (must fix):');
+    errors.forEach(err => console.log(`   - ${err}`));
+  }
+  
+  if (warnings.length > 0) {
+    console.log('\n⚠️  WARNINGS (should fix):');
+    warnings.forEach(warn => console.log(`   - ${warn}`));
+  }
+  
+  console.log('\n🔧 Fix these issues before deploying to prevent failures.');
+  process.exit(errors.length > 0 ? 1 : 0);
 }

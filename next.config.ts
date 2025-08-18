@@ -32,15 +32,24 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
+  // EMERGENCY: Disable all build-time checks
   typescript: {
     ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
   },
+  
+  // EMERGENCY: Build-time environment variables
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
+    NEXT_PHASE: process.env.NEXT_PHASE,
+    BUILDING_FOR_VERCEL: process.env.BUILDING_FOR_VERCEL,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    CI: process.env.CI,
+    VERCEL: process.env.VERCEL,
   },
+  
   headers: async () => {
     return [
       {
@@ -110,6 +119,14 @@ const nextConfig: NextConfig = {
         },
       };
     }
+    
+    // EMERGENCY: Handle build-time module resolution
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      // Ensure auth modules are resolved correctly during build
+      './auth': './auth-build-safe',
+    };
+    
     return config;
   },
 };

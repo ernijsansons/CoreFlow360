@@ -9,6 +9,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useConsciousnessAudio } from '@/hooks/useConsciousnessAudio'
 
 interface BetaUser {
   email: string
@@ -235,7 +236,7 @@ const BetaSignupPage: React.FC = () => {
   useEffect(() => {
     // Increase consciousness intensity as user progresses
     setConsciousnessIntensity(currentStep + 1)
-    consciousnessAudio.updateConsciousnessLevel(currentStep + 1)
+    consciousnessAudio.setConsciousnessLevel(currentStep + 1)
   }, [currentStep, consciousnessAudio])
 
   const handleFieldChange = (fieldName: string, value: any) => {
@@ -365,7 +366,7 @@ const BetaSignupPage: React.FC = () => {
       })
       
       if (response.ok) {
-        consciousnessAudio.playSuccessSound()
+        consciousnessAudio.playConsciousnessEmergence()
         setIsComplete(true)
       } else {
         throw new Error('Signup failed')

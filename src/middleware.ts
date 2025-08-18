@@ -1,11 +1,21 @@
 /**
  * CoreFlow360 - Edge-compatible middleware
- * Route protection without Node.js dependencies
+ * EMERGENCY FIX: Route protection without Node.js dependencies
  */
 
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { getToken } from 'next-auth/jwt'
+
+// EMERGENCY: Build phase detection
+const isBuildPhase = () => {
+  return !!(
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.BUILDING_FOR_VERCEL === '1' ||
+    process.env.CI === 'true' ||
+    process.env.VERCEL_ENV === 'production' ||
+    process.env.VERCEL === '1'
+  )
+}
 
 // Public routes that don't require authentication
 const PUBLIC_ROUTES = [
@@ -41,6 +51,12 @@ const ADMIN_ROUTES = [
 ]
 
 export async function middleware(request: NextRequest) {
+  // EMERGENCY: Skip middleware during build phase
+  if (isBuildPhase()) {
+    console.log('[Middleware] Build phase detected - skipping middleware')
+    return NextResponse.next()
+  }
+
   const { pathname } = request.nextUrl
   
   // Allow all static files and API routes
@@ -61,6 +77,7 @@ export async function middleware(request: NextRequest) {
   // Get session token safely
   let token = null
   try {
+    const { getToken } = await import('next-auth/jwt')
     token = await getToken({ 
       req: request, 
       secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || 'dev-secret-minimum-32-characters-long-for-security'

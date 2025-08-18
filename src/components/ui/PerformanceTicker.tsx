@@ -277,7 +277,7 @@ export default function PerformanceTicker({
     initializeMetrics()
   }, [])
 
-  if (!showOnMobile && window.innerWidth < 768) {
+  if (!showOnMobile && typeof window !== 'undefined' && window.innerWidth < 768) {
     return null
   }
 

@@ -1,0 +1,41 @@
+name: Deployment Safety Check
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  pre-deploy-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run pre-deployment checks
+      run: node scripts/pre-deploy-check.js
+      
+    - name: Test build
+      env:
+        DATABASE_URL: postgresql://test:test@localhost:5432/test
+        NEXTAUTH_SECRET: test-secret-minimum-32-characters-for-testing
+        NEXTAUTH_URL: http://localhost:3000
+        API_KEY_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+        ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      run: npm run build
+      
+    - name: Check for module-level errors
+      run: |
+        if grep -r "Module not found" .next/; then
+          echo "Build contains module errors!"
+          exit 1
+        fi

@@ -1,98 +1,124 @@
 #!/usr/bin/env node
 
 /**
- * Environment verification script
- * Checks that all required environment variables are set
+ * Environment validation for Vercel deployment
+ * Run this to verify all env vars are properly set
  */
 
-const requiredEnvVars = [
-  'DATABASE_URL',
-  'NEXTAUTH_SECRET',
-  'NEXTAUTH_URL',
-  'API_KEY_SECRET',
-  'ENCRYPTION_KEY'
-];
+const crypto = require('crypto');
 
-const optionalEnvVars = [
-  'GOOGLE_CLIENT_ID',
-  'GOOGLE_CLIENT_SECRET',
-  'STRIPE_SECRET_KEY',
-  'STRIPE_PUBLISHABLE_KEY',
-  'REDIS_URL',
-  'OPENAI_API_KEY'
-];
+console.log('🔐 Verifying environment configuration...\n');
 
-console.log('🔍 Verifying environment variables...\n');
+const required = {
+  DATABASE_URL: {
+    pattern: /^postgres(ql)?:\/\/.+/,
+    description: 'PostgreSQL connection string'
+  },
+  NEXTAUTH_SECRET: {
+    minLength: 32,
+    description: 'Authentication secret (min 32 chars)'
+  },
+  NEXTAUTH_URL: {
+    pattern: /^https?:\/\/.+/,
+    description: 'Application URL'
+  },
+  API_KEY_SECRET: {
+    minLength: 32,
+    description: 'API key encryption secret'
+  },
+  ENCRYPTION_KEY: {
+    length: 64,
+    pattern: /^[0-9a-f]{64}$/,
+    description: '64-character hex string'
+  }
+};
 
-// Check if we're in build phase
-const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' ||
-                     process.env.BUILDING_FOR_VERCEL === '1' ||
-                     process.env.CI === 'true';
-
-if (isBuildPhase) {
-  console.log('📦 Build phase detected - skipping runtime checks\n');
-  process.exit(0);
-}
-
-// Check required variables
+const results = [];
 let hasErrors = false;
-console.log('Required variables:');
-requiredEnvVars.forEach(varName => {
-  const value = process.env[varName];
+
+// Check each required variable
+for (const [key, config] of Object.entries(required)) {
+  const value = process.env[key];
+  
   if (!value) {
-    console.log(`❌ ${varName}: NOT SET`);
+    results.push({
+      key,
+      status: '❌',
+      message: `Missing - ${config.description}`
+    });
     hasErrors = true;
-  } else {
-    const displayValue = varName.includes('SECRET') || varName.includes('KEY') 
-      ? '***' + value.slice(-4) 
-      : value.slice(0, 20) + '...';
-    console.log(`✅ ${varName}: ${displayValue}`);
+    continue;
   }
+  
+  // Validate pattern
+  if (config.pattern && !config.pattern.test(value)) {
+    results.push({
+      key,
+      status: '❌',
+      message: `Invalid format - expected ${config.description}`
+    });
+    hasErrors = true;
+    continue;
+  }
+  
+  // Validate length
+  if (config.minLength && value.length < config.minLength) {
+    results.push({
+      key,
+      status: '❌',
+      message: `Too short - minimum ${config.minLength} characters`
+    });
+    hasErrors = true;
+    continue;
+  }
+  
+  if (config.length && value.length !== config.length) {
+    results.push({
+      key,
+      status: '❌',
+      message: `Wrong length - must be exactly ${config.length} characters`
+    });
+    hasErrors = true;
+    continue;
+  }
+  
+  results.push({
+    key,
+    status: '✅',
+    message: 'Valid'
+  });
+}
+
+// Display results
+console.log('Environment Variable Status:');
+console.log('─'.repeat(50));
+results.forEach(({ key, status, message }) => {
+  console.log(`${status} ${key.padEnd(20)} ${message}`);
 });
 
-console.log('\nOptional variables:');
-optionalEnvVars.forEach(varName => {
-  const value = process.env[varName];
-  if (!value) {
-    console.log(`⚠️  ${varName}: not set`);
-  } else {
-    const displayValue = varName.includes('SECRET') || varName.includes('KEY') 
-      ? '***' + value.slice(-4) 
-      : value.slice(0, 20) + '...';
-    console.log(`✅ ${varName}: ${displayValue}`);
-  }
-});
-
-// Special checks
-console.log('\nSpecial checks:');
-
-// Check NEXTAUTH_SECRET length
-if (process.env.NEXTAUTH_SECRET && process.env.NEXTAUTH_SECRET.length < 32) {
-  console.log('❌ NEXTAUTH_SECRET must be at least 32 characters');
-  hasErrors = true;
-} else if (process.env.NEXTAUTH_SECRET) {
-  console.log('✅ NEXTAUTH_SECRET length: OK');
-}
-
-// Check ENCRYPTION_KEY format
-if (process.env.ENCRYPTION_KEY && !/^[0-9a-f]{64}$/i.test(process.env.ENCRYPTION_KEY)) {
-  console.log('❌ ENCRYPTION_KEY must be exactly 64 hex characters');
-  hasErrors = true;
-} else if (process.env.ENCRYPTION_KEY) {
-  console.log('✅ ENCRYPTION_KEY format: OK');
-}
-
-// Check DATABASE_URL format
-if (process.env.DATABASE_URL && !process.env.DATABASE_URL.startsWith('postgresql://')) {
-  console.log('⚠️  DATABASE_URL should start with postgresql://');
-}
-
-console.log('\n' + '='.repeat(50));
+// Generate missing values if needed
 if (hasErrors) {
-  console.log('❌ Environment validation failed!');
-  console.log('Please set all required environment variables.');
+  console.log('\n🔧 Generate missing values with these commands:');
+  console.log('─'.repeat(50));
+  
+  if (!process.env.NEXTAUTH_SECRET) {
+    const secret = crypto.randomBytes(32).toString('base64');
+    console.log(`NEXTAUTH_SECRET="${secret}"`);
+  }
+  
+  if (!process.env.API_KEY_SECRET) {
+    const apiSecret = crypto.randomBytes(32).toString('hex');
+    console.log(`API_KEY_SECRET="${apiSecret}"`);
+  }
+  
+  if (!process.env.ENCRYPTION_KEY) {
+    const encKey = crypto.randomBytes(32).toString('hex');
+    console.log(`ENCRYPTION_KEY="${encKey}"`);
+  }
+  
+  console.log('\n❗ Add these to your Vercel environment variables');
   process.exit(1);
 } else {
-  console.log('✅ Environment validation passed!');
+  console.log('\n✅ All environment variables are properly configured!');
   process.exit(0);
 }

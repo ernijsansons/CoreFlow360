@@ -230,8 +230,8 @@ let globalWebSocket: CoreFlowWebSocket | null = null
 export function getWebSocketClient(): CoreFlowWebSocket {
   if (!globalWebSocket) {
     // Determine WebSocket URL based on current location
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const host = window.location.host
+    const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const host = typeof window !== 'undefined' ? window.location.host : 'localhost:3000'
     const wsUrl = `${protocol}//${host}/api/ws`
     
     globalWebSocket = new CoreFlowWebSocket(wsUrl, {
