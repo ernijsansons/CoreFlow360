@@ -16,6 +16,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "npx prisma generate && NODE_OPTIONS='--max-old-space-size=4096' next build",
+    "build:ci": "npx prisma generate && NODE_OPTIONS='--max-old-space-size=8192' NEXT_TELEMETRY_DISABLED=1 next build",
     "build:production": "npx prisma generate && NODE_OPTIONS='--max-old-space-size=8192' NEXT_TELEMETRY_DISABLED=1 next build",
     "build:analyze": "ANALYZE=true npm run build",
     "analyze": "node scripts/analyze-bundle.js",

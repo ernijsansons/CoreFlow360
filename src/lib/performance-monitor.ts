@@ -49,9 +49,13 @@ export class PerformanceMonitor {
     cpuUsage: 80 // 80%
   }
   private listeners = new Set<(alert: PerformanceAlert) => void>()
+  private cleanupInterval: NodeJS.Timeout | null = null
 
   private constructor() {
-    this.startPeriodicCleanup()
+    // Only start periodic cleanup in runtime environment
+    if (typeof window !== 'undefined' || (typeof process !== 'undefined' && process.versions?.node)) {
+      this.startPeriodicCleanup()
+    }
   }
 
   static getInstance(): PerformanceMonitor {
@@ -280,9 +284,21 @@ export class PerformanceMonitor {
    * Start periodic cleanup
    */
   private startPeriodicCleanup(): void {
-    setInterval(() => {
-      this.clearOldAlerts()
-    }, 60 * 60 * 1000) // Clean up every hour
+    if (typeof setInterval !== 'undefined') {
+      this.cleanupInterval = setInterval(() => {
+        this.clearOldAlerts()
+      }, 60 * 60 * 1000) // Clean up every hour
+    }
+  }
+  
+  /**
+   * Stop periodic cleanup
+   */
+  stopPeriodicCleanup(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval)
+      this.cleanupInterval = null
+    }
   }
 }
 
@@ -347,6 +363,7 @@ export function usePerformanceMonitoring() {
     updateThresholds: monitor.updateThresholds.bind(monitor)
   }
 }
+
 
 
 

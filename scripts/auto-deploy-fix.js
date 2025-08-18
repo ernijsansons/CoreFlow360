@@ -56,6 +56,41 @@ const ERROR_PATTERNS = {
     type: 'eslint_error',
     fix: 'Ignore ESLint errors during build',
     files: ['next.config.ts']
+  },
+  
+  // Environment variable errors
+  'process is not defined': {
+    type: 'env_error',
+    fix: 'Fix build-time environment variable access',
+    files: ['src/lib/csrf.ts', 'src/lib/performance-monitor.ts']
+  },
+  
+  // Crypto/Edge runtime errors
+  'crypto.*is not defined': {
+    type: 'crypto_error',
+    fix: 'Fix Web Crypto API usage',
+    files: ['src/lib/csrf.ts', 'src/lib/encryption.ts']
+  },
+  
+  // Build memory errors
+  'JavaScript heap out of memory': {
+    type: 'memory_error',
+    fix: 'Increase Node.js memory allocation',
+    files: ['package.json']
+  },
+  
+  // Missing dependencies
+  'Cannot resolve.*module': {
+    type: 'dependency_error',
+    fix: 'Install missing dependencies',
+    files: ['package.json']
+  },
+  
+  // Prisma errors
+  'PrismaClient is unable to be run': {
+    type: 'prisma_error',
+    fix: 'Regenerate Prisma client',
+    files: ['prisma/schema.prisma']
   }
 };
 
@@ -153,6 +188,21 @@ class AutoDeployFixer {
           break;
         case 'eslint_error':
           await this.ignoreESLintErrors();
+          break;
+        case 'env_error':
+          await this.fixEnvironmentErrors(issue.files);
+          break;
+        case 'crypto_error':
+          await this.fixCryptoErrors(issue.files);
+          break;
+        case 'memory_error':
+          await this.increaseMemoryAllocation();
+          break;
+        case 'dependency_error':
+          await this.installMissingDependencies();
+          break;
+        case 'prisma_error':
+          await this.regeneratePrismaClient();
           break;
       }
       
@@ -278,6 +328,81 @@ const isBuildTime = () => {
         fs.writeFileSync(file, content);
       }
     }
+  }
+
+  async fixEnvironmentErrors(files) {
+    for (const file of files) {
+      if (fs.existsSync(file)) {
+        let content = fs.readFileSync(file, 'utf8');
+        
+        // Fix process.env access in build time
+        content = content.replace(
+          /process\.env\.(\w+)/g,
+          "(typeof process !== 'undefined' && process.env?.$1)"
+        );
+        
+        // Fix default parameter assignments with process.env
+        content = content.replace(
+          /= process\.env\.(\w+) \|\| '([^']+)'/g,
+          "|| (typeof process !== 'undefined' && process.env?.$1) || '$2'"
+        );
+        
+        fs.writeFileSync(file, content);
+      }
+    }
+  }
+
+  async fixCryptoErrors(files) {
+    for (const file of files) {
+      if (fs.existsSync(file)) {
+        let content = fs.readFileSync(file, 'utf8');
+        
+        // Use globalThis.crypto for Web Crypto API
+        content = content.replace(
+          /\bcrypto\./g,
+          'globalThis.crypto.'
+        );
+        
+        // Add crypto availability check
+        content = content.replace(
+          /globalThis\.crypto\.getRandomValues/g,
+          "(typeof globalThis.crypto !== 'undefined' && globalThis.crypto.getRandomValues)"
+        );
+        
+        fs.writeFileSync(file, content);
+      }
+    }
+  }
+
+  async increaseMemoryAllocation() {
+    const file = 'package.json';
+    if (fs.existsSync(file)) {
+      let content = fs.readFileSync(file, 'utf8');
+      
+      // Increase memory for build scripts
+      content = content.replace(
+        /NODE_OPTIONS='--max-old-space-size=\d+'/g,
+        "NODE_OPTIONS='--max-old-space-size=8192'"
+      );
+      
+      // Also update build:production script
+      content = content.replace(
+        /"build:production": "([^"]+)"/,
+        '"build:production": "npx prisma generate && NODE_OPTIONS=\'--max-old-space-size=8192\' NEXT_TELEMETRY_DISABLED=1 next build"'
+      );
+      
+      fs.writeFileSync(file, content);
+    }
+  }
+
+  async installMissingDependencies() {
+    this.log('Installing missing dependencies...', 'info');
+    await this.runCommand('npm install');
+  }
+
+  async regeneratePrismaClient() {
+    this.log('Regenerating Prisma client...', 'info');
+    await this.runCommand('npx prisma generate');
   }
 
   async commitAndPush() {

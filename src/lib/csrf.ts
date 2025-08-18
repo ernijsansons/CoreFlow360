@@ -141,7 +141,7 @@ export function getCSRFTokenFromHeaders(headers: Headers): string | null {
  */
 export async function validateCSRFMiddleware(
   request: Request,
-  secret: string = process.env.API_KEY_SECRET || 'default-secret'
+  secret?: string
 ): Promise<boolean> {
   // Skip CSRF validation for safe methods
   if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
@@ -151,19 +151,27 @@ export async function validateCSRFMiddleware(
   const token = getCSRFTokenFromHeaders(request.headers)
   const cookieValue = await getCSRFCookie()
   
-  return await validateCSRFToken(token, cookieValue, secret)
+  // Use provided secret or fallback to default
+  const csrfSecret = secret || (typeof process !== 'undefined' && process.env?.API_KEY_SECRET) || 'default-secret'
+  
+  return await validateCSRFToken(token, cookieValue, csrfSecret)
 }
 
 /**
  * Generate and set a new CSRF token for a session
  */
 export async function initializeCSRFProtection(
-  secret: string = process.env.API_KEY_SECRET || 'default-secret'
+  secret?: string
 ): Promise<string> {
-  const { token, cookieValue } = await createCSRFTokenPair(secret)
+  // Use provided secret or fallback to default
+  const csrfSecret = secret || (typeof process !== 'undefined' && process.env?.API_KEY_SECRET) || 'default-secret'
+  
+  const { token, cookieValue } = await createCSRFTokenPair(csrfSecret)
   await setCSRFCookie(cookieValue)
   return token
 }
+
+
 
 
 
