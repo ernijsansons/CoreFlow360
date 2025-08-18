@@ -6,7 +6,6 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { prisma } from '@/lib/db'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type ConsciousnessTheme = 'neural' | 'synaptic' | 'autonomous' | 'transcendent'
