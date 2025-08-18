@@ -14,7 +14,7 @@ import crypto from 'crypto'
 */
 
 // Build-time detection - comprehensive check for all build environments
-const isBuildTime = !!(
+const getIsBuildTime = () => !!(
   process.env.VERCEL_ENV || 
   process.env.CI || 
   process.env.NEXT_PHASE === 'phase-production-build' || 
@@ -37,7 +37,7 @@ const environmentSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   
   // Database Configuration - Make completely optional during build
-  DATABASE_URL: isBuildTime
+  DATABASE_URL: getIsBuildTime()
     ? z.string().optional().default('postgresql://placeholder:placeholder@localhost:5432/placeholder')
     : z.string().url().refine(
         (url) => url.startsWith('postgresql://') || url.startsWith('postgres://') || url.startsWith('file:'),
@@ -48,7 +48,7 @@ const environmentSchema = z.object({
   DATABASE_TIMEOUT: z.coerce.number().int().min(1000).max(60000).default(30000),
   
   // NextAuth Configuration - Make completely optional during build
-  NEXTAUTH_SECRET: isBuildTime 
+  NEXTAUTH_SECRET: getIsBuildTime() 
     ? z.string().optional().default('build-time-placeholder-secret-32-chars-for-nextauth-validation')
     : z.string().min(32).refine(
         (secret) => {
@@ -58,7 +58,7 @@ const environmentSchema = z.object({
         },
         { message: 'NEXTAUTH_SECRET must have sufficient entropy (min 4 bits/char)' }
       ),
-  NEXTAUTH_URL: isBuildTime
+  NEXTAUTH_URL: getIsBuildTime()
     ? z.string().optional().default('http://localhost:3000')
     : z.string().url(),
   
@@ -91,7 +91,7 @@ const environmentSchema = z.object({
   EMAIL_FROM: z.string().email().optional(),
   
   // Security Configuration - Make completely optional during build
-  ENCRYPTION_KEY: isBuildTime
+  ENCRYPTION_KEY: getIsBuildTime()
     ? z.string().optional().default('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
     : z.string().optional(),
   SESSION_SECRET: z.string().min(32).optional(),
@@ -205,7 +205,7 @@ function validateEnvironment() {
     const env = environmentSchema.parse(process.env)
     
     // Security validations - Skip during build time
-    if (env.NODE_ENV === 'production' && !isBuildTime && !process.env.VERCEL) {
+    if (env.NODE_ENV === 'production' && !getIsBuildTime() && !process.env.VERCEL) {
       if (!env.ENCRYPTION_KEY) {
         console.warn('ENCRYPTION_KEY not set in production - using default for build')
       }
@@ -273,7 +273,7 @@ function validateEnvironment() {
 
 // Export validated configuration
 // During build, use lenient validation
-export const config = isBuildTime || process.env.VERCEL
+export const config = getIsBuildTime() || process.env.VERCEL
   ? (() => {
       try {
         return validateEnvironment()
