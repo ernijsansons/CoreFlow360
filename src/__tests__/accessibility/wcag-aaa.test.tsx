@@ -3,7 +3,7 @@
  * Comprehensive accessibility testing for voice features
  */
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals'
+import { describe, it, expect, beforeEach } from '@jest/globals'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { axe, toHaveNoViolations, configureAxe } from 'jest-axe'
 import { VoiceNoteRecorder } from '@/components/voice/VoiceNoteRecorder'
@@ -45,7 +45,7 @@ global.MediaRecorder = jest.fn().mockImplementation(() => ({
   state: 'inactive',
   ondataavailable: null,
   onstop: null
-})) as any
+})) as unknown as typeof MediaRecorder
 
 global.MediaRecorder.isTypeSupported = jest.fn(() => true)
 
@@ -197,7 +197,7 @@ describe('WCAG AAA Accessibility Tests', () => {
       
       // Check for proper headings hierarchy
       const headings = screen.getAllByRole('heading')
-      headings.forEach((heading, index) => {
+      headings.forEach((heading) => {
         const level = parseInt(heading.tagName.charAt(1))
         expect(level).toBeGreaterThanOrEqual(1)
         expect(level).toBeLessThanOrEqual(6)

@@ -1,0 +1,838 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "@vercel/nft": {
+      "name": "@vercel/nft",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "node-pre-gyp"
+      ],
+      "effects": [
+        "@vercel/redwood",
+        "@vercel/remix"
+      ],
+      "range": "<=0.20.0",
+      "nodes": [
+        "node_modules/@vercel/nft"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "@vercel/node": {
+      "name": "@vercel/node",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "node-fetch"
+      ],
+      "effects": [
+        "vercel"
+      ],
+      "range": "2.1.1-canary.0 - 2.4.4",
+      "nodes": [
+        "node_modules/@vercel/node"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "@vercel/redwood": {
+      "name": "@vercel/redwood",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "@vercel/nft",
+        "@vercel/routing-utils",
+        "semver"
+      ],
+      "effects": [
+        "vercel"
+      ],
+      "range": "0.2.1-canary.0 - 2.2.0",
+      "nodes": [
+        "node_modules/@vercel/redwood"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "@vercel/remix": {
+      "name": "@vercel/remix",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "@vercel/nft"
+      ],
+      "effects": [
+        "vercel"
+      ],
+      "range": "<=1.0.2",
+      "nodes": [
+        "node_modules/@vercel/remix"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "@vercel/routing-utils": {
+      "name": "@vercel/routing-utils",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "path-to-regexp"
+      ],
+      "effects": [
+        "@vercel/redwood"
+      ],
+      "range": "<=3.1.0 || >=5.0.0",
+      "nodes": [
+        "node_modules/@vercel/routing-utils"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "braces": {
+      "name": "braces",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1085715,
+          "name": "braces",
+          "dependency": "braces",
+          "title": "Regular Expression Denial of Service in braces",
+          "url": "https://github.com/advisories/GHSA-g95f-p29q-9xw4",
+          "severity": "low",
+          "cwe": [
+            "CWE-185",
+            "CWE-400"
+          ],
+          "cvss": {
+            "score": 3.7,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L"
+          },
+          "range": "<2.3.1"
+        },
+        {
+          "source": 1089939,
+          "name": "braces",
+          "dependency": "braces",
+          "title": "Regular Expression Denial of Service (ReDoS) in braces",
+          "url": "https://github.com/advisories/GHSA-cwfw-4gq5-mrqx",
+          "severity": "low",
+          "cwe": [
+            "CWE-400"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<2.3.1"
+        },
+        {
+          "source": 1098094,
+          "name": "braces",
+          "dependency": "braces",
+          "title": "Uncontrolled resource consumption in braces",
+          "url": "https://github.com/advisories/GHSA-grv7-fg5c-xmjg",
+          "severity": "high",
+          "cwe": [
+            "CWE-400",
+            "CWE-1050"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": "<3.0.3"
+        }
+      ],
+      "effects": [
+        "micromatch"
+      ],
+      "range": "<=3.0.2",
+      "nodes": [
+        "node_modules/findup-sync/node_modules/braces"
+      ],
+      "fixAvailable": {
+        "name": "commitizen",
+        "version": "4.3.1",
+        "isSemVerMajor": true
+      }
+    },
+    "commitizen": {
+      "name": "commitizen",
+      "severity": "critical",
+      "isDirect": true,
+      "via": [
+        "find-node-modules",
+        "lodash",
+        "minimist",
+        "shelljs"
+      ],
+      "effects": [],
+      "range": "1.0.5 - 4.2.4",
+      "nodes": [
+        "node_modules/commitizen"
+      ],
+      "fixAvailable": {
+        "name": "commitizen",
+        "version": "4.3.1",
+        "isSemVerMajor": true
+      }
+    },
+    "external-editor": {
+      "name": "external-editor",
+      "severity": "low",
+      "isDirect": false,
+      "via": [
+        "tmp"
+      ],
+      "effects": [],
+      "range": ">=1.1.1",
+      "nodes": [
+        "node_modules/external-editor"
+      ],
+      "fixAvailable": true
+    },
+    "find-node-modules": {
+      "name": "find-node-modules",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "findup-sync",
+        "merge"
+      ],
+      "effects": [
+        "commitizen"
+      ],
+      "range": "<=2.1.0",
+      "nodes": [
+        "node_modules/find-node-modules"
+      ],
+      "fixAvailable": {
+        "name": "commitizen",
+        "version": "4.3.1",
+        "isSemVerMajor": true
+      }
+    },
+    "findup-sync": {
+      "name": "findup-sync",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "micromatch"
+      ],
+      "effects": [
+        "find-node-modules"
+      ],
+      "range": "0.4.0 - 3.0.0",
+      "nodes": [
+        "node_modules/findup-sync"
+      ],
+      "fixAvailable": {
+        "name": "commitizen",
+        "version": "4.3.1",
+        "isSemVerMajor": true
+      }
+    },
+    "got": {
+      "name": "got",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1088948,
+          "name": "got",
+          "dependency": "got",
+          "title": "Got allows a redirect to a UNIX socket",
+          "url": "https://github.com/advisories/GHSA-pfrx-2q88-qq97",
+          "severity": "moderate",
+          "cwe": [],
+          "cvss": {
+            "score": 5.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N"
+          },
+          "range": "<11.8.5"
+        }
+      ],
+      "effects": [
+        "package-json"
+      ],
+      "range": "<11.8.5",
+      "nodes": [
+        "node_modules/package-json/node_modules/got"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "latest-version": {
+      "name": "latest-version",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "package-json"
+      ],
+      "effects": [
+        "update-notifier"
+      ],
+      "range": "0.2.0 - 5.1.0",
+      "nodes": [
+        "node_modules/latest-version"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "lodash": {
+      "name": "lodash",
+      "severity": "critical",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1106913,
+          "name": "lodash",
+          "dependency": "lodash",
+          "title": "Command Injection in lodash",
+          "url": "https://github.com/advisories/GHSA-35jh-r3h4-6jhm",
+          "severity": "high",
+          "cwe": [
+            "CWE-77",
+            "CWE-94"
+          ],
+          "cvss": {
+            "score": 7.2,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "range": "<4.17.21"
+        },
+        {
+          "source": 1106918,
+          "name": "lodash",
+          "dependency": "lodash",
+          "title": "Prototype Pollution in lodash",
+          "url": "https://github.com/advisories/GHSA-jf85-cpcp-j695",
+          "severity": "critical",
+          "cwe": [
+            "CWE-20",
+            "CWE-1321"
+          ],
+          "cvss": {
+            "score": 9.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H"
+          },
+          "range": "<4.17.12"
+        },
+        {
+          "source": 1106919,
+          "name": "lodash",
+          "dependency": "lodash",
+          "title": "Regular Expression Denial of Service (ReDoS) in lodash",
+          "url": "https://github.com/advisories/GHSA-29mw-wpgm-hmr9",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-400",
+            "CWE-1333"
+          ],
+          "cvss": {
+            "score": 5.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+          },
+          "range": "<4.17.21"
+        },
+        {
+          "source": 1106920,
+          "name": "lodash",
+          "dependency": "lodash",
+          "title": "Prototype Pollution in lodash",
+          "url": "https://github.com/advisories/GHSA-p6mc-m468-83gw",
+          "severity": "high",
+          "cwe": [
+            "CWE-770",
+            "CWE-1321"
+          ],
+          "cvss": {
+            "score": 7.4,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:H"
+          },
+          "range": ">=3.7.0 <4.17.19"
+        }
+      ],
+      "effects": [
+        "commitizen"
+      ],
+      "range": "<=4.17.20",
+      "nodes": [
+        "node_modules/commitizen/node_modules/lodash"
+      ],
+      "fixAvailable": {
+        "name": "commitizen",
+        "version": "4.3.1",
+        "isSemVerMajor": true
+      }
+    },
+    "merge": {
+      "name": "merge",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1096479,
+          "name": "merge",
+          "dependency": "merge",
+          "title": "Prototype Pollution in merge",
+          "url": "https://github.com/advisories/GHSA-7wpw-2hjm-89gp",
+          "severity": "high",
+          "cwe": [
+            "CWE-915"
+          ],
+          "cvss": {
+            "score": 7.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+          },
+          "range": "<2.1.1"
+        }
+      ],
+      "effects": [
+        "find-node-modules"
+      ],
+      "range": "<2.1.1",
+      "nodes": [
+        "node_modules/merge"
+      ],
+      "fixAvailable": {
+        "name": "commitizen",
+        "version": "4.3.1",
+        "isSemVerMajor": true
+      }
+    },
+    "micromatch": {
+      "name": "micromatch",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1098681,
+          "name": "micromatch",
+          "dependency": "micromatch",
+          "title": "Regular Expression Denial of Service (ReDoS) in micromatch",
+          "url": "https://github.com/advisories/GHSA-952p-6rrq-rcjv",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-1333"
+          ],
+          "cvss": {
+            "score": 5.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+          },
+          "range": "<4.0.8"
+        },
+        "braces"
+      ],
+      "effects": [
+        "findup-sync"
+      ],
+      "range": "<=4.0.7",
+      "nodes": [
+        "node_modules/findup-sync/node_modules/micromatch"
+      ],
+      "fixAvailable": {
+        "name": "commitizen",
+        "version": "4.3.1",
+        "isSemVerMajor": true
+      }
+    },
+    "minimist": {
+      "name": "minimist",
+      "severity": "critical",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1096465,
+          "name": "minimist",
+          "dependency": "minimist",
+          "title": "Prototype Pollution in minimist",
+          "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-1321"
+          ],
+          "cvss": {
+            "score": 5.6,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L"
+          },
+          "range": ">=1.0.0 <1.2.3"
+        },
+        {
+          "source": 1097678,
+          "name": "minimist",
+          "dependency": "minimist",
+          "title": "Prototype Pollution in minimist",
+          "url": "https://github.com/advisories/GHSA-xvch-5gv4-984h",
+          "severity": "critical",
+          "cwe": [
+            "CWE-1321"
+          ],
+          "cvss": {
+            "score": 9.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "range": ">=1.0.0 <1.2.6"
+        }
+      ],
+      "effects": [
+        "commitizen"
+      ],
+      "range": "1.0.0 - 1.2.5",
+      "nodes": [
+        "node_modules/commitizen/node_modules/minimist"
+      ],
+      "fixAvailable": {
+        "name": "commitizen",
+        "version": "4.3.1",
+        "isSemVerMajor": true
+      }
+    },
+    "node-fetch": {
+      "name": "node-fetch",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1095073,
+          "name": "node-fetch",
+          "dependency": "node-fetch",
+          "title": "node-fetch forwards secure headers to untrusted sites",
+          "url": "https://github.com/advisories/GHSA-r683-j2x4-v87g",
+          "severity": "high",
+          "cwe": [
+            "CWE-173",
+            "CWE-200",
+            "CWE-601"
+          ],
+          "cvss": {
+            "score": 8.8,
+            "vectorString": "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "range": "<2.6.7"
+        }
+      ],
+      "effects": [
+        "@vercel/node"
+      ],
+      "range": "<2.6.7",
+      "nodes": [
+        "node_modules/@vercel/node/node_modules/node-fetch"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "node-pre-gyp": {
+      "name": "node-pre-gyp",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "tar"
+      ],
+      "effects": [
+        "@vercel/nft"
+      ],
+      "range": "*",
+      "nodes": [
+        "node_modules/node-pre-gyp"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "package-json": {
+      "name": "package-json",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "got"
+      ],
+      "effects": [
+        "latest-version"
+      ],
+      "range": "<=6.5.0",
+      "nodes": [
+        "node_modules/package-json"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "path-to-regexp": {
+      "name": "path-to-regexp",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1101846,
+          "name": "path-to-regexp",
+          "dependency": "path-to-regexp",
+          "title": "path-to-regexp outputs backtracking regular expressions",
+          "url": "https://github.com/advisories/GHSA-9wv6-86v2-598j",
+          "severity": "high",
+          "cwe": [
+            "CWE-1333"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": ">=4.0.0 <6.3.0"
+        }
+      ],
+      "effects": [
+        "@vercel/routing-utils"
+      ],
+      "range": "4.0.0 - 6.2.2",
+      "nodes": [
+        "node_modules/@vercel/routing-utils/node_modules/path-to-regexp"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "semver": {
+      "name": "semver",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1101090,
+          "name": "semver",
+          "dependency": "semver",
+          "title": "semver vulnerable to Regular Expression Denial of Service",
+          "url": "https://github.com/advisories/GHSA-c2qf-rxjj-qqgw",
+          "severity": "high",
+          "cwe": [
+            "CWE-1333"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": ">=6.0.0 <6.3.1"
+        }
+      ],
+      "effects": [
+        "@vercel/redwood"
+      ],
+      "range": "6.0.0 - 6.3.0",
+      "nodes": [
+        "node_modules/@vercel/redwood/node_modules/semver"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "shelljs": {
+      "name": "shelljs",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1088208,
+          "name": "shelljs",
+          "dependency": "shelljs",
+          "title": "Improper Privilege Management in shelljs",
+          "url": "https://github.com/advisories/GHSA-64g7-mvw6-v9qj",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-269"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<0.8.5"
+        },
+        {
+          "source": 1095126,
+          "name": "shelljs",
+          "dependency": "shelljs",
+          "title": "Improper Privilege Management in shelljs",
+          "url": "https://github.com/advisories/GHSA-4rq4-32rv-6wp6",
+          "severity": "high",
+          "cwe": [
+            "CWE-269"
+          ],
+          "cvss": {
+            "score": 7.1,
+            "vectorString": "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:H"
+          },
+          "range": "<0.8.5"
+        }
+      ],
+      "effects": [
+        "commitizen"
+      ],
+      "range": "<=0.8.4",
+      "nodes": [
+        "node_modules/shelljs"
+      ],
+      "fixAvailable": {
+        "name": "commitizen",
+        "version": "4.3.1",
+        "isSemVerMajor": true
+      }
+    },
+    "tar": {
+      "name": "tar",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1097493,
+          "name": "tar",
+          "dependency": "tar",
+          "title": "Denial of service while parsing a tar file due to lack of folders count validation",
+          "url": "https://github.com/advisories/GHSA-f5x3-32g6-xq36",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-400"
+          ],
+          "cvss": {
+            "score": 6.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+          },
+          "range": "<6.2.1"
+        }
+      ],
+      "effects": [
+        "node-pre-gyp"
+      ],
+      "range": "<6.2.1",
+      "nodes": [
+        "node_modules/node-pre-gyp/node_modules/tar"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "tmp": {
+      "name": "tmp",
+      "severity": "low",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1106849,
+          "name": "tmp",
+          "dependency": "tmp",
+          "title": "tmp allows arbitrary temporary file / directory write via symbolic link `dir` parameter",
+          "url": "https://github.com/advisories/GHSA-52f5-9888-hmc6",
+          "severity": "low",
+          "cwe": [
+            "CWE-59"
+          ],
+          "cvss": {
+            "score": 2.5,
+            "vectorString": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:N"
+          },
+          "range": "<=0.2.3"
+        }
+      ],
+      "effects": [
+        "external-editor"
+      ],
+      "range": "<=0.2.3",
+      "nodes": [
+        "node_modules/external-editor/node_modules/tmp"
+      ],
+      "fixAvailable": true
+    },
+    "update-notifier": {
+      "name": "update-notifier",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "latest-version"
+      ],
+      "effects": [
+        "vercel"
+      ],
+      "range": "0.2.0 - 5.1.0",
+      "nodes": [
+        "node_modules/update-notifier"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    },
+    "vercel": {
+      "name": "vercel",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "@vercel/node",
+        "@vercel/redwood",
+        "@vercel/remix",
+        "update-notifier"
+      ],
+      "effects": [],
+      "range": "19.1.3-canary.0 - 32.1.0",
+      "nodes": [
+        "node_modules/vercel"
+      ],
+      "fixAvailable": {
+        "name": "vercel",
+        "version": "46.0.1",
+        "isSemVerMajor": true
+      }
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 2,
+      "moderate": 10,
+      "high": 11,
+      "critical": 3,
+      "total": 26
+    },
+    "dependencies": {
+      "prod": 1895,
+      "dev": 842,
+      "optional": 271,
+      "peer": 167,
+      "peerOptional": 0,
+      "total": 3050
+    }
+  }
+}

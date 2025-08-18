@@ -44,7 +44,8 @@ let orchestrator: AIOrchestrator | null = null
 
 function getOrchestrator(): AIOrchestrator {
   if (!orchestrator) {
-    orchestrator = new AIOrchestrator({
+    // Delay environment variable access until runtime
+    const getConfig = () => ({
       models: {
         primary: 'gpt-4',
         reasoning: 'gpt-4',
@@ -78,6 +79,8 @@ function getOrchestrator(): AIOrchestrator {
         password: process.env.REDIS_PASSWORD
       }
     })
+    
+    orchestrator = new AIOrchestrator(getConfig())
   }
   return orchestrator
 }

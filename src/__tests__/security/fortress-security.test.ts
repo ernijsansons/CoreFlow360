@@ -11,6 +11,7 @@ import { AuditLogger } from '@/services/security/audit-logging'
 import { PrismaClient, UserRole } from '@prisma/client'
 import { Redis } from 'ioredis'
 import crypto from 'crypto'
+import { testConfig } from '@/test-config'
 
 describe('Fortress-Level Security', () => {
   let secureOpsManager: SecureOperationsManager
@@ -234,7 +235,7 @@ describe('Fortress-Level Security', () => {
           email: 'mfa@test.com',
           name: 'MFA Test User',
           mfaEnabled: true,
-          mfaSecret: 'JBSWY3DPEHPK3PXP', // Test secret
+          mfaSecret: testConfig.security.mfaSecret, // Test secret
           role: UserRole.USER,
           tenantId: 'test_tenant'
         }

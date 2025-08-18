@@ -4,11 +4,12 @@
  */
 
 import { test, expect, Page } from '@playwright/test'
+import { testConfig } from '@/test-config'
 
 const TEST_USER = {
   name: 'Test User',
   email: 'test@example.com',
-  password: 'TestPassword123!',
+  password: testConfig.auth.defaultPassword,
   companyName: 'Test Company Inc'
 }
 
@@ -61,8 +62,8 @@ test.describe('Authentication Flow', () => {
     await expect(page).toHaveTitle(/CoreFlow360.*Login/)
 
     // Fill login form
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
 
     // Submit form
     await page.click('button[type="submit"]')
@@ -131,8 +132,8 @@ test.describe('Authentication Flow', () => {
   test('should redirect authenticated users away from auth pages', async () => {
     // First login
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
     await expect(page).toHaveURL('/dashboard')
 
@@ -159,8 +160,8 @@ test.describe('Dashboard Access', () => {
   test('should display user information in dashboard', async ({ page }) => {
     // Login first
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
     
     // Check dashboard content
@@ -171,8 +172,8 @@ test.describe('Dashboard Access', () => {
   test('should show subscription information', async ({ page }) => {
     // Login and navigate to dashboard
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     // Check for subscription-related content
@@ -188,8 +189,8 @@ test.describe('Admin Interface', () => {
     await expect(page).toHaveURL(/\/login/)
 
     // Login as regular user (if available)
-    await page.fill('input[name="email"]', 'user@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.userEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     // Try to access admin page
@@ -200,8 +201,8 @@ test.describe('Admin Interface', () => {
 
   test('should allow admin users to access admin interface', async ({ page }) => {
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     await page.goto('/admin')
@@ -276,8 +277,8 @@ test.describe('UI Responsiveness', () => {
     await expect(page.locator('input[name="password"]')).toBeVisible()
 
     // Form should be usable on mobile
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     await expect(page).toHaveURL('/dashboard')

@@ -18,9 +18,11 @@ describe('Security Middleware', () => {
   })
 
   describe('CSRF Protection', () => {
-    it('should reject requests without CSRF token', async () => {
+    it('should reject POST requests without CSRF token', async () => {
       const response = await securityMiddleware(mockRequest)
       expect(response.status).toBe(403)
+      const data = await response.json()
+      expect(data.error).toBe('Invalid CSRF token')
     })
 
     it('should accept requests with valid CSRF token', async () => {

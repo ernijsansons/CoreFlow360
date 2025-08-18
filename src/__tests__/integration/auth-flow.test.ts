@@ -6,6 +6,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { PrismaClient } from '@prisma/client'
 import bcryptjs from 'bcryptjs'
+import { testConfig } from '@/test-config'
 
 const prisma = new PrismaClient()
 
@@ -13,7 +14,7 @@ describe('Authentication Flow Integration', () => {
   let testTenantId: string
   let testUserId: string
   const testEmail = 'test@example.com'
-  const testPassword = 'testpassword123'
+  const testPassword = testConfig.auth.testPassword
   const testCompany = 'Test Company'
 
   beforeAll(async () => {

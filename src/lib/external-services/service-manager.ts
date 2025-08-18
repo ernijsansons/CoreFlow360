@@ -4,11 +4,9 @@
  */
 
 import { z } from 'zod'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/db'
 import { redis } from '@/lib/redis'
 import type { ExternalResource, ExternalServiceConfig } from '@/types/bundles'
-
-const prisma = new PrismaClient()
 
 export interface ServiceHealth {
   service: ExternalResource

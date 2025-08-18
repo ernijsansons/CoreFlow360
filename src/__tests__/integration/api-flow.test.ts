@@ -5,6 +5,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { PrismaClient } from '@prisma/client'
+import { testConfig } from '@/test-config'
 
 const prisma = new PrismaClient()
 const API_BASE = process.env.TEST_API_URL || 'http://localhost:3000'
@@ -12,7 +13,7 @@ const API_BASE = process.env.TEST_API_URL || 'http://localhost:3000'
 // Test data
 const testUser = {
   email: 'test@coreflow360.com',
-  password: 'TestPassword123!',
+  password: testConfig.auth.defaultPassword,
   name: 'Test User',
   companyName: 'Test Company'
 }

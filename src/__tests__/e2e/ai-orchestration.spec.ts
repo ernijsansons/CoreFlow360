@@ -4,6 +4,7 @@
  */
 
 import { test, expect, Page } from '@playwright/test'
+import { testConfig } from '@/test-config'
 
 // Test data
 const TEST_ORCHESTRATION_REQUEST = {
@@ -31,7 +32,7 @@ test.describe('AI Orchestration API', () => {
     const loginResponse = await request.post('/api/auth/register', {
       data: {
         email: 'test-ai@example.com',
-        password: 'TestPassword123!',
+        password: testConfig.auth.defaultPassword,
         name: 'AI Test User',
         companyName: 'AI Test Company'
       }
@@ -57,8 +58,8 @@ test.describe('AI Orchestration API', () => {
   test('should handle AI orchestration request with valid auth', async ({ request, page }) => {
     // Login first
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
     await expect(page).toHaveURL('/dashboard')
 
@@ -92,8 +93,8 @@ test.describe('AI Orchestration API', () => {
   test('should validate request schema', async ({ request, page }) => {
     // Login first
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     const cookies = await page.context().cookies()
@@ -120,8 +121,8 @@ test.describe('AI Orchestration API', () => {
   test('should respect rate limiting', async ({ request, page }) => {
     // Login first
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     const cookies = await page.context().cookies()
@@ -151,8 +152,8 @@ test.describe('AI Orchestration API', () => {
   test('should return subscription capabilities', async ({ request, page }) => {
     // Login first
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     const cookies = await page.context().cookies()
@@ -181,8 +182,8 @@ test.describe('Subscription-Aware Features', () => {
   test('should display different features based on subscription', async ({ page }) => {
     // Login as admin (should have full access)
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     await page.goto('/dashboard')
@@ -198,8 +199,8 @@ test.describe('Subscription-Aware Features', () => {
     // This test would check for upgrade prompts when users try to access
     // features not included in their subscription
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'user@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.userEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     // Try to access premium features
@@ -223,8 +224,8 @@ test.describe('Error Boundaries', () => {
 
   test('should recover from errors', async ({ page }) => {
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     // Go to a page that might have errors
@@ -245,8 +246,8 @@ test.describe('Performance', () => {
     const startTime = Date.now()
     
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     // Wait for dashboard to fully load
@@ -261,8 +262,8 @@ test.describe('Performance', () => {
   test('should handle large datasets efficiently', async ({ page }) => {
     // This would test loading pages with large amounts of data
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     // Navigate to admin page which might load lots of data
@@ -288,8 +289,8 @@ test.describe('Accessibility', () => {
     await expect(page.locator('button[type="submit"]')).toBeFocused()
 
     // Should be able to submit with Enter
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.keyboard.press('Enter')
 
     await expect(page).toHaveURL('/dashboard')
@@ -311,8 +312,8 @@ test.describe('Accessibility', () => {
 test.describe('Security', () => {
   test('should not expose sensitive information in client', async ({ page }) => {
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     await page.goto('/dashboard')
@@ -328,8 +329,8 @@ test.describe('Security', () => {
 
   test('should handle session expiration', async ({ page, context }) => {
     await page.goto('/login')
-    await page.fill('input[name="email"]', 'admin@coreflow360.com')
-    await page.fill('input[name="password"]', 'demo123456')
+    await page.fill('input[name="email"]', testConfig.auth.adminEmail)
+    await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
 
     await page.goto('/dashboard')

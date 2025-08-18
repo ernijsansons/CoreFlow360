@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '../auth'
+import { validateCsrfToken } from '@/middleware/security'
 
 // Create compatibility function for getServerSession
 const getServerSession = async () => {
@@ -34,6 +35,7 @@ export interface AuthWrapperOptions {
   requireRole?: string
   allowedMethods?: string[]
   rateLimitByUser?: boolean
+  skipCsrfCheck?: boolean // For webhook endpoints
 }
 
 /**
@@ -57,6 +59,22 @@ export function withAuth(
           },
           { status: 405 }
         )
+      }
+
+      // CSRF Protection for mutations
+      if (!options.skipCsrfCheck && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
+        const csrfToken = request.headers.get('x-csrf-token')
+        const sessionToken = request.cookies.get('csrf-token')?.value
+
+        if (!csrfToken || !sessionToken || !validateCsrfToken(csrfToken, sessionToken)) {
+          return NextResponse.json(
+            { 
+              error: 'Invalid CSRF token',
+              code: 'CSRF_VALIDATION_FAILED' 
+            },
+            { status: 403 }
+          )
+        }
       }
 
       // Get session

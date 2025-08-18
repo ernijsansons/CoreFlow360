@@ -1,18 +1,18 @@
 # CoreFlow360 Code Audit Report
 
-**Generated:** 8/17/2025, 2:25:36 PM
+**Generated:** 8/17/2025, 8:04:31 PM
 
 ## 📊 Executive Summary
 
-- **Total Issues:** 6271
+- **Total Issues:** 6285
 - **Critical Issues:** 0 🔴
-- **High Issues:** 36 🟠
-- **Medium Issues:** 364 🟡
-- **Low Issues:** 5871 🟢
+- **High Issues:** 30 🟠
+- **Medium Issues:** 390 🟡
+- **Low Issues:** 5865 🟢
 
 ## Security Issues
 
-**Total:** 400
+**Total:** 420
 
 - **CSRF Vulnerabilities**: No description
   - File: `src/__tests__/auth/session-security.test.ts`
@@ -27,38 +27,38 @@
   - Severity: medium
 
 - **CSRF Vulnerabilities**: No description
-  - File: `src/__tests__/security.test.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
   - Severity: medium
 
 - **CSRF Vulnerabilities**: No description
-  - File: `src/__tests__/security.test.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
   - Severity: medium
 
 - **CSRF Vulnerabilities**: No description
-  - File: `src/__tests__/security.test.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
   - Severity: medium
 
 - **CSRF Vulnerabilities**: No description
-  - File: `src/__tests__/security.test.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
   - Severity: medium
 
 - **CSRF Vulnerabilities**: No description
-  - File: `src/__tests__/security.test.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
   - Severity: medium
 
 - **CSRF Vulnerabilities**: No description
-  - File: `src/__tests__/security.test.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
   - Severity: medium
 
 - **CSRF Vulnerabilities**: No description
-  - File: `src/__tests__/security.test.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
   - Severity: medium
 
-*... and 390 more issues*
+*... and 410 more issues*
 
 ## Quality Issues
 
-**Total:** 4934
+**Total:** 4933
 
 - **typescript**: .next/types/app/api/admin/api-keys/[id]/rotate/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
 
@@ -74,13 +74,13 @@
 
 - **typescript**: .next/types/app/api/auth/saml/metadata/[tenantId]/[idpName]/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { tenantId: string; idpName: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
 
-- **typescript**: .next/types/app/api/billing/anomalies/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/billing/anomalies/route"), "config" | "generateStaticParams" | "revalidate" | "dynamic" | ... 11 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+- **typescript**: .next/types/app/api/billing/anomalies/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/billing/anomalies/route"), "DELETE" | "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | ... 8 more ... | "maxDuration", "">' does not satisfy the constraint '{ [x: string]: never; }'.
 
-- **typescript**: .next/types/app/api/events/batch/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/events/batch/route"), "config" | "generateStaticParams" | "revalidate" | "dynamic" | "dynamicParams" | ... 10 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+- **typescript**: .next/types/app/api/events/batch/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/events/batch/route"), "DELETE" | "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "config" | ... 7 more ... | "maxDuration", "">' does not satisfy the constraint '{ [x: string]: never; }'.
 
 - **typescript**: .next/types/app/api/intelligence/business/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/intelligence/business/route"), "config" | "generateStaticParams" | "revalidate" | "dynamic" | ... 11 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
 
-*... and 4924 more issues*
+*... and 4923 more issues*
 
 ## Compliance Issues
 
@@ -120,7 +120,10 @@
 
 ## Secrets Issues
 
-**Total:** 24
+**Total:** 19
+
+- **hardcoded_secret**: No description
+  - File: `src/__tests__/auth/session-security.test.ts`
 
 - **hardcoded_secret**: No description
   - File: `src/__tests__/e2e/ai-orchestration.spec.ts`
@@ -129,30 +132,27 @@
   - File: `src/__tests__/e2e/auth-flow.spec.ts`
 
 - **hardcoded_secret**: No description
-  - File: `src/__tests__/e2e/global-setup.ts`
-
-- **hardcoded_secret**: No description
-  - File: `src/__tests__/e2e/global-setup.ts`
-
-- **hardcoded_secret**: No description
-  - File: `src/__tests__/e2e/global-setup.ts`
-
-- **hardcoded_secret**: No description
-  - File: `src/__tests__/e2e/global-setup.ts`
-
-- **hardcoded_secret**: No description
   - File: `src/__tests__/integration/api-flow.test.ts`
 
 - **hardcoded_secret**: No description
   - File: `src/__tests__/integration/auth-flow.test.ts`
 
 - **hardcoded_secret**: No description
-  - File: `src/__tests__/security/fortress-security.test.ts`
+  - File: `src/__tests__/stripe/subscription-lifecycle.test.ts`
 
 - **hardcoded_secret**: No description
-  - File: `src/__tests__/security/webhook-security.test.ts`
+  - File: `src/__tests__/stripe/webhook-processing.test.ts`
 
-*... and 14 more issues*
+- **hardcoded_secret**: No description
+  - File: `src/app/login/page.tsx`
+
+- **hardcoded_secret**: No description
+  - File: `src/app/login/page.tsx`
+
+- **hardcoded_secret**: No description
+  - File: `src/integrations/inventory/inventory-management-plugin.ts`
+
+*... and 9 more issues*
 
 ## 🚀 Recommendations
 

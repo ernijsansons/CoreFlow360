@@ -7,9 +7,10 @@
 
 import crypto from 'crypto'
 import { createWebhookValidator, WEBHOOK_CONFIGS } from '@/lib/security/webhook-security'
+import { testConfig } from '@/test-config'
 
 describe('Webhook Security Validation', () => {
-  const testSecret = 'test-webhook-secret-key-for-testing'
+  const testSecret = testConfig.security.webhookSecret
   
   describe('Stripe Webhook Security', () => {
     const stripeValidator = createWebhookValidator({

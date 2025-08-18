@@ -5,6 +5,7 @@
 
 import { chromium, FullConfig } from '@playwright/test'
 import { PrismaClient } from '@prisma/client'
+import { testConfig } from '@/test-config'
 
 const prisma = new PrismaClient()
 
@@ -92,25 +93,25 @@ async function seedTestData() {
         email: 'super@coreflow360.com',
         name: 'Super Admin',
         role: 'SUPER_ADMIN',
-        password: 'demo123456'
+        password: testConfig.auth.demoPassword
       },
       {
         email: 'admin@coreflow360.com',
         name: 'Admin User',
         role: 'ADMIN',
-        password: 'demo123456'
+        password: testConfig.auth.demoPassword
       },
       {
         email: 'manager@coreflow360.com',
         name: 'Manager User',
         role: 'MANAGER',
-        password: 'demo123456'
+        password: testConfig.auth.demoPassword
       },
       {
         email: 'user@coreflow360.com',
         name: 'Regular User',
         role: 'USER',
-        password: 'demo123456'
+        password: testConfig.auth.demoPassword
       }
     ]
 

@@ -13,11 +13,147 @@ vi.mock('next-auth', () => ({
   getServerSession: vi.fn()
 }))
 
+// Mock security middleware
+vi.mock('@/middleware/security', () => ({
+  validateCsrfToken: vi.fn((token1: string, token2: string) => token1 === token2)
+}))
+
 const mockGetServerSession = getServerSession as Mock
 
 describe('Authentication Security Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  describe('CSRF Protection', () => {
+    it('should reject POST requests without CSRF token', async () => {
+      const validSession = {
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          name: 'Test User',
+          tenantId: 'tenant-123',
+          role: 'user',
+          departmentId: 'dept-123',
+          permissions: ['read', 'write']
+        }
+      }
+
+      mockGetServerSession.mockResolvedValue(validSession)
+
+      const mockHandler = vi.fn()
+      const protectedHandler = withAuth(mockHandler)
+
+      const request = new NextRequest('http://localhost:3000/api/test', {
+        method: 'POST'
+      })
+      const response = await protectedHandler(request)
+
+      expect(response.status).toBe(403)
+      expect(mockHandler).not.toHaveBeenCalled()
+
+      const responseData = await response.json()
+      expect(responseData.error).toBe('Invalid CSRF token')
+      expect(responseData.code).toBe('CSRF_VALIDATION_FAILED')
+    })
+
+    it('should accept POST requests with valid CSRF token', async () => {
+      const validSession = {
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          name: 'Test User',
+          tenantId: 'tenant-123',
+          role: 'user',
+          departmentId: 'dept-123',
+          permissions: ['read', 'write']
+        }
+      }
+
+      mockGetServerSession.mockResolvedValue(validSession)
+
+      const mockHandler = vi.fn().mockImplementation(() => 
+        NextResponse.json({ success: true })
+      )
+      const protectedHandler = withAuth(mockHandler)
+
+      const csrfToken = 'test-csrf-token-123'
+      const request = new NextRequest('http://localhost:3000/api/test', {
+        method: 'POST',
+        headers: {
+          'x-csrf-token': csrfToken
+        }
+      })
+      // Mock cookie
+      Object.defineProperty(request, 'cookies', {
+        value: {
+          get: (name: string) => name === 'csrf-token' ? { value: csrfToken } : null
+        }
+      })
+
+      const response = await protectedHandler(request)
+
+      expect(response.status).toBe(200)
+      expect(mockHandler).toHaveBeenCalled()
+    })
+
+    it('should skip CSRF check for GET requests', async () => {
+      const validSession = {
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          name: 'Test User',
+          tenantId: 'tenant-123',
+          role: 'user',
+          departmentId: 'dept-123',
+          permissions: ['read']
+        }
+      }
+
+      mockGetServerSession.mockResolvedValue(validSession)
+
+      const mockHandler = vi.fn().mockImplementation(() => 
+        NextResponse.json({ success: true })
+      )
+      const protectedHandler = withAuth(mockHandler)
+
+      const request = new NextRequest('http://localhost:3000/api/test', {
+        method: 'GET'
+      })
+      const response = await protectedHandler(request)
+
+      expect(response.status).toBe(200)
+      expect(mockHandler).toHaveBeenCalled()
+    })
+
+    it('should skip CSRF check when skipCsrfCheck option is true', async () => {
+      const validSession = {
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          name: 'Test User',
+          tenantId: 'tenant-123',
+          role: 'user',
+          departmentId: 'dept-123',
+          permissions: ['webhook:receive']
+        }
+      }
+
+      mockGetServerSession.mockResolvedValue(validSession)
+
+      const mockHandler = vi.fn().mockImplementation(() => 
+        NextResponse.json({ success: true })
+      )
+      const webhookHandler = withAuth(mockHandler, { skipCsrfCheck: true })
+
+      const request = new NextRequest('http://localhost:3000/api/webhook', {
+        method: 'POST'
+      })
+      const response = await webhookHandler(request)
+
+      expect(response.status).toBe(200)
+      expect(mockHandler).toHaveBeenCalled()
+    })
   })
 
   describe('Session Validation', () => {
@@ -71,8 +207,7 @@ describe('Authentication Security Tests', () => {
           role: 'user',
           departmentId: 'dept-123',
           permissions: ['read', 'write']
-        },
-        csrfToken: process.env.TEST_CSRF_TOKEN || 'test-csrf-token-123'
+        }
       }
 
       mockGetServerSession.mockResolvedValue(validSession)
