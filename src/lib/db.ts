@@ -56,3 +56,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Type exports
 export type { Prisma }
+
+// Legacy export for backward compatibility
+export const db = prisma

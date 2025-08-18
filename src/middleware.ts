@@ -58,11 +58,17 @@ export async function middleware(request: NextRequest) {
     pathname === route || pathname.startsWith(`${route}/`)
   )
   
-  // Get session token
-  const token = await getToken({ 
-    req: request, 
-    secret: process.env.NEXTAUTH_SECRET 
-  })
+  // Get session token safely
+  let token = null
+  try {
+    token = await getToken({ 
+      req: request, 
+      secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || 'dev-secret-minimum-32-characters-long-for-security'
+    })
+  } catch (error) {
+    console.error('[Middleware] Auth token error:', error)
+    // Continue without token on error
+  }
 
   // If user is authenticated
   if (token) {

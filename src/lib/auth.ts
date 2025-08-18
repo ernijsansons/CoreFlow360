@@ -1,13 +1,11 @@
 /**
- * CoreFlow360 - Authentication Configuration
- * Fixed version that works on Vercel
+ * CoreFlow360 - Authentication v2
+ * Ultimate production-ready auth with complete error handling
  */
 
 import NextAuth from "next-auth"
-import type { NextAuthConfig, Session } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import GoogleProvider from "next-auth/providers/google"
-import { JWT } from "next-auth/jwt"
+import type { Session } from "next-auth"
+import { authConfig, isBuildTime } from "./auth-config"
 
 // Extended session type
 export interface ExtendedSession extends Session {
@@ -21,164 +19,141 @@ export interface ExtendedSession extends Session {
   csrfToken?: string
 }
 
-// Define auth configuration
-const authConfig: NextAuthConfig = {
-  providers: [
-    CredentialsProvider({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-        tenantId: { label: "Tenant ID", type: "text" }
-      },
-      async authorize(credentials) {
-        // Check if we're in a build environment
-        if (process.env.NEXT_PHASE === 'phase-production-build') {
-          return null
-        }
+// Create NextAuth instance with error handling
+let authInstance: ReturnType<typeof NextAuth> | null = null
 
-        try {
-          // Only load dependencies when actually authenticating
-          const [bcryptjs, { z }, { prisma }] = await Promise.all([
-            import("bcryptjs"),
-            import("zod"),
-            import("./db")
-          ])
-
-          const loginSchema = z.object({
-            email: z.string().email(),
-            password: z.string().min(8),
-            tenantId: z.string().optional()
-          })
-
-          const parsed = loginSchema.safeParse(credentials)
-          if (!parsed.success) return null
-
-          const { email, password, tenantId } = parsed.data
-
-          const user = await prisma.user.findFirst({
-            where: {
-              email,
-              ...(tenantId && { tenantId })
-            },
-            include: {
-              tenant: true,
-              department: true
-            }
-          })
-
-          if (!user || !user.password) return null
-          if (user.status !== 'ACTIVE') return null
-          if (!user.tenant || !user.tenant.isActive) return null
-
-          const isValid = await bcryptjs.compare(password, user.password)
-          if (!isValid) return null
-
-          // Update last login
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { lastLoginAt: new Date() }
-          }).catch(console.error)
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            image: user.avatar,
-            tenantId: user.tenantId,
-            role: user.role,
-            departmentId: user.departmentId,
-            permissions: JSON.parse(user.permissions || '[]')
-          }
-        } catch (error) {
-          console.error('[Auth] Login error:', error)
-          return null
-        }
-      }
-    }),
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
-      GoogleProvider({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        authorization: {
-          params: {
-            prompt: 'consent',
-            access_type: 'offline',
-            response_type: 'code'
-          }
-        }
-      })
-    ] : [])
-  ],
-  session: {
-    strategy: "jwt",
-    maxAge: 8 * 60 * 60, // 8 hours
-    updateAge: 60 * 60 // 1 hour
-  },
-  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "dev-secret-minimum-32-characters-long-for-security",
-  pages: {
-    signIn: "/login",
-    signOut: "/logout",
-    error: "/login", // Redirect to login on error
-    verifyRequest: "/auth/verify-request",
-    newUser: "/onboarding"
-  },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
-        token.tenantId = (user as any).tenantId
-        token.role = (user as any).role
-        token.departmentId = (user as any).departmentId
-        token.permissions = (user as any).permissions
-      }
-      return token
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string
-        session.user.tenantId = token.tenantId as string
-        session.user.role = token.role as string
-        session.user.departmentId = token.departmentId as string
-        session.user.permissions = (token.permissions as string[]) || []
-      }
-      return session as ExtendedSession
-    },
-    async signIn({ user, account }) {
-      // Allow all sign ins for now
-      return true
+function getAuthInstance() {
+  if (!authInstance) {
+    try {
+      authInstance = NextAuth(authConfig)
+    } catch (error) {
+      console.error('[Auth] Failed to create NextAuth instance:', error)
+      // Return a mock instance that always returns null/error
+      authInstance = {
+        auth: async () => null,
+        handlers: {
+          GET: async () => new Response('Auth service unavailable', { status: 503 }),
+          POST: async () => new Response('Auth service unavailable', { status: 503 })
+        },
+        signIn: async () => { throw new Error('Auth service unavailable') },
+        signOut: async () => { throw new Error('Auth service unavailable') }
+      } as any
     }
-  },
-  events: {
-    async signIn({ user }) {
-      console.log('[Auth] User signed in:', user.email)
-    },
-    async signOut({ token }) {
-      console.log('[Auth] User signed out')
-    }
-  },
-  debug: process.env.NODE_ENV === 'development'
+  }
+  return authInstance
 }
 
-// Create NextAuth instance
-const nextAuthInstance = NextAuth(authConfig)
-
-// Export auth methods
-export const { auth, handlers, signIn, signOut } = nextAuthInstance
-export const { GET, POST } = handlers
-
-// Helper functions
-export async function getServerSession(): Promise<ExtendedSession | null> {
+// Export auth method with complete error handling
+export const auth = async (): Promise<Session | null> => {
+  if (isBuildTime()) {
+    return null
+  }
+  
   try {
-    const session = await auth()
-    return session as ExtendedSession
+    const instance = getAuthInstance()
+    const session = await instance.auth()
+    
+    // Validate session structure
+    if (session && typeof session === 'object' && 'user' in session) {
+      return session
+    }
+    
+    return null
   } catch (error) {
-    console.error('[Auth] Get session error:', error)
+    console.error('[Auth] Session error:', error)
     return null
   }
 }
 
-export async function requireAuth() {
+// Export handlers with error handling
+export const handlers = {
+  GET: async (req: Request) => {
+    try {
+      const instance = getAuthInstance()
+      return await instance.handlers.GET(req)
+    } catch (error) {
+      console.error('[Auth] GET handler error:', error)
+      return new Response(
+        JSON.stringify({ error: 'Authentication service error' }),
+        { 
+          status: 503, 
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    }
+  },
+  POST: async (req: Request) => {
+    try {
+      const instance = getAuthInstance()
+      return await instance.handlers.POST(req)
+    } catch (error) {
+      console.error('[Auth] POST handler error:', error)
+      return new Response(
+        JSON.stringify({ error: 'Authentication service error' }),
+        { 
+          status: 503, 
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    }
+  }
+}
+
+// Export auth actions with error handling
+export const signIn = async (...args: any[]) => {
+  if (isBuildTime()) {
+    throw new Error('Cannot sign in during build time')
+  }
+  
+  try {
+    const instance = getAuthInstance()
+    return await instance.signIn(...args)
+  } catch (error) {
+    console.error('[Auth] Sign in error:', error)
+    throw error
+  }
+}
+
+export const signOut = async (...args: any[]) => {
+  if (isBuildTime()) {
+    throw new Error('Cannot sign out during build time')
+  }
+  
+  try {
+    const instance = getAuthInstance()
+    return await instance.signOut(...args)
+  } catch (error) {
+    console.error('[Auth] Sign out error:', error)
+    throw error
+  }
+}
+
+// Export handlers for route.ts
+export const { GET, POST } = handlers
+
+// Helper functions
+export async function getServerSession(): Promise<ExtendedSession | null> {
+  if (isBuildTime()) {
+    return null
+  }
+  
+  try {
+    const session = await auth()
+    if (!session) return null
+    
+    // Type assertion with validation
+    if ('user' in session && session.user) {
+      return session as ExtendedSession
+    }
+    
+    return null
+  } catch (error) {
+    console.error('[Auth] Get server session error:', error)
+    return null
+  }
+}
+
+export async function requireAuth(): Promise<ExtendedSession> {
   const session = await getServerSession()
   if (!session) {
     throw new Error('Unauthorized')
@@ -196,7 +171,7 @@ export function hasPermission(session: ExtendedSession, permission: string): boo
   return session.user.permissions?.includes(permission) || false
 }
 
-export async function requirePermission(permission: string) {
+export async function requirePermission(permission: string): Promise<ExtendedSession> {
   const session = await requireAuth()
   if (!hasPermission(session, permission)) {
     throw new Error('Forbidden')
@@ -204,13 +179,19 @@ export async function requirePermission(permission: string) {
   return session
 }
 
-// Password utilities
+// Password utilities with lazy loading
 export async function hashPassword(password: string): Promise<string> {
+  if (isBuildTime()) {
+    return 'build-time-hash'
+  }
   const bcryptjs = await import("bcryptjs")
   return bcryptjs.default.hash(password, 12)
 }
 
 export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+  if (isBuildTime()) {
+    return false
+  }
   const bcryptjs = await import("bcryptjs")
   return bcryptjs.default.compare(password, hashedPassword)
 }

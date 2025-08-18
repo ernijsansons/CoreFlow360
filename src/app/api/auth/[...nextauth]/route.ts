@@ -1,23 +1,31 @@
 /**
  * CoreFlow360 - NextAuth.js API Route Handler
- * Secure authentication endpoint with comprehensive error handling
+ * Production-ready authentication endpoint
  */
 
-export { GET, POST } from '@/lib/auth'
+import { handlers } from '@/lib/auth'
 
-/*
-✅ Pre-flight validation: NextAuth route handler with proper exports
-✅ Dependencies verified: Auth config provides GET/POST handlers
-✅ Failure modes identified: Handler errors, missing config, network issues
-✅ Scale planning: Route caching and load balancing ready
-*/
+// Re-export handlers with error handling
+export const GET = async (req: Request) => {
+  try {
+    return await handlers.GET(req)
+  } catch (error) {
+    console.error('[Auth Route] GET error:', error)
+    return new Response(
+      JSON.stringify({ error: 'Authentication service error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+}
 
-/*
-// Simulated Validations:
-// tsc: 0 errors
-// eslint: 0 warnings  
-// prettier: formatted
-// route-test: GET/POST handlers responding correctly
-// error-handling: proper error boundaries in place
-// performance: sub-50ms response times
-*/
+export const POST = async (req: Request) => {
+  try {
+    return await handlers.POST(req)
+  } catch (error) {
+    console.error('[Auth Route] POST error:', error)
+    return new Response(
+      JSON.stringify({ error: 'Authentication service error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+}
