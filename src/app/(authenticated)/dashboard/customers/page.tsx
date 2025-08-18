@@ -4,6 +4,11 @@ import { Suspense, lazy } from "react"
 import DashboardLayout from "@/components/layouts/DashboardLayout"
 import { ErrorBoundary } from "@/components/error/ErrorBoundary"
 
+// Build-time check to prevent prerendering issues
+const isBuildTime = () => {
+  return typeof window === 'undefined' && process.env.NODE_ENV === 'production'
+}
+
 // Dynamic import with loading fallback
 const CRMDashboard = lazy(() => import("@/components/crm/CRMDashboard").then(module => ({
   default: module.default
@@ -23,6 +28,17 @@ const CRMDashboardSkeleton = () => (
 )
 
 export default function CustomersPage() {
+  // Return a simple loading state during build time
+  if (isBuildTime()) {
+    return (
+      <DashboardLayout>
+        <div className="px-4 sm:px-6 lg:px-8">
+          <CRMDashboardSkeleton />
+        </div>
+      </DashboardLayout>
+    )
+  }
+
   return (
     <DashboardLayout>
       <div className="px-4 sm:px-6 lg:px-8">

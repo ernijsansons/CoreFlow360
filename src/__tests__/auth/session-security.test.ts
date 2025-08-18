@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest'
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from '@/lib/auth'
 import { withAuth, withAdminAuth, withPermissions } from '@/lib/auth/withAuth'
 
 // Mock next-auth

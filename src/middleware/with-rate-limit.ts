@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from '@/lib/auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { rateLimiter } from '@/lib/rate-limiting/enhanced-limiter'
 import { api } from '@/lib/api-response'

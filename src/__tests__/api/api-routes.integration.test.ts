@@ -23,7 +23,7 @@ vi.mock('@/lib/prisma', () => ({
   }
 }))
 
-import { getServerSession } from 'next-auth'
+import { getServerSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 const mockGetServerSession = getServerSession as Mock

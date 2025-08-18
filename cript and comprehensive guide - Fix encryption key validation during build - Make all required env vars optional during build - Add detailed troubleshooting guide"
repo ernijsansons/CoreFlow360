@@ -1,5 +1,0 @@
-[33m654cee4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m docs: Add deployment validation and final checklist
-[33m22027be[m fix: Critical deployment fixes for all build-time issues
-[33m0fcc092[m fix: Critical deployment issues resolved for Vercel
-[33mf3e4662[m fix: Update RATE_LIMIT_WINDOW validation to accept milliseconds
-[33m13f45f3[m chore: Update gitignore and dependencies
