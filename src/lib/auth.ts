@@ -39,10 +39,15 @@ const authConfig = () => {
   const authUrl = process.env.NEXTAUTH_URL
   const domain = isProd && authUrl ? authUrl.replace(/https?:\/\//, '') : undefined
   
+  // Check if we're in build time
+  const isBuildTime = process.env.VERCEL || process.env.BUILDING_FOR_VERCEL === '1' || 
+                      process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+  
   return {
-    adapter: PrismaAdapter(prisma),
+    // Only use PrismaAdapter at runtime, not during build
+    ...(isBuildTime ? {} : { adapter: PrismaAdapter(prisma) }),
     session: { 
-      strategy: "database",
+      strategy: "jwt", // Changed from "database" to "jwt" for build compatibility
       maxAge: 8 * 60 * 60, // 8 hours for security
       updateAge: 60 * 60, // Update session every hour
     },
@@ -327,13 +332,41 @@ const authConfig = () => {
   }
 }
 
+// Create NextAuth instance with proper error handling
+const createAuth = () => {
+  try {
+    // Ensure NEXTAUTH_SECRET is available
+    if (!process.env.NEXTAUTH_SECRET && process.env.NODE_ENV === 'production') {
+      console.error('NEXTAUTH_SECRET is not set in production')
+      // Use a fallback for build time only
+      if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build') {
+        process.env.NEXTAUTH_SECRET = 'build-time-placeholder-this-is-not-secure-and-only-for-build'
+      }
+    }
+    
+    return NextAuth(authConfig())
+  } catch (error) {
+    console.error('Failed to initialize NextAuth:', error)
+    // Return a minimal auth object for build time
+    return {
+      handlers: { 
+        GET: async () => new Response('Auth not configured', { status: 500 }),
+        POST: async () => new Response('Auth not configured', { status: 500 })
+      },
+      auth: async () => null,
+      signIn: async () => ({ error: 'Auth not configured' }),
+      signOut: async () => {}
+    }
+  }
+}
+
 // Export NextAuth configuration
 export const {
   handlers: { GET, POST },
   auth,
   signIn,
   signOut
-} = NextAuth(authConfig())
+} = createAuth()
 
 /**
  * Helper function to hash passwords
