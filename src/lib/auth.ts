@@ -33,48 +33,49 @@ export interface ExtendedSession extends Session {
   csrfToken?: string
 }
 
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut
-} = NextAuth({
-  adapter: PrismaAdapter(prisma),
-  session: { 
-    strategy: "database",
-    maxAge: 8 * 60 * 60, // 8 hours for security
-    updateAge: 60 * 60, // Update session every hour
-  },
-  cookies: {
-    sessionToken: {
-      name: process.env.NODE_ENV === 'production' ? `__Host-next-auth.session-token` : 'next-auth.session-token',
-      options: {
-        httpOnly: true,
-        sameSite: 'strict',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-        domain: process.env.NODE_ENV === 'production' ? process.env.NEXTAUTH_URL?.replace(/https?:\/\//, '') : undefined
+// Create auth configuration with lazy environment variable access
+const authConfig = () => {
+  const isProd = process.env.NODE_ENV === 'production'
+  const authUrl = process.env.NEXTAUTH_URL
+  const domain = isProd && authUrl ? authUrl.replace(/https?:\/\//, '') : undefined
+  
+  return {
+    adapter: PrismaAdapter(prisma),
+    session: { 
+      strategy: "database",
+      maxAge: 8 * 60 * 60, // 8 hours for security
+      updateAge: 60 * 60, // Update session every hour
+    },
+    cookies: {
+      sessionToken: {
+        name: isProd ? `__Host-next-auth.session-token` : 'next-auth.session-token',
+        options: {
+          httpOnly: true,
+          sameSite: 'strict',
+          path: '/',
+          secure: isProd,
+          domain: domain
+        }
+      },
+      callbackUrl: {
+        name: isProd ? `__Host-next-auth.callback-url` : 'next-auth.callback-url',
+        options: {
+          httpOnly: true,
+          sameSite: 'strict',
+          path: '/',
+          secure: isProd
+        }
+      },
+      csrfToken: {
+        name: isProd ? `__Host-next-auth.csrf-token` : 'next-auth.csrf-token',
+        options: {
+          httpOnly: true,
+          sameSite: 'strict',
+          path: '/',
+          secure: isProd
+        }
       }
     },
-    callbackUrl: {
-      name: process.env.NODE_ENV === 'production' ? `__Host-next-auth.callback-url` : 'next-auth.callback-url',
-      options: {
-        httpOnly: true,
-        sameSite: 'strict',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production'
-      }
-    },
-    csrfToken: {
-      name: process.env.NODE_ENV === 'production' ? `__Host-next-auth.csrf-token` : 'next-auth.csrf-token',
-      options: {
-        httpOnly: true,
-        sameSite: 'strict',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production'
-      }
-    }
-  },
   pages: {
     signIn: "/login",
     signOut: "/logout",
@@ -323,7 +324,16 @@ export const {
     }
   },
   debug: false // Disable debug in all environments for security
-})
+  }
+}
+
+// Export NextAuth configuration
+export const {
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut
+} = NextAuth(authConfig())
 
 /**
  * Helper function to hash passwords
