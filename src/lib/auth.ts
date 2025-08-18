@@ -3,9 +3,14 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import bcryptjs from "bcryptjs"
-import { prisma } from "./db"
 import { z } from "zod"
 import { initializeCSRFProtection } from "./csrf"
+
+// Lazy load prisma to prevent module-level database connections
+const getPrisma = () => {
+  const { prisma } = require("./db")
+  return prisma
+}
 
 // Enhanced login schema with security validations
 const loginSchema = z.object({
@@ -45,7 +50,7 @@ const authConfig = () => {
   
   return {
     // Only use PrismaAdapter at runtime, not during build
-    ...(isBuildTime ? {} : { adapter: PrismaAdapter(prisma) }),
+    ...(isBuildTime ? {} : { adapter: PrismaAdapter(getPrisma()) }),
     session: { 
       strategy: "jwt", // Changed from "database" to "jwt" for build compatibility
       maxAge: 8 * 60 * 60, // 8 hours for security
@@ -102,7 +107,7 @@ const authConfig = () => {
           const { email, password, tenantId } = loginSchema.parse(credentials)
 
           // Find user with tenant
-          const user = await prisma.user.findFirst({
+          const user = await getPrisma().user.findFirst({
             where: {
               email,
               ...(tenantId && { tenantId })
@@ -137,7 +142,7 @@ const authConfig = () => {
           const isPasswordValid = await bcryptjs.compare(password, user.password)
           if (!isPasswordValid) {
             // Increment login attempts
-            await prisma.user.update({
+            await getPrisma().user.update({
               where: { id: user.id },
               data: { 
                 loginAttempts: { increment: 1 },
@@ -150,7 +155,7 @@ const authConfig = () => {
           }
 
           // Reset login attempts and update last login
-          await prisma.user.update({
+          await getPrisma().user.update({
             where: { id: user.id },
             data: {
               loginAttempts: 0,
@@ -203,7 +208,7 @@ const authConfig = () => {
     async signIn({ user, account, profile, email, credentials }) {
       // For OAuth providers, ensure user is associated with a tenant
       if (account?.provider !== 'credentials') {
-        const existingUser = await prisma.user.findUnique({
+        const existingUser = await getPrisma().user.findUnique({
           where: { email: user.email! },
           include: { tenant: true }
         })
@@ -219,7 +224,7 @@ const authConfig = () => {
         }
 
         // Update last login
-        await prisma.user.update({
+        await getPrisma().user.update({
           where: { id: existingUser.id },
           data: { lastLoginAt: new Date() }
         })
@@ -244,7 +249,7 @@ const authConfig = () => {
 
       // Refresh tenant data periodically (every 5 minutes)
       if (token.tenantId && token.iat && Date.now() - token.iat * 1000 > 5 * 60 * 1000) {
-        const user = await prisma.user.findUnique({
+        const user = await getPrisma().user.findUnique({
           where: { id: token.id as string },
           include: { tenant: true }
         })
@@ -298,7 +303,7 @@ const authConfig = () => {
     async signIn({ user, account, profile, isNewUser }) {
       // Log sign in event
       if (user.id && user.tenantId) {
-        await prisma.auditLog.create({
+        await getPrisma().auditLog.create({
           data: {
             tenantId: user.tenantId,
             userId: user.id,
@@ -316,7 +321,7 @@ const authConfig = () => {
     async signOut({ token }) {
       // Log sign out event
       if (token?.id && token?.tenantId) {
-        await prisma.auditLog.create({
+        await getPrisma().auditLog.create({
           data: {
             tenantId: token.tenantId as string,
             userId: token.id as string,
