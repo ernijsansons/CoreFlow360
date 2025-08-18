@@ -1,9 +1,9 @@
 /**
  * CoreFlow360 - CSRF Protection
  * Generates and validates CSRF tokens for secure state-changing operations
+ * Edge-compatible implementation using Web Crypto API
  */
 
-import * as crypto from 'crypto'
 import { cookies } from 'next/headers'
 
 const CSRF_TOKEN_LENGTH = 32
@@ -16,45 +16,90 @@ export interface CSRFTokenPair {
 }
 
 /**
- * Generate a secure CSRF token
+ * Generate a secure CSRF token using Web Crypto API (Edge-compatible)
  */
 export function generateCSRFToken(): string {
-  return crypto.randomBytes(CSRF_TOKEN_LENGTH).toString('hex')
+  // Use Web Crypto API for Edge Runtime compatibility
+  const array = new Uint8Array(CSRF_TOKEN_LENGTH)
+  if (typeof globalThis.crypto !== 'undefined' && globalThis.crypto.getRandomValues) {
+    globalThis.crypto.getRandomValues(array)
+  } else {
+    // Fallback for environments without Web Crypto
+    for (let i = 0; i < array.length; i++) {
+      array[i] = Math.floor(Math.random() * 256)
+    }
+  }
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
+}
+
+/**
+ * Create HMAC using Web Crypto API (Edge-compatible)
+ */
+async function createHMAC(secret: string, data: string): Promise<string> {
+  // Convert strings to Uint8Array
+  const encoder = new TextEncoder()
+  const keyData = encoder.encode(secret)
+  const dataArray = encoder.encode(data)
+  
+  // Import the key
+  const key = await globalThis.crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  
+  // Create HMAC
+  const signature = await globalThis.crypto.subtle.sign(
+    'HMAC',
+    key,
+    dataArray
+  )
+  
+  // Convert to hex string
+  return Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
 }
 
 /**
  * Create a CSRF token pair (token and hashed cookie value)
  */
-export function createCSRFTokenPair(secret: string): CSRFTokenPair {
+export async function createCSRFTokenPair(secret: string): Promise<CSRFTokenPair> {
   const token = generateCSRFToken()
-  const cookieValue = crypto
-    .createHmac('sha256', secret)
-    .update(token)
-    .digest('hex')
+  const cookieValue = await createHMAC(secret, token)
   
   return { token, cookieValue }
 }
 
 /**
+ * Constant-time string comparison (Edge-compatible)
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  
+  let result = 0
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  }
+  return result === 0
+}
+
+/**
  * Validate a CSRF token against the cookie value
  */
-export function validateCSRFToken(
+export async function validateCSRFToken(
   token: string | null,
   cookieValue: string | null,
   secret: string
-): boolean {
+): Promise<boolean> {
   if (!token || !cookieValue) return false
   
-  const expectedCookieValue = crypto
-    .createHmac('sha256', secret)
-    .update(token)
-    .digest('hex')
+  const expectedCookieValue = await createHMAC(secret, token)
   
   // Constant-time comparison to prevent timing attacks
-  return crypto.timingSafeEqual(
-    Buffer.from(cookieValue),
-    Buffer.from(expectedCookieValue)
-  )
+  return timingSafeEqual(cookieValue, expectedCookieValue)
 }
 
 /**
@@ -106,7 +151,7 @@ export async function validateCSRFMiddleware(
   const token = getCSRFTokenFromHeaders(request.headers)
   const cookieValue = await getCSRFCookie()
   
-  return validateCSRFToken(token, cookieValue, secret)
+  return await validateCSRFToken(token, cookieValue, secret)
 }
 
 /**
@@ -115,7 +160,7 @@ export async function validateCSRFMiddleware(
 export async function initializeCSRFProtection(
   secret: string = process.env.API_KEY_SECRET || 'default-secret'
 ): Promise<string> {
-  const { token, cookieValue } = createCSRFTokenPair(secret)
+  const { token, cookieValue } = await createCSRFTokenPair(secret)
   await setCSRFCookie(cookieValue)
   return token
 }

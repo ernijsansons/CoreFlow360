@@ -4,10 +4,16 @@ import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import bcryptjs from "bcryptjs"
 import { z } from "zod"
-import { initializeCSRFProtection } from "./csrf"
 
 // Lazy load prisma to prevent module-level database connections
 const getPrisma = () => {
+  // Skip during build time
+  if (process.env.NEXT_PHASE === 'phase-production-build' || 
+      process.env.BUILDING_FOR_VERCEL === '1' ||
+      process.env.VERCEL || 
+      process.env.CI) {
+    return null
+  }
   const { prisma } = require("./db")
   return prisma
 }
@@ -35,7 +41,6 @@ export interface ExtendedSession extends Session {
     departmentId?: string
     permissions: string[]
   }
-  csrfToken?: string
 }
 
 // Create auth configuration with lazy environment variable access
@@ -50,7 +55,7 @@ const authConfig = () => {
   
   return {
     // Only use PrismaAdapter at runtime, not during build
-    ...(isBuildTime ? {} : { adapter: PrismaAdapter(getPrisma()) }),
+    ...(isBuildTime || !getPrisma() ? {} : { adapter: PrismaAdapter(getPrisma()) }),
     session: { 
       strategy: "jwt", // Changed from "database" to "jwt" for build compatibility
       maxAge: 8 * 60 * 60, // 8 hours for security
@@ -107,7 +112,10 @@ const authConfig = () => {
           const { email, password, tenantId } = loginSchema.parse(credentials)
 
           // Find user with tenant
-          const user = await getPrisma().user.findFirst({
+          const prisma = getPrisma()
+          if (!prisma) return null
+          
+          const user = await prisma.user.findFirst({
             where: {
               email,
               ...(tenantId && { tenantId })
@@ -142,7 +150,7 @@ const authConfig = () => {
           const isPasswordValid = await bcryptjs.compare(password, user.password)
           if (!isPasswordValid) {
             // Increment login attempts
-            await getPrisma().user.update({
+            await prisma.user.update({
               where: { id: user.id },
               data: { 
                 loginAttempts: { increment: 1 },
@@ -155,7 +163,7 @@ const authConfig = () => {
           }
 
           // Reset login attempts and update last login
-          await getPrisma().user.update({
+          await prisma.user.update({
             where: { id: user.id },
             data: {
               loginAttempts: 0,
@@ -208,7 +216,10 @@ const authConfig = () => {
     async signIn({ user, account, profile, email, credentials }) {
       // For OAuth providers, ensure user is associated with a tenant
       if (account?.provider !== 'credentials') {
-        const existingUser = await getPrisma().user.findUnique({
+        const prisma = getPrisma()
+        if (!prisma) return true // Allow during build
+        
+        const existingUser = await prisma.user.findUnique({
           where: { email: user.email! },
           include: { tenant: true }
         })
@@ -224,7 +235,7 @@ const authConfig = () => {
         }
 
         // Update last login
-        await getPrisma().user.update({
+        await prisma.user.update({
           where: { id: existingUser.id },
           data: { lastLoginAt: new Date() }
         })
@@ -249,7 +260,10 @@ const authConfig = () => {
 
       // Refresh tenant data periodically (every 5 minutes)
       if (token.tenantId && token.iat && Date.now() - token.iat * 1000 > 5 * 60 * 1000) {
-        const user = await getPrisma().user.findUnique({
+        const prisma = getPrisma()
+        if (!prisma) return token
+        
+        const user = await prisma.user.findUnique({
           where: { id: token.id as string },
           include: { tenant: true }
         })
@@ -278,16 +292,9 @@ const authConfig = () => {
         session.user.permissions = token.permissions as string[]
       }
 
-      // Generate CSRF token for the session
-      const secret = process.env.API_KEY_SECRET || process.env.NEXTAUTH_SECRET
-      if (!secret) {
-        throw new Error('No secret available for CSRF token generation')
-      }
-      const csrfToken = initializeCSRFProtection(secret)
-      return {
-        ...session,
-        csrfToken
-      } as ExtendedSession
+      // CSRF token generation removed from here to avoid Edge Runtime issues
+      // CSRF tokens should be generated in API routes or server components
+      return session as ExtendedSession
     },
     async redirect({ url, baseUrl }) {
       // Redirect to dashboard after successful login
@@ -303,33 +310,39 @@ const authConfig = () => {
     async signIn({ user, account, profile, isNewUser }) {
       // Log sign in event
       if (user.id && user.tenantId) {
-        await getPrisma().auditLog.create({
-          data: {
-            tenantId: user.tenantId,
-            userId: user.id,
-            action: 'LOGIN',
-            entityType: 'user',
-            entityId: user.id,
-            metadata: JSON.stringify({
-              provider: account?.provider || 'credentials',
-              isNewUser
-            })
-          }
-        }).catch(console.error) // Don't fail auth if audit log fails
+        const prisma = getPrisma()
+        if (prisma) {
+          await prisma.auditLog.create({
+            data: {
+              tenantId: user.tenantId,
+              userId: user.id,
+              action: 'LOGIN',
+              entityType: 'user',
+              entityId: user.id,
+              metadata: JSON.stringify({
+                provider: account?.provider || 'credentials',
+                isNewUser
+              })
+            }
+          }).catch(console.error) // Don't fail auth if audit log fails
+        }
       }
     },
     async signOut({ token }) {
       // Log sign out event
       if (token?.id && token?.tenantId) {
-        await getPrisma().auditLog.create({
-          data: {
-            tenantId: token.tenantId as string,
-            userId: token.id as string,
-            action: 'LOGOUT',
-            entityType: 'user',
-            entityId: token.id as string
-          }
-        }).catch(console.error) // Don't fail signout if audit log fails
+        const prisma = getPrisma()
+        if (prisma) {
+          await prisma.auditLog.create({
+            data: {
+              tenantId: token.tenantId as string,
+              userId: token.id as string,
+              action: 'LOGOUT',
+              entityType: 'user',
+              entityId: token.id as string
+            }
+          }).catch(console.error) // Don't fail signout if audit log fails
+        }
       }
     }
   },

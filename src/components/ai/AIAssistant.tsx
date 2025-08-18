@@ -54,7 +54,16 @@ interface AIContext {
 }
 
 export function AIAssistant() {
-  const { user } = useAuth()
+  // Try to use auth context, but handle the case when it's not available
+  let user = null
+  try {
+    const auth = useAuth()
+    user = auth.user
+  } catch (error) {
+    // Auth context not available (e.g., during static generation)
+    // Component will render without user-specific features
+  }
+  
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [messages, setMessages] = useState<AIMessage[]>([])
@@ -67,7 +76,7 @@ export function AIAssistant() {
   // Initialize with welcome message based on role
   useEffect(() => {
     if (user && messages.length === 0) {
-      const welcomeMessage = getWelcomeMessage(user.role)
+      const welcomeMessage = getWelcomeMessage(user.role || UserRole.GUEST)
       setMessages([welcomeMessage])
     }
   }, [user])

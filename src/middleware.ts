@@ -115,7 +115,13 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all paths except static files and images
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\..*|api/auth).*)',
+    // Match protected routes only
+    '/dashboard/:path*',
+    '/admin/:path*',
+    '/super-admin/:path*',
+    '/settings/:path*',
+    '/profile/:path*',
+    // Match API routes that need auth (excluding auth endpoints)
+    '/api/((?!auth|health|ping).*)',
   ]
 }

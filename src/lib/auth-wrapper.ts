@@ -5,11 +5,12 @@
 import { auth as nextAuth } from './auth'
 
 export async function getSession() {
-  // Skip auth during build time
+  // Skip auth during build time or in Edge runtime
   if (process.env.NEXT_PHASE === 'phase-production-build' || 
       process.env.BUILDING_FOR_VERCEL === '1' ||
       process.env.VERCEL_ENV === 'production' ||
-      process.env.CI) {
+      process.env.CI ||
+      typeof globalThis.EdgeRuntime !== 'undefined') {
     return null
   }
 
