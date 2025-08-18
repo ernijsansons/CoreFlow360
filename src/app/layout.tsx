@@ -110,11 +110,18 @@ export default async function RootLayout({
 }>) {
   // Safely handle auth - prevent 500 errors during build/SSR
   let session = null;
-  try {
-    session = await auth();
-  } catch (error) {
-    console.error('Auth error in layout:', error);
-    // Continue with null session rather than crashing
+  
+  // Skip auth during build time
+  const isBuildTime = process.env.VERCEL || process.env.BUILDING_FOR_VERCEL === '1' || 
+                      process.env.CI || process.env.NEXT_PHASE === 'phase-production-build';
+  
+  if (!isBuildTime) {
+    try {
+      session = await auth();
+    } catch (error) {
+      console.error('Auth error in layout:', error);
+      // Continue with null session rather than crashing
+    }
   }
   
   return (
