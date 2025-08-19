@@ -18,9 +18,9 @@ describe('Redis Cache', () => {
       misses: 0,
       sets: 0,
       deletes: 0,
-      errors: 0
+      errors: 0,
     }),
-    getHitRate: () => 0
+    getHitRate: () => 0,
   }
 
   it('should handle unavailable Redis gracefully', async () => {
@@ -51,7 +51,7 @@ describe('Redis Cache', () => {
     // This would test our cacheKey function
     const key1 = ['user', '123', 'profile'].join(':')
     const key2 = ['tenant', 'abc', 'settings'].join(':')
-    
+
     expect(key1).toBe('user:123:profile')
     expect(key2).toBe('tenant:abc:settings')
   })
@@ -61,7 +61,7 @@ describe('Redis Cache', () => {
     const tenantId = 'tenant-123'
     const key = 'user:456'
     const fullKey = `cf360:t:${tenantId}:${key}`
-    
+
     expect(fullKey).toBe('cf360:t:tenant-123:user:456')
   })
 
@@ -76,8 +76,12 @@ describe('Redis Cache', () => {
   it('should handle Redis errors gracefully', async () => {
     // Simulate Redis error
     const errorMock = {
-      get: async () => { throw new Error('Redis connection failed') },
-      set: async () => { throw new Error('Redis connection failed') }
+      get: async () => {
+        throw new Error('Redis connection failed')
+      },
+      set: async () => {
+        throw new Error('Redis connection failed')
+      },
     }
 
     // In real implementation, these should return null/false on error
@@ -90,14 +94,9 @@ describe('Redis Cache', () => {
 
   // Test cache invalidation patterns
   it('should support pattern-based cache invalidation', () => {
-    const patterns = [
-      'user:*',
-      'tenant:abc:*', 
-      'ai:*',
-      'session:*'
-    ]
-    
-    patterns.forEach(pattern => {
+    const patterns = ['user:*', 'tenant:abc:*', 'ai:*', 'session:*']
+
+    patterns.forEach((pattern) => {
       expect(pattern).toContain('*')
       expect(pattern.split(':').length).toBeGreaterThanOrEqual(2)
     })
@@ -107,9 +106,9 @@ describe('Redis Cache', () => {
 describe('Cache Helper Functions', () => {
   it('should create cache keys correctly', () => {
     function cacheKey(...parts: (string | number)[]): string {
-      return parts.map(p => String(p).replace(/:/g, '_')).join(':')
+      return parts.map((p) => String(p).replace(/:/g, '_')).join(':')
     }
-    
+
     expect(cacheKey('user', 123)).toBe('user:123')
     expect(cacheKey('tenant', 'abc', 'settings')).toBe('tenant:abc:settings')
     expect(cacheKey('user:special', 'data')).toBe('user_special:data')
@@ -121,13 +120,13 @@ describe('Cache Helper Functions', () => {
       tenantId?: string
       prefix?: string
     }
-    
+
     const options: CacheOptions = {
       ttl: 300,
       tenantId: 'tenant-123',
-      prefix: 'api'
+      prefix: 'api',
     }
-    
+
     expect(options.ttl).toBe(300)
     expect(options.tenantId).toBe('tenant-123')
     expect(options.prefix).toBe('api')
@@ -143,20 +142,20 @@ describe('Cache Integration Patterns', () => {
       if (cached !== null) {
         return cached
       }
-      
+
       // 2. Fetch from database
       const fresh = await fetchFromDatabase(key)
-      
+
       // 3. Update cache
       await mockRedis.set(key, fresh)
-      
+
       return fresh
     }
-    
+
     async function fetchFromDatabase(key: string) {
       return `fresh-data-for-${key}`
     }
-    
+
     const result = await getData('test-key')
     expect(result).toBe('fresh-data-for-test-key')
   })
@@ -166,18 +165,18 @@ describe('Cache Integration Patterns', () => {
     async function updateData(key: string, value: any) {
       // 1. Update database
       await updateDatabase(key, value)
-      
+
       // 2. Update cache
       await mockRedis.set(key, value)
-      
+
       return value
     }
-    
+
     async function updateDatabase(key: string, value: any) {
       // Simulate database update
       return true
     }
-    
+
     const result = await updateData('test-key', 'new-value')
     expect(result).toBe('new-value')
   })

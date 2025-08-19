@@ -16,7 +16,7 @@ export const PaymentEventSchema = z.object({
   sessionId: z.string(),
   eventType: z.enum([
     'payment_initiated',
-    'payment_processing', 
+    'payment_processing',
     'payment_succeeded',
     'payment_failed',
     'payment_cancelled',
@@ -29,7 +29,7 @@ export const PaymentEventSchema = z.object({
     'subscription_cancelled',
     'trial_started',
     'trial_converted',
-    'trial_expired'
+    'trial_expired',
   ]),
   timestamp: z.date(),
   amount: z.number(),
@@ -42,18 +42,22 @@ export const PaymentEventSchema = z.object({
   failureMessage: z.string().optional(),
   retryAttempt: z.number().default(0),
   isRetry: z.boolean().default(false),
-  metadata: z.object({
-    source: z.string().optional(),
-    campaign: z.string().optional(),
-    referrer: z.string().optional(),
-    userAgent: z.string().optional(),
-    ipAddress: z.string().optional(),
-    geoLocation: z.object({
-      country: z.string(),
-      region: z.string(),
-      city: z.string()
-    }).optional()
-  }).optional()
+  metadata: z
+    .object({
+      source: z.string().optional(),
+      campaign: z.string().optional(),
+      referrer: z.string().optional(),
+      userAgent: z.string().optional(),
+      ipAddress: z.string().optional(),
+      geoLocation: z
+        .object({
+          country: z.string(),
+          region: z.string(),
+          city: z.string(),
+        })
+        .optional(),
+    })
+    .optional(),
 })
 
 export const PaymentFunnelSchema = z.object({
@@ -63,16 +67,18 @@ export const PaymentFunnelSchema = z.object({
   startedAt: z.date(),
   completedAt: z.date().optional(),
   abandonedAt: z.date().optional(),
-  steps: z.array(z.object({
-    step: z.string(),
-    timestamp: z.date(),
-    completed: z.boolean(),
-    timeSpent: z.number().optional(),
-    exitReason: z.string().optional()
-  })),
+  steps: z.array(
+    z.object({
+      step: z.string(),
+      timestamp: z.date(),
+      completed: z.boolean(),
+      timeSpent: z.number().optional(),
+      exitReason: z.string().optional(),
+    })
+  ),
   conversionValue: z.number().optional(),
   plan: z.string().optional(),
-  abandonmentReason: z.string().optional()
+  abandonmentReason: z.string().optional(),
 })
 
 export type PaymentEvent = z.infer<typeof PaymentEventSchema>
@@ -140,7 +146,7 @@ export interface PaymentRecoveryStrategy {
 
 export class PaymentAnalyticsEngine {
   private recoveryStrategies: PaymentRecoveryStrategy[] = []
-  
+
   constructor() {
     this.initializeRecoveryStrategies()
   }
@@ -154,7 +160,7 @@ export class PaymentAnalyticsEngine {
       const validatedEvent = PaymentEventSchema.parse({
         ...event,
         eventId: event.eventId || this.generateEventId(),
-        timestamp: event.timestamp || new Date()
+        timestamp: event.timestamp || new Date(),
       })
 
       // Store event
@@ -183,19 +189,17 @@ export class PaymentAnalyticsEngine {
 
       // Track with enhanced event tracker
       await eventTracker.trackPaymentFlow(
-        validatedEvent.eventType.replace('payment_', '') as any,
+        validatedEvent.eventType.replace('payment_', '') as unknown,
         validatedEvent.amount,
         {
           subscriptionId: validatedEvent.subscriptionId,
           paymentMethodId: validatedEvent.paymentMethodId,
           failureReason: validatedEvent.failureMessage,
           retryAttempt: validatedEvent.retryAttempt,
-          planType: validatedEvent.planId
+          planType: validatedEvent.planId,
         }
       )
-
     } catch (error) {
-      console.error('Payment event tracking failed:', error)
       throw error
     }
   }
@@ -208,7 +212,7 @@ export class PaymentAnalyticsEngine {
     tenantId?: string
   ): Promise<PaymentAnalytics> {
     const cacheKey = `payment_analytics:${timeframe}:${tenantId || 'global'}`
-    
+
     // Try cache first
     const cached = await redis.get(cacheKey)
     if (cached) {
@@ -217,10 +221,10 @@ export class PaymentAnalyticsEngine {
 
     // Calculate analytics
     const analytics = await this.calculatePaymentAnalytics(timeframe, tenantId)
-    
+
     // Cache for 1 hour
     await redis.setex(cacheKey, 3600, JSON.stringify(analytics))
-    
+
     return analytics
   }
 
@@ -250,36 +254,36 @@ export class PaymentAnalyticsEngine {
           step: 'pricing_page',
           entered: 10000,
           completed: 3000,
-          conversionRate: 0.30,
+          conversionRate: 0.3,
           averageTime: 45,
           dropoffReasons: {
-            'price_concern': 40,
-            'feature_comparison': 25,
-            'session_timeout': 35
-          }
+            price_concern: 40,
+            feature_comparison: 25,
+            session_timeout: 35,
+          },
         },
         {
           step: 'signup_form',
           entered: 3000,
           completed: 2400,
-          conversionRate: 0.80,
+          conversionRate: 0.8,
           averageTime: 90,
           dropoffReasons: {
-            'form_complexity': 60,
-            'email_verification': 40
-          }
+            form_complexity: 60,
+            email_verification: 40,
+          },
         },
         {
           step: 'payment_details',
           entered: 2400,
           completed: 1920,
-          conversionRate: 0.80,
+          conversionRate: 0.8,
           averageTime: 120,
           dropoffReasons: {
-            'card_declined': 50,
-            'form_errors': 30,
-            'trust_concerns': 20
-          }
+            card_declined: 50,
+            form_errors: 30,
+            trust_concerns: 20,
+          },
         },
         {
           step: 'confirmation',
@@ -288,10 +292,10 @@ export class PaymentAnalyticsEngine {
           conversionRate: 0.78,
           averageTime: 30,
           dropoffReasons: {
-            'payment_processing': 70,
-            'page_errors': 30
-          }
-        }
+            payment_processing: 70,
+            page_errors: 30,
+          },
+        },
       ],
       optimizationRecommendations: [
         'Simplify pricing page with clear CTAs',
@@ -299,8 +303,8 @@ export class PaymentAnalyticsEngine {
         'Add trust badges to payment form',
         'Implement payment retry logic',
         'Add progress indicators',
-        'Optimize for mobile experience'
-      ]
+        'Optimize for mobile experience',
+      ],
     }
   }
 
@@ -324,7 +328,7 @@ export class PaymentAnalyticsEngine {
     }>
   }> {
     const cacheKey = `payment_failures:${timeframe}`
-    
+
     const cached = await redis.get(cacheKey)
     if (cached) {
       return JSON.parse(cached)
@@ -332,10 +336,10 @@ export class PaymentAnalyticsEngine {
 
     // Calculate failure analysis
     const analysis = await this.calculateFailureAnalysis(timeframe)
-    
+
     // Cache for 2 hours
     await redis.setex(cacheKey, 7200, JSON.stringify(analysis))
-    
+
     return analysis
   }
 
@@ -353,14 +357,14 @@ export class PaymentAnalyticsEngine {
     actions: string[]
   }> {
     const recoveryId = this.generateRecoveryId()
-    const selectedStrategy = strategy || await this.selectOptimalRecoveryStrategy(failedPaymentId)
-    
+    const selectedStrategy = strategy || (await this.selectOptimalRecoveryStrategy(failedPaymentId))
+
     // Store recovery attempt
     await this.storeRecoveryAttempt(recoveryId, failedPaymentId, selectedStrategy)
-    
+
     // Execute recovery actions
     const recoveryPlan = await this.executeRecoveryStrategy(recoveryId, selectedStrategy)
-    
+
     return recoveryPlan
   }
 
@@ -376,24 +380,27 @@ export class PaymentAnalyticsEngine {
     netRevenueRetention: number
     lifetimeValue: number
     paybackPeriod: number
-    cohortAnalysis: Record<string, {
-      retained: number
-      revenue: number
-      churnRate: number
-    }>
+    cohortAnalysis: Record<
+      string,
+      {
+        retained: number
+        revenue: number
+        churnRate: number
+      }
+    >
   }> {
     const cacheKey = `subscription_metrics:${timeframe}`
-    
+
     const cached = await redis.get(cacheKey)
     if (cached) {
       return JSON.parse(cached)
     }
 
     const metrics = await this.calculateSubscriptionMetrics(timeframe)
-    
+
     // Cache for 4 hours
     await redis.setex(cacheKey, 14400, JSON.stringify(metrics))
-    
+
     return metrics
   }
 
@@ -402,18 +409,18 @@ export class PaymentAnalyticsEngine {
    */
   private async storePaymentEvent(event: PaymentEvent): Promise<void> {
     const key = `payment_event:${event.eventId}`
-    
+
     // Store event data
     await redis.setex(key, 86400 * 90, JSON.stringify(event)) // 90 days retention
-    
+
     // Index by type and timestamp
     const typeKey = `payment_events:${event.eventType}:${this.getDateKey(event.timestamp)}`
     await redis.zadd(typeKey, event.timestamp.getTime(), event.eventId)
-    
+
     // Index by user
     const userKey = `user_payments:${event.userId}`
     await redis.zadd(userKey, event.timestamp.getTime(), event.eventId)
-    
+
     // Index by subscription if applicable
     if (event.subscriptionId) {
       const subKey = `subscription_payments:${event.subscriptionId}`
@@ -422,7 +429,9 @@ export class PaymentAnalyticsEngine {
   }
 
   private isHighValueTransaction(event: PaymentEvent): boolean {
-    return event.amount >= 1000 || (event.eventType === 'subscription_created' && event.amount >= 500)
+    return (
+      event.amount >= 1000 || (event.eventType === 'subscription_created' && event.amount >= 500)
+    )
   }
 
   private async runFraudDetection(event: PaymentEvent): Promise<void> {
@@ -431,36 +440,36 @@ export class PaymentAnalyticsEngine {
         eventId: event.eventId,
         userId: event.userId,
         tenantId: event.tenantId || '',
-        eventType: event.eventType as any,
+        eventType: event.eventType as unknown,
         timestamp: event.timestamp,
         amount: event.amount,
         paymentMethodId: event.paymentMethodId,
         ipAddress: event.metadata?.ipAddress || '',
         userAgent: event.metadata?.userAgent || '',
         geolocation: event.metadata?.geoLocation,
-        metadata: event.metadata || {}
+        metadata: event.metadata || {},
       })
 
       if (fraudAnalysis.blockTransaction) {
         await this.blockSuspiciousTransaction(event, fraudAnalysis)
       }
-    } catch (error) {
-      console.error('Fraud detection failed:', error)
-    }
+    } catch (error) {}
   }
 
   private async trackPaymentFunnel(event: PaymentEvent): Promise<void> {
     const funnelKey = `payment_funnel:${event.sessionId}`
-    
+
     // Get existing funnel or create new
-    let funnel = await redis.get(funnelKey)
-    const funnelData = funnel ? JSON.parse(funnel) : {
-      funnelId: this.generateFunnelId(),
-      userId: event.userId,
-      sessionId: event.sessionId,
-      startedAt: event.timestamp,
-      steps: []
-    }
+    const funnel = await redis.get(funnelKey)
+    const funnelData = funnel
+      ? JSON.parse(funnel)
+      : {
+          funnelId: this.generateFunnelId(),
+          userId: event.userId,
+          sessionId: event.sessionId,
+          startedAt: event.timestamp,
+          steps: [],
+        }
 
     // Add current step
     const step = this.mapEventToFunnelStep(event)
@@ -469,7 +478,7 @@ export class PaymentAnalyticsEngine {
         step,
         timestamp: event.timestamp,
         completed: event.eventType === 'payment_succeeded',
-        timeSpent: this.calculateStepTime(funnelData.steps, event.timestamp)
+        timeSpent: this.calculateStepTime(funnelData.steps, event.timestamp),
       })
 
       if (event.eventType === 'payment_succeeded') {
@@ -487,19 +496,22 @@ export class PaymentAnalyticsEngine {
 
   private async handlePaymentFailure(event: PaymentEvent): Promise<void> {
     // Store failure for analysis
-    await redis.lpush('payment_failures', JSON.stringify({
-      eventId: event.eventId,
-      userId: event.userId,
-      amount: event.amount,
-      failureCode: event.failureCode,
-      failureMessage: event.failureMessage,
-      timestamp: event.timestamp,
-      retryAttempt: event.retryAttempt
-    }))
+    await redis.lpush(
+      'payment_failures',
+      JSON.stringify({
+        eventId: event.eventId,
+        userId: event.userId,
+        amount: event.amount,
+        failureCode: event.failureCode,
+        failureMessage: event.failureMessage,
+        timestamp: event.timestamp,
+        retryAttempt: event.retryAttempt,
+      })
+    )
 
     // Determine if failure is recoverable
     const isRecoverable = this.isRecoverableFailure(event.failureCode || '')
-    
+
     if (isRecoverable && event.retryAttempt < 3) {
       // Queue for automatic recovery
       await this.queueAutomaticRecovery(event)
@@ -508,7 +520,7 @@ export class PaymentAnalyticsEngine {
     // Update failure metrics
     await redis.incr('metrics:payment_failures:total')
     await redis.incr(`metrics:payment_failures:${event.failureCode || 'unknown'}`)
-    
+
     if (isRecoverable) {
       await redis.incr('metrics:payment_failures:recoverable')
     }
@@ -518,7 +530,7 @@ export class PaymentAnalyticsEngine {
     // Update success metrics
     await redis.incr('metrics:payment_success:total')
     await redis.incrbyfloat('metrics:revenue:total', event.amount)
-    
+
     // Update MRR if subscription
     if (event.subscriptionId && event.eventType === 'subscription_created') {
       await redis.incrbyfloat('metrics:mrr', event.amount)
@@ -530,14 +542,14 @@ export class PaymentAnalyticsEngine {
 
   private async updatePaymentMetrics(event: PaymentEvent): Promise<void> {
     const dateKey = this.getDateKey(event.timestamp)
-    
+
     // Daily metrics
     await redis.incr(`metrics:payments:${dateKey}:total`)
     await redis.incrbyfloat(`metrics:revenue:${dateKey}`, event.amount)
-    
+
     // Event type metrics
     await redis.incr(`metrics:${event.eventType}:${dateKey}`)
-    
+
     // Success rate calculation
     if (event.eventType === 'payment_succeeded') {
       await redis.incr(`metrics:payments:${dateKey}:success`)
@@ -556,7 +568,7 @@ export class PaymentAnalyticsEngine {
         recoveryActions: ['retry_payment', 'suggest_different_card'],
         expectedRecoveryRate: 0.25,
         timeDelay: 60 * 60 * 24, // 24 hours
-        maxAttempts: 3
+        maxAttempts: 3,
       },
       {
         id: 'insufficient_funds_delay',
@@ -564,9 +576,9 @@ export class PaymentAnalyticsEngine {
         description: 'Retry payment after insufficient funds',
         triggerConditions: (event) => event.failureCode === 'insufficient_funds',
         recoveryActions: ['delay_retry', 'email_reminder'],
-        expectedRecoveryRate: 0.40,
+        expectedRecoveryRate: 0.4,
         timeDelay: 60 * 60 * 72, // 72 hours
-        maxAttempts: 2
+        maxAttempts: 2,
       },
       {
         id: 'expired_card_update',
@@ -574,14 +586,17 @@ export class PaymentAnalyticsEngine {
         description: 'Request card update for expired cards',
         triggerConditions: (event) => event.failureCode === 'expired_card',
         recoveryActions: ['request_card_update', 'pause_subscription'],
-        expectedRecoveryRate: 0.60,
+        expectedRecoveryRate: 0.6,
         timeDelay: 60 * 60 * 24, // 24 hours
-        maxAttempts: 1
-      }
+        maxAttempts: 1,
+      },
     ]
   }
 
-  private async calculatePaymentAnalytics(timeframe: string, tenantId?: string): Promise<PaymentAnalytics> {
+  private async calculatePaymentAnalytics(
+    _timeframe: string,
+    tenantId?: string
+  ): Promise<PaymentAnalytics> {
     // Implementation would calculate real analytics from stored events
     return {
       overview: {
@@ -592,104 +607,128 @@ export class PaymentAnalyticsEngine {
         conversionRate: 0.15,
         churnRate: 0.05,
         mrr: 45000,
-        arr: 540000
+        arr: 540000,
       },
       failures: {
         totalFailures: 120,
         failureRate: 0.08,
         failuresByReason: {
-          'card_declined': 45,
-          'insufficient_funds': 30,
-          'expired_card': 25,
-          'processing_error': 20
+          card_declined: 45,
+          insufficient_funds: 30,
+          expired_card: 25,
+          processing_error: 20,
         },
         recoverableFailures: 100,
-        recoveryOpportunity: 8000
+        recoveryOpportunity: 8000,
       },
       funnel: {
         steps: [
-          { step: 'pricing_view', users: 10000, dropoffRate: 0.70, conversionRate: 0.30, averageTime: 45 },
-          { step: 'signup_form', users: 3000, dropoffRate: 0.20, conversionRate: 0.80, averageTime: 90 },
-          { step: 'payment_form', users: 2400, dropoffRate: 0.20, conversionRate: 0.80, averageTime: 120 },
-          { step: 'confirmation', users: 1920, dropoffRate: 0.22, conversionRate: 0.78, averageTime: 30 }
+          {
+            step: 'pricing_view',
+            users: 10000,
+            dropoffRate: 0.7,
+            conversionRate: 0.3,
+            averageTime: 45,
+          },
+          {
+            step: 'signup_form',
+            users: 3000,
+            dropoffRate: 0.2,
+            conversionRate: 0.8,
+            averageTime: 90,
+          },
+          {
+            step: 'payment_form',
+            users: 2400,
+            dropoffRate: 0.2,
+            conversionRate: 0.8,
+            averageTime: 120,
+          },
+          {
+            step: 'confirmation',
+            users: 1920,
+            dropoffRate: 0.22,
+            conversionRate: 0.78,
+            averageTime: 30,
+          },
         ],
         abandonmentReasons: {
-          'price_concern': 40,
-          'payment_failure': 25,
-          'form_complexity': 20,
-          'trust_issues': 15
+          price_concern: 40,
+          payment_failure: 25,
+          form_complexity: 20,
+          trust_issues: 15,
         },
         optimizationOpportunities: [
           'Simplify payment form',
           'Add trust badges',
           'Offer payment plans',
-          'Improve error messaging'
-        ]
+          'Improve error messaging',
+        ],
       },
       cohorts: {
         retention: {
-          'month_1': 0.85,
-          'month_3': 0.70,
-          'month_6': 0.60,
-          'month_12': 0.55
+          month_1: 0.85,
+          month_3: 0.7,
+          month_6: 0.6,
+          month_12: 0.55,
         },
         ltv: {
-          'month_1': 100,
-          'month_3': 280,
-          'month_6': 520,
-          'month_12': 960
+          month_1: 100,
+          month_3: 280,
+          month_6: 520,
+          month_12: 960,
         },
-        paybackPeriod: 3.2
+        paybackPeriod: 3.2,
       },
       fraud: {
         riskScore: 15,
         blockedTransactions: 8,
         savedAmount: 5000,
-        falsePositives: 2
+        falsePositives: 2,
       },
       recovery: {
         failedPayments: 120,
         recoveryAttempts: 95,
         successfulRecoveries: 35,
         recoveredRevenue: 3500,
-        recoveryRate: 0.37
-      }
+        recoveryRate: 0.37,
+      },
     }
   }
 
-  private async calculateFailureAnalysis(timeframe: string): Promise<any> {
+  private async calculateFailureAnalysis(_timeframe: string): Promise<unknown> {
     // Implementation would analyze actual failure data
     return {
       totalFailures: 120,
       failureRate: 0.08,
       failuresByReason: {
-        'card_declined': { count: 45, recoverable: true, impact: 4500 },
-        'insufficient_funds': { count: 30, recoverable: true, impact: 3000 },
-        'expired_card': { count: 25, recoverable: true, impact: 2500 },
-        'processing_error': { count: 20, recoverable: false, impact: 2000 }
+        card_declined: { count: 45, recoverable: true, impact: 4500 },
+        insufficient_funds: { count: 30, recoverable: true, impact: 3000 },
+        expired_card: { count: 25, recoverable: true, impact: 2500 },
+        processing_error: { count: 20, recoverable: false, impact: 2000 },
       },
       recoveryOpportunities: [
         {
           reason: 'card_declined',
           count: 45,
           potentialRecovery: 1125,
-          recommendedActions: ['Retry with different card', 'Contact customer']
+          recommendedActions: ['Retry with different card', 'Contact customer'],
         },
         {
           reason: 'insufficient_funds',
           count: 30,
           potentialRecovery: 1200,
-          recommendedActions: ['Delay retry', 'Offer payment plan']
-        }
+          recommendedActions: ['Delay retry', 'Offer payment plan'],
+        },
       ],
       topFailurePatterns: [
         { pattern: 'Mobile checkout failures', occurrences: 35, impact: 3500 },
-        { pattern: 'International card issues', occurrences: 20, impact: 2000 }
-      ]
+        { pattern: 'International card issues', occurrences: 20, impact: 2000 },
+      ],
     }
   }
 
-  private async calculateSubscriptionMetrics(timeframe: string): Promise<any> {
+  private async calculateSubscriptionMetrics(_timeframe: string): Promise<unknown> {
     // Implementation would calculate real subscription metrics
     return {
       mrr: 45000,
@@ -702,9 +741,9 @@ export class PaymentAnalyticsEngine {
       paybackPeriod: 3.2,
       cohortAnalysis: {
         '2024-01': { retained: 0.85, revenue: 15000, churnRate: 0.15 },
-        '2024-02': { retained: 0.80, revenue: 18000, churnRate: 0.12 },
-        '2024-03': { retained: 0.78, revenue: 20000, churnRate: 0.10 }
-      }
+        '2024-02': { retained: 0.8, revenue: 18000, churnRate: 0.12 },
+        '2024-03': { retained: 0.78, revenue: 20000, churnRate: 0.1 },
+      },
     }
   }
 
@@ -727,17 +766,17 @@ export class PaymentAnalyticsEngine {
 
   private mapEventToFunnelStep(event: PaymentEvent): string | null {
     const stepMap: Record<string, string> = {
-      'payment_initiated': 'payment_form',
-      'payment_processing': 'processing',
-      'payment_succeeded': 'confirmation',
-      'payment_failed': 'payment_form',
-      'payment_cancelled': 'payment_form'
+      payment_initiated: 'payment_form',
+      payment_processing: 'processing',
+      payment_succeeded: 'confirmation',
+      payment_failed: 'payment_form',
+      payment_cancelled: 'payment_form',
     }
-    
+
     return stepMap[event.eventType] || null
   }
 
-  private calculateStepTime(steps: any[], currentTime: Date): number {
+  private calculateStepTime(steps: unknown[], currentTime: Date): number {
     if (steps.length === 0) return 0
     const lastStep = steps[steps.length - 1]
     return currentTime.getTime() - new Date(lastStep.timestamp).getTime()
@@ -748,65 +787,83 @@ export class PaymentAnalyticsEngine {
       'card_declined',
       'insufficient_funds',
       'expired_card',
-      'authentication_required'
+      'authentication_required',
     ]
-    
+
     return recoverableCodes.includes(failureCode)
   }
 
   private async queueAutomaticRecovery(event: PaymentEvent): Promise<void> {
     // Queue recovery attempt
-    await redis.lpush('payment_recovery_queue', JSON.stringify({
-      eventId: event.eventId,
-      userId: event.userId,
-      subscriptionId: event.subscriptionId,
-      amount: event.amount,
-      failureCode: event.failureCode,
-      retryAttempt: event.retryAttempt + 1,
-      scheduledFor: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-    }))
+    await redis.lpush(
+      'payment_recovery_queue',
+      JSON.stringify({
+        eventId: event.eventId,
+        userId: event.userId,
+        subscriptionId: event.subscriptionId,
+        amount: event.amount,
+        failureCode: event.failureCode,
+        retryAttempt: event.retryAttempt + 1,
+        scheduledFor: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      })
+    )
   }
 
-  private async blockSuspiciousTransaction(event: PaymentEvent, fraudAnalysis: any): Promise<void> {
+  private async blockSuspiciousTransaction(
+    event: PaymentEvent,
+    fraudAnalysis: unknown
+  ): Promise<void> {
     // Block the transaction
-    await redis.setex(`blocked_transaction:${event.eventId}`, 86400, JSON.stringify({
-      reason: 'fraud_detection',
-      riskScore: fraudAnalysis.riskScore,
-      indicators: fraudAnalysis.fraudIndicators
-    }))
+    await redis.setex(
+      `blocked_transaction:${event.eventId}`,
+      86400,
+      JSON.stringify({
+        reason: 'fraud_detection',
+        riskScore: fraudAnalysis.riskScore,
+        indicators: fraudAnalysis.fraudIndicators,
+      })
+    )
   }
 
-  private async storeRecoveryAttempt(recoveryId: string, paymentId: string, strategy: string): Promise<void> {
-    await redis.setex(`recovery_attempt:${recoveryId}`, 86400 * 30, JSON.stringify({
-      paymentId,
-      strategy,
-      createdAt: new Date(),
-      status: 'initiated'
-    }))
+  private async storeRecoveryAttempt(
+    recoveryId: string,
+    paymentId: string,
+    strategy: string
+  ): Promise<void> {
+    await redis.setex(
+      `recovery_attempt:${recoveryId}`,
+      86400 * 30,
+      JSON.stringify({
+        paymentId,
+        strategy,
+        createdAt: new Date(),
+        status: 'initiated',
+      })
+    )
   }
 
-  private async selectOptimalRecoveryStrategy(paymentId: string): Promise<string> {
+  private async selectOptimalRecoveryStrategy(_paymentId: string): Promise<string> {
     // Default to card_declined_retry
     return 'card_declined_retry'
   }
 
-  private async executeRecoveryStrategy(recoveryId: string, strategy: string): Promise<any> {
+  private async executeRecoveryStrategy(recoveryId: string, strategy: string): Promise<unknown> {
     // Implementation would execute the actual recovery strategy
     return {
       recoveryId,
       strategy,
       estimatedRecoveryRate: 0.25,
       nextAttemptAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      actions: ['Retry payment in 24 hours', 'Send recovery email']
+      actions: ['Retry payment in 24 hours', 'Send recovery email'],
     }
   }
 
   private async clearRecoveryAttempts(userId: string, subscriptionId?: string): Promise<void> {
     // Clear recovery attempts for successful payment
-    const pattern = subscriptionId 
-      ? `recovery_attempt:*:${subscriptionId}` 
+    const pattern = subscriptionId
+      ? `recovery_attempt:*:${subscriptionId}`
       : `recovery_attempt:*:${userId}`
-    
+
     // Implementation would clear recovery attempts
   }
 }

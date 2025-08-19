@@ -10,7 +10,7 @@ export interface NotificationOptions {
   title: string
   message: string
   type: 'info' | 'success' | 'warning' | 'error' | 'urgent'
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   actionUrl?: string
   actionLabel?: string
 }
@@ -22,7 +22,7 @@ export interface Notification {
   message: string
   type: string
   read: boolean
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   actionUrl?: string
   actionLabel?: string
   createdAt: Date
@@ -44,19 +44,17 @@ export async function createNotification(options: NotificationOptions): Promise<
       metadata: options.metadata,
       actionUrl: options.actionUrl,
       actionLabel: options.actionLabel,
-      createdAt: new Date()
+      createdAt: new Date(),
     }
-    
+
     // Log notification for development
-    console.log('Creating notification:', notification)
-    
+
     // In production, save to database and trigger real-time update
     // await prisma.notification.create({ data: notification })
     // await sendRealtimeUpdate(options.userId, 'notification', notification)
-    
+
     return notification
   } catch (error) {
-    console.error('Notification creation error:', error)
     throw new Error('Failed to create notification')
   }
 }
@@ -64,17 +62,17 @@ export async function createNotification(options: NotificationOptions): Promise<
 /**
  * Mark notification as read
  */
-export async function markNotificationAsRead(notificationId: string, userId: string): Promise<void> {
+export async function markNotificationAsRead(
+  _notificationId: string,
+  userId: string
+): Promise<void> {
   try {
-    console.log('Marking notification as read:', { notificationId, userId })
-    
     // In production:
     // await prisma.notification.update({
     //   where: { id: notificationId, userId },
     //   data: { read: true, readAt: new Date() }
     // })
   } catch (error) {
-    console.error('Mark notification error:', error)
     throw new Error('Failed to mark notification as read')
   }
 }
@@ -82,17 +80,16 @@ export async function markNotificationAsRead(notificationId: string, userId: str
 /**
  * Get unread notification count
  */
-export async function getUnreadCount(userId: string): Promise<number> {
+export async function getUnreadCount(_userId: string): Promise<number> {
   try {
     // In production:
     // return await prisma.notification.count({
     //   where: { userId, read: false }
     // })
-    
+
     // Mock for development
     return Math.floor(Math.random() * 5)
   } catch (error) {
-    console.error('Get unread count error:', error)
     throw new Error('Failed to get unread count')
   }
 }
@@ -119,7 +116,7 @@ export async function getUserNotifications(
     //   take: options?.limit || 20,
     //   skip: options?.offset || 0
     // })
-    
+
     // Mock for development
     return [
       {
@@ -131,7 +128,7 @@ export async function getUserNotifications(
         read: false,
         actionUrl: '/dashboard/leads/lead-123',
         actionLabel: 'View Lead',
-        createdAt: new Date(Date.now() - 1000 * 60 * 30)
+        createdAt: new Date(Date.now() - 1000 * 60 * 30),
       },
       {
         id: 'notif-2',
@@ -140,11 +137,10 @@ export async function getUserNotifications(
         message: 'Congratulations! Enterprise Deal with GlobalTech closed for $125,000',
         type: 'success',
         read: true,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2)
-      }
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
+      },
     ]
   } catch (error) {
-    console.error('Get notifications error:', error)
     throw new Error('Failed to get notifications')
   }
 }
@@ -157,13 +153,10 @@ export async function broadcastNotification(
   options: Omit<NotificationOptions, 'userId'>
 ): Promise<void> {
   try {
-    const promises = userIds.map(userId =>
-      createNotification({ ...options, userId })
-    )
-    
+    const promises = userIds.map((userId) => createNotification({ ...options, userId }))
+
     await Promise.all(promises)
   } catch (error) {
-    console.error('Broadcast notification error:', error)
     throw new Error('Failed to broadcast notification')
   }
 }
@@ -171,11 +164,6 @@ export async function broadcastNotification(
 /**
  * Send real-time update (for WebSocket/SSE)
  */
-async function sendRealtimeUpdate(
-  userId: string,
-  type: string,
-  data: any
-): Promise<void> {
+async function sendRealtimeUpdate(_userId: string, _type: string, _data: unknown): Promise<void> {
   // In production, this would send via WebSocket or Server-Sent Events
-  console.log('Sending realtime update:', { userId, type, data })
 }

@@ -3,7 +3,16 @@
  * End-to-end flow testing from lead ingestion to AI voice calls
  */
 
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, jest } from '@jest/globals'
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  beforeAll,
+  afterAll,
+  jest,
+} from '@jest/globals'
 import { createServer } from 'http'
 import request from 'supertest'
 import { db } from '@/lib/db'
@@ -28,7 +37,7 @@ describe('Webhook to Calls Integration', () => {
   beforeAll(async () => {
     // Setup test WebSocket server
     wsServer = new WebSocket.Server({ port: wsPort })
-    
+
     // Clean database
     await db.lead.deleteMany({ where: { phone: { contains: '+1555' } } })
     await db.callLog.deleteMany({ where: { toNumber: { contains: '+1555' } } })
@@ -40,21 +49,21 @@ describe('Webhook to Calls Integration', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    
+
     // Mock successful Twilio responses
     mockTwilioClient.initiateCall.mockResolvedValue({
       success: true,
       callSid: 'CA' + Math.random().toString(36).substr(2, 14),
       status: 'queued',
-      estimatedDuration: 60
+      estimatedDuration: 60,
     })
-    
+
     mockTwilioClient.getCallStatus.mockResolvedValue({
       callSid: 'CA123456789',
       status: 'completed',
       duration: 45,
       startTime: new Date(Date.now() - 45000),
-      endTime: new Date()
+      endTime: new Date(),
     })
   })
 
@@ -62,43 +71,46 @@ describe('Webhook to Calls Integration', () => {
     it('should process Facebook webhook and initiate voice call', async () => {
       const facebookPayload = {
         object: 'page',
-        entry: [{
-          id: '123456789',
-          time: Date.now(),
-          changes: [{
-            value: {
-              form_id: '987654321',
-              leadgen_id: 'lead_123',
-              created_time: Date.now(),
-              page_id: '123456789',
-              adgroup_id: '456789123'
-            },
-            field: 'leadgen'
-          }]
-        }]
+        entry: [
+          {
+            id: '123456789',
+            time: Date.now(),
+            changes: [
+              {
+                value: {
+                  form_id: '987654321',
+                  leadgen_id: 'lead_123',
+                  created_time: Date.now(),
+                  page_id: '123456789',
+                  adgroup_id: '456789123',
+                },
+                field: 'leadgen',
+              },
+            ],
+          },
+        ],
       }
 
       // Mock Facebook API response for lead details
-      global.fetch = jest.fn()
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            name: 'John Doe',
-            email: 'john@example.com',
-            phone_number: '+15551234567',
-            custom_questions: [
-              { question: 'Service needed?', answer: 'AC repair' },
-              { question: 'Property type?', answer: 'Single family home' }
-            ]
-          })
-        })
+      global.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          name: 'John Doe',
+          email: 'john@example.com',
+          phone_number: '+15551234567',
+          custom_questions: [
+            { question: 'Service needed?', answer: 'AC repair' },
+            { question: 'Property type?', answer: 'Single family home' },
+          ],
+        }),
+      })
 
       const { req, res } = createMocks<NextApiRequest, NextApiResponse>({
         method: 'POST',
         body: facebookPayload,
         headers: {
-          'x-hub-signature-256': 'sha256=valid_signature'
-        }
+          'x-hub-signature-256': 'sha256=valid_signature',
+        },
       })
 
       // Import and call webhook handler
@@ -110,13 +122,13 @@ describe('Webhook to Calls Integration', () => {
       expect(result.processed).toBe(true)
 
       // Wait for queue processing
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
       // Verify lead created in database
       const lead = await db.lead.findFirst({
-        where: { phone: '+15551234567' }
+        where: { phone: '+15551234567' },
       })
-      
+
       expect(lead).toBeDefined()
       expect(lead!.name).toBe('John Doe')
       expect(lead!.email).toBe('john@example.com')
@@ -130,19 +142,19 @@ describe('Webhook to Calls Integration', () => {
           leadId: lead!.id,
           script: expect.objectContaining({
             id: expect.any(String),
-            greeting: expect.stringContaining('CoreFlow360')
-          })
+            greeting: expect.stringContaining('CoreFlow360'),
+          }),
         })
       )
 
       // Verify call log created
       const callLog = await db.callLog.findFirst({
-        where: { 
+        where: {
           leadId: lead!.id,
-          toNumber: '+15551234567'
-        }
+          toNumber: '+15551234567',
+        },
       })
-      
+
       expect(callLog).toBeDefined()
       expect(callLog!.status).toBe('QUEUED')
       expect(callLog!.callType).toBe('OUTBOUND_AUTO')
@@ -151,12 +163,12 @@ describe('Webhook to Calls Integration', () => {
     it('should handle malformed Facebook webhook', async () => {
       const invalidPayload = {
         object: 'invalid',
-        entry: []
+        entry: [],
       }
 
       const { req } = createMocks<NextApiRequest>({
         method: 'POST',
-        body: invalidPayload
+        body: invalidPayload,
       })
 
       const { POST } = await import('@/app/api/leads/webhook/route')
@@ -168,26 +180,30 @@ describe('Webhook to Calls Integration', () => {
     it('should handle duplicate webhooks idempotently', async () => {
       const payload = {
         object: 'page',
-        entry: [{
-          id: '123',
-          time: Date.now(),
-          changes: [{
-            value: {
-              leadgen_id: 'duplicate_lead_123',
-              form_id: '987',
-              created_time: Date.now()
-            },
-            field: 'leadgen'
-          }]
-        }]
+        entry: [
+          {
+            id: '123',
+            time: Date.now(),
+            changes: [
+              {
+                value: {
+                  leadgen_id: 'duplicate_lead_123',
+                  form_id: '987',
+                  created_time: Date.now(),
+                },
+                field: 'leadgen',
+              },
+            ],
+          },
+        ],
       }
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
           name: 'Jane Doe',
-          phone_number: '+15559876543'
-        })
+          phone_number: '+15559876543',
+        }),
       })
 
       const { POST } = await import('@/app/api/leads/webhook/route')
@@ -204,11 +220,11 @@ describe('Webhook to Calls Integration', () => {
 
       // Should only create one lead
       const leads = await db.lead.findMany({
-        where: { phone: '+15559876543' }
+        where: { phone: '+15559876543' },
       })
-      
+
       expect(leads).toHaveLength(1)
-      
+
       // Should only initiate one call
       expect(mockTwilioClient.initiateCall).toHaveBeenCalledTimes(1)
     })
@@ -223,14 +239,14 @@ describe('Webhook to Calls Integration', () => {
           email: 'bob@example.com',
           phone: '+15557890123',
           campaign: 'HVAC Summer 2024',
-          keywords: 'ac repair near me'
-        }
+          keywords: 'ac repair near me',
+        },
       }
 
       const { req } = createMocks({
         method: 'POST',
         body: zapierPayload,
-        headers: { 'x-zapier-webhook-id': 'zap_123' }
+        headers: { 'x-zapier-webhook-id': 'zap_123' },
       })
 
       const { POST } = await import('@/app/api/leads/webhook/route')
@@ -238,10 +254,10 @@ describe('Webhook to Calls Integration', () => {
 
       expect(response.status).toBe(200)
 
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
       const lead = await db.lead.findFirst({
-        where: { phone: '+15557890123' }
+        where: { phone: '+15557890123' },
       })
 
       expect(lead).toBeDefined()
@@ -256,13 +272,13 @@ describe('Webhook to Calls Integration', () => {
         phone: '+15556547890',
         service: 'heating_maintenance',
         preferred_time: 'morning',
-        message: 'Need annual maintenance'
+        message: 'Need annual maintenance',
       }
 
       const { req } = createMocks({
         method: 'POST',
         body: formPayload,
-        headers: { 'content-type': 'application/json' }
+        headers: { 'content-type': 'application/json' },
       })
 
       const { POST } = await import('@/app/api/leads/webhook/route')
@@ -270,10 +286,10 @@ describe('Webhook to Calls Integration', () => {
 
       expect(response.status).toBe(200)
 
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
       const lead = await db.lead.findFirst({
-        where: { phone: '+15556547890' }
+        where: { phone: '+15556547890' },
       })
 
       expect(lead).toBeDefined()
@@ -293,8 +309,8 @@ describe('Webhook to Calls Integration', () => {
           phone: '+15551237890',
           email: 'test@example.com',
           source: 'test',
-          status: 'NEW'
-        }
+          status: 'NEW',
+        },
       })
 
       const callLog = await db.callLog.create({
@@ -305,8 +321,8 @@ describe('Webhook to Calls Integration', () => {
           toNumber: '+15551237890',
           fromNumber: '+15559876543',
           status: 'QUEUED',
-          callType: 'OUTBOUND_AUTO'
-        }
+          callType: 'OUTBOUND_AUTO',
+        },
       })
 
       // Simulate Twilio status callback
@@ -315,13 +331,13 @@ describe('Webhook to Calls Integration', () => {
         CallStatus: 'in-progress',
         CallDuration: '0',
         From: '+15559876543',
-        To: '+15551237890'
+        To: '+15551237890',
       }
 
       const { req } = createMocks({
         method: 'POST',
         body: statusPayload,
-        headers: { 'content-type': 'application/x-www-form-urlencoded' }
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
       })
 
       const { POST } = await import('@/app/api/voice/twilio/status/route')
@@ -331,7 +347,7 @@ describe('Webhook to Calls Integration', () => {
 
       // Verify call status updated
       const updatedCall = await db.callLog.findUnique({
-        where: { id: callLog.id }
+        where: { id: callLog.id },
       })
 
       expect(updatedCall!.status).toBe('IN_PROGRESS')
@@ -346,8 +362,8 @@ describe('Webhook to Calls Integration', () => {
           phone: '+15551234321',
           email: 'test2@example.com',
           source: 'test',
-          status: 'QUALIFIED'
-        }
+          status: 'QUALIFIED',
+        },
       })
 
       const callLog = await db.callLog.create({
@@ -359,8 +375,8 @@ describe('Webhook to Calls Integration', () => {
           fromNumber: '+15559876543',
           status: 'IN_PROGRESS',
           callType: 'OUTBOUND_AUTO',
-          startedAt: new Date(Date.now() - 60000)
-        }
+          startedAt: new Date(Date.now() - 60000),
+        },
       })
 
       // Simulate call completion
@@ -369,12 +385,12 @@ describe('Webhook to Calls Integration', () => {
         CallStatus: 'completed',
         CallDuration: '45',
         From: '+15559876543',
-        To: '+15551234321'
+        To: '+15551234321',
       }
 
       const { req } = createMocks({
         method: 'POST',
-        body: completionPayload
+        body: completionPayload,
       })
 
       const { POST } = await import('@/app/api/voice/twilio/status/route')
@@ -384,7 +400,7 @@ describe('Webhook to Calls Integration', () => {
 
       // Verify call completed
       const completedCall = await db.callLog.findUnique({
-        where: { id: callLog.id }
+        where: { id: callLog.id },
       })
 
       expect(completedCall!.status).toBe('COMPLETED')
@@ -393,7 +409,7 @@ describe('Webhook to Calls Integration', () => {
 
       // Verify lead status updated
       const updatedLead = await db.lead.findUnique({
-        where: { id: lead.id }
+        where: { id: lead.id },
       })
 
       expect(updatedLead!.status).toBe('CONTACTED')
@@ -404,38 +420,44 @@ describe('Webhook to Calls Integration', () => {
   describe('Performance and Reliability', () => {
     it('should handle high-volume webhook processing', async () => {
       const webhooks = []
-      
+
       // Create 100 concurrent webhook requests
       for (let i = 0; i < 100; i++) {
         const payload = {
           object: 'page',
-          entry: [{
-            id: `entry-${i}`,
-            time: Date.now(),
-            changes: [{
-              value: {
-                leadgen_id: `lead_${i}`,
-                form_id: '123'
-              },
-              field: 'leadgen'
-            }]
-          }]
+          entry: [
+            {
+              id: `entry-${i}`,
+              time: Date.now(),
+              changes: [
+                {
+                  value: {
+                    leadgen_id: `lead_${i}`,
+                    form_id: '123',
+                  },
+                  field: 'leadgen',
+                },
+              ],
+            },
+          ],
         }
 
         global.fetch = jest.fn().mockResolvedValue({
           ok: true,
           json: async () => ({
             name: `Test User ${i}`,
-            phone_number: `+155512${String(i).padStart(5, '0')}`
-          })
+            phone_number: `+155512${String(i).padStart(5, '0')}`,
+          }),
         })
 
         const { req } = createMocks({
           method: 'POST',
-          body: payload
+          body: payload,
         })
 
-        webhooks.push(import('@/app/api/leads/webhook/route').then(module => module.POST(req as any)))
+        webhooks.push(
+          import('@/app/api/leads/webhook/route').then((module) => module.POST(req as any))
+        )
       }
 
       const startTime = Date.now()
@@ -443,7 +465,7 @@ describe('Webhook to Calls Integration', () => {
       const endTime = Date.now()
 
       // All webhooks should succeed
-      results.forEach(response => {
+      results.forEach((response) => {
         expect(response.status).toBe(200)
       })
 
@@ -451,7 +473,7 @@ describe('Webhook to Calls Integration', () => {
       expect(endTime - startTime).toBeLessThan(5000) // 5 seconds
 
       // Wait for queue processing
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000))
 
       // Verify calls were initiated
       expect(mockTwilioClient.initiateCall).toHaveBeenCalledTimes(100)
@@ -464,18 +486,22 @@ describe('Webhook to Calls Integration', () => {
 
       const payload = {
         object: 'page',
-        entry: [{
-          id: '123',
-          changes: [{
-            value: { leadgen_id: 'failed_lead' },
-            field: 'leadgen'
-          }]
-        }]
+        entry: [
+          {
+            id: '123',
+            changes: [
+              {
+                value: { leadgen_id: 'failed_lead' },
+                field: 'leadgen',
+              },
+            ],
+          },
+        ],
       }
 
       const { req } = createMocks({
         method: 'POST',
-        body: payload
+        body: payload,
       })
 
       const { POST } = await import('@/app/api/leads/webhook/route')
@@ -495,34 +521,38 @@ describe('Webhook to Calls Integration', () => {
         .mockResolvedValueOnce({
           success: true,
           callSid: 'CA123',
-          status: 'queued'
+          status: 'queued',
         })
 
       const payload = {
         object: 'page',
-        entry: [{
-          id: '123',
-          changes: [{
-            value: {
-              leadgen_id: 'rate_limit_lead',
-              form_id: '123'
-            },
-            field: 'leadgen'
-          }]
-        }]
+        entry: [
+          {
+            id: '123',
+            changes: [
+              {
+                value: {
+                  leadgen_id: 'rate_limit_lead',
+                  form_id: '123',
+                },
+                field: 'leadgen',
+              },
+            ],
+          },
+        ],
       }
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
           name: 'Rate Limit Test',
-          phone_number: '+15558889999'
-        })
+          phone_number: '+15558889999',
+        }),
       })
 
       const { req } = createMocks({
         method: 'POST',
-        body: payload
+        body: payload,
       })
 
       const { POST } = await import('@/app/api/leads/webhook/route')
@@ -531,7 +561,7 @@ describe('Webhook to Calls Integration', () => {
       expect(response.status).toBe(200)
 
       // Wait for retry processing
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      await new Promise((resolve) => setTimeout(resolve, 3000))
 
       // Should have been retried and succeeded
       expect(mockTwilioClient.initiateCall).toHaveBeenCalledTimes(2)
@@ -542,15 +572,15 @@ describe('Webhook to Calls Integration', () => {
     it('should validate webhook signatures', async () => {
       const payload = {
         object: 'page',
-        entry: []
+        entry: [],
       }
 
       const { req } = createMocks({
         method: 'POST',
         body: payload,
         headers: {
-          'x-hub-signature-256': 'sha256=invalid_signature'
-        }
+          'x-hub-signature-256': 'sha256=invalid_signature',
+        },
       })
 
       const { POST } = await import('@/app/api/leads/webhook/route')
@@ -562,29 +592,33 @@ describe('Webhook to Calls Integration', () => {
     it('should sanitize input data', async () => {
       const maliciousPayload = {
         object: 'page',
-        entry: [{
-          id: '<script>alert("xss")</script>',
-          changes: [{
-            value: {
-              leadgen_id: 'safe_lead',
-              form_id: '123'
-            },
-            field: 'leadgen'
-          }]
-        }]
+        entry: [
+          {
+            id: '<script>alert("xss")</script>',
+            changes: [
+              {
+                value: {
+                  leadgen_id: 'safe_lead',
+                  form_id: '123',
+                },
+                field: 'leadgen',
+              },
+            ],
+          },
+        ],
       }
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
           name: '<script>alert("xss")</script>',
-          phone_number: '+15557777777'
-        })
+          phone_number: '+15557777777',
+        }),
       })
 
       const { req } = createMocks({
         method: 'POST',
-        body: maliciousPayload
+        body: maliciousPayload,
       })
 
       const { POST } = await import('@/app/api/leads/webhook/route')
@@ -592,10 +626,10 @@ describe('Webhook to Calls Integration', () => {
 
       expect(response.status).toBe(200)
 
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
       const lead = await db.lead.findFirst({
-        where: { phone: '+15557777777' }
+        where: { phone: '+15557777777' },
       })
 
       // Data should be sanitized
@@ -606,29 +640,33 @@ describe('Webhook to Calls Integration', () => {
     it('should handle invalid phone numbers', async () => {
       const payload = {
         object: 'page',
-        entry: [{
-          id: '123',
-          changes: [{
-            value: {
-              leadgen_id: 'invalid_phone_lead',
-              form_id: '123'
-            },
-            field: 'leadgen'
-          }]
-        }]
+        entry: [
+          {
+            id: '123',
+            changes: [
+              {
+                value: {
+                  leadgen_id: 'invalid_phone_lead',
+                  form_id: '123',
+                },
+                field: 'leadgen',
+              },
+            ],
+          },
+        ],
       }
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
           name: 'Invalid Phone User',
-          phone_number: 'invalid-phone-number'
-        })
+          phone_number: 'invalid-phone-number',
+        }),
       })
 
       const { req } = createMocks({
         method: 'POST',
-        body: payload
+        body: payload,
       })
 
       const { POST } = await import('@/app/api/leads/webhook/route')
@@ -636,16 +674,16 @@ describe('Webhook to Calls Integration', () => {
 
       expect(response.status).toBe(200)
 
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
       // Lead should be created but marked as invalid
       const lead = await db.lead.findFirst({
-        where: { name: 'Invalid Phone User' }
+        where: { name: 'Invalid Phone User' },
       })
 
       expect(lead).toBeDefined()
       expect(lead!.status).toBe('INVALID')
-      
+
       // No call should be initiated
       expect(mockTwilioClient.initiateCall).not.toHaveBeenCalled()
     })

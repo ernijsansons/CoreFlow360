@@ -3,12 +3,17 @@
  * Handles experiment assignment, tracking, and variant selection
  */
 
-import { Experiment, Variant, getActiveExperiments, userQualifiesForExperiment } from './experiments'
+import {
+  Experiment,
+  Variant,
+  getActiveExperiments,
+  userQualifiesForExperiment,
+} from './experiments'
 
 export class ABTestManager {
   private assignments: Map<string, string> = new Map()
   private userId: string | null = null
-  private userContext: Record<string, any> = {}
+  private userContext: Record<string, unknown> = {}
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -41,7 +46,7 @@ export class ABTestManager {
       isNewUser: this.isNewUser(),
       browser: navigator.userAgent,
       referrer: document.referrer,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }
   }
 
@@ -75,9 +80,7 @@ export class ABTestManager {
       try {
         const assignments = JSON.parse(saved)
         this.assignments = new Map(Object.entries(assignments))
-      } catch (error) {
-        console.error('Failed to load A/B test assignments:', error)
-      }
+      } catch (error) {}
     }
   }
 
@@ -90,19 +93,19 @@ export class ABTestManager {
   // Get variant for experiment
   getVariant(experimentId: string): Variant | null {
     const experiments = getActiveExperiments()
-    const experiment = experiments.find(exp => exp.id === experimentId)
-    
+    const experiment = experiments.find((exp) => exp.id === experimentId)
+
     if (!experiment) return null
 
     // Check if user qualifies
     if (!userQualifiesForExperiment(experiment, this.userContext)) {
-      return experiment.variants.find(v => v.id === 'control') || null
+      return experiment.variants.find((v) => v.id === 'control') || null
     }
 
     // Check existing assignment
     const existingAssignment = this.assignments.get(experimentId)
     if (existingAssignment) {
-      return experiment.variants.find(v => v.id === existingAssignment) || null
+      return experiment.variants.find((v) => v.id === existingAssignment) || null
     }
 
     // Assign variant
@@ -133,13 +136,13 @@ export class ABTestManager {
 
   // Track experiment assignment
   private trackAssignment(experiment: Experiment, variant: Variant) {
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'experiment_assignment', {
+    if (typeof window !== 'undefined' && (window as unknown).gtag) {
+      ;(window as unknown).gtag('event', 'experiment_assignment', {
         experiment_id: experiment.id,
         experiment_name: experiment.name,
         variant_id: variant.id,
         variant_name: variant.name,
-        user_id: this.userId
+        user_id: this.userId,
       })
     }
 
@@ -148,7 +151,7 @@ export class ABTestManager {
       experimentId: experiment.id,
       variantId: variant.id,
       userId: this.userId,
-      context: this.userContext
+      context: this.userContext,
     })
   }
 
@@ -157,13 +160,13 @@ export class ABTestManager {
     const variantId = this.assignments.get(experimentId)
     if (!variantId) return
 
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'experiment_conversion', {
+    if (typeof window !== 'undefined' && (window as unknown).gtag) {
+      ;(window as unknown).gtag('event', 'experiment_conversion', {
         experiment_id: experimentId,
         variant_id: variantId,
         conversion_type: conversionType,
         conversion_value: value,
-        user_id: this.userId
+        user_id: this.userId,
       })
     }
 
@@ -172,12 +175,12 @@ export class ABTestManager {
       variantId,
       conversionType,
       value,
-      userId: this.userId
+      userId: this.userId,
     })
   }
 
   // Track metric
-  trackMetric(experimentId: string, metric: string, value: any) {
+  trackMetric(experimentId: string, metric: string, value: unknown) {
     const variantId = this.assignments.get(experimentId)
     if (!variantId) return
 
@@ -187,17 +190,17 @@ export class ABTestManager {
       metric,
       value,
       userId: this.userId,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
   }
 
   // Log event (for internal analytics)
-  private logEvent(eventType: string, data: any) {
+  private logEvent(eventType: string, data: unknown) {
     const events = this.getStoredEvents()
     events.push({
       type: eventType,
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
 
     // Keep only last 1000 events
@@ -209,7 +212,7 @@ export class ABTestManager {
   }
 
   // Get stored events
-  private getStoredEvents(): any[] {
+  private getStoredEvents(): unknown[] {
     try {
       const stored = localStorage.getItem('ab_events')
       return stored ? JSON.parse(stored) : []
@@ -236,12 +239,12 @@ export class ABTestManager {
   }
 
   // Export analytics data
-  exportAnalytics(): any {
+  exportAnalytics(): unknown {
     return {
       userId: this.userId,
       assignments: Object.fromEntries(this.assignments),
       events: this.getStoredEvents(),
-      context: this.userContext
+      context: this.userContext,
     }
   }
 }

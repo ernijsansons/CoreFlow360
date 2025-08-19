@@ -31,7 +31,7 @@ export interface AnomalyDetectionRequest {
   data: {
     timestamp: string
     value: number
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   }[]
   threshold?: number
   lookbackPeriod?: number
@@ -63,7 +63,7 @@ export interface FinancialForecastRequest {
   forecastPeriods: number
   confidenceLevel?: number
   includeSeasonality?: boolean
-  externalFactors?: Record<string, any>
+  externalFactors?: Record<string, unknown>
 }
 
 export interface FinancialForecastResponse {
@@ -77,23 +77,23 @@ export interface FinancialForecastResponse {
   model: {
     type: string
     accuracy: number
-    parameters: Record<string, any>
+    parameters: Record<string, unknown>
   }
   insights: string[]
 }
 
 export class FinGPTWrapper {
   private static instance: FinGPTWrapper
-  
+
   private constructor() {}
-  
+
   static getInstance(): FinGPTWrapper {
     if (!FinGPTWrapper.instance) {
       FinGPTWrapper.instance = new FinGPTWrapper()
     }
     return FinGPTWrapper.instance
   }
-  
+
   /**
    * Analyze financial sentiment
    */
@@ -108,23 +108,25 @@ export class FinGPTWrapper {
       request,
       tenantId
     )
-    
+
     // Validate response
     const schema = z.object({
       sentiment: z.enum(['positive', 'negative', 'neutral']),
       confidence: z.number().min(0).max(1),
-      aspects: z.array(z.object({
-        aspect: z.string(),
-        sentiment: z.string(),
-        confidence: z.number()
-      })),
+      aspects: z.array(
+        z.object({
+          aspect: z.string(),
+          sentiment: z.string(),
+          confidence: z.number(),
+        })
+      ),
       keywords: z.array(z.string()),
-      summary: z.string().optional()
+      summary: z.string().optional(),
     })
-    
+
     return schema.parse(response)
   }
-  
+
   /**
    * Detect anomalies in financial data
    */
@@ -136,7 +138,7 @@ export class FinGPTWrapper {
     if (request.data.length < 10) {
       throw new Error('Insufficient data for anomaly detection (minimum 10 points)')
     }
-    
+
     const response = await serviceManager.callService<AnomalyDetectionResponse>(
       ExternalResource.FINGPT,
       '/anomaly',
@@ -144,27 +146,29 @@ export class FinGPTWrapper {
       request,
       tenantId
     )
-    
+
     // Validate response
     const schema = z.object({
-      anomalies: z.array(z.object({
-        timestamp: z.string(),
-        value: z.number(),
-        severity: z.enum(['low', 'medium', 'high', 'critical']),
-        explanation: z.string().optional(),
-        relatedFactors: z.array(z.string()).optional()
-      })),
+      anomalies: z.array(
+        z.object({
+          timestamp: z.string(),
+          value: z.number(),
+          severity: z.enum(['low', 'medium', 'high', 'critical']),
+          explanation: z.string().optional(),
+          relatedFactors: z.array(z.string()).optional(),
+        })
+      ),
       confidence: z.number().min(0).max(1),
       baselineStats: z.object({
         mean: z.number(),
         stdDev: z.number(),
-        trend: z.enum(['increasing', 'decreasing', 'stable'])
-      })
+        trend: z.enum(['increasing', 'decreasing', 'stable']),
+      }),
     })
-    
+
     return schema.parse(response)
   }
-  
+
   /**
    * Generate financial forecast
    */
@@ -176,11 +180,11 @@ export class FinGPTWrapper {
     if (request.historicalData.length < 30) {
       throw new Error('Insufficient historical data for forecasting (minimum 30 points)')
     }
-    
+
     if (request.forecastPeriods > 365) {
       throw new Error('Forecast period too long (maximum 365 periods)')
     }
-    
+
     const response = await serviceManager.callService<FinancialForecastResponse>(
       ExternalResource.FINGPT,
       '/forecast',
@@ -188,27 +192,29 @@ export class FinGPTWrapper {
       request,
       tenantId
     )
-    
+
     // Validate response
     const schema = z.object({
-      forecast: z.array(z.object({
-        timestamp: z.string(),
-        predicted: z.number(),
-        lower: z.number(),
-        upper: z.number(),
-        confidence: z.number().min(0).max(1)
-      })),
+      forecast: z.array(
+        z.object({
+          timestamp: z.string(),
+          predicted: z.number(),
+          lower: z.number(),
+          upper: z.number(),
+          confidence: z.number().min(0).max(1),
+        })
+      ),
       model: z.object({
         type: z.string(),
         accuracy: z.number().min(0).max(1),
-        parameters: z.record(z.any())
+        parameters: z.record(z.any()),
       }),
-      insights: z.array(z.string())
+      insights: z.array(z.string()),
     })
-    
+
     return schema.parse(response)
   }
-  
+
   /**
    * Batch analyze multiple documents
    */
@@ -216,27 +222,30 @@ export class FinGPTWrapper {
     documents: { id: string; content: string }[],
     analysisType: 'sentiment' | 'risk' | 'compliance',
     tenantId: string
-  ): Promise<Record<string, any>> {
+  ): Promise<Record<string, unknown>> {
     const batchSize = 10
-    const results: Record<string, any> = {}
-    
+    const results: Record<string, unknown> = {}
+
     // Process in batches to avoid overwhelming the service
     for (let i = 0; i < documents.length; i += batchSize) {
       const batch = documents.slice(i, i + batchSize)
-      
+
       const batchResults = await Promise.all(
         batch.map(async (doc) => {
           try {
             let result
-            
+
             switch (analysisType) {
               case 'sentiment':
-                result = await this.analyzeSentiment({
-                  text: doc.content,
-                  includeConfidence: true
-                }, tenantId)
+                result = await this.analyzeSentiment(
+                  {
+                    text: doc.content,
+                    includeConfidence: true,
+                  },
+                  tenantId
+                )
                 break
-              
+
               case 'risk':
                 result = await serviceManager.callService(
                   ExternalResource.FINGPT,
@@ -246,7 +255,7 @@ export class FinGPTWrapper {
                   tenantId
                 )
                 break
-              
+
               case 'compliance':
                 result = await serviceManager.callService(
                   ExternalResource.FINGPT,
@@ -257,45 +266,47 @@ export class FinGPTWrapper {
                 )
                 break
             }
-            
+
             return { id: doc.id, result, success: true }
           } catch (error) {
-            return { 
-              id: doc.id, 
+            return {
+              id: doc.id,
               error: error instanceof Error ? error.message : 'Unknown error',
-              success: false 
+              success: false,
             }
           }
         })
       )
-      
+
       // Aggregate results
       batchResults.forEach(({ id, result, error, success }) => {
         results[id] = success ? result : { error }
       })
-      
+
       // Rate limiting delay between batches
       if (i + batchSize < documents.length) {
-        await new Promise(resolve => setTimeout(resolve, 100))
+        await new Promise((resolve) => setTimeout(resolve, 100))
       }
     }
-    
+
     return results
   }
-  
+
   /**
    * Get real-time market insights
    */
   async getMarketInsights(
     symbols: string[],
     tenantId: string
-  ): Promise<{
-    symbol: string
-    sentiment: string
-    momentum: number
-    risks: string[]
-    opportunities: string[]
-  }[]> {
+  ): Promise<
+    {
+      symbol: string
+      sentiment: string
+      momentum: number
+      risks: string[]
+      opportunities: string[]
+    }[]
+  > {
     const response = await serviceManager.callService(
       ExternalResource.FINGPT,
       '/market-insights',
@@ -303,10 +314,10 @@ export class FinGPTWrapper {
       { symbols, realtime: true },
       tenantId
     )
-    
+
     return response
   }
-  
+
   /**
    * Analyze financial document (PDF, Excel, etc.)
    */
@@ -324,15 +335,15 @@ export class FinGPTWrapper {
       ExternalResource.FINGPT,
       '/document-analysis',
       'POST',
-      { 
-        documentUrl, 
+      {
+        documentUrl,
         documentType,
         extractTables: true,
-        generateSummary: true
+        generateSummary: true,
       },
       tenantId
     )
-    
+
     return response
   }
 }

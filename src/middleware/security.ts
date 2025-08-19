@@ -29,8 +29,8 @@ const securityHeaders = {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "upgrade-insecure-requests"
-  ].join('; ')
+    'upgrade-insecure-requests',
+  ].join('; '),
 }
 
 // Rate limiting configuration
@@ -46,26 +46,26 @@ const rateLimitConfigs: Record<string, RateLimitConfig> = {
     windowMs: 60 * 1000, // 1 minute
     maxRequests: 100,
     message: 'Too many requests from this IP, please try again later.',
-    blockDuration: 300000 // 5 minutes block for repeated violations
+    blockDuration: 300000, // 5 minutes block for repeated violations
   },
   auth: {
     windowMs: 15 * 60 * 1000, // 15 minutes
     maxRequests: 5,
     message: 'Too many authentication attempts, please try again later.',
-    blockDuration: 900000 // 15 minutes block
+    blockDuration: 900000, // 15 minutes block
   },
   stripe: {
     windowMs: 60 * 1000, // 1 minute
     maxRequests: 10,
     message: 'Too many payment requests, please try again later.',
-    blockDuration: 600000 // 10 minutes block
+    blockDuration: 600000, // 10 minutes block
   },
   ai: {
     windowMs: 60 * 1000, // 1 minute
     maxRequests: 20,
     message: 'Too many AI requests, please try again later.',
-    blockDuration: 300000 // 5 minutes block
-  }
+    blockDuration: 300000, // 5 minutes block
+  },
 }
 
 // Enhanced rate limit store with blocking capability
@@ -85,7 +85,7 @@ function getRedisClient() {
 
 export async function securityMiddleware(request: NextRequest) {
   const response = NextResponse.next()
-  
+
   // Apply security headers
   Object.entries(securityHeaders).forEach(([key, value]) => {
     response.headers.set(key, value)
@@ -99,10 +99,7 @@ export async function securityMiddleware(request: NextRequest) {
 
     if (!isWebhook) {
       if (!csrfToken || !sessionToken || !validateCsrfToken(csrfToken, sessionToken)) {
-        return NextResponse.json(
-          { error: 'Invalid CSRF token' },
-          { status: 403 }
-        )
+        return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 })
       }
     }
   }
@@ -110,9 +107,9 @@ export async function securityMiddleware(request: NextRequest) {
   // Enhanced rate limiting with Redis support
   const ip = getClientIP(request)
   const path = request.nextUrl.pathname
-  
+
   let rateLimitConfig: RateLimitConfig | undefined
-  
+
   if (path.startsWith('/api/auth')) {
     rateLimitConfig = rateLimitConfigs.auth
   } else if (path.startsWith('/api/stripe')) {
@@ -128,21 +125,22 @@ export async function securityMiddleware(request: NextRequest) {
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: rateLimitResult.message },
-        { 
+        {
           status: 429,
           headers: {
             'Retry-After': String(Math.ceil(rateLimitResult.retryAfter / 1000)),
             'X-RateLimit-Limit': String(rateLimitConfig.maxRequests),
             'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': String(rateLimitResult.resetTime)
-          }
+            'X-RateLimit-Reset': String(rateLimitResult.resetTime),
+          },
         }
       )
     }
   }
 
   // Clean up old rate limit entries periodically
-  if (Math.random() < 0.01) { // 1% chance
+  if (Math.random() < 0.01) {
+    // 1% chance
     cleanupRateLimitStore()
   }
 
@@ -150,19 +148,19 @@ export async function securityMiddleware(request: NextRequest) {
 }
 
 // Enhanced input sanitization utilities
-export function sanitizeInput(input: any): any {
+export function sanitizeInput(input: unknown): unknown {
   if (typeof input === 'string') {
     // Remove null bytes and control characters
     input = input.replace(/[\x00-\x1F\x7F]/g, '')
-    
+
     // Trim whitespace
     input = input.trim()
-    
+
     // Prevent script injection with more comprehensive patterns
     input = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     input = input.replace(/javascript:/gi, '')
     input = input.replace(/on\w+\s*=/gi, '')
-    
+
     // Encode special characters
     input = input
       .replace(/&/g, '&amp;')
@@ -174,13 +172,13 @@ export function sanitizeInput(input: any): any {
   } else if (Array.isArray(input)) {
     return input.map(sanitizeInput)
   } else if (input && typeof input === 'object') {
-    const sanitized: any = {}
+    const sanitized: unknown = {}
     for (const [key, value] of Object.entries(input)) {
       sanitized[sanitizeInput(key)] = sanitizeInput(value)
     }
     return sanitized
   }
-  
+
   return input
 }
 
@@ -193,24 +191,24 @@ export async function validateTenantAccess(
   if (!tenantId || !userId) {
     return false
   }
-  
+
   // Enhanced tenant ID format validation
   const tenantIdRegex = /^[a-zA-Z0-9-_]{3,50}$/
   if (!tenantIdRegex.test(tenantId)) {
     return false
   }
-  
+
   // Enhanced user ID format validation
   const userIdRegex = /^[a-zA-Z0-9-_]{3,50}$/
   if (!userIdRegex.test(userId)) {
     return false
   }
-  
+
   // Additional checks would go here:
   // - Verify user belongs to tenant
   // - Check user permissions for resource
   // - Validate resource ownership
-  
+
   return true
 }
 
@@ -219,22 +217,22 @@ export function validateApiKey(apiKey: string): { valid: boolean; tenantId?: str
   if (!apiKey || !apiKey.startsWith('cf360_')) {
     return { valid: false }
   }
-  
+
   try {
     // API key format: cf360_<tenantId>_<random>_<signature>
     const parts = apiKey.split('_')
     if (parts.length !== 4) {
       return { valid: false }
     }
-    
+
     const [prefix, tenantId, random, signature] = parts
-    
+
     // Validate tenant ID format
     const tenantIdRegex = /^[a-zA-Z0-9-_]{3,50}$/
     if (!tenantIdRegex.test(tenantId)) {
       return { valid: false }
     }
-    
+
     // Verify signature with timing-safe comparison
     const secret = process.env.API_KEY_SECRET
     if (!secret) {
@@ -245,14 +243,11 @@ export function validateApiKey(apiKey: string): { valid: boolean; tenantId?: str
       .update(`${prefix}_${tenantId}_${random}`)
       .digest('hex')
       .substring(0, 16)
-    
-    if (!crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    )) {
+
+    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
       return { valid: false }
     }
-    
+
     return { valid: true, tenantId }
   } catch (error) {
     return { valid: false }
@@ -274,12 +269,9 @@ export function validateCsrfToken(token: string, sessionToken: string): boolean 
   if (!token || !sessionToken) {
     return false
   }
-  
+
   // Use timing-safe comparison
-  return crypto.timingSafeEqual(
-    Buffer.from(token),
-    Buffer.from(sessionToken)
-  )
+  return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(sessionToken))
 }
 
 // Enhanced webhook signature validation
@@ -289,16 +281,10 @@ export function validateWebhookSignature(
   secret: string
 ): boolean {
   try {
-    const expectedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(payload)
-      .digest('hex')
-    
+    const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
+
     // Use timing-safe comparison
-    return crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    )
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
   } catch (error) {
     return false
   }
@@ -306,20 +292,22 @@ export function validateWebhookSignature(
 
 // Helper functions
 function getClientIP(request: NextRequest): string {
-  return request.ip || 
-         request.headers.get('x-forwarded-for')?.split(',')[0] || 
-         request.headers.get('x-real-ip') || 
-         'unknown'
+  return (
+    request.ip ||
+    request.headers.get('x-forwarded-for')?.split(',')[0] ||
+    request.headers.get('x-real-ip') ||
+    'unknown'
+  )
 }
 
 async function checkRateLimit(
-  ip: string, 
-  path: string, 
+  ip: string,
+  path: string,
   config: RateLimitConfig
 ): Promise<{ allowed: boolean; message: string; retryAfter: number; resetTime: number }> {
   const key = `${ip}:${path}`
   const now = Date.now()
-  
+
   const client = getRedisClient()
   if (client && client.status === 'ready') {
     // Use Redis for production
@@ -331,8 +319,8 @@ async function checkRateLimit(
 }
 
 async function checkRateLimitRedis(
-  key: string, 
-  now: number, 
+  key: string,
+  now: number,
   config: RateLimitConfig
 ): Promise<{ allowed: boolean; message: string; retryAfter: number; resetTime: number }> {
   const client = getRedisClient()
@@ -340,88 +328,87 @@ async function checkRateLimitRedis(
     // Fallback to memory if Redis not available
     return checkRateLimitMemory(key, now, config)
   }
-  
+
   try {
     // Atomic rate limiting using Redis pipeline
     const pipeline = client.pipeline()
     pipeline.incr(key)
     pipeline.expire(key, Math.floor(config.windowMs / 1000))
     pipeline.get(key)
-    
+
     const results = await pipeline.exec()
     const newCount = results[0][1] as number
-    const currentCount = results[2][1] as number || newCount
-    
+    const currentCount = (results[2][1] as number) || newCount
+
     if (currentCount > config.maxRequests) {
       const ttl = await client.ttl(key)
       const retryAfter = ttl > 0 ? ttl * 1000 : config.windowMs
-      
+
       return {
         allowed: false,
         message: config.message,
         retryAfter,
-        resetTime: now + retryAfter
+        resetTime: now + retryAfter,
       }
     }
-    
+
     return {
       allowed: true,
       message: '',
       retryAfter: 0,
-      resetTime: now + config.windowMs
+      resetTime: now + config.windowMs,
     }
   } catch (error) {
-    console.error('Redis rate limiting error:', error)
     // Fallback to memory-based rate limiting
     return checkRateLimitMemory(key, now, config)
   }
 }
 
 function checkRateLimitMemory(
-  key: string, 
-  now: number, 
+  key: string,
+  now: number,
   config: RateLimitConfig
 ): { allowed: boolean; message: string; retryAfter: number; resetTime: number } {
   const limit = rateLimitStore.get(key)
-  
+
   if (limit && limit.blockedUntil && limit.blockedUntil > now) {
     return {
       allowed: false,
       message: config.message,
       retryAfter: limit.blockedUntil - now,
-      resetTime: limit.blockedUntil
+      resetTime: limit.blockedUntil,
     }
   }
-  
+
   if (limit && limit.resetTime > now) {
     if (limit.count >= config.maxRequests) {
       // Block the IP for additional duration
       const blockDuration = config.blockDuration || config.windowMs
       limit.blockedUntil = now + blockDuration
       limit.violations++
-      
+
       return {
         allowed: false,
         message: config.message,
         retryAfter: blockDuration,
-        resetTime: limit.blockedUntil
+        resetTime: limit.blockedUntil,
       }
     }
-    
+
     limit.count++
   } else {
     rateLimitStore.set(key, {
       count: 1,
       resetTime: now + config.windowMs,
-      violations: 0
+      violations: 0,
     })
   }
-  
+
   return {
     allowed: true,
     message: '',
     retryAfter: 0,
-    resetTime: now + config.windowMs
+    resetTime: now + config.windowMs,
   }
 }
 

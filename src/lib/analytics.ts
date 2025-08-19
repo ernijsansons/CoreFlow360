@@ -7,8 +7,13 @@
 export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_TRACKING_ID
 
 // Google Analytics events
-export const gtag = (...args: any[]) => {
-  if (typeof window !== 'undefined' && window.gtag && GA_TRACKING_ID && /^G-[A-Z0-9]+$/.test(GA_TRACKING_ID)) {
+export const gtag = (...args: unknown[]) => {
+  if (
+    typeof window !== 'undefined' &&
+    window.gtag &&
+    GA_TRACKING_ID &&
+    /^G-[A-Z0-9]+$/.test(GA_TRACKING_ID)
+  ) {
     window.gtag(...args)
   }
 }
@@ -24,7 +29,12 @@ export const pageview = (url: string) => {
 }
 
 // Custom event tracking
-export const event = ({ action, category, label, value }: {
+export const event = ({
+  action,
+  category,
+  label,
+  value,
+}: {
   action: string
   category: string
   label?: string
@@ -45,16 +55,16 @@ export const trackBusinessEvents = {
       action: 'module_selected',
       category: 'subscription',
       label: moduleName,
-      value: price
+      value: price,
     })
   },
 
   pricingCalculated: (totalPrice: number, modules: string[]) => {
     event({
-      action: 'pricing_calculated', 
+      action: 'pricing_calculated',
       category: 'subscription',
       label: modules.join(','),
-      value: totalPrice
+      value: totalPrice,
     })
   },
 
@@ -62,7 +72,7 @@ export const trackBusinessEvents = {
     event({
       action: 'trial_started',
       category: 'conversion',
-      label: plan
+      label: plan,
     })
   },
 
@@ -72,13 +82,15 @@ export const trackBusinessEvents = {
       transaction_id: Date.now().toString(),
       value: value,
       currency: 'USD',
-      items: [{
-        item_id: plan,
-        item_name: `CoreFlow360 ${plan}`,
-        category: 'subscription',
-        price: value,
-        quantity: 1
-      }]
+      items: [
+        {
+          item_id: plan,
+          item_name: `CoreFlow360 ${plan}`,
+          category: 'subscription',
+          price: value,
+          quantity: 1,
+        },
+      ],
     })
   },
 
@@ -87,7 +99,7 @@ export const trackBusinessEvents = {
     event({
       action: 'ai_orchestration_used',
       category: 'ai_interaction',
-      label: `${taskType}_${modules.join(',')}`
+      label: `${taskType}_${modules.join(',')}`,
     })
   },
 
@@ -95,7 +107,7 @@ export const trackBusinessEvents = {
     event({
       action: 'demo_completed',
       category: 'engagement',
-      label: demoType
+      label: demoType,
     })
   },
 
@@ -104,7 +116,7 @@ export const trackBusinessEvents = {
     event({
       action: 'feature_used',
       category: 'user_engagement',
-      label: `${module}_${feature}`
+      label: `${module}_${feature}`,
     })
   },
 
@@ -112,33 +124,33 @@ export const trackBusinessEvents = {
     event({
       action: 'support_requested',
       category: 'support',
-      label: type
+      label: type,
     })
-  }
+  },
 }
 
 // Vercel Analytics (Free) - Auto-enabled with NEXT_PUBLIC_VERCEL_ANALYTICS=1
 export const vercelAnalytics = {
-  track: (eventName: string, properties?: Record<string, any>) => {
+  track: (eventName: string, properties?: Record<string, unknown>) => {
     if (typeof window !== 'undefined' && window.va) {
       window.va('track', eventName, properties)
     }
-  }
+  },
 }
 
 // PostHog (Free tier - 1M events/month)
 export const posthog = {
-  capture: (eventName: string, properties?: Record<string, any>) => {
+  capture: (eventName: string, properties?: Record<string, unknown>) => {
     if (typeof window !== 'undefined' && window.posthog) {
       window.posthog.capture(eventName, properties)
     }
   },
 
-  identify: (userId: string, properties?: Record<string, any>) => {
+  identify: (userId: string, properties?: Record<string, unknown>) => {
     if (typeof window !== 'undefined' && window.posthog) {
       window.posthog.identify(userId, properties)
     }
-  }
+  },
 }
 
 // Combined analytics tracking
@@ -148,38 +160,38 @@ export const analytics = {
     vercelAnalytics.track('pageview', { path: url })
   },
 
-  track: (eventName: string, properties?: Record<string, any>) => {
+  track: (eventName: string, properties?: Record<string, unknown>) => {
     // Google Analytics
     event({
       action: eventName,
       category: properties?.category || 'general',
       label: properties?.label,
-      value: properties?.value
+      value: properties?.value,
     })
 
-    // Vercel Analytics  
+    // Vercel Analytics
     vercelAnalytics.track(eventName, properties)
 
     // PostHog
     posthog.capture(eventName, properties)
   },
 
-  identify: (userId: string, traits?: Record<string, any>) => {
+  identify: (userId: string, traits?: Record<string, unknown>) => {
     // PostHog identification
     posthog.identify(userId, traits)
 
     // Google Analytics user properties
     gtag('config', GA_TRACKING_ID, {
       user_id: userId,
-      custom_map: traits
+      custom_map: traits,
     })
-  }
+  },
 }
 
 // Performance tracking (Web Vitals)
-export const trackWebVitals = (metric: any) => {
+export const trackWebVitals = (metric: unknown) => {
   const { id, name, value, label } = metric
-  
+
   // Send to Google Analytics
   gtag('event', name, {
     event_category: label === 'web-vital' ? 'Web Vitals' : 'Next.js custom metric',
@@ -192,28 +204,27 @@ export const trackWebVitals = (metric: any) => {
   vercelAnalytics.track('web-vital', {
     name,
     value,
-    id
+    id,
   })
 }
 
 // Error tracking integration with Sentry
-export const trackError = (error: Error, context?: Record<string, any>) => {
+export const trackError = (error: Error, context?: Record<string, unknown>) => {
   // Send to Google Analytics
   event({
     action: 'exception',
     category: 'error',
-    label: error.message
+    label: error.message,
   })
 
   // Send to Vercel Analytics
   vercelAnalytics.track('error', {
     message: error.message,
     stack: error.stack,
-    ...context
+    ...context,
   })
 
   // Sentry will automatically capture if configured
-  console.error('Tracked error:', error, context)
 }
 
 // Cohort analysis helpers
@@ -224,7 +235,7 @@ export const trackUserJourney = {
   firstAiInteraction: (type: string) => analytics.track('first_ai_interaction', { type }),
   becamePaidUser: (plan: string, daysToConvert: number) => {
     analytics.track('became_paid_user', { plan, daysToConvert })
-  }
+  },
 }
 
 // A/B testing helpers (for future use)
@@ -233,18 +244,18 @@ export const abTest = {
     analytics.track('ab_test', {
       test_name: testName,
       variant,
-      converted: converted || false
+      converted: converted || false,
     })
-  }
+  },
 }
 
 declare global {
   interface Window {
-    gtag: (...args: any[]) => void
-    va: (action: string, ...args: any[]) => void
+    gtag: (...args: unknown[]) => void
+    va: (action: string, ...args: unknown[]) => void
     posthog: {
-      capture: (event: string, properties?: any) => void
-      identify: (userId: string, properties?: any) => void
+      capture: (event: string, properties?: unknown) => void
+      identify: (userId: string, properties?: unknown) => void
     }
   }
 }

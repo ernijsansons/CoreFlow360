@@ -3,8 +3,15 @@
  * Enhanced AI orchestration that adapts to tenant subscription levels
  */
 
-import { AIAgentOrchestrator, AIAgentConfig, AITask, TaskType, AgentType, AgentCapability } from './ai-agent-orchestrator'
-import { moduleManager } from '@/services/subscription/module-manager'
+import {
+  AIAgentOrchestrator,
+  AIAgentConfig,
+  AITask,
+  TaskType,
+  AgentType,
+  AgentCapability,
+} from './ai-agent-orchestrator'
+import { moduleManager } from '@/lib/services/subscription/module-manager'
 import { AIModelType } from '@prisma/client'
 import { prisma } from '@/lib/db'
 
@@ -56,14 +63,15 @@ export interface CrossModuleInsight {
 export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
   private moduleAgentMap: Map<string, string[]> = new Map()
   private crossModuleAgentMap: Map<string, string[]> = new Map()
-  private subscriptionCache: Map<string, { modules: string[], tier: string, timestamp: number }> = new Map()
-  
+  private subscriptionCache: Map<string, { modules: string[]; tier: string; timestamp: number }> =
+    new Map()
+
   constructor(
-    langChainManager: any,
-    aiServiceManager: any,
-    auditLogger: any,
+    langChainManager: unknown,
+    aiServiceManager: unknown,
+    auditLogger: unknown,
     prisma: PrismaClient,
-    redis: any
+    redis: unknown
   ) {
     super(langChainManager, aiServiceManager, auditLogger, prisma, redis)
     this.initializeModuleMappings()
@@ -83,12 +91,30 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
 
     // Cross-module agents (only available with multiple subscriptions)
     this.crossModuleAgentMap.set('crm+hr', ['lead-to-hire-agent', 'sales-performance-agent'])
-    this.crossModuleAgentMap.set('crm+accounting', ['quote-to-invoice-agent', 'revenue-analysis-agent'])
-    this.crossModuleAgentMap.set('hr+accounting', ['payroll-processing-agent', 'expense-approval-agent'])
-    this.crossModuleAgentMap.set('crm+inventory', ['demand-forecast-agent', 'stock-optimization-agent'])
-    this.crossModuleAgentMap.set('inventory+accounting', ['cost-analysis-agent', 'procurement-optimization-agent'])
-    this.crossModuleAgentMap.set('projects+hr', ['resource-allocation-agent', 'productivity-analysis-agent'])
-    this.crossModuleAgentMap.set('full_suite', ['enterprise-intelligence-agent', 'predictive-analytics-agent'])
+    this.crossModuleAgentMap.set('crm+accounting', [
+      'quote-to-invoice-agent',
+      'revenue-analysis-agent',
+    ])
+    this.crossModuleAgentMap.set('hr+accounting', [
+      'payroll-processing-agent',
+      'expense-approval-agent',
+    ])
+    this.crossModuleAgentMap.set('crm+inventory', [
+      'demand-forecast-agent',
+      'stock-optimization-agent',
+    ])
+    this.crossModuleAgentMap.set('inventory+accounting', [
+      'cost-analysis-agent',
+      'procurement-optimization-agent',
+    ])
+    this.crossModuleAgentMap.set('projects+hr', [
+      'resource-allocation-agent',
+      'productivity-analysis-agent',
+    ])
+    this.crossModuleAgentMap.set('full_suite', [
+      'enterprise-intelligence-agent',
+      'predictive-analytics-agent',
+    ])
   }
 
   /**
@@ -106,18 +132,26 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
       const { activeModules, subscriptionTier } = subscriptionDetails
 
       // Determine available agents based on subscription
-      const availableAgents = await this.getAvailableAgentsForSubscription(activeModules, subscriptionTier)
-      
+      const availableAgents = await this.getAvailableAgentsForSubscription(
+        activeModules,
+        subscriptionTier
+      )
+
       // Filter agents suitable for the task
       const suitableAgents = this.filterAgentsByTask(availableAgents, taskType)
-      
+
       if (suitableAgents.length === 0) {
-        return this.createUpgradeRequiredResponse(tenantId, taskType, subscriptionTier, activeModules)
+        return this.createUpgradeRequiredResponse(
+          tenantId,
+          taskType,
+          subscriptionTier,
+          activeModules
+        )
       }
 
       // Check for cross-module capabilities
       const crossModuleCapabilities = this.getCrossModuleCapabilities(activeModules, taskType)
-      
+
       // Execute the task with available agents
       const executionResult = await this.executeWithSubscriptionConstraints(
         tenantId,
@@ -160,13 +194,10 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
           tokensUsed: executionResult.tokensUsed || 0,
           modelsUsed: executionResult.modelsUsed,
           subscriptionTier,
-          activeModules
-        }
+          activeModules,
+        },
       }
-
     } catch (error) {
-      console.error('Subscription-aware orchestration error:', error)
-      
       return {
         success: false,
         data: { error: error instanceof Error ? error.message : 'Orchestration failed' },
@@ -180,8 +211,8 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
           tokensUsed: 0,
           modelsUsed: [],
           subscriptionTier: 'unknown',
-          activeModules: []
-        }
+          activeModules: [],
+        },
       }
     }
   }
@@ -201,9 +232,9 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
 
     // Fetch from database
     const activeModules = await moduleManager.getActiveModules(tenantId)
-    
+
     const subscription = await prisma.tenantSubscription.findUnique({
-      where: { tenantId }
+      where: { tenantId },
     })
 
     const subscriptionTier = subscription?.subscriptionTier || 'basic'
@@ -212,7 +243,7 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
     this.subscriptionCache.set(tenantId, {
       modules: activeModules,
       tier: subscriptionTier,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
 
     return { activeModules, subscriptionTier }
@@ -241,7 +272,7 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
           availableAgentIds.push(...agents)
         } else {
           const requiredModules = combination.split('+')
-          if (requiredModules.every(mod => activeModules.includes(mod))) {
+          if (requiredModules.every((mod) => activeModules.includes(mod))) {
             availableAgentIds.push(...agents)
           }
         }
@@ -250,9 +281,9 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
 
     // Filter by subscription tier restrictions
     const allAgents = Array.from(this.agents.values())
-    return allAgents.filter(agent => {
+    return allAgents.filter((agent) => {
       if (!availableAgentIds.includes(agent.id)) return false
-      
+
       // Enterprise-only agents
       if (agent.id.includes('enterprise') && subscriptionTier !== 'enterprise') {
         return false
@@ -265,7 +296,7 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
   /**
    * Get cross-module capabilities
    */
-  private getCrossModuleCapabilities(activeModules: string[], taskType: TaskType): string[] {
+  private getCrossModuleCapabilities(_activeModules: string[], _taskType: TaskType): string[] {
     const capabilities: string[] = []
 
     if (activeModules.length < 2) return capabilities
@@ -276,13 +307,13 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
       'crm+hr': ['sales_performance_correlation', 'lead_to_hire_tracking', 'team_productivity'],
       'hr+accounting': ['payroll_optimization', 'cost_per_employee', 'budget_allocation'],
       'crm+inventory': ['demand_forecasting', 'customer_inventory_needs', 'stock_recommendations'],
-      'projects+hr': ['resource_optimization', 'skill_matching', 'workload_balancing']
+      'projects+hr': ['resource_optimization', 'skill_matching', 'workload_balancing'],
     }
 
     // Check which combinations are available
     for (const [combination, caps] of Object.entries(crossCapabilities)) {
       const requiredModules = combination.split('+')
-      if (requiredModules.every(mod => activeModules.includes(mod))) {
+      if (requiredModules.every((mod) => activeModules.includes(mod))) {
         capabilities.push(...caps)
       }
     }
@@ -300,11 +331,11 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
     context: Record<string, unknown>,
     availableAgents: AIAgentConfig[],
     crossModuleCapabilities: string[],
-    requirements?: any
-  ): Promise<any> {
+    requirements?: unknown
+  ): Promise<unknown> {
     // Select best agent for the task
     const selectedAgent = this.selectOptimalAgent(availableAgents, taskType, requirements)
-    
+
     if (!selectedAgent) {
       throw new Error('No suitable agents available for this task with current subscription')
     }
@@ -314,22 +345,22 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
       ...context,
       crossModuleCapabilities,
       subscriptionConstraints: {
-        availableAgents: availableAgents.map(a => a.id),
-        maxComplexity: this.getMaxComplexityForAgent(selectedAgent)
-      }
+        availableAgents: availableAgents.map((a) => a.id),
+        maxComplexity: this.getMaxComplexityForAgent(selectedAgent),
+      },
     }
 
     // Execute the task (this would integrate with the existing task execution)
     const result = {
-      data: { 
+      data: {
         result: `Task executed by ${selectedAgent.name}`,
-        capabilities: crossModuleCapabilities
+        capabilities: crossModuleCapabilities,
       },
       confidence: 0.85,
       agentsUsed: [selectedAgent.id],
       cost: selectedAgent.performanceTargets.costPerOperation,
       tokensUsed: 150,
-      modelsUsed: [selectedAgent.model]
+      modelsUsed: [selectedAgent.model],
     }
 
     return result
@@ -340,7 +371,7 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
    */
   private async generateCrossModuleInsights(
     activeModules: string[],
-    executionResult: any,
+    _executionResult: unknown,
     taskType: TaskType
   ): Promise<CrossModuleInsight[]> {
     const insights: CrossModuleInsight[] = []
@@ -356,7 +387,7 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
         description: 'Sales performance data can be correlated with employee satisfaction metrics',
         confidence: 0.78,
         actionable: true,
-        requiredModules: ['crm', 'hr']
+        requiredModules: ['crm', 'hr'],
       })
     }
 
@@ -368,7 +399,7 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
         description: 'Customer data can improve revenue forecasting accuracy by 23%',
         confidence: 0.82,
         actionable: true,
-        requiredModules: ['crm', 'accounting']
+        requiredModules: ['crm', 'accounting'],
       })
     }
 
@@ -381,8 +412,8 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
   private generateUpgradeSuggestions(
     activeModules: string[],
     subscriptionTier: string,
-    taskType: TaskType,
-    executionResult: any
+    _taskType: TaskType,
+    executionResult: unknown
   ): string[] {
     const suggestions: string[] = []
 
@@ -417,7 +448,7 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
     activeModules: string[]
   ): EnhancedOrchestrationResult {
     const requiredModules = this.getRequiredModulesForTask(taskType)
-    const missingModules = requiredModules.filter(mod => !activeModules.includes(mod))
+    const missingModules = requiredModules.filter((mod) => !activeModules.includes(mod))
 
     return {
       success: false,
@@ -427,11 +458,11 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
       modulesInvolved: activeModules,
       subscriptionLimitations: [
         `Task requires modules: ${requiredModules.join(', ')}`,
-        `Missing modules: ${missingModules.join(', ')}`
+        `Missing modules: ${missingModules.join(', ')}`,
       ],
       upgradeSuggestions: [
         `Add ${missingModules.join(', ')} module(s) to enable this capability`,
-        subscriptionTier === 'basic' ? 'Consider upgrading to Professional tier' : undefined
+        subscriptionTier === 'basic' ? 'Consider upgrading to Professional tier' : undefined,
       ].filter(Boolean) as string[],
       executionMetadata: {
         executionTime: 0,
@@ -439,28 +470,36 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
         tokensUsed: 0,
         modelsUsed: [],
         subscriptionTier,
-        activeModules
-      }
+        activeModules,
+      },
     }
   }
 
   /**
    * Helper methods
    */
-  private selectOptimalAgent(agents: AIAgentConfig[], taskType: TaskType, requirements?: any): AIAgentConfig | null {
+  private selectOptimalAgent(
+    agents: AIAgentConfig[],
+    taskType: TaskType,
+    requirements?: unknown
+  ): AIAgentConfig | null {
     // Score agents based on suitability for the task
-    const scoredAgents = agents.map(agent => ({
+    const scoredAgents = agents.map((agent) => ({
       agent,
-      score: this.calculateAgentScore(agent, taskType, requirements)
+      score: this.calculateAgentScore(agent, taskType, requirements),
     }))
 
     // Sort by score (highest first)
     scoredAgents.sort((a, b) => b.score - a.score)
-    
+
     return scoredAgents.length > 0 ? scoredAgents[0].agent : null
   }
 
-  private calculateAgentScore(agent: AIAgentConfig, taskType: TaskType, requirements?: any): number {
+  private calculateAgentScore(
+    agent: AIAgentConfig,
+    taskType: TaskType,
+    requirements?: unknown
+  ): number {
     let score = 0
 
     // Base capability match
@@ -494,9 +533,9 @@ export class SubscriptionAwareAIOrchestrator extends AIAgentOrchestrator {
       [TaskType.OPTIMIZE_PRICING]: ['crm', 'accounting'],
       [TaskType.FORECAST_DEMAND]: ['inventory'],
       [TaskType.CROSS_MODULE_SYNC]: ['crm', 'accounting'], // Example
-      [TaskType.PERFORMANCE_ANALYSIS]: ['hr']
+      [TaskType.PERFORMANCE_ANALYSIS]: ['hr'],
     }
-    
+
     return taskModuleMap[taskType] || ['crm']
   }
 

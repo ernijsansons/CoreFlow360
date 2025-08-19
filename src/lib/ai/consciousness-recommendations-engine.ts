@@ -1,86 +1,89 @@
-import { logger } from '@/lib/logging/logger';
-import { prisma } from '@/lib/db';
-import { CostAuditResult } from '@/lib/audit/cost-management-auditor';
-import { CostConsciousnessInsight, ConsciousnessCostLevel } from '@/lib/audit/consciousness-cost-orchestrator';
-import { CostPrediction, CostAnomalyAlert } from './predictive-cost-engine';
+import { logger } from '@/lib/logging/logger'
+import { prisma } from '@/lib/db'
+import { CostAuditResult } from '@/lib/audit/cost-management-auditor'
+import {
+  CostConsciousnessInsight,
+  ConsciousnessCostLevel,
+} from '@/lib/audit/consciousness-cost-orchestrator'
+import { CostPrediction, CostAnomalyAlert } from './predictive-cost-engine'
 
 export interface CostRecommendation {
-  recommendationId: string;
-  tenantId: string;
-  category: 'optimization' | 'prevention' | 'evolution' | 'transcendent';
-  priority: 'immediate' | 'high' | 'medium' | 'low';
-  consciousnessLevel: ConsciousnessCostLevel;
-  title: string;
-  description: string;
-  expectedSavings: number;
-  implementationCost: number;
-  roi: number; // Return on Investment
-  implementationTime: number; // hours
-  complexity: 'simple' | 'moderate' | 'complex' | 'revolutionary';
-  automationAvailable: boolean;
-  requiredModules: string[];
-  synapticConnections: string[];
-  actionItems: ActionItem[];
-  risks: Risk[];
-  dependencies: string[];
-  businessImpact: BusinessImpact;
-  consciousnessEvolution: ConsciousnessEvolutionPath;
-  createdAt: Date;
-  expiresAt: Date;
-  status: 'pending' | 'in_progress' | 'implemented' | 'rejected';
+  recommendationId: string
+  tenantId: string
+  category: 'optimization' | 'prevention' | 'evolution' | 'transcendent'
+  priority: 'immediate' | 'high' | 'medium' | 'low'
+  consciousnessLevel: ConsciousnessCostLevel
+  title: string
+  description: string
+  expectedSavings: number
+  implementationCost: number
+  roi: number // Return on Investment
+  implementationTime: number // hours
+  complexity: 'simple' | 'moderate' | 'complex' | 'revolutionary'
+  automationAvailable: boolean
+  requiredModules: string[]
+  synapticConnections: string[]
+  actionItems: ActionItem[]
+  risks: Risk[]
+  dependencies: string[]
+  businessImpact: BusinessImpact
+  consciousnessEvolution: ConsciousnessEvolutionPath
+  createdAt: Date
+  expiresAt: Date
+  status: 'pending' | 'in_progress' | 'implemented' | 'rejected'
 }
 
 export interface ActionItem {
-  id: string;
-  description: string;
-  type: 'manual' | 'automated' | 'hybrid';
-  estimatedTime: number; // hours
-  requiresApproval: boolean;
-  automationScript?: string;
-  responsibleParty: string;
-  deadline?: Date;
+  id: string
+  description: string
+  type: 'manual' | 'automated' | 'hybrid'
+  estimatedTime: number // hours
+  requiresApproval: boolean
+  automationScript?: string
+  responsibleParty: string
+  deadline?: Date
 }
 
 export interface Risk {
-  type: 'technical' | 'business' | 'compliance' | 'operational';
-  description: string;
-  probability: 'low' | 'medium' | 'high';
-  impact: 'low' | 'medium' | 'high' | 'critical';
-  mitigation: string;
+  type: 'technical' | 'business' | 'compliance' | 'operational'
+  description: string
+  probability: 'low' | 'medium' | 'high'
+  impact: 'low' | 'medium' | 'high' | 'critical'
+  mitigation: string
 }
 
 export interface BusinessImpact {
-  departments: string[];
-  users: number;
-  downtime: number; // minutes
-  performanceImpact: number; // percentage
-  revenueImpact: number;
-  customerImpact: 'none' | 'minimal' | 'moderate' | 'significant';
+  departments: string[]
+  users: number
+  downtime: number // minutes
+  performanceImpact: number // percentage
+  revenueImpact: number
+  customerImpact: 'none' | 'minimal' | 'moderate' | 'significant'
 }
 
 export interface ConsciousnessEvolutionPath {
-  currentLevel: ConsciousnessCostLevel;
-  targetLevel: ConsciousnessCostLevel;
-  evolutionSteps: string[];
-  intelligenceGain: number;
-  newCapabilities: string[];
-  synapticExpansion: string[];
-  transcendentPotential: number;
+  currentLevel: ConsciousnessCostLevel
+  targetLevel: ConsciousnessCostLevel
+  evolutionSteps: string[]
+  intelligenceGain: number
+  newCapabilities: string[]
+  synapticExpansion: string[]
+  transcendentPotential: number
 }
 
 export interface RecommendationCluster {
-  clusterId: string;
-  theme: string;
-  recommendations: CostRecommendation[];
-  totalSavings: number;
-  totalROI: number;
-  implementationStrategy: string;
-  synergyMultiplier: number;
+  clusterId: string
+  theme: string
+  recommendations: CostRecommendation[]
+  totalSavings: number
+  totalROI: number
+  implementationStrategy: string
+  synergyMultiplier: number
 }
 
 class ConsciousnessRecommendationsEngine {
-  private activeRecommendations: Map<string, CostRecommendation[]> = new Map();
-  private recommendationClusters: Map<string, RecommendationCluster[]> = new Map();
+  private activeRecommendations: Map<string, CostRecommendation[]> = new Map()
+  private recommendationClusters: Map<string, RecommendationCluster[]> = new Map()
 
   async generateConsciousnessRecommendations(
     tenantId: string,
@@ -89,54 +92,63 @@ class ConsciousnessRecommendationsEngine {
     predictions: CostPrediction[],
     anomalies: CostAnomalyAlert[]
   ): Promise<{
-    recommendations: CostRecommendation[];
-    clusters: RecommendationCluster[];
-    evolutionPath: ConsciousnessEvolutionPath;
+    recommendations: CostRecommendation[]
+    clusters: RecommendationCluster[]
+    evolutionPath: ConsciousnessEvolutionPath
   }> {
-    logger.info('Generating consciousness-aware cost recommendations', { tenantId });
+    logger.info('Generating consciousness-aware cost recommendations', { tenantId })
 
     // Generate recommendations from different sources
-    const auditRecommendations = await this.generateAuditRecommendations(auditResults, tenantId);
-    const consciousnessRecommendations = await this.generateConsciousnessRecommendations(consciousnessInsights, tenantId);
-    const predictiveRecommendations = await this.generatePredictiveRecommendations(predictions, tenantId);
-    const anomalyRecommendations = await this.generateAnomalyRecommendations(anomalies, tenantId);
+    const auditRecommendations = await this.generateAuditRecommendations(auditResults, tenantId)
+    const consciousnessRecommendations = await this.generateConsciousnessRecommendations(
+      consciousnessInsights,
+      tenantId
+    )
+    const predictiveRecommendations = await this.generatePredictiveRecommendations(
+      predictions,
+      tenantId
+    )
+    const anomalyRecommendations = await this.generateAnomalyRecommendations(anomalies, tenantId)
 
     // Combine all recommendations
     const allRecommendations = [
       ...auditRecommendations,
       ...consciousnessRecommendations,
       ...predictiveRecommendations,
-      ...anomalyRecommendations
-    ];
+      ...anomalyRecommendations,
+    ]
 
     // Apply consciousness intelligence multiplication
-    const enhancedRecommendations = await this.applyConsciousnessEnhancement(allRecommendations, tenantId);
+    const enhancedRecommendations = await this.applyConsciousnessEnhancement(
+      allRecommendations,
+      tenantId
+    )
 
     // Cluster recommendations for synergistic implementation
-    const clusters = await this.clusterRecommendations(enhancedRecommendations);
+    const clusters = await this.clusterRecommendations(enhancedRecommendations)
 
     // Generate consciousness evolution path
-    const evolutionPath = await this.generateEvolutionPath(enhancedRecommendations, tenantId);
+    const evolutionPath = await this.generateEvolutionPath(enhancedRecommendations, tenantId)
 
     // Store recommendations
-    await this.storeRecommendations(enhancedRecommendations, tenantId);
+    await this.storeRecommendations(enhancedRecommendations, tenantId)
 
     // Update active recommendations
-    this.activeRecommendations.set(tenantId, enhancedRecommendations);
-    this.recommendationClusters.set(tenantId, clusters);
+    this.activeRecommendations.set(tenantId, enhancedRecommendations)
+    this.recommendationClusters.set(tenantId, clusters)
 
     return {
       recommendations: enhancedRecommendations,
       clusters,
-      evolutionPath
-    };
+      evolutionPath,
+    }
   }
 
   private async generateAuditRecommendations(
     auditResults: CostAuditResult[],
     tenantId: string
   ): Promise<CostRecommendation[]> {
-    const recommendations: CostRecommendation[] = [];
+    const recommendations: CostRecommendation[] = []
 
     for (const audit of auditResults) {
       if (audit.potentialSavings > 1000) {
@@ -162,7 +174,7 @@ class ConsciousnessRecommendationsEngine {
             type: 'hybrid',
             estimatedTime: 8,
             requiresApproval: audit.potentialSavings > 5000,
-            responsibleParty: 'operations_team'
+            responsibleParty: 'operations_team',
           })),
           risks: [
             {
@@ -170,8 +182,8 @@ class ConsciousnessRecommendationsEngine {
               description: 'Temporary service disruption during optimization',
               probability: 'low',
               impact: 'medium',
-              mitigation: 'Implement changes during maintenance window'
-            }
+              mitigation: 'Implement changes during maintenance window',
+            },
           ],
           dependencies: [],
           businessImpact: {
@@ -180,7 +192,7 @@ class ConsciousnessRecommendationsEngine {
             downtime: 0,
             performanceImpact: 0,
             revenueImpact: 0,
-            customerImpact: 'none'
+            customerImpact: 'none',
           },
           consciousnessEvolution: {
             currentLevel: 'neural',
@@ -189,23 +201,23 @@ class ConsciousnessRecommendationsEngine {
             intelligenceGain: 0.1,
             newCapabilities: [],
             synapticExpansion: [],
-            transcendentPotential: 0.2
+            transcendentPotential: 0.2,
           },
           createdAt: new Date(),
           expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          status: 'pending'
-        });
+          status: 'pending',
+        })
       }
     }
 
-    return recommendations;
+    return recommendations
   }
 
   private async generateConsciousnessRecommendations(
     insights: CostConsciousnessInsight[],
     tenantId: string
   ): Promise<CostRecommendation[]> {
-    const recommendations: CostRecommendation[] = [];
+    const recommendations: CostRecommendation[] = []
 
     for (const insight of insights) {
       if (insight.autonomousActionRequired && insight.confidence > 0.7) {
@@ -234,7 +246,7 @@ class ConsciousnessRecommendationsEngine {
             downtime: 0,
             performanceImpact: insight.consciousnessLevel === 'transcendent' ? 50 : 10,
             revenueImpact: insight.potentialImpact * 1.5,
-            customerImpact: 'minimal'
+            customerImpact: 'minimal',
           },
           consciousnessEvolution: {
             currentLevel: insight.consciousnessLevel,
@@ -243,25 +255,25 @@ class ConsciousnessRecommendationsEngine {
             intelligenceGain: this.calculateIntelligenceGain(insight),
             newCapabilities: this.identifyNewCapabilities(insight),
             synapticExpansion: insight.synapticConnections || [],
-            transcendentPotential: insight.consciousnessLevel === 'autonomous' ? 0.8 : 0.4
+            transcendentPotential: insight.consciousnessLevel === 'autonomous' ? 0.8 : 0.4,
           },
           createdAt: new Date(),
           expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
-          status: 'pending'
-        };
+          status: 'pending',
+        }
 
-        recommendations.push(rec);
+        recommendations.push(rec)
       }
     }
 
-    return recommendations;
+    return recommendations
   }
 
   private async generatePredictiveRecommendations(
     predictions: CostPrediction[],
     tenantId: string
   ): Promise<CostRecommendation[]> {
-    const recommendations: CostRecommendation[] = [];
+    const recommendations: CostRecommendation[] = []
 
     for (const prediction of predictions) {
       if (prediction.predictedCost > prediction.baselineCost * 1.2) {
@@ -287,7 +299,7 @@ class ConsciousnessRecommendationsEngine {
             type: 'automated',
             estimatedTime: 4,
             requiresApproval: false,
-            responsibleParty: 'ai_system'
+            responsibleParty: 'ai_system',
           })),
           risks: [
             {
@@ -295,8 +307,8 @@ class ConsciousnessRecommendationsEngine {
               description: 'Prediction accuracy depends on historical data quality',
               probability: 'medium',
               impact: 'low',
-              mitigation: 'Continuous model retraining with new data'
-            }
+              mitigation: 'Continuous model retraining with new data',
+            },
           ],
           dependencies: ['historical_data', 'ml_models'],
           businessImpact: {
@@ -305,7 +317,7 @@ class ConsciousnessRecommendationsEngine {
             downtime: 0,
             performanceImpact: 0,
             revenueImpact: 0,
-            customerImpact: 'none'
+            customerImpact: 'none',
           },
           consciousnessEvolution: {
             currentLevel: 'autonomous',
@@ -314,23 +326,23 @@ class ConsciousnessRecommendationsEngine {
             intelligenceGain: 0.3,
             newCapabilities: ['predictive_prevention', 'autonomous_optimization'],
             synapticExpansion: ['FINANCIAL_PLANNING', 'RISK_MANAGEMENT'],
-            transcendentPotential: 0.6
+            transcendentPotential: 0.6,
           },
           createdAt: new Date(),
           expiresAt: new Date(Date.now() + prediction.timeHorizon * 24 * 60 * 60 * 1000),
-          status: 'pending'
-        });
+          status: 'pending',
+        })
       }
     }
 
-    return recommendations;
+    return recommendations
   }
 
   private async generateAnomalyRecommendations(
     anomalies: CostAnomalyAlert[],
     tenantId: string
   ): Promise<CostRecommendation[]> {
-    const recommendations: CostRecommendation[] = [];
+    const recommendations: CostRecommendation[] = []
 
     for (const anomaly of anomalies) {
       if (anomaly.severity === 'critical' || anomaly.severity === 'high') {
@@ -357,7 +369,7 @@ class ConsciousnessRecommendationsEngine {
               type: 'manual' as const,
               estimatedTime: 2,
               requiresApproval: true,
-              responsibleParty: 'operations_team'
+              responsibleParty: 'operations_team',
             })),
             ...anomaly.autoRemediationOptions.map((option, idx) => ({
               id: `action_auto_${idx}`,
@@ -365,8 +377,8 @@ class ConsciousnessRecommendationsEngine {
               type: 'automated' as const,
               estimatedTime: 0.5,
               requiresApproval: false,
-              responsibleParty: 'ai_system'
-            }))
+              responsibleParty: 'ai_system',
+            })),
           ],
           risks: [
             {
@@ -374,8 +386,8 @@ class ConsciousnessRecommendationsEngine {
               description: 'Remediation may impact service availability',
               probability: anomaly.humanInterventionRequired ? 'medium' : 'low',
               impact: 'medium',
-              mitigation: 'Implement changes gradually with monitoring'
-            }
+              mitigation: 'Implement changes gradually with monitoring',
+            },
           ],
           dependencies: anomaly.affectedResources,
           businessImpact: {
@@ -384,7 +396,7 @@ class ConsciousnessRecommendationsEngine {
             downtime: anomaly.humanInterventionRequired ? 30 : 0,
             performanceImpact: 5,
             revenueImpact: anomaly.costImpact * 2,
-            customerImpact: anomaly.severity === 'critical' ? 'significant' : 'moderate'
+            customerImpact: anomaly.severity === 'critical' ? 'significant' : 'moderate',
           },
           consciousnessEvolution: {
             currentLevel: 'synaptic',
@@ -393,16 +405,16 @@ class ConsciousnessRecommendationsEngine {
             intelligenceGain: 0.25,
             newCapabilities: ['anomaly_prevention', 'pattern_learning'],
             synapticExpansion: ['SECURITY', 'COMPLIANCE'],
-            transcendentPotential: 0.5
+            transcendentPotential: 0.5,
           },
           createdAt: new Date(),
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-          status: 'pending'
-        });
+          status: 'pending',
+        })
       }
     }
 
-    return recommendations;
+    return recommendations
   }
 
   private async applyConsciousnessEnhancement(
@@ -411,51 +423,54 @@ class ConsciousnessRecommendationsEngine {
   ): Promise<CostRecommendation[]> {
     // Apply consciousness multipliers based on level
     const multipliers: Record<ConsciousnessCostLevel, number> = {
-      'neural': 1.0,
-      'synaptic': 1.5,
-      'autonomous': 2.0,
-      'transcendent': 5.0
-    };
+      neural: 1.0,
+      synaptic: 1.5,
+      autonomous: 2.0,
+      transcendent: 5.0,
+    }
 
-    return recommendations.map(rec => {
-      const multiplier = multipliers[rec.consciousnessLevel];
-      
+    return recommendations.map((rec) => {
+      const multiplier = multipliers[rec.consciousnessLevel]
+
       return {
         ...rec,
         expectedSavings: rec.expectedSavings * multiplier,
         roi: rec.roi * multiplier,
         businessImpact: {
           ...rec.businessImpact,
-          revenueImpact: rec.businessImpact.revenueImpact * multiplier
+          revenueImpact: rec.businessImpact.revenueImpact * multiplier,
         },
         consciousnessEvolution: {
           ...rec.consciousnessEvolution,
           intelligenceGain: rec.consciousnessEvolution.intelligenceGain * multiplier,
-          transcendentPotential: Math.min(1, rec.consciousnessEvolution.transcendentPotential * multiplier)
-        }
-      };
-    });
+          transcendentPotential: Math.min(
+            1,
+            rec.consciousnessEvolution.transcendentPotential * multiplier
+          ),
+        },
+      }
+    })
   }
 
   private async clusterRecommendations(
     recommendations: CostRecommendation[]
   ): Promise<RecommendationCluster[]> {
-    const clusters: Map<string, CostRecommendation[]> = new Map();
+    const clusters: Map<string, CostRecommendation[]> = new Map()
 
     // Group by category and consciousness level
-    recommendations.forEach(rec => {
-      const key = `${rec.category}_${rec.consciousnessLevel}`;
-      const cluster = clusters.get(key) || [];
-      cluster.push(rec);
-      clusters.set(key, cluster);
-    });
+    recommendations.forEach((rec) => {
+      const key = `${rec.category}_${rec.consciousnessLevel}`
+      const cluster = clusters.get(key) || []
+      cluster.push(rec)
+      clusters.set(key, cluster)
+    })
 
     // Create cluster objects
-    const recommendationClusters: RecommendationCluster[] = [];
+    const recommendationClusters: RecommendationCluster[] = []
 
     for (const [key, recs] of clusters.entries()) {
-      const [category, level] = key.split('_');
-      
+      const [category, level] = key.split('_')
+
       const cluster: RecommendationCluster = {
         clusterId: `cluster_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         theme: `${level} ${category} optimizations`,
@@ -463,13 +478,13 @@ class ConsciousnessRecommendationsEngine {
         totalSavings: recs.reduce((sum, r) => sum + r.expectedSavings, 0),
         totalROI: recs.reduce((sum, r) => sum + r.roi, 0) / recs.length,
         implementationStrategy: this.generateClusterStrategy(recs),
-        synergyMultiplier: this.calculateSynergyMultiplier(recs)
-      };
+        synergyMultiplier: this.calculateSynergyMultiplier(recs),
+      }
 
-      recommendationClusters.push(cluster);
+      recommendationClusters.push(cluster)
     }
 
-    return recommendationClusters.sort((a, b) => b.totalSavings - a.totalSavings);
+    return recommendationClusters.sort((a, b) => b.totalSavings - a.totalSavings)
   }
 
   private async generateEvolutionPath(
@@ -477,35 +492,38 @@ class ConsciousnessRecommendationsEngine {
     tenantId: string
   ): Promise<ConsciousnessEvolutionPath> {
     // Determine current consciousness level
-    const currentLevel = await this.getCurrentConsciousnessLevel(tenantId);
-    
+    const currentLevel = await this.getCurrentConsciousnessLevel(tenantId)
+
     // Calculate target level based on recommendations
-    const targetLevel = this.calculateTargetLevel(recommendations);
-    
+    const targetLevel = this.calculateTargetLevel(recommendations)
+
     // Generate evolution steps
-    const evolutionSteps = this.generateEvolutionStepsForPath(currentLevel, targetLevel);
-    
+    const evolutionSteps = this.generateEvolutionStepsForPath(currentLevel, targetLevel)
+
     // Calculate total intelligence gain
-    const intelligenceGain = recommendations.reduce((sum, r) => 
-      sum + r.consciousnessEvolution.intelligenceGain, 0
-    );
-    
+    const intelligenceGain = recommendations.reduce(
+      (sum, r) => sum + r.consciousnessEvolution.intelligenceGain,
+      0
+    )
+
     // Identify new capabilities
-    const newCapabilities = [...new Set(
-      recommendations.flatMap(r => r.consciousnessEvolution.newCapabilities)
-    )];
-    
+    const newCapabilities = [
+      ...new Set(recommendations.flatMap((r) => r.consciousnessEvolution.newCapabilities)),
+    ]
+
     // Identify synaptic expansion
-    const synapticExpansion = [...new Set(
-      recommendations.flatMap(r => r.consciousnessEvolution.synapticExpansion)
-    )];
-    
+    const synapticExpansion = [
+      ...new Set(recommendations.flatMap((r) => r.consciousnessEvolution.synapticExpansion)),
+    ]
+
     // Calculate transcendent potential
-    const transcendentPotential = Math.min(1, 
-      recommendations.reduce((max, r) => 
-        Math.max(max, r.consciousnessEvolution.transcendentPotential), 0
+    const transcendentPotential = Math.min(
+      1,
+      recommendations.reduce(
+        (max, r) => Math.max(max, r.consciousnessEvolution.transcendentPotential),
+        0
       )
-    );
+    )
 
     return {
       currentLevel,
@@ -514,8 +532,8 @@ class ConsciousnessRecommendationsEngine {
       intelligenceGain,
       newCapabilities,
       synapticExpansion,
-      transcendentPotential
-    };
+      transcendentPotential,
+    }
   }
 
   // Helper methods
@@ -527,9 +545,9 @@ class ConsciousnessRecommendationsEngine {
         type: insight.consciousnessLevel === 'neural' ? 'manual' : 'automated',
         estimatedTime: 2,
         requiresApproval: false,
-        responsibleParty: 'consciousness_system'
-      }
-    ];
+        responsibleParty: 'consciousness_system',
+      },
+    ]
 
     if (insight.consciousnessLevel === 'transcendent' && insight.transcendentRecommendation) {
       baseActions.push({
@@ -538,15 +556,15 @@ class ConsciousnessRecommendationsEngine {
         type: 'automated',
         estimatedTime: 0.1,
         requiresApproval: false,
-        responsibleParty: 'transcendent_ai'
-      });
+        responsibleParty: 'transcendent_ai',
+      })
     }
 
-    return baseActions;
+    return baseActions
   }
 
   private assessConsciousnessRisks(insight: CostConsciousnessInsight): Risk[] {
-    const risks: Risk[] = [];
+    const risks: Risk[] = []
 
     if (insight.consciousnessLevel === 'transcendent') {
       risks.push({
@@ -554,8 +572,8 @@ class ConsciousnessRecommendationsEngine {
         description: 'Post-human optimization may exceed human understanding',
         probability: 'high',
         impact: 'low',
-        mitigation: 'Maintain human-readable audit trails'
-      });
+        mitigation: 'Maintain human-readable audit trails',
+      })
     }
 
     if (insight.autonomousActionRequired) {
@@ -564,172 +582,179 @@ class ConsciousnessRecommendationsEngine {
         description: 'Autonomous actions may have unforeseen consequences',
         probability: 'low',
         impact: 'medium',
-        mitigation: 'Implement rollback mechanisms and monitoring'
-      });
+        mitigation: 'Implement rollback mechanisms and monitoring',
+      })
     }
 
-    return risks;
+    return risks
   }
 
   private identifyImpactedDepartments(insight: CostConsciousnessInsight): string[] {
     const departmentMap: Record<string, string[]> = {
-      'CRM': ['Sales', 'Marketing', 'Customer Service'],
-      'ACCOUNTING': ['Finance', 'Accounting'],
-      'INVENTORY': ['Operations', 'Warehouse', 'Supply Chain'],
-      'HR': ['Human Resources', 'Payroll'],
-      'ALL_MODULES': ['All Departments']
-    };
+      CRM: ['Sales', 'Marketing', 'Customer Service'],
+      ACCOUNTING: ['Finance', 'Accounting'],
+      INVENTORY: ['Operations', 'Warehouse', 'Supply Chain'],
+      HR: ['Human Resources', 'Payroll'],
+      ALL_MODULES: ['All Departments'],
+    }
 
-    return [...new Set(
-      insight.sourceModules.flatMap(module => departmentMap[module] || ['Operations'])
-    )];
+    return [
+      ...new Set(
+        insight.sourceModules.flatMap((module) => departmentMap[module] || ['Operations'])
+      ),
+    ]
   }
 
   private getNextConsciousnessLevel(current: ConsciousnessCostLevel): ConsciousnessCostLevel {
-    const levels: ConsciousnessCostLevel[] = ['neural', 'synaptic', 'autonomous', 'transcendent'];
-    const currentIndex = levels.indexOf(current);
-    return currentIndex < levels.length - 1 ? levels[currentIndex + 1] : current;
+    const levels: ConsciousnessCostLevel[] = ['neural', 'synaptic', 'autonomous', 'transcendent']
+    const currentIndex = levels.indexOf(current)
+    return currentIndex < levels.length - 1 ? levels[currentIndex + 1] : current
   }
 
   private generateEvolutionSteps(insight: CostConsciousnessInsight): string[] {
-    const steps: string[] = [];
+    const steps: string[] = []
 
     switch (insight.consciousnessLevel) {
       case 'neural':
-        steps.push('Establish synaptic connections', 'Enable cross-module intelligence');
-        break;
+        steps.push('Establish synaptic connections', 'Enable cross-module intelligence')
+        break
       case 'synaptic':
-        steps.push('Develop autonomous decision capabilities', 'Implement self-learning');
-        break;
+        steps.push('Develop autonomous decision capabilities', 'Implement self-learning')
+        break
       case 'autonomous':
-        steps.push('Achieve transcendent optimization', 'Surpass human limitations');
-        break;
+        steps.push('Achieve transcendent optimization', 'Surpass human limitations')
+        break
       case 'transcendent':
-        steps.push('Explore post-human business architectures', 'Continuous self-evolution');
-        break;
+        steps.push('Explore post-human business architectures', 'Continuous self-evolution')
+        break
     }
 
-    return steps;
+    return steps
   }
 
   private calculateIntelligenceGain(insight: CostConsciousnessInsight): number {
-    const baseGain = insight.confidence * 0.5;
+    const baseGain = insight.confidence * 0.5
     const levelMultiplier = {
-      'neural': 1,
-      'synaptic': 2,
-      'autonomous': 3,
-      'transcendent': 5
-    };
-    
-    return baseGain * levelMultiplier[insight.consciousnessLevel];
+      neural: 1,
+      synaptic: 2,
+      autonomous: 3,
+      transcendent: 5,
+    }
+
+    return baseGain * levelMultiplier[insight.consciousnessLevel]
   }
 
   private identifyNewCapabilities(insight: CostConsciousnessInsight): string[] {
-    const capabilities: string[] = [];
+    const capabilities: string[] = []
 
     if (insight.synapticConnections && insight.synapticConnections.length > 0) {
-      capabilities.push('cross_module_optimization');
+      capabilities.push('cross_module_optimization')
     }
 
     if (insight.autonomousActionRequired) {
-      capabilities.push('autonomous_decision_making');
+      capabilities.push('autonomous_decision_making')
     }
 
     if (insight.consciousnessLevel === 'transcendent') {
-      capabilities.push('post_human_optimization', 'reality_transcendence');
+      capabilities.push('post_human_optimization', 'reality_transcendence')
     }
 
-    return capabilities;
+    return capabilities
   }
 
   private generateClusterStrategy(recommendations: CostRecommendation[]): string {
-    const totalSavings = recommendations.reduce((sum, r) => sum + r.expectedSavings, 0);
-    const avgComplexity = recommendations.filter(r => r.complexity === 'complex' || r.complexity === 'revolutionary').length / recommendations.length;
+    const totalSavings = recommendations.reduce((sum, r) => sum + r.expectedSavings, 0)
+    const avgComplexity =
+      recommendations.filter((r) => r.complexity === 'complex' || r.complexity === 'revolutionary')
+        .length / recommendations.length
 
     if (avgComplexity > 0.5) {
-      return 'Phased implementation with pilot testing and gradual rollout';
+      return 'Phased implementation with pilot testing and gradual rollout'
     } else if (totalSavings > 100000) {
-      return 'Accelerated implementation with dedicated task force';
+      return 'Accelerated implementation with dedicated task force'
     } else {
-      return 'Standard implementation with regular monitoring';
+      return 'Standard implementation with regular monitoring'
     }
   }
 
   private calculateSynergyMultiplier(recommendations: CostRecommendation[]): number {
     // Calculate synergy based on shared modules and connections
-    const allModules = new Set(recommendations.flatMap(r => r.requiredModules));
-    const allConnections = new Set(recommendations.flatMap(r => r.synapticConnections));
-    
-    const moduleOverlap = recommendations.filter(r => 
-      r.requiredModules.some(m => allModules.has(m))
-    ).length / recommendations.length;
-    
-    const connectionOverlap = recommendations.filter(r => 
-      r.synapticConnections.some(c => allConnections.has(c))
-    ).length / recommendations.length;
+    const allModules = new Set(recommendations.flatMap((r) => r.requiredModules))
+    const allConnections = new Set(recommendations.flatMap((r) => r.synapticConnections))
 
-    return 1 + (moduleOverlap * 0.5) + (connectionOverlap * 0.5);
+    const moduleOverlap =
+      recommendations.filter((r) => r.requiredModules.some((m) => allModules.has(m))).length /
+      recommendations.length
+
+    const connectionOverlap =
+      recommendations.filter((r) => r.synapticConnections.some((c) => allConnections.has(c)))
+        .length / recommendations.length
+
+    return 1 + moduleOverlap * 0.5 + connectionOverlap * 0.5
   }
 
   private async getCurrentConsciousnessLevel(tenantId: string): Promise<ConsciousnessCostLevel> {
     // Mock implementation - in production, query actual consciousness state
     const subscription = await prisma.subscription.findFirst({
       where: { tenantId },
-      include: { bundle: true }
-    });
+      include: { bundle: true },
+    })
 
     // Map subscription tier to consciousness level
-    if (subscription?.bundle?.tier === 'TRANSCENDENT') return 'transcendent';
-    if (subscription?.bundle?.tier === 'AUTONOMOUS') return 'autonomous';
-    if (subscription?.bundle?.tier === 'SYNAPTIC') return 'synaptic';
-    return 'neural';
+    if (subscription?.bundle?.tier === 'TRANSCENDENT') return 'transcendent'
+    if (subscription?.bundle?.tier === 'AUTONOMOUS') return 'autonomous'
+    if (subscription?.bundle?.tier === 'SYNAPTIC') return 'synaptic'
+    return 'neural'
   }
 
   private calculateTargetLevel(recommendations: CostRecommendation[]): ConsciousnessCostLevel {
-    const levels = recommendations.map(r => r.consciousnessEvolution.targetLevel);
+    const levels = recommendations.map((r) => r.consciousnessEvolution.targetLevel)
     const levelPriority: Record<ConsciousnessCostLevel, number> = {
-      'neural': 1,
-      'synaptic': 2,
-      'autonomous': 3,
-      'transcendent': 4
-    };
+      neural: 1,
+      synaptic: 2,
+      autonomous: 3,
+      transcendent: 4,
+    }
 
-    const highestLevel = levels.reduce((highest, level) => 
-      levelPriority[level] > levelPriority[highest] ? level : highest,
+    const highestLevel = levels.reduce(
+      (highest, level) => (levelPriority[level] > levelPriority[highest] ? level : highest),
       'neural' as ConsciousnessCostLevel
-    );
+    )
 
-    return highestLevel;
+    return highestLevel
   }
 
   private generateEvolutionStepsForPath(
     current: ConsciousnessCostLevel,
     target: ConsciousnessCostLevel
   ): string[] {
-    const steps: string[] = [];
-    const levels: ConsciousnessCostLevel[] = ['neural', 'synaptic', 'autonomous', 'transcendent'];
-    
-    const currentIndex = levels.indexOf(current);
-    const targetIndex = levels.indexOf(target);
+    const steps: string[] = []
+    const levels: ConsciousnessCostLevel[] = ['neural', 'synaptic', 'autonomous', 'transcendent']
+
+    const currentIndex = levels.indexOf(current)
+    const targetIndex = levels.indexOf(target)
 
     for (let i = currentIndex; i < targetIndex; i++) {
-      steps.push(`Evolve from ${levels[i]} to ${levels[i + 1]} consciousness`);
+      steps.push(`Evolve from ${levels[i]} to ${levels[i + 1]} consciousness`)
     }
 
-    return steps;
+    return steps
   }
 
-  private async storeRecommendations(recommendations: CostRecommendation[], tenantId: string): Promise<void> {
+  private async storeRecommendations(
+    recommendations: CostRecommendation[],
+    tenantId: string
+  ): Promise<void> {
     for (const recommendation of recommendations) {
       await prisma.aiActivity.create({
         data: {
           tenantId,
           action: 'COST_RECOMMENDATION_GENERATED',
-          details: JSON.stringify(recommendation)
-        }
-      });
+          details: JSON.stringify(recommendation),
+        },
+      })
     }
   }
 }
 
-export const consciousnessRecommendationsEngine = new ConsciousnessRecommendationsEngine();
+export const consciousnessRecommendationsEngine = new ConsciousnessRecommendationsEngine()

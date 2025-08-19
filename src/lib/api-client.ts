@@ -10,7 +10,7 @@ export class ApiError extends Error {
     message: string,
     public statusCode: number,
     public code?: string,
-    public details?: any
+    public details?: unknown
   ) {
     super(message)
     this.name = 'ApiError'
@@ -18,29 +18,29 @@ export class ApiError extends Error {
 }
 
 export interface ApiRequestOptions extends Omit<RequestInit, 'body'> {
-  body?: any
-  params?: Record<string, any>
+  body?: unknown
+  params?: Record<string, unknown>
   timeout?: number
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: {
     type: string
     message: string
     code: string
-    details?: any
+    details?: unknown
     requestId?: string
   }
-  meta?: any
+  meta?: unknown
   timestamp: string
 }
 
 /**
  * Enhanced fetch wrapper with CSRF protection, error handling, and request cancellation
  */
-export async function apiFetch<T = any>(
+export async function apiFetch<T = unknown>(
   url: string,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
@@ -68,7 +68,7 @@ export async function apiFetch<T = any>(
     // Prepare headers with CSRF protection
     const headers = ClientCSRF.addToHeaders({
       'Content-Type': 'application/json',
-      ...fetchOptions.headers
+      ...fetchOptions.headers,
     })
 
     // Prepare request options
@@ -76,7 +76,7 @@ export async function apiFetch<T = any>(
       ...fetchOptions,
       headers,
       signal: controller.signal,
-      credentials: 'include' // Include cookies for auth
+      credentials: 'include', // Include cookies for auth
     }
 
     // Add body if present
@@ -95,11 +95,13 @@ export async function apiFetch<T = any>(
     if (!response.ok) {
       // Emit auth error event for 401 responses
       if (response.status === 401) {
-        window.dispatchEvent(new CustomEvent('auth:error', {
-          detail: { statusCode: 401, url }
-        }))
+        window.dispatchEvent(
+          new CustomEvent('auth:error', {
+            detail: { statusCode: 401, url },
+          })
+        )
       }
-      
+
       // Check if response follows our standard error format
       if (responseData.error) {
         throw new ApiError(
@@ -127,7 +129,7 @@ export async function apiFetch<T = any>(
     return {
       success: true,
       data: responseData,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     }
   } catch (error) {
     clearTimeout(timeoutId)
@@ -148,12 +150,7 @@ export async function apiFetch<T = any>(
     }
 
     // Handle other errors
-    throw new ApiError(
-      error.message || 'Unknown error occurred',
-      500,
-      'UNKNOWN_ERROR',
-      error
-    )
+    throw new ApiError(error.message || 'Unknown error occurred', 500, 'UNKNOWN_ERROR', error)
   }
 }
 
@@ -161,33 +158,33 @@ export async function apiFetch<T = any>(
  * Convenience methods for common HTTP verbs
  */
 export const api = {
-  get: <T = any>(url: string, options?: ApiRequestOptions) =>
+  get: <T = unknown>(url: string, options?: ApiRequestOptions) =>
     apiFetch<T>(url, { ...options, method: 'GET' }),
 
-  post: <T = any>(url: string, body?: any, options?: ApiRequestOptions) =>
+  post: <T = unknown>(url: string, body?: unknown, options?: ApiRequestOptions) =>
     apiFetch<T>(url, { ...options, method: 'POST', body }),
 
-  put: <T = any>(url: string, body?: any, options?: ApiRequestOptions) =>
+  put: <T = unknown>(url: string, body?: unknown, options?: ApiRequestOptions) =>
     apiFetch<T>(url, { ...options, method: 'PUT', body }),
 
-  patch: <T = any>(url: string, body?: any, options?: ApiRequestOptions) =>
+  patch: <T = unknown>(url: string, body?: unknown, options?: ApiRequestOptions) =>
     apiFetch<T>(url, { ...options, method: 'PATCH', body }),
 
-  delete: <T = any>(url: string, options?: ApiRequestOptions) =>
-    apiFetch<T>(url, { ...options, method: 'DELETE' })
+  delete: <T = unknown>(url: string, options?: ApiRequestOptions) =>
+    apiFetch<T>(url, { ...options, method: 'DELETE' }),
 }
 
 /**
  * Create a cancellable request
  */
-export function createCancellableRequest<T = any>(
+export function createCancellableRequest<T = unknown>(
   requestFn: () => Promise<T>
 ): {
   promise: Promise<T>
   cancel: () => void
 } {
   const controller = new AbortController()
-  
+
   const wrappedFn = async () => {
     try {
       return await requestFn()
@@ -201,7 +198,7 @@ export function createCancellableRequest<T = any>(
 
   return {
     promise: wrappedFn(),
-    cancel: () => controller.abort()
+    cancel: () => controller.abort(),
   }
 }
 
@@ -214,7 +211,7 @@ export async function withRetry<T>(
     maxAttempts?: number
     delay?: number
     backoffMultiplier?: number
-    shouldRetry?: (error: any) => boolean
+    shouldRetry?: (error: unknown) => boolean
   } = {}
 ): Promise<T> {
   const {
@@ -227,10 +224,10 @@ export async function withRetry<T>(
         return error.statusCode === 0 || error.statusCode >= 500
       }
       return false
-    }
+    },
   } = options
 
-  let lastError: any
+  let lastError: unknown
   let currentDelay = delay
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -238,13 +235,13 @@ export async function withRetry<T>(
       return await fn()
     } catch (error) {
       lastError = error
-      
+
       if (attempt === maxAttempts || !shouldRetry(error)) {
         throw error
       }
 
       // Wait before retrying
-      await new Promise(resolve => setTimeout(resolve, currentDelay))
+      await new Promise((resolve) => setTimeout(resolve, currentDelay))
       currentDelay *= backoffMultiplier
     }
   }

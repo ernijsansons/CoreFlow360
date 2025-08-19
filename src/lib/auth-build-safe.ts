@@ -3,8 +3,8 @@
  * EMERGENCY FIX: This file ensures auth NEVER initializes during build time
  */
 
-import type { NextAuthConfig } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
+import type { NextAuthConfig } from 'next-auth'
+import CredentialsProvider from 'next-auth/providers/credentials'
 
 // Comprehensive build detection
 export const isBuildPhase = () => {
@@ -23,43 +23,41 @@ export const isBuildPhase = () => {
 
 // EMERGENCY: Mock provider for build time - NO database access
 const buildTimeProvider = CredentialsProvider({
-  name: "build-time",
+  name: 'build-time',
   credentials: {},
   async authorize() {
-    console.log('[AUTH] Build time provider called - returning null')
     return null
-  }
+  },
 })
 
 // Real provider for runtime - with lazy loading
 const getRuntimeProviders = () => {
   const providers: NextAuthConfig['providers'] = []
-  
+
   providers.push(
     CredentialsProvider({
-      name: "credentials",
+      name: 'credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         // EMERGENCY: Double-check we're not in build phase
         if (isBuildPhase()) {
-          console.log('[AUTH] Build phase detected in runtime provider - returning null')
           return null
         }
 
         try {
           // Lazy load dependencies only at runtime
           const [bcryptjs, { z }, { getPrisma }] = await Promise.all([
-            import("bcryptjs"),
-            import("zod"),
-            import("./db")
+            import('bcryptjs'),
+            import('zod'),
+            import('./db'),
           ])
 
           const loginSchema = z.object({
             email: z.string().email(),
-            password: z.string().min(8)
+            password: z.string().min(8),
           })
 
           const parsed = loginSchema.safeParse(credentials)
@@ -73,12 +71,12 @@ const getRuntimeProviders = () => {
             where: { email },
             include: {
               tenant: true,
-              department: true
-            }
+              department: true,
+            },
           })
 
           if (!user || !user.password) return null
-          
+
           const isValid = await bcryptjs.compare(password, user.password)
           if (!isValid) return null
 
@@ -89,13 +87,12 @@ const getRuntimeProviders = () => {
             image: user.avatar,
             tenantId: user.tenantId,
             role: user.role,
-            departmentId: user.departmentId
+            departmentId: user.departmentId,
           }
         } catch (error) {
-          console.error('[AUTH] Runtime error:', error)
           return null
         }
-      }
+      },
     })
   )
 
@@ -105,27 +102,25 @@ const getRuntimeProviders = () => {
 // Export config factory with build-time safety
 export const createAuthConfig = (): NextAuthConfig => {
   const isBuild = isBuildPhase()
-  
-  console.log('[AUTH] Creating config, build phase:', isBuild)
-  
+
   return {
     providers: isBuild ? [buildTimeProvider] : getRuntimeProviders(),
     secret: process.env.NEXTAUTH_SECRET || 'dev-secret-minimum-32-characters-for-security',
     session: {
-      strategy: "jwt",
-      maxAge: 8 * 60 * 60
+      strategy: 'jwt',
+      maxAge: 8 * 60 * 60,
     },
     pages: {
-      signIn: "/login",
-      error: "/auth/error"
+      signIn: '/login',
+      error: '/auth/error',
     },
     callbacks: {
       async jwt({ token, user }) {
         if (user) {
           token.id = user.id
-          token.tenantId = (user as any).tenantId
-          token.role = (user as any).role
-          token.departmentId = (user as any).departmentId
+          token.tenantId = (user as unknown).tenantId
+          token.role = (user as unknown).role
+          token.departmentId = (user as unknown).departmentId
         }
         return token
       },
@@ -137,8 +132,8 @@ export const createAuthConfig = (): NextAuthConfig => {
           session.user.departmentId = token.departmentId as string
         }
         return session
-      }
+      },
     },
-    debug: false // Never debug in production
+    debug: false, // Never debug in production
   }
 }

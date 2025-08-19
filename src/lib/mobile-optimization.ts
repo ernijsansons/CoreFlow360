@@ -6,13 +6,16 @@
 // Detect mobile device
 export const isMobile = (): boolean => {
   if (typeof window === 'undefined') return false
-  return window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  return (
+    window.innerWidth <= 768 ||
+    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  )
 }
 
 // Detect slow network connection
 export const isSlowConnection = (): boolean => {
   if (typeof navigator === 'undefined' || !('connection' in navigator)) return false
-  const connection = (navigator as any).connection
+  const connection = (navigator as unknown).connection
   return connection?.effectiveType === '2g' || connection?.effectiveType === 'slow-2g'
 }
 
@@ -20,13 +23,9 @@ export const isSlowConnection = (): boolean => {
 export const preloadCriticalResources = () => {
   if (typeof document === 'undefined') return
 
-  const criticalResources = [
-    '/fonts/inter-var.woff2',
-    '/images/logo.webp',
-    '/images/hero-bg.webp'
-  ]
+  const criticalResources = ['/fonts/inter-var.woff2', '/images/logo.webp', '/images/hero-bg.webp']
 
-  criticalResources.forEach(href => {
+  criticalResources.forEach((href) => {
     const link = document.createElement('link')
     link.rel = 'preload'
     link.href = href
@@ -40,27 +39,30 @@ export const preloadCriticalResources = () => {
 export const createLazyImageObserver = (): IntersectionObserver | null => {
   if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return null
 
-  return new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target as HTMLImageElement
-        if (img.dataset.src) {
-          img.src = img.dataset.src
-          img.classList.remove('blur-sm')
-          img.classList.add('transition-all', 'duration-300')
+  return new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const img = entry.target as HTMLImageElement
+          if (img.dataset.src) {
+            img.src = img.dataset.src
+            img.classList.remove('blur-sm')
+            img.classList.add('transition-all', 'duration-300')
+          }
         }
-      }
-    })
-  }, {
-    rootMargin: '50px 0px',
-    threshold: 0.1
-  })
+      })
+    },
+    {
+      rootMargin: '50px 0px',
+      threshold: 0.1,
+    }
+  )
 }
 
 // Optimize animations for mobile
 export const getOptimizedAnimationConfig = () => {
-  const shouldReduceMotion = typeof window !== 'undefined' && 
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const shouldReduceMotion =
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   const isMobileDevice = isMobile()
   const isSlowNetwork = isSlowConnection()
@@ -69,17 +71,17 @@ export const getOptimizedAnimationConfig = () => {
     return {
       initial: { opacity: 0 },
       animate: { opacity: 1 },
-      transition: { duration: 0.2 }
+      transition: { duration: 0.2 },
     }
   }
 
   return {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
-    transition: { 
+    transition: {
       duration: isMobileDevice ? 0.3 : 0.6,
-      ease: 'easeOut'
-    }
+      ease: 'easeOut',
+    },
   }
 }
 
@@ -95,7 +97,7 @@ export class VirtualScrollList {
     this.container = container
     this.itemHeight = itemHeight
     this.visibleCount = Math.ceil(container.clientHeight / itemHeight) + 2
-    
+
     this.container.addEventListener('scroll', this.handleScroll.bind(this))
   }
 
@@ -113,7 +115,7 @@ export class VirtualScrollList {
 
   private updateVisibleItems() {
     // Override this method to update visible items
-    console.log(`Showing items ${this.startIndex} to ${this.endIndex}`)
+    
   }
 }
 
@@ -123,10 +125,10 @@ export const registerServiceWorker = async () => {
 
   try {
     const registration = await navigator.serviceWorker.register('/sw.js')
-    console.log('Service Worker registered successfully:', registration)
+    
     return registration
   } catch (error) {
-    console.warn('Service Worker registration failed:', error)
+    
     return null
   }
 }
@@ -148,10 +150,10 @@ export const addResourceHints = () => {
   const hints = [
     { rel: 'dns-prefetch', href: '//fonts.googleapis.com' },
     { rel: 'dns-prefetch', href: '//www.google-analytics.com' },
-    { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' }
+    { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
   ]
 
-  hints.forEach(hint => {
+  hints.forEach((hint) => {
     const link = document.createElement('link')
     link.rel = hint.rel
     link.href = hint.href
@@ -172,7 +174,7 @@ export class MobilePerformanceMonitor {
     const startTime = this.metrics[`${name}_start`]
     if (startTime) {
       this.metrics[name] = performance.now() - startTime
-      console.log(`Performance: ${name} took ${this.metrics[name].toFixed(2)}ms`)
+      console.log(`${name} took ${this.metrics[name]}ms`)
     }
   }
 
@@ -185,27 +187,27 @@ export class MobilePerformanceMonitor {
     if (typeof window === 'undefined') return
 
     // First Contentful Paint
-    new PerformanceObserver(list => {
+    new PerformanceObserver((list) => {
       const entry = list.getEntries()[0]
-      console.log('FCP:', entry.startTime)
+      
     }).observe({ entryTypes: ['paint'] })
 
     // Largest Contentful Paint
-    new PerformanceObserver(list => {
+    new PerformanceObserver((list) => {
       const entries = list.getEntries()
       const lastEntry = entries[entries.length - 1]
-      console.log('LCP:', lastEntry.startTime)
+      
     }).observe({ entryTypes: ['largest-contentful-paint'] })
 
     // Cumulative Layout Shift
-    new PerformanceObserver(list => {
+    new PerformanceObserver((list) => {
       let cumulativeScore = 0
-      list.getEntries().forEach(entry => {
-        if (!(entry as any).hadRecentInput) {
-          cumulativeScore += (entry as any).value
+      list.getEntries().forEach((entry) => {
+        if (!(entry as unknown).hadRecentInput) {
+          cumulativeScore += (entry as unknown).value
         }
       })
-      console.log('CLS:', cumulativeScore)
+      
     }).observe({ entryTypes: ['layout-shift'] })
   }
 }
@@ -218,11 +220,7 @@ export const optimizeTouch = () => {
 
   // Add touch-action CSS for better scrolling
   const style = document.createElement('style')
-  style.textContent = `
-    * { touch-action: manipulation; }
-    .scrollable { -webkit-overflow-scrolling: touch; }
-    button, a { touch-action: manipulation; }
-  `
+  style.textContent = '* { touch-action: manipulation; } .scrollable { -webkit-overflow-scrolling: touch; } button, a { touch-action: manipulation; }'
   document.head.appendChild(style)
 }
 
@@ -252,5 +250,5 @@ export const initMobileOptimizations = () => {
   registerServiceWorker()
   performanceMonitor.monitorWebVitals()
 
-  console.log('Mobile optimizations initialized')
+  console.log('🚀 Mobile optimization initialized')
 }

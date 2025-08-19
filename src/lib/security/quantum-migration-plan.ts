@@ -51,7 +51,7 @@ class QuantumMigrationPlanner {
       quantumBreakYear: 2030,
       migrationPriority: 'high',
       replacementAlgorithm: 'Kyber-1024',
-      migrationComplexity: 'moderate'
+      migrationComplexity: 'moderate',
     },
     {
       algorithm: 'RSA-4096',
@@ -59,7 +59,7 @@ class QuantumMigrationPlanner {
       quantumBreakYear: 2035,
       migrationPriority: 'medium',
       replacementAlgorithm: 'Kyber-1024',
-      migrationComplexity: 'moderate'
+      migrationComplexity: 'moderate',
     },
     {
       algorithm: 'ECDSA-P256',
@@ -67,7 +67,7 @@ class QuantumMigrationPlanner {
       quantumBreakYear: 2030,
       migrationPriority: 'high',
       replacementAlgorithm: 'Dilithium-3',
-      migrationComplexity: 'complex'
+      migrationComplexity: 'complex',
     },
     {
       algorithm: 'ECDSA-P384',
@@ -75,7 +75,7 @@ class QuantumMigrationPlanner {
       quantumBreakYear: 2032,
       migrationPriority: 'medium',
       replacementAlgorithm: 'Dilithium-5',
-      migrationComplexity: 'complex'
+      migrationComplexity: 'complex',
     },
     {
       algorithm: 'ECDH-P256',
@@ -83,7 +83,7 @@ class QuantumMigrationPlanner {
       quantumBreakYear: 2030,
       migrationPriority: 'high',
       replacementAlgorithm: 'Kyber-768',
-      migrationComplexity: 'moderate'
+      migrationComplexity: 'moderate',
     },
     {
       algorithm: 'AES-256',
@@ -91,7 +91,7 @@ class QuantumMigrationPlanner {
       quantumBreakYear: 2050,
       migrationPriority: 'low',
       replacementAlgorithm: 'AES-256', // Already quantum-resistant
-      migrationComplexity: 'simple'
+      migrationComplexity: 'simple',
     },
     {
       algorithm: 'SHA-256',
@@ -99,7 +99,7 @@ class QuantumMigrationPlanner {
       quantumBreakYear: 2045,
       migrationPriority: 'low',
       replacementAlgorithm: 'SHA-3-256',
-      migrationComplexity: 'simple'
+      migrationComplexity: 'simple',
     },
     {
       algorithm: 'HMAC-SHA256',
@@ -107,8 +107,8 @@ class QuantumMigrationPlanner {
       quantumBreakYear: 2045,
       migrationPriority: 'low',
       replacementAlgorithm: 'HMAC-SHA-3-256',
-      migrationComplexity: 'simple'
-    }
+      migrationComplexity: 'simple',
+    },
   ]
 
   private readonly postQuantumAlgorithms = {
@@ -116,7 +116,7 @@ class QuantumMigrationPlanner {
     keyExchange: ['Kyber-512', 'Kyber-768', 'Kyber-1024'],
     digitalSignature: ['Dilithium-2', 'Dilithium-3', 'Dilithium-5', 'Falcon-512', 'Falcon-1024'],
     symmetricEncryption: ['AES-256', 'ChaCha20-Poly1305'],
-    hashing: ['SHA-3-256', 'SHA-3-512', 'BLAKE3']
+    hashing: ['SHA-3-256', 'SHA-3-512', 'BLAKE3'],
   }
 
   generateMigrationPlan(): QuantumReadinessReport {
@@ -137,20 +137,20 @@ class QuantumMigrationPlanner {
       migrationTimeline,
       estimatedTotalCost,
       recommendedActions,
-      complianceStatus
+      complianceStatus,
     }
   }
 
   private identifyVulnerableComponents(): string[] {
     return this.currentAlgorithms
-      .filter(alg => alg.vulnerabilityLevel === 'high' || alg.vulnerabilityLevel === 'critical')
-      .map(alg => alg.algorithm)
+      .filter((alg) => alg.vulnerabilityLevel === 'high' || alg.vulnerabilityLevel === 'critical')
+      .map((alg) => alg.algorithm)
   }
 
   private identifyReadyComponents(): string[] {
     return this.currentAlgorithms
-      .filter(alg => alg.vulnerabilityLevel === 'low')
-      .map(alg => alg.algorithm)
+      .filter((alg) => alg.vulnerabilityLevel === 'low')
+      .map((alg) => alg.algorithm)
   }
 
   private createMigrationTimeline(): MigrationPhase[] {
@@ -161,7 +161,8 @@ class QuantumMigrationPlanner {
     phases.push({
       id: 'phase1-research',
       name: 'Research and Assessment',
-      description: 'Comprehensive audit of current cryptographic implementations and threat assessment',
+      description:
+        'Comprehensive audit of current cryptographic implementations and threat assessment',
       startDate: new Date(2025, 0, 1),
       endDate: new Date(2025, 5, 30),
       status: 'not-started',
@@ -170,7 +171,7 @@ class QuantumMigrationPlanner {
       systems: ['audit-system', 'assessment-tools', 'documentation'],
       riskLevel: 'low',
       estimatedCost: 50000,
-      resources: ['security-architect', 'cryptography-expert', 'compliance-officer']
+      resources: ['security-architect', 'cryptography-expert', 'compliance-officer'],
     })
 
     // Phase 2: Hybrid Implementation (2025 Q3-Q4)
@@ -186,14 +187,15 @@ class QuantumMigrationPlanner {
       systems: ['tls-layer', 'api-authentication', 'database-encryption'],
       riskLevel: 'medium',
       estimatedCost: 150000,
-      resources: ['crypto-engineer', 'backend-developer', 'security-tester']
+      resources: ['crypto-engineer', 'backend-developer', 'security-tester'],
     })
 
     // Phase 3: Core System Migration (2026 Q1-Q3)
     phases.push({
       id: 'phase3-core',
       name: 'Core System Migration',
-      description: 'Migrate critical authentication and encryption systems to post-quantum algorithms',
+      description:
+        'Migrate critical authentication and encryption systems to post-quantum algorithms',
       startDate: new Date(2026, 0, 1),
       endDate: new Date(2026, 8, 30),
       status: 'not-started',
@@ -202,7 +204,7 @@ class QuantumMigrationPlanner {
       systems: ['user-authentication', 'session-management', 'data-encryption'],
       riskLevel: 'high',
       estimatedCost: 300000,
-      resources: ['senior-crypto-engineer', 'system-architect', 'qa-team']
+      resources: ['senior-crypto-engineer', 'system-architect', 'qa-team'],
     })
 
     // Phase 4: Communication Security (2026 Q4-2027 Q2)
@@ -218,7 +220,7 @@ class QuantumMigrationPlanner {
       systems: ['tls-1.4', 'vpn-tunnels', 'message-encryption', 'voice-encryption'],
       riskLevel: 'medium',
       estimatedCost: 200000,
-      resources: ['network-engineer', 'protocol-specialist', 'security-analyst']
+      resources: ['network-engineer', 'protocol-specialist', 'security-analyst'],
     })
 
     // Phase 5: Legacy System Migration (2027 Q3-Q4)
@@ -234,14 +236,15 @@ class QuantumMigrationPlanner {
       systems: ['legacy-integrations', 'archive-systems', 'backup-encryption'],
       riskLevel: 'low',
       estimatedCost: 100000,
-      resources: ['legacy-specialist', 'migration-engineer', 'compliance-auditor']
+      resources: ['legacy-specialist', 'migration-engineer', 'compliance-auditor'],
     })
 
     // Phase 6: Validation and Certification (2028 Q1)
     phases.push({
       id: 'phase6-validation',
       name: 'Validation and Certification',
-      description: 'Comprehensive testing, validation, and certification of quantum-resistant systems',
+      description:
+        'Comprehensive testing, validation, and certification of quantum-resistant systems',
       startDate: new Date(2028, 0, 1),
       endDate: new Date(2028, 2, 31),
       status: 'not-started',
@@ -250,7 +253,7 @@ class QuantumMigrationPlanner {
       systems: ['full-system-audit', 'penetration-testing', 'compliance-certification'],
       riskLevel: 'low',
       estimatedCost: 75000,
-      resources: ['security-auditor', 'penetration-tester', 'compliance-expert']
+      resources: ['security-auditor', 'penetration-tester', 'compliance-expert'],
     })
 
     return phases
@@ -258,25 +261,37 @@ class QuantumMigrationPlanner {
 
   private calculateReadinessScore(): number {
     const totalAlgorithms = this.currentAlgorithms.length
-    const lowRiskAlgorithms = this.currentAlgorithms.filter(alg => alg.vulnerabilityLevel === 'low').length
-    const mediumRiskAlgorithms = this.currentAlgorithms.filter(alg => alg.vulnerabilityLevel === 'medium').length
-    const highRiskAlgorithms = this.currentAlgorithms.filter(alg => alg.vulnerabilityLevel === 'high').length
-    const criticalRiskAlgorithms = this.currentAlgorithms.filter(alg => alg.vulnerabilityLevel === 'critical').length
+    const lowRiskAlgorithms = this.currentAlgorithms.filter(
+      (alg) => alg.vulnerabilityLevel === 'low'
+    ).length
+    const mediumRiskAlgorithms = this.currentAlgorithms.filter(
+      (alg) => alg.vulnerabilityLevel === 'medium'
+    ).length
+    const highRiskAlgorithms = this.currentAlgorithms.filter(
+      (alg) => alg.vulnerabilityLevel === 'high'
+    ).length
+    const criticalRiskAlgorithms = this.currentAlgorithms.filter(
+      (alg) => alg.vulnerabilityLevel === 'critical'
+    ).length
 
     // Weighted scoring
-    const score = (
-      (lowRiskAlgorithms * 100) +
-      (mediumRiskAlgorithms * 60) +
-      (highRiskAlgorithms * 20) +
-      (criticalRiskAlgorithms * 0)
-    ) / totalAlgorithms
+    const score =
+      (lowRiskAlgorithms * 100 +
+        mediumRiskAlgorithms * 60 +
+        highRiskAlgorithms * 20 +
+        criticalRiskAlgorithms * 0) /
+      totalAlgorithms
 
     return Math.round(score)
   }
 
   private assessOverallRisk(): 'low' | 'medium' | 'high' | 'critical' {
-    const criticalAlgorithms = this.currentAlgorithms.filter(alg => alg.vulnerabilityLevel === 'critical').length
-    const highRiskAlgorithms = this.currentAlgorithms.filter(alg => alg.vulnerabilityLevel === 'high').length
+    const criticalAlgorithms = this.currentAlgorithms.filter(
+      (alg) => alg.vulnerabilityLevel === 'critical'
+    ).length
+    const highRiskAlgorithms = this.currentAlgorithms.filter(
+      (alg) => alg.vulnerabilityLevel === 'high'
+    ).length
 
     if (criticalAlgorithms > 0) return 'critical'
     if (highRiskAlgorithms > 3) return 'high'
@@ -290,8 +305,8 @@ class QuantumMigrationPlanner {
 
   private generateRecommendations(): string[] {
     const recommendations: string[] = []
-    const vulnerableAlgorithms = this.currentAlgorithms.filter(alg => 
-      alg.vulnerabilityLevel === 'high' || alg.vulnerabilityLevel === 'critical'
+    const vulnerableAlgorithms = this.currentAlgorithms.filter(
+      (alg) => alg.vulnerabilityLevel === 'high' || alg.vulnerabilityLevel === 'critical'
     )
 
     recommendations.push('Begin immediate assessment of current cryptographic inventory')
@@ -299,7 +314,9 @@ class QuantumMigrationPlanner {
     recommendations.push('Develop hybrid classical/post-quantum implementation strategy')
 
     if (vulnerableAlgorithms.length > 0) {
-      recommendations.push(`Prioritize migration of ${vulnerableAlgorithms.length} vulnerable algorithms`)
+      recommendations.push(
+        `Prioritize migration of ${vulnerableAlgorithms.length} vulnerable algorithms`
+      )
     }
 
     recommendations.push('Implement crypto-agility architecture for future algorithm updates')
@@ -317,8 +334,8 @@ class QuantumMigrationPlanner {
     return {
       nist: false, // Not yet compliant with NIST post-quantum standards
       fips: false, // Not yet FIPS 140-3 compliant with post-quantum
-      iso: false,  // Not yet ISO/IEC 27001 compliant with post-quantum
-      custom: true // Custom security frameworks can be more flexible
+      iso: false, // Not yet ISO/IEC 27001 compliant with post-quantum
+      custom: true, // Custom security frameworks can be more flexible
     }
   }
 
@@ -329,17 +346,17 @@ class QuantumMigrationPlanner {
     longTermThreats: QuantumThreatAssessment[]
   } {
     const currentYear = new Date().getFullYear()
-    
+
     return {
-      immediateThreats: this.currentAlgorithms.filter(alg => 
-        alg.quantumBreakYear <= currentYear + 5 && alg.vulnerabilityLevel === 'high'
+      immediateThreats: this.currentAlgorithms.filter(
+        (alg) => alg.quantumBreakYear <= currentYear + 5 && alg.vulnerabilityLevel === 'high'
       ),
-      nearTermThreats: this.currentAlgorithms.filter(alg => 
-        alg.quantumBreakYear > currentYear + 5 && alg.quantumBreakYear <= currentYear + 10
+      nearTermThreats: this.currentAlgorithms.filter(
+        (alg) => alg.quantumBreakYear > currentYear + 5 && alg.quantumBreakYear <= currentYear + 10
       ),
-      longTermThreats: this.currentAlgorithms.filter(alg => 
-        alg.quantumBreakYear > currentYear + 10
-      )
+      longTermThreats: this.currentAlgorithms.filter(
+        (alg) => alg.quantumBreakYear > currentYear + 10
+      ),
     }
   }
 
@@ -354,21 +371,21 @@ class QuantumMigrationPlanner {
         'NIST SP 800-208 (Post-Quantum Cryptography)',
         'FIPS 140-3 (Post-Quantum Module Requirements)',
         'ISO/IEC 29192-7 (Lightweight Post-Quantum Cryptography)',
-        'ETSI TR 103 570 (Quantum-Safe Cryptography)'
+        'ETSI TR 103 570 (Quantum-Safe Cryptography)',
       ],
       gaps: [
         'Missing post-quantum key exchange implementation',
         'No hybrid cryptographic architecture',
         'Lack of crypto-agility framework',
-        'Insufficient quantum threat monitoring'
+        'Insufficient quantum threat monitoring',
       ],
       recommendations: [
         'Implement NIST-approved post-quantum algorithms',
         'Establish quantum-safe key management system',
         'Deploy hybrid classical/post-quantum protocols',
-        'Create comprehensive testing framework'
+        'Create comprehensive testing framework',
       ],
-      timeline: '2025-2028 (3-year migration plan)'
+      timeline: '2025-2028 (3-year migration plan)',
     }
   }
 
@@ -383,22 +400,22 @@ class QuantumMigrationPlanner {
       recentBreakthroughs: [
         'IBM 127-qubit Eagle processor advancement',
         'Google quantum error correction improvements',
-        'IonQ quantum networking protocols'
+        'IonQ quantum networking protocols',
       ],
       algorithmUpdates: [
         'NIST Kyber-1024 specification update',
         'Dilithium-3 optimization improvements',
-        'Falcon signature scheme enhancements'
+        'Falcon signature scheme enhancements',
       ],
       threatLevelChanges: [
         'RSA-2048 threat level increased to HIGH',
-        'ECDSA-P256 estimated break date moved to 2030'
+        'ECDSA-P256 estimated break date moved to 2030',
       ],
       recommendedActions: [
         'Update threat assessment models',
         'Accelerate hybrid implementation timeline',
-        'Increase monitoring frequency'
-      ]
+        'Increase monitoring frequency',
+      ],
     }
   }
 }
@@ -408,28 +425,28 @@ export const quantumMigrationPlanner = new QuantumMigrationPlanner()
 
 // Utility functions for integration
 export function isQuantumVulnerable(algorithm: string): boolean {
-  const assessment = quantumMigrationPlanner['currentAlgorithms'].find(alg => 
+  const assessment = quantumMigrationPlanner['currentAlgorithms'].find((alg) =>
     alg.algorithm.toLowerCase().includes(algorithm.toLowerCase())
   )
   return assessment ? ['high', 'critical'].includes(assessment.vulnerabilityLevel) : false
 }
 
 export function getRecommendedReplacement(algorithm: string): string | null {
-  const assessment = quantumMigrationPlanner['currentAlgorithms'].find(alg => 
+  const assessment = quantumMigrationPlanner['currentAlgorithms'].find((alg) =>
     alg.algorithm.toLowerCase().includes(algorithm.toLowerCase())
   )
   return assessment?.replacementAlgorithm || null
 }
 
 export function getMigrationPriority(algorithm: string): string {
-  const assessment = quantumMigrationPlanner['currentAlgorithms'].find(alg => 
+  const assessment = quantumMigrationPlanner['currentAlgorithms'].find((alg) =>
     alg.algorithm.toLowerCase().includes(algorithm.toLowerCase())
   )
   return assessment?.migrationPriority || 'low'
 }
 
 export function estimateQuantumBreakYear(algorithm: string): number | null {
-  const assessment = quantumMigrationPlanner['currentAlgorithms'].find(alg => 
+  const assessment = quantumMigrationPlanner['currentAlgorithms'].find((alg) =>
     alg.algorithm.toLowerCase().includes(algorithm.toLowerCase())
   )
   return assessment?.quantumBreakYear || null

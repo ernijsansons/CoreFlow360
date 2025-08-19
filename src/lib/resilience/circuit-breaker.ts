@@ -4,14 +4,14 @@
  */
 
 export interface CircuitBreakerConfig {
-  failureThreshold: number    // Number of failures before opening
-  recoveryTimeout: number     // Time in ms before trying again
-  monitoringPeriod: number   // Time window for failure counting
-  expectedErrors?: string[]   // Error types that should open the circuit
-  successThreshold?: number   // Successes needed to close from half-open
-  volumeThreshold?: number    // Minimum calls before circuit can open
+  failureThreshold: number // Number of failures before opening
+  recoveryTimeout: number // Time in ms before trying again
+  monitoringPeriod: number // Time window for failure counting
+  expectedErrors?: string[] // Error types that should open the circuit
+  successThreshold?: number // Successes needed to close from half-open
+  volumeThreshold?: number // Minimum calls before circuit can open
   errorRateThreshold?: number // Error rate (0-1) that triggers opening
-  adaptiveRecovery?: boolean  // Whether to use adaptive recovery times
+  adaptiveRecovery?: boolean // Whether to use adaptive recovery times
   maxRecoveryTimeout?: number // Maximum recovery timeout
 }
 
@@ -67,7 +67,9 @@ export class CircuitBreaker {
 
     if (this.state === 'OPEN') {
       if (Date.now() < this.nextAttempt) {
-        const error = new Error(`Circuit breaker '${this.name}' is OPEN. Next attempt in ${Math.ceil((this.nextAttempt - Date.now()) / 1000)}s`)
+        const error = new Error(
+          `Circuit breaker '${this.name}' is OPEN. Next attempt in ${Math.ceil((this.nextAttempt - Date.now()) / 1000)}s`
+        )
         error.name = 'CircuitBreakerOpenError'
         throw error
       } else {
@@ -95,7 +97,7 @@ export class CircuitBreaker {
     if (this.state === 'HALF_OPEN') {
       this.halfOpenSuccesses++
       const successThreshold = this.config.successThreshold || 3
-      
+
       if (this.halfOpenSuccesses >= successThreshold) {
         this.state = 'CLOSED'
         this.failures = 0
@@ -115,14 +117,14 @@ export class CircuitBreaker {
 
     // Classify the error
     const errorClassification = this.classifyError(error)
-    
+
     // Store recent error for analysis
     this.recentErrors.push({
       timestamp: now,
       type: errorClassification.type,
-      message: error.message
+      message: error.message,
     })
-    
+
     // Keep only last 50 errors
     if (this.recentErrors.length > 50) {
       this.recentErrors.shift()
@@ -130,11 +132,11 @@ export class CircuitBreaker {
 
     // Add weighted failure to window
     this.windowFailures.push(now)
-    
+
     // Only count certain errors towards circuit breaker
     if (this.config.expectedErrors?.length) {
-      const isExpectedError = this.config.expectedErrors.some(
-        expectedError => error.message.toLowerCase().includes(expectedError.toLowerCase())
+      const isExpectedError = this.config.expectedErrors.some((expectedError) =>
+        error.message.toLowerCase().includes(expectedError.toLowerCase())
       )
       if (!isExpectedError && errorClassification.type !== 'temporary') {
         return // Don't count this failure
@@ -143,10 +145,10 @@ export class CircuitBreaker {
 
     // Check if circuit should open
     const shouldOpen = this.shouldOpenCircuit(errorClassification)
-    
+
     if (this.state === 'HALF_OPEN' || shouldOpen) {
       this.state = 'OPEN'
-      
+
       // Adaptive recovery timeout
       if (this.config.adaptiveRecovery) {
         this.adaptiveRecoveryTimeout = Math.min(
@@ -154,7 +156,7 @@ export class CircuitBreaker {
           this.config.maxRecoveryTimeout || 300000 // Max 5 minutes
         )
       }
-      
+
       this.nextAttempt = now + this.adaptiveRecoveryTimeout
     }
   }
@@ -164,23 +166,41 @@ export class CircuitBreaker {
     const name = error.name.toLowerCase()
 
     // Rate limiting errors
-    if (message.includes('rate limit') || message.includes('too many requests') || name.includes('ratelimit')) {
+    if (
+      message.includes('rate limit') ||
+      message.includes('too many requests') ||
+      name.includes('ratelimit')
+    ) {
       return { type: 'rate_limit', retryable: true, weight: 0.5 }
     }
 
     // Authentication errors
-    if (message.includes('unauthorized') || message.includes('authentication') || message.includes('forbidden')) {
+    if (
+      message.includes('unauthorized') ||
+      message.includes('authentication') ||
+      message.includes('forbidden')
+    ) {
       return { type: 'authentication', retryable: false, weight: 0.2 }
     }
 
     // Temporary network/connection errors
-    if (message.includes('connection') || message.includes('timeout') || message.includes('network') || 
-        message.includes('econnreset') || message.includes('enotfound') || message.includes('socket')) {
+    if (
+      message.includes('connection') ||
+      message.includes('timeout') ||
+      message.includes('network') ||
+      message.includes('econnreset') ||
+      message.includes('enotfound') ||
+      message.includes('socket')
+    ) {
       return { type: 'temporary', retryable: true, weight: 1.0 }
     }
 
     // Permanent errors (4xx client errors)
-    if (message.includes('bad request') || message.includes('not found') || message.includes('validation')) {
+    if (
+      message.includes('bad request') ||
+      message.includes('not found') ||
+      message.includes('validation')
+    ) {
       return { type: 'permanent', retryable: false, weight: 0.1 }
     }
 
@@ -190,7 +210,10 @@ export class CircuitBreaker {
 
   private shouldOpenCircuit(errorClassification: ErrorClassification): boolean {
     // Don't open for non-retryable errors unless they're overwhelming
-    if (!errorClassification.retryable && this.consecutiveFailures < this.config.failureThreshold * 2) {
+    if (
+      !errorClassification.retryable &&
+      this.consecutiveFailures < this.config.failureThreshold * 2
+    ) {
       return false
     }
 
@@ -220,28 +243,30 @@ export class CircuitBreaker {
     const windowMs = this.config.monitoringPeriod || 60000
     const now = Date.now()
     const windowStart = now - windowMs
-    
-    const recentFailures = this.windowFailures.filter(timestamp => timestamp >= windowStart).length
+
+    const recentFailures = this.windowFailures.filter(
+      (timestamp) => timestamp >= windowStart
+    ).length
     const recentCalls = Math.max(1, this.totalCalls) // Avoid division by zero
-    
+
     return recentFailures / recentCalls
   }
 
   private cleanupOldWindows(): void {
     const windowMs = this.config.monitoringPeriod || 60000
     const cutoff = Date.now() - windowMs
-    
+
     // Clean up old window failures
-    this.windowFailures = this.windowFailures.filter(timestamp => timestamp >= cutoff)
-    
+    this.windowFailures = this.windowFailures.filter((timestamp) => timestamp >= cutoff)
+
     // Clean up old error records (keep last 24 hours)
-    const errorCutoff = Date.now() - (24 * 60 * 60 * 1000)
-    this.recentErrors = this.recentErrors.filter(error => error.timestamp >= errorCutoff)
+    const errorCutoff = Date.now() - 24 * 60 * 60 * 1000
+    this.recentErrors = this.recentErrors.filter((error) => error.timestamp >= errorCutoff)
   }
 
   getStats(): CircuitBreakerStats {
     this.cleanupOldWindows()
-    
+
     return {
       state: this.state,
       failures: this.failures,
@@ -255,7 +280,7 @@ export class CircuitBreaker {
       halfOpenSuccesses: this.halfOpenSuccesses,
       adaptiveRecoveryTimeout: this.adaptiveRecoveryTimeout,
       windowFailures: [...this.windowFailures],
-      recentErrors: [...this.recentErrors]
+      recentErrors: [...this.recentErrors],
     }
   }
 
@@ -319,7 +344,7 @@ class CircuitBreakerRegistry {
     if (name) {
       this.breakers.get(name)?.reset()
     } else {
-      this.breakers.forEach(breaker => breaker.reset())
+      this.breakers.forEach((breaker) => breaker.reset())
     }
   }
 }
@@ -339,7 +364,7 @@ export const circuitBreakers = {
     volumeThreshold: 10,
     errorRateThreshold: 0.5,
     adaptiveRecovery: true,
-    maxRecoveryTimeout: 300000
+    maxRecoveryTimeout: 300000,
   }),
 
   redis: circuitBreakerRegistry.getOrCreate('redis', {
@@ -351,7 +376,7 @@ export const circuitBreakers = {
     volumeThreshold: 5,
     errorRateThreshold: 0.6,
     adaptiveRecovery: true,
-    maxRecoveryTimeout: 120000
+    maxRecoveryTimeout: 120000,
   }),
 
   stripe: circuitBreakerRegistry.getOrCreate('stripe', {
@@ -363,7 +388,7 @@ export const circuitBreakers = {
     volumeThreshold: 10,
     errorRateThreshold: 0.3,
     adaptiveRecovery: true,
-    maxRecoveryTimeout: 600000
+    maxRecoveryTimeout: 600000,
   }),
 
   openai: circuitBreakerRegistry.getOrCreate('openai', {
@@ -375,7 +400,7 @@ export const circuitBreakers = {
     volumeThreshold: 5,
     errorRateThreshold: 0.4,
     adaptiveRecovery: true,
-    maxRecoveryTimeout: 900000
+    maxRecoveryTimeout: 900000,
   }),
 
   anthropic: circuitBreakerRegistry.getOrCreate('anthropic', {
@@ -387,7 +412,7 @@ export const circuitBreakers = {
     volumeThreshold: 5,
     errorRateThreshold: 0.4,
     adaptiveRecovery: true,
-    maxRecoveryTimeout: 900000
+    maxRecoveryTimeout: 900000,
   }),
 
   sendgrid: circuitBreakerRegistry.getOrCreate('sendgrid', {
@@ -399,7 +424,7 @@ export const circuitBreakers = {
     volumeThreshold: 10,
     errorRateThreshold: 0.3,
     adaptiveRecovery: true,
-    maxRecoveryTimeout: 1800000
+    maxRecoveryTimeout: 1800000,
   }),
 
   webhook: circuitBreakerRegistry.getOrCreate('webhook', {
@@ -411,26 +436,19 @@ export const circuitBreakers = {
     volumeThreshold: 5,
     errorRateThreshold: 0.5,
     adaptiveRecovery: true,
-    maxRecoveryTimeout: 300000
-  })
+    maxRecoveryTimeout: 300000,
+  }),
 }
 
 /**
  * Decorator for adding circuit breaker to methods
  */
-export function withCircuitBreaker(
-  breakerName: string,
-  config?: CircuitBreakerConfig
-) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+export function withCircuitBreaker(breakerName: string, config?: CircuitBreakerConfig) {
+  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value
 
-    descriptor.value = async function (...args: any[]) {
-      const breaker = config 
+    descriptor.value = async function (...args: unknown[]) {
+      const breaker = config
         ? circuitBreakerRegistry.getOrCreate(breakerName, config)
         : circuitBreakers[breakerName as keyof typeof circuitBreakers]
 
@@ -453,7 +471,7 @@ export async function withCircuitBreakerProtection<T>(
   operation: () => Promise<T>,
   config?: CircuitBreakerConfig
 ): Promise<T> {
-  const breaker = config 
+  const breaker = config
     ? circuitBreakerRegistry.getOrCreate(breakerName, config)
     : circuitBreakers[breakerName as keyof typeof circuitBreakers]
 

@@ -13,11 +13,11 @@ import { z } from 'zod'
 import { prisma } from '@/lib/db'
 
 const UsageReportSchema = z.object({
-  tenantId: z.string().min(1, "Tenant ID is required"),
+  tenantId: z.string().min(1, 'Tenant ID is required'),
   metric: z.enum(['api_calls', 'ai_operations', 'storage_gb', 'active_users']),
-  quantity: z.number().positive("Quantity must be positive"),
+  quantity: z.number().positive('Quantity must be positive'),
   timestamp: z.string().datetime().optional(),
-  action: z.enum(['increment', 'set']).default('increment')
+  action: z.enum(['increment', 'set']).default('increment'),
 })
 
 export async function POST(request: NextRequest) {
@@ -25,31 +25,25 @@ export async function POST(request: NextRequest) {
     // Initialize Stripe client
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY
     if (!stripeSecretKey) {
-      return NextResponse.json(
-        { error: 'Stripe not configured' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 })
     }
-    
+
     const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2024-06-20'
+      apiVersion: '2024-06-20',
     })
-    
+
     const body = await request.json()
     const validatedData = UsageReportSchema.parse(body)
-    
+
     const { tenantId, metric, quantity, timestamp, action } = validatedData
 
     // Get tenant subscription
     const tenantSubscription = await prisma.tenantSubscription.findUnique({
-      where: { tenantId }
+      where: { tenantId },
     })
 
     if (!tenantSubscription || !tenantSubscription.stripeSubscriptionId) {
-      return NextResponse.json(
-        { error: 'No active subscription found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'No active subscription found' }, { status: 404 })
     }
 
     // Get subscription from Stripe
@@ -58,7 +52,7 @@ export async function POST(request: NextRequest) {
     )
 
     // Find the usage-based price item for this metric
-    const usageItem = subscription.items.data.find(item => {
+    const usageItem = subscription.items.data.find((item) => {
       return item.price.metadata?.metric === metric
     })
 
@@ -77,9 +71,9 @@ export async function POST(request: NextRequest) {
             metric,
             quantity,
             action,
-            recorded_at: timestamp || new Date()
-          })
-        }
+            recorded_at: timestamp || new Date(),
+          }),
+        },
       })
 
       return NextResponse.json({
@@ -87,19 +81,16 @@ export async function POST(request: NextRequest) {
         message: 'Usage recorded locally (no usage-based pricing configured)',
         tenantId,
         metric,
-        quantity
+        quantity,
       })
     }
 
     // Report usage to Stripe
-    const usageRecord = await stripe.subscriptionItems.createUsageRecord(
-      usageItem.id,
-      {
-        quantity: Math.round(quantity),
-        timestamp: timestamp ? Math.floor(new Date(timestamp).getTime() / 1000) : undefined,
-        action: action as 'increment' | 'set'
-      }
-    )
+    const usageRecord = await stripe.subscriptionItems.createUsageRecord(usageItem.id, {
+      quantity: Math.round(quantity),
+      timestamp: timestamp ? Math.floor(new Date(timestamp).getTime() / 1000) : undefined,
+      action: action as 'increment' | 'set',
+    })
 
     // Store usage record locally
     await prisma.subscriptionUsage.create({
@@ -115,9 +106,9 @@ export async function POST(request: NextRequest) {
           stripe_usage_record_id: usageRecord.id,
           metric,
           quantity,
-          action
-        })
-      }
+          action,
+        }),
+      },
     })
 
     return NextResponse.json({
@@ -126,27 +117,24 @@ export async function POST(request: NextRequest) {
       tenantId,
       metric,
       quantity,
-      timestamp: new Date(usageRecord.timestamp * 1000).toISOString()
+      timestamp: new Date(usageRecord.timestamp * 1000).toISOString(),
     })
-
   } catch (error) {
-    console.error('Usage reporting error:', error)
-    
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: 'Invalid request data', 
-          details: error.errors 
+          error: 'Invalid request data',
+          details: error.errors,
         },
         { status: 400 }
       )
     }
 
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to report usage' 
+        error: error instanceof Error ? error.message : 'Failed to report usage',
       },
       { status: 500 }
     )
@@ -166,21 +154,18 @@ export async function GET(request: NextRequest) {
           metric: 'api_calls | ai_operations | storage_gb | active_users',
           quantity: 'number',
           timestamp: 'ISO 8601 datetime (optional)',
-          action: 'increment | set (optional)'
-        }
+          action: 'increment | set (optional)',
+        },
       })
     }
 
     // Get usage summary for tenant
     const tenantSubscription = await prisma.tenantSubscription.findUnique({
-      where: { tenantId }
+      where: { tenantId },
     })
 
     if (!tenantSubscription) {
-      return NextResponse.json(
-        { error: 'No subscription found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'No subscription found' }, { status: 404 })
     }
 
     // Get current period usage
@@ -188,43 +173,41 @@ export async function GET(request: NextRequest) {
       where: {
         tenantSubscriptionId: tenantSubscription.id,
         billingPeriodStart: {
-          gte: tenantSubscription.currentPeriodStart || new Date(0)
-        }
+          gte: tenantSubscription.currentPeriodStart || new Date(0),
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     })
 
     // Aggregate usage
-    const usageSummary = currentPeriodUsage.reduce((acc, usage) => {
-      acc.apiCalls += usage.apiCalls
-      acc.aiOperations += usage.aiOperations
-      acc.storageUsed = Math.max(acc.storageUsed, usage.storageUsed)
-      acc.activeUsers = Math.max(acc.activeUsers, usage.activeUsers)
-      return acc
-    }, {
-      apiCalls: 0,
-      aiOperations: 0,
-      storageUsed: 0,
-      activeUsers: 0
-    })
+    const usageSummary = currentPeriodUsage.reduce(
+      (acc, usage) => {
+        acc.apiCalls += usage.apiCalls
+        acc.aiOperations += usage.aiOperations
+        acc.storageUsed = Math.max(acc.storageUsed, usage.storageUsed)
+        acc.activeUsers = Math.max(acc.activeUsers, usage.activeUsers)
+        return acc
+      },
+      {
+        apiCalls: 0,
+        aiOperations: 0,
+        storageUsed: 0,
+        activeUsers: 0,
+      }
+    )
 
     return NextResponse.json({
       tenantId,
       currentPeriod: {
         start: tenantSubscription.currentPeriodStart,
-        end: tenantSubscription.currentPeriodEnd
+        end: tenantSubscription.currentPeriodEnd,
       },
       usage: usageSummary,
-      recordCount: currentPeriodUsage.length
+      recordCount: currentPeriodUsage.length,
     })
-
   } catch (error) {
-    console.error('Error fetching usage summary:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch usage summary' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch usage summary' }, { status: 500 })
   }
 }

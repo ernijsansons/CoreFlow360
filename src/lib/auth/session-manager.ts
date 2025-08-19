@@ -3,32 +3,32 @@
  * Handles session creation, validation, and management for all auth providers
  */
 
-import { prisma } from '@/lib/db';
-import { redis } from '@/lib/redis';
-import { v4 as uuidv4 } from 'uuid';
-import crypto from 'crypto';
-import { telemetry } from '@/lib/telemetry/opentelemetry';
+import { prisma } from '@/lib/db'
+import { redis } from '@/lib/redis'
+import { v4 as uuidv4 } from 'uuid'
+import crypto from 'crypto'
+import { telemetry } from '@/lib/telemetry/opentelemetry'
 
 export interface SessionData {
-  userId: string;
-  tenantId: string;
-  email: string;
-  role: string;
-  authProvider: string;
-  authProviderId?: string;
-  metadata?: Record<string, any>;
+  userId: string
+  tenantId: string
+  email: string
+  role: string
+  authProvider: string
+  authProviderId?: string
+  metadata?: Record<string, unknown>
 }
 
 export interface Session extends SessionData {
-  id: string;
-  token: string;
-  expiresAt: Date;
-  createdAt: Date;
-  lastAccessedAt: Date;
+  id: string
+  token: string
+  expiresAt: Date
+  createdAt: Date
+  lastAccessedAt: Date
 }
 
-const SESSION_PREFIX = 'session:';
-const SESSION_TTL = 60 * 60 * 24 * 7; // 7 days in seconds
+const SESSION_PREFIX = 'session:'
+const SESSION_TTL = 60 * 60 * 24 * 7 // 7 days in seconds
 
 export class SessionManager {
   /**
@@ -38,10 +38,10 @@ export class SessionManager {
     return telemetry.traceBusinessOperation(
       'session.create',
       async () => {
-        const sessionId = uuidv4();
-        const token = this.generateSecureToken();
-        const now = new Date();
-        const expiresAt = new Date(now.getTime() + SESSION_TTL * 1000);
+        const sessionId = uuidv4()
+        const token = this.generateSecureToken()
+        const now = new Date()
+        const expiresAt = new Date(now.getTime() + SESSION_TTL * 1000)
 
         const session: Session = {
           id: sessionId,
@@ -49,15 +49,11 @@ export class SessionManager {
           ...data,
           createdAt: now,
           expiresAt,
-          lastAccessedAt: now
-        };
+          lastAccessedAt: now,
+        }
 
         // Store in Redis
-        await redis.setex(
-          `${SESSION_PREFIX}${token}`,
-          SESSION_TTL,
-          JSON.stringify(session)
-        );
+        await redis.setex(`${SESSION_PREFIX}${token}`, SESSION_TTL, JSON.stringify(session))
 
         // Store in database for audit trail
         await prisma.userSession.create({
@@ -72,32 +68,32 @@ export class SessionManager {
             userAgent: data.metadata?.userAgent,
             metadata: data.metadata,
             expiresAt,
-            isActive: true
-          }
-        });
+            isActive: true,
+          },
+        })
 
         // Update user's last login
         await prisma.user.update({
           where: { id: data.userId },
-          data: { lastLoginAt: now }
-        });
+          data: { lastLoginAt: now },
+        })
 
         telemetry.recordEvent('session_created', {
           userId: data.userId,
           tenantId: data.tenantId,
           authProvider: data.authProvider,
-          sessionId
-        });
+          sessionId,
+        })
 
-        return token;
+        return token
       },
       {
         entityType: 'session',
         operationType: 'create',
         userId: data.userId,
-        tenantId: data.tenantId
+        tenantId: data.tenantId,
       }
-    );
+    )
   }
 
   /**
@@ -106,43 +102,37 @@ export class SessionManager {
   async validateSession(token: string): Promise<Session | null> {
     try {
       // Get from Redis
-      const sessionData = await redis.get(`${SESSION_PREFIX}${token}`);
+      const sessionData = await redis.get(`${SESSION_PREFIX}${token}`)
       if (!sessionData) {
-        return null;
+        return null
       }
 
-      const session: Session = JSON.parse(sessionData);
+      const session: Session = JSON.parse(sessionData)
 
       // Check if expired
       if (new Date() > new Date(session.expiresAt)) {
-        await this.invalidateSession(token);
-        return null;
+        await this.invalidateSession(token)
+        return null
       }
 
       // Update last accessed time
-      session.lastAccessedAt = new Date();
-      await redis.setex(
-        `${SESSION_PREFIX}${token}`,
-        SESSION_TTL,
-        JSON.stringify(session)
-      );
+      session.lastAccessedAt = new Date()
+      await redis.setex(`${SESSION_PREFIX}${token}`, SESSION_TTL, JSON.stringify(session))
 
       // Update database record
       await prisma.userSession.updateMany({
         where: {
           userId: session.userId,
-          isActive: true
+          isActive: true,
         },
         data: {
-          lastAccessedAt: session.lastAccessedAt
-        }
-      });
+          lastAccessedAt: session.lastAccessedAt,
+        },
+      })
 
-      return session;
-
+      return session
     } catch (error) {
-      console.error('Session validation error:', error);
-      return null;
+      return null
     }
   }
 
@@ -152,34 +142,32 @@ export class SessionManager {
   async invalidateSession(token: string): Promise<void> {
     try {
       // Get session data first
-      const sessionData = await redis.get(`${SESSION_PREFIX}${token}`);
+      const sessionData = await redis.get(`${SESSION_PREFIX}${token}`)
       if (sessionData) {
-        const session: Session = JSON.parse(sessionData);
-        
+        const session: Session = JSON.parse(sessionData)
+
         // Remove from Redis
-        await redis.del(`${SESSION_PREFIX}${token}`);
+        await redis.del(`${SESSION_PREFIX}${token}`)
 
         // Mark as inactive in database
         await prisma.userSession.updateMany({
           where: {
             userId: session.userId,
-            isActive: true
+            isActive: true,
           },
           data: {
             isActive: false,
-            loggedOutAt: new Date()
-          }
-        });
+            loggedOutAt: new Date(),
+          },
+        })
 
         telemetry.recordEvent('session_invalidated', {
           userId: session.userId,
           tenantId: session.tenantId,
-          sessionId: session.id
-        });
+          sessionId: session.id,
+        })
       }
-    } catch (error) {
-      console.error('Session invalidation error:', error);
-    }
+    } catch (error) {}
   }
 
   /**
@@ -191,56 +179,55 @@ export class SessionManager {
       const sessions = await prisma.userSession.findMany({
         where: {
           userId,
-          isActive: true
-        }
-      });
+          isActive: true,
+        },
+      })
 
       // Remove from Redis
-      const pipeline = redis.pipeline();
+      const pipeline = redis.pipeline()
       for (const session of sessions) {
         // We need to scan Redis for sessions since we only store hashed tokens
         // In production, consider maintaining a user->sessions mapping
       }
-      await pipeline.exec();
+      await pipeline.exec()
 
       // Mark all as inactive
       await prisma.userSession.updateMany({
         where: {
           userId,
-          isActive: true
+          isActive: true,
         },
         data: {
           isActive: false,
-          loggedOutAt: new Date()
-        }
-      });
+          loggedOutAt: new Date(),
+        },
+      })
 
       telemetry.recordEvent('user_sessions_invalidated', {
         userId,
-        sessionCount: sessions.length
-      });
-
-    } catch (error) {
-      console.error('User sessions invalidation error:', error);
-    }
+        sessionCount: sessions.length,
+      })
+    } catch (error) {}
   }
 
   /**
    * Get active sessions for a user
    */
-  async getUserSessions(userId: string): Promise<Array<{
-    id: string;
-    authProvider: string;
-    createdAt: Date;
-    lastAccessedAt: Date;
-    ipAddress?: string;
-    userAgent?: string;
-  }>> {
+  async getUserSessions(userId: string): Promise<
+    Array<{
+      id: string
+      authProvider: string
+      createdAt: Date
+      lastAccessedAt: Date
+      ipAddress?: string
+      userAgent?: string
+    }>
+  > {
     const sessions = await prisma.userSession.findMany({
       where: {
         userId,
         isActive: true,
-        expiresAt: { gt: new Date() }
+        expiresAt: { gt: new Date() },
       },
       select: {
         id: true,
@@ -248,14 +235,14 @@ export class SessionManager {
         createdAt: true,
         lastAccessedAt: true,
         ipAddress: true,
-        userAgent: true
+        userAgent: true,
       },
       orderBy: {
-        lastAccessedAt: 'desc'
-      }
-    });
+        lastAccessedAt: 'desc',
+      },
+    })
 
-    return sessions;
+    return sessions
   }
 
   /**
@@ -266,36 +253,33 @@ export class SessionManager {
       const result = await prisma.userSession.updateMany({
         where: {
           isActive: true,
-          expiresAt: { lt: new Date() }
+          expiresAt: { lt: new Date() },
         },
         data: {
-          isActive: false
-        }
-      });
+          isActive: false,
+        },
+      })
 
       if (result.count > 0) {
         telemetry.recordEvent('expired_sessions_cleaned', {
-          count: result.count
-        });
+          count: result.count,
+        })
       }
-
-    } catch (error) {
-      console.error('Session cleanup error:', error);
-    }
+    } catch (error) {}
   }
 
   /**
    * Generate secure token
    */
   private generateSecureToken(): string {
-    return crypto.randomBytes(32).toString('base64url');
+    return crypto.randomBytes(32).toString('base64url')
   }
 
   /**
    * Hash token for storage
    */
   private hashToken(token: string): string {
-    return crypto.createHash('sha256').update(token).digest('hex');
+    return crypto.createHash('sha256').update(token).digest('hex')
   }
 
   /**
@@ -303,57 +287,55 @@ export class SessionManager {
    */
   async extendSession(token: string, additionalSeconds?: number): Promise<boolean> {
     try {
-      const sessionData = await redis.get(`${SESSION_PREFIX}${token}`);
+      const sessionData = await redis.get(`${SESSION_PREFIX}${token}`)
       if (!sessionData) {
-        return false;
+        return false
       }
 
-      const session: Session = JSON.parse(sessionData);
-      const extension = additionalSeconds || SESSION_TTL;
-      const newExpiry = new Date(Date.now() + extension * 1000);
+      const session: Session = JSON.parse(sessionData)
+      const extension = additionalSeconds || SESSION_TTL
+      const newExpiry = new Date(Date.now() + extension * 1000)
 
-      session.expiresAt = newExpiry;
-      session.lastAccessedAt = new Date();
+      session.expiresAt = newExpiry
+      session.lastAccessedAt = new Date()
 
-      await redis.setex(
-        `${SESSION_PREFIX}${token}`,
-        extension,
-        JSON.stringify(session)
-      );
+      await redis.setex(`${SESSION_PREFIX}${token}`, extension, JSON.stringify(session))
 
       await prisma.userSession.updateMany({
         where: {
           userId: session.userId,
-          isActive: true
+          isActive: true,
         },
         data: {
           expiresAt: newExpiry,
-          lastAccessedAt: session.lastAccessedAt
-        }
-      });
+          lastAccessedAt: session.lastAccessedAt,
+        },
+      })
 
-      return true;
-
+      return true
     } catch (error) {
-      console.error('Session extension error:', error);
-      return false;
+      return false
     }
   }
 }
 
 // Global session manager instance
-export const sessionManager = new SessionManager();
+export const sessionManager = new SessionManager()
 
 // Convenience functions
-export const createSession = (data: SessionData) => sessionManager.createSession(data);
-export const validateSession = (token: string) => sessionManager.validateSession(token);
-export const invalidateSession = (token: string) => sessionManager.invalidateSession(token);
-export const invalidateUserSessions = (userId: string) => sessionManager.invalidateUserSessions(userId);
-export const getUserSessions = (userId: string) => sessionManager.getUserSessions(userId);
+export const createSession = (data: SessionData) => sessionManager.createSession(data)
+export const validateSession = (token: string) => sessionManager.validateSession(token)
+export const invalidateSession = (token: string) => sessionManager.invalidateSession(token)
+export const invalidateUserSessions = (userId: string) =>
+  sessionManager.invalidateUserSessions(userId)
+export const getUserSessions = (userId: string) => sessionManager.getUserSessions(userId)
 
 // Run cleanup job periodically
 if (process.env.NODE_ENV !== 'test') {
-  setInterval(() => {
-    sessionManager.cleanupExpiredSessions().catch(console.error);
-  }, 60 * 60 * 1000); // Every hour
+  setInterval(
+    () => {
+      sessionManager.cleanupExpiredSessions().catch(console.error)
+    },
+    60 * 60 * 1000
+  ) // Every hour
 }

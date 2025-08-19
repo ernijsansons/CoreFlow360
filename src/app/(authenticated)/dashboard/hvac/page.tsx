@@ -3,28 +3,28 @@
  * Main dashboard for HVAC/Field Service management
  */
 
-"use client"
+'use client'
 
-import { useState } from "react"
-import DashboardLayout from "@/components/layouts/DashboardLayout"
-import EquipmentManager from "@/components/hvac/EquipmentManager"
-import ServiceScheduler from "@/components/hvac/ServiceScheduler"
-import ContractManager from "@/components/hvac/ContractManager"
-import MobileFieldService from "@/components/hvac/MobileFieldService"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
+import { useState } from 'react'
+import DashboardLayout from '@/components/layouts/DashboardLayout'
+import EquipmentManager from '@/components/hvac/EquipmentManager'
+import ServiceScheduler from '@/components/hvac/ServiceScheduler'
+import ContractManager from '@/components/hvac/ContractManager'
+import MobileFieldService from '@/components/hvac/MobileFieldService'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
   WrenchScrewdriverIcon,
   CalendarIcon,
   DocumentTextIcon,
   CogIcon,
   ChartBarIcon,
-  DevicePhoneMobileIcon
-} from "@heroicons/react/24/outline"
+  DevicePhoneMobileIcon,
+} from '@heroicons/react/24/outline'
 
 export default function HVACPage() {
-  const [activeTab, setActiveTab] = useState("equipment")
+  const [activeTab, setActiveTab] = useState('equipment')
 
-  const handleEquipmentSelect = (equipment: any) => {
+  const handleEquipmentSelect = (_equipment: unknown) => {
     // TODO: Open equipment detail modal or navigate to equipment page
   }
 
@@ -32,12 +32,12 @@ export default function HVACPage() {
     // TODO: Open add equipment modal
   }
 
-  const handleScheduleService = (equipment: any) => {
+  const handleScheduleService = (_equipment: unknown) => {
     // TODO: Open service scheduling modal with equipment pre-selected
-    setActiveTab("scheduler")
+    setActiveTab('scheduler')
   }
 
-  const handleWorkOrderSelect = (workOrder: any) => {
+  const handleWorkOrderSelect = (_workOrder: unknown) => {
     // TODO: Open work order detail modal
   }
 
@@ -45,15 +45,15 @@ export default function HVACPage() {
     // TODO: Open create work order modal
   }
 
-  const handleEditWorkOrder = (workOrder: any) => {
+  const handleEditWorkOrder = (_workOrder: unknown) => {
     // TODO: Open edit work order modal
   }
 
-  const handleAssignTechnician = (workOrderId: string, technicianId: string) => {
+  const handleAssignTechnician = (_workOrderId: string, _technicianId: string) => {
     // TODO: Update work order assignment
   }
 
-  const handleContractSelect = (contract: any) => {
+  const handleContractSelect = (_contract: unknown) => {
     // TODO: Open contract detail modal
   }
 
@@ -61,19 +61,19 @@ export default function HVACPage() {
     // TODO: Open create contract modal
   }
 
-  const handleRenewContract = (contract: any) => {
+  const handleRenewContract = (_contract: unknown) => {
     // TODO: Open contract renewal flow
   }
 
-  const handleScheduleContractService = (contract: any, equipmentId: string) => {
+  const handleScheduleContractService = (_contract: unknown, _equipmentId: string) => {
     // TODO: Open scheduling with contract context
   }
 
-  const handleWorkOrderUpdate = (workOrder: any) => {
+  const handleWorkOrderUpdate = (_workOrder: unknown) => {
     // TODO: Sync work order changes
   }
 
-  const handleNavigateToLocation = (coordinates: { lat: number; lng: number }) => {
+  const handleNavigateToLocation = (_coordinates: { lat: number; lng: number }) => {
     // TODO: Open maps app with coordinates
   }
 
@@ -153,7 +153,7 @@ export default function HVACPage() {
             </TabsContent>
 
             <TabsContent value="maintenance" className="mt-6">
-              <div className="text-center py-12">
+              <div className="py-12 text-center">
                 <CogIcon className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">Maintenance Planning</h3>
                 <p className="mt-1 text-sm text-gray-500">
@@ -163,7 +163,7 @@ export default function HVACPage() {
             </TabsContent>
 
             <TabsContent value="reports" className="mt-6">
-              <div className="text-center py-12">
+              <div className="py-12 text-center">
                 <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">HVAC Reports</h3>
                 <p className="mt-1 text-sm text-gray-500">

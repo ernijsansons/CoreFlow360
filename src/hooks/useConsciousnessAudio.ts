@@ -1,16 +1,16 @@
 /**
  * CoreFlow360 Consciousness Audio Hook
- * 
+ *
  * React hook for managing consciousness audio experiences throughout
  * the application. Provides easy integration with business consciousness
  * state changes and user interactions.
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { 
+import {
   ConsciousnessAudioEvent,
   AudioSystemConfig,
-  DEFAULT_AUDIO_CONFIG
+  DEFAULT_AUDIO_CONFIG,
 } from '../lib/consciousness/soundDesign'
 
 interface ConsciousnessAudioState {
@@ -46,8 +46,8 @@ interface UseConsciousnessAudioOptions {
 }
 
 interface UseConsciousnessAudioReturn extends ConsciousnessAudioState, ConsciousnessAudioActions {
-  audioEngine: any | null
-  setAudioEngine: (engine: any) => void
+  audioEngine: unknown | null
+  setAudioEngine: (engine: unknown) => void
 }
 
 /**
@@ -62,20 +62,21 @@ export const useConsciousnessAudio = (
     initialSpatialPosition = [0, 0, 0],
     audioConfig = {},
     onAudioEvent,
-    debugMode = false
+    debugMode = false,
   } = options
 
   // Audio engine state
-  const [audioEngine, setAudioEngine] = useState<any>(null)
+  const [audioEngine, setAudioEngine] = useState<unknown>(null)
   const [isEnabled, setIsEnabled] = useState(initiallyEnabled)
   const [isInitialized, setIsInitialized] = useState(false)
   const [consciousnessLevel, setConsciousnessLevel] = useState(initialConsciousnessLevel)
   const [currentState, setCurrentState] = useState('single_department')
-  const [spatialPosition, setSpatialPosition] = useState<[number, number, number]>(initialSpatialPosition)
+  const [spatialPosition, setSpatialPosition] =
+    useState<[number, number, number]>(initialSpatialPosition)
   const [activeEvents, setActiveEvents] = useState<ConsciousnessAudioEvent[]>([])
   const [fullAudioConfig, setFullAudioConfig] = useState<AudioSystemConfig>({
     ...DEFAULT_AUDIO_CONFIG,
-    ...audioConfig
+    ...audioConfig,
   })
 
   // Refs for tracking
@@ -85,11 +86,11 @@ export const useConsciousnessAudio = (
   // Update consciousness state based on level
   const updateConsciousnessState = useCallback(() => {
     let newState = 'single_department'
-    
+
     if (consciousnessLevel >= 10) {
       newState = 'full_consciousness'
     } else if (consciousnessLevel >= 5) {
-      newState = 'quad_intelligence'  
+      newState = 'quad_intelligence'
     } else if (consciousnessLevel >= 3) {
       newState = 'triple_synergy'
     } else if (consciousnessLevel >= 2) {
@@ -98,9 +99,11 @@ export const useConsciousnessAudio = (
 
     if (newState !== currentState) {
       setCurrentState(newState)
-      
+
       if (debugMode) {
-        console.log(`Consciousness state updated: ${currentState} -> ${newState} (level: ${consciousnessLevel})`)
+        console.log(
+          `Consciousness state updated: ${currentState} -> ${newState} (level: ${consciousnessLevel})`
+        )
       }
     }
   }, [consciousnessLevel, currentState, debugMode])
@@ -108,86 +111,92 @@ export const useConsciousnessAudio = (
   // Enable audio system
   const enable = useCallback(() => {
     setIsEnabled(true)
-    
+
     if (debugMode) {
-      console.log('Consciousness audio enabled')
     }
   }, [debugMode])
 
   // Disable audio system
   const disable = useCallback(() => {
     setIsEnabled(false)
-    
+
     // Clear any pending events
-    eventTimeouts.current.forEach(timeout => clearTimeout(timeout))
+    eventTimeouts.current.forEach((timeout) => clearTimeout(timeout))
     eventTimeouts.current.clear()
-    
+
     if (debugMode) {
-      console.log('Consciousness audio disabled')
     }
   }, [debugMode])
 
   // Update spatial position
-  const updateSpatialPosition = useCallback((position: [number, number, number]) => {
-    setSpatialPosition(position)
-    
-    if (audioEngine) {
-      audioEngine.updateSpatialPosition?.(position)
-    }
-  }, [audioEngine])
+  const updateSpatialPosition = useCallback(
+    (position: [number, number, number]) => {
+      setSpatialPosition(position)
+
+      if (audioEngine) {
+        audioEngine.updateSpatialPosition?.(position)
+      }
+    },
+    [audioEngine]
+  )
 
   // Trigger consciousness audio event
-  const triggerEvent = useCallback((event: ConsciousnessAudioEvent) => {
-    if (!isEnabled || !audioEngine) {
+  const triggerEvent = useCallback(
+    (event: ConsciousnessAudioEvent) => {
+      if (!isEnabled || !audioEngine) {
+        if (debugMode) {
+        }
+        return
+      }
+
+      // Add to active events
+      setActiveEvents((prev) => {
+        if (!prev.includes(event)) {
+          return [...prev, event]
+        }
+        return prev
+      })
+
+      // Trigger through audio engine
+      audioEngine.triggerEvent?.(event)
+
+      // Notify parent
+      onAudioEvent?.(event)
+
+      // Remove from active events after duration
+      const eventTimeout = setTimeout(() => {
+        setActiveEvents((prev) => prev.filter((e) => e !== event))
+      }, 3000) // 3 second event duration
+
+      eventTimeouts.current.set(event, eventTimeout)
+
       if (debugMode) {
-        console.warn(`Cannot trigger event ${event}: audio not enabled or engine not ready`)
       }
-      return
-    }
-
-    // Add to active events
-    setActiveEvents(prev => {
-      if (!prev.includes(event)) {
-        return [...prev, event]
-      }
-      return prev
-    })
-
-    // Trigger through audio engine
-    audioEngine.triggerEvent?.(event)
-
-    // Notify parent
-    onAudioEvent?.(event)
-
-    // Remove from active events after duration
-    const eventTimeout = setTimeout(() => {
-      setActiveEvents(prev => prev.filter(e => e !== event))
-    }, 3000) // 3 second event duration
-
-    eventTimeouts.current.set(event, eventTimeout)
-
-    if (debugMode) {
-      console.log(`Triggered consciousness event: ${event}`)
-    }
-  }, [isEnabled, audioEngine, onAudioEvent, debugMode])
+    },
+    [isEnabled, audioEngine, onAudioEvent, debugMode]
+  )
 
   // Update audio configuration
-  const updateConfig = useCallback((config: Partial<AudioSystemConfig>) => {
-    setFullAudioConfig(prev => ({ ...prev, ...config }))
-    
-    if (debugMode) {
-      console.log('Audio config updated:', config)
-    }
-  }, [debugMode])
+  const updateConfig = useCallback(
+    (config: Partial<AudioSystemConfig>) => {
+      setFullAudioConfig((prev) => ({ ...prev, ...config }))
+
+      if (debugMode) {
+      }
+    },
+    [debugMode]
+  )
 
   // Convenience methods for common events
-  const playDepartmentAwakening = useCallback((departmentId: string) => {
-    triggerEvent('department_awaken')
-    
-    if (debugMode) {
-      console.log(`Department awakening: ${departmentId}`)
-    }
-  }, [triggerEvent, debugMode])
+  const playDepartmentAwakening = useCallback(
+    (_departmentId: string) => {
+      triggerEvent('department_awaken')
+
+      if (debugMode) {
+      }
+    },
+    [triggerEvent, debugMode]
+  )
 
   const playConnectionSound = useCallback(() => {
     triggerEvent('first_connection')
@@ -204,27 +213,33 @@ export const useConsciousnessAudio = (
   // Auto-trigger events based on consciousness level changes
   useEffect(() => {
     const levelDiff = consciousnessLevel - lastConsciousnessLevel.current
-    
+
     if (levelDiff > 0 && isEnabled) {
       // Consciousness level increased
       if (consciousnessLevel >= 2 && lastConsciousnessLevel.current < 2) {
         // First connection achieved
         setTimeout(() => playConnectionSound(), 500)
       }
-      
+
       if (consciousnessLevel >= 4 && lastConsciousnessLevel.current < 4) {
         // Intelligence multiplication begins
         setTimeout(() => playMultiplicationSound(), 800)
       }
-      
+
       if (consciousnessLevel >= 10 && lastConsciousnessLevel.current < 10) {
         // Full consciousness emergence
         setTimeout(() => playConsciousnessEmergence(), 1200)
       }
     }
-    
+
     lastConsciousnessLevel.current = consciousnessLevel
-  }, [consciousnessLevel, isEnabled, playConnectionSound, playMultiplicationSound, playConsciousnessEmergence])
+  }, [
+    consciousnessLevel,
+    isEnabled,
+    playConnectionSound,
+    playMultiplicationSound,
+    playConsciousnessEmergence,
+  ])
 
   // Update consciousness state when level changes
   useEffect(() => {
@@ -243,7 +258,7 @@ export const useConsciousnessAudio = (
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      eventTimeouts.current.forEach(timeout => clearTimeout(timeout))
+      eventTimeouts.current.forEach((timeout) => clearTimeout(timeout))
       eventTimeouts.current.clear()
     }
   }, [])
@@ -258,7 +273,7 @@ export const useConsciousnessAudio = (
     activeEvents,
     audioConfig: fullAudioConfig,
     audioEngine,
-    
+
     // Actions
     enable,
     disable,
@@ -270,7 +285,7 @@ export const useConsciousnessAudio = (
     playConnectionSound,
     playMultiplicationSound,
     playConsciousnessEmergence,
-    setAudioEngine
+    setAudioEngine,
   }
 }
 
@@ -285,10 +300,10 @@ export const useBasicConsciousnessAudio = (consciousnessLevel: number) => {
     playDepartmentAwakening,
     playConnectionSound,
     playMultiplicationSound,
-    playConsciousnessEmergence
+    playConsciousnessEmergence,
   } = useConsciousnessAudio({
     initialConsciousnessLevel: consciousnessLevel,
-    initiallyEnabled: false
+    initiallyEnabled: false,
   })
 
   return {
@@ -298,7 +313,7 @@ export const useBasicConsciousnessAudio = (consciousnessLevel: number) => {
     playAwakening: playDepartmentAwakening,
     playConnection: playConnectionSound,
     playMultiplication: playMultiplicationSound,
-    playEmergence: playConsciousnessEmergence
+    playEmergence: playConsciousnessEmergence,
   }
 }
 
@@ -308,7 +323,7 @@ export const useBasicConsciousnessAudio = (consciousnessLevel: number) => {
 export const usePricingAudio = (intelligenceMultiplier: number) => {
   const { triggerEvent, setConsciousnessLevel } = useConsciousnessAudio({
     initiallyEnabled: true,
-    initialConsciousnessLevel: intelligenceMultiplier
+    initialConsciousnessLevel: intelligenceMultiplier,
   })
 
   const handleDepartmentSelect = useCallback(() => {
@@ -333,7 +348,7 @@ export const usePricingAudio = (intelligenceMultiplier: number) => {
   return {
     onDepartmentSelect: handleDepartmentSelect,
     onCalculationUpdate: handleCalculationUpdate,
-    onMultiplicationVisualize: handleMultiplicationVisualization
+    onMultiplicationVisualize: handleMultiplicationVisualization,
   }
 }
 
@@ -342,17 +357,21 @@ export const usePricingAudio = (intelligenceMultiplier: number) => {
  */
 export const useCursorConsciousnessAudio = () => {
   const { triggerEvent } = useConsciousnessAudio({
-    initiallyEnabled: true
+    initiallyEnabled: true,
   })
 
-  const handleCursorMove = useCallback((x: number, y: number) => {
-    // Subtle cursor consciousness field
-    if (Math.random() < 0.05) { // 5% chance on mouse move
-      triggerEvent('cursor_awareness')
-    }
-  }, [triggerEvent])
+  const handleCursorMove = useCallback(
+    (_x: number, _y: number) => {
+      // Subtle cursor consciousness field
+      if (Math.random() < 0.05) {
+        // 5% chance on mouse move
+        triggerEvent('cursor_awareness')
+      }
+    },
+    [triggerEvent]
+  )
 
   return {
-    onCursorMove: handleCursorMove
+    onCursorMove: handleCursorMove,
   }
 }

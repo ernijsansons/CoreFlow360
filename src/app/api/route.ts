@@ -255,11 +255,11 @@ const getAPILandingHTML = () => `
  * GET /api
  * API landing page with links to documentation
  */
-export const GET = withShutdownHandling(async (request: NextRequest) => {
+export const GET = withShutdownHandling(async (_request: NextRequest) => {
   return new NextResponse(getAPILandingHTML(), {
     headers: {
       'Content-Type': 'text/html',
-      'Cache-Control': 'public, max-age=3600'
-    }
+      'Cache-Control': 'public, max-age=3600',
+    },
   })
 })

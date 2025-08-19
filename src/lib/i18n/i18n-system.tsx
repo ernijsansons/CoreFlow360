@@ -28,7 +28,7 @@ export const supportedLanguages: LanguageConfig[] = [
     region: 'US',
     currency: 'USD',
     dateFormat: 'MM/DD/YYYY',
-    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }
+    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
   },
   {
     code: 'es',
@@ -38,7 +38,7 @@ export const supportedLanguages: LanguageConfig[] = [
     region: 'ES',
     currency: 'EUR',
     dateFormat: 'DD/MM/YYYY',
-    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }
+    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
   },
   {
     code: 'fr',
@@ -48,7 +48,7 @@ export const supportedLanguages: LanguageConfig[] = [
     region: 'FR',
     currency: 'EUR',
     dateFormat: 'DD/MM/YYYY',
-    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }
+    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
   },
   {
     code: 'de',
@@ -58,7 +58,7 @@ export const supportedLanguages: LanguageConfig[] = [
     region: 'DE',
     currency: 'EUR',
     dateFormat: 'DD.MM.YYYY',
-    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }
+    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
   },
   {
     code: 'zh',
@@ -68,7 +68,7 @@ export const supportedLanguages: LanguageConfig[] = [
     region: 'CN',
     currency: 'CNY',
     dateFormat: 'YYYY-MM-DD',
-    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }
+    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
   },
   {
     code: 'ar',
@@ -78,7 +78,7 @@ export const supportedLanguages: LanguageConfig[] = [
     region: 'SA',
     currency: 'SAR',
     dateFormat: 'DD/MM/YYYY',
-    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }
+    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
   },
   {
     code: 'he',
@@ -88,7 +88,7 @@ export const supportedLanguages: LanguageConfig[] = [
     region: 'IL',
     currency: 'ILS',
     dateFormat: 'DD/MM/YYYY',
-    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }
+    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
   },
   {
     code: 'ja',
@@ -98,12 +98,12 @@ export const supportedLanguages: LanguageConfig[] = [
     region: 'JP',
     currency: 'JPY',
     dateFormat: 'YYYY-MM-DD',
-    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }
-  }
+    numberFormat: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 },
+  },
 ]
 
 // Translation key type for type safety
-export type TranslationKey = 
+export type TranslationKey =
   // Navigation
   | 'nav.dashboard'
   | 'nav.customers'
@@ -111,7 +111,7 @@ export type TranslationKey =
   | 'nav.reports'
   | 'nav.settings'
   | 'nav.logout'
-  
+
   // Common actions
   | 'common.save'
   | 'common.cancel'
@@ -132,7 +132,7 @@ export type TranslationKey =
   | 'common.previous'
   | 'common.submit'
   | 'common.reset'
-  
+
   // Dashboard
   | 'dashboard.title'
   | 'dashboard.welcome'
@@ -140,7 +140,7 @@ export type TranslationKey =
   | 'dashboard.customers'
   | 'dashboard.projects'
   | 'dashboard.growth'
-  
+
   // Forms
   | 'form.required'
   | 'form.invalid_email'
@@ -148,7 +148,7 @@ export type TranslationKey =
   | 'form.password_too_short'
   | 'form.passwords_dont_match'
   | 'form.field_required'
-  
+
   // Accessibility
   | 'a11y.skip_to_content'
   | 'a11y.skip_to_navigation'
@@ -172,7 +172,7 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'nav.reports': 'Reports',
     'nav.settings': 'Settings',
     'nav.logout': 'Logout',
-    
+
     // Common actions
     'common.save': 'Save',
     'common.cancel': 'Cancel',
@@ -193,7 +193,7 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'common.previous': 'Previous',
     'common.submit': 'Submit',
     'common.reset': 'Reset',
-    
+
     // Dashboard
     'dashboard.title': 'Dashboard',
     'dashboard.welcome': 'Welcome back',
@@ -201,7 +201,7 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'dashboard.customers': 'Customers',
     'dashboard.projects': 'Projects',
     'dashboard.growth': 'Growth',
-    
+
     // Forms
     'form.required': 'This field is required',
     'form.invalid_email': 'Please enter a valid email address',
@@ -209,7 +209,7 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'form.password_too_short': 'Password must be at least 8 characters',
     'form.passwords_dont_match': 'Passwords do not match',
     'form.field_required': 'Field is required',
-    
+
     // Accessibility
     'a11y.skip_to_content': 'Skip to main content',
     'a11y.skip_to_navigation': 'Skip to navigation',
@@ -221,9 +221,9 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'a11y.page_of': 'Page {current} of {total}',
     'a11y.sort_by': 'Sort by',
     'a11y.ascending': 'Ascending',
-    'a11y.descending': 'Descending'
+    'a11y.descending': 'Descending',
   },
-  
+
   es: {
     // Navigation
     'nav.dashboard': 'Panel de Control',
@@ -232,7 +232,7 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'nav.reports': 'Informes',
     'nav.settings': 'Configuración',
     'nav.logout': 'Cerrar Sesión',
-    
+
     // Common actions
     'common.save': 'Guardar',
     'common.cancel': 'Cancelar',
@@ -253,7 +253,7 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'common.previous': 'Anterior',
     'common.submit': 'Enviar',
     'common.reset': 'Restablecer',
-    
+
     // Dashboard
     'dashboard.title': 'Panel de Control',
     'dashboard.welcome': 'Bienvenido de nuevo',
@@ -261,7 +261,7 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'dashboard.customers': 'Clientes',
     'dashboard.projects': 'Proyectos',
     'dashboard.growth': 'Crecimiento',
-    
+
     // Forms
     'form.required': 'Este campo es obligatorio',
     'form.invalid_email': 'Por favor ingrese un email válido',
@@ -269,7 +269,7 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'form.password_too_short': 'La contraseña debe tener al menos 8 caracteres',
     'form.passwords_dont_match': 'Las contraseñas no coinciden',
     'form.field_required': 'El campo es obligatorio',
-    
+
     // Accessibility
     'a11y.skip_to_content': 'Saltar al contenido principal',
     'a11y.skip_to_navigation': 'Saltar a la navegación',
@@ -281,9 +281,9 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'a11y.page_of': 'Página {current} de {total}',
     'a11y.sort_by': 'Ordenar por',
     'a11y.ascending': 'Ascendente',
-    'a11y.descending': 'Descendente'
+    'a11y.descending': 'Descendente',
   },
-  
+
   ar: {
     // Navigation
     'nav.dashboard': 'لوحة التحكم',
@@ -292,7 +292,7 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'nav.reports': 'التقارير',
     'nav.settings': 'الإعدادات',
     'nav.logout': 'تسجيل الخروج',
-    
+
     // Common actions
     'common.save': 'حفظ',
     'common.cancel': 'إلغاء',
@@ -313,7 +313,7 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'common.previous': 'السابق',
     'common.submit': 'إرسال',
     'common.reset': 'إعادة تعيين',
-    
+
     // Dashboard
     'dashboard.title': 'لوحة التحكم',
     'dashboard.welcome': 'أهلاً بعودتك',
@@ -321,7 +321,7 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'dashboard.customers': 'العملاء',
     'dashboard.projects': 'المشاريع',
     'dashboard.growth': 'النمو',
-    
+
     // Forms
     'form.required': 'هذا الحقل مطلوب',
     'form.invalid_email': 'يرجى إدخال بريد إلكتروني صالح',
@@ -329,7 +329,7 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'form.password_too_short': 'يجب أن تكون كلمة المرور 8 أحرف على الأقل',
     'form.passwords_dont_match': 'كلمات المرور غير متطابقة',
     'form.field_required': 'الحقل مطلوب',
-    
+
     // Accessibility
     'a11y.skip_to_content': 'الانتقال إلى المحتوى الرئيسي',
     'a11y.skip_to_navigation': 'الانتقال إلى التنقل',
@@ -341,8 +341,8 @@ export const translations: Record<string, Record<TranslationKey, string>> = {
     'a11y.page_of': 'الصفحة {current} من {total}',
     'a11y.sort_by': 'ترتيب حسب',
     'a11y.ascending': 'تصاعدي',
-    'a11y.descending': 'تنازلي'
-  }
+    'a11y.descending': 'تنازلي',
+  },
 }
 
 // I18n Context
@@ -367,17 +367,18 @@ interface I18nProviderProps {
 
 export function I18nProvider({ children, defaultLanguage = 'en' }: I18nProviderProps) {
   const [language, setLanguage] = useState<string>(defaultLanguage)
-  const languageConfig = supportedLanguages.find(lang => lang.code === language) || supportedLanguages[0]
+  const languageConfig =
+    supportedLanguages.find((lang) => lang.code === language) || supportedLanguages[0]
 
   // Initialize language from localStorage or browser
   useEffect(() => {
     const storedLanguage = localStorage.getItem('coreflow360-language')
-    if (storedLanguage && supportedLanguages.some(lang => lang.code === storedLanguage)) {
+    if (storedLanguage && supportedLanguages.some((lang) => lang.code === storedLanguage)) {
       setLanguage(storedLanguage)
     } else {
       // Detect browser language
       const browserLanguage = navigator.language.split('-')[0]
-      if (supportedLanguages.some(lang => lang.code === browserLanguage)) {
+      if (supportedLanguages.some((lang) => lang.code === browserLanguage)) {
         setLanguage(browserLanguage)
       }
     }
@@ -388,47 +389,54 @@ export function I18nProvider({ children, defaultLanguage = 'en' }: I18nProviderP
     document.documentElement.lang = language
     document.documentElement.dir = languageConfig.direction
     document.title = t('dashboard.title') + ' - CoreFlow360'
-    
+
     // Update meta tags
     const metaDescription = document.querySelector('meta[name="description"]')
     if (metaDescription) {
-      metaDescription.setAttribute('content', 
-        language === 'en' ? 'AI-powered business management platform' :
-        language === 'es' ? 'Plataforma de gestión empresarial con IA' :
-        language === 'ar' ? 'منصة إدارة الأعمال المدعومة بالذكاء الاصطناعي' :
-        'AI-powered business management platform'
+      metaDescription.setAttribute(
+        'content',
+        language === 'en'
+          ? 'AI-powered business management platform'
+          : language === 'es'
+            ? 'Plataforma de gestión empresarial con IA'
+            : language === 'ar'
+              ? 'منصة إدارة الأعمال المدعومة بالذكاء الاصطناعي'
+              : 'AI-powered business management platform'
       )
     }
   }, [language, languageConfig])
 
   const t = (key: TranslationKey, params?: Record<string, string | number>): string => {
     let translation = translations[language]?.[key] || translations.en[key] || key
-    
+
     // Replace parameters in translation
     if (params) {
       Object.entries(params).forEach(([param, value]) => {
         translation = translation.replace(`{${param}}`, String(value))
       })
     }
-    
+
     return translation
   }
 
   const changeLanguage = (newLanguage: string) => {
-    if (supportedLanguages.some(lang => lang.code === newLanguage)) {
+    if (supportedLanguages.some((lang) => lang.code === newLanguage)) {
       setLanguage(newLanguage)
       localStorage.setItem('coreflow360-language', newLanguage)
     }
   }
 
   const formatNumber = (value: number): string => {
-    return new Intl.NumberFormat(`${language}-${languageConfig.region}`, languageConfig.numberFormat).format(value)
+    return new Intl.NumberFormat(
+      `${language}-${languageConfig.region}`,
+      languageConfig.numberFormat
+    ).format(value)
   }
 
   const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat(`${language}-${languageConfig.region}`, {
       style: 'currency',
-      currency: languageConfig.currency
+      currency: languageConfig.currency,
     }).format(value)
   }
 
@@ -436,12 +444,14 @@ export function I18nProvider({ children, defaultLanguage = 'en' }: I18nProviderP
     return new Intl.DateTimeFormat(`${language}-${languageConfig.region}`, {
       year: 'numeric',
       month: '2-digit',
-      day: '2-digit'
+      day: '2-digit',
     }).format(date)
   }
 
   const formatRelativeTime = (date: Date): string => {
-    const rtf = new Intl.RelativeTimeFormat(`${language}-${languageConfig.region}`, { numeric: 'auto' })
+    const rtf = new Intl.RelativeTimeFormat(`${language}-${languageConfig.region}`, {
+      numeric: 'auto',
+    })
     const diffInSeconds = (date.getTime() - Date.now()) / 1000
     const diffInMinutes = diffInSeconds / 60
     const diffInHours = diffInMinutes / 60
@@ -464,14 +474,10 @@ export function I18nProvider({ children, defaultLanguage = 'en' }: I18nProviderP
     formatNumber,
     formatCurrency,
     formatDate,
-    formatRelativeTime
+    formatRelativeTime,
   }
 
-  return (
-    <I18nContext.Provider value={contextValue}>
-      {children}
-    </I18nContext.Provider>
-  )
+  return <I18nContext.Provider value={contextValue}>{children}</I18nContext.Provider>
 }
 
 // Hook to use i18n
@@ -490,10 +496,10 @@ interface LanguageSwitcherProps {
   compact?: boolean
 }
 
-export function LanguageSwitcher({ 
-  className = '', 
-  showFlag = true, 
-  compact = false 
+export function LanguageSwitcher({
+  className = '',
+  showFlag = true,
+  compact = false,
 }: LanguageSwitcherProps) {
   const { language, languageConfig, changeLanguage, t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
@@ -501,18 +507,20 @@ export function LanguageSwitcher({
   const handleLanguageChange = (newLanguage: string) => {
     changeLanguage(newLanguage)
     setIsOpen(false)
-    
+
     // Announce language change to screen readers
-    const announcement = t('common.info') + ': ' + 
-      supportedLanguages.find(lang => lang.code === newLanguage)?.nativeName
-    
+    const announcement =
+      t('common.info') +
+      ': ' +
+      supportedLanguages.find((lang) => lang.code === newLanguage)?.nativeName
+
     // Create announcement element
     const element = document.createElement('div')
     element.setAttribute('aria-live', 'polite')
     element.className = 'sr-only'
     element.textContent = announcement
     document.body.appendChild(element)
-    
+
     setTimeout(() => {
       document.body.removeChild(element)
     }, 1000)
@@ -522,21 +530,21 @@ export function LanguageSwitcher({
     <div className={`relative ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:border-gray-600 transition-colors"
+        className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 transition-colors hover:border-gray-600"
         aria-label={`Current language: ${languageConfig.nativeName}. Click to change language`}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
         {showFlag && <span className="text-lg">🌐</span>}
         {!compact && <span className="text-white">{languageConfig.nativeName}</span>}
-        <span className="text-gray-400 text-sm">
+        <span className="text-sm text-gray-400">
           {languageConfig.direction === 'rtl' ? '▲' : '▼'}
         </span>
       </button>
 
       {isOpen && (
-        <div 
-          className="absolute top-full mt-1 min-w-full bg-gray-900 border border-gray-800 rounded-lg shadow-2xl z-50"
+        <div
+          className="absolute top-full z-50 mt-1 min-w-full rounded-lg border border-gray-800 bg-gray-900 shadow-2xl"
           role="listbox"
           aria-label="Language options"
         >
@@ -544,7 +552,7 @@ export function LanguageSwitcher({
             <button
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code)}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-800 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+              className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors first:rounded-t-lg last:rounded-b-lg hover:bg-gray-800 ${
                 lang.code === language ? 'bg-violet-500/20 text-violet-400' : 'text-white'
               }`}
               role="option"
@@ -555,9 +563,7 @@ export function LanguageSwitcher({
                 <div className="font-medium">{lang.nativeName}</div>
                 <div className="text-sm text-gray-400">{lang.name}</div>
               </div>
-              {lang.code === language && (
-                <div className="ml-auto text-violet-400">✓</div>
-              )}
+              {lang.code === language && <div className="ml-auto text-violet-400">✓</div>}
             </button>
           ))}
         </div>
@@ -586,7 +592,7 @@ export function useRTLSupport() {
   // RTL-aware border radius
   const getBorderRadius = (corners: string) => {
     if (!isRTL) return corners
-    
+
     // Flip border radius for RTL
     const mapping: Record<string, string> = {
       'rounded-l': 'rounded-r',
@@ -594,9 +600,9 @@ export function useRTLSupport() {
       'rounded-tl': 'rounded-tr',
       'rounded-tr': 'rounded-tl',
       'rounded-bl': 'rounded-br',
-      'rounded-br': 'rounded-bl'
+      'rounded-br': 'rounded-bl',
     }
-    
+
     return mapping[corners] || corners
   }
 
@@ -604,7 +610,7 @@ export function useRTLSupport() {
     isRTL,
     getPosition,
     getSpacing,
-    getBorderRadius
+    getBorderRadius,
   }
 }
 
@@ -615,21 +621,21 @@ export function useLocalizedDateTime() {
   const formatDateTime = (date: Date, options?: Intl.DateTimeFormatOptions) => {
     return new Intl.DateTimeFormat(`${language}-${languageConfig.region}`, {
       ...options,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     }).format(date)
   }
 
   const formatTime = (date: Date) => {
     return formatDateTime(date, {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     })
   }
 
   const formatDateShort = (date: Date) => {
     return formatDateTime(date, {
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     })
   }
 
@@ -638,7 +644,7 @@ export function useLocalizedDateTime() {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     })
   }
 
@@ -646,6 +652,6 @@ export function useLocalizedDateTime() {
     formatDateTime,
     formatTime,
     formatDateShort,
-    formatDateFull
+    formatDateFull,
   }
 }

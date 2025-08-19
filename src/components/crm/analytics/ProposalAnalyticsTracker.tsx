@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
+import {
   ChartBarIcon,
   EyeIcon,
   ClockIcon,
@@ -27,7 +27,7 @@ import {
   ExclamationTriangleIcon,
   FireIcon,
   LightBulbIcon,
-  TrophyIcon
+  TrophyIcon,
 } from '@heroicons/react/24/outline'
 import { toast } from 'react-hot-toast'
 
@@ -105,7 +105,7 @@ interface ConversionEvent {
   type: 'meeting_booked' | 'demo_requested' | 'proposal_accepted' | 'contract_signed'
   timestamp: string
   value?: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 interface DeviceMetrics {
@@ -143,38 +143,42 @@ const MOCK_ANALYTICS: ProposalAnalytics[] = [
       avgScrollDepth: 87.3,
       hottestSections: [
         { section: 'ROI Calculator', page: 3, viewTime: 340, interactions: 12, heatmapData: [] },
-        { section: 'Case Studies', page: 5, viewTime: 280, interactions: 8, heatmapData: [] }
+        { section: 'Case Studies', page: 5, viewTime: 280, interactions: 8, heatmapData: [] },
       ],
       engagementScore: 94.5,
-      attentionSpan: 195
+      attentionSpan: 195,
     },
     sharing: {
       totalShares: 3,
       shareChannels: { email: 2, linkedin: 1 },
       sharedWith: ['sarah.chen@acme.com', 'mike.johnson@acme.com'],
-      virality: 1.2
+      virality: 1.2,
     },
     conversion: {
       conversionEvents: [
-        { type: 'demo_requested', timestamp: '2024-01-16T15:45:00Z', metadata: { urgency: 'high' } }
+        {
+          type: 'demo_requested',
+          timestamp: '2024-01-16T15:45:00Z',
+          metadata: { urgency: 'high' },
+        },
       ],
       conversionRate: 12.5,
       timeToConversion: 1980, // seconds from first view
-      dropoffPoints: ['Pricing Section', 'Technical Specs']
+      dropoffPoints: ['Pricing Section', 'Technical Specs'],
     },
     devices: {
       desktop: 75,
       mobile: 20,
       tablet: 5,
       browsers: { chrome: 60, safari: 25, firefox: 15 },
-      operatingSystems: { windows: 45, macos: 35, ios: 20 }
+      operatingSystems: { windows: 45, macos: 35, ios: 20 },
     },
     geography: {
-      countries: { 'United States': 80, 'Canada': 20 },
-      cities: { 'New York': 60, 'Toronto': 20, 'Boston': 20 },
-      timeZones: { 'America/New_York': 80, 'America/Toronto': 20 }
-    }
-  }
+      countries: { 'United States': 80, Canada: 20 },
+      cities: { 'New York': 60, Toronto: 20, Boston: 20 },
+      timeZones: { 'America/New_York': 80, 'America/Toronto': 20 },
+    },
+  },
 ]
 
 export default function ProposalAnalyticsTracker() {
@@ -186,7 +190,7 @@ export default function ProposalAnalyticsTracker() {
 
   useEffect(() => {
     loadAnalyticsData()
-    
+
     if (realTimeEnabled) {
       const interval = setInterval(loadAnalyticsData, 30000) // Update every 30 seconds
       return () => clearInterval(interval)
@@ -196,7 +200,7 @@ export default function ProposalAnalyticsTracker() {
   const loadAnalyticsData = async () => {
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       setAnalytics(MOCK_ANALYTICS)
     } catch (error) {
       toast.error('Failed to load analytics data')
@@ -213,51 +217,57 @@ export default function ProposalAnalyticsTracker() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'sent': return <ClockIcon className="w-5 h-5 text-gray-500" />
-      case 'viewed': return <EyeIcon className="w-5 h-5 text-blue-500" />
-      case 'engaged': return <FireIcon className="w-5 h-5 text-orange-500" />
-      case 'accepted': return <CheckCircleIcon className="w-5 h-5 text-green-500" />
-      case 'declined': return <XCircleIcon className="w-5 h-5 text-red-500" />
-      default: return <ExclamationTriangleIcon className="w-5 h-5 text-gray-500" />
+      case 'sent':
+        return <ClockIcon className="h-5 w-5 text-gray-500" />
+      case 'viewed':
+        return <EyeIcon className="h-5 w-5 text-blue-500" />
+      case 'engaged':
+        return <FireIcon className="h-5 w-5 text-orange-500" />
+      case 'accepted':
+        return <CheckCircleIcon className="h-5 w-5 text-green-500" />
+      case 'declined':
+        return <XCircleIcon className="h-5 w-5 text-red-500" />
+      default:
+        return <ExclamationTriangleIcon className="h-5 w-5 text-gray-500" />
     }
   }
 
   const generateInsights = useCallback((proposal: ProposalAnalytics) => {
     const insights = []
-    
+
     if (proposal.engagement.engagementScore > 80) {
       insights.push({
         type: 'positive',
         icon: TrophyIcon,
         message: `Exceptional engagement! ${proposal.recipientName} is highly interested.`,
-        action: 'Consider scheduling a follow-up call immediately.'
+        action: 'Consider scheduling a follow-up call immediately.',
       })
     }
-    
+
     if (proposal.sharing.totalShares > 0) {
       insights.push({
         type: 'info',
         icon: ShareIcon,
         message: `Proposal shared with ${proposal.sharing.sharedWith.length} colleagues.`,
-        action: 'This indicates buying committee involvement - prepare for group presentation.'
+        action: 'This indicates buying committee involvement - prepare for group presentation.',
       })
     }
-    
+
     if (proposal.engagement.avgScrollDepth < 50) {
       insights.push({
         type: 'warning',
         icon: ExclamationTriangleIcon,
-        message: 'Low scroll depth suggests content isn\'t resonating.',
-        action: 'Consider personalizing the opening section more.'
+        message: "Low scroll depth suggests content isn't resonating.",
+        action: 'Consider personalizing the opening section more.',
       })
     }
-    
+
     if (proposal.conversion.dropoffPoints.length > 0) {
       insights.push({
         type: 'warning',
         icon: LightBulbIcon,
         message: `Viewers dropping off at: ${proposal.conversion.dropoffPoints.join(', ')}`,
-        action: 'Revise these sections to reduce friction.'
+        action: 'Revise these sections to reduce friction.',
       })
     }
 
@@ -266,9 +276,9 @@ export default function ProposalAnalyticsTracker() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4" />
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-purple-600" />
           <p className="text-gray-600">Loading proposal analytics...</p>
         </div>
       </div>
@@ -277,12 +287,12 @@ export default function ProposalAnalyticsTracker() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="mx-auto max-w-7xl p-6">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              <h1 className="mb-2 text-4xl font-bold text-gray-900">
                 Proposal Analytics & Tracking
               </h1>
               <p className="text-lg text-gray-600">
@@ -292,8 +302,8 @@ export default function ProposalAnalyticsTracker() {
             <div className="flex gap-3">
               <select
                 value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value as any)}
-                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                onChange={(e) => setTimeRange(e.target.value as unknown)}
+                className="rounded-lg border px-4 py-2 focus:ring-2 focus:ring-purple-500"
               >
                 <option value="7d">Last 7 days</option>
                 <option value="30d">Last 30 days</option>
@@ -302,13 +312,11 @@ export default function ProposalAnalyticsTracker() {
               </select>
               <button
                 onClick={() => setRealTimeEnabled(!realTimeEnabled)}
-                className={`px-4 py-2 rounded-lg transition-all flex items-center ${
-                  realTimeEnabled
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-700'
+                className={`flex items-center rounded-lg px-4 py-2 transition-all ${
+                  realTimeEnabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
                 }`}
               >
-                <BellIcon className="w-4 h-4 mr-2" />
+                <BellIcon className="mr-2 h-4 w-4" />
                 Real-time {realTimeEnabled ? 'ON' : 'OFF'}
               </button>
             </div>
@@ -316,14 +324,14 @@ export default function ProposalAnalyticsTracker() {
         </div>
 
         {/* Summary Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <DocumentTextIcon className="w-8 h-8 text-blue-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <DocumentTextIcon className="h-8 w-8 text-blue-600" />
               <span className="text-2xl font-bold text-gray-900">{analytics.length}</span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900">Total Proposals</h3>
@@ -334,10 +342,10 @@ export default function ProposalAnalyticsTracker() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <EyeIcon className="w-8 h-8 text-green-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <EyeIcon className="h-8 w-8 text-green-600" />
               <span className="text-2xl font-bold text-gray-900">
                 {analytics.reduce((sum, a) => sum + a.totalViews, 0)}
               </span>
@@ -350,12 +358,15 @@ export default function ProposalAnalyticsTracker() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <FireIcon className="w-8 h-8 text-orange-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <FireIcon className="h-8 w-8 text-orange-600" />
               <span className="text-2xl font-bold text-gray-900">
-                {(analytics.reduce((sum, a) => sum + a.engagement.engagementScore, 0) / analytics.length).toFixed(1)}
+                {(
+                  analytics.reduce((sum, a) => sum + a.engagement.engagementScore, 0) /
+                  analytics.length
+                ).toFixed(1)}
               </span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900">Avg Engagement</h3>
@@ -366,12 +377,12 @@ export default function ProposalAnalyticsTracker() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <TrophyIcon className="w-8 h-8 text-purple-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <TrophyIcon className="h-8 w-8 text-purple-600" />
               <span className="text-2xl font-bold text-gray-900">
-                {analytics.filter(a => a.conversion.conversionEvents.length > 0).length}
+                {analytics.filter((a) => a.conversion.conversionEvents.length > 0).length}
               </span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900">Conversions</h3>
@@ -379,27 +390,27 @@ export default function ProposalAnalyticsTracker() {
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Proposals List */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-xl font-semibold mb-4">Proposal Performance</h3>
+            <div className="rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 text-xl font-semibold">Proposal Performance</h3>
               <div className="space-y-4">
                 {analytics.map((proposal) => (
                   <motion.div
                     key={proposal.id}
                     whileHover={{ scale: 1.01 }}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    className={`cursor-pointer rounded-lg border-2 p-4 transition-all ${
                       selectedProposal?.id === proposal.id
                         ? 'border-purple-500 bg-purple-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                     onClick={() => setSelectedProposal(proposal)}
                   >
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="mb-3 flex items-start justify-between">
                       <div className="flex-1">
                         <h4 className="font-semibold text-gray-900">{proposal.title}</h4>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="mt-1 text-sm text-gray-600">
                           {proposal.recipientName} • {proposal.recipientCompany}
                         </p>
                       </div>
@@ -420,7 +431,9 @@ export default function ProposalAnalyticsTracker() {
                       </div>
                       <div>
                         <span className="text-gray-500">Engagement</span>
-                        <p className={`font-medium ${getEngagementColor(proposal.engagement.engagementScore)}`}>
+                        <p
+                          className={`font-medium ${getEngagementColor(proposal.engagement.engagementScore)}`}
+                        >
                           {proposal.engagement.engagementScore}%
                         </p>
                       </div>
@@ -432,9 +445,9 @@ export default function ProposalAnalyticsTracker() {
 
                     {/* Engagement Bar */}
                     <div className="mt-3">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all"
+                      <div className="h-2 w-full rounded-full bg-gray-200">
+                        <div
+                          className="h-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 transition-all"
                           style={{ width: `${proposal.engagement.engagementScore}%` }}
                         />
                       </div>
@@ -450,22 +463,27 @@ export default function ProposalAnalyticsTracker() {
             {selectedProposal ? (
               <>
                 {/* AI Insights */}
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200 p-6">
-                  <div className="flex items-center mb-4">
-                    <SparklesIcon className="w-6 h-6 text-purple-600 mr-2" />
+                <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6">
+                  <div className="mb-4 flex items-center">
+                    <SparklesIcon className="mr-2 h-6 w-6 text-purple-600" />
                     <h3 className="text-lg font-semibold text-purple-900">AI Insights</h3>
                   </div>
                   <div className="space-y-3">
                     {generateInsights(selectedProposal).map((insight, index) => (
-                      <div key={index} className="bg-white rounded-lg p-3">
+                      <div key={index} className="rounded-lg bg-white p-3">
                         <div className="flex items-start">
-                          <insight.icon className={`w-5 h-5 mr-2 mt-0.5 ${
-                            insight.type === 'positive' ? 'text-green-600' :
-                            insight.type === 'warning' ? 'text-yellow-600' : 'text-blue-600'
-                          }`} />
+                          <insight.icon
+                            className={`mt-0.5 mr-2 h-5 w-5 ${
+                              insight.type === 'positive'
+                                ? 'text-green-600'
+                                : insight.type === 'warning'
+                                  ? 'text-yellow-600'
+                                  : 'text-blue-600'
+                            }`}
+                          />
                           <div>
                             <p className="text-sm font-medium text-gray-900">{insight.message}</p>
-                            <p className="text-xs text-gray-600 mt-1">{insight.action}</p>
+                            <p className="mt-1 text-xs text-gray-600">{insight.action}</p>
                           </div>
                         </div>
                       </div>
@@ -474,42 +492,48 @@ export default function ProposalAnalyticsTracker() {
                 </div>
 
                 {/* Device Analytics */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-lg font-semibold mb-4">Device Analytics</h3>
+                <div className="rounded-xl bg-white p-6 shadow-lg">
+                  <h3 className="mb-4 text-lg font-semibold">Device Analytics</h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <ComputerDesktopIcon className="w-5 h-5 mr-2 text-gray-600" />
+                        <ComputerDesktopIcon className="mr-2 h-5 w-5 text-gray-600" />
                         <span className="text-sm">Desktop</span>
                       </div>
-                      <span className="text-sm font-medium">{selectedProposal.devices.desktop}%</span>
+                      <span className="text-sm font-medium">
+                        {selectedProposal.devices.desktop}%
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <DevicePhoneMobileIcon className="w-5 h-5 mr-2 text-gray-600" />
+                        <DevicePhoneMobileIcon className="mr-2 h-5 w-5 text-gray-600" />
                         <span className="text-sm">Mobile</span>
                       </div>
-                      <span className="text-sm font-medium">{selectedProposal.devices.mobile}%</span>
+                      <span className="text-sm font-medium">
+                        {selectedProposal.devices.mobile}%
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <TabletIcon className="w-5 h-5 mr-2 text-gray-600" />
+                        <TabletIcon className="mr-2 h-5 w-5 text-gray-600" />
                         <span className="text-sm">Tablet</span>
                       </div>
-                      <span className="text-sm font-medium">{selectedProposal.devices.tablet}%</span>
+                      <span className="text-sm font-medium">
+                        {selectedProposal.devices.tablet}%
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Geography */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <MapIcon className="w-5 h-5 mr-2 text-blue-600" />
+                <div className="rounded-xl bg-white p-6 shadow-lg">
+                  <h3 className="mb-4 flex items-center text-lg font-semibold">
+                    <MapIcon className="mr-2 h-5 w-5 text-blue-600" />
                     Geography
                   </h3>
                   <div className="space-y-2">
                     {Object.entries(selectedProposal.geography.cities).map(([city, percentage]) => (
-                      <div key={city} className="flex justify-between items-center">
+                      <div key={city} className="flex items-center justify-between">
                         <span className="text-sm text-gray-700">{city}</span>
                         <span className="text-sm font-medium">{percentage}%</span>
                       </div>
@@ -518,9 +542,9 @@ export default function ProposalAnalyticsTracker() {
                 </div>
 
                 {/* Sharing Analytics */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <ShareIcon className="w-5 h-5 mr-2 text-green-600" />
+                <div className="rounded-xl bg-white p-6 shadow-lg">
+                  <h3 className="mb-4 flex items-center text-lg font-semibold">
+                    <ShareIcon className="mr-2 h-5 w-5 text-green-600" />
                     Sharing Activity
                   </h3>
                   {selectedProposal.sharing.totalShares > 0 ? (
@@ -529,7 +553,7 @@ export default function ProposalAnalyticsTracker() {
                         Shared {selectedProposal.sharing.totalShares} times with:
                       </p>
                       {selectedProposal.sharing.sharedWith.map((email, index) => (
-                        <div key={index} className="text-sm bg-gray-50 rounded px-3 py-2">
+                        <div key={index} className="rounded bg-gray-50 px-3 py-2 text-sm">
                           {email}
                         </div>
                       ))}
@@ -540,21 +564,28 @@ export default function ProposalAnalyticsTracker() {
                 </div>
 
                 {/* Hot Sections */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <FireIcon className="w-5 h-5 mr-2 text-red-600" />
+                <div className="rounded-xl bg-white p-6 shadow-lg">
+                  <h3 className="mb-4 flex items-center text-lg font-semibold">
+                    <FireIcon className="mr-2 h-5 w-5 text-red-600" />
                     Hot Sections
                   </h3>
                   <div className="space-y-3">
                     {selectedProposal.engagement.hottestSections.map((section, index) => (
-                      <div key={index} className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between rounded-lg bg-red-50 p-3"
+                      >
                         <div>
                           <p className="font-medium text-gray-900">{section.section}</p>
                           <p className="text-sm text-gray-600">Page {section.page}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-medium">{Math.floor(section.viewTime / 60)}m</p>
-                          <p className="text-xs text-gray-500">{section.interactions} interactions</p>
+                          <p className="text-sm font-medium">
+                            {Math.floor(section.viewTime / 60)}m
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {section.interactions} interactions
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -562,9 +593,9 @@ export default function ProposalAnalyticsTracker() {
                 </div>
               </>
             ) : (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="text-center py-8">
-                  <ChartBarIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+              <div className="rounded-xl bg-white p-6 shadow-lg">
+                <div className="py-8 text-center">
+                  <ChartBarIcon className="mx-auto mb-4 h-16 w-16 text-gray-300" />
                   <p className="text-gray-500">Select a proposal to view detailed analytics</p>
                 </div>
               </div>

@@ -51,9 +51,30 @@ const AIWorkflowVisualizer: React.FC = () => {
         { id: 'qualify', type: 'decision', label: 'Qualified?', module: 'crm', x: 350, y: 100 },
         { id: 'nurture', type: 'action', label: 'Nurture Campaign', module: 'crm', x: 350, y: 200 },
         { id: 'deal', type: 'action', label: 'Create Deal', module: 'crm', x: 500, y: 100 },
-        { id: 'predict', type: 'ai', label: 'Revenue Prediction', module: 'accounting', x: 650, y: 100 },
-        { id: 'invoice', type: 'action', label: 'Generate Invoice', module: 'accounting', x: 800, y: 100 },
-        { id: 'payment', type: 'ai', label: 'Payment Follow-up', module: 'accounting', x: 950, y: 100 }
+        {
+          id: 'predict',
+          type: 'ai',
+          label: 'Revenue Prediction',
+          module: 'accounting',
+          x: 650,
+          y: 100,
+        },
+        {
+          id: 'invoice',
+          type: 'action',
+          label: 'Generate Invoice',
+          module: 'accounting',
+          x: 800,
+          y: 100,
+        },
+        {
+          id: 'payment',
+          type: 'ai',
+          label: 'Payment Follow-up',
+          module: 'accounting',
+          x: 950,
+          y: 100,
+        },
       ],
       edges: [
         { from: 'lead', to: 'score' },
@@ -63,8 +84,8 @@ const AIWorkflowVisualizer: React.FC = () => {
         { from: 'nurture', to: 'score' },
         { from: 'deal', to: 'predict' },
         { from: 'predict', to: 'invoice' },
-        { from: 'invoice', to: 'payment' }
-      ]
+        { from: 'invoice', to: 'payment' },
+      ],
     },
     {
       id: 'demand-forecast',
@@ -73,12 +94,40 @@ const AIWorkflowVisualizer: React.FC = () => {
       requiredModules: ['crm', 'inventory', 'projects'],
       nodes: [
         { id: 'pipeline', type: 'trigger', label: 'Pipeline Update', module: 'crm', x: 50, y: 100 },
-        { id: 'milestone', type: 'trigger', label: 'Project Milestone', module: 'projects', x: 50, y: 200 },
-        { id: 'analyze', type: 'ai', label: 'Demand Analysis', module: 'inventory', x: 250, y: 150 },
-        { id: 'forecast', type: 'ai', label: 'AI Forecasting', module: 'inventory', x: 450, y: 150 },
-        { id: 'optimize', type: 'ai', label: 'Order Optimization', module: 'inventory', x: 650, y: 150 },
+        {
+          id: 'milestone',
+          type: 'trigger',
+          label: 'Project Milestone',
+          module: 'projects',
+          x: 50,
+          y: 200,
+        },
+        {
+          id: 'analyze',
+          type: 'ai',
+          label: 'Demand Analysis',
+          module: 'inventory',
+          x: 250,
+          y: 150,
+        },
+        {
+          id: 'forecast',
+          type: 'ai',
+          label: 'AI Forecasting',
+          module: 'inventory',
+          x: 450,
+          y: 150,
+        },
+        {
+          id: 'optimize',
+          type: 'ai',
+          label: 'Order Optimization',
+          module: 'inventory',
+          x: 650,
+          y: 150,
+        },
         { id: 'purchase', type: 'action', label: 'Create PO', module: 'inventory', x: 850, y: 150 },
-        { id: 'alert', type: 'action', label: 'Alert Team', module: 'inventory', x: 850, y: 250 }
+        { id: 'alert', type: 'action', label: 'Alert Team', module: 'inventory', x: 850, y: 250 },
       ],
       edges: [
         { from: 'pipeline', to: 'analyze' },
@@ -86,8 +135,8 @@ const AIWorkflowVisualizer: React.FC = () => {
         { from: 'analyze', to: 'forecast' },
         { from: 'forecast', to: 'optimize' },
         { from: 'optimize', to: 'purchase', condition: 'Critical' },
-        { from: 'optimize', to: 'alert', condition: 'Monitor' }
-      ]
+        { from: 'optimize', to: 'alert', condition: 'Monitor' },
+      ],
     },
     {
       id: 'performance-sales',
@@ -100,22 +149,20 @@ const AIWorkflowVisualizer: React.FC = () => {
         { id: 'insights', type: 'ai', label: 'Generate Insights', module: 'hr', x: 450, y: 100 },
         { id: 'recommend', type: 'ai', label: 'AI Recommendations', module: 'hr', x: 650, y: 100 },
         { id: 'coaching', type: 'action', label: 'Coaching Plan', module: 'hr', x: 850, y: 100 },
-        { id: 'goals', type: 'action', label: 'Update Goals', module: 'crm', x: 850, y: 200 }
+        { id: 'goals', type: 'action', label: 'Update Goals', module: 'crm', x: 850, y: 200 },
       ],
       edges: [
         { from: 'review', to: 'correlate' },
         { from: 'correlate', to: 'insights' },
         { from: 'insights', to: 'recommend' },
         { from: 'recommend', to: 'coaching' },
-        { from: 'recommend', to: 'goals' }
-      ]
-    }
+        { from: 'recommend', to: 'goals' },
+      ],
+    },
   ]
 
   // Filter workflows based on active modules
-  const availableWorkflows = workflows.filter(workflow =>
-    hasAllModules(workflow.requiredModules)
-  )
+  const availableWorkflows = workflows.filter((workflow) => hasAllModules(workflow.requiredModules))
 
   useEffect(() => {
     if (isPlaying && selectedScenario) {
@@ -127,7 +174,7 @@ const AIWorkflowVisualizer: React.FC = () => {
           setAnimationStep(0)
         }
       }, 1500)
-      
+
       return () => clearTimeout(timer)
     }
   }, [isPlaying, animationStep, selectedScenario])
@@ -137,7 +184,7 @@ const AIWorkflowVisualizer: React.FC = () => {
       trigger: 'bg-blue-500',
       ai: 'bg-purple-500',
       action: 'bg-green-500',
-      decision: 'bg-yellow-500'
+      decision: 'bg-yellow-500',
     }
     return colors[node.type]
   }
@@ -149,9 +196,9 @@ const AIWorkflowVisualizer: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6 p-6">
       {/* Header */}
-      <div className="text-center space-y-2">
+      <div className="space-y-2 text-center">
         <h2 className="text-3xl font-bold text-gray-900">AI Workflow Visualizer</h2>
         <p className="text-gray-600">
           See how AI orchestrates workflows across your active modules
@@ -159,16 +206,16 @@ const AIWorkflowVisualizer: React.FC = () => {
       </div>
 
       {/* Module Status */}
-      <div className="bg-gray-50 rounded-xl p-4">
+      <div className="rounded-xl bg-gray-50 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-600">Active Modules:</span>
             <div className="flex space-x-2">
               {activeModules.length > 0 ? (
-                activeModules.map(module => (
+                activeModules.map((module) => (
                   <span
                     key={module}
-                    className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                    className="inline-flex items-center rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
                   >
                     {module.toUpperCase()}
                   </span>
@@ -179,33 +226,34 @@ const AIWorkflowVisualizer: React.FC = () => {
             </div>
           </div>
           <div className="text-sm text-gray-600">
-            {availableWorkflows.length} workflow{availableWorkflows.length !== 1 ? 's' : ''} available
+            {availableWorkflows.length} workflow{availableWorkflows.length !== 1 ? 's' : ''}{' '}
+            available
           </div>
         </div>
       </div>
 
       {/* Workflow Selection */}
       {availableWorkflows.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {availableWorkflows.map(workflow => (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {availableWorkflows.map((workflow) => (
             <motion.div
               key={workflow.id}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => playAnimation(workflow)}
-              className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${
+              className={`cursor-pointer rounded-xl border-2 p-4 transition-all ${
                 selectedScenario?.id === workflow.id
                   ? 'border-purple-500 bg-purple-50'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >
-              <h3 className="font-semibold text-gray-900 mb-1">{workflow.name}</h3>
-              <p className="text-sm text-gray-600 mb-2">{workflow.description}</p>
+              <h3 className="mb-1 font-semibold text-gray-900">{workflow.name}</h3>
+              <p className="mb-2 text-sm text-gray-600">{workflow.description}</p>
               <div className="flex space-x-1">
-                {workflow.requiredModules.map(module => (
+                {workflow.requiredModules.map((module) => (
                   <span
                     key={module}
-                    className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded"
+                    className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-600"
                   >
                     {module}
                   </span>
@@ -215,14 +263,10 @@ const AIWorkflowVisualizer: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-xl">
-          <div className="text-4xl mb-4">🔒</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            No Workflows Available
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Activate multiple modules to unlock AI workflows
-          </p>
+        <div className="rounded-xl bg-gray-50 py-12 text-center">
+          <div className="mb-4 text-4xl">🔒</div>
+          <h3 className="mb-2 text-xl font-semibold text-gray-900">No Workflows Available</h3>
+          <p className="mb-4 text-gray-600">Activate multiple modules to unlock AI workflows</p>
           <div className="text-sm text-gray-500">
             Try activating: CRM + Accounting, or CRM + Inventory + Projects
           </div>
@@ -234,38 +278,47 @@ const AIWorkflowVisualizer: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-lg p-6"
+          className="rounded-xl bg-white p-6 shadow-lg"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              {selectedScenario.name}
-            </h3>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">{selectedScenario.name}</h3>
             <button
               onClick={() => playAnimation(selectedScenario)}
-              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              className="flex items-center space-x-2 rounded-lg bg-purple-600 px-4 py-2 text-white transition-colors hover:bg-purple-700"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {isPlaying ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                  />
                 )}
               </svg>
               <span>{isPlaying ? 'Pause' : 'Play'} Animation</span>
             </button>
           </div>
 
-          <div className="relative bg-gray-50 rounded-lg p-8 overflow-x-auto">
-            <svg className="w-full h-80" viewBox="0 0 1000 300">
+          <div className="relative overflow-x-auto rounded-lg bg-gray-50 p-8">
+            <svg className="h-80 w-full" viewBox="0 0 1000 300">
               {/* Render edges */}
               {selectedScenario.edges.map((edge, index) => {
-                const fromNode = selectedScenario.nodes.find(n => n.id === edge.from)
-                const toNode = selectedScenario.nodes.find(n => n.id === edge.to)
-                
+                const fromNode = selectedScenario.nodes.find((n) => n.id === edge.from)
+                const toNode = selectedScenario.nodes.find((n) => n.id === edge.to)
+
                 if (!fromNode || !toNode) return null
-                
-                const isActive = animationStep >= selectedScenario.nodes.findIndex(n => n.id === toNode.id)
-                
+
+                const isActive =
+                  animationStep >= selectedScenario.nodes.findIndex((n) => n.id === toNode.id)
+
                 return (
                   <g key={index}>
                     <line
@@ -281,7 +334,7 @@ const AIWorkflowVisualizer: React.FC = () => {
                       <text
                         x={(fromNode.x + toNode.x) / 2}
                         y={(fromNode.y + toNode.y) / 2 - 10}
-                        className="text-xs fill-gray-600"
+                        className="fill-gray-600 text-xs"
                         textAnchor="middle"
                       >
                         {edge.condition}
@@ -301,17 +354,14 @@ const AIWorkflowVisualizer: React.FC = () => {
                   refY="3.5"
                   orient="auto"
                 >
-                  <polygon
-                    points="0 0, 10 3.5, 0 7"
-                    fill="#8B5CF6"
-                  />
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#8B5CF6" />
                 </marker>
               </defs>
 
               {/* Render nodes */}
               {selectedScenario.nodes.map((node, index) => {
                 const isActive = index <= animationStep
-                
+
                 return (
                   <motion.g
                     key={node.id}
@@ -332,7 +382,7 @@ const AIWorkflowVisualizer: React.FC = () => {
                     <text
                       x={node.x}
                       y={node.y + 5}
-                      className="text-xs fill-white font-medium"
+                      className="fill-white text-xs font-medium"
                       textAnchor="middle"
                     >
                       {node.label}
@@ -340,7 +390,7 @@ const AIWorkflowVisualizer: React.FC = () => {
                     <text
                       x={node.x}
                       y={node.y - 30}
-                      className="text-xs fill-gray-600"
+                      className="fill-gray-600 text-xs"
                       textAnchor="middle"
                     >
                       {node.module.toUpperCase()}
@@ -354,19 +404,19 @@ const AIWorkflowVisualizer: React.FC = () => {
           {/* Legend */}
           <div className="mt-4 flex items-center justify-center space-x-6">
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-blue-500 rounded"></div>
+              <div className="h-4 w-4 rounded bg-blue-500"></div>
               <span className="text-sm text-gray-600">Trigger</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-purple-500 rounded"></div>
+              <div className="h-4 w-4 rounded bg-purple-500"></div>
               <span className="text-sm text-gray-600">AI Processing</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-green-500 rounded"></div>
+              <div className="h-4 w-4 rounded bg-green-500"></div>
               <span className="text-sm text-gray-600">Action</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-yellow-500 rounded"></div>
+              <div className="h-4 w-4 rounded bg-yellow-500"></div>
               <span className="text-sm text-gray-600">Decision</span>
             </div>
           </div>
@@ -374,24 +424,18 @@ const AIWorkflowVisualizer: React.FC = () => {
       )}
 
       {/* AI Benefits */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
-          <h4 className="font-semibold text-blue-900 mb-2">Single Module AI</h4>
-          <p className="text-sm text-blue-700">
-            Isolated intelligence within module boundaries
-          </p>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+          <h4 className="mb-2 font-semibold text-blue-900">Single Module AI</h4>
+          <p className="text-sm text-blue-700">Isolated intelligence within module boundaries</p>
         </div>
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
-          <h4 className="font-semibold text-purple-900 mb-2">Cross-Module AI</h4>
-          <p className="text-sm text-purple-700">
-            Insights and automation across departments
-          </p>
+        <div className="rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 p-4">
+          <h4 className="mb-2 font-semibold text-purple-900">Cross-Module AI</h4>
+          <p className="text-sm text-purple-700">Insights and automation across departments</p>
         </div>
-        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
-          <h4 className="font-semibold text-green-900 mb-2">Full Orchestration</h4>
-          <p className="text-sm text-green-700">
-            Complete business process automation
-          </p>
+        <div className="rounded-xl bg-gradient-to-br from-green-50 to-green-100 p-4">
+          <h4 className="mb-2 font-semibold text-green-900">Full Orchestration</h4>
+          <p className="text-sm text-green-700">Complete business process automation</p>
         </div>
       </div>
     </div>

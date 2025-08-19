@@ -1,9 +1,9 @@
 // Test configuration file - loads test environment variables
-import dotenv from 'dotenv';
-import path from 'path';
+import dotenv from 'dotenv'
+import path from 'path'
 
 // Load test environment variables
-dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env.test') })
 
 export const testConfig = {
   auth: {
@@ -22,4 +22,4 @@ export const testConfig = {
     testApiKey: process.env.TEST_API_KEY || 'test-api-key-development-only',
     testSecretKey: process.env.TEST_SECRET_KEY || 'test-secret-key-development-only',
   },
-};
+}

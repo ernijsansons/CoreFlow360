@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { securityMiddleware, sanitizeInput, validateApiKey, validateCsrfToken } from '@/middleware/security'
+import {
+  securityMiddleware,
+  sanitizeInput,
+  validateApiKey,
+  validateCsrfToken,
+} from '@/lib/middleware/security'
 import { NextRequest } from 'next/server'
 
 describe('Security Middleware', () => {
@@ -12,8 +17,8 @@ describe('Security Middleware', () => {
       headers: {
         'content-type': 'application/json',
         'user-agent': 'test-agent',
-        'x-forwarded-for': '127.0.0.1'
-      }
+        'x-forwarded-for': '127.0.0.1',
+      },
     })
   })
 
@@ -29,7 +34,7 @@ describe('Security Middleware', () => {
       // Add valid CSRF token
       mockRequest.headers.set('x-csrf-token', 'valid-token')
       mockRequest.cookies.set('csrf-token', 'valid-token')
-      
+
       const response = await securityMiddleware(mockRequest)
       expect(response.status).toBe(200)
     })
@@ -37,7 +42,7 @@ describe('Security Middleware', () => {
     it('should reject requests with mismatched CSRF tokens', async () => {
       mockRequest.headers.set('x-csrf-token', 'token1')
       mockRequest.cookies.set('csrf-token', 'token2')
-      
+
       const response = await securityMiddleware(mockRequest)
       expect(response.status).toBe(403)
     })
@@ -45,9 +50,9 @@ describe('Security Middleware', () => {
     it('should skip CSRF check for webhook endpoints', async () => {
       const webhookRequest = new NextRequest('http://localhost:3000/api/stripe/webhook', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' }
+        headers: { 'content-type': 'application/json' },
       })
-      
+
       const response = await securityMiddleware(webhookRequest)
       expect(response.status).toBe(200)
     })
@@ -56,30 +61,30 @@ describe('Security Middleware', () => {
   describe('Rate Limiting', () => {
     it('should apply rate limiting to API endpoints', async () => {
       // Make multiple requests to trigger rate limiting
-      const requests = Array(101).fill(null).map(() => 
-        securityMiddleware(mockRequest)
-      )
-      
+      const requests = Array(101)
+        .fill(null)
+        .map(() => securityMiddleware(mockRequest))
+
       const responses = await Promise.all(requests)
-      const rateLimited = responses.filter(r => r.status === 429)
-      
+      const rateLimited = responses.filter((r) => r.status === 429)
+
       expect(rateLimited.length).toBeGreaterThan(0)
     })
 
     it('should apply stricter rate limiting to auth endpoints', async () => {
       const authRequest = new NextRequest('http://localhost:3000/api/auth/signin', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' }
+        headers: { 'content-type': 'application/json' },
       })
-      
+
       // Make multiple auth requests
-      const requests = Array(6).fill(null).map(() => 
-        securityMiddleware(authRequest)
-      )
-      
+      const requests = Array(6)
+        .fill(null)
+        .map(() => securityMiddleware(authRequest))
+
       const responses = await Promise.all(requests)
-      const rateLimited = responses.filter(r => r.status === 429)
-      
+      const rateLimited = responses.filter((r) => r.status === 429)
+
       expect(rateLimited.length).toBeGreaterThan(0)
     })
   })
@@ -87,7 +92,7 @@ describe('Security Middleware', () => {
   describe('Security Headers', () => {
     it('should set security headers', async () => {
       const response = await securityMiddleware(mockRequest)
-      
+
       expect(response.headers.get('X-Frame-Options')).toBe('SAMEORIGIN')
       expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff')
       expect(response.headers.get('X-XSS-Protection')).toBe('1; mode=block')
@@ -97,7 +102,7 @@ describe('Security Middleware', () => {
     it('should set Content Security Policy', async () => {
       const response = await securityMiddleware(mockRequest)
       const csp = response.headers.get('Content-Security-Policy')
-      
+
       expect(csp).toContain("default-src 'self'")
       expect(csp).toContain("script-src 'self'")
       expect(csp).toContain("frame-ancestors 'none'")
@@ -149,10 +154,10 @@ describe('Input Sanitization', () => {
         name: '<script>alert("xss")</script>',
         email: 'test@example.com',
         data: {
-          description: 'javascript:alert("xss")'
-        }
+          description: 'javascript:alert("xss")',
+        },
       }
-      
+
       const sanitized = sanitizeInput(input)
       expect(sanitized.name).not.toContain('<script>')
       expect(sanitized.email).toBe('test@example.com')
@@ -163,9 +168,9 @@ describe('Input Sanitization', () => {
       const input = [
         '<script>alert("xss")</script>',
         'normal text',
-        { key: 'javascript:alert("xss")' }
+        { key: 'javascript:alert("xss")' },
       ]
-      
+
       const sanitized = sanitizeInput(input)
       expect(sanitized[0]).not.toContain('<script>')
       expect(sanitized[1]).toBe('normal text')
@@ -188,10 +193,10 @@ describe('API Key Validation', () => {
       'cf360_',
       'cf360_tenant',
       'cf360_tenant_random',
-      'cf360_tenant_random_signature_extra'
+      'cf360_tenant_random_signature_extra',
     ]
-    
-    invalidKeys.forEach(key => {
+
+    invalidKeys.forEach((key) => {
       const result = validateApiKey(key)
       expect(result.valid).toBe(false)
     })

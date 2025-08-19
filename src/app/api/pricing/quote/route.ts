@@ -9,24 +9,24 @@ import { z } from 'zod'
 
 const QuoteRequestSchema = z.object({
   // Customer information
-  companyName: z.string().min(1, "Company name is required"),
-  contactEmail: z.string().email("Valid email is required"),
-  contactName: z.string().min(1, "Contact name is required"),
-  
+  companyName: z.string().min(1, 'Company name is required'),
+  contactEmail: z.string().email('Valid email is required'),
+  contactName: z.string().min(1, 'Contact name is required'),
+
   // Subscription details
-  modules: z.array(z.string()).min(1, "At least one module is required"),
-  userCount: z.number().min(1, "User count must be at least 1"),
+  modules: z.array(z.string()).min(1, 'At least one module is required'),
+  userCount: z.number().min(1, 'User count must be at least 1'),
   billingCycle: z.enum(['monthly', 'annual']).default('monthly'),
-  
+
   // Optional preferences
   industry: z.string().optional(),
   bundleKey: z.string().optional(),
   customRequirements: z.string().optional(),
-  
+
   // Quote options
   includeImplementation: z.boolean().default(false),
   includeTraining: z.boolean().default(false),
-  includeSupport: z.boolean().default(true)
+  includeSupport: z.boolean().default(true),
 })
 
 interface QuoteLineItem {
@@ -46,16 +46,16 @@ interface GeneratedQuote {
   contactName: string
   quoteDate: string
   validUntil: string
-  
+
   subscription: {
     modules: string[]
     userCount: number
     billingCycle: 'monthly' | 'annual'
     bundleApplied?: string
   }
-  
+
   lineItems: QuoteLineItem[]
-  
+
   pricing: {
     subtotal: number
     discounts: Array<{
@@ -68,7 +68,7 @@ interface GeneratedQuote {
     annualTotal?: number
     firstInvoiceTotal: number
   }
-  
+
   terms: {
     paymentTerms: string
     billingFrequency: string
@@ -76,7 +76,7 @@ interface GeneratedQuote {
     cancellationPolicy: string
     supportLevel: string
   }
-  
+
   nextSteps: {
     stripeCheckoutReady: boolean
     implementationRequired: boolean
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const validatedData = QuoteRequestSchema.parse(body)
-    
+
     const {
       companyName,
       contactEmail,
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       customRequirements,
       includeImplementation,
       includeTraining,
-      includeSupport
+      includeSupport,
     } = validatedData
 
     // Generate unique quote ID
@@ -112,30 +112,30 @@ export async function POST(request: NextRequest) {
     const moduleDefinitions = await prisma.moduleDefinition.findMany({
       where: {
         moduleKey: { in: modules },
-        isActive: true
-      }
+        isActive: true,
+      },
     })
 
     // Check if bundle was specified
     let bundleDefinition = null
     if (bundleKey) {
       bundleDefinition = await prisma.bundleDefinition.findUnique({
-        where: { bundleKey, isActive: true }
+        where: { bundleKey, isActive: true },
       })
     }
 
     // Calculate pricing
-    let lineItems: QuoteLineItem[] = []
+    const lineItems: QuoteLineItem[] = []
     let subtotal = 0
     let setupFees = 0
 
     if (bundleDefinition) {
       // Use bundle pricing
       const bundlePrice = Math.max(
-        bundleDefinition.basePrice, 
+        bundleDefinition.basePrice,
         bundleDefinition.perUserPrice * userCount
       )
-      
+
       lineItems.push({
         type: 'bundle',
         name: bundleDefinition.name,
@@ -143,15 +143,15 @@ export async function POST(request: NextRequest) {
         quantity: userCount,
         unitPrice: bundleDefinition.perUserPrice,
         totalPrice: bundlePrice,
-        billingFrequency: billingCycle === 'annual' ? 'annual' : 'monthly'
+        billingFrequency: billingCycle === 'annual' ? 'annual' : 'monthly',
       })
-      
+
       subtotal = bundlePrice
     } else {
       // Individual module pricing
       for (const module of moduleDefinitions) {
         const modulePrice = Math.max(module.basePrice, module.perUserPrice * userCount)
-        
+
         lineItems.push({
           type: 'module',
           name: module.name,
@@ -159,9 +159,9 @@ export async function POST(request: NextRequest) {
           quantity: userCount,
           unitPrice: module.perUserPrice,
           totalPrice: modulePrice,
-          billingFrequency: billingCycle === 'annual' ? 'annual' : 'monthly'
+          billingFrequency: billingCycle === 'annual' ? 'annual' : 'monthly',
         })
-        
+
         subtotal += modulePrice
         setupFees += module.setupFee || 0
       }
@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
         quantity: 1,
         unitPrice: setupFees,
         totalPrice: setupFees,
-        billingFrequency: 'one-time'
+        billingFrequency: 'one-time',
       })
     }
 
@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
         quantity: 1,
         unitPrice: implementationFee,
         totalPrice: implementationFee,
-        billingFrequency: 'one-time'
+        billingFrequency: 'one-time',
       })
       setupFees += implementationFee
     }
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
         quantity: 1,
         unitPrice: trainingFee,
         totalPrice: trainingFee,
-        billingFrequency: 'one-time'
+        billingFrequency: 'one-time',
       })
       setupFees += trainingFee
     }
@@ -215,22 +215,22 @@ export async function POST(request: NextRequest) {
 
     // Annual billing discount (10%)
     if (billingCycle === 'annual') {
-      const annualDiscount = subtotal * 0.10
+      const annualDiscount = subtotal * 0.1
       discounts.push({
         type: 'annual',
         description: '10% Annual Billing Discount',
-        amount: annualDiscount
+        amount: annualDiscount,
       })
       discountedSubtotal -= annualDiscount
     }
 
     // Volume discounts
     if (userCount >= 50) {
-      const volumeDiscount = subtotal * 0.10
+      const volumeDiscount = subtotal * 0.1
       discounts.push({
         type: 'volume',
         description: '10% Volume Discount (50+ Users)',
-        amount: volumeDiscount
+        amount: volumeDiscount,
       })
       discountedSubtotal -= volumeDiscount
     } else if (userCount >= 25) {
@@ -238,7 +238,7 @@ export async function POST(request: NextRequest) {
       discounts.push({
         type: 'volume',
         description: '5% Volume Discount (25+ Users)',
-        amount: volumeDiscount
+        amount: volumeDiscount,
       })
       discountedSubtotal -= volumeDiscount
     }
@@ -256,39 +256,39 @@ export async function POST(request: NextRequest) {
       contactName,
       quoteDate: new Date().toISOString().split('T')[0],
       validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days
-      
+
       subscription: {
         modules,
         userCount,
         billingCycle,
-        bundleApplied: bundleKey
+        bundleApplied: bundleKey,
       },
-      
+
       lineItems,
-      
+
       pricing: {
         subtotal,
         discounts,
         setupFees,
         monthlyRecurring,
         annualTotal: billingCycle === 'annual' ? annualTotal : undefined,
-        firstInvoiceTotal
+        firstInvoiceTotal,
       },
-      
+
       terms: {
         paymentTerms: billingCycle === 'annual' ? 'Annual prepayment' : 'Monthly in advance',
         billingFrequency: billingCycle,
         autoRenewal: true,
         cancellationPolicy: '30-day notice required',
-        supportLevel: includeSupport ? 'Standard support included' : 'Self-service support'
+        supportLevel: includeSupport ? 'Standard support included' : 'Self-service support',
       },
-      
+
       nextSteps: {
         stripeCheckoutReady: true,
         implementationRequired: includeImplementation,
         trainingIncluded: includeTraining,
-        estimatedGoLiveDate: calculateGoLiveDate(includeImplementation, includeTraining)
-      }
+        estimatedGoLiveDate: calculateGoLiveDate(includeImplementation, includeTraining),
+      },
     }
 
     // TODO: Store quote in database for follow-up
@@ -296,12 +296,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      quote
+      quote,
     })
-
   } catch (error) {
-    console.error('Quote generation error:', error)
-    
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid quote request', details: error.errors },
@@ -309,10 +306,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(
-      { error: 'Failed to generate quote' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to generate quote' }, { status: 500 })
   }
 }
 
@@ -332,7 +326,7 @@ function calculateGoLiveDate(includeImplementation: boolean, includeTraining: bo
 }
 
 export async function GET() {
-  return NextResponse.json({ 
+  return NextResponse.json({
     message: 'POST to this endpoint with quote generation parameters',
     schema: {
       companyName: 'string',
@@ -345,7 +339,7 @@ export async function GET() {
       bundleKey: 'string (optional)',
       includeImplementation: 'boolean (default: false)',
       includeTraining: 'boolean (default: false)',
-      includeSupport: 'boolean (default: true)'
-    }
+      includeSupport: 'boolean (default: true)',
+    },
   })
 }

@@ -1,7 +1,7 @@
 /**
  * CoreFlow360 - Bigcapital Accounting Plugin
  * MATHEMATICALLY PERFECT, ALGORITHMICALLY OPTIMAL, PROVABLY CORRECT
- * 
+ *
  * AI-enhanced accounting and financial operations module
  * Integrates Bigcapital's double-entry bookkeeping with AI intelligence
  */
@@ -23,7 +23,7 @@ export interface BigcapitalAccount {
   balance: number
   currency: string
   isActive: boolean
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface BigcapitalTransaction {
@@ -80,7 +80,7 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
   module = ModuleType.ACCOUNTING
   version = '1.0.0'
   status: 'ACTIVE' | 'INACTIVE' | 'LOADING' | 'ERROR' = 'INACTIVE'
-  
+
   config = {
     enabled: true,
     priority: 1,
@@ -93,52 +93,52 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
         method: 'GET' as const,
         handler: 'getAccounts',
         authentication: true,
-        rateLimit: 100
+        rateLimit: 100,
       },
       {
         path: '/api/accounting/transactions',
         method: 'POST' as const,
         handler: 'createTransaction',
         authentication: true,
-        rateLimit: 50
+        rateLimit: 50,
       },
       {
         path: '/api/accounting/ai/analyze',
         method: 'POST' as const,
         handler: 'analyzeFinancials',
         authentication: true,
-        rateLimit: 20
+        rateLimit: 20,
       },
       {
         path: '/api/accounting/ai/forecast',
         method: 'POST' as const,
         handler: 'forecastFinancials',
         authentication: true,
-        rateLimit: 10
-      }
+        rateLimit: 10,
+      },
     ],
     webhooks: [
       {
         event: 'transaction.created',
         internal: true,
-        retry: { attempts: 3, backoff: 'EXPONENTIAL' as const }
+        retry: { attempts: 3, backoff: 'EXPONENTIAL' as const },
       },
       {
         event: 'invoice.paid',
         internal: true,
-        retry: { attempts: 3, backoff: 'EXPONENTIAL' as const }
-      }
-    ]
+        retry: { attempts: 3, backoff: 'EXPONENTIAL' as const },
+      },
+    ],
   }
-  
+
   capabilities = {
     aiEnabled: true,
     realTimeSync: true,
     crossModuleData: true,
     industrySpecific: true,
-    customFields: true
+    customFields: true,
   }
-  
+
   private eventBus: CoreFlowEventBus
   private aiOrchestrator: AIAgentOrchestrator
   private bigcapitalAPI: BigcapitalAPIClient
@@ -150,9 +150,9 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
     taxOptimization: true,
     financialForecasting: true,
     complianceMonitoring: true,
-    auditAutomation: true
+    auditAutomation: true,
   }
-  
+
   constructor(eventBus: CoreFlowEventBus, aiOrchestrator: AIAgentOrchestrator) {
     this.eventBus = eventBus
     this.aiOrchestrator = aiOrchestrator
@@ -163,21 +163,17 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
    * Initialize the plugin
    */
   async initialize(): Promise<void> {
-    console.log('🏦 Initializing Bigcapital Accounting Plugin...')
-    
     // Connect to Bigcapital instance
     await this.bigcapitalAPI.connect()
-    
+
     // Setup event listeners
     this.setupEventListeners()
-    
+
     // Initialize AI models
     await this.initializeAIModels()
-    
+
     // Load chart of accounts
     await this.loadChartOfAccounts()
-    
-    console.log('✅ Bigcapital Accounting Plugin initialized')
   }
 
   /**
@@ -189,14 +185,12 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
       { operation: 'PLUGIN_ACTIVATION', pluginId: this.id },
       async () => {
         this.status = 'ACTIVE'
-        
+
         // Start real-time monitoring
         await this.startFinancialMonitoring()
-        
+
         // Enable AI analysis
         await this.enableAIAnalysis()
-        
-        console.log('✅ Bigcapital Accounting Plugin activated')
       }
     )
   }
@@ -206,11 +200,9 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
    */
   async deactivate(): Promise<void> {
     this.status = 'INACTIVE'
-    
+
     // Stop monitoring
     await this.stopFinancialMonitoring()
-    
-    console.log('⏹️ Bigcapital Accounting Plugin deactivated')
   }
 
   /**
@@ -218,13 +210,12 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
    */
   async destroy(): Promise<void> {
     await this.bigcapitalAPI.disconnect()
-    console.log('🗑️ Bigcapital Accounting Plugin destroyed')
   }
 
   /**
    * Sync data with Bigcapital
    */
-  async syncData(direction: 'IN' | 'OUT', data: any): Promise<any> {
+  async syncData(direction: 'IN' | 'OUT', data: unknown): Promise<unknown> {
     return await withPerformanceTracking('bigcapital_sync', async () => {
       if (direction === 'IN') {
         return await this.importData(data)
@@ -237,7 +228,7 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
   /**
    * Transform data for Bigcapital format
    */
-  async transformData(data: any, targetFormat: string): Promise<any> {
+  async transformData(data: unknown, targetFormat: string): Promise<unknown> {
     switch (targetFormat) {
       case 'journal_entry':
         return this.transformToJournalEntry(data)
@@ -255,19 +246,23 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
   /**
    * Validate financial data
    */
-  async validateData(data: any): Promise<boolean> {
+  async validateData(data: unknown): Promise<boolean> {
     // Validate double-entry bookkeeping rules
     if (data.journalEntries) {
-      const totalDebits = data.journalEntries.reduce((sum: number, entry: JournalEntry) => 
-        sum + entry.debit, 0)
-      const totalCredits = data.journalEntries.reduce((sum: number, entry: JournalEntry) => 
-        sum + entry.credit, 0)
-      
+      const totalDebits = data.journalEntries.reduce(
+        (sum: number, entry: JournalEntry) => sum + entry.debit,
+        0
+      )
+      const totalCredits = data.journalEntries.reduce(
+        (sum: number, entry: JournalEntry) => sum + entry.credit,
+        0
+      )
+
       if (Math.abs(totalDebits - totalCredits) > 0.01) {
         throw new Error('Journal entries must balance (debits = credits)')
       }
     }
-    
+
     // Additional validation rules
     return true
   }
@@ -276,7 +271,7 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
    * AI-Enhanced Financial Analysis
    */
   async analyzeFinancialData(
-    data: any,
+    data: unknown,
     analysisType: 'ANOMALY' | 'FORECAST' | 'OPTIMIZATION' | 'COMPLIANCE'
   ): Promise<AIFinancialAnalysis> {
     const taskId = await this.aiOrchestrator.submitTask(
@@ -284,30 +279,30 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
       {
         analysisType,
         financialData: data,
-        aiCapabilities: this.aiCapabilities
+        aiCapabilities: this.aiCapabilities,
       },
       {
         entityType: 'financial_data',
         entityId: data.id || 'batch',
-        industryContext: { module: 'accounting' }
+        industryContext: { module: 'accounting' },
       },
       {
         maxExecutionTime: 30000,
         accuracyThreshold: 0.95,
         explainability: true,
-        realTime: false
+        realTime: false,
       },
       'HIGH',
       data.tenantId
     )
-    
+
     // Wait for AI analysis
     const task = await this.waitForTaskCompletion(taskId)
-    
+
     if (!task.result?.success) {
       throw new Error('AI financial analysis failed')
     }
-    
+
     return this.parseAIAnalysisResult(task.result.data)
   }
 
@@ -321,26 +316,26 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
       {
         transaction,
         historicalTransactions: await this.getHistoricalTransactions(transaction),
-        accountBalances: await this.getAccountBalances()
+        accountBalances: await this.getAccountBalances(),
       },
       {
         entityType: 'transaction',
         entityId: transaction.id,
-        businessRules: await this.getBusinessRules()
+        businessRules: await this.getBusinessRules(),
       },
       {
         maxExecutionTime: 5000, // Real-time requirement
         accuracyThreshold: 0.9,
         explainability: true,
-        realTime: true
+        realTime: true,
       },
       'CRITICAL',
       'system'
     )
-    
+
     // Handle anomaly detection results
     const task = await this.waitForTaskCompletion(anomalyResult, 5000)
-    
+
     if (task.result?.data.anomalyDetected) {
       await this.handleFinancialAnomaly(transaction, task.result.data)
     }
@@ -349,12 +344,9 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
   /**
    * Cash flow prediction with AI
    */
-  async predictCashFlow(
-    timeHorizon: number,
-    scenarioParams?: any
-  ): Promise<any> {
+  async predictCashFlow(timeHorizon: number, scenarioParams?: unknown): Promise<unknown> {
     const historicalData = await this.getHistoricalFinancialData()
-    
+
     const predictionResult = await this.aiOrchestrator.submitTask(
       TaskType.FORECAST_DEMAND, // Repurposed for cash flow
       {
@@ -362,26 +354,26 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
         historicalData,
         timeHorizon,
         scenarioParams,
-        externalFactors: await this.getExternalFactors()
+        externalFactors: await this.getExternalFactors(),
       },
       {
         entityType: 'financial_forecast',
         entityId: `cashflow_${Date.now()}`,
-        industryContext: { 
+        industryContext: {
           module: 'accounting',
-          forecastType: 'cash_flow'
-        }
+          forecastType: 'cash_flow',
+        },
       },
       {
         maxExecutionTime: 60000,
         accuracyThreshold: 0.85,
         explainability: true,
-        realTime: false
+        realTime: false,
       },
       'HIGH',
       'system'
     )
-    
+
     const task = await this.waitForTaskCompletion(predictionResult)
     return task.result?.data
   }
@@ -403,7 +395,7 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
         }
       }
     )
-    
+
     // Listen for HR events
     this.eventBus.registerHandler(
       'bigcapital-hr-sync',
@@ -417,7 +409,7 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
         }
       }
     )
-    
+
     // Listen for inventory events
     this.eventBus.registerHandler(
       'bigcapital-inventory-sync',
@@ -438,14 +430,10 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
    */
   private async initializeAIModels(): Promise<void> {
     // Register specialized financial AI models
-    console.log('🤖 Initializing financial AI models...')
-    
     // Anomaly detection model
     // Cash flow prediction model
     // Expense optimization model
     // Fraud detection model
-    
-    console.log('✅ Financial AI models initialized')
   }
 
   /**
@@ -459,11 +447,14 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
           target: 'Customer',
           fields: [
             { sourceField: 'id', targetField: 'externalId' },
-            { sourceField: 'firstName', targetField: 'displayName', 
-              transform: (value: any) => `${value.firstName} ${value.lastName}` },
+            {
+              sourceField: 'firstName',
+              targetField: 'displayName',
+              transform: (value: unknown) => `${value.firstName} ${value.lastName}`,
+            },
             { sourceField: 'email', targetField: 'email' },
-            { sourceField: 'phone', targetField: 'phone' }
-          ]
+            { sourceField: 'phone', targetField: 'phone' },
+          ],
         },
         {
           source: 'Opportunity',
@@ -471,97 +462,93 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
           fields: [
             { sourceField: 'id', targetField: 'externalId' },
             { sourceField: 'amount', targetField: 'total' },
-            { sourceField: 'closeDate', targetField: 'dueDate' }
-          ]
-        }
+            { sourceField: 'closeDate', targetField: 'dueDate' },
+          ],
+        },
       ],
       relationships: [
         {
           sourceEntity: 'Contact',
           targetEntity: 'Customer',
           type: 'ONE_TO_ONE',
-          foreignKey: 'contactId'
+          foreignKey: 'contactId',
         },
         {
           sourceEntity: 'Invoice',
           targetEntity: 'Transaction',
           type: 'ONE_TO_MANY',
-          foreignKey: 'invoiceId'
-        }
-      ]
+          foreignKey: 'invoiceId',
+        },
+      ],
     }
   }
 
   /**
    * Helper methods
    */
-  private async importData(data: any): Promise<any> {
+  private async importData(data: unknown): Promise<unknown> {
     // Import data into Bigcapital
     return await this.bigcapitalAPI.importData(data)
   }
 
-  private async exportData(data: any): Promise<any> {
+  private async exportData(data: unknown): Promise<unknown> {
     // Export data from Bigcapital
     return await this.bigcapitalAPI.exportData(data)
   }
 
-  private transformToJournalEntry(data: any): JournalEntry[] {
+  private transformToJournalEntry(_data: unknown): JournalEntry[] {
     // Transform data to journal entry format
     return []
   }
 
-  private transformToInvoice(data: any): any {
+  private transformToInvoice(_data: unknown): unknown {
     // Transform data to invoice format
     return {}
   }
 
-  private transformToPayment(data: any): any {
+  private transformToPayment(_data: unknown): unknown {
     // Transform data to payment format
     return {}
   }
 
-  private transformToFinancialReport(data: any): any {
+  private transformToFinancialReport(_data: unknown): unknown {
     // Transform data to financial report format
     return {}
   }
 
   private async loadChartOfAccounts(): Promise<void> {
     // Load chart of accounts from Bigcapital
-    console.log('📊 Loading chart of accounts...')
   }
 
   private async startFinancialMonitoring(): Promise<void> {
     // Start real-time financial monitoring
-    console.log('👁️ Starting financial monitoring...')
   }
 
   private async stopFinancialMonitoring(): Promise<void> {
     // Stop financial monitoring
-    console.log('⏹️ Stopping financial monitoring...')
   }
 
   private async enableAIAnalysis(): Promise<void> {
     // Enable AI analysis features
-    console.log('🤖 Enabling AI analysis...')
   }
 
-  private async waitForTaskCompletion(taskId: string, timeout = 60000): Promise<any> {
+  private async waitForTaskCompletion(taskId: string, timeout = 60000): Promise<unknown> {
     const startTime = Date.now()
-    
+
     while (Date.now() - startTime < timeout) {
       const task = await this.aiOrchestrator.getTaskStatus(taskId)
-      
+
       if (task?.status === 'COMPLETED' || task?.status === 'FAILED') {
         return task
       }
-      
-      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      await new Promise((resolve) => setTimeout(resolve, 1000))
     }
-    
+
     throw new Error('Task timeout')
   }
 
-  private parseAIAnalysisResult(data: any): AIFinancialAnalysis {
+  private parseAIAnalysisResult(data: unknown): AIFinancialAnalysis {
     return {
       anomalyScore: data.anomalyScore || 0,
       riskLevel: data.riskLevel || 'LOW',
@@ -571,27 +558,30 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
       predictedImpact: {
         cashFlow: data.predictedImpact?.cashFlow || 0,
         profitability: data.predictedImpact?.profitability || 0,
-        liquidity: data.predictedImpact?.liquidity || 0
-      }
+        liquidity: data.predictedImpact?.liquidity || 0,
+      },
     }
   }
 
-  private async getHistoricalTransactions(transaction: BigcapitalTransaction): Promise<any[]> {
+  private async getHistoricalTransactions(_transaction: BigcapitalTransaction): Promise<unknown[]> {
     // Get historical transactions for comparison
     return []
   }
 
-  private async getAccountBalances(): Promise<any> {
+  private async getAccountBalances(): Promise<unknown> {
     // Get current account balances
     return {}
   }
 
-  private async getBusinessRules(): Promise<any> {
+  private async getBusinessRules(): Promise<unknown> {
     // Get business rules for validation
     return {}
   }
 
-  private async handleFinancialAnomaly(transaction: BigcapitalTransaction, anomalyData: any): Promise<void> {
+  private async handleFinancialAnomaly(
+    transaction: BigcapitalTransaction,
+    anomalyData: unknown
+  ): Promise<void> {
     // Handle detected financial anomaly
     await this.eventBus.publishEvent(
       EventType.AI_ANOMALY_DETECTED,
@@ -600,44 +590,41 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
         transaction,
         anomaly: anomalyData,
         severity: anomalyData.severity,
-        recommendations: anomalyData.recommendations
+        recommendations: anomalyData.recommendations,
       },
       {
         module: ModuleType.ACCOUNTING,
         tenantId: 'system',
         entityType: 'transaction',
-        entityId: transaction.id
+        entityId: transaction.id,
       }
     )
   }
 
-  private async getHistoricalFinancialData(): Promise<any> {
+  private async getHistoricalFinancialData(): Promise<unknown> {
     // Get historical financial data for predictions
     return {}
   }
 
-  private async getExternalFactors(): Promise<any> {
+  private async getExternalFactors(): Promise<unknown> {
     // Get external factors affecting cash flow
     return {
       economicIndicators: {},
       industryTrends: {},
-      seasonalFactors: {}
+      seasonalFactors: {},
     }
   }
 
-  private async syncFromCRM(data: any): Promise<void> {
+  private async syncFromCRM(_data: unknown): Promise<void> {
     // Sync data from CRM module
-    console.log('🔄 Syncing from CRM:', data.entityType)
   }
 
-  private async syncFromHR(data: any): Promise<void> {
+  private async syncFromHR(_data: unknown): Promise<void> {
     // Sync data from HR module
-    console.log('🔄 Syncing from HR:', data.entityType)
   }
 
-  private async createInventoryJournalEntry(data: any): Promise<void> {
+  private async createInventoryJournalEntry(_data: unknown): Promise<void> {
     // Create journal entry for inventory adjustment
-    console.log('📝 Creating inventory journal entry')
   }
 }
 
@@ -647,28 +634,26 @@ export class BigcapitalAccountingPlugin implements CoreFlowPlugin {
 class BigcapitalAPIClient {
   private baseURL: string
   private apiKey: string
-  
+
   constructor() {
     this.baseURL = process.env.BIGCAPITAL_API_URL || 'http://localhost:5000/api'
     this.apiKey = process.env.BIGCAPITAL_API_KEY || ''
   }
-  
+
   async connect(): Promise<void> {
     // Connect to Bigcapital API
-    console.log('🔌 Connecting to Bigcapital API...')
   }
-  
+
   async disconnect(): Promise<void> {
     // Disconnect from Bigcapital API
-    console.log('🔌 Disconnecting from Bigcapital API...')
   }
-  
-  async importData(data: any): Promise<any> {
+
+  async importData(data: unknown): Promise<unknown> {
     // Import data via API
     return data
   }
-  
-  async exportData(query: any): Promise<any> {
+
+  async exportData(_query: unknown): Promise<unknown> {
     // Export data via API
     return {}
   }

@@ -18,7 +18,7 @@ import { piiEncryptionMiddleware } from '@/lib/db-encryption'
 // Ensure a valid database URL during tests
 if (process.env.NODE_ENV === 'test') {
   const dbUrl = process.env.DATABASE_URL
-  if (!dbUrl || !dbUrl.startsWith('postgresql://') && !dbUrl.startsWith('file:')) {
+  if (!dbUrl || (!dbUrl.startsWith('postgresql://') && !dbUrl.startsWith('file:'))) {
     process.env.DATABASE_URL = 'file:./prisma/test.db'
   }
 }
@@ -32,78 +32,73 @@ const globalForPrisma = globalThis as unknown as {
 // Enhanced Prisma client configuration - lazy evaluated to prevent build-time crashes
 function getPrismaConfig(): Prisma.PrismaClientOptions {
   // Get database config safely
-  const dbUrl = database?.url || process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/db'
+  const dbUrl =
+    database?.url || process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/db'
   const poolSize = database?.poolSize || 20
   const timeout = database?.timeout || 30000
-  
+
   return {
     // Comprehensive logging configuration
-    log: isDevelopment 
+    log: isDevelopment
       ? [
           { emit: 'event', level: 'query' },
           { emit: 'event', level: 'error' },
           { emit: 'event', level: 'warn' },
-          { emit: 'event', level: 'info' }
+          { emit: 'event', level: 'info' },
         ]
       : [
           { emit: 'event', level: 'error' },
-          { emit: 'event', level: 'warn' }
+          { emit: 'event', level: 'warn' },
         ],
-    
+
     // Error formatting for better debugging
     errorFormat: isDevelopment ? 'pretty' : 'minimal',
-    
+
     // Datasource configuration with connection pooling
     datasources: {
       db: {
-        url: dbUrl.includes('postgresql://') 
+        url: dbUrl.includes('postgresql://')
           ? `${dbUrl}?connection_limit=${poolSize}&pool_timeout=${Math.floor(timeout / 1000)}&sslmode=require`
-          : dbUrl
-      }
-    }
+          : dbUrl,
+      },
+    },
   }
 }
 
 // Create Prisma client instance
 function createPrismaClient(): PrismaClient {
   const client = new PrismaClient(getPrismaConfig())
-  
+
   // Skip middleware and event handlers during build time
-  const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
-  
+  const isBuildTime =
+    process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+
   if (!isBuildTime) {
     // Enhanced logging with performance tracking
     if (isDevelopment) {
       client.$on('query', async (e) => {
-        console.log(`Query: ${e.query}`)
-        console.log(`Duration: ${e.duration}ms`)
         if (e.duration > 1000) {
-          console.warn(`Slow query detected: ${e.duration}ms`)
         }
       })
     }
-    
+
     // Error event logging
-    client.$on('error', (e) => {
-      console.error('Prisma Error:', e)
-    })
-    
+    client.$on('error', (e) => {})
+
     // Warning event logging
-    client.$on('warn', (e) => {
-      console.warn('Prisma Warning:', e)
-    })
-    
+    client.$on('warn', (e) => {})
+
     // Info event logging (development only)
     if (isDevelopment) {
       client.$on('info', (e) => {
         console.info('Prisma Info:', e)
       })
     }
-    
+
     // Add PII encryption middleware
     client.$use(piiEncryptionMiddleware)
   }
-  
+
   return client
 }
 
@@ -111,7 +106,7 @@ function createPrismaClient(): PrismaClient {
 export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
 // Prevent multiple instances in development
-if (process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
 }
 
@@ -122,25 +117,25 @@ export async function checkDatabaseHealth(): Promise<{
   responseTime?: number
 }> {
   const startTime = Date.now()
-  
+
   try {
     // Test database connection with a simple query
     await prisma.$queryRaw`SELECT 1`
-    
+
     const responseTime = Date.now() - startTime
-    
+
     return {
       status: 'healthy',
       message: 'Database connection successful',
-      responseTime
+      responseTime,
     }
   } catch (error) {
     const responseTime = Date.now() - startTime
-    
+
     return {
       status: 'unhealthy',
       message: error instanceof Error ? error.message : 'Database connection failed',
-      responseTime
+      responseTime,
     }
   }
 }
@@ -151,12 +146,11 @@ export async function disconnectDatabase(): Promise<void> {
     await prisma.$disconnect()
   } catch (error) {
     // Keep console.error for critical shutdown errors
-    console.error('Error closing database connection:', error)
   }
 }
 
 // Handle process termination in Node.js runtime only (not Edge/middleware)
-const isEdgeRuntime = typeof (globalThis as any).EdgeRuntime !== 'undefined'
+const isEdgeRuntime = typeof (globalThis as unknown).EdgeRuntime !== 'undefined'
 if (typeof process !== 'undefined' && typeof process.on === 'function' && !isEdgeRuntime) {
   process.on('SIGINT', async () => {
     await disconnectDatabase()

@@ -29,7 +29,7 @@ export interface Invoice {
   updatedAt: string
   paymentTerms?: string
   notes?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface InvoiceItem {
@@ -144,19 +144,19 @@ export interface IDURARService {
     filters?: InvoiceFilters,
     pagination?: PaginationOptions
   ): Promise<PaginatedResult<Invoice>>
-  
+
   // Customer Management
   createCustomer(customer: Omit<Customer, 'id' | 'createdAt'>): Promise<Customer>
   getCustomer(id: string): Promise<Customer>
   listCustomers(pagination?: PaginationOptions): Promise<PaginatedResult<Customer>>
-  
+
   // Dashboard & Reports
   getDashboard(dateRange?: { from: string; to: string }): Promise<DashboardData>
-  generateReport(type: 'revenue' | 'customers' | 'invoices', params: any): Promise<any>
-  
+  generateReport(type: 'revenue' | 'customers' | 'invoices', params: unknown): Promise<unknown>
+
   // Payment Processing
   recordPayment(invoiceId: string, amount: number, paymentDate: string): Promise<Invoice>
-  
+
   // Multi-currency Support
   convertCurrency(amount: number, from: string, to: string): Promise<number>
   getSupportedCurrencies(): Promise<string[]>
@@ -168,7 +168,7 @@ const InvoiceItemSchema = z.object({
   quantity: z.number().positive(),
   unitPrice: z.number().nonnegative(),
   taxRate: z.number().min(0).max(1).optional(),
-  category: z.string().optional()
+  category: z.string().optional(),
 })
 
 const CreateInvoiceRequestSchema = z.object({
@@ -178,23 +178,25 @@ const CreateInvoiceRequestSchema = z.object({
   paymentTerms: z.string().optional(),
   notes: z.string().max(1000).optional(),
   taxRate: z.number().min(0).max(1).optional(),
-  currency: z.string().length(3).optional()
+  currency: z.string().length(3).optional(),
 })
 
 const CustomerSchema = z.object({
   name: z.string().min(1).max(200),
   email: z.string().email(),
   phone: z.string().optional(),
-  address: z.object({
-    street: z.string(),
-    city: z.string(),
-    state: z.string(),
-    zipCode: z.string(),
-    country: z.string()
-  }).optional(),
+  address: z
+    .object({
+      street: z.string(),
+      city: z.string(),
+      state: z.string(),
+      zipCode: z.string(),
+      country: z.string(),
+    })
+    .optional(),
   paymentTerms: z.string(),
   creditLimit: z.number().positive().optional(),
-  status: z.enum(['active', 'inactive'])
+  status: z.enum(['active', 'inactive']),
 })
 
 // Mock Implementation
@@ -219,12 +221,12 @@ export class MockIDURARService implements IDURARService {
         city: 'New York',
         state: 'NY',
         zipCode: '10001',
-        country: 'US'
+        country: 'US',
       },
       paymentTerms: 'Net 30',
       creditLimit: 50000,
       status: 'active',
-      createdAt: '2023-01-15T10:00:00Z'
+      createdAt: '2023-01-15T10:00:00Z',
     }
 
     const customer2: Customer = {
@@ -233,7 +235,7 @@ export class MockIDURARService implements IDURARService {
       email: 'accounts@techsol.com',
       paymentTerms: 'Net 15',
       status: 'active',
-      createdAt: '2023-02-20T14:30:00Z'
+      createdAt: '2023-02-20T14:30:00Z',
     }
 
     this.customers.set(customer1.id, customer1)
@@ -254,7 +256,7 @@ export class MockIDURARService implements IDURARService {
           unitPrice: 150,
           totalPrice: 6000,
           taxRate: 0.08,
-          category: 'Services'
+          category: 'Services',
         },
         {
           id: 'item-2',
@@ -263,8 +265,8 @@ export class MockIDURARService implements IDURARService {
           unitPrice: 120,
           totalPrice: 2400,
           taxRate: 0.08,
-          category: 'Services'
-        }
+          category: 'Services',
+        },
       ],
       subtotal: 8400,
       taxAmount: 672,
@@ -273,7 +275,7 @@ export class MockIDURARService implements IDURARService {
       dueDate: '2024-01-15T00:00:00Z',
       createdAt: '2023-12-15T10:00:00Z',
       updatedAt: '2024-01-10T16:30:00Z',
-      paymentTerms: 'Net 30'
+      paymentTerms: 'Net 30',
     }
 
     this.invoices.set(invoice1.id, invoice1)
@@ -296,7 +298,7 @@ export class MockIDURARService implements IDURARService {
     const items: InvoiceItem[] = request.items.map((item, index) => ({
       id: `item-${invoiceId}-${index}`,
       ...item,
-      totalPrice: item.quantity * item.unitPrice
+      totalPrice: item.quantity * item.unitPrice,
     }))
 
     const subtotal = items.reduce((sum, item) => sum + item.totalPrice, 0)
@@ -319,13 +321,13 @@ export class MockIDURARService implements IDURARService {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       paymentTerms: request.paymentTerms,
-      notes: request.notes
+      notes: request.notes,
     }
 
     this.invoices.set(invoice.id, invoice)
 
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
     return invoice
   }
@@ -347,7 +349,7 @@ export class MockIDURARService implements IDURARService {
     const updatedInvoice: Invoice = {
       ...invoice,
       ...request,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     // Recalculate totals if items changed
@@ -355,9 +357,9 @@ export class MockIDURARService implements IDURARService {
       updatedInvoice.items = request.items.map((item, index) => ({
         id: `item-${id}-${index}`,
         ...item,
-        totalPrice: item.quantity * item.unitPrice
+        totalPrice: item.quantity * item.unitPrice,
       }))
-      
+
       updatedInvoice.subtotal = updatedInvoice.items.reduce((sum, item) => sum + item.totalPrice, 0)
       updatedInvoice.taxAmount = updatedInvoice.subtotal * 0.08
       updatedInvoice.total = updatedInvoice.subtotal + updatedInvoice.taxAmount
@@ -366,7 +368,7 @@ export class MockIDURARService implements IDURARService {
     this.invoices.set(id, updatedInvoice)
 
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 300))
+    await new Promise((resolve) => setTimeout(resolve, 300))
 
     return updatedInvoice
   }
@@ -393,16 +395,16 @@ export class MockIDURARService implements IDURARService {
     // Apply filters
     if (filters) {
       if (filters.status) {
-        invoices = invoices.filter(inv => filters.status!.includes(inv.status))
+        invoices = invoices.filter((inv) => filters.status!.includes(inv.status))
       }
       if (filters.customerId) {
-        invoices = invoices.filter(inv => inv.customerId === filters.customerId)
+        invoices = invoices.filter((inv) => inv.customerId === filters.customerId)
       }
       if (filters.minAmount) {
-        invoices = invoices.filter(inv => inv.total >= filters.minAmount!)
+        invoices = invoices.filter((inv) => inv.total >= filters.minAmount!)
       }
       if (filters.maxAmount) {
-        invoices = invoices.filter(inv => inv.total <= filters.maxAmount!)
+        invoices = invoices.filter((inv) => inv.total <= filters.maxAmount!)
       }
     }
 
@@ -422,8 +424,8 @@ export class MockIDURARService implements IDURARService {
         totalPages,
         totalItems: invoices.length,
         hasNext: page < totalPages,
-        hasPrev: page > 1
-      }
+        hasPrev: page > 1,
+      },
     }
   }
 
@@ -433,13 +435,13 @@ export class MockIDURARService implements IDURARService {
     const customer: Customer = {
       id: `customer-${Date.now()}`,
       ...customerData,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     }
 
     this.customers.set(customer.id, customer)
 
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 400))
+    await new Promise((resolve) => setTimeout(resolve, 400))
 
     return customer
   }
@@ -454,7 +456,7 @@ export class MockIDURARService implements IDURARService {
 
   async listCustomers(pagination?: PaginationOptions): Promise<PaginatedResult<Customer>> {
     const customers = Array.from(this.customers.values())
-    
+
     const page = pagination?.page || 1
     const limit = pagination?.limit || 20
     const startIndex = (page - 1) * limit
@@ -470,27 +472,27 @@ export class MockIDURARService implements IDURARService {
         totalPages,
         totalItems: customers.length,
         hasNext: page < totalPages,
-        hasPrev: page > 1
-      }
+        hasPrev: page > 1,
+      },
     }
   }
 
-  async getDashboard(dateRange?: { from: string; to: string }): Promise<DashboardData> {
+  async getDashboard(dateRange?: { _from: string; to: string }): Promise<DashboardData> {
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 800))
+    await new Promise((resolve) => setTimeout(resolve, 800))
 
     const invoices = Array.from(this.invoices.values())
     const customers = Array.from(this.customers.values())
 
     // Calculate summary metrics
     const totalRevenue = invoices
-      .filter(inv => inv.status === 'paid')
+      .filter((inv) => inv.status === 'paid')
       .reduce((sum, inv) => sum + inv.total, 0)
-    
-    const pendingInvoices = invoices.filter(inv => inv.status === 'sent').length
-    
+
+    const pendingInvoices = invoices.filter((inv) => inv.status === 'sent').length
+
     const overdueAmount = invoices
-      .filter(inv => inv.status === 'overdue')
+      .filter((inv) => inv.status === 'overdue')
       .reduce((sum, inv) => sum + inv.total, 0)
 
     return {
@@ -502,8 +504,8 @@ export class MockIDURARService implements IDURARService {
         growth: {
           revenue: 15.6,
           customers: 8.3,
-          invoices: 12.1
-        }
+          invoices: 12.1,
+        },
       },
       charts: {
         revenueByMonth: [
@@ -512,26 +514,26 @@ export class MockIDURARService implements IDURARService {
           { month: '2024-03', amount: 48000 },
           { month: '2024-04', amount: 61000 },
           { month: '2024-05', amount: 58000 },
-          { month: '2024-06', amount: 67000 }
+          { month: '2024-06', amount: 67000 },
         ],
         invoicesByStatus: [
           { status: 'paid', count: 45 },
           { status: 'sent', count: 12 },
           { status: 'overdue', count: 3 },
-          { status: 'draft', count: 8 }
+          { status: 'draft', count: 8 },
         ],
         topCustomers: [
           { name: 'Acme Corporation', amount: 125000 },
           { name: 'Tech Solutions LLC', amount: 89000 },
           { name: 'Global Industries', amount: 67000 },
-          { name: 'StartupXYZ', amount: 45000 }
+          { name: 'StartupXYZ', amount: 45000 },
         ],
         paymentTrends: [
           { date: '2024-01', paid: 125000, overdue: 5000 },
           { date: '2024-02', paid: 143000, overdue: 3000 },
           { date: '2024-03', paid: 132000, overdue: 8000 },
-          { date: '2024-04', paid: 156000, overdue: 4000 }
-        ]
+          { date: '2024-04', paid: 156000, overdue: 4000 },
+        ],
       },
       recentActivity: [
         {
@@ -539,28 +541,28 @@ export class MockIDURARService implements IDURARService {
           type: 'invoice_created',
           description: 'Invoice INV-001023 created for Tech Solutions LLC',
           timestamp: '2024-01-10T14:30:00Z',
-          amount: 5400
+          amount: 5400,
         },
         {
           id: 'activity-2',
           type: 'payment_received',
           description: 'Payment received for Invoice INV-001020',
           timestamp: '2024-01-10T11:15:00Z',
-          amount: 12000
+          amount: 12000,
         },
         {
           id: 'activity-3',
           type: 'customer_added',
           description: 'New customer "Digital Marketing Pro" added',
-          timestamp: '2024-01-09T16:45:00Z'
-        }
-      ]
+          timestamp: '2024-01-09T16:45:00Z',
+        },
+      ],
     }
   }
 
-  async generateReport(type: string, params: any): Promise<any> {
+  async generateReport(_type: string, _params: unknown): Promise<unknown> {
     // Simulate report generation
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    await new Promise((resolve) => setTimeout(resolve, 1500))
 
     switch (type) {
       case 'revenue':
@@ -572,15 +574,15 @@ export class MockIDURARService implements IDURARService {
             monthlyBreakdown: [
               { month: '2024-01', revenue: 45000 },
               { month: '2024-02', revenue: 52000 },
-              { month: '2024-03', revenue: 48000 }
+              { month: '2024-03', revenue: 48000 },
             ],
             topProducts: [
               { name: 'Software Development', revenue: 120000 },
               { name: 'Consulting', revenue: 85000 },
-              { name: 'Support Services', revenue: 40000 }
-            ]
+              { name: 'Support Services', revenue: 40000 },
+            ],
           },
-          generatedAt: new Date().toISOString()
+          generatedAt: new Date().toISOString(),
         }
       case 'customers':
         return {
@@ -590,9 +592,9 @@ export class MockIDURARService implements IDURARService {
             totalCustomers: this.customers.size,
             newCustomers: Math.round(this.customers.size * 0.15),
             activeCustomers: Math.round(this.customers.size * 0.85),
-            averageOrderValue: 8500
+            averageOrderValue: 8500,
           },
-          generatedAt: new Date().toISOString()
+          generatedAt: new Date().toISOString(),
         }
       default:
         throw new Error('Unsupported report type')
@@ -621,9 +623,9 @@ export class MockIDURARService implements IDURARService {
         ...invoice.metadata,
         lastPayment: {
           amount,
-          date: paymentDate
-        }
-      }
+          date: paymentDate,
+        },
+      },
     }
 
     this.invoices.set(invoiceId, updatedInvoice)
@@ -637,7 +639,7 @@ export class MockIDURARService implements IDURARService {
       'USD-EUR': 0.85,
       'USD-GBP': 0.73,
       'EUR-USD': 1.18,
-      'GBP-USD': 1.37
+      'GBP-USD': 1.37,
     }
 
     const rate = exchangeRates[`${from}-${to}`]
@@ -645,7 +647,7 @@ export class MockIDURARService implements IDURARService {
       throw new Error('Exchange rate not available')
     }
 
-    return Math.round((amount * rate) * 100) / 100
+    return Math.round(amount * rate * 100) / 100
   }
 
   async getSupportedCurrencies(): Promise<string[]> {

@@ -3,7 +3,10 @@
  * Implement conditional workflows that span multiple modules based on subscriptions
  */
 
-import { publishModuleEvent, subscribeToModuleEvents } from '@/services/events/subscription-aware-event-bus'
+import {
+  publishModuleEvent,
+  subscribeToModuleEvents,
+} from '@/services/events/subscription-aware-event-bus'
 import { moduleManager } from '@/services/subscription/module-manager'
 import SubscriptionAwareAIOrchestrator from '@/ai/orchestration/subscription-aware-orchestrator'
 import { TaskType } from '@/ai/orchestration/ai-agent-orchestrator'
@@ -76,11 +79,13 @@ export class CrossModuleWorkflowEngine {
       name: 'Lead to Hire Workflow',
       description: 'Track conversion from sales leads to potential hires',
       requiredModules: ['crm', 'hr'],
-      triggerEvents: [{
-        eventType: 'deal.won',
-        sourceModule: 'crm',
-        conditions: { deal_value: { $gt: 50000 }, customer_type: 'enterprise' }
-      }],
+      triggerEvents: [
+        {
+          eventType: 'deal.won',
+          sourceModule: 'crm',
+          conditions: { deal_value: { $gt: 50000 }, customer_type: 'enterprise' },
+        },
+      ],
       steps: [
         {
           id: 'analyze-growth-needs',
@@ -89,7 +94,7 @@ export class CrossModuleWorkflowEngine {
           module: 'hr',
           action: 'predict_hiring_needs',
           parameters: { context: 'deal_expansion' },
-          nextSteps: ['create-job-requisition']
+          nextSteps: ['create-job-requisition'],
         },
         {
           id: 'create-job-requisition',
@@ -98,7 +103,7 @@ export class CrossModuleWorkflowEngine {
           module: 'hr',
           action: 'create_requisition',
           parameters: { auto_approve: false },
-          nextSteps: ['notify-hiring-manager']
+          nextSteps: ['notify-hiring-manager'],
         },
         {
           id: 'notify-hiring-manager',
@@ -107,11 +112,11 @@ export class CrossModuleWorkflowEngine {
           module: 'hr',
           action: 'send_notification',
           parameters: { template: 'growth_opportunity' },
-          nextSteps: []
-        }
+          nextSteps: [],
+        },
       ],
       conditions: [],
-      isActive: true
+      isActive: true,
     })
 
     // Quote to Cash Workflow (CRM + Accounting)
@@ -120,10 +125,12 @@ export class CrossModuleWorkflowEngine {
       name: 'Quote to Cash Workflow',
       description: 'Automate the process from quote approval to payment collection',
       requiredModules: ['crm', 'accounting'],
-      triggerEvents: [{
-        eventType: 'quote.accepted',
-        sourceModule: 'crm'
-      }],
+      triggerEvents: [
+        {
+          eventType: 'quote.accepted',
+          sourceModule: 'crm',
+        },
+      ],
       steps: [
         {
           id: 'create-invoice',
@@ -132,7 +139,7 @@ export class CrossModuleWorkflowEngine {
           module: 'accounting',
           action: 'create_invoice_from_quote',
           parameters: { auto_send: true },
-          nextSteps: ['track-payment']
+          nextSteps: ['track-payment'],
         },
         {
           id: 'track-payment',
@@ -142,7 +149,7 @@ export class CrossModuleWorkflowEngine {
           action: 'predict_payment_timeline',
           parameters: { customer_history: true },
           nextSteps: ['payment-reminder'],
-          fallbackSteps: ['escalate-collections']
+          fallbackSteps: ['escalate-collections'],
         },
         {
           id: 'payment-reminder',
@@ -151,11 +158,11 @@ export class CrossModuleWorkflowEngine {
           module: 'accounting',
           action: 'send_payment_reminder',
           parameters: { days_after: 7 },
-          nextSteps: []
-        }
+          nextSteps: [],
+        },
       ],
       conditions: [],
-      isActive: true
+      isActive: true,
     })
 
     // Inventory Demand Forecasting (CRM + Inventory + Projects)
@@ -167,12 +174,12 @@ export class CrossModuleWorkflowEngine {
       triggerEvents: [
         {
           eventType: 'deal.pipeline_updated',
-          sourceModule: 'crm'
+          sourceModule: 'crm',
         },
         {
           eventType: 'project.milestone_reached',
-          sourceModule: 'projects'
-        }
+          sourceModule: 'projects',
+        },
       ],
       steps: [
         {
@@ -181,12 +188,12 @@ export class CrossModuleWorkflowEngine {
           type: 'ai_analysis',
           module: 'inventory',
           action: 'forecast_demand',
-          parameters: { 
+          parameters: {
             include_crm_pipeline: true,
             include_project_requirements: true,
-            forecast_period: 90
+            forecast_period: 90,
           },
-          nextSteps: ['generate-purchase-recommendations']
+          nextSteps: ['generate-purchase-recommendations'],
         },
         {
           id: 'generate-purchase-recommendations',
@@ -195,7 +202,7 @@ export class CrossModuleWorkflowEngine {
           module: 'inventory',
           action: 'optimize_purchasing',
           parameters: { cost_optimization: true },
-          nextSteps: ['notify-procurement']
+          nextSteps: ['notify-procurement'],
         },
         {
           id: 'notify-procurement',
@@ -204,18 +211,18 @@ export class CrossModuleWorkflowEngine {
           module: 'inventory',
           action: 'send_procurement_alert',
           parameters: { urgency_threshold: 'medium' },
-          nextSteps: []
-        }
+          nextSteps: [],
+        },
       ],
       conditions: [
         {
           field: 'confidence_score',
           operator: 'greater_than',
           value: 0.75,
-          moduleSource: 'inventory'
-        }
+          moduleSource: 'inventory',
+        },
       ],
-      isActive: true
+      isActive: true,
     })
 
     // Employee Performance to Sales Correlation (HR + CRM)
@@ -224,10 +231,12 @@ export class CrossModuleWorkflowEngine {
       name: 'Performance-Sales Correlation Analysis',
       description: 'Correlate employee performance reviews with sales outcomes',
       requiredModules: ['hr', 'crm'],
-      triggerEvents: [{
-        eventType: 'performance.reviewed',
-        sourceModule: 'hr'
-      }],
+      triggerEvents: [
+        {
+          eventType: 'performance.reviewed',
+          sourceModule: 'hr',
+        },
+      ],
       steps: [
         {
           id: 'correlate-performance-sales',
@@ -236,7 +245,7 @@ export class CrossModuleWorkflowEngine {
           module: 'crm',
           action: 'analyze_performance_impact',
           parameters: { time_window: 90 },
-          nextSteps: ['generate-insights']
+          nextSteps: ['generate-insights'],
         },
         {
           id: 'generate-insights',
@@ -245,7 +254,7 @@ export class CrossModuleWorkflowEngine {
           module: 'hr',
           action: 'generate_coaching_recommendations',
           parameters: { include_sales_data: true },
-          nextSteps: ['notify-manager']
+          nextSteps: ['notify-manager'],
         },
         {
           id: 'notify-manager',
@@ -254,11 +263,11 @@ export class CrossModuleWorkflowEngine {
           module: 'hr',
           action: 'send_performance_insights',
           parameters: { confidential: true },
-          nextSteps: []
-        }
+          nextSteps: [],
+        },
       ],
       conditions: [],
-      isActive: true
+      isActive: true,
     })
   }
 
@@ -277,8 +286,6 @@ export class CrossModuleWorkflowEngine {
             await this.handleWorkflowTrigger(workflow.id, event.tenantId, event)
           }
         )
-        
-        console.log(`🔄 Workflow subscription created: ${workflow.name} -> ${subscriptionId}`)
       }
     }
   }
@@ -294,31 +301,37 @@ export class CrossModuleWorkflowEngine {
     try {
       const workflow = this.workflows.get(workflowId)
       if (!workflow || !workflow.isActive) {
-        console.log(`⚠️ Workflow ${workflowId} not found or inactive`)
         return
       }
 
       // Check if tenant has required module subscriptions
       const hasRequiredModules = await this.validateWorkflowSubscription(workflow, tenantId)
       if (!hasRequiredModules) {
-        console.log(`⚠️ Workflow ${workflowId} blocked for tenant ${tenantId} - insufficient modules`)
-        await this.logWorkflowBlocked(workflowId, tenantId, 'insufficient_modules', workflow.requiredModules)
+        console.log(
+          `⚠️ Workflow ${workflowId} blocked for tenant ${tenantId} - insufficient modules`
+        )
+        await this.logWorkflowBlocked(
+          workflowId,
+          tenantId,
+          'insufficient_modules',
+          workflow.requiredModules
+        )
         return
       }
 
       // Check workflow conditions
-      const conditionsMet = await this.evaluateWorkflowConditions(workflow.conditions, triggerEvent, tenantId)
+      const conditionsMet = await this.evaluateWorkflowConditions(
+        workflow.conditions,
+        triggerEvent,
+        tenantId
+      )
       if (!conditionsMet) {
-        console.log(`⚠️ Workflow ${workflowId} conditions not met for tenant ${tenantId}`)
         return
       }
 
       // Start workflow execution
       await this.startWorkflowExecution(workflow, tenantId, triggerEvent)
-
-    } catch (error) {
-      console.error(`❌ Error handling workflow trigger for ${workflowId}:`, error)
-    }
+    } catch (error) {}
   }
 
   /**
@@ -330,7 +343,7 @@ export class CrossModuleWorkflowEngine {
     triggerEvent: Record<string, unknown>
   ): Promise<string> {
     const executionId = `exec-${Date.now()}-${Math.random().toString(36).substr(2, 8)}`
-    
+
     const execution: WorkflowExecution = {
       id: executionId,
       workflowId: workflow.id,
@@ -339,29 +352,32 @@ export class CrossModuleWorkflowEngine {
       currentStep: workflow.steps[0].id,
       context: {
         triggerEvent: triggerEvent.payload,
-        triggerMetadata: triggerEvent.metadata
+        triggerMetadata: triggerEvent.metadata,
       },
-      startedAt: new Date()
+      startedAt: new Date(),
     }
 
     this.activeExecutions.set(executionId, execution)
-    
-    console.log(`🚀 Started workflow execution: ${workflow.name} (${executionId}) for tenant ${tenantId}`)
+
+    console.log(
+      `🚀 Started workflow execution: ${workflow.name} (${executionId}) for tenant ${tenantId}`
+    )
 
     // Execute first step
     await this.executeWorkflowStep(execution, workflow.steps[0])
-    
+
     return executionId
   }
 
   /**
    * Execute a workflow step
    */
-  private async executeWorkflowStep(execution: WorkflowExecution, step: WorkflowStep): Promise<void> {
+  private async executeWorkflowStep(
+    execution: WorkflowExecution,
+    step: WorkflowStep
+  ): Promise<void> {
     try {
-      console.log(`⚡ Executing step: ${step.name} for execution ${execution.id}`)
-      
-              let result: Record<string, unknown>
+      let result: Record<string, unknown>
 
       switch (step.type) {
         case 'ai_analysis':
@@ -385,12 +401,12 @@ export class CrossModuleWorkflowEngine {
 
       // Update execution context with step result
       execution.context[step.id] = result
-      
+
       // Determine next steps
       if (step.nextSteps.length > 0) {
         const workflow = this.workflows.get(execution.workflowId)!
-        const nextStep = workflow.steps.find(s => s.id === step.nextSteps[0])
-        
+        const nextStep = workflow.steps.find((s) => s.id === step.nextSteps[0])
+
         if (nextStep) {
           execution.currentStep = nextStep.id
           await this.executeWorkflowStep(execution, nextStep)
@@ -400,17 +416,13 @@ export class CrossModuleWorkflowEngine {
       } else {
         await this.completeWorkflowExecution(execution)
       }
-
     } catch (error) {
-      console.error(`❌ Step execution failed: ${step.name}`, error)
-      
       // Try fallback steps if available
       if (step.fallbackSteps && step.fallbackSteps.length > 0) {
         const workflow = this.workflows.get(execution.workflowId)!
-        const fallbackStep = workflow.steps.find(s => s.id === step.fallbackSteps![0])
-        
+        const fallbackStep = workflow.steps.find((s) => s.id === step.fallbackSteps![0])
+
         if (fallbackStep) {
-          console.log(`🔄 Executing fallback step: ${fallbackStep.name}`)
           await this.executeWorkflowStep(execution, fallbackStep)
           return
         }
@@ -426,18 +438,21 @@ export class CrossModuleWorkflowEngine {
   /**
    * Execute AI analysis step
    */
-  private async executeAIAnalysisStep(step: WorkflowStep, execution: WorkflowExecution): Promise<Record<string, unknown>> {
+  private async executeAIAnalysisStep(
+    step: WorkflowStep,
+    execution: WorkflowExecution
+  ): Promise<Record<string, unknown>> {
     if (!this.aiOrchestrator) {
       throw new Error('AI Orchestrator not available')
     }
 
     // Map action to TaskType
     const taskTypeMap: Record<string, TaskType> = {
-      'predict_hiring_needs': TaskType.PERFORMANCE_ANALYSIS,
-      'predict_payment_timeline': TaskType.ANALYZE_CUSTOMER,
-      'forecast_demand': TaskType.FORECAST_DEMAND,
-      'analyze_performance_impact': TaskType.PERFORMANCE_ANALYSIS,
-      'generate_coaching_recommendations': TaskType.RECOMMEND_ACTION
+      predict_hiring_needs: TaskType.PERFORMANCE_ANALYSIS,
+      predict_payment_timeline: TaskType.ANALYZE_CUSTOMER,
+      forecast_demand: TaskType.FORECAST_DEMAND,
+      analyze_performance_impact: TaskType.PERFORMANCE_ANALYSIS,
+      generate_coaching_recommendations: TaskType.RECOMMEND_ACTION,
     }
 
     const taskType = taskTypeMap[step.action] || TaskType.ANALYZE_CUSTOMER
@@ -451,8 +466,8 @@ export class CrossModuleWorkflowEngine {
         maxExecutionTime: 30000,
         accuracyThreshold: 0.8,
         explainability: true,
-        crossModule: true
-      }
+        crossModule: true,
+      },
     })
 
     return result
@@ -461,25 +476,21 @@ export class CrossModuleWorkflowEngine {
   /**
    * Execute data synchronization step
    */
-  private async executeDataSyncStep(step: WorkflowStep, execution: WorkflowExecution): Promise<Record<string, unknown>> {
-    console.log(`🔄 Data sync: ${step.action} in module ${step.module}`)
-    
+  private async executeDataSyncStep(
+    step: WorkflowStep,
+    execution: WorkflowExecution
+  ): Promise<Record<string, unknown>> {
     // In production, this would interact with actual module APIs
     const result = {
       action: step.action,
       module: step.module,
       parameters: step.parameters,
       timestamp: new Date(),
-      success: true
+      success: true,
     }
 
     // Publish event about data sync
-    await publishModuleEvent(
-      step.module,
-      `workflow.${step.action}`,
-      execution.tenantId,
-      result
-    )
+    await publishModuleEvent(step.module, `workflow.${step.action}`, execution.tenantId, result)
 
     return result
   }
@@ -487,16 +498,17 @@ export class CrossModuleWorkflowEngine {
   /**
    * Execute notification step
    */
-  private async executeNotificationStep(step: WorkflowStep, _execution: WorkflowExecution): Promise<Record<string, unknown>> {
-    console.log(`📧 Notification: ${step.action} from module ${step.module}`)
-    
+  private async executeNotificationStep(
+    step: WorkflowStep,
+    _execution: WorkflowExecution
+  ): Promise<Record<string, unknown>> {
     const result = {
       action: step.action,
       module: step.module,
       parameters: step.parameters,
       recipient: 'determined_by_parameters',
       timestamp: new Date(),
-      sent: true
+      sent: true,
     }
 
     return result
@@ -505,17 +517,18 @@ export class CrossModuleWorkflowEngine {
   /**
    * Execute approval step
    */
-  private async executeApprovalStep(step: WorkflowStep, execution: WorkflowExecution): Promise<Record<string, unknown>> {
-    console.log(`✋ Approval required: ${step.action} in module ${step.module}`)
-    
+  private async executeApprovalStep(
+    step: WorkflowStep,
+    execution: WorkflowExecution
+  ): Promise<Record<string, unknown>> {
     // Mark execution as paused pending approval
     execution.status = 'paused'
-    
+
     const result = {
       action: step.action,
       module: step.module,
       status: 'pending_approval',
-      timestamp: new Date()
+      timestamp: new Date(),
     }
 
     return result
@@ -524,14 +537,15 @@ export class CrossModuleWorkflowEngine {
   /**
    * Execute external API step
    */
-  private async executeExternalAPIStep(step: WorkflowStep, _execution: WorkflowExecution): Promise<Record<string, unknown>> {
-    console.log(`🌐 External API call: ${step.action}`)
-    
+  private async executeExternalAPIStep(
+    step: WorkflowStep,
+    _execution: WorkflowExecution
+  ): Promise<Record<string, unknown>> {
     const result = {
       action: step.action,
       endpoint: step.parameters.endpoint || 'not_specified',
       timestamp: new Date(),
-      success: true
+      success: true,
     }
 
     return result
@@ -543,21 +557,14 @@ export class CrossModuleWorkflowEngine {
   private async completeWorkflowExecution(execution: WorkflowExecution): Promise<void> {
     execution.status = 'completed'
     execution.completedAt = new Date()
-    
-    console.log(`✅ Workflow execution completed: ${execution.id}`)
 
     // Publish completion event
-    await publishModuleEvent(
-      'workflows',
-      'workflow.completed',
-      execution.tenantId,
-      {
-        workflowId: execution.workflowId,
-        executionId: execution.id,
-        duration: execution.completedAt.getTime() - execution.startedAt.getTime(),
-        stepsCompleted: Object.keys(execution.context).length
-      }
-    )
+    await publishModuleEvent('workflows', 'workflow.completed', execution.tenantId, {
+      workflowId: execution.workflowId,
+      executionId: execution.id,
+      duration: execution.completedAt.getTime() - execution.startedAt.getTime(),
+      stepsCompleted: Object.keys(execution.context).length,
+    })
 
     // Clean up completed execution after some time
     setTimeout(() => {
@@ -568,10 +575,13 @@ export class CrossModuleWorkflowEngine {
   /**
    * Validate tenant has required module subscriptions
    */
-  private async validateWorkflowSubscription(workflow: CrossModuleWorkflow, tenantId: string): Promise<boolean> {
+  private async validateWorkflowSubscription(
+    workflow: CrossModuleWorkflow,
+    tenantId: string
+  ): Promise<boolean> {
     const activeModules = await moduleManager.getActiveModules(tenantId)
-    
-    return workflow.requiredModules.every(module => activeModules.includes(module))
+
+    return workflow.requiredModules.every((module) => activeModules.includes(module))
   }
 
   /**
@@ -585,11 +595,17 @@ export class CrossModuleWorkflowEngine {
     if (conditions.length === 0) return true
 
     for (const condition of conditions) {
-      const fieldValue = this.extractFieldValue(condition.field, triggerEvent, condition.moduleSource)
+      const fieldValue = this.extractFieldValue(
+        condition.field,
+        triggerEvent,
+        condition.moduleSource
+      )
       const conditionMet = this.evaluateCondition(fieldValue, condition.operator, condition.value)
-      
+
       if (!conditionMet) {
-        console.log(`❌ Condition not met: ${condition.field} ${condition.operator} ${condition.value}`)
+        console.log(
+          `❌ Condition not met: ${condition.field} ${condition.operator} ${condition.value}`
+        )
         return false
       }
     }
@@ -600,19 +616,27 @@ export class CrossModuleWorkflowEngine {
   /**
    * Helper methods
    */
-  private extractFieldValue(fieldPath: string, data: Record<string, unknown>, _moduleSource: string): unknown {
+  private extractFieldValue(
+    fieldPath: string,
+    data: Record<string, unknown>,
+    _moduleSource: string
+  ): unknown {
     // Extract nested field values using dot notation
     const parts = fieldPath.split('.')
     let value = data
-    
+
     for (const part of parts) {
       value = value?.[part]
     }
-    
+
     return value
   }
 
-  private evaluateCondition(fieldValue: unknown, operator: string, expectedValue: unknown): boolean {
+  private evaluateCondition(
+    fieldValue: unknown,
+    operator: string,
+    expectedValue: unknown
+  ): boolean {
     switch (operator) {
       case 'equals':
         return fieldValue === expectedValue
@@ -635,20 +659,13 @@ export class CrossModuleWorkflowEngine {
     reason: string,
     requiredModules: string[]
   ): Promise<void> {
-    console.log(`🚫 Workflow blocked: ${workflowId} for tenant ${tenantId} - ${reason}`)
-    
     // Could store this for upgrade recommendations
-    await publishModuleEvent(
-      'workflows',
-      'workflow.blocked',
-      tenantId,
-      {
-        workflowId,
-        reason,
-        requiredModules,
-        timestamp: new Date()
-      }
-    )
+    await publishModuleEvent('workflows', 'workflow.blocked', tenantId, {
+      workflowId,
+      reason,
+      requiredModules,
+      timestamp: new Date(),
+    })
   }
 
   /**
@@ -656,16 +673,17 @@ export class CrossModuleWorkflowEngine {
    */
   public async getActiveWorkflows(tenantId: string): Promise<CrossModuleWorkflow[]> {
     const activeModules = await moduleManager.getActiveModules(tenantId)
-    
-    return Array.from(this.workflows.values()).filter(workflow => 
-      workflow.isActive && 
-      workflow.requiredModules.every(module => activeModules.includes(module))
+
+    return Array.from(this.workflows.values()).filter(
+      (workflow) =>
+        workflow.isActive &&
+        workflow.requiredModules.every((module) => activeModules.includes(module))
     )
   }
 
   public async getWorkflowExecutions(tenantId: string): Promise<WorkflowExecution[]> {
     return Array.from(this.activeExecutions.values()).filter(
-      execution => execution.tenantId === tenantId
+      (execution) => execution.tenantId === tenantId
     )
   }
 

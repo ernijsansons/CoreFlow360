@@ -3,9 +3,9 @@
  * Converts plain English descriptions into structured workflows using AI
  */
 
-import { 
-  Workflow, 
-  WorkflowNode, 
+import {
+  Workflow,
+  WorkflowNode,
   WorkflowConnection,
   WorkflowIntent,
   WorkflowIntentType,
@@ -16,7 +16,7 @@ import {
   WorkflowGenerationResponse,
   WorkflowQuestion,
   WorkflowSuggestion,
-  WorkflowWarning
+  WorkflowWarning,
 } from './workflow-types'
 
 export class NaturalLanguageWorkflowProcessor {
@@ -31,32 +31,33 @@ export class NaturalLanguageWorkflowProcessor {
   /**
    * Main entry point - convert natural language to workflow
    */
-  async processDescription(request: WorkflowGenerationRequest): Promise<WorkflowGenerationResponse> {
+  async processDescription(
+    request: WorkflowGenerationRequest
+  ): Promise<WorkflowGenerationResponse> {
     try {
       // Step 1: Parse intent and entities
       const intent = await this.parseIntent(request.description)
-      
+
       // Step 2: Generate workflow structure
       const workflow = await this.generateWorkflow(request, intent)
-      
+
       // Step 3: Generate clarifying questions
       const questions = await this.generateQuestions(workflow, request)
-      
+
       // Step 4: Generate optimization suggestions
       const suggestions = await this.generateSuggestions(workflow, request)
-      
+
       // Step 5: Check for warnings
       const warnings = await this.checkWarnings(workflow, request)
-      
+
       return {
         workflow,
         confidence: intent.confidence,
         questions,
         suggestions,
-        warnings
+        warnings,
       }
     } catch (error) {
-      console.error('Workflow generation error:', error)
       throw new Error('Failed to generate workflow from description')
     }
   }
@@ -102,7 +103,7 @@ export class NaturalLanguageWorkflowProcessor {
    * Generate workflow structure from intent and entities
    */
   private async generateWorkflow(
-    request: WorkflowGenerationRequest, 
+    request: WorkflowGenerationRequest,
     intent: WorkflowIntent
   ): Promise<Workflow> {
     const systemPrompt = `
@@ -150,10 +151,10 @@ export class NaturalLanguageWorkflowProcessor {
     `
 
     const response = await this.callAI(systemPrompt + '\n\n' + userPrompt, 'gpt-4')
-    
+
     // Parse and enhance the workflow
     const baseWorkflow = JSON.parse(response)
-    
+
     return {
       ...baseWorkflow,
       id: this.generateId('workflow'),
@@ -174,13 +175,13 @@ export class NaturalLanguageWorkflowProcessor {
         notifications: {
           onSuccess: false,
           onError: true,
-          recipients: []
+          recipients: [],
         },
         logging: {
           enabled: true,
-          level: 'basic'
-        }
-      }
+          level: 'basic',
+        },
+      },
     }
   }
 
@@ -188,7 +189,7 @@ export class NaturalLanguageWorkflowProcessor {
    * Generate clarifying questions to perfect the workflow
    */
   private async generateQuestions(
-    workflow: Workflow, 
+    workflow: Workflow,
     request: WorkflowGenerationRequest
   ): Promise<WorkflowQuestion[]> {
     const prompt = `
@@ -278,25 +279,25 @@ export class NaturalLanguageWorkflowProcessor {
       warnings.push({
         type: 'complexity',
         message: 'This workflow has many steps. Consider breaking it into smaller workflows.',
-        severity: 'warning'
+        severity: 'warning',
       })
     }
 
     // Check for rate limits
-    const emailActions = workflow.nodes.filter(node => 
-      node.type === WorkflowNodeType.ACTION_SEND_EMAIL
+    const emailActions = workflow.nodes.filter(
+      (node) => node.type === WorkflowNodeType.ACTION_SEND_EMAIL
     )
     if (emailActions.length > 5) {
       warnings.push({
         type: 'rate_limit',
         message: 'Multiple email actions may hit rate limits. Consider adding delays.',
         severity: 'warning',
-        affectedNodeIds: emailActions.map(node => node.id)
+        affectedNodeIds: emailActions.map((node) => node.id),
       })
     }
 
     // Check for required integrations
-    const integrationNodes = workflow.nodes.filter(node => 
+    const integrationNodes = workflow.nodes.filter((node) =>
       node.type.toString().startsWith('INTEGRATION_')
     )
     if (integrationNodes.length > 0) {
@@ -304,7 +305,7 @@ export class NaturalLanguageWorkflowProcessor {
         type: 'integration_required',
         message: 'This workflow requires setting up integrations with external services.',
         severity: 'info',
-        affectedNodeIds: integrationNodes.map(node => node.id)
+        affectedNodeIds: integrationNodes.map((node) => node.id),
       })
     }
 
@@ -314,7 +315,10 @@ export class NaturalLanguageWorkflowProcessor {
   /**
    * Call AI service (OpenAI or Anthropic)
    */
-  private async callAI(prompt: string, model: 'gpt-4' | 'claude-3-opus' = 'gpt-4'): Promise<string> {
+  private async callAI(
+    prompt: string,
+    model: 'gpt-4' | 'claude-3-opus' = 'gpt-4'
+  ): Promise<string> {
     if (model === 'gpt-4') {
       return await this.callOpenAI(prompt)
     } else {
@@ -326,24 +330,25 @@ export class NaturalLanguageWorkflowProcessor {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.openaiApiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.openaiApiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: 'gpt-4-turbo-preview',
         messages: [
           {
             role: 'system',
-            content: 'You are a workflow automation expert. Always respond with valid JSON when requested.'
+            content:
+              'You are a workflow automation expert. Always respond with valid JSON when requested.',
           },
           {
-            role: 'user', 
-            content: prompt
-          }
+            role: 'user',
+            content: prompt,
+          },
         ],
         temperature: 0.7,
-        max_tokens: 4000
-      })
+        max_tokens: 4000,
+      }),
     })
 
     if (!response.ok) {
@@ -360,16 +365,18 @@ export class NaturalLanguageWorkflowProcessor {
       headers: {
         'x-api-key': this.anthropicApiKey,
         'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
         model: 'claude-3-opus-20240229',
         max_tokens: 4000,
-        messages: [{
-          role: 'user',
-          content: prompt
-        }]
-      })
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+      }),
     })
 
     if (!response.ok) {
@@ -388,29 +395,34 @@ export class NaturalLanguageWorkflowProcessor {
 // Example workflow patterns for better AI training
 export const WORKFLOW_EXAMPLES = {
   lead_nurturing: {
-    description: "When a new lead fills out our contact form, add them to CRM, send welcome email, and create follow-up task for sales team",
-    pattern: "TRIGGER → ADD_TO_CRM → SEND_EMAIL → CREATE_TASK"
+    description:
+      'When a new lead fills out our contact form, add them to CRM, send welcome email, and create follow-up task for sales team',
+    pattern: 'TRIGGER → ADD_TO_CRM → SEND_EMAIL → CREATE_TASK',
   },
-  
+
   invoice_follow_up: {
-    description: "When an invoice becomes 30 days overdue, send reminder email and notify accounts receivable team",
-    pattern: "TIME_TRIGGER → CHECK_STATUS → SEND_REMINDER → NOTIFY_TEAM"
+    description:
+      'When an invoice becomes 30 days overdue, send reminder email and notify accounts receivable team',
+    pattern: 'TIME_TRIGGER → CHECK_STATUS → SEND_REMINDER → NOTIFY_TEAM',
   },
-  
+
   customer_onboarding: {
-    description: "After customer signs contract, create onboarding checklist, assign customer success manager, and schedule kickoff call",
-    pattern: "CONTRACT_TRIGGER → CREATE_CHECKLIST → ASSIGN_MANAGER → SCHEDULE_CALL"
+    description:
+      'After customer signs contract, create onboarding checklist, assign customer success manager, and schedule kickoff call',
+    pattern: 'CONTRACT_TRIGGER → CREATE_CHECKLIST → ASSIGN_MANAGER → SCHEDULE_CALL',
   },
-  
+
   support_escalation: {
-    description: "If support ticket isn't responded to within 4 hours, escalate to manager and send customer update",
-    pattern: "TIME_CHECK → CONDITION → ESCALATE → SEND_UPDATE"
+    description:
+      "If support ticket isn't responded to within 4 hours, escalate to manager and send customer update",
+    pattern: 'TIME_CHECK → CONDITION → ESCALATE → SEND_UPDATE',
   },
-  
+
   project_completion: {
-    description: "When project status changes to complete, generate final report, send to stakeholders, and create feedback survey",
-    pattern: "STATUS_TRIGGER → GENERATE_REPORT → SEND_REPORT → CREATE_SURVEY"
-  }
+    description:
+      'When project status changes to complete, generate final report, send to stakeholders, and create feedback survey',
+    pattern: 'STATUS_TRIGGER → GENERATE_REPORT → SEND_REPORT → CREATE_SURVEY',
+  },
 }
 
 export default NaturalLanguageWorkflowProcessor

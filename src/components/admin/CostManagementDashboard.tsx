@@ -1,128 +1,136 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  TrendingDown, 
-  AlertTriangle, 
-  DollarSign, 
+import React, { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  TrendingDown,
+  AlertTriangle,
+  DollarSign,
   Target,
   Settings,
   BarChart3,
   PieChart,
-  Activity
-} from 'lucide-react';
-import { CostAuditResult } from '@/lib/audit/cost-management-auditor';
+  Activity,
+} from 'lucide-react'
+import { CostAuditResult } from '@/lib/audit/cost-management-auditor'
 
 interface CostManagementDashboardProps {
-  tenantId: string;
+  tenantId: string
 }
 
 export default function CostManagementDashboard({ tenantId }: CostManagementDashboardProps) {
-  const [auditResults, setAuditResults] = useState<CostAuditResult[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedAudit, setSelectedAudit] = useState<string>('overview');
+  const [auditResults, setAuditResults] = useState<CostAuditResult[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedAudit, setSelectedAudit] = useState<string>('overview')
 
   useEffect(() => {
-    fetchCostAudits();
-  }, [tenantId]);
+    fetchCostAudits()
+  }, [tenantId])
 
   const fetchCostAudits = async () => {
     try {
-      setLoading(true);
-      const response = await fetch(`/api/admin/cost-audits?tenantId=${tenantId}`);
-      const data = await response.json();
-      setAuditResults(data.audits || []);
+      setLoading(true)
+      const response = await fetch(`/api/admin/cost-audits?tenantId=${tenantId}`)
+      const data = await response.json()
+      setAuditResults(data.audits || [])
     } catch (error) {
-      console.error('Failed to fetch cost audits:', error);
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const runCostAudit = async () => {
     try {
-      setLoading(true);
+      setLoading(true)
       const response = await fetch('/api/admin/cost-audits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantId })
-      });
-      const data = await response.json();
-      setAuditResults(data.audits || []);
+        body: JSON.stringify({ tenantId }),
+      })
+      const data = await response.json()
+      setAuditResults(data.audits || [])
     } catch (error) {
-      console.error('Failed to run cost audit:', error);
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const totalPotentialSavings = auditResults.reduce((sum, audit) => sum + audit.potentialSavings, 0);
-  const totalCriticalIssues = auditResults.reduce((sum, audit) => sum + audit.criticalIssues.length, 0);
+  const totalPotentialSavings = auditResults.reduce((sum, audit) => sum + audit.potentialSavings, 0)
+  const totalCriticalIssues = auditResults.reduce(
+    (sum, audit) => sum + audit.criticalIssues.length,
+    0
+  )
 
   const getAuditIcon = (auditType: string) => {
     switch (auditType) {
-      case 'UTILITY_OPTIMIZER': return <Activity className="h-4 w-4" />;
-      case 'LOCK_IN_ASSESSOR': return <AlertTriangle className="h-4 w-4" />;
-      case 'PRICING_MODELER': return <DollarSign className="h-4 w-4" />;
-      case 'FINOPS_PROCESSOR': return <BarChart3 className="h-4 w-4" />;
-      case 'TRANSFER_MINIMIZER': return <TrendingDown className="h-4 w-4" />;
-      case 'TCO_AGGREGATOR': return <PieChart className="h-4 w-4" />;
-      default: return <Settings className="h-4 w-4" />;
+      case 'UTILITY_OPTIMIZER':
+        return <Activity className="h-4 w-4" />
+      case 'LOCK_IN_ASSESSOR':
+        return <AlertTriangle className="h-4 w-4" />
+      case 'PRICING_MODELER':
+        return <DollarSign className="h-4 w-4" />
+      case 'FINOPS_PROCESSOR':
+        return <BarChart3 className="h-4 w-4" />
+      case 'TRANSFER_MINIMIZER':
+        return <TrendingDown className="h-4 w-4" />
+      case 'TCO_AGGREGATOR':
+        return <PieChart className="h-4 w-4" />
+      default:
+        return <Settings className="h-4 w-4" />
     }
-  };
+  }
 
   const getSeverityColor = (criticalCount: number) => {
-    if (criticalCount >= 5) return 'bg-red-500';
-    if (criticalCount >= 3) return 'bg-yellow-500';
-    if (criticalCount >= 1) return 'bg-orange-500';
-    return 'bg-green-500';
-  };
+    if (criticalCount >= 5) return 'bg-red-500'
+    if (criticalCount >= 3) return 'bg-yellow-500'
+    if (criticalCount >= 1) return 'bg-orange-500'
+    return 'bg-green-500'
+  }
 
   if (loading && auditResults.length === 0) {
     return (
-      <div className="p-6 space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="space-y-6 p-6">
+        <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Cost Management Audits</h1>
-          <button 
+          <button
             onClick={runCostAudit}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             Run Cost Audit
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(i => (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="animate-pulse">
               <CardContent className="p-6">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                <div className="mb-2 h-4 w-3/4 rounded bg-gray-200"></div>
+                <div className="h-8 w-1/2 rounded bg-gray-200"></div>
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 p-6">
+      <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Cost Management Audits</h1>
-        <button 
+        <button
           onClick={runCostAudit}
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {loading ? 'Running...' : 'Run Cost Audit'}
         </button>
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -167,10 +175,9 @@ export default function CostManagementDashboard({ tenantId }: CostManagementDash
               <div>
                 <p className="text-sm font-medium text-gray-600">Last Audit</p>
                 <p className="text-sm text-gray-500">
-                  {auditResults.length > 0 
+                  {auditResults.length > 0
                     ? new Date(auditResults[0].timestamp).toLocaleDateString()
-                    : 'Never'
-                  }
+                    : 'Never'}
                 </p>
               </div>
               <Activity className="h-8 w-8 text-gray-500" />
@@ -205,7 +212,7 @@ export default function CostManagementDashboard({ tenantId }: CostManagementDash
                       <Badge variant="outline">
                         ${audit.potentialSavings.toLocaleString()} savings
                       </Badge>
-                      <Badge 
+                      <Badge
                         className={`text-white ${getSeverityColor(audit.criticalIssues.length)}`}
                       >
                         {audit.criticalIssues.length} critical
@@ -216,24 +223,24 @@ export default function CostManagementDashboard({ tenantId }: CostManagementDash
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-semibold mb-2">Recommendations</h4>
+                      <h4 className="mb-2 font-semibold">Recommendations</h4>
                       <ul className="space-y-1">
                         {audit.recommendations.slice(0, 3).map((rec, idx) => (
-                          <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
-                            <span className="text-blue-500 mt-1">•</span>
+                          <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
+                            <span className="mt-1 text-blue-500">•</span>
                             {rec}
                           </li>
                         ))}
                       </ul>
                     </div>
-                    
+
                     {audit.criticalIssues.length > 0 && (
                       <div>
-                        <h4 className="font-semibold mb-2 text-red-600">Critical Issues</h4>
+                        <h4 className="mb-2 font-semibold text-red-600">Critical Issues</h4>
                         <ul className="space-y-1">
                           {audit.criticalIssues.map((issue, idx) => (
-                            <li key={idx} className="text-sm text-red-600 flex items-start gap-2">
-                              <AlertTriangle className="h-3 w-3 mt-1" />
+                            <li key={idx} className="flex items-start gap-2 text-sm text-red-600">
+                              <AlertTriangle className="mt-1 h-3 w-3" />
                               {issue}
                             </li>
                           ))}
@@ -249,7 +256,7 @@ export default function CostManagementDashboard({ tenantId }: CostManagementDash
 
         {/* Individual Audit Tabs */}
         {auditResults.map((audit) => {
-          const tabValue = audit.auditType.toLowerCase().split('_')[0];
+          const tabValue = audit.auditType.toLowerCase().split('_')[0]
           return (
             <TabsContent key={audit.auditType} value={tabValue}>
               <Card>
@@ -260,20 +267,20 @@ export default function CostManagementDashboard({ tenantId }: CostManagementDash
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div className="rounded-lg bg-green-50 p-4 text-center">
                       <p className="text-2xl font-bold text-green-600">
                         ${audit.potentialSavings.toLocaleString()}
                       </p>
                       <p className="text-sm text-gray-600">Potential Savings</p>
                     </div>
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="rounded-lg bg-blue-50 p-4 text-center">
                       <p className="text-2xl font-bold text-blue-600">
                         {audit.recommendations.length}
                       </p>
                       <p className="text-sm text-gray-600">Recommendations</p>
                     </div>
-                    <div className="text-center p-4 bg-red-50 rounded-lg">
+                    <div className="rounded-lg bg-red-50 p-4 text-center">
                       <p className="text-2xl font-bold text-red-600">
                         {audit.criticalIssues.length}
                       </p>
@@ -281,21 +288,21 @@ export default function CostManagementDashboard({ tenantId }: CostManagementDash
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <div>
-                      <h4 className="font-semibold mb-4">Detailed Findings</h4>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <pre className="text-sm overflow-auto">
+                      <h4 className="mb-4 font-semibold">Detailed Findings</h4>
+                      <div className="rounded-lg bg-gray-50 p-4">
+                        <pre className="overflow-auto text-sm">
                           {JSON.stringify(audit.findings, null, 2)}
                         </pre>
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="font-semibold mb-4">All Recommendations</h4>
+                      <h4 className="mb-4 font-semibold">All Recommendations</h4>
                       <ul className="space-y-2">
                         {audit.recommendations.map((rec, idx) => (
-                          <li key={idx} className="text-sm bg-blue-50 p-3 rounded-lg">
+                          <li key={idx} className="rounded-lg bg-blue-50 p-3 text-sm">
                             {rec}
                           </li>
                         ))}
@@ -305,12 +312,17 @@ export default function CostManagementDashboard({ tenantId }: CostManagementDash
 
                   {audit.criticalIssues.length > 0 && (
                     <div>
-                      <h4 className="font-semibold mb-4 text-red-600">Critical Issues Requiring Immediate Attention</h4>
+                      <h4 className="mb-4 font-semibold text-red-600">
+                        Critical Issues Requiring Immediate Attention
+                      </h4>
                       <div className="space-y-2">
                         {audit.criticalIssues.map((issue, idx) => (
-                          <div key={idx} className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                          <div
+                            key={idx}
+                            className="rounded border-l-4 border-red-500 bg-red-50 p-4"
+                          >
                             <div className="flex items-start gap-2">
-                              <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
+                              <AlertTriangle className="mt-0.5 h-5 w-5 text-red-500" />
                               <span className="text-sm text-red-700">{issue}</span>
                             </div>
                           </div>
@@ -321,9 +333,9 @@ export default function CostManagementDashboard({ tenantId }: CostManagementDash
                 </CardContent>
               </Card>
             </TabsContent>
-          );
+          )
         })}
       </Tabs>
     </div>
-  );
+  )
 }

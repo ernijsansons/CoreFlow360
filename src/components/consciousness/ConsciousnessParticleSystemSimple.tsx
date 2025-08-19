@@ -2,7 +2,7 @@
 
 /**
  * CoreFlow360 Consciousness Particle System (Simplified)
- * 
+ *
  * Simplified CSS-based version of the consciousness particle system
  * for production build compatibility.
  */
@@ -38,7 +38,7 @@ export default function ConsciousnessParticleSystem({
   interactive = true,
   showMetrics = true,
   onAwakeningComplete,
-  className = ''
+  className = '',
 }: ParticleSystemProps) {
   const [particles, setParticles] = useState<Particle[]>([])
   const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 })
@@ -55,7 +55,7 @@ export default function ConsciousnessParticleSystem({
       vy: (Math.random() - 0.5) * 0.5,
       size: Math.random() * 4 + 2,
       color: getConsciousnessColor(consciousnessLevel),
-      consciousness: Math.random()
+      consciousness: Math.random(),
     }))
     setParticles(newParticles)
   }, [particleCount, consciousnessLevel])
@@ -63,63 +63,73 @@ export default function ConsciousnessParticleSystem({
   // Get color based on consciousness level
   const getConsciousnessColor = (level: string) => {
     switch (level) {
-      case 'neural': return '#3b82f6'
-      case 'synaptic': return '#8b5cf6'
-      case 'autonomous': return '#10b981'
-      case 'transcendent': return '#f59e0b'
-      default: return '#6b7280'
+      case 'neural':
+        return '#3b82f6'
+      case 'synaptic':
+        return '#8b5cf6'
+      case 'autonomous':
+        return '#10b981'
+      case 'transcendent':
+        return '#f59e0b'
+      default:
+        return '#6b7280'
     }
   }
 
   // Handle mouse movement
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!interactive) return
-    
-    const rect = e.currentTarget.getBoundingClientRect()
-    setMousePosition({
-      x: (e.clientX - rect.left) / rect.width,
-      y: (e.clientY - rect.top) / rect.height
-    })
-  }, [interactive])
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!interactive) return
+
+      const rect = e.currentTarget.getBoundingClientRect()
+      setMousePosition({
+        x: (e.clientX - rect.left) / rect.width,
+        y: (e.clientY - rect.top) / rect.height,
+      })
+    },
+    [interactive]
+  )
 
   // Animate particles and consciousness
   useEffect(() => {
     const interval = setInterval(() => {
-      setParticles(prev => prev.map(particle => {
-        // Move towards mouse when interactive
-        let newX = particle.x + particle.vx
-        let newY = particle.y + particle.vy
+      setParticles((prev) =>
+        prev.map((particle) => {
+          // Move towards mouse when interactive
+          let newX = particle.x + particle.vx
+          let newY = particle.y + particle.vy
 
-        if (interactive) {
-          const mouseInfluence = 0.05
-          const dx = mousePosition.x * 100 - particle.x
-          const dy = mousePosition.y * 100 - particle.y
-          const distance = Math.sqrt(dx * dx + dy * dy)
-          
-          if (distance < 30) {
-            newX += dx * mouseInfluence
-            newY += dy * mouseInfluence
+          if (interactive) {
+            const mouseInfluence = 0.05
+            const dx = mousePosition.x * 100 - particle.x
+            const dy = mousePosition.y * 100 - particle.y
+            const distance = Math.sqrt(dx * dx + dy * dy)
+
+            if (distance < 30) {
+              newX += dx * mouseInfluence
+              newY += dy * mouseInfluence
+            }
           }
-        }
 
-        // Wrap around edges
-        if (newX < 0) newX = 100
-        if (newX > 100) newX = 0
-        if (newY < 0) newY = 100
-        if (newY > 100) newY = 0
+          // Wrap around edges
+          if (newX < 0) newX = 100
+          if (newX > 100) newX = 0
+          if (newY < 0) newY = 100
+          if (newY > 100) newY = 0
 
-        return {
-          ...particle,
-          x: newX,
-          y: newY,
-          consciousness: Math.min(1, particle.consciousness + 0.001)
-        }
-      }))
+          return {
+            ...particle,
+            x: newX,
+            y: newY,
+            consciousness: Math.min(1, particle.consciousness + 0.001),
+          }
+        })
+      )
 
       // Update consciousness intensity based on mouse interaction
       const mouseInfluence = Math.abs(mousePosition.x - 0.5) + Math.abs(mousePosition.y - 0.5)
       setConsciousnessIntensity(1 + mouseInfluence * 2)
-      
+
       // Count neural connections (particles close to each other)
       let connections = 0
       for (let i = 0; i < particles.length; i++) {
@@ -138,29 +148,31 @@ export default function ConsciousnessParticleSystem({
 
   // Check for awakening completion
   useEffect(() => {
-    const avgConsciousness = particles.reduce((sum, p) => sum + p.consciousness, 0) / particles.length
+    const avgConsciousness =
+      particles.reduce((sum, p) => sum + p.consciousness, 0) / particles.length
     if (avgConsciousness > 0.8 && onAwakeningComplete) {
       onAwakeningComplete()
     }
   }, [particles, onAwakeningComplete])
 
   return (
-    <div 
-      className={`relative w-full h-full overflow-hidden ${className}`}
+    <div
+      className={`relative h-full w-full overflow-hidden ${className}`}
       onMouseMove={handleMouseMove}
       style={{
-        background: theme === 'consciousness' 
-          ? 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, rgba(0,0,0,0.9) 100%)'
-          : theme === 'dark' 
-            ? '#000000'
-            : '#ffffff'
+        background:
+          theme === 'consciousness'
+            ? 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, rgba(0,0,0,0.9) 100%)'
+            : theme === 'dark'
+              ? '#000000'
+              : '#ffffff',
       }}
     >
       {/* Particles */}
-      {particles.map(particle => (
+      {particles.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute rounded-full pointer-events-none"
+          className="pointer-events-none absolute rounded-full"
           style={{
             left: `${particle.x}%`,
             top: `${particle.y}%`,
@@ -168,28 +180,28 @@ export default function ConsciousnessParticleSystem({
             height: `${particle.size}px`,
             backgroundColor: particle.color,
             boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`,
-            opacity: 0.6 + particle.consciousness * 0.4
+            opacity: 0.6 + particle.consciousness * 0.4,
           }}
           animate={{
             scale: [1, 1 + consciousnessIntensity * 0.2, 1],
-            opacity: [0.6, 1, 0.6]
+            opacity: [0.6, 1, 0.6],
           }}
           transition={{
             duration: 2,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: 'easeInOut',
           }}
         />
       ))}
 
       {/* Neural Connections */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none">
-        {particles.map((particle, i) => 
+      <svg className="pointer-events-none absolute inset-0 h-full w-full">
+        {particles.map((particle, i) =>
           particles.slice(i + 1).map((otherParticle, j) => {
             const dx = particle.x - otherParticle.x
             const dy = particle.y - otherParticle.y
             const distance = Math.sqrt(dx * dx + dy * dy)
-            
+
             if (distance < 15) {
               return (
                 <motion.line
@@ -215,7 +227,7 @@ export default function ConsciousnessParticleSystem({
       {/* Consciousness Metrics */}
       {showMetrics && (
         <motion.div
-          className="absolute top-4 left-4 bg-black/30 backdrop-blur-md rounded-lg p-4 text-white"
+          className="absolute top-4 left-4 rounded-lg bg-black/30 p-4 text-white backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
@@ -245,13 +257,13 @@ export default function ConsciousnessParticleSystem({
       <AnimatePresence>
         {consciousnessIntensity > 2 && (
           <motion.div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
           >
             <div className="text-center text-white">
-              <h2 className="text-4xl font-bold mb-2">Consciousness Awakening</h2>
+              <h2 className="mb-2 text-4xl font-bold">Consciousness Awakening</h2>
               <p className="text-xl opacity-80">Business Intelligence Multiplication Active</p>
             </div>
           </motion.div>

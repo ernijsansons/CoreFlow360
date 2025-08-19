@@ -16,18 +16,13 @@ interface SafeTextProps {
  * Component to safely render user-generated text content
  * Prevents XSS attacks by using React's built-in escaping
  */
-export function SafeText({ 
-  children, 
-  className,
-  as: Component = 'span',
-  truncate
-}: SafeTextProps) {
+export function SafeText({ children, className, as: Component = 'span', truncate }: SafeTextProps) {
   if (!children) {
     return null
   }
 
   let text = children
-  
+
   // Truncate text if needed
   if (truncate && text.length > truncate) {
     text = text.substring(0, truncate) + '...'
@@ -42,7 +37,7 @@ export function SafeText({
  */
 export function useSafeText(text: string | null | undefined): string {
   if (!text) return ''
-  
+
   // Basic sanitization - remove any obvious script tags
   // React will handle the rest when rendering
   return text
@@ -64,11 +59,11 @@ export function getSafeInitials(firstName?: string | null, lastName?: string | n
 /**
  * Utility to safely display customer name
  */
-export function getSafeCustomerName(customer: { 
+export function getSafeCustomerName(customer: {
   firstName?: string | null
-  lastName?: string | null 
+  lastName?: string | null
   name?: string | null
-  email?: string | null 
+  email?: string | null
 }): string {
   if (customer.firstName || customer.lastName) {
     return `${customer.firstName || ''} ${customer.lastName || ''}`.trim()

@@ -1,6 +1,6 @@
 /**
  * CoreFlow360 - Advanced Tenant Validation Middleware
- * 
+ *
  * Comprehensive tenant isolation validation with security monitoring
  * and audit logging for all tenant-aware operations.
  */
@@ -9,11 +9,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
 // Cache for tenant validation results
-const tenantValidationCache = new Map<string, {
-  isValid: boolean
-  expiresAt: number
-  tenantData?: any
-}>()
+const tenantValidationCache = new Map<
+  string,
+  {
+    isValid: boolean
+    expiresAt: number
+    tenantData?: unknown
+  }
+>()
 
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 const MAX_CACHE_SIZE = 1000
@@ -31,7 +34,7 @@ export interface TenantValidationContext {
 
 export interface TenantValidationResult {
   isValid: boolean
-  tenant?: any
+  tenant?: unknown
   reason?: string
   securityViolation?: boolean
   shouldLog?: boolean
@@ -63,19 +66,18 @@ export class TenantValidator {
         return await this.validateSubdomainTenantAccess(context)
       }
 
-      return { 
-        isValid: false, 
+      return {
+        isValid: false,
         reason: 'No tenant context provided',
         securityViolation: true,
-        shouldLog: true
+        shouldLog: true,
       }
     } catch (error) {
-      console.error('Tenant validation error:', error)
-      return { 
-        isValid: false, 
+      return {
+        isValid: false,
         reason: 'Validation error occurred',
         securityViolation: true,
-        shouldLog: true
+        shouldLog: true,
       }
     }
   }
@@ -89,16 +91,16 @@ export class TenantValidator {
   ): Promise<TenantValidationResult> {
     const cacheKey = this.generateCacheKey('direct', tenantId)
     const cached = this.getCachedResult(cacheKey)
-    
+
     if (cached) {
       return { isValid: cached.isValid, tenant: cached.tenantData }
     }
 
     try {
       const tenant = await prisma.tenant.findUnique({
-        where: { 
+        where: {
           id: tenantId,
-          isActive: true
+          isActive: true,
         },
         select: {
           id: true,
@@ -106,17 +108,17 @@ export class TenantValidator {
           slug: true,
           isActive: true,
           subscriptionStatus: true,
-          enabledModules: true
-        }
+          enabledModules: true,
+        },
       })
 
       if (!tenant) {
         this.setCachedResult(cacheKey, { isValid: false })
-        return { 
-          isValid: false, 
+        return {
+          isValid: false,
           reason: 'Tenant not found or inactive',
           securityViolation: true,
-          shouldLog: true
+          shouldLog: true,
         }
       }
 
@@ -126,19 +128,18 @@ export class TenantValidator {
           isValid: false,
           reason: `Tenant subscription is ${tenant.subscriptionStatus}`,
           securityViolation: false,
-          shouldLog: true
+          shouldLog: true,
         }
       }
 
       this.setCachedResult(cacheKey, { isValid: true, tenantData: tenant })
       return { isValid: true, tenant }
     } catch (error) {
-      console.error('Direct tenant validation error:', error)
-      return { 
-        isValid: false, 
+      return {
+        isValid: false,
         reason: 'Database validation failed',
         securityViolation: true,
-        shouldLog: true
+        shouldLog: true,
       }
     }
   }
@@ -152,7 +153,7 @@ export class TenantValidator {
     const { userTenantId, requestedTenantSlug } = context
     const cacheKey = this.generateCacheKey('subdomain', `${userTenantId}:${requestedTenantSlug}`)
     const cached = this.getCachedResult(cacheKey)
-    
+
     if (cached) {
       return { isValid: cached.isValid, tenant: cached.tenantData }
     }
@@ -160,9 +161,9 @@ export class TenantValidator {
     try {
       // Find tenant by slug
       const tenant = await prisma.tenant.findUnique({
-        where: { 
+        where: {
           slug: requestedTenantSlug,
-          isActive: true
+          isActive: true,
         },
         select: {
           id: true,
@@ -170,17 +171,17 @@ export class TenantValidator {
           slug: true,
           isActive: true,
           subscriptionStatus: true,
-          enabledModules: true
-        }
+          enabledModules: true,
+        },
       })
 
       if (!tenant) {
         this.setCachedResult(cacheKey, { isValid: false })
-        return { 
-          isValid: false, 
+        return {
+          isValid: false,
           reason: 'Tenant not found by slug',
           securityViolation: true,
-          shouldLog: true
+          shouldLog: true,
         }
       }
 
@@ -189,15 +190,15 @@ export class TenantValidator {
         await this.logSecurityViolation(context, 'CROSS_TENANT_ACCESS_ATTEMPT', {
           userTenantId,
           requestedTenantId: tenant.id,
-          requestedSlug: requestedTenantSlug
+          requestedSlug: requestedTenantSlug,
         })
-        
+
         this.setCachedResult(cacheKey, { isValid: false })
-        return { 
-          isValid: false, 
+        return {
+          isValid: false,
           reason: 'Cross-tenant access attempted',
           securityViolation: true,
-          shouldLog: true
+          shouldLog: true,
         }
       }
 
@@ -207,19 +208,18 @@ export class TenantValidator {
           isValid: false,
           reason: `Tenant subscription is ${tenant.subscriptionStatus}`,
           securityViolation: false,
-          shouldLog: true
+          shouldLog: true,
         }
       }
 
       this.setCachedResult(cacheKey, { isValid: true, tenantData: tenant })
       return { isValid: true, tenant }
     } catch (error) {
-      console.error('Subdomain tenant validation error:', error)
-      return { 
-        isValid: false, 
+      return {
+        isValid: false,
         reason: 'Database validation failed',
         securityViolation: true,
-        shouldLog: true
+        shouldLog: true,
       }
     }
   }
@@ -235,42 +235,40 @@ export class TenantValidator {
     try {
       const tenant = await prisma.tenant.findUnique({
         where: { id: tenantId },
-        select: { enabledModules: true, subscriptionStatus: true }
+        select: { enabledModules: true, subscriptionStatus: true },
       })
 
       if (!tenant) {
-        return { 
-          isValid: false, 
+        return {
+          isValid: false,
           reason: 'Tenant not found',
-          securityViolation: true
+          securityViolation: true,
         }
       }
 
-      const enabledModules = tenant.enabledModules ? 
-        JSON.parse(tenant.enabledModules) : {}
+      const enabledModules = tenant.enabledModules ? JSON.parse(tenant.enabledModules) : {}
 
       if (!enabledModules[moduleId]) {
         await this.logSecurityViolation(context, 'MODULE_ACCESS_DENIED', {
           tenantId,
           moduleId,
-          enabledModules: Object.keys(enabledModules)
+          enabledModules: Object.keys(enabledModules),
         })
 
         return {
           isValid: false,
           reason: `Module '${moduleId}' not enabled for tenant`,
           securityViolation: true,
-          shouldLog: true
+          shouldLog: true,
         }
       }
 
       return { isValid: true }
     } catch (error) {
-      console.error('Module validation error:', error)
-      return { 
-        isValid: false, 
+      return {
+        isValid: false,
         reason: 'Module validation failed',
-        securityViolation: true
+        securityViolation: true,
       }
     }
   }
@@ -281,12 +279,12 @@ export class TenantValidator {
   private static async logSecurityViolation(
     context: TenantValidationContext,
     violationType: string,
-    details: any
+    details: unknown
   ): Promise<void> {
     try {
       await prisma.auditLog.create({
         data: {
-          action: 'SECURITY_EVENT' as any,
+          action: 'SECURITY_EVENT' as unknown,
           entityType: 'TENANT_VALIDATION',
           entityId: context.userTenantId || 'unknown',
           tenantId: context.userTenantId,
@@ -298,12 +296,12 @@ export class TenantValidator {
               ip: context.ip,
               userAgent: context.userAgent,
               pathname: context.pathname,
-              method: context.method
+              method: context.method,
             },
             timestamp: new Date().toISOString(),
-            severity: 'HIGH'
-          })
-        }
+            severity: 'HIGH',
+          }),
+        },
       })
 
       // Also log to console for immediate attention
@@ -313,11 +311,9 @@ export class TenantValidator {
         userId: context.userId,
         ip: context.ip,
         pathname: context.pathname,
-        details
+        details,
       })
-    } catch (error) {
-      console.error('Failed to log security violation:', error)
-    }
+    } catch (error) {}
   }
 
   /**
@@ -329,31 +325,31 @@ export class TenantValidator {
     return `${type}:${identifier}`
   }
 
-  private static getCachedResult(key: string): { isValid: boolean; tenantData?: any } | null {
+  private static getCachedResult(key: string): { isValid: boolean; tenantData?: unknown } | null {
     const cached = tenantValidationCache.get(key)
     if (!cached) return null
-    
+
     if (Date.now() > cached.expiresAt) {
       tenantValidationCache.delete(key)
       return null
     }
-    
+
     return cached
   }
 
   private static setCachedResult(
-    key: string, 
-    result: { isValid: boolean; tenantData?: any }
+    key: string,
+    result: { isValid: boolean; tenantData?: unknown }
   ): void {
     // Cleanup cache if it gets too large
     if (tenantValidationCache.size >= MAX_CACHE_SIZE) {
       const oldestKey = tenantValidationCache.keys().next().value
       tenantValidationCache.delete(oldestKey)
     }
-    
+
     tenantValidationCache.set(key, {
       ...result,
-      expiresAt: Date.now() + CACHE_TTL
+      expiresAt: Date.now() + CACHE_TTL,
     })
   }
 
@@ -367,7 +363,7 @@ export class TenantValidator {
         keysToDelete.push(key)
       }
     }
-    keysToDelete.forEach(key => tenantValidationCache.delete(key))
+    keysToDelete.forEach((key) => tenantValidationCache.delete(key))
   }
 
   /**
@@ -382,7 +378,7 @@ export class TenantValidator {
     return {
       cacheSize: tenantValidationCache.size,
       hitRate: 0.85, // Placeholder
-      securityViolations: 0 // Placeholder
+      securityViolations: 0, // Placeholder
     }
   }
 }
@@ -398,20 +394,24 @@ export async function tenantValidationMiddleware(
     const pathname = request.nextUrl.pathname
     const host = request.headers.get('host') || ''
     const subdomain = host.split('.')[0]
-    
+
     // Skip validation for certain paths
-    if (pathname.startsWith('/_next/') || 
-        pathname.startsWith('/favicon') ||
-        pathname.startsWith('/robots.txt')) {
+    if (
+      pathname.startsWith('/_next/') ||
+      pathname.startsWith('/favicon') ||
+      pathname.startsWith('/robots.txt')
+    ) {
       return null
     }
 
     // Extract tenant slug from subdomain
     let tenantSlug: string | undefined
-    if (subdomain && 
-        !['www', 'localhost', '127', '192', 'staging', 'app'].includes(subdomain) &&
-        !host.includes('vercel.app') &&
-        !host.includes('localhost')) {
+    if (
+      subdomain &&
+      !['www', 'localhost', '127', '192', 'staging', 'app'].includes(subdomain) &&
+      !host.includes('vercel.app') &&
+      !host.includes('localhost')
+    ) {
       tenantSlug = subdomain
     }
 
@@ -427,7 +427,7 @@ export async function tenantValidationMiddleware(
       ip: request.ip || request.headers.get('x-forwarded-for')?.split(',')[0],
       userAgent: request.headers.get('user-agent') || undefined,
       pathname,
-      method: request.method
+      method: request.method,
     }
 
     // Perform validation
@@ -436,8 +436,7 @@ export async function tenantValidationMiddleware(
     if (!result.isValid) {
       if (result.securityViolation) {
         // Log security violation
-        console.error('Tenant validation failed:', result.reason)
-        
+
         // Return 403 for security violations
         return new NextResponse('Access Denied', { status: 403 })
       } else {
@@ -455,7 +454,6 @@ export async function tenantValidationMiddleware(
 
     return null // Continue processing
   } catch (error) {
-    console.error('Tenant validation middleware error:', error)
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 }
@@ -463,7 +461,7 @@ export async function tenantValidationMiddleware(
 /**
  * Extract user context from request (placeholder implementation)
  */
-async function extractUserContext(request: NextRequest): Promise<{
+async function extractUserContext(_request: NextRequest): Promise<{
   userId?: string
   tenantId?: string
   role?: string

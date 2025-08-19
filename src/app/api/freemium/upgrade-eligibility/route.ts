@@ -6,8 +6,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
-
-
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
@@ -15,13 +13,8 @@ export async function GET(request: NextRequest) {
     const context = searchParams.get('context') // 'feature_limit', 'page_load', 'action_blocked'
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'userId parameter is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'userId parameter is required' }, { status: 400 })
     }
-
-    console.log(`🎯 Checking upgrade eligibility for user ${userId}, context: ${context}`)
 
     // Get freemium user data with recent conversion events
     const freemiumUser = await prisma.freemiumUser.findUnique({
@@ -31,17 +24,17 @@ export async function GET(request: NextRequest) {
           select: {
             name: true,
             email: true,
-            createdAt: true
-          }
-        }
-      }
+            createdAt: true,
+          },
+        },
+      },
     })
 
     if (!freemiumUser) {
       return NextResponse.json({
         success: true,
         eligible: false,
-        reason: 'User is not on freemium plan'
+        reason: 'User is not on freemium plan',
       })
     }
 
@@ -50,10 +43,10 @@ export async function GET(request: NextRequest) {
       where: {
         userId,
         createdAt: {
-          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Last 7 days
-        }
+          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     })
 
     // Calculate eligibility based on multiple factors
@@ -69,8 +62,8 @@ export async function GET(request: NextRequest) {
           daysActive: freemiumUser.daysActive,
           dailyUsageCount: freemiumUser.dailyUsageCount,
           upgradePromptedCount: freemiumUser.upgradePromptedCount,
-          upgradeDeclinedCount: freemiumUser.upgradeDeclinedCount
-        }
+          upgradeDeclinedCount: freemiumUser.upgradeDeclinedCount,
+        },
       })
     }
 
@@ -88,12 +81,12 @@ export async function GET(request: NextRequest) {
           context,
           eligible: true,
           triggerReason: eligibilityCheck.reason,
-          offerType: upgradeOffer.type
+          offerType: upgradeOffer.type,
         }),
         userPlan: 'free',
         currentModule: freemiumUser.selectedAgent,
-        actionTaken: 'evaluated'
-      }
+        actionTaken: 'evaluated',
+      },
     })
 
     return NextResponse.json({
@@ -110,21 +103,16 @@ export async function GET(request: NextRequest) {
         upgradePromptedCount: freemiumUser.upgradePromptedCount,
         upgradeDeclinedCount: freemiumUser.upgradeDeclinedCount,
         lastUpgradePrompt: freemiumUser.lastUpgradePrompt,
-        memberSince: freemiumUser.createdAt
+        memberSince: freemiumUser.createdAt,
       },
       timing: {
         optimalTiming: getOptimalPromptTiming(),
         delayRecommended: false,
-        followUpScheduled: false
-      }
+        followUpScheduled: false,
+      },
     })
-
   } catch (error) {
-    console.error('❌ Failed to check upgrade eligibility:', error)
-    return NextResponse.json(
-      { error: 'Failed to check upgrade eligibility' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to check upgrade eligibility' }, { status: 500 })
   }
 }
 
@@ -134,28 +122,20 @@ export async function POST(request: NextRequest) {
     const { userId, action, offerType, context } = body
 
     if (!userId || !action) {
-      return NextResponse.json(
-        { error: 'userId and action are required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'userId and action are required' }, { status: 400 })
     }
 
-    console.log(`💰 Recording upgrade action for user ${userId}: ${action}`)
-
     const freemiumUser = await prisma.freemiumUser.findUnique({
-      where: { userId }
+      where: { userId },
     })
 
     if (!freemiumUser) {
-      return NextResponse.json(
-        { error: 'User is not on freemium plan' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'User is not on freemium plan' }, { status: 404 })
     }
 
     // Update freemium user based on action
-    let updateData: any = {}
-    
+    const updateData: unknown = {}
+
     if (action === 'declined' || action === 'dismissed') {
       updateData.upgradeDeclinedCount = freemiumUser.upgradeDeclinedCount + 1
     }
@@ -168,7 +148,7 @@ export async function POST(request: NextRequest) {
     if (Object.keys(updateData).length > 0) {
       await prisma.freemiumUser.update({
         where: { userId },
-        data: updateData
+        data: updateData,
       })
     }
 
@@ -183,50 +163,55 @@ export async function POST(request: NextRequest) {
           offerType,
           context,
           previousPrompts: freemiumUser.upgradePromptedCount,
-          previousDeclines: freemiumUser.upgradeDeclinedCount
+          previousDeclines: freemiumUser.upgradeDeclinedCount,
         }),
         userPlan: 'free',
         currentModule: freemiumUser.selectedAgent,
         actionTaken: action,
         actionTakenAt: new Date(),
-        conversionValue: action === 'converted' ? 49 : undefined // Starter plan price
-      }
+        conversionValue: action === 'converted' ? 49 : undefined, // Starter plan price
+      },
     })
 
     return NextResponse.json({
       success: true,
       message: `Upgrade action '${action}' recorded successfully`,
-      nextEligibleAt: action === 'declined' 
-        ? new Date(Date.now() + 48 * 60 * 60 * 1000) // Wait 48 hours after decline
-        : action === 'delayed'
-        ? new Date(Date.now() + 24 * 60 * 60 * 1000) // Wait 24 hours after delay
-        : null
+      nextEligibleAt:
+        action === 'declined'
+          ? new Date(Date.now() + 48 * 60 * 60 * 1000) // Wait 48 hours after decline
+          : action === 'delayed'
+            ? new Date(Date.now() + 24 * 60 * 60 * 1000) // Wait 24 hours after delay
+            : null,
     })
-
   } catch (error) {
-    console.error('❌ Failed to record upgrade action:', error)
-    return NextResponse.json(
-      { error: 'Failed to record upgrade action' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to record upgrade action' }, { status: 500 })
   }
 }
 
 // Helper functions
-function calculateUpgradeEligibility(freemiumUser: any, recentEvents: any[], context?: string) {
+function calculateUpgradeEligibility(
+  freemiumUser: unknown,
+  recentEvents: unknown[],
+  context?: string
+) {
   // Check cooldown periods
   if (freemiumUser.lastUpgradePrompt) {
-    const hoursSinceLastPrompt = (new Date().getTime() - new Date(freemiumUser.lastUpgradePrompt).getTime()) / (1000 * 60 * 60)
-    
+    const hoursSinceLastPrompt =
+      (new Date().getTime() - new Date(freemiumUser.lastUpgradePrompt).getTime()) / (1000 * 60 * 60)
+
     // Different cooldown periods based on last action
-    const lastAction = recentEvents.find(e => e.eventType === 'upgrade_prompt_response')?.actionTaken
+    const lastAction = recentEvents.find(
+      (e) => e.eventType === 'upgrade_prompt_response'
+    )?.actionTaken
     const cooldownHours = getCooldownHours(lastAction, freemiumUser.upgradeDeclinedCount)
-    
+
     if (hoursSinceLastPrompt < cooldownHours) {
       return {
         eligible: false,
         reason: 'Cooldown period active',
-        nextEligibleAt: new Date(new Date(freemiumUser.lastUpgradePrompt).getTime() + cooldownHours * 60 * 60 * 1000)
+        nextEligibleAt: new Date(
+          new Date(freemiumUser.lastUpgradePrompt).getTime() + cooldownHours * 60 * 60 * 1000
+        ),
       }
     }
   }
@@ -236,7 +221,7 @@ function calculateUpgradeEligibility(freemiumUser: any, recentEvents: any[], con
     return {
       eligible: false,
       reason: 'Maximum decline threshold reached',
-      nextEligibleAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Wait 7 days
+      nextEligibleAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Wait 7 days
     }
   }
 
@@ -247,12 +232,12 @@ function calculateUpgradeEligibility(freemiumUser: any, recentEvents: any[], con
   }
 
   // Calculate confidence score (0-100)
-  let confidence = calculateConfidenceScore(freemiumUser, recentEvents)
+  const confidence = calculateConfidenceScore(freemiumUser, recentEvents)
 
   return {
     eligible: true,
     reason: contextChecks.reason,
-    confidence
+    confidence,
   }
 }
 
@@ -269,7 +254,7 @@ function getCooldownHours(lastAction?: string, declineCount: number = 0): number
   }
 }
 
-function getContextEligibility(freemiumUser: any, context?: string) {
+function getContextEligibility(freemiumUser: unknown, context?: string) {
   const usagePercentage = (freemiumUser.dailyUsageCount / freemiumUser.dailyLimit) * 100
 
   switch (context) {
@@ -278,25 +263,25 @@ function getContextEligibility(freemiumUser: any, context?: string) {
         return { eligible: true, reason: 'Feature usage approaching limit' }
       }
       break
-      
+
     case 'action_blocked':
       if (freemiumUser.dailyUsageCount >= freemiumUser.dailyLimit) {
         return { eligible: true, reason: 'Daily limit reached' }
       }
       break
-      
+
     case 'success_story':
       if (freemiumUser.daysActive >= 7) {
         return { eligible: true, reason: 'User showing consistent engagement' }
       }
       break
-      
+
     case 'value_demonstration':
       if (freemiumUser.weeklyUsageCount >= 30) {
         return { eligible: true, reason: 'High value user ready for upgrade' }
       }
       break
-      
+
     default:
       // General eligibility checks
       if (usagePercentage >= 80) {
@@ -310,7 +295,7 @@ function getContextEligibility(freemiumUser: any, context?: string) {
   return { eligible: false, reason: 'Context criteria not met' }
 }
 
-function calculateConfidenceScore(freemiumUser: any, recentEvents: any[]): number {
+function calculateConfidenceScore(freemiumUser: unknown, recentEvents: unknown[]): number {
   let score = 50 // Base score
 
   // Usage-based factors
@@ -327,20 +312,20 @@ function calculateConfidenceScore(freemiumUser: any, recentEvents: any[]): numbe
   score -= freemiumUser.upgradeDeclinedCount * 5
 
   // Recent activity boost
-  const recentUsage = recentEvents.filter(e => e.eventType === 'feature_usage').length
+  const recentUsage = recentEvents.filter((e) => e.eventType === 'feature_usage').length
   score += Math.min(10, recentUsage)
 
   return Math.max(0, Math.min(100, Math.round(score)))
 }
 
-function generateUpgradeOffer(freemiumUser: any, recentEvents: any[], context?: string) {
+function generateUpgradeOffer(_freemiumUser: unknown, _recentEvents: unknown[], context?: string) {
   const usagePercentage = (freemiumUser.dailyUsageCount / freemiumUser.dailyLimit) * 100
-  
+
   // Determine offer type based on user behavior
   let offerType = 'standard'
   let discount = 0
   let urgency = 'medium'
-  
+
   if (freemiumUser.daysActive >= 14) {
     offerType = 'loyalty'
     discount = 25 // 25% off first month
@@ -368,17 +353,17 @@ function generateUpgradeOffer(freemiumUser: any, recentEvents: any[], context?: 
     pricing: {
       original: 49,
       discounted: discount > 0 ? Math.round(49 * (1 - discount / 100)) : 49,
-      savings: discount > 0 ? Math.round(49 * (discount / 100)) : 0
-    }
+      savings: discount > 0 ? Math.round(49 * (discount / 100)) : 0,
+    },
   }
 }
 
-function getOfferTitle(offerType: string, freemiumUser: any): string {
+function getOfferTitle(_offerType: string, _freemiumUser: unknown): string {
   switch (offerType) {
     case 'loyalty':
       return 'Thank You Offer: 25% Off Your First Month!'
     case 'usage_driven':
-      return 'You\'re Crushing It! Upgrade to Keep Going'
+      return "You're Crushing It! Upgrade to Keep Going"
     case 'win_back':
       return 'We Miss You - Come Back for 15% Off'
     default:
@@ -386,14 +371,14 @@ function getOfferTitle(offerType: string, freemiumUser: any): string {
   }
 }
 
-function getOfferDescription(offerType: string, freemiumUser: any): string {
+function getOfferDescription(offerType: string, freemiumUser: unknown): string {
   switch (offerType) {
     case 'loyalty':
       return `After ${freemiumUser.daysActive} days of great results, you've earned this exclusive discount.`
     case 'usage_driven':
-      return 'Your daily usage shows you\'re ready for unlimited access. Don\'t let limits slow you down!'
+      return "Your daily usage shows you're ready for unlimited access. Don't let limits slow you down!"
     case 'win_back':
-      return 'We\'ve improved our platform based on your feedback. Give us another chance!'
+      return "We've improved our platform based on your feedback. Give us another chance!"
     default:
       return 'Join thousands of businesses growing 3x faster with our full AI workforce.'
   }
@@ -425,22 +410,22 @@ function getSocialProof(offerType: string): string {
   }
 }
 
-function getValueProps(freemiumUser: any): string[] {
+function getValueProps(freemiumUser: unknown): string[] {
   const baseProps = [
     'Get 3 AI employees instead of 1',
     'Unlimited daily actions',
     'Cross-module intelligence',
-    'Priority support'
+    'Priority support',
   ]
 
   // Add personalized value prop based on selected agent
   const agentProps: Record<string, string> = {
-    'sales': 'Advanced pipeline forecasting',
-    'finance': 'Automated financial reporting',
-    'crm': 'Customer lifecycle automation',
-    'operations': 'Workflow optimization tools',
-    'analytics': 'Predictive business insights',
-    'hr': 'Talent acquisition automation'
+    sales: 'Advanced pipeline forecasting',
+    finance: 'Automated financial reporting',
+    crm: 'Customer lifecycle automation',
+    operations: 'Workflow optimization tools',
+    analytics: 'Predictive business insights',
+    hr: 'Talent acquisition automation',
   }
 
   if (agentProps[freemiumUser.selectedAgent]) {
@@ -452,10 +437,10 @@ function getValueProps(freemiumUser: any): string[] {
 
 function getOptimalPromptTiming(): string {
   const hour = new Date().getHours()
-  
+
   if (hour >= 9 && hour <= 11) return 'optimal' // Morning productivity hours
-  if (hour >= 14 && hour <= 16) return 'good'   // Afternoon decision-making hours
-  if (hour >= 19 && hour <= 21) return 'fair'   // Evening planning hours
-  
+  if (hour >= 14 && hour <= 16) return 'good' // Afternoon decision-making hours
+  if (hour >= 19 && hour <= 21) return 'fair' // Evening planning hours
+
   return 'suboptimal'
 }

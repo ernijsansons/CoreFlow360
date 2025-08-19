@@ -51,11 +51,16 @@ export class AudioEncryptionService {
 
   constructor() {
     // Check if we're in build time
-    const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
-    
+    const isBuildTime =
+      process.env.VERCEL_ENV ||
+      process.env.CI ||
+      process.env.NEXT_PHASE === 'phase-production-build'
+
     // Master key from environment - MUST be 32+ characters
-    this.masterKey = process.env.AUDIO_ENCRYPTION_MASTER_KEY || (isBuildTime ? 'build-time-placeholder-key-32-characters-long' : '')
-    
+    this.masterKey =
+      process.env.AUDIO_ENCRYPTION_MASTER_KEY ||
+      (isBuildTime ? 'build-time-placeholder-key-32-characters-long' : '')
+
     if (!isBuildTime && (!this.masterKey || this.masterKey.length < 32)) {
       throw new Error('AUDIO_ENCRYPTION_MASTER_KEY must be set and at least 32 characters')
     }
@@ -64,7 +69,10 @@ export class AudioEncryptionService {
   /**
    * Encrypt audio buffer with AES-256-GCM
    */
-  async encryptAudio(audioBuffer: Buffer, metadata?: Record<string, any>): Promise<EncryptedData> {
+  async encryptAudio(
+    audioBuffer: Buffer,
+    metadata?: Record<string, unknown>
+  ): Promise<EncryptedData> {
     try {
       // Generate random salt and IV
       const salt = crypto.randomBytes(SALT_LENGTH)
@@ -82,10 +90,7 @@ export class AudioEncryptionService {
       }
 
       // Encrypt the audio data
-      const encrypted = Buffer.concat([
-        cipher.update(audioBuffer),
-        cipher.final()
-      ])
+      const encrypted = Buffer.concat([cipher.update(audioBuffer), cipher.final()])
 
       // Get the authentication tag
       const tag = cipher.getAuthTag()
@@ -102,17 +107,15 @@ export class AudioEncryptionService {
         keyDerivation: {
           method: 'pbkdf2',
           iterations: PBKDF2_ITERATIONS,
-          length: KEY_LENGTH
-        }
+          length: KEY_LENGTH,
+        },
       }
 
       return {
         data: encrypted,
-        metadata: encryptionMetadata
+        metadata: encryptionMetadata,
       }
-
     } catch (error) {
-      console.error('Encryption error:', error)
       throw new Error('Failed to encrypt audio data')
     }
   }
@@ -123,7 +126,7 @@ export class AudioEncryptionService {
   async decryptAudio(
     encryptedData: Buffer,
     metadata: EncryptionMetadata,
-    additionalData?: Record<string, any>
+    additionalData?: Record<string, unknown>
   ): Promise<DecryptedData> {
     try {
       // Validate metadata
@@ -149,25 +152,19 @@ export class AudioEncryptionService {
       }
 
       // Decrypt the data
-      const decrypted = Buffer.concat([
-        decipher.update(encryptedData),
-        decipher.final()
-      ])
+      const decrypted = Buffer.concat([decipher.update(encryptedData), decipher.final()])
 
       return {
         data: decrypted,
         verified: true,
-        metadata
+        metadata,
       }
-
     } catch (error) {
-      console.error('Decryption error:', error)
-      
       // Check if authentication failed
       if (error.message.includes('Unsupported state or unable to authenticate data')) {
         throw new Error('Audio authentication failed - data may be tampered')
       }
-      
+
       throw new Error('Failed to decrypt audio data')
     }
   }
@@ -175,7 +172,10 @@ export class AudioEncryptionService {
   /**
    * Encrypt transcript text
    */
-  async encryptTranscript(transcript: string, metadata?: Record<string, any>): Promise<EncryptedData> {
+  async encryptTranscript(
+    transcript: string,
+    metadata?: Record<string, unknown>
+  ): Promise<EncryptedData> {
     const transcriptBuffer = Buffer.from(transcript, 'utf8')
     return this.encryptAudio(transcriptBuffer, metadata)
   }
@@ -186,7 +186,7 @@ export class AudioEncryptionService {
   async decryptTranscript(
     encryptedData: Buffer,
     metadata: EncryptionMetadata,
-    additionalData?: Record<string, any>
+    additionalData?: Record<string, unknown>
   ): Promise<string> {
     const decrypted = await this.decryptAudio(encryptedData, metadata, additionalData)
     return decrypted.data.toString('utf8')
@@ -195,7 +195,7 @@ export class AudioEncryptionService {
   /**
    * Create encryption stream for real-time audio
    */
-  createEncryptionStream(metadata?: Record<string, any>): {
+  createEncryptionStream(metadata?: Record<string, unknown>): {
     stream: Transform
     getMetadata: () => EncryptionMetadata
   } {
@@ -211,7 +211,7 @@ export class AudioEncryptionService {
             // Initialize cipher on first chunk
             const key = await this.deriveKey(this.masterKey, salt)
             cipher = crypto.createCipheriv(ALGORITHM, key, iv)
-            
+
             if (metadata) {
               cipher.setAAD(Buffer.from(JSON.stringify(metadata), 'utf8'))
             }
@@ -219,7 +219,6 @@ export class AudioEncryptionService {
 
           const encrypted = cipher.update(chunk)
           callback(null, encrypted)
-
         } catch (error) {
           callback(error)
         }
@@ -237,7 +236,7 @@ export class AudioEncryptionService {
         } catch (error) {
           callback(error)
         }
-      }
+      },
     })
 
     const getMetadata = (): EncryptionMetadata => ({
@@ -251,8 +250,8 @@ export class AudioEncryptionService {
       keyDerivation: {
         method: 'pbkdf2',
         iterations: PBKDF2_ITERATIONS,
-        length: KEY_LENGTH
-      }
+        length: KEY_LENGTH,
+      },
     })
 
     return { stream: encryptStream, getMetadata }
@@ -263,7 +262,7 @@ export class AudioEncryptionService {
    */
   createDecryptionStream(
     metadata: EncryptionMetadata,
-    additionalData?: Record<string, any>
+    additionalData?: Record<string, unknown>
   ): Transform {
     const salt = Buffer.from(metadata.salt, 'hex')
     const iv = Buffer.from(metadata.iv, 'hex')
@@ -278,7 +277,7 @@ export class AudioEncryptionService {
             const key = await this.deriveKey(this.masterKey, salt)
             decipher = crypto.createDecipheriv(ALGORITHM, key, iv)
             decipher.setAuthTag(tag)
-            
+
             if (additionalData) {
               decipher.setAAD(Buffer.from(JSON.stringify(additionalData), 'utf8'))
             }
@@ -286,7 +285,6 @@ export class AudioEncryptionService {
 
           const decrypted = decipher.update(chunk)
           callback(null, decrypted)
-
         } catch (error) {
           callback(error)
         }
@@ -303,7 +301,7 @@ export class AudioEncryptionService {
         } catch (error) {
           callback(error)
         }
-      }
+      },
     })
   }
 
@@ -314,13 +312,13 @@ export class AudioEncryptionService {
     try {
       // Read file
       const data = await fs.readFile(filePath)
-      
+
       // Get file metadata
       const stats = await fs.stat(filePath)
       const fileMetadata = {
         originalName: path.basename(filePath),
         size: stats.size,
-        modified: stats.mtime
+        modified: stats.mtime,
       }
 
       // Encrypt data
@@ -341,9 +339,7 @@ export class AudioEncryptionService {
       await fs.rename(encryptedPath, filePath)
 
       return encrypted.metadata
-
     } catch (error) {
-      console.error('File encryption error:', error)
       throw new Error(`Failed to encrypt file: ${filePath}`)
     }
   }
@@ -373,9 +369,7 @@ export class AudioEncryptionService {
 
       // Remove metadata file
       await fs.unlink(metaPath)
-
     } catch (error) {
-      console.error('File decryption error:', error)
       throw new Error(`Failed to decrypt file: ${filePath}`)
     }
   }
@@ -403,9 +397,7 @@ export class AudioEncryptionService {
 
       // Finally delete the file
       await fs.unlink(filePath)
-
     } catch (error) {
-      console.error('Secure delete error:', error)
       // Fall back to regular delete
       await fs.unlink(filePath)
     }
@@ -416,10 +408,8 @@ export class AudioEncryptionService {
    */
   generateTenantKey(tenantId: string): string {
     // Create deterministic key for tenant
-    const hash = crypto.createHmac('sha256', this.masterKey)
-      .update(tenantId)
-      .digest('hex')
-    
+    const hash = crypto.createHmac('sha256', this.masterKey).update(tenantId).digest('hex')
+
     return hash.substring(0, 32) // Use first 32 chars as key
   }
 

@@ -33,9 +33,9 @@ export interface LoadTestScenario {
 
 export interface LoadTestThresholds {
   http_req_duration?: string // e.g., 'p(95)<500'
-  http_req_failed?: string   // e.g., 'rate<0.01'
-  http_reqs?: string         // e.g., 'rate>100'
-  checks?: string            // e.g., 'rate>0.95'
+  http_req_failed?: string // e.g., 'rate<0.01'
+  http_reqs?: string // e.g., 'rate>100'
+  checks?: string // e.g., 'rate>0.95'
 }
 
 export interface LoadTestResult {
@@ -78,11 +78,14 @@ export class LoadTestingFramework {
   /**
    * Run a comprehensive load test suite
    */
-  async runTestSuite(baseUrl: string, environment: 'development' | 'staging' | 'production' = 'development'): Promise<LoadTestResult[]> {
+  async runTestSuite(
+    baseUrl: string,
+    environment: 'development' | 'staging' | 'production' = 'development'
+  ): Promise<LoadTestResult[]> {
     logger.info('Starting comprehensive load test suite', {
       baseUrl,
       environment,
-      suite: 'load_testing'
+      suite: 'load_testing',
     })
 
     const results: LoadTestResult[] = []
@@ -95,9 +98,9 @@ export class LoadTestingFramework {
         logger.info(`Running load test: ${config.name}`)
         const result = await this.runLoadTest(config)
         results.push(result)
-        
+
         // Short delay between tests
-        await new Promise(resolve => setTimeout(resolve, 5000))
+        await new Promise((resolve) => setTimeout(resolve, 5000))
       } catch (error) {
         logger.error(`Load test failed: ${config.name}`, error as Error)
       }
@@ -115,47 +118,55 @@ export class LoadTestingFramework {
   async runLoadTest(config: LoadTestConfig): Promise<LoadTestResult> {
     const testId = this.generateTestId(config.name)
     const startTime = new Date().toISOString()
-    
-    logger.performance('Load test started', {
-      operation: 'load_test',
-      duration_ms: 0
-    }, {
-      component: 'load_testing',
-      metadata: { testId, testName: config.name }
-    })
+
+    logger.performance(
+      'Load test started',
+      {
+        operation: 'load_test',
+        duration_ms: 0,
+      },
+      {
+        component: 'load_testing',
+        metadata: { testId, testName: config.name },
+      }
+    )
 
     try {
       // Generate K6 script
       const scriptPath = this.generateK6Script(config, testId)
-      
+
       // Run K6 test
       const rawOutput = await this.executeK6Test(scriptPath, testId)
-      
+
       // Parse results
       const result = this.parseK6Output(testId, config, startTime, rawOutput)
-      
+
       this.testResults.push(result)
       this.saveTestResult(result)
 
       // Log test completion
-      logger.performance('Load test completed', {
-        operation: 'load_test',
-        duration_ms: result.duration
-      }, {
-        component: 'load_testing',
-        metadata: {
-          testId,
-          passed: result.thresholdsPassed,
-          requestsPerSecond: result.summary.requestsPerSecond,
-          errorRate: result.summary.errorRate
+      logger.performance(
+        'Load test completed',
+        {
+          operation: 'load_test',
+          duration_ms: result.duration,
+        },
+        {
+          component: 'load_testing',
+          metadata: {
+            testId,
+            passed: result.thresholdsPassed,
+            requestsPerSecond: result.summary.requestsPerSecond,
+            errorRate: result.summary.errorRate,
+          },
         }
-      })
+      )
 
       return result
     } catch (error) {
       logger.error('Load test execution failed', error as Error, {
         component: 'load_testing',
-        metadata: { testId, testName: config.name }
+        metadata: { testId, testName: config.name },
       })
       throw error
     }
@@ -170,23 +181,25 @@ export class LoadTestingFramework {
       target: baseUrl,
       duration: '10m',
       virtualUsers: maxVirtualUsers,
-      scenarios: [{
-        name: 'stress_ramp',
-        weight: 100,
-        executor: 'ramping-vus',
-        stages: [
-          { duration: '2m', target: 100 },    // Ramp up to 100 users
-          { duration: '2m', target: 200 },    // Ramp to 200 users
-          { duration: '2m', target: 500 },    // Ramp to 500 users
-          { duration: '2m', target: maxVirtualUsers }, // Peak load
-          { duration: '1m', target: maxVirtualUsers }, // Stay at peak
-          { duration: '1m', target: 0 }       // Ramp down
-        ]
-      }],
+      scenarios: [
+        {
+          name: 'stress_ramp',
+          weight: 100,
+          executor: 'ramping-vus',
+          stages: [
+            { duration: '2m', target: 100 }, // Ramp up to 100 users
+            { duration: '2m', target: 200 }, // Ramp to 200 users
+            { duration: '2m', target: 500 }, // Ramp to 500 users
+            { duration: '2m', target: maxVirtualUsers }, // Peak load
+            { duration: '1m', target: maxVirtualUsers }, // Stay at peak
+            { duration: '1m', target: 0 }, // Ramp down
+          ],
+        },
+      ],
       thresholds: {
         http_req_duration: 'p(95)<2000', // More lenient for stress test
-        http_req_failed: 'rate<0.05',    // Allow 5% failures
-      }
+        http_req_failed: 'rate<0.05', // Allow 5% failures
+      },
     }
 
     return this.runLoadTest(config)
@@ -201,22 +214,24 @@ export class LoadTestingFramework {
       target: baseUrl,
       duration: '5m',
       virtualUsers: 500,
-      scenarios: [{
-        name: 'spike_pattern',
-        weight: 100,
-        executor: 'ramping-vus',
-        stages: [
-          { duration: '30s', target: 50 },   // Baseline
-          { duration: '30s', target: 500 },  // Spike
-          { duration: '1m', target: 500 },   // Maintain spike
-          { duration: '30s', target: 50 },   // Return to baseline
-          { duration: '2m', target: 50 },    // Maintain baseline
-        ]
-      }],
+      scenarios: [
+        {
+          name: 'spike_pattern',
+          weight: 100,
+          executor: 'ramping-vus',
+          stages: [
+            { duration: '30s', target: 50 }, // Baseline
+            { duration: '30s', target: 500 }, // Spike
+            { duration: '1m', target: 500 }, // Maintain spike
+            { duration: '30s', target: 50 }, // Return to baseline
+            { duration: '2m', target: 50 }, // Maintain baseline
+          ],
+        },
+      ],
       thresholds: {
         http_req_duration: 'p(95)<1000',
         http_req_failed: 'rate<0.02',
-      }
+      },
     }
 
     return this.runLoadTest(config)
@@ -236,13 +251,19 @@ const errorRate = new Rate('errors');
 const responseTrend = new Trend('response_time');
 
 export const options = {
-  scenarios: ${JSON.stringify(config.scenarios ? this.convertScenarios(config.scenarios) : {
-    default: {
-      executor: 'constant-vus',
-      vus: config.virtualUsers,
-      duration: config.duration,
-    }
-  }, null, 2)},
+  scenarios: ${JSON.stringify(
+    config.scenarios
+      ? this.convertScenarios(config.scenarios)
+      : {
+          default: {
+            executor: 'constant-vus',
+            vus: config.virtualUsers,
+            duration: config.duration,
+          },
+        },
+    null,
+    2
+  )},
   thresholds: ${JSON.stringify(config.thresholds || {}, null, 2)},
   userAgent: 'CoreFlow360-LoadTester/2.0',
 };
@@ -341,17 +362,17 @@ function textSummary(data, options = {}) {
   private executeK6Test(scriptPath: string, testId: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const outputPath = join(this.resultsDir, `output-${testId}.json`)
-      
+
       const command = `${this.k6Binary} run --out json=${outputPath} ${scriptPath}`
-      
+
       try {
         const output = execSync(command, {
           encoding: 'utf8',
           timeout: 30 * 60 * 1000, // 30 minutes timeout
-          maxBuffer: 50 * 1024 * 1024 // 50MB buffer
+          maxBuffer: 50 * 1024 * 1024, // 50MB buffer
         })
         resolve(output)
-      } catch (error: any) {
+      } catch (error: unknown) {
         // K6 might exit with non-zero code even on successful tests
         if (error.stdout) {
           resolve(error.stdout)
@@ -365,16 +386,21 @@ function textSummary(data, options = {}) {
   /**
    * Parse K6 output
    */
-  private parseK6Output(testId: string, config: LoadTestConfig, startTime: string, rawOutput: string): LoadTestResult {
+  private parseK6Output(
+    testId: string,
+    config: LoadTestConfig,
+    startTime: string,
+    rawOutput: string
+  ): LoadTestResult {
     const endTime = new Date().toISOString()
     const duration = new Date(endTime).getTime() - new Date(startTime).getTime()
 
     // Try to parse JSON output
-    let parsedData: any = null
+    let parsedData: unknown = null
     try {
       const outputPath = join(this.resultsDir, `output-${testId}.json`)
       if (existsSync(outputPath)) {
-        const jsonOutput = require('fs').readFileSync(outputPath, 'utf8')
+        import jsonOutput from 'fs'.readFileSync(outputPath, 'utf8')
         parsedData = JSON.parse(jsonOutput)
       }
     } catch (error) {
@@ -393,14 +419,14 @@ function textSummary(data, options = {}) {
       summary,
       thresholdsPassed: this.checkThresholds(summary, config.thresholds),
       errors: this.extractErrors(rawOutput),
-      rawOutput
+      rawOutput,
     }
   }
 
   /**
    * Extract metrics from K6 output
    */
-  private extractMetricsFromOutput(rawOutput: string, parsedData?: any): LoadTestResult['summary'] {
+  private extractMetricsFromOutput(rawOutput: string, parsedData?: unknown): LoadTestResult['summary'] {
     const defaultSummary = {
       totalRequests: 0,
       failedRequests: 0,
@@ -409,7 +435,7 @@ function textSummary(data, options = {}) {
       p99ResponseTime: 0,
       requestsPerSecond: 0,
       dataTransferred: '0 B',
-      errorRate: 0
+      errorRate: 0,
     }
 
     if (parsedData?.metrics) {
@@ -422,7 +448,7 @@ function textSummary(data, options = {}) {
         p99ResponseTime: metrics.http_req_duration?.p99 || 0,
         requestsPerSecond: metrics.http_reqs?.rate || 0,
         dataTransferred: this.formatBytes(metrics.data_received?.count || 0),
-        errorRate: (metrics.http_req_failed?.rate || 0) * 100
+        errorRate: (metrics.http_req_failed?.rate || 0) * 100,
       }
     }
 
@@ -441,7 +467,7 @@ function textSummary(data, options = {}) {
         p99ResponseTime: 0,
         requestsPerSecond: totalReqs ? totalReqs / 60 : 0, // Rough estimate
         dataTransferred: '0 B',
-        errorRate: totalReqs ? (failedReqs / totalReqs) * 100 : 0
+        errorRate: totalReqs ? (failedReqs / totalReqs) * 100 : 0,
       }
     } catch (error) {
       logger.warn('Could not extract metrics from K6 output')
@@ -463,8 +489,8 @@ function textSummary(data, options = {}) {
         virtualUsers: 5,
         thresholds: {
           http_req_duration: 'p(95)<2000',
-          http_req_failed: 'rate<0.01'
-        }
+          http_req_failed: 'rate<0.01',
+        },
       })
     } else if (environment === 'staging') {
       configs.push(
@@ -475,25 +501,27 @@ function textSummary(data, options = {}) {
           virtualUsers: 50,
           thresholds: {
             http_req_duration: 'p(95)<1000',
-            http_req_failed: 'rate<0.01'
-          }
+            http_req_failed: 'rate<0.01',
+          },
         },
         {
           name: 'staging-burst-test',
           target: baseUrl,
           duration: '3m',
           virtualUsers: 100,
-          scenarios: [{
-            name: 'burst',
-            weight: 100,
-            executor: 'ramping-vus',
-            stages: [
-              { duration: '30s', target: 20 },
-              { duration: '1m', target: 100 },
-              { duration: '30s', target: 100 },
-              { duration: '1m', target: 0 }
-            ]
-          }]
+          scenarios: [
+            {
+              name: 'burst',
+              weight: 100,
+              executor: 'ramping-vus',
+              stages: [
+                { duration: '30s', target: 20 },
+                { duration: '1m', target: 100 },
+                { duration: '30s', target: 100 },
+                { duration: '1m', target: 0 },
+              ],
+            },
+          ],
         }
       )
     } else {
@@ -505,8 +533,8 @@ function textSummary(data, options = {}) {
           virtualUsers: 100,
           thresholds: {
             http_req_duration: 'p(95)<500',
-            http_req_failed: 'rate<0.005'
-          }
+            http_req_failed: 'rate<0.005',
+          },
         },
         {
           name: 'prod-load-test',
@@ -515,8 +543,8 @@ function textSummary(data, options = {}) {
           virtualUsers: 300,
           thresholds: {
             http_req_duration: 'p(95)<1000',
-            http_req_failed: 'rate<0.01'
-          }
+            http_req_failed: 'rate<0.01',
+          },
         }
       )
     }
@@ -547,22 +575,25 @@ function textSummary(data, options = {}) {
     return `${testName}_${Date.now()}_${Math.random().toString(36).substring(7)}`
   }
 
-  private convertScenarios(scenarios: LoadTestScenario[]): Record<string, any> {
-    const k6Scenarios: Record<string, any> = {}
-    
-    scenarios.forEach(scenario => {
+  private convertScenarios(scenarios: LoadTestScenario[]): Record<string, unknown> {
+    const k6Scenarios: Record<string, unknown> = {}
+
+    scenarios.forEach((scenario) => {
       k6Scenarios[scenario.name] = {
         executor: scenario.executor,
         ...(scenario.stages && { stages: scenario.stages }),
         ...(scenario.env && { env: scenario.env }),
-        ...(scenario.tags && { tags: scenario.tags })
+        ...(scenario.tags && { tags: scenario.tags }),
       }
     })
 
     return k6Scenarios
   }
 
-  private checkThresholds(summary: LoadTestResult['summary'], thresholds?: LoadTestThresholds): boolean {
+  private checkThresholds(
+    summary: LoadTestResult['summary'],
+    thresholds?: LoadTestThresholds
+  ): boolean {
     if (!thresholds) return true
 
     // Simple threshold checking (would be more sophisticated in real implementation)
@@ -579,24 +610,25 @@ function textSummary(data, options = {}) {
     return true
   }
 
-  private extractErrors(rawOutput: string): Array<{ type: string; count: number; message: string }> {
+  private extractErrors(
+    rawOutput: string
+  ): Array<{ type: string; count: number; message: string }> {
     const errors: Array<{ type: string; count: number; message: string }> = []
-    
-    // Parse error patterns from K6 output
-    const errorPatterns = [
-      /(\d+) network errors/,
-      /(\d+) timeout errors/,
-      /(\d+) HTTP errors/
-    ]
 
-    errorPatterns.forEach(pattern => {
+    // Parse error patterns from K6 output
+    const errorPatterns = [/(\d+) network errors/, /(\d+) timeout errors/, /(\d+) HTTP errors/]
+
+    errorPatterns.forEach((pattern) => {
       const match = rawOutput.match(pattern)
       if (match) {
         errors.push({
-          type: pattern.source.includes('network') ? 'network' : 
-                pattern.source.includes('timeout') ? 'timeout' : 'http',
+          type: pattern.source.includes('network')
+            ? 'network'
+            : pattern.source.includes('timeout')
+              ? 'timeout'
+              : 'http',
           count: parseInt(match[1]),
-          message: match[0]
+          message: match[0],
         })
       }
     })
@@ -624,19 +656,19 @@ function textSummary(data, options = {}) {
 
   private generateTestReport(results: LoadTestResult[]): void {
     const reportPath = join(this.resultsDir, `report-${Date.now()}.html`)
-    
+
     const html = this.generateHTMLReport(results)
     writeFileSync(reportPath, html)
-    
+
     logger.info('Load test report generated', {
       reportPath,
       totalTests: results.length,
-      passedTests: results.filter(r => r.thresholdsPassed).length
+      passedTests: results.filter((r) => r.thresholdsPassed).length,
     })
   }
 
   private generateHTMLReport(results: LoadTestResult[]): string {
-    const passedTests = results.filter(r => r.thresholdsPassed).length
+    const passedTests = results.filter((r) => r.thresholdsPassed).length
     const totalTests = results.length
 
     return `
@@ -678,7 +710,9 @@ function textSummary(data, options = {}) {
         </div>
     </div>
 
-    ${results.map(result => `
+    ${results
+      .map(
+        (result) => `
         <div class="test-result ${result.thresholdsPassed ? 'passed' : 'failed'}">
             <h3>${result.config.name} ${result.thresholdsPassed ? '✅' : '❌'}</h3>
             <table>
@@ -693,7 +727,9 @@ function textSummary(data, options = {}) {
                 <tr><td>Error Rate</td><td>${result.summary.errorRate.toFixed(2)}%</td></tr>
             </table>
         </div>
-    `).join('')}
+    `
+      )
+      .join('')}
 </body>
 </html>`
   }
@@ -712,9 +748,7 @@ function textSummary(data, options = {}) {
     const cutoffDate = new Date()
     cutoffDate.setDate(cutoffDate.getDate() - daysToKeep)
 
-    this.testResults = this.testResults.filter(result => 
-      new Date(result.startTime) > cutoffDate
-    )
+    this.testResults = this.testResults.filter((result) => new Date(result.startTime) > cutoffDate)
   }
 }
 
@@ -725,8 +759,8 @@ export const loadTester = new LoadTestingFramework()
  * Quick load test runner
  */
 export async function runQuickLoadTest(
-  baseUrl: string, 
-  virtualUsers: number = 10, 
+  baseUrl: string,
+  virtualUsers: number = 10,
   duration: string = '1m'
 ): Promise<LoadTestResult> {
   const config: LoadTestConfig = {
@@ -736,8 +770,8 @@ export async function runQuickLoadTest(
     virtualUsers,
     thresholds: {
       http_req_duration: 'p(95)<1000',
-      http_req_failed: 'rate<0.01'
-    }
+      http_req_failed: 'rate<0.01',
+    },
   }
 
   return loadTester.runLoadTest(config)

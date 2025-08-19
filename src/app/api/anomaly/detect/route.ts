@@ -12,25 +12,26 @@ import { eventTracker } from '@/lib/events/enhanced-event-tracker'
 const DetectionRequestSchema = z.object({
   metricName: z.string(),
   dataPoints: z.array(DataPointSchema),
-  config: z.object({
-    sensitivity: z.number().min(0).max(1).optional(),
-    algorithms: z.array(z.string()).optional(),
-    businessContext: z.object({
-      industry: z.string().optional(),
-      businessModel: z.string().optional(),
-      seasonality: z.array(z.string()).optional()
-    }).optional()
-  }).optional()
+  config: z
+    .object({
+      sensitivity: z.number().min(0).max(1).optional(),
+      algorithms: z.array(z.string()).optional(),
+      businessContext: z
+        .object({
+          industry: z.string().optional(),
+          businessModel: z.string().optional(),
+          seasonality: z.array(z.string()).optional(),
+        })
+        .optional(),
+    })
+    .optional(),
 })
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession()
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -61,9 +62,9 @@ export async function POST(request: NextRequest) {
       properties: {
         metricName,
         dataPointsCount: dataPoints.length,
-        anomaliesDetected: anomalies.filter(a => a.isAnomaly).length,
-        tenantId: session.user.tenantId
-      }
+        anomaliesDetected: anomalies.filter((a) => a.isAnomaly).length,
+        tenantId: session.user.tenantId,
+      },
     })
 
     return NextResponse.json({
@@ -73,14 +74,11 @@ export async function POST(request: NextRequest) {
       metadata: {
         metricName,
         dataPointsAnalyzed: dataPoints.length,
-        anomaliesDetected: anomalies.filter(a => a.isAnomaly).length,
-        timestamp: new Date().toISOString()
-      }
+        anomaliesDetected: anomalies.filter((a) => a.isAnomaly).length,
+        timestamp: new Date().toISOString(),
+      },
     })
-
   } catch (error) {
-    console.error('Anomaly detection API error:', error)
-    
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid request format', details: error.errors },
@@ -88,10 +86,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -99,10 +94,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession()
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -110,10 +102,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '100')
 
     if (!metricName) {
-      return NextResponse.json(
-        { error: 'Metric name is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Metric name is required' }, { status: 400 })
     }
 
     // Get recent anomalies for the metric (in production, from database)
@@ -122,15 +111,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       metricName,
       anomalies: recentAnomalies,
-      count: recentAnomalies.length
+      count: recentAnomalies.length,
     })
-
   } catch (error) {
-    console.error('Get anomalies API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -139,11 +123,11 @@ async function loadHistoricalData(metricName: string, tenantId: string) {
   // Mock historical data - in production, load from database
   const data = []
   const now = new Date()
-  
+
   for (let i = 30; i >= 0; i--) {
     const timestamp = new Date(now.getTime() - i * 24 * 60 * 60 * 1000)
     let value: number
-    
+
     switch (metricName) {
       case 'daily_revenue':
         value = 25000 + Math.random() * 10000 + Math.sin(i / 7) * 5000
@@ -166,18 +150,18 @@ async function loadHistoricalData(metricName: string, tenantId: string) {
       default:
         value = Math.random() * 100
     }
-    
+
     data.push({
       timestamp,
       value,
-      metadata: { source: 'historical', tenantId }
+      metadata: { source: 'historical', tenantId },
     })
   }
-  
+
   return data
 }
 
-async function getRecentAnomalies(metricName: string, tenantId: string, limit: number) {
+async function getRecentAnomalies(_metricName: string, _tenantId: string, _limit: number) {
   // Mock recent anomalies - in production, query from database
   return []
 }

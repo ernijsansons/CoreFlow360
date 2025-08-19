@@ -28,7 +28,6 @@ async function startServer() {
         const parsedUrl = parse(req.url!, true)
         await handle(req, res, parsedUrl)
       } catch (err) {
-        console.error('Error occurred handling', req.url, err)
         res.statusCode = 500
         res.end('Internal server error')
       }
@@ -36,34 +35,24 @@ async function startServer() {
 
     // Initialize WebSocket server
     wsServer = new AnalyticsWebSocketServer(server)
-    console.log('[Server] WebSocket server initialized')
 
     // Start listening
-    server.listen(port, () => {
-      console.log(`[Server] Ready on http://${hostname}:${port}`)
-      console.log(`[WebSocket] Analytics streaming available on ws://${hostname}:${port}`)
-    })
+    server.listen(port, () => {})
 
     // Graceful shutdown
     const gracefulShutdown = () => {
-      console.log('[Server] Received shutdown signal, closing gracefully...')
-      
       if (wsServer) {
         wsServer.shutdown()
-        console.log('[WebSocket] Server closed')
       }
 
       server.close(() => {
-        console.log('[Server] HTTP server closed')
         process.exit(0)
       })
     }
 
     process.on('SIGTERM', gracefulShutdown)
     process.on('SIGINT', gracefulShutdown)
-
   } catch (err) {
-    console.error('[Server] Failed to start:', err)
     process.exit(1)
   }
 }

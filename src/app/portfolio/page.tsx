@@ -8,6 +8,11 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/contexts/AuthContext'
+
+// Build-time check to prevent prerendering issues
+const isBuildTime = () => {
+  return typeof window === 'undefined' && process.env.NODE_ENV === 'production'
+}
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { BusinessSwitcher } from '@/components/business/BusinessSwitcher'
 import { KPIGrid } from '@/components/kpi/KPIGrid'
@@ -34,7 +39,7 @@ import {
   Activity,
   Globe,
   Shield,
-  Star
+  Star,
 } from 'lucide-react'
 
 // Mock data - in production this would come from the API
@@ -47,7 +52,7 @@ const portfolioData = {
     businessCount: 4,
     totalUsers: 89,
     avgGrowthRate: 23.5,
-    riskScore: 12
+    riskScore: 12,
   },
   businesses: [
     {
@@ -61,10 +66,10 @@ const portfolioData = {
       growth: 28.5,
       health: 92,
       status: 'excellent',
-      ownershipType: 'PRIMARY'
+      ownershipType: 'PRIMARY',
     },
     {
-      id: '2', 
+      id: '2',
       name: 'GreenTech Manufacturing',
       industry: 'Manufacturing',
       revenue: 850000,
@@ -74,7 +79,7 @@ const portfolioData = {
       growth: 18.2,
       health: 85,
       status: 'good',
-      ownershipType: 'PRIMARY'
+      ownershipType: 'PRIMARY',
     },
     {
       id: '3',
@@ -87,7 +92,7 @@ const portfolioData = {
       growth: 35.1,
       health: 89,
       status: 'excellent',
-      ownershipType: 'SECONDARY'
+      ownershipType: 'SECONDARY',
     },
     {
       id: '4',
@@ -100,8 +105,8 @@ const portfolioData = {
       growth: 12.8,
       health: 78,
       status: 'warning',
-      ownershipType: 'PARTNER'
-    }
+      ownershipType: 'PARTNER',
+    },
   ],
   kpis: [
     {
@@ -111,7 +116,7 @@ const portfolioData = {
       change: 15.2,
       trend: 'up',
       target: 300000,
-      format: 'currency'
+      format: 'currency',
     },
     {
       key: 'customer_acquisition_cost',
@@ -120,7 +125,7 @@ const portfolioData = {
       change: -8.5,
       trend: 'down',
       target: 75,
-      format: 'currency'
+      format: 'currency',
     },
     {
       key: 'customer_lifetime_value',
@@ -129,7 +134,7 @@ const portfolioData = {
       change: 22.3,
       trend: 'up',
       target: 3000,
-      format: 'currency'
+      format: 'currency',
     },
     {
       key: 'net_promoter_score',
@@ -138,7 +143,7 @@ const portfolioData = {
       change: 5.2,
       trend: 'up',
       target: 70,
-      format: 'number'
+      format: 'number',
     },
     {
       key: 'churn_rate',
@@ -147,7 +152,7 @@ const portfolioData = {
       change: -1.8,
       trend: 'down',
       target: 2.5,
-      format: 'percentage'
+      format: 'percentage',
     },
     {
       key: 'employee_satisfaction',
@@ -156,12 +161,26 @@ const portfolioData = {
       change: 0.3,
       trend: 'up',
       target: 4.8,
-      format: 'rating'
-    }
-  ]
+      format: 'rating',
+    },
+  ],
 }
 
+// Mark as dynamic to skip static generation
+export const dynamic = 'force-dynamic'
+
 export default function PortfolioDashboard() {
+  // Return a simple loading state during build time
+  if (isBuildTime()) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="mx-auto max-w-7xl px-4 py-8">
+          <div className="h-8 animate-pulse rounded bg-gray-200"></div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <ProtectedRoute>
       <ExecutivePortfolio />
@@ -178,7 +197,7 @@ function ExecutivePortfolio() {
   const handleRefresh = async () => {
     setRefreshing(true)
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000))
     setRefreshing(false)
   }
 
@@ -187,19 +206,22 @@ function ExecutivePortfolio() {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount)
   }
 
   const formatGrowth = (rate: number) => {
-    const icon = rate > 0 ? <ArrowUp className="w-4 h-4" /> : 
-                  rate < 0 ? <ArrowDown className="w-4 h-4" /> : 
-                  <Minus className="w-4 h-4" />
-    
-    const color = rate > 0 ? 'text-green-600' : 
-                  rate < 0 ? 'text-red-600' : 
-                  'text-gray-600'
-    
+    const icon =
+      rate > 0 ? (
+        <ArrowUp className="h-4 w-4" />
+      ) : rate < 0 ? (
+        <ArrowDown className="h-4 w-4" />
+      ) : (
+        <Minus className="h-4 w-4" />
+      )
+
+    const color = rate > 0 ? 'text-green-600' : rate < 0 ? 'text-red-600' : 'text-gray-600'
+
     return (
       <div className={`flex items-center space-x-1 ${color}`}>
         {icon}
@@ -218,13 +240,15 @@ function ExecutivePortfolio() {
     const config = {
       PRIMARY: { icon: Crown, color: 'text-yellow-600 bg-yellow-50', label: 'Primary' },
       SECONDARY: { icon: Star, color: 'text-blue-600 bg-blue-50', label: 'Secondary' },
-      PARTNER: { icon: Users, color: 'text-purple-600 bg-purple-50', label: 'Partner' }
+      PARTNER: { icon: Users, color: 'text-purple-600 bg-purple-50', label: 'Partner' },
     }
     const { icon: Icon, color, label } = config[type as keyof typeof config] || config.PRIMARY
-    
+
     return (
-      <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${color}`}>
-        <Icon className="w-3 h-3" />
+      <span
+        className={`inline-flex items-center space-x-1 rounded-full px-2 py-1 text-xs font-medium ${color}`}
+      >
+        <Icon className="h-3 w-3" />
         <span>{label}</span>
       </span>
     )
@@ -232,119 +256,119 @@ function ExecutivePortfolio() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               Executive Portfolio
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <p className="mt-1 text-gray-600 dark:text-gray-400">
               World-class analytics for your business empire
             </p>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <BusinessSwitcher showPortfolioOption={false} />
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-all duration-200 disabled:opacity-50"
+              className="flex items-center space-x-2 rounded-lg border border-gray-200 bg-white px-4 py-2 transition-all duration-200 hover:shadow-md disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800"
             >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
             </button>
           </div>
         </div>
 
         {/* Portfolio Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white"
+            className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-blue-100 text-sm">Total Portfolio Revenue</p>
-                <p className="text-3xl font-bold mt-1">
+                <p className="text-sm text-blue-100">Total Portfolio Revenue</p>
+                <p className="mt-1 text-3xl font-bold">
                   {formatCurrency(portfolioData.summary.totalRevenue)}
                 </p>
-                <div className="flex items-center space-x-2 mt-2">
+                <div className="mt-2 flex items-center space-x-2">
                   {formatGrowth(portfolioData.summary.avgGrowthRate)}
-                  <span className="text-blue-100 text-sm">vs last month</span>
+                  <span className="text-sm text-blue-100">vs last month</span>
                 </div>
               </div>
-              <DollarSign className="w-12 h-12 text-blue-200" />
+              <DollarSign className="h-12 w-12 text-blue-200" />
             </div>
           </motion.div>
 
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm"
+            className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">Portfolio Health Score</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Portfolio Health Score</p>
+                <p className="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
                   {portfolioData.summary.portfolioHealth}%
                 </p>
-                <div className="flex items-center space-x-2 mt-2">
-                  <div className="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div 
-                      className="h-2 bg-green-500 rounded-full transition-all duration-500"
+                <div className="mt-2 flex items-center space-x-2">
+                  <div className="h-2 w-20 rounded-full bg-gray-200 dark:bg-gray-700">
+                    <div
+                      className="h-2 rounded-full bg-green-500 transition-all duration-500"
                       style={{ width: `${portfolioData.summary.portfolioHealth}%` }}
                     />
                   </div>
-                  <span className="text-green-600 text-sm font-medium">Excellent</span>
+                  <span className="text-sm font-medium text-green-600">Excellent</span>
                 </div>
               </div>
-              <Shield className="w-12 h-12 text-green-600" />
+              <Shield className="h-12 w-12 text-green-600" />
             </div>
           </motion.div>
 
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm"
+            className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">Total Customers</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total Customers</p>
+                <p className="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
                   {portfolioData.summary.totalCustomers.toLocaleString()}
                 </p>
-                <div className="flex items-center space-x-2 mt-2">
-                  <span className="text-gray-500 text-sm">
+                <div className="mt-2 flex items-center space-x-2">
+                  <span className="text-sm text-gray-500">
                     Across {portfolioData.summary.businessCount} businesses
                   </span>
                 </div>
               </div>
-              <Users className="w-12 h-12 text-blue-600" />
+              <Users className="h-12 w-12 text-blue-600" />
             </div>
           </motion.div>
 
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm"
+            className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">Risk Assessment</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Risk Assessment</p>
+                <p className="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
                   {portfolioData.summary.riskScore}%
                 </p>
-                <div className="flex items-center space-x-2 mt-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <div className="mt-2 flex items-center space-x-2">
+                  <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
                     Low Risk
                   </span>
                 </div>
               </div>
-              <Activity className="w-12 h-12 text-purple-600" />
+              <Activity className="h-12 w-12 text-purple-600" />
             </div>
           </motion.div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
+        <div className="mb-6 rounded-lg bg-white shadow-sm dark:bg-gray-800">
           <div className="border-b border-gray-200 dark:border-gray-700">
             <div className="flex space-x-8 px-6">
               {[
@@ -352,18 +376,18 @@ function ExecutivePortfolio() {
                 { id: 'businesses', label: 'Business Performance', icon: Building2 },
                 { id: 'kpis', label: 'Key Metrics', icon: Target },
                 { id: 'analytics', label: 'AI Analytics', icon: TrendingUp },
-                { id: 'pricing', label: 'Pricing Calculator', icon: DollarSign }
+                { id: 'pricing', label: 'Pricing Calculator', icon: DollarSign },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-4 border-b-2 font-medium text-sm transition-colors ${
+                  className={`flex items-center space-x-2 border-b-2 py-4 text-sm font-medium transition-colors ${
                     activeTab === tab.id
                       ? 'border-purple-600 text-purple-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  <tab.icon className="w-5 h-5" />
+                  <tab.icon className="h-5 w-5" />
                   <span>{tab.label}</span>
                 </button>
               ))}
@@ -373,16 +397,16 @@ function ExecutivePortfolio() {
 
         {/* Business Performance Grid */}
         {activeTab === 'businesses' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {portfolioData.businesses.map((business, index) => (
               <motion.div
                 key={business.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                className="rounded-xl bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:bg-gray-800"
               >
-                <div className="flex items-start justify-between mb-4">
+                <div className="mb-4 flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3">
                       <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -390,12 +414,14 @@ function ExecutivePortfolio() {
                       </h3>
                       {getOwnershipBadge(business.ownershipType)}
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                       {business.industry}
                     </p>
                   </div>
-                  
-                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${getHealthColor(business.health)}`}>
+
+                  <div
+                    className={`rounded-full px-3 py-1 text-sm font-medium ${getHealthColor(business.health)}`}
+                  >
                     {business.health}% Health
                   </div>
                 </div>
@@ -406,9 +432,7 @@ function ExecutivePortfolio() {
                     <p className="text-xl font-bold text-gray-900 dark:text-white">
                       {formatCurrency(business.revenue)}
                     </p>
-                    <div className="mt-1">
-                      {formatGrowth(business.growth)}
-                    </div>
+                    <div className="mt-1">{formatGrowth(business.growth)}</div>
                   </div>
 
                   <div>
@@ -416,7 +440,7 @@ function ExecutivePortfolio() {
                     <p className="text-xl font-bold text-gray-900 dark:text-white">
                       {formatCurrency(business.profit)}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="mt-1 text-sm text-gray-500">
                       {((business.profit / business.revenue) * 100).toFixed(1)}% margin
                     </p>
                   </div>
@@ -436,8 +460,8 @@ function ExecutivePortfolio() {
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <button className="w-full py-2 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                <div className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
+                  <button className="w-full rounded-lg bg-purple-600 px-4 py-2 text-white transition-colors hover:bg-purple-700">
                     View Details
                   </button>
                 </div>
@@ -449,20 +473,28 @@ function ExecutivePortfolio() {
         {/* Key Metrics */}
         {activeTab === 'kpis' && (
           <div>
-            <KPIGrid 
-              kpis={portfolioData.kpis.map(kpi => ({
+            <KPIGrid
+              kpis={portfolioData.kpis.map((kpi) => ({
                 ...kpi,
-                displayValue: kpi.format === 'currency' ? formatCurrency(kpi.value) :
-                            kpi.format === 'percentage' ? `${kpi.value}%` :
-                            kpi.format === 'rating' ? `${kpi.value}/5.0` :
-                            kpi.value.toLocaleString(),
+                displayValue:
+                  kpi.format === 'currency'
+                    ? formatCurrency(kpi.value)
+                    : kpi.format === 'percentage'
+                      ? `${kpi.value}%`
+                      : kpi.format === 'rating'
+                        ? `${kpi.value}/5.0`
+                        : kpi.value.toLocaleString(),
                 changePercent: kpi.change,
-                status: kpi.value >= kpi.target ? 'good' : 
-                        kpi.value >= kpi.target * 0.8 ? 'warning' : 'critical',
+                status:
+                  kpi.value >= kpi.target
+                    ? 'good'
+                    : kpi.value >= kpi.target * 0.8
+                      ? 'warning'
+                      : 'critical',
                 category: 'FINANCIAL',
-                lastUpdated: new Date()
+                lastUpdated: new Date(),
               }))}
-              onDrillDown={(kpiKey) => console.log('Drilling down into:', kpiKey)}
+              onDrillDown={(kpiKey) => {}}
               showFilters={true}
               showSearch={true}
             />
@@ -471,23 +503,23 @@ function ExecutivePortfolio() {
 
         {/* Portfolio Overview Charts */}
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+              <h3 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">
                 Revenue Distribution
               </h3>
-              <div className="h-64 flex items-center justify-center text-gray-500">
-                <PieChart className="w-16 h-16 mr-4" />
+              <div className="flex h-64 items-center justify-center text-gray-500">
+                <PieChart className="mr-4 h-16 w-16" />
                 <span>Advanced chart component would be integrated here</span>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+            <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+              <h3 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">
                 Growth Trends
               </h3>
-              <div className="h-64 flex items-center justify-center text-gray-500">
-                <TrendingUp className="w-16 h-16 mr-4" />
+              <div className="flex h-64 items-center justify-center text-gray-500">
+                <TrendingUp className="mr-4 h-16 w-16" />
                 <span>Interactive trend charts would be displayed here</span>
               </div>
             </div>
@@ -504,12 +536,7 @@ function ExecutivePortfolio() {
         {/* Pricing Calculator Tab */}
         {activeTab === 'pricing' && (
           <div>
-            <PricingCalculator 
-              showMultiBusiness={true}
-              onPricingChange={(calculation) => {
-                console.log('Pricing updated:', calculation)
-              }}
-            />
+            <PricingCalculator showMultiBusiness={true} onPricingChange={(calculation) => {}} />
           </div>
         )}
       </div>

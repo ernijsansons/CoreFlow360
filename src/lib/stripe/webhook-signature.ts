@@ -24,10 +24,9 @@ export async function verifyWebhookSignature(
     const event = stripe.webhooks.constructEvent(body, signature, secret)
     return { success: true, event }
   } catch (err) {
-    console.error('Webhook signature verification failed:', err)
-    return { 
-      success: false, 
-      error: err instanceof Error ? err.message : 'Invalid signature' 
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Invalid signature',
     }
   }
 }
@@ -36,7 +35,7 @@ export async function verifyWebhookSignature(
  * Extract tenant ID from webhook event metadata
  */
 export function extractTenantId(event: Stripe.Event): string | null {
-  const metadata = (event.data.object as any).metadata
+  const metadata = (event.data.object as unknown).metadata
   return metadata?.tenant_id || null
 }
 
@@ -44,15 +43,15 @@ export function extractTenantId(event: Stripe.Event): string | null {
  * Extract subscription metadata
  */
 export function extractSubscriptionMetadata(event: Stripe.Event) {
-  const obj = event.data.object as any
+  const obj = event.data.object as unknown
   const metadata = obj.metadata || {}
-  
+
   return {
     tenantId: metadata.tenant_id,
     modules: metadata.modules?.split(',') || [],
     bundleKey: metadata.bundle_key || null,
     userCount: parseInt(metadata.user_count || '1'),
     billingCycle: (metadata.billing_cycle as 'monthly' | 'annual') || 'monthly',
-    monthlyPrice: parseFloat(metadata.monthly_price || '0')
+    monthlyPrice: parseFloat(metadata.monthly_price || '0'),
   }
 }

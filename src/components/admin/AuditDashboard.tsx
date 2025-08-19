@@ -11,19 +11,19 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Shield, 
-  Zap, 
-  Code, 
-  Users, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Shield,
+  Zap,
+  Code,
+  Users,
+  AlertTriangle,
+  CheckCircle,
   Clock,
   TrendingUp,
   Download,
   Play,
   Pause,
-  RotateCcw
+  RotateCcw,
 } from 'lucide-react'
 
 interface AuditMetrics {
@@ -64,7 +64,7 @@ const AUDIT_CATEGORIES = [
   { key: 'security', label: 'Security', icon: Shield, color: 'bg-red-500' },
   { key: 'performance', label: 'Performance', icon: Zap, color: 'bg-yellow-500' },
   { key: 'architecture', label: 'Architecture', icon: Code, color: 'bg-blue-500' },
-  { key: 'business', label: 'Business Logic', icon: Users, color: 'bg-green-500' }
+  { key: 'business', label: 'Business Logic', icon: Users, color: 'bg-green-500' },
 ]
 
 export default function AuditDashboard() {
@@ -92,7 +92,7 @@ export default function AuditDashboard() {
         security_score: 75,
         performance_score: 85,
         architecture_score: 90,
-        business_logic_score: 80
+        business_logic_score: 80,
       }
 
       const mockExecution: AuditExecution = {
@@ -102,7 +102,7 @@ export default function AuditDashboard() {
         current_batch: 'Security & Authentication',
         start_time: new Date().toISOString(),
         estimated_completion: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-        scope: ['security', 'performance', 'architecture']
+        scope: ['security', 'performance', 'architecture'],
       }
 
       const mockFindings: AuditFinding[] = [
@@ -115,10 +115,10 @@ export default function AuditDashboard() {
           location: 'src/config/database.ts:15',
           business_value: 95,
           implementation_cost: 4,
-          status: 'new'
+          status: 'new',
         },
         {
-          id: 'finding_002', 
+          id: 'finding_002',
           title: 'N+1 Query Pattern in User Dashboard',
           severity: 'high',
           category: 'performance',
@@ -126,19 +126,19 @@ export default function AuditDashboard() {
           location: 'src/app/dashboard/page.tsx:45',
           business_value: 70,
           implementation_cost: 12,
-          status: 'in_progress'
+          status: 'in_progress',
         },
         {
           id: 'finding_003',
           title: 'Missing Input Validation on API Routes',
           severity: 'high',
-          category: 'security', 
+          category: 'security',
           description: 'User input not validated on critical API endpoints',
           location: 'src/app/api/users/route.ts',
           business_value: 85,
           implementation_cost: 16,
-          status: 'new'
-        }
+          status: 'new',
+        },
       ]
 
       setMetrics(mockMetrics)
@@ -146,30 +146,26 @@ export default function AuditDashboard() {
       setFindings(mockFindings)
       setLoading(false)
     } catch (error) {
-      console.error('Failed to load audit data:', error)
       setLoading(false)
     }
   }
 
-  const startNewAudit = async (scope: string[]) => {
+  const startNewAudit = async (_scope: string[]) => {
     // Implement audit start logic
-    console.log('Starting new audit with scope:', scope)
   }
 
   const pauseAudit = async () => {
     // Implement audit pause logic
-    console.log('Pausing current audit')
   }
 
-  const downloadReport = (format: 'json' | 'html' | 'pdf') => {
+  const downloadReport = (_format: 'json' | 'html' | 'pdf') => {
     // Implement report download logic
-    console.log('Downloading report in format:', format)
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -184,11 +180,11 @@ export default function AuditDashboard() {
         </div>
         <div className="flex space-x-2">
           <Button onClick={() => startNewAudit(['all'])} className="bg-blue-600 hover:bg-blue-700">
-            <Play className="w-4 h-4 mr-2" />
+            <Play className="mr-2 h-4 w-4" />
             Start New Audit
           </Button>
           <Button variant="outline" onClick={() => downloadReport('html')}>
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             Download Report
           </Button>
         </div>
@@ -200,16 +196,17 @@ export default function AuditDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-blue-600"></div>
                 Audit in Progress
               </div>
               <Button variant="outline" size="sm" onClick={pauseAudit}>
-                <Pause className="w-4 h-4 mr-1" />
+                <Pause className="mr-1 h-4 w-4" />
                 Pause
               </Button>
             </CardTitle>
             <CardDescription>
-              Current batch: {execution.current_batch} | Started: {new Date(execution.start_time).toLocaleTimeString()}
+              Current batch: {execution.current_batch} | Started:{' '}
+              {new Date(execution.start_time).toLocaleTimeString()}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -240,7 +237,7 @@ export default function AuditDashboard() {
 
         <TabsContent value="overview" className="space-y-6">
           {/* Metrics Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Findings</CardTitle>
@@ -248,7 +245,7 @@ export default function AuditDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{metrics?.total_findings}</div>
-                <div className="flex space-x-2 text-xs text-gray-500 mt-1">
+                <div className="mt-1 flex space-x-2 text-xs text-gray-500">
                   <span className="text-red-600">{metrics?.critical_issues} Critical</span>
                   <span className="text-orange-600">{metrics?.high_issues} High</span>
                 </div>
@@ -293,29 +290,40 @@ export default function AuditDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Priority Findings</CardTitle>
-              <CardDescription>Critical and high-priority issues requiring immediate attention</CardDescription>
+              <CardDescription>
+                Critical and high-priority issues requiring immediate attention
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {findings
-                  .filter(f => f.severity === 'critical' || f.severity === 'high')
+                  .filter((f) => f.severity === 'critical' || f.severity === 'high')
                   .slice(0, 5)
                   .map((finding) => (
-                    <div key={finding.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div
+                      key={finding.id}
+                      className="flex items-center justify-between rounded-lg border p-3"
+                    >
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
-                          <Badge variant={finding.severity === 'critical' ? 'destructive' : 'default'}>
+                          <Badge
+                            variant={finding.severity === 'critical' ? 'destructive' : 'default'}
+                          >
                             {finding.severity}
                           </Badge>
                           <Badge variant="outline">{finding.category}</Badge>
                           <span className="font-medium">{finding.title}</span>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">{finding.description}</p>
-                        <p className="text-xs text-gray-500 mt-1">📍 {finding.location}</p>
+                        <p className="mt-1 text-sm text-gray-600">{finding.description}</p>
+                        <p className="mt-1 text-xs text-gray-500">📍 {finding.location}</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-medium">ROI: {Math.round(finding.business_value / finding.implementation_cost)}x</div>
-                        <div className="text-xs text-gray-500">{finding.implementation_cost}h cost</div>
+                        <div className="text-sm font-medium">
+                          ROI: {Math.round(finding.business_value / finding.implementation_cost)}x
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {finding.implementation_cost}h cost
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -328,19 +336,24 @@ export default function AuditDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>All Findings</CardTitle>
-              <CardDescription>Complete list of audit findings across all categories</CardDescription>
+              <CardDescription>
+                Complete list of audit findings across all categories
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {findings.map((finding) => (
-                  <div key={finding.id} className="p-4 border rounded-lg">
+                  <div key={finding.id} className="rounded-lg border p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <Badge 
+                        <div className="mb-2 flex items-center space-x-2">
+                          <Badge
                             variant={
-                              finding.severity === 'critical' ? 'destructive' :
-                              finding.severity === 'high' ? 'default' : 'secondary'
+                              finding.severity === 'critical'
+                                ? 'destructive'
+                                : finding.severity === 'high'
+                                  ? 'default'
+                                  : 'secondary'
                             }
                           >
                             {finding.severity}
@@ -350,15 +363,15 @@ export default function AuditDashboard() {
                             {finding.status.replace('_', ' ')}
                           </Badge>
                         </div>
-                        <h3 className="font-medium mb-1">{finding.title}</h3>
-                        <p className="text-sm text-gray-600 mb-2">{finding.description}</p>
+                        <h3 className="mb-1 font-medium">{finding.title}</h3>
+                        <p className="mb-2 text-sm text-gray-600">{finding.description}</p>
                         <p className="text-xs text-gray-500">📍 {finding.location}</p>
                       </div>
-                      <div className="text-right ml-4">
-                        <div className="text-sm font-medium mb-1">
+                      <div className="ml-4 text-right">
+                        <div className="mb-1 text-sm font-medium">
                           Value: {finding.business_value}
                         </div>
-                        <div className="text-sm text-gray-600 mb-1">
+                        <div className="mb-1 text-sm text-gray-600">
                           Cost: {finding.implementation_cost}h
                         </div>
                         <div className="text-sm font-medium text-green-600">
@@ -374,17 +387,19 @@ export default function AuditDashboard() {
         </TabsContent>
 
         <TabsContent value="categories" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {AUDIT_CATEGORIES.map((category) => {
-              const categoryFindings = findings.filter(f => f.category === category.key)
+              const categoryFindings = findings.filter((f) => f.category === category.key)
               const Icon = category.icon
-              
+
               return (
                 <Card key={category.key}>
                   <CardHeader>
                     <CardTitle className="flex items-center">
-                      <div className={`w-8 h-8 rounded-lg ${category.color} flex items-center justify-center mr-3`}>
-                        <Icon className="w-4 h-4 text-white" />
+                      <div
+                        className={`h-8 w-8 rounded-lg ${category.color} mr-3 flex items-center justify-center`}
+                      >
+                        <Icon className="h-4 w-4 text-white" />
                       </div>
                       {category.label}
                     </CardTitle>
@@ -395,20 +410,29 @@ export default function AuditDashboard() {
                   <CardContent>
                     <div className="space-y-3">
                       <div className="flex justify-between text-sm">
-                        <span>Critical: {categoryFindings.filter(f => f.severity === 'critical').length}</span>
-                        <span>High: {categoryFindings.filter(f => f.severity === 'high').length}</span>
+                        <span>
+                          Critical:{' '}
+                          {categoryFindings.filter((f) => f.severity === 'critical').length}
+                        </span>
+                        <span>
+                          High: {categoryFindings.filter((f) => f.severity === 'high').length}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>Medium: {categoryFindings.filter(f => f.severity === 'medium').length}</span>
-                        <span>Low: {categoryFindings.filter(f => f.severity === 'low').length}</span>
+                        <span>
+                          Medium: {categoryFindings.filter((f) => f.severity === 'medium').length}
+                        </span>
+                        <span>
+                          Low: {categoryFindings.filter((f) => f.severity === 'low').length}
+                        </span>
                       </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full mt-3"
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-3 w-full"
                         onClick={() => startNewAudit([category.key])}
                       >
-                        <RotateCcw className="w-4 h-4 mr-2" />
+                        <RotateCcw className="mr-2 h-4 w-4" />
                         Re-audit {category.label}
                       </Button>
                     </div>
@@ -423,24 +447,26 @@ export default function AuditDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2" />
+                <TrendingUp className="mr-2 h-5 w-5" />
                 Audit Trends & Progress
               </CardTitle>
-              <CardDescription>Historical view of audit results and improvements over time</CardDescription>
+              <CardDescription>
+                Historical view of audit results and improvements over time
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 {/* Score Trends */}
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-medium mb-3">Security Score Trend</h4>
-                    <div className="h-32 bg-gray-50 rounded-lg flex items-center justify-center">
+                    <h4 className="mb-3 font-medium">Security Score Trend</h4>
+                    <div className="flex h-32 items-center justify-center rounded-lg bg-gray-50">
                       <span className="text-gray-500">Chart placeholder - Security trend</span>
                     </div>
                   </div>
                   <div>
-                    <h4 className="font-medium mb-3">Performance Score Trend</h4>
-                    <div className="h-32 bg-gray-50 rounded-lg flex items-center justify-center">
+                    <h4 className="mb-3 font-medium">Performance Score Trend</h4>
+                    <div className="flex h-32 items-center justify-center rounded-lg bg-gray-50">
                       <span className="text-gray-500">Chart placeholder - Performance trend</span>
                     </div>
                   </div>
@@ -448,7 +474,7 @@ export default function AuditDashboard() {
 
                 {/* Issue Resolution Rate */}
                 <div>
-                  <h4 className="font-medium mb-3">Issue Resolution Progress</h4>
+                  <h4 className="mb-3 font-medium">Issue Resolution Progress</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Resolved Issues</span>
@@ -464,17 +490,17 @@ export default function AuditDashboard() {
 
                 {/* Recent Activity */}
                 <div>
-                  <h4 className="font-medium mb-3">Recent Audit Activity</h4>
+                  <h4 className="mb-3 font-medium">Recent Audit Activity</h4>
                   <div className="space-y-2 text-sm">
-                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <div className="flex items-center justify-between rounded bg-gray-50 p-2">
                       <span>Security audit completed</span>
                       <span className="text-gray-500">2 hours ago</span>
                     </div>
-                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <div className="flex items-center justify-between rounded bg-gray-50 p-2">
                       <span>3 critical issues resolved</span>
                       <span className="text-gray-500">1 day ago</span>
                     </div>
-                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <div className="flex items-center justify-between rounded bg-gray-50 p-2">
                       <span>Performance audit started</span>
                       <span className="text-gray-500">2 days ago</span>
                     </div>

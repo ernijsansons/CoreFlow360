@@ -15,20 +15,25 @@ let redis: Redis | null = null
 
 function getRedis(): Redis | null {
   // Skip during build
-  if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+  if (
+    process.env.VERCEL ||
+    process.env.CI ||
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.VERCEL_ENV === 'preview'
+  ) {
     return null
   }
-  
+
   if (!redis) {
     redis = new Redis({
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
       password: process.env.REDIS_PASSWORD,
       lazyConnect: true,
-      enableOfflineQueue: false
+      enableOfflineQueue: false,
     })
   }
-  
+
   return redis
 }
 
@@ -47,32 +52,27 @@ export async function GET(request: NextRequest) {
     switch (metric) {
       case 'queue-status':
         return NextResponse.json(await getQueueStatus())
-      
+
       case 'rate-limits':
         return NextResponse.json(await getRateLimitStatus(tenantId))
-      
+
       case 'error-stats':
         return NextResponse.json(await getErrorStats(timeWindow))
-      
+
       case 'lead-stats':
         return NextResponse.json(await getLeadStats(timeWindow, tenantId))
-      
+
       case 'call-stats':
         return NextResponse.json(await getCallStats(timeWindow, tenantId))
-      
+
       case 'system-health':
         return NextResponse.json(await getSystemHealth())
-      
+
       default:
         return NextResponse.json(await getComprehensiveMetrics(timeWindow, tenantId))
     }
-    
   } catch (error) {
-    console.error('Pipeline monitoring error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch pipeline metrics' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch pipeline metrics' }, { status: 500 })
   }
 }
 
@@ -88,47 +88,55 @@ export async function POST(request: NextRequest) {
       case 'pause-queues':
         await queueMonitor.pauseQueues()
         return NextResponse.json({ success: true, message: 'Queues paused' })
-      
+
       case 'resume-queues':
         await queueMonitor.resumeQueues()
         return NextResponse.json({ success: true, message: 'Queues resumed' })
-      
+
       case 'cleanup-jobs':
         await queueMonitor.cleanupJobs()
         return NextResponse.json({ success: true, message: 'Jobs cleaned up' })
-      
+
       case 'pause-tenant-calls':
         if (!tenantId) {
           return NextResponse.json({ error: 'tenantId required' }, { status: 400 })
         }
-        await callLimiter.pauseCalling(tenantId, params.reason || 'Admin action', params.duration || 300)
-        return NextResponse.json({ success: true, message: `Calling paused for tenant ${tenantId}` })
-      
+        await callLimiter.pauseCalling(
+          tenantId,
+          params.reason || 'Admin action',
+          params.duration || 300
+        )
+        return NextResponse.json({
+          success: true,
+          message: `Calling paused for tenant ${tenantId}`,
+        })
+
       case 'resume-tenant-calls':
         if (!tenantId) {
           return NextResponse.json({ error: 'tenantId required' }, { status: 400 })
         }
         await callLimiter.resumeCalling(tenantId)
-        return NextResponse.json({ success: true, message: `Calling resumed for tenant ${tenantId}` })
-      
+        return NextResponse.json({
+          success: true,
+          message: `Calling resumed for tenant ${tenantId}`,
+        })
+
       case 'emergency-mode':
-        await rateLimiter.enableEmergencyMode(params.reason || 'Admin triggered', params.duration || 300)
+        await rateLimiter.enableEmergencyMode(
+          params.reason || 'Admin triggered',
+          params.duration || 300
+        )
         return NextResponse.json({ success: true, message: 'Emergency mode enabled' })
-      
+
       case 'resolve-error':
         await LeadPipelineErrorHandler.resolveError(params.errorId, params.resolvedBy || 'admin')
         return NextResponse.json({ success: true, message: 'Error marked as resolved' })
-      
+
       default:
         return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
     }
-    
   } catch (error) {
-    console.error('Pipeline admin action error:', error)
-    return NextResponse.json(
-      { error: 'Failed to execute admin action' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to execute admin action' }, { status: 500 })
   }
 }
 
@@ -137,18 +145,18 @@ export async function POST(request: NextRequest) {
  */
 async function getQueueStatus() {
   const stats = await queueMonitor.getStats()
-  
+
   return {
     queues: stats,
     performance: {
       throughput: await calculateThroughput(),
       avgProcessingTime: await getAverageProcessingTime(),
-      successRate: await getQueueSuccessRate()
+      successRate: await getQueueSuccessRate(),
     },
     health: {
       redis: stats.redis.status,
-      memoryUsage: stats.redis.memory
-    }
+      memoryUsage: stats.redis.memory,
+    },
   }
 }
 
@@ -161,18 +169,18 @@ async function getRateLimitStatus(tenantId?: string) {
       tenant: tenantId,
       limits: await rateLimiter.getStatus(tenantId),
       calling: await callLimiter.getStatus(tenantId),
-      paused: await callLimiter.isCallingPaused(tenantId)
+      paused: await callLimiter.isCallingPaused(tenantId),
     }
   }
-  
+
   // System-wide rate limit status
   const emergencyMode = await rateLimiter.isEmergencyMode()
-  
+
   return {
     system: {
       emergencyMode,
-      health: await rateLimiter.checkSystemLoad()
-    }
+      health: await rateLimiter.checkSystemLoad(),
+    },
   }
 }
 
@@ -181,16 +189,16 @@ async function getRateLimitStatus(tenantId?: string) {
  */
 async function getErrorStats(timeWindow: number) {
   const stats = await LeadPipelineErrorHandler.getErrorStats(timeWindow)
-  
+
   // Get recent critical errors
   const connection = getRedis()
   const escalations = connection ? await connection.lrange('escalation_queue', 0, 9) : [] // Last 10 escalations
-  const recentEscalations = escalations.map(e => JSON.parse(e))
-  
+  const recentEscalations = escalations.map((e) => JSON.parse(e))
+
   return {
     ...stats,
     escalations: recentEscalations,
-    trends: await getErrorTrends(timeWindow)
+    trends: await getErrorTrends(timeWindow),
   }
 }
 
@@ -200,46 +208,49 @@ async function getErrorStats(timeWindow: number) {
 async function getLeadStats(timeWindow: number, tenantId?: string) {
   const now = Date.now()
   const windowStart = new Date(now - timeWindow)
-  
+
   const baseWhere = {
     createdAt: { gte: windowStart },
-    ...(tenantId && { tenantId })
+    ...(tenantId && { tenantId }),
   }
-  
+
   const [totalLeads, callsInitiated, successfulCalls] = await Promise.all([
     db.customer.count({ where: baseWhere }),
-    db.callLog.count({ 
+    db.callLog.count({
       where: {
         ...baseWhere,
-        status: { not: 'FAILED' }
-      }
+        status: { not: 'FAILED' },
+      },
     }),
     db.callLog.count({
       where: {
         ...baseWhere,
         status: 'COMPLETED',
-        outcome: { in: ['QUALIFIED', 'APPOINTMENT'] }
-      }
-    })
+        outcome: { in: ['QUALIFIED', 'APPOINTMENT'] },
+      },
+    }),
   ])
-  
+
   // Lead source breakdown
   const leadSources = await db.customer.groupBy({
     by: ['source'],
     where: baseWhere,
-    _count: true
+    _count: true,
   })
-  
+
   return {
     total: totalLeads,
     callsInitiated,
     successfulCalls,
     conversionRate: totalLeads > 0 ? (callsInitiated / totalLeads) * 100 : 0,
     successRate: callsInitiated > 0 ? (successfulCalls / callsInitiated) * 100 : 0,
-    sources: leadSources.reduce((acc, source) => {
-      acc[source.source || 'unknown'] = source._count
-      return acc
-    }, {} as Record<string, number>)
+    sources: leadSources.reduce(
+      (acc, source) => {
+        acc[source.source || 'unknown'] = source._count
+        return acc
+      },
+      {} as Record<string, number>
+    ),
   }
 }
 
@@ -249,38 +260,32 @@ async function getLeadStats(timeWindow: number, tenantId?: string) {
 async function getCallStats(timeWindow: number, tenantId?: string) {
   const now = Date.now()
   const windowStart = new Date(now - timeWindow)
-  
+
   const baseWhere = {
     startedAt: { gte: windowStart },
-    ...(tenantId && { tenantId })
+    ...(tenantId && { tenantId }),
   }
-  
-  const [
-    totalCalls,
-    completedCalls,
-    failedCalls,
-    avgDuration,
-    totalCost,
-    callsByOutcome
-  ] = await Promise.all([
-    db.callLog.count({ where: baseWhere }),
-    db.callLog.count({ where: { ...baseWhere, status: 'COMPLETED' } }),
-    db.callLog.count({ where: { ...baseWhere, status: 'FAILED' } }),
-    db.callLog.aggregate({
-      where: { ...baseWhere, duration: { not: null } },
-      _avg: { duration: true }
-    }),
-    db.callLog.aggregate({
-      where: { ...baseWhere, cost: { not: null } },
-      _sum: { cost: true }
-    }),
-    db.callLog.groupBy({
-      by: ['outcome'],
-      where: { ...baseWhere, outcome: { not: null } },
-      _count: true
-    })
-  ])
-  
+
+  const [totalCalls, completedCalls, failedCalls, avgDuration, totalCost, callsByOutcome] =
+    await Promise.all([
+      db.callLog.count({ where: baseWhere }),
+      db.callLog.count({ where: { ...baseWhere, status: 'COMPLETED' } }),
+      db.callLog.count({ where: { ...baseWhere, status: 'FAILED' } }),
+      db.callLog.aggregate({
+        where: { ...baseWhere, duration: { not: null } },
+        _avg: { duration: true },
+      }),
+      db.callLog.aggregate({
+        where: { ...baseWhere, cost: { not: null } },
+        _sum: { cost: true },
+      }),
+      db.callLog.groupBy({
+        by: ['outcome'],
+        where: { ...baseWhere, outcome: { not: null } },
+        _count: true,
+      }),
+    ])
+
   return {
     total: totalCalls,
     completed: completedCalls,
@@ -289,10 +294,13 @@ async function getCallStats(timeWindow: number, tenantId?: string) {
     avgDuration: Math.round(avgDuration._avg.duration || 0),
     totalCost: totalCost._sum.cost || 0,
     avgCostPerCall: totalCalls > 0 ? (totalCost._sum.cost || 0) / totalCalls : 0,
-    outcomes: callsByOutcome.reduce((acc, outcome) => {
-      acc[outcome.outcome || 'unknown'] = outcome._count
-      return acc
-    }, {} as Record<string, number>)
+    outcomes: callsByOutcome.reduce(
+      (acc, outcome) => {
+        acc[outcome.outcome || 'unknown'] = outcome._count
+        return acc
+      },
+      {} as Record<string, number>
+    ),
   }
 }
 
@@ -300,26 +308,21 @@ async function getCallStats(timeWindow: number, tenantId?: string) {
  * Get overall system health
  */
 async function getSystemHealth() {
-  const [
-    queueStats,
-    redisHealth,
-    dbHealth,
-    errorRate
-  ] = await Promise.all([
+  const [queueStats, redisHealth, dbHealth, errorRate] = await Promise.all([
     queueMonitor.getStats(),
     checkRedisHealth(),
     checkDatabaseHealth(),
-    calculateErrorRate()
+    calculateErrorRate(),
   ])
-  
+
   // Overall health score (0-100)
   const healthScore = calculateHealthScore({
     redis: redisHealth.healthy ? 100 : 0,
     database: dbHealth.healthy ? 100 : 0,
     queues: queueStats.leadQueue.failed < 10 ? 100 : Math.max(0, 100 - queueStats.leadQueue.failed),
-    errorRate: Math.max(0, 100 - (errorRate * 100))
+    errorRate: Math.max(0, 100 - errorRate * 100),
   })
-  
+
   return {
     score: healthScore,
     status: healthScore >= 90 ? 'healthy' : healthScore >= 70 ? 'degraded' : 'unhealthy',
@@ -327,9 +330,9 @@ async function getSystemHealth() {
       redis: redisHealth,
       database: dbHealth,
       queues: queueStats,
-      errorRate
+      errorRate,
     },
-    timestamp: new Date()
+    timestamp: new Date(),
   }
 }
 
@@ -337,35 +340,29 @@ async function getSystemHealth() {
  * Get comprehensive metrics dashboard
  */
 async function getComprehensiveMetrics(timeWindow: number, tenantId?: string) {
-  const [
-    queueStatus,
-    rateLimits,
-    errorStats,
-    leadStats,
-    callStats,
-    systemHealth
-  ] = await Promise.all([
-    getQueueStatus(),
-    getRateLimitStatus(tenantId),
-    getErrorStats(timeWindow),
-    getLeadStats(timeWindow, tenantId),
-    getCallStats(timeWindow, tenantId),
-    getSystemHealth()
-  ])
-  
+  const [queueStatus, rateLimits, errorStats, leadStats, callStats, systemHealth] =
+    await Promise.all([
+      getQueueStatus(),
+      getRateLimitStatus(tenantId),
+      getErrorStats(timeWindow),
+      getLeadStats(timeWindow, tenantId),
+      getCallStats(timeWindow, tenantId),
+      getSystemHealth(),
+    ])
+
   return {
     overview: {
       timeWindow,
       tenantId,
       timestamp: new Date(),
-      health: systemHealth.status
+      health: systemHealth.status,
     },
     queues: queueStatus,
     rateLimits,
     errors: errorStats,
     leads: leadStats,
     calls: callStats,
-    system: systemHealth
+    system: systemHealth,
   }
 }
 
@@ -375,7 +372,7 @@ async function getComprehensiveMetrics(timeWindow: number, tenantId?: string) {
 async function calculateThroughput(): Promise<number> {
   // Get processed jobs in last hour
   const connection = getRedis()
-  const processed = connection ? await connection.get('metrics:jobs_processed:hour') || '0' : '0'
+  const processed = connection ? (await connection.get('metrics:jobs_processed:hour')) || '0' : '0'
   return parseInt(processed)
 }
 
@@ -384,7 +381,7 @@ async function getAverageProcessingTime(): Promise<number> {
   const connection = getRedis()
   const times = connection ? await connection.lrange('metrics:processing_times', 0, 99) : []
   if (times.length === 0) return 0
-  
+
   const avg = times.reduce((sum, time) => sum + parseInt(time), 0) / times.length
   return Math.round(avg)
 }
@@ -393,47 +390,51 @@ async function getQueueSuccessRate(): Promise<number> {
   const connection = getRedis()
   const [successful, total] = await Promise.all([
     connection ? connection.get('metrics:successful_jobs:day') || '0' : Promise.resolve('0'),
-    connection ? connection.get('metrics:total_jobs:day') || '0' : Promise.resolve('0')
+    connection ? connection.get('metrics:total_jobs:day') || '0' : Promise.resolve('0'),
   ])
-  
+
   const successCount = parseInt(successful)
   const totalCount = parseInt(total)
-  
+
   return totalCount > 0 ? (successCount / totalCount) * 100 : 100
 }
 
-async function getErrorTrends(timeWindow: number): Promise<any> {
+async function getErrorTrends(timeWindow: number): Promise<unknown> {
   // Simple hourly error count trend
   const hours = Math.ceil(timeWindow / 3600000)
   const trends = []
   const connection = getRedis()
-  
+
   for (let i = 0; i < Math.min(hours, 24); i++) {
-    const hourKey = `error_count:${Date.now() - (i * 3600000)}`
-    const count = connection ? await connection.get(hourKey) || '0' : '0'
+    const hourKey = `error_count:${Date.now() - i * 3600000}`
+    const count = connection ? (await connection.get(hourKey)) || '0' : '0'
     trends.unshift({ hour: i, errors: parseInt(count) })
   }
-  
+
   return trends
 }
 
-async function checkRedisHealth(): Promise<{ healthy: boolean; latency?: number; memory?: number }> {
+async function checkRedisHealth(): Promise<{
+  healthy: boolean
+  latency?: number
+  memory?: number
+}> {
   try {
     const connection = getRedis()
     if (!connection) {
       return { healthy: false }
     }
-    
+
     const start = Date.now()
     await connection.ping()
     const latency = Date.now() - start
-    
+
     const memory = await connection.memory('usage')
-    
+
     return {
       healthy: latency < 100, // Consider healthy if latency < 100ms
       latency,
-      memory
+      memory,
     }
   } catch (error) {
     return { healthy: false }
@@ -445,10 +446,10 @@ async function checkDatabaseHealth(): Promise<{ healthy: boolean; latency?: numb
     const start = Date.now()
     await db.$queryRaw`SELECT 1`
     const latency = Date.now() - start
-    
+
     return {
       healthy: latency < 500, // Consider healthy if latency < 500ms
-      latency
+      latency,
     }
   } catch (error) {
     return { healthy: false }
@@ -459,12 +460,12 @@ async function calculateErrorRate(): Promise<number> {
   const connection = getRedis()
   const [errors, total] = await Promise.all([
     connection ? connection.get('metrics:errors:hour') || '0' : Promise.resolve('0'),
-    connection ? connection.get('metrics:requests:hour') || '0' : Promise.resolve('0')
+    connection ? connection.get('metrics:requests:hour') || '0' : Promise.resolve('0'),
   ])
-  
+
   const errorCount = parseInt(errors)
   const totalCount = parseInt(total)
-  
+
   return totalCount > 0 ? errorCount / totalCount : 0
 }
 
@@ -473,13 +474,13 @@ function calculateHealthScore(components: Record<string, number>): number {
     redis: 0.3,
     database: 0.3,
     queues: 0.2,
-    errorRate: 0.2
+    errorRate: 0.2,
   }
-  
+
   let score = 0
   for (const [component, value] of Object.entries(components)) {
-    score += (value * (weights[component] || 0))
+    score += value * (weights[component] || 0)
   }
-  
+
   return Math.round(score)
 }

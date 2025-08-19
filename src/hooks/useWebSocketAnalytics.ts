@@ -51,7 +51,7 @@ export interface RealtimeEvent {
   id: string
   type: string
   timestamp: Date
-  data: any
+  data: unknown
   tenantId: string
   userId?: string
 }
@@ -75,7 +75,7 @@ interface UseWebSocketAnalyticsOptions {
   onConnect?: () => void
   onDisconnect?: () => void
   onError?: (error: Error) => void
-  onData?: (channel: string, data: any) => void
+  onData?: (channel: string, data: unknown) => void
 }
 
 interface UseWebSocketAnalyticsReturn {
@@ -88,21 +88,21 @@ interface UseWebSocketAnalyticsReturn {
   // Data streams
   analyticsData: AnalyticsData | null
   realtimeEvents: RealtimeEvent[]
-  
+
   // Connection methods
   connect: () => Promise<void>
   disconnect: () => void
   reconnect: () => Promise<void>
-  
+
   // Subscription methods
-  subscribe: (channel: string, filters?: any) => Promise<void>
+  subscribe: (channel: string, filters?: unknown) => Promise<void>
   unsubscribe: (channel: string) => Promise<void>
-  
+
   // Event methods
-  trackEvent: (eventType: string, data: any) => void
-  
+  trackEvent: (eventType: string, data: unknown) => void
+
   // Data methods
-  getLatestData: (channel: string) => any
+  getLatestData: (channel: string) => unknown
   clearEvents: () => void
 }
 
@@ -118,7 +118,7 @@ export function useWebSocketAnalytics(
     onConnect,
     onDisconnect,
     onError,
-    onData
+    onData,
   } = options
 
   // State
@@ -132,14 +132,14 @@ export function useWebSocketAnalytics(
     reconnectAttempts: 0,
     subscriptions: [],
     messagesReceived: 0,
-    errors: []
+    errors: [],
   })
 
   // Refs
   const socketRef = useRef<Socket | null>(null)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastPingRef = useRef<number>(0)
-  const dataBufferRef = useRef<Map<string, any>>(new Map())
+  const dataBufferRef = useRef<Map<string, unknown>>(new Map())
 
   // Connect to WebSocket server
   const connect = useCallback(async () => {
@@ -156,24 +156,23 @@ export function useWebSocketAnalytics(
           tenantId: session.user.tenantId,
           userId: session.user.id || session.user.email,
           userAgent: navigator.userAgent,
-          department: session.user.department
+          department: session.user.department,
         },
-        forceNew: true
+        forceNew: true,
       })
 
       socketRef.current = socket
 
       // Set up event handlers
       socket.on('connect', () => {
-        console.log('[WebSocket] Connected with ID:', socket.id)
         setIsConnected(true)
         setIsConnecting(false)
-        
-        setMetrics(prev => ({
+
+        setMetrics((prev) => ({
           ...prev,
           connected: true,
           connectionId: socket.id,
-          reconnectAttempts: 0
+          reconnectAttempts: 0,
         }))
 
         // Authenticate
@@ -182,15 +181,13 @@ export function useWebSocketAnalytics(
           tenantId: session.user.tenantId,
           userId: session.user.id || session.user.email,
           userAgent: navigator.userAgent,
-          department: session.user.department
+          department: session.user.department,
         })
 
         onConnect?.()
       })
 
       socket.on('authenticated', async (data) => {
-        console.log('[WebSocket] Authenticated:', data)
-        
         // Subscribe to default channels
         for (const channel of subscriptions) {
           await subscribeToChannel(channel)
@@ -198,16 +195,14 @@ export function useWebSocketAnalytics(
       })
 
       socket.on('authentication_failed', (data) => {
-        console.error('[WebSocket] Authentication failed:', data)
         setError('Authentication failed')
         setIsConnecting(false)
       })
 
       socket.on('disconnect', (reason) => {
-        console.log('[WebSocket] Disconnected:', reason)
         setIsConnected(false)
-        setMetrics(prev => ({ ...prev, connected: false }))
-        
+        setMetrics((prev) => ({ ...prev, connected: false }))
+
         onDisconnect?.()
 
         // Auto-reconnect if enabled
@@ -217,10 +212,9 @@ export function useWebSocketAnalytics(
       })
 
       socket.on('connect_error', (err) => {
-        console.error('[WebSocket] Connection error:', err)
         setError(err.message)
         setIsConnecting(false)
-        
+
         onError?.(err)
 
         if (autoReconnect) {
@@ -230,13 +224,16 @@ export function useWebSocketAnalytics(
 
       // Data handlers
       socket.on('initial_data', (data) => {
-        console.log('[WebSocket] Initial data received:', data.channel)
         handleDataUpdate(data.channel, data.data)
       })
 
       socket.on('analytics_update', (data) => {
         handleDataUpdate(data.channel, data.data)
-        setMetrics(prev => ({ ...prev, messagesReceived: prev.messagesReceived + 1, lastUpdate: new Date() }))
+        setMetrics((prev) => ({
+          ...prev,
+          messagesReceived: prev.messagesReceived + 1,
+          lastUpdate: new Date(),
+        }))
       })
 
       socket.on('metrics_update', (data) => {
@@ -244,36 +241,38 @@ export function useWebSocketAnalytics(
           setAnalyticsData(data.data)
         }
         handleDataUpdate(data.channel, data.data)
-        setMetrics(prev => ({ ...prev, messagesReceived: prev.messagesReceived + 1, lastUpdate: new Date() }))
+        setMetrics((prev) => ({
+          ...prev,
+          messagesReceived: prev.messagesReceived + 1,
+          lastUpdate: new Date(),
+        }))
       })
 
       socket.on('realtime_event', (data) => {
         const event: RealtimeEvent = {
           ...data.data,
-          timestamp: new Date(data.timestamp)
+          timestamp: new Date(data.timestamp),
         }
-        
-        setRealtimeEvents(prev => [...prev.slice(-49), event]) // Keep last 50 events
+
+        setRealtimeEvents((prev) => [...prev.slice(-49), event]) // Keep last 50 events
         handleDataUpdate(data.channel, event)
-        setMetrics(prev => ({ ...prev, messagesReceived: prev.messagesReceived + 1 }))
+        setMetrics((prev) => ({ ...prev, messagesReceived: prev.messagesReceived + 1 }))
       })
 
       socket.on('subscription_confirmed', (data) => {
-        console.log('[WebSocket] Subscription confirmed:', data.channel)
-        setMetrics(prev => ({
+        setMetrics((prev) => ({
           ...prev,
-          subscriptions: [...prev.subscriptions, data.channel]
+          subscriptions: [...prev.subscriptions, data.channel],
         }))
       })
 
       socket.on('subscription_error', (data) => {
-        console.error('[WebSocket] Subscription error:', data)
         setError(data.error)
       })
 
       socket.on('pong', (data) => {
         const latency = Date.now() - lastPingRef.current
-        setMetrics(prev => ({ ...prev, latency }))
+        setMetrics((prev) => ({ ...prev, latency }))
       })
 
       // Start ping/pong for latency measurement
@@ -288,42 +287,56 @@ export function useWebSocketAnalytics(
       return () => {
         clearInterval(pingInterval)
       }
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Connection failed')
       setIsConnecting(false)
       onError?.(err instanceof Error ? err : new Error('Connection failed'))
     }
-  }, [session, isConnecting, isConnected, subscriptions, autoReconnect, onConnect, onDisconnect, onError])
+  }, [
+    session,
+    isConnecting,
+    isConnected,
+    subscriptions,
+    autoReconnect,
+    onConnect,
+    onDisconnect,
+    onError,
+  ])
 
-  const subscribeToChannel = useCallback(async (channel: string, filters?: any) => {
-    const socket = socketRef.current
-    if (!socket || !isConnected) return
+  const subscribeToChannel = useCallback(
+    async (channel: string, filters?: unknown) => {
+      const socket = socketRef.current
+      if (!socket || !isConnected) return
 
-    const subscriptionData = {
-      channel,
-      filters: {
-        tenantId: session?.user?.tenantId || '',
-        timeframe: '5m' as const,
-        ...filters
+      const subscriptionData = {
+        channel,
+        filters: {
+          tenantId: session?.user?.tenantId || '',
+          timeframe: '5m' as const,
+          ...filters,
+        },
       }
-    }
 
-    socket.emit('subscribe', subscriptionData)
-  }, [isConnected, session?.user?.tenantId])
+      socket.emit('subscribe', subscriptionData)
+    },
+    [isConnected, session?.user?.tenantId]
+  )
 
-  const handleDataUpdate = useCallback((channel: string, data: any) => {
-    // Store in buffer for getLatestData
-    dataBufferRef.current.set(channel, data)
-    
-    // Call custom data handler
-    onData?.(channel, data)
-  }, [onData])
+  const handleDataUpdate = useCallback(
+    (channel: string, data: unknown) => {
+      // Store in buffer for getLatestData
+      dataBufferRef.current.set(channel, data)
+
+      // Call custom data handler
+      onData?.(channel, data)
+    },
+    [onData]
+  )
 
   const scheduleReconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) return
 
-    setMetrics(prev => {
+    setMetrics((prev) => {
       if (prev.reconnectAttempts >= maxReconnectAttempts) {
         setError('Max reconnection attempts reached')
         return prev
@@ -338,7 +351,7 @@ export function useWebSocketAnalytics(
 
       return {
         ...prev,
-        reconnectAttempts: prev.reconnectAttempts + 1
+        reconnectAttempts: prev.reconnectAttempts + 1,
       }
     })
   }, [maxReconnectAttempts, connect])
@@ -357,41 +370,50 @@ export function useWebSocketAnalytics(
 
     setIsConnected(false)
     setIsConnecting(false)
-    setMetrics(prev => ({ ...prev, connected: false }))
+    setMetrics((prev) => ({ ...prev, connected: false }))
   }, [])
 
   const reconnect = useCallback(async () => {
     disconnect()
-    await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1s before reconnecting
+    await new Promise((resolve) => setTimeout(resolve, 1000)) // Wait 1s before reconnecting
     await connect()
   }, [disconnect, connect])
 
-  const subscribe = useCallback(async (channel: string, filters?: any) => {
-    await subscribeToChannel(channel, filters)
-  }, [subscribeToChannel])
+  const subscribe = useCallback(
+    async (channel: string, filters?: unknown) => {
+      await subscribeToChannel(channel, filters)
+    },
+    [subscribeToChannel]
+  )
 
-  const unsubscribe = useCallback(async (channel: string) => {
-    const socket = socketRef.current
-    if (!socket || !isConnected) return
+  const unsubscribe = useCallback(
+    async (channel: string) => {
+      const socket = socketRef.current
+      if (!socket || !isConnected) return
 
-    socket.emit('unsubscribe', channel)
-    
-    setMetrics(prev => ({
-      ...prev,
-      subscriptions: prev.subscriptions.filter(s => s !== channel)
-    }))
-  }, [isConnected])
+      socket.emit('unsubscribe', channel)
 
-  const trackEvent = useCallback((eventType: string, data: any) => {
-    const socket = socketRef.current
-    if (!socket || !isConnected) return
+      setMetrics((prev) => ({
+        ...prev,
+        subscriptions: prev.subscriptions.filter((s) => s !== channel),
+      }))
+    },
+    [isConnected]
+  )
 
-    socket.emit('track_event', {
-      type: eventType,
-      data,
-      timestamp: new Date()
-    })
-  }, [isConnected])
+  const trackEvent = useCallback(
+    (eventType: string, data: unknown) => {
+      const socket = socketRef.current
+      if (!socket || !isConnected) return
+
+      socket.emit('track_event', {
+        type: eventType,
+        data,
+        timestamp: new Date(),
+      })
+    },
+    [isConnected]
+  )
 
   const getLatestData = useCallback((channel: string) => {
     return dataBufferRef.current.get(channel)
@@ -447,7 +469,7 @@ export function useWebSocketAnalytics(
 
     // Data methods
     getLatestData,
-    clearEvents
+    clearEvents,
   }
 }
 

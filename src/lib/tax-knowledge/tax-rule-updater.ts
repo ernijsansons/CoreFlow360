@@ -32,7 +32,7 @@ export class TaxRuleUpdater {
       rulesAdded: 0,
       rulesDeprecated: 0,
       updatesStagied: 0,
-      errors: []
+      errors: [],
     }
 
     for (const change of changes) {
@@ -44,7 +44,7 @@ export class TaxRuleUpdater {
         results.errors.push({
           changeId: change.id,
           error: error.message,
-          timestamp: new Date()
+          timestamp: new Date(),
         })
       }
     }
@@ -80,7 +80,7 @@ export class TaxRuleUpdater {
           confidence: 85,
           requiresReview: true,
           aiAnalysis: await this.generateAIAnalysis(change, null, newRule),
-          timestamp: new Date()
+          timestamp: new Date(),
         })
       }
     }
@@ -91,21 +91,23 @@ export class TaxRuleUpdater {
   // Check if tax change affects existing rule
   private doesChangeAffectRule(change: TaxChange, rule: TaxRule): boolean {
     // Check IRC section overlap
-    const sectionOverlap = change.affectedSections.some(section => 
-      rule.code.includes(section) || 
-      rule.applicableBusinessTypes?.some(type => 
-        change.categories.some(cat => this.categoryMatchesBusinessType(cat, type))
-      )
+    const sectionOverlap = change.affectedSections.some(
+      (section) =>
+        rule.code.includes(section) ||
+        rule.applicableBusinessTypes?.some((type) =>
+          change.categories.some((cat) => this.categoryMatchesBusinessType(cat, type))
+        )
     )
 
     // Check keyword overlap
-    const keywordOverlap = change.keywords.some(keyword =>
-      rule.description.toLowerCase().includes(keyword.toLowerCase()) ||
-      rule.guidancePrompt.toLowerCase().includes(keyword.toLowerCase())
+    const keywordOverlap = change.keywords.some(
+      (keyword) =>
+        rule.description.toLowerCase().includes(keyword.toLowerCase()) ||
+        rule.guidancePrompt.toLowerCase().includes(keyword.toLowerCase())
     )
 
     // Check category relevance
-    const categoryRelevance = change.categories.some(category =>
+    const categoryRelevance = change.categories.some((category) =>
       this.categoryAffectsRule(category, rule)
     )
 
@@ -113,7 +115,10 @@ export class TaxRuleUpdater {
   }
 
   // Generate rule update based on tax change
-  private async generateRuleUpdate(change: TaxChange, existingRule: TaxRule): Promise<TaxRuleUpdate | null> {
+  private async generateRuleUpdate(
+    change: TaxChange,
+    existingRule: TaxRule
+  ): Promise<TaxRuleUpdate | null> {
     const updatedRule = { ...existingRule }
     let changesMade = false
 
@@ -153,15 +158,15 @@ export class TaxRuleUpdater {
       confidence: 90,
       requiresReview: change.urgency === 'critical',
       aiAnalysis: await this.generateAIAnalysis(change, existingRule, updatedRule),
-      timestamp: new Date()
+      timestamp: new Date(),
     }
   }
 
   // Generate new tax rule from change
   private async generateNewRule(change: TaxChange): Promise<TaxRule | null> {
     // Determine if change warrants a new rule
-    const isNewProvision = !TAX_RULES_2025.some(rule =>
-      change.affectedSections.some(section => rule.code.includes(section))
+    const isNewProvision = !TAX_RULES_2025.some((rule) =>
+      change.affectedSections.some((section) => rule.code.includes(section))
     )
 
     if (!isNewProvision) return null
@@ -178,7 +183,7 @@ export class TaxRuleUpdater {
       effectiveDate: change.effectiveDate,
       expirationDate: await this.inferExpirationDate(change),
       complexity: this.assessComplexity(change),
-      estimatedImpact: await this.estimateRuleImpact(change)
+      estimatedImpact: await this.estimateRuleImpact(change),
     }
 
     return newRule
@@ -190,7 +195,7 @@ export class TaxRuleUpdater {
       applied: 0,
       skipped: 0,
       errors: [],
-      updatedRules: []
+      updatedRules: [],
     }
 
     for (const update of this.pendingUpdates) {
@@ -203,7 +208,7 @@ export class TaxRuleUpdater {
         await this.applyRuleUpdate(update)
         result.applied++
         result.updatedRules.push(update.newRule)
-        
+
         // Log the update
         this.updateLog.push({
           updateId: update.changeId,
@@ -211,21 +216,20 @@ export class TaxRuleUpdater {
           ruleId: update.ruleId,
           timestamp: new Date(),
           confidence: update.confidence,
-          reviewStatus: update.requiresReview ? 'approved' : 'auto-applied'
+          reviewStatus: update.requiresReview ? 'approved' : 'auto-applied',
         })
-
       } catch (error) {
         result.errors.push({
           updateId: update.changeId,
           error: error.message,
-          timestamp: new Date()
+          timestamp: new Date(),
         })
       }
     }
 
     // Clear applied updates
-    this.pendingUpdates = this.pendingUpdates.filter(update =>
-      update.requiresReview && !reviewApproved
+    this.pendingUpdates = this.pendingUpdates.filter(
+      (update) => update.requiresReview && !reviewApproved
     )
 
     return result
@@ -233,7 +237,7 @@ export class TaxRuleUpdater {
 
   // Get pending updates for review
   getPendingUpdates(): TaxRuleUpdate[] {
-    return this.pendingUpdates.filter(update => update.requiresReview)
+    return this.pendingUpdates.filter((update) => update.requiresReview)
   }
 
   // Get update history
@@ -246,28 +250,29 @@ export class TaxRuleUpdater {
   // Utility methods
   private categoryMatchesBusinessType(category: string, businessType: string): boolean {
     const mappings = {
-      'business_expenses': ['freelancer', 'small_business', 'corporation'],
-      'deductions': ['freelancer', 'small_business'],
-      'payroll': ['small_business', 'corporation'],
-      'international': ['corporation'],
-      'retirement': ['freelancer', 'small_business']
+      business_expenses: ['freelancer', 'small_business', 'corporation'],
+      deductions: ['freelancer', 'small_business'],
+      payroll: ['small_business', 'corporation'],
+      international: ['corporation'],
+      retirement: ['freelancer', 'small_business'],
     }
-    
+
     return mappings[category]?.includes(businessType) || false
   }
 
   private categoryAffectsRule(category: string, rule: TaxRule): boolean {
     const categoryKeywords = {
-      'deductions': ['deduction', 'deduct', 'expense'],
-      'credits': ['credit', 'tax credit'],
-      'compliance': ['filing', 'report', 'documentation'],
-      'business_expenses': ['business', 'expense', 'meal', 'travel']
+      deductions: ['deduction', 'deduct', 'expense'],
+      credits: ['credit', 'tax credit'],
+      compliance: ['filing', 'report', 'documentation'],
+      business_expenses: ['business', 'expense', 'meal', 'travel'],
     }
 
     const keywords = categoryKeywords[category] || []
-    return keywords.some(keyword =>
-      rule.description.toLowerCase().includes(keyword) ||
-      rule.guidancePrompt.toLowerCase().includes(keyword)
+    return keywords.some(
+      (keyword) =>
+        rule.description.toLowerCase().includes(keyword) ||
+        rule.guidancePrompt.toLowerCase().includes(keyword)
     )
   }
 
@@ -277,10 +282,12 @@ export class TaxRuleUpdater {
     oldRule: TaxRule | null,
     newRule: TaxRule
   ): Promise<string> {
-    return `AI Analysis: Tax change "${change.title}" ${oldRule ? 'updates' : 'creates new'} rule ${newRule.id}. ` +
-           `Change effective ${change.effectiveDate.toLocaleDateString()}. ` +
-           `Confidence: High. Review recommended for implementation details. ` +
-           `🚨 NOT TAX ADVICE - Professional consultation required 🚨`
+    return (
+      `AI Analysis: Tax change "${change.title}" ${oldRule ? 'updates' : 'creates new'} rule ${newRule.id}. ` +
+      `Change effective ${change.effectiveDate.toLocaleDateString()}. ` +
+      `Confidence: High. Review recommended for implementation details. ` +
+      `🚨 NOT TAX ADVICE - Professional consultation required 🚨`
+    )
   }
 
   // Helper methods for rule generation
@@ -298,7 +305,7 @@ export class TaxRuleUpdater {
     if (!numbers) return undefined
 
     return {
-      amount: parseInt(numbers[0].replace(/[$,]/g, '')) || 0
+      amount: parseInt(numbers[0].replace(/[$,]/g, '')) || 0,
     }
   }
 
@@ -330,7 +337,7 @@ export class TaxRuleUpdater {
     return 'moderate'
   }
 
-  private async estimateRuleImpact(change: TaxChange): Promise<{
+  private async estimateRuleImpact(_change: TaxChange): Promise<{
     potentialSavings: number
     implementationCost: number
     applicabilityScore: number
@@ -338,23 +345,31 @@ export class TaxRuleUpdater {
     return {
       potentialSavings: 1000, // Default estimate
       implementationCost: 200,
-      applicabilityScore: 75
+      applicabilityScore: 75,
     }
   }
 
   private async updateRuleDescription(description: string, change: TaxChange): Promise<string> {
     // Simple update - in production would use AI to intelligently update
     if (change.title.includes('threshold') && description.includes('threshold')) {
-      return description + ` Updated thresholds effective ${change.effectiveDate.toLocaleDateString()}.`
+      return (
+        description + ` Updated thresholds effective ${change.effectiveDate.toLocaleDateString()}.`
+      )
     }
     return description
   }
 
   private async updateGuidancePrompt(prompt: string, change: TaxChange): Promise<string> {
-    return prompt + ` Note: Recent changes effective ${change.effectiveDate.toLocaleDateString()} may affect this guidance - worth exploring with your tax professional.`
+    return (
+      prompt +
+      ` Note: Recent changes effective ${change.effectiveDate.toLocaleDateString()} may affect this guidance - worth exploring with your tax professional.`
+    )
   }
 
-  private async updateRuleThresholds(rule: TaxRule, change: TaxChange): Promise<Record<string, number> | null> {
+  private async updateRuleThresholds(
+    rule: TaxRule,
+    change: TaxChange
+  ): Promise<Record<string, number> | null> {
     if (!rule.thresholds || !change.title.includes('threshold')) return null
 
     // Mock threshold update - in production would parse actual new thresholds
@@ -367,8 +382,8 @@ export class TaxRuleUpdater {
 
   private async applyRuleUpdate(update: TaxRuleUpdate): Promise<void> {
     // In production, this would update the actual TAX_RULES_2025 database
-    const index = TAX_RULES_2025.findIndex(rule => rule.id === update.ruleId)
-    
+    const index = TAX_RULES_2025.findIndex((rule) => rule.id === update.ruleId)
+
     if (update.type === 'update' && index >= 0) {
       // Update existing rule
       TAX_RULES_2025[index] = update.newRule

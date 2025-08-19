@@ -20,7 +20,13 @@ export interface LegalCase {
   description: string
   clientId: string
   clientName: string
-  caseType: 'litigation' | 'corporate' | 'family' | 'criminal' | 'immigration' | 'intellectual_property'
+  caseType:
+    | 'litigation'
+    | 'corporate'
+    | 'family'
+    | 'criminal'
+    | 'immigration'
+    | 'intellectual_property'
   status: 'open' | 'in_progress' | 'on_hold' | 'closed' | 'settled'
   priority: 'low' | 'medium' | 'high' | 'urgent'
   assignedLawyers: string[]
@@ -89,7 +95,14 @@ export interface TimeEntry {
   duration: number // in minutes
   billableHours: number
   description: string
-  activityType: 'research' | 'drafting' | 'client_meeting' | 'court_appearance' | 'phone_call' | 'travel' | 'administrative'
+  activityType:
+    | 'research'
+    | 'drafting'
+    | 'client_meeting'
+    | 'court_appearance'
+    | 'phone_call'
+    | 'travel'
+    | 'administrative'
   billableRate: number
   totalAmount: number
   isBillable: boolean
@@ -180,7 +193,12 @@ export interface BillingInvoice {
 // Service Interfaces
 export interface DolibarrCaseService {
   // Case Management
-  createCase(caseData: Omit<LegalCase, 'id' | 'caseNumber' | 'documents' | 'timeEntries' | 'notes' | 'createdAt' | 'updatedAt'>): Promise<LegalCase>
+  createCase(
+    caseData: Omit<
+      LegalCase,
+      'id' | 'caseNumber' | 'documents' | 'timeEntries' | 'notes' | 'createdAt' | 'updatedAt'
+    >
+  ): Promise<LegalCase>
   getCase(id: string): Promise<LegalCase>
   updateCase(id: string, updates: Partial<LegalCase>): Promise<LegalCase>
   listCases(filters?: {
@@ -190,32 +208,49 @@ export interface DolibarrCaseService {
     assignedLawyer?: string
     dateRange?: { from: string; to: string }
   }): Promise<LegalCase[]>
-  
+
   // Case Documents
-  addDocument(caseId: string, document: Omit<CaseDocument, 'id' | 'uploadedAt'>): Promise<CaseDocument>
+  addDocument(
+    caseId: string,
+    document: Omit<CaseDocument, 'id' | 'uploadedAt'>
+  ): Promise<CaseDocument>
   getDocument(documentId: string): Promise<CaseDocument>
-  listDocuments(caseId: string, filters?: { documentType?: string; isPrivileged?: boolean }): Promise<CaseDocument[]>
-  
+  listDocuments(
+    caseId: string,
+    filters?: { documentType?: string; isPrivileged?: boolean }
+  ): Promise<CaseDocument[]>
+
   // Case Notes
   addNote(caseId: string, note: Omit<CaseNote, 'id' | 'createdAt' | 'updatedAt'>): Promise<CaseNote>
   updateNote(noteId: string, content: string): Promise<CaseNote>
   listNotes(caseId: string, includePrivileged?: boolean): Promise<CaseNote[]>
-  
+
   // Conflict Checking
-  performConflictCheck(clientInfo: any, opposingParties?: string[]): Promise<ConflictCheckResult>
+  performConflictCheck(
+    clientInfo: unknown,
+    opposingParties?: string[]
+  ): Promise<ConflictCheckResult>
   getConflictHistory(clientId: string): Promise<ConflictCheckResult[]>
 }
 
 export interface DolibarrTimeService {
   // Time Tracking
-  createTimeEntry(timeEntry: Omit<TimeEntry, 'id' | 'totalAmount' | 'createdAt' | 'updatedAt'>): Promise<TimeEntry>
+  createTimeEntry(
+    timeEntry: Omit<TimeEntry, 'id' | 'totalAmount' | 'createdAt' | 'updatedAt'>
+  ): Promise<TimeEntry>
   getTimeEntry(id: string): Promise<TimeEntry>
   updateTimeEntry(id: string, updates: Partial<TimeEntry>): Promise<TimeEntry>
   deleteTimeEntry(id: string): Promise<void>
-  
+
   // Time Entry Queries
-  getTimeEntriesByCase(caseId: string, dateRange?: { from: string; to: string }): Promise<TimeEntry[]>
-  getTimeEntriesByLawyer(lawyerId: string, dateRange?: { from: string; to: string }): Promise<TimeEntry[]>
+  getTimeEntriesByCase(
+    caseId: string,
+    dateRange?: { from: string; to: string }
+  ): Promise<TimeEntry[]>
+  getTimeEntriesByLawyer(
+    lawyerId: string,
+    dateRange?: { from: string; to: string }
+  ): Promise<TimeEntry[]>
   getBillableHours(filters: {
     caseId?: string
     lawyerId?: string
@@ -227,13 +262,16 @@ export interface DolibarrTimeService {
     nonBillableHours: number
     totalAmount: number
   }>
-  
+
   // Time Entry Approval
   submitTimeEntries(timeEntryIds: string[]): Promise<TimeEntry[]>
   approveTimeEntries(timeEntryIds: string[], approvedBy: string): Promise<TimeEntry[]>
-  
+
   // Expense Management
-  addExpenseToTimeEntry(timeEntryId: string, expense: Omit<TimeEntryExpense, 'id'>): Promise<TimeEntry>
+  addExpenseToTimeEntry(
+    timeEntryId: string,
+    expense: Omit<TimeEntryExpense, 'id'>
+  ): Promise<TimeEntry>
   updateExpense(expenseId: string, updates: Partial<TimeEntryExpense>): Promise<TimeEntryExpense>
 }
 
@@ -247,34 +285,51 @@ export interface DolibarrBillingService {
     billingPeriod: { startDate: string; endDate: string }
     dueDate: string
   }): Promise<BillingInvoice>
-  
+
   // Invoice Management
   getInvoice(id: string): Promise<BillingInvoice>
   updateInvoiceStatus(id: string, status: BillingInvoice['status']): Promise<BillingInvoice>
   sendInvoice(id: string, recipientEmail: string): Promise<BillingInvoice>
-  recordPayment(id: string, amount: number, paymentDate: string, method: string): Promise<BillingInvoice>
-  
+  recordPayment(
+    id: string,
+    amount: number,
+    paymentDate: string,
+    method: string
+  ): Promise<BillingInvoice>
+
   // Billing Reports
   getBillingReport(params: {
     clientId?: string
     lawyerId?: string
     dateRange: { from: string; to: string }
     includeNonBillable?: boolean
-  }): Promise<any>
-  
+  }): Promise<unknown>
+
   // Trust Accounting
-  updateRetainerBalance(clientId: string, amount: number, operation: 'add' | 'subtract', description: string): Promise<Client>
-  getRetainerBalance(clientId: string): Promise<{ balance: number; transactions: any[] }>
+  updateRetainerBalance(
+    clientId: string,
+    amount: number,
+    operation: 'add' | 'subtract',
+    description: string
+  ): Promise<Client>
+  getRetainerBalance(clientId: string): Promise<{ balance: number; transactions: unknown[] }>
 }
 
 // Validation Schemas
 const CaseSchema = z.object({
   title: z.string().min(1).max(500),
   clientId: z.string().uuid(),
-  caseType: z.enum(['litigation', 'corporate', 'family', 'criminal', 'immigration', 'intellectual_property']),
+  caseType: z.enum([
+    'litigation',
+    'corporate',
+    'family',
+    'criminal',
+    'immigration',
+    'intellectual_property',
+  ]),
   status: z.enum(['open', 'in_progress', 'on_hold', 'closed', 'settled']),
   priority: z.enum(['low', 'medium', 'high', 'urgent']),
-  assignedLawyers: z.array(z.string()).min(1)
+  assignedLawyers: z.array(z.string()).min(1),
 })
 
 const TimeEntrySchema = z.object({
@@ -284,9 +339,17 @@ const TimeEntrySchema = z.object({
   startTime: z.string(),
   endTime: z.string(),
   description: z.string().min(10).max(1000),
-  activityType: z.enum(['research', 'drafting', 'client_meeting', 'court_appearance', 'phone_call', 'travel', 'administrative']),
+  activityType: z.enum([
+    'research',
+    'drafting',
+    'client_meeting',
+    'court_appearance',
+    'phone_call',
+    'travel',
+    'administrative',
+  ]),
   billableRate: z.number().positive(),
-  isBillable: z.boolean()
+  isBillable: z.boolean(),
 })
 
 // Mock Implementation
@@ -316,19 +379,19 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
         courtName: 'Superior Court of California',
         judgeNames: ['Judge Sarah Johnson'],
         caseFileNumber: 'CV-2024-001234',
-        hearingDates: ['2024-02-15T10:00:00Z', '2024-03-10T14:00:00Z']
+        hearingDates: ['2024-02-15T10:00:00Z', '2024-03-10T14:00:00Z'],
       },
       importantDates: {
         caseOpenDate: '2023-11-15T00:00:00Z',
         nextHearingDate: '2024-02-15T10:00:00Z',
-        expectedCloseDate: '2024-06-30T00:00:00Z'
+        expectedCloseDate: '2024-06-30T00:00:00Z',
       },
       billingInfo: {
         billingType: 'hourly',
         hourlyRate: 450,
         totalBilled: 25000,
         totalPaid: 15000,
-        outstandingAmount: 10000
+        outstandingAmount: 10000,
       },
       documents: [],
       timeEntries: [],
@@ -336,17 +399,22 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
       conflictCheckStatus: 'cleared',
       confidentialityLevel: 'confidential',
       createdAt: '2023-11-15T09:30:00Z',
-      updatedAt: '2024-01-10T16:45:00Z'
+      updatedAt: '2024-01-10T16:45:00Z',
     }
 
     this.cases.set(mockCase.id, mockCase)
   }
 
-  async createCase(caseData: Omit<LegalCase, 'id' | 'caseNumber' | 'documents' | 'timeEntries' | 'notes' | 'createdAt' | 'updatedAt'>): Promise<LegalCase> {
+  async createCase(
+    caseData: Omit<
+      LegalCase,
+      'id' | 'caseNumber' | 'documents' | 'timeEntries' | 'notes' | 'createdAt' | 'updatedAt'
+    >
+  ): Promise<LegalCase> {
     CaseSchema.parse(caseData)
 
     const caseNumber = `CASE-${String(this.caseCounter++).padStart(6, '0')}`
-    
+
     const legalCase: LegalCase = {
       id: `case-${Date.now()}`,
       caseNumber,
@@ -355,13 +423,13 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
       timeEntries: [],
       notes: [],
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     this.cases.set(legalCase.id, legalCase)
 
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 600))
+    await new Promise((resolve) => setTimeout(resolve, 600))
 
     return legalCase
   }
@@ -383,7 +451,7 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
     const updatedCase: LegalCase = {
       ...legalCase,
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     this.cases.set(id, updatedCase)
@@ -401,21 +469,21 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
 
     if (filters) {
       if (filters.clientId) {
-        cases = cases.filter(c => c.clientId === filters.clientId)
+        cases = cases.filter((c) => c.clientId === filters.clientId)
       }
       if (filters.status) {
-        cases = cases.filter(c => filters.status!.includes(c.status))
+        cases = cases.filter((c) => filters.status!.includes(c.status))
       }
       if (filters.caseType) {
-        cases = cases.filter(c => filters.caseType!.includes(c.caseType))
+        cases = cases.filter((c) => filters.caseType!.includes(c.caseType))
       }
       if (filters.assignedLawyer) {
-        cases = cases.filter(c => c.assignedLawyers.includes(filters.assignedLawyer!))
+        cases = cases.filter((c) => c.assignedLawyers.includes(filters.assignedLawyer!))
       }
       if (filters.dateRange) {
         const from = new Date(filters.dateRange.from)
         const to = new Date(filters.dateRange.to)
-        cases = cases.filter(c => {
+        cases = cases.filter((c) => {
           const caseDate = new Date(c.createdAt)
           return caseDate >= from && caseDate <= to
         })
@@ -425,7 +493,10 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
     return cases
   }
 
-  async addDocument(caseId: string, documentData: Omit<CaseDocument, 'id' | 'uploadedAt'>): Promise<CaseDocument> {
+  async addDocument(
+    caseId: string,
+    documentData: Omit<CaseDocument, 'id' | 'uploadedAt'>
+  ): Promise<CaseDocument> {
     const legalCase = this.cases.get(caseId)
     if (!legalCase) {
       throw new Error('Case not found')
@@ -434,7 +505,7 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
     const document: CaseDocument = {
       id: `doc-${Date.now()}`,
       ...documentData,
-      uploadedAt: new Date().toISOString()
+      uploadedAt: new Date().toISOString(),
     }
 
     this.documents.set(document.id, document)
@@ -454,7 +525,10 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
     return { ...document }
   }
 
-  async listDocuments(caseId: string, filters?: { documentType?: string; isPrivileged?: boolean }): Promise<CaseDocument[]> {
+  async listDocuments(
+    caseId: string,
+    filters?: { documentType?: string; isPrivileged?: boolean }
+  ): Promise<CaseDocument[]> {
     const legalCase = this.cases.get(caseId)
     if (!legalCase) {
       throw new Error('Case not found')
@@ -464,17 +538,20 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
 
     if (filters) {
       if (filters.documentType) {
-        documents = documents.filter(doc => doc.documentType === filters.documentType)
+        documents = documents.filter((doc) => doc.documentType === filters.documentType)
       }
       if (filters.isPrivileged !== undefined) {
-        documents = documents.filter(doc => doc.isPrivileged === filters.isPrivileged)
+        documents = documents.filter((doc) => doc.isPrivileged === filters.isPrivileged)
       }
     }
 
     return documents
   }
 
-  async addNote(caseId: string, noteData: Omit<CaseNote, 'id' | 'createdAt' | 'updatedAt'>): Promise<CaseNote> {
+  async addNote(
+    caseId: string,
+    noteData: Omit<CaseNote, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<CaseNote> {
     const legalCase = this.cases.get(caseId)
     if (!legalCase) {
       throw new Error('Case not found')
@@ -484,7 +561,7 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
       id: `note-${Date.now()}`,
       ...noteData,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     this.notes.set(note.id, note)
@@ -503,7 +580,7 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
     const updatedNote: CaseNote = {
       ...note,
       content,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     this.notes.set(noteId, updatedNote)
@@ -519,15 +596,18 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
     let notes = legalCase.notes
 
     if (!includePrivileged) {
-      notes = notes.filter(note => !note.isPrivileged)
+      notes = notes.filter((note) => !note.isPrivileged)
     }
 
     return notes
   }
 
-  async performConflictCheck(clientInfo: any, opposingParties?: string[]): Promise<ConflictCheckResult> {
+  async performConflictCheck(
+    _clientInfo: unknown,
+    opposingParties?: string[]
+  ): Promise<ConflictCheckResult> {
     // Simulate conflict checking process
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    await new Promise((resolve) => setTimeout(resolve, 1500))
 
     const hasConflicts = Math.random() < 0.1 // 10% chance of conflicts
 
@@ -535,24 +615,26 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
       id: `conflict-${Date.now()}`,
       checkDate: new Date().toISOString(),
       checkedBy: 'system-automated',
-      conflicts: hasConflicts ? [
-        {
-          type: 'potential',
-          description: 'Previous representation of related entity',
-          relatedCases: ['case-123'],
-          severity: 'medium'
-        }
-      ] : [],
+      conflicts: hasConflicts
+        ? [
+            {
+              type: 'potential',
+              description: 'Previous representation of related entity',
+              relatedCases: ['case-123'],
+              severity: 'medium',
+            },
+          ]
+        : [],
       approved: !hasConflicts,
       approvedBy: hasConflicts ? undefined : 'conflict-officer',
       approvalDate: hasConflicts ? undefined : new Date().toISOString(),
-      notes: hasConflicts ? 'Requires manual review' : 'No conflicts found'
+      notes: hasConflicts ? 'Requires manual review' : 'No conflicts found',
     }
 
     return result
   }
 
-  async getConflictHistory(clientId: string): Promise<ConflictCheckResult[]> {
+  async getConflictHistory(_clientId: string): Promise<ConflictCheckResult[]> {
     // Return mock conflict history
     return [
       {
@@ -563,8 +645,8 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
         approved: true,
         approvedBy: 'conflict-officer',
         approvalDate: '2023-06-15T10:05:00Z',
-        notes: 'Initial client onboarding check - no conflicts'
-      }
+        notes: 'Initial client onboarding check - no conflicts',
+      },
     ]
   }
 }
@@ -573,7 +655,9 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
   private timeEntries: Map<string, TimeEntry> = new Map()
   private expenses: Map<string, TimeEntryExpense> = new Map()
 
-  async createTimeEntry(timeEntryData: Omit<TimeEntry, 'id' | 'totalAmount' | 'createdAt' | 'updatedAt'>): Promise<TimeEntry> {
+  async createTimeEntry(
+    timeEntryData: Omit<TimeEntry, 'id' | 'totalAmount' | 'createdAt' | 'updatedAt'>
+  ): Promise<TimeEntry> {
     TimeEntrySchema.parse(timeEntryData)
 
     const startTime = new Date(`${timeEntryData.date.split('T')[0]}T${timeEntryData.startTime}`)
@@ -591,13 +675,13 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
       status: 'draft',
       expenseItems: [],
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     this.timeEntries.set(timeEntry.id, timeEntry)
 
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 400))
+    await new Promise((resolve) => setTimeout(resolve, 400))
 
     return timeEntry
   }
@@ -619,16 +703,20 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
     const updatedTimeEntry: TimeEntry = {
       ...timeEntry,
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     // Recalculate amounts if relevant fields changed
     if (updates.startTime || updates.endTime || updates.billableRate || updates.isBillable) {
-      const startTime = new Date(`${updatedTimeEntry.date.split('T')[0]}T${updatedTimeEntry.startTime}`)
+      const startTime = new Date(
+        `${updatedTimeEntry.date.split('T')[0]}T${updatedTimeEntry.startTime}`
+      )
       const endTime = new Date(`${updatedTimeEntry.date.split('T')[0]}T${updatedTimeEntry.endTime}`)
       const duration = (endTime.getTime() - startTime.getTime()) / (1000 * 60)
       const billableHours = duration / 60
-      const totalAmount = updatedTimeEntry.isBillable ? billableHours * updatedTimeEntry.billableRate : 0
+      const totalAmount = updatedTimeEntry.isBillable
+        ? billableHours * updatedTimeEntry.billableRate
+        : 0
 
       updatedTimeEntry.duration = duration
       updatedTimeEntry.billableHours = billableHours
@@ -652,13 +740,16 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
     this.timeEntries.delete(id)
   }
 
-  async getTimeEntriesByCase(caseId: string, dateRange?: { from: string; to: string }): Promise<TimeEntry[]> {
-    let entries = Array.from(this.timeEntries.values()).filter(entry => entry.caseId === caseId)
+  async getTimeEntriesByCase(
+    caseId: string,
+    dateRange?: { from: string; to: string }
+  ): Promise<TimeEntry[]> {
+    let entries = Array.from(this.timeEntries.values()).filter((entry) => entry.caseId === caseId)
 
     if (dateRange) {
       const from = new Date(dateRange.from)
       const to = new Date(dateRange.to)
-      entries = entries.filter(entry => {
+      entries = entries.filter((entry) => {
         const entryDate = new Date(entry.date)
         return entryDate >= from && entryDate <= to
       })
@@ -667,13 +758,18 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
     return entries
   }
 
-  async getTimeEntriesByLawyer(lawyerId: string, dateRange?: { from: string; to: string }): Promise<TimeEntry[]> {
-    let entries = Array.from(this.timeEntries.values()).filter(entry => entry.lawyerId === lawyerId)
+  async getTimeEntriesByLawyer(
+    lawyerId: string,
+    dateRange?: { from: string; to: string }
+  ): Promise<TimeEntry[]> {
+    let entries = Array.from(this.timeEntries.values()).filter(
+      (entry) => entry.lawyerId === lawyerId
+    )
 
     if (dateRange) {
       const from = new Date(dateRange.from)
       const to = new Date(dateRange.to)
-      entries = entries.filter(entry => {
+      entries = entries.filter((entry) => {
         const entryDate = new Date(entry.date)
         return entryDate >= from && entryDate <= to
       })
@@ -697,27 +793,27 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
 
     // Apply filters
     if (filters.caseId) {
-      entries = entries.filter(entry => entry.caseId === filters.caseId)
+      entries = entries.filter((entry) => entry.caseId === filters.caseId)
     }
     if (filters.lawyerId) {
-      entries = entries.filter(entry => entry.lawyerId === filters.lawyerId)
+      entries = entries.filter((entry) => entry.lawyerId === filters.lawyerId)
     }
     if (filters.dateRange) {
       const from = new Date(filters.dateRange.from)
       const to = new Date(filters.dateRange.to)
-      entries = entries.filter(entry => {
+      entries = entries.filter((entry) => {
         const entryDate = new Date(entry.date)
         return entryDate >= from && entryDate <= to
       })
     }
     if (filters.status) {
-      entries = entries.filter(entry => filters.status!.includes(entry.status))
+      entries = entries.filter((entry) => filters.status!.includes(entry.status))
     }
 
     const totalHours = entries.reduce((sum, entry) => sum + entry.billableHours, 0)
-    const billableEntries = entries.filter(entry => entry.isBillable)
-    const nonBillableEntries = entries.filter(entry => !entry.isBillable)
-    
+    const billableEntries = entries.filter((entry) => entry.isBillable)
+    const nonBillableEntries = entries.filter((entry) => !entry.isBillable)
+
     const billableHours = billableEntries.reduce((sum, entry) => sum + entry.billableHours, 0)
     const nonBillableHours = nonBillableEntries.reduce((sum, entry) => sum + entry.billableHours, 0)
     const totalAmount = billableEntries.reduce((sum, entry) => sum + entry.totalAmount, 0)
@@ -726,7 +822,7 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
       totalHours,
       billableHours,
       nonBillableHours,
-      totalAmount
+      totalAmount,
     }
   }
 
@@ -736,25 +832,10 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
     for (const id of timeEntryIds) {
       const entry = this.timeEntries.get(id)
       if (entry && entry.status === 'draft') {
-        const updatedEntry = { ...entry, status: 'submitted' as const, updatedAt: new Date().toISOString() }
-        this.timeEntries.set(id, updatedEntry)
-        entries.push(updatedEntry)
-      }
-    }
-
-    return entries
-  }
-
-  async approveTimeEntries(timeEntryIds: string[], approvedBy: string): Promise<TimeEntry[]> {
-    const entries: TimeEntry[] = []
-
-    for (const id of timeEntryIds) {
-      const entry = this.timeEntries.get(id)
-      if (entry && entry.status === 'submitted') {
-        const updatedEntry = { 
-          ...entry, 
-          status: 'approved' as const, 
-          updatedAt: new Date().toISOString()
+        const updatedEntry = {
+          ...entry,
+          status: 'submitted' as const,
+          updatedAt: new Date().toISOString(),
         }
         this.timeEntries.set(id, updatedEntry)
         entries.push(updatedEntry)
@@ -764,7 +845,29 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
     return entries
   }
 
-  async addExpenseToTimeEntry(timeEntryId: string, expenseData: Omit<TimeEntryExpense, 'id'>): Promise<TimeEntry> {
+  async approveTimeEntries(_timeEntryIds: string[], _approvedBy: string): Promise<TimeEntry[]> {
+    const entries: TimeEntry[] = []
+
+    for (const id of timeEntryIds) {
+      const entry = this.timeEntries.get(id)
+      if (entry && entry.status === 'submitted') {
+        const updatedEntry = {
+          ...entry,
+          status: 'approved' as const,
+          updatedAt: new Date().toISOString(),
+        }
+        this.timeEntries.set(id, updatedEntry)
+        entries.push(updatedEntry)
+      }
+    }
+
+    return entries
+  }
+
+  async addExpenseToTimeEntry(
+    timeEntryId: string,
+    expenseData: Omit<TimeEntryExpense, 'id'>
+  ): Promise<TimeEntry> {
     const timeEntry = this.timeEntries.get(timeEntryId)
     if (!timeEntry) {
       throw new Error('Time entry not found')
@@ -772,7 +875,7 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
 
     const expense: TimeEntryExpense = {
       id: `expense-${Date.now()}`,
-      ...expenseData
+      ...expenseData,
     }
 
     this.expenses.set(expense.id, expense)
@@ -780,14 +883,17 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
     const updatedTimeEntry = {
       ...timeEntry,
       expenseItems: [...(timeEntry.expenseItems || []), expense],
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     this.timeEntries.set(timeEntryId, updatedTimeEntry)
     return updatedTimeEntry
   }
 
-  async updateExpense(expenseId: string, updates: Partial<TimeEntryExpense>): Promise<TimeEntryExpense> {
+  async updateExpense(
+    expenseId: string,
+    updates: Partial<TimeEntryExpense>
+  ): Promise<TimeEntryExpense> {
     const expense = this.expenses.get(expenseId)
     if (!expense) {
       throw new Error('Expense not found')

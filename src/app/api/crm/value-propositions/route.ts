@@ -6,7 +6,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import ValuePropositionEngine, { ValueProposition, ValuePropCategory } from '@/lib/crm/value-proposition-engine'
+import ValuePropositionEngine, {
+  ValueProposition,
+  ValuePropCategory,
+} from '@/lib/crm/value-proposition-engine'
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,12 +30,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Build query filters
-    const where: any = {
+    const where: unknown = {
       tenantId,
       ...(category && { category }),
       ...(active !== null && { isActive: active === 'true' }),
       ...(industry && { targetIndustry: { has: industry } }),
-      ...(persona && { targetPersona: { has: persona } })
+      ...(persona && { targetPersona: { has: persona } }),
     }
 
     const valuePropositions = await prisma.valueProposition.findMany({
@@ -42,21 +45,17 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             name: true,
-            email: true
-          }
+            email: true,
+          },
         },
         _count: {
           select: {
             customerProblems: true,
-            generatedInfographics: true
-          }
-        }
+            generatedInfographics: true,
+          },
+        },
       },
-      orderBy: [
-        { aiOptimizationScore: 'desc' },
-        { usageCount: 'desc' },
-        { createdAt: 'desc' }
-      ]
+      orderBy: [{ aiOptimizationScore: 'desc' }, { usageCount: 'desc' }, { createdAt: 'desc' }],
     })
 
     // Transform to include performance metrics
@@ -67,11 +66,11 @@ export async function GET(request: NextRequest) {
           where: {
             valuePropId: vp.id,
             dateperiod: {
-              gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
-            }
+              gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+            },
           },
           orderBy: { dateperiod: 'desc' },
-          take: 30
+          take: 30,
         })
 
         const totalViews = analytics.reduce((sum, a) => sum + (a.totalViews || 0), 0)
@@ -109,8 +108,8 @@ export async function GET(request: NextRequest) {
             totalViews,
             conversionRate: Math.round(conversionRate * 100) / 100,
             problemsMatched: vp._count.customerProblems,
-            materialsGenerated: vp._count.generatedInfographics
-          }
+            materialsGenerated: vp._count.generatedInfographics,
+          },
         }
       })
     )
@@ -120,24 +119,25 @@ export async function GET(request: NextRequest) {
       total: transformedValueProps.length,
       categories: Object.values(ValuePropCategory),
       summary: {
-        totalActive: transformedValueProps.filter(vp => vp.isActive).length,
-        avgOptimizationScore: Math.round(
-          transformedValueProps.reduce((sum, vp) => sum + vp.aiOptimizationScore, 0) / 
-          transformedValueProps.length * 100
-        ) / 100,
+        totalActive: transformedValueProps.filter((vp) => vp.isActive).length,
+        avgOptimizationScore:
+          Math.round(
+            (transformedValueProps.reduce((sum, vp) => sum + vp.aiOptimizationScore, 0) /
+              transformedValueProps.length) *
+              100
+          ) / 100,
         topPerforming: transformedValueProps
           .sort((a, b) => b.performanceMetrics.conversionRate - a.performanceMetrics.conversionRate)
           .slice(0, 3)
-          .map(vp => ({ id: vp.id, title: vp.title, conversionRate: vp.performanceMetrics.conversionRate }))
-      }
+          .map((vp) => ({
+            id: vp.id,
+            title: vp.title,
+            conversionRate: vp.performanceMetrics.conversionRate,
+          })),
+      },
     })
-
   } catch (error) {
-    console.error('Error fetching value propositions:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch value propositions' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch value propositions' }, { status: 500 })
   }
 }
 
@@ -168,15 +168,19 @@ export async function POST(request: NextRequest) {
       iconUrl,
       colorScheme,
       visualStyle = 'MODERN',
-      generateWithAI = false
+      generateWithAI = false,
     } = body
 
     // Validation
-    if (!tenantId || !title || !description || !category || !problemStatement || !solutionDescription) {
-      return NextResponse.json(
-        { error: 'Required fields missing' },
-        { status: 400 }
-      )
+    if (
+      !tenantId ||
+      !title ||
+      !description ||
+      !category ||
+      !problemStatement ||
+      !solutionDescription
+    ) {
+      return NextResponse.json({ error: 'Required fields missing' }, { status: 400 })
     }
 
     let valuePropData = {
@@ -203,7 +207,7 @@ export async function POST(request: NextRequest) {
       aiSuggestions: [],
       usageCount: 0,
       successRate: 0.0,
-      isActive: true
+      isActive: true,
     }
 
     // Use AI to enhance the value proposition if requested
@@ -224,7 +228,7 @@ export async function POST(request: NextRequest) {
         quantifiableBenefits: aiEnhancedVP.quantifiableBenefits,
         useCase: aiEnhancedVP.useCase,
         aiOptimizationScore: aiEnhancedVP.aiOptimizationScore,
-        aiSuggestions: aiEnhancedVP.aiSuggestions
+        aiSuggestions: aiEnhancedVP.aiSuggestions,
       }
     }
 
@@ -235,10 +239,10 @@ export async function POST(request: NextRequest) {
           select: {
             id: true,
             name: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     })
 
     // Initialize analytics tracking
@@ -257,8 +261,8 @@ export async function POST(request: NextRequest) {
         dealsInfluenced: 0,
         revenueInfluenced: 0,
         engagementRate: 0,
-        conversionRate: 0
-      }
+        conversionRate: 0,
+      },
     })
 
     return NextResponse.json({
@@ -288,16 +292,11 @@ export async function POST(request: NextRequest) {
         isActive: valueProposition.isActive,
         createdAt: valueProposition.createdAt.toISOString(),
         updatedAt: valueProposition.updatedAt.toISOString(),
-        user: valueProposition.user
-      }
+        user: valueProposition.user,
+      },
     })
-
   } catch (error) {
-    console.error('Error creating value proposition:', error)
-    return NextResponse.json(
-      { error: 'Failed to create value proposition' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create value proposition' }, { status: 500 })
   }
 }
 
@@ -319,8 +318,8 @@ export async function PUT(request: NextRequest) {
     const existingVP = await prisma.valueProposition.findFirst({
       where: {
         id,
-        tenantId: updateData.tenantId || session.user.tenantId
-      }
+        tenantId: updateData.tenantId || session.user.tenantId,
+      },
     })
 
     if (!existingVP) {
@@ -332,30 +331,29 @@ export async function PUT(request: NextRequest) {
     // Use AI to optimize the value proposition if requested
     if (optimizeWithAI) {
       const engine = new ValuePropositionEngine()
-      
+
       // Get recent performance data
       const recentAnalytics = await prisma.valuePropositionAnalytics.findMany({
         where: {
           valuePropId: id,
           datePeriod: {
-            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-          }
-        }
+            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          },
+        },
       })
 
       const totalViews = recentAnalytics.reduce((sum, a) => sum + (a.totalViews || 0), 0)
       const totalConversions = recentAnalytics.reduce((sum, a) => sum + (a.leadsGenerated || 0), 0)
-      const engagementRate = recentAnalytics.reduce((sum, a) => sum + Number(a.engagementRate || 0), 0) / Math.max(recentAnalytics.length, 1)
+      const engagementRate =
+        recentAnalytics.reduce((sum, a) => sum + Number(a.engagementRate || 0), 0) /
+        Math.max(recentAnalytics.length, 1)
       const conversionRate = totalViews > 0 ? (totalConversions / totalViews) * 100 : 0
 
-      const optimizedVP = await engine.optimizeValueProposition(
-        existingVP as any,
-        {
-          engagementRate,
-          conversionRate,
-          feedbackScore: 7.5 // Would come from actual feedback data
-        }
-      )
+      const optimizedVP = await engine.optimizeValueProposition(existingVP as unknown, {
+        engagementRate,
+        conversionRate,
+        feedbackScore: 7.5, // Would come from actual feedback data
+      })
 
       finalUpdateData = {
         ...finalUpdateData,
@@ -363,7 +361,7 @@ export async function PUT(request: NextRequest) {
         description: optimizedVP.description,
         keyBenefits: optimizedVP.keyBenefits,
         aiOptimizationScore: optimizedVP.aiOptimizationScore,
-        aiSuggestions: optimizedVP.aiSuggestions
+        aiSuggestions: optimizedVP.aiSuggestions,
       }
 
       // Track the optimization
@@ -380,8 +378,8 @@ export async function PUT(request: NextRequest) {
           confidenceScore: optimizedVP.aiOptimizationScore,
           originalPerformance: { engagementRate, conversionRate },
           optimizedPerformance: { expected: true },
-          status: 'IMPLEMENTED'
-        }
+          status: 'IMPLEMENTED',
+        },
       })
     }
 
@@ -393,10 +391,10 @@ export async function PUT(request: NextRequest) {
           select: {
             id: true,
             name: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     })
 
     return NextResponse.json({
@@ -426,16 +424,11 @@ export async function PUT(request: NextRequest) {
         isActive: updatedValueProposition.isActive,
         createdAt: updatedValueProposition.createdAt.toISOString(),
         updatedAt: updatedValueProposition.updatedAt.toISOString(),
-        user: updatedValueProposition.user
-      }
+        user: updatedValueProposition.user,
+      },
     })
-
   } catch (error) {
-    console.error('Error updating value proposition:', error)
-    return NextResponse.json(
-      { error: 'Failed to update value proposition' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to update value proposition' }, { status: 500 })
   }
 }
 
@@ -456,7 +449,7 @@ export async function DELETE(request: NextRequest) {
 
     // Check ownership/access
     const valueProposition = await prisma.valueProposition.findFirst({
-      where: { id, tenantId }
+      where: { id, tenantId },
     })
 
     if (!valueProposition) {
@@ -466,16 +459,11 @@ export async function DELETE(request: NextRequest) {
     // Soft delete by setting inactive (preserve analytics)
     await prisma.valueProposition.update({
       where: { id },
-      data: { isActive: false }
+      data: { isActive: false },
     })
 
     return NextResponse.json({ success: true })
-
   } catch (error) {
-    console.error('Error deleting value proposition:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete value proposition' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to delete value proposition' }, { status: 500 })
   }
 }

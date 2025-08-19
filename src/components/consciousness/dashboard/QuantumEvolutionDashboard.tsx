@@ -2,17 +2,17 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Brain, 
-  Zap, 
-  TrendingUp, 
-  Network, 
+import {
+  Brain,
+  Zap,
+  TrendingUp,
+  Network,
   Activity,
   Sparkles,
   Globe,
   Shield,
   BarChart3,
-  Users
+  Users,
 } from 'lucide-react'
 
 interface MetricCardProps {
@@ -24,22 +24,31 @@ interface MetricCardProps {
   consciousnessLevel: number
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({ title, value, change, icon, color, consciousnessLevel }) => {
+const MetricCard: React.FC<MetricCardProps> = ({
+  title,
+  value,
+  change,
+  icon,
+  color,
+  consciousnessLevel,
+}) => {
   return (
     <motion.div
-      className={`relative p-6 rounded-xl bg-black/50 backdrop-blur-md border ${color} overflow-hidden group`}
+      className={`relative rounded-xl border bg-black/50 p-6 backdrop-blur-md ${color} group overflow-hidden`}
       whileHover={{ scale: 1.02, y: -5 }}
-      transition={{ type: "spring", stiffness: 300 }}
+      transition={{ type: 'spring', stiffness: 300 }}
     >
       {/* Background consciousness effect */}
-      <div className={`absolute inset-0 opacity-10 bg-gradient-to-br ${color.replace('border-', 'from-')} to-transparent`} />
-      
+      <div
+        className={`absolute inset-0 bg-gradient-to-br opacity-10 ${color.replace('border-', 'from-')} to-transparent`}
+      />
+
       {/* Animated particles */}
       <div className="absolute inset-0">
         {[...Array(3)].map((_, i) => (
           <motion.div
             key={i}
-            className={`absolute w-1 h-1 rounded-full ${color.replace('border-', 'bg-')}`}
+            className={`absolute h-1 w-1 rounded-full ${color.replace('border-', 'bg-')}`}
             initial={{ x: 0, y: 0, opacity: 0 }}
             animate={{
               x: [0, Math.random() * 200 - 100],
@@ -50,37 +59,40 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, change, icon, col
               duration: 3,
               delay: i * 0.5,
               repeat: Infinity,
-              ease: "easeOut"
+              ease: 'easeOut',
             }}
           />
         ))}
       </div>
-      
+
       <div className="relative z-10">
-        <div className="flex items-start justify-between mb-4">
-          <div className={`p-3 rounded-lg ${color.replace('border-', 'bg-').replace(/(\d+)/, '$1/20')}`}>
+        <div className="mb-4 flex items-start justify-between">
+          <div
+            className={`rounded-lg p-3 ${color.replace('border-', 'bg-').replace(/(\d+)/, '$1/20')}`}
+          >
             {icon}
           </div>
           <div className={`text-sm font-medium ${change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {change >= 0 ? '+' : ''}{change}%
+            {change >= 0 ? '+' : ''}
+            {change}%
           </div>
         </div>
-        
-        <h3 className="text-gray-400 text-sm mb-1">{title}</h3>
+
+        <h3 className="mb-1 text-sm text-gray-400">{title}</h3>
         <p className="text-2xl font-bold text-white">{value}</p>
-        
+
         {/* Consciousness indicator */}
         <div className="mt-4">
-          <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+          <div className="mb-1 flex items-center justify-between text-xs text-gray-500">
             <span>Consciousness</span>
             <span>{consciousnessLevel}%</span>
           </div>
-          <div className="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-1 w-full overflow-hidden rounded-full bg-gray-800">
             <motion.div
               className={`h-full ${color.replace('border-', 'bg-')}`}
               initial={{ width: 0 }}
               animate={{ width: `${consciousnessLevel}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              transition={{ duration: 1, ease: 'easeOut' }}
             />
           </div>
         </div>
@@ -98,24 +110,44 @@ interface ConsciousnessPhase {
 
 const ConsciousnessMeter: React.FC<{ level: number }> = ({ level }) => {
   const phases: ConsciousnessPhase[] = [
-    { name: 'Neural', level: 25, color: 'from-blue-600 to-blue-400', description: 'Basic automation' },
-    { name: 'Synaptic', level: 50, color: 'from-purple-600 to-purple-400', description: 'Cross-module intelligence' },
-    { name: 'Autonomous', level: 75, color: 'from-amber-600 to-amber-400', description: 'Self-managing systems' },
-    { name: 'Transcendent', level: 100, color: 'from-white via-purple-200 to-blue-200', description: 'Full consciousness' },
+    {
+      name: 'Neural',
+      level: 25,
+      color: 'from-blue-600 to-blue-400',
+      description: 'Basic automation',
+    },
+    {
+      name: 'Synaptic',
+      level: 50,
+      color: 'from-purple-600 to-purple-400',
+      description: 'Cross-module intelligence',
+    },
+    {
+      name: 'Autonomous',
+      level: 75,
+      color: 'from-amber-600 to-amber-400',
+      description: 'Self-managing systems',
+    },
+    {
+      name: 'Transcendent',
+      level: 100,
+      color: 'from-white via-purple-200 to-blue-200',
+      description: 'Full consciousness',
+    },
   ]
-  
-  const currentPhase = phases.find(p => level <= p.level) || phases[3]
-  
+
+  const currentPhase = phases.find((p) => level <= p.level) || phases[3]
+
   return (
     <div className="relative">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-white mb-2">Business Consciousness Level</h2>
+      <div className="mb-8 text-center">
+        <h2 className="mb-2 text-3xl font-bold text-white">Business Consciousness Level</h2>
         <p className="text-gray-400">{currentPhase.description}</p>
       </div>
-      
-      <div className="relative w-64 h-64 mx-auto">
+
+      <div className="relative mx-auto h-64 w-64">
         {/* Background circle */}
-        <svg className="absolute inset-0 w-full h-full -rotate-90">
+        <svg className="absolute inset-0 h-full w-full -rotate-90">
           <circle
             cx="128"
             cy="128"
@@ -126,9 +158,9 @@ const ConsciousnessMeter: React.FC<{ level: number }> = ({ level }) => {
             className="text-gray-800"
           />
         </svg>
-        
+
         {/* Progress circle */}
-        <svg className="absolute inset-0 w-full h-full -rotate-90">
+        <svg className="absolute inset-0 h-full w-full -rotate-90">
           <motion.circle
             cx="128"
             cy="128"
@@ -139,7 +171,7 @@ const ConsciousnessMeter: React.FC<{ level: number }> = ({ level }) => {
             strokeLinecap="round"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: level / 100 }}
-            transition={{ duration: 2, ease: "easeInOut" }}
+            transition={{ duration: 2, ease: 'easeInOut' }}
             style={{ strokeDasharray: 754, strokeDashoffset: 0 }}
           />
           <defs>
@@ -150,27 +182,29 @@ const ConsciousnessMeter: React.FC<{ level: number }> = ({ level }) => {
             </linearGradient>
           </defs>
         </svg>
-        
+
         {/* Center content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <motion.div
-            className="text-5xl font-bold text-white mb-2"
+            className="mb-2 text-5xl font-bold text-white"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.5, type: "spring" }}
+            transition={{ delay: 0.5, type: 'spring' }}
           >
             {level}%
           </motion.div>
-          <div className={`text-lg font-medium bg-gradient-to-r ${currentPhase.color} bg-clip-text text-transparent`}>
+          <div
+            className={`bg-gradient-to-r text-lg font-medium ${currentPhase.color} bg-clip-text text-transparent`}
+          >
             {currentPhase.name}
           </div>
         </div>
-        
+
         {/* Orbiting particles */}
         {[...Array(3)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 rounded-full bg-consciousness-synaptic"
+            className="bg-consciousness-synaptic absolute h-2 w-2 rounded-full"
             style={{
               top: '50%',
               left: '50%',
@@ -183,11 +217,11 @@ const ConsciousnessMeter: React.FC<{ level: number }> = ({ level }) => {
             transition={{
               duration: 10 + i * 5,
               repeat: Infinity,
-              ease: "linear",
+              ease: 'linear',
             }}
           >
-            <div 
-              className="w-2 h-2 rounded-full bg-consciousness-synaptic animate-consciousness-pulse"
+            <div
+              className="bg-consciousness-synaptic animate-consciousness-pulse h-2 w-2 rounded-full"
               style={{ transform: `translateX(${120}px)` }}
             />
           </motion.div>
@@ -208,39 +242,39 @@ const AIEvolutionTree: React.FC = () => {
     { name: 'Legal', connections: 2, active: false },
     { name: 'Supply Chain', connections: 4, active: true },
   ]
-  
+
   return (
-    <div className="p-6 rounded-xl bg-black/50 backdrop-blur-md border border-consciousness-neural/30">
-      <h3 className="text-xl font-bold text-white mb-6">AI Evolution Tree</h3>
-      
+    <div className="border-consciousness-neural/30 rounded-xl border bg-black/50 p-6 backdrop-blur-md">
+      <h3 className="mb-6 text-xl font-bold text-white">AI Evolution Tree</h3>
+
       <div className="relative h-96">
         {/* Central node */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+        <div className="absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
           <motion.div
-            className="w-24 h-24 rounded-full bg-gradient-to-br from-consciousness-neural to-consciousness-synaptic flex items-center justify-center"
+            className="from-consciousness-neural to-consciousness-synaptic flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br"
             animate={{
               boxShadow: [
                 '0 0 20px rgba(124, 58, 237, 0.5)',
                 '0 0 40px rgba(124, 58, 237, 0.8)',
                 '0 0 20px rgba(124, 58, 237, 0.5)',
-              ]
+              ],
             }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <Brain className="w-10 h-10 text-white" />
+            <Brain className="h-10 w-10 text-white" />
           </motion.div>
         </div>
-        
+
         {/* Module nodes */}
         {modules.map((module, index) => {
           const angle = (index / modules.length) * 2 * Math.PI
           const x = Math.cos(angle) * 150 + 192 // center at 192px (half of 384px)
           const y = Math.sin(angle) * 150 + 192
-          
+
           return (
             <div key={module.name}>
               {/* Connection lines */}
-              <svg className="absolute inset-0 w-full h-full">
+              <svg className="absolute inset-0 h-full w-full">
                 <motion.line
                   x1="192"
                   y1="192"
@@ -253,18 +287,18 @@ const AIEvolutionTree: React.FC = () => {
                   transition={{ duration: 1, delay: index * 0.1 }}
                 />
               </svg>
-              
+
               {/* Module node */}
               <motion.div
-                className={`absolute w-16 h-16 rounded-full flex items-center justify-center text-xs font-medium ${
-                  module.active 
-                    ? 'bg-consciousness-synaptic/20 border-2 border-consciousness-synaptic text-white' 
-                    : 'bg-gray-800 border-2 border-gray-700 text-gray-400'
+                className={`absolute flex h-16 w-16 items-center justify-center rounded-full text-xs font-medium ${
+                  module.active
+                    ? 'bg-consciousness-synaptic/20 border-consciousness-synaptic border-2 text-white'
+                    : 'border-2 border-gray-700 bg-gray-800 text-gray-400'
                 }`}
                 style={{ left: x - 32, top: y - 32 }}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: index * 0.1, type: "spring" }}
+                transition={{ delay: index * 0.1, type: 'spring' }}
                 whileHover={{ scale: 1.1 }}
               >
                 <div className="text-center">
@@ -282,60 +316,60 @@ const AIEvolutionTree: React.FC = () => {
 
 const PredictiveInsights: React.FC = () => {
   const insights = [
-    { 
-      title: 'Revenue Growth Trajectory', 
-      prediction: '+34% in Q2', 
+    {
+      title: 'Revenue Growth Trajectory',
+      prediction: '+34% in Q2',
       confidence: 89,
-      icon: <TrendingUp className="w-5 h-5" />
+      icon: <TrendingUp className="h-5 w-5" />,
     },
-    { 
-      title: 'Customer Churn Risk', 
-      prediction: '2.3% reduction', 
+    {
+      title: 'Customer Churn Risk',
+      prediction: '2.3% reduction',
       confidence: 92,
-      icon: <Users className="w-5 h-5" />
+      icon: <Users className="h-5 w-5" />,
     },
-    { 
-      title: 'Operational Efficiency', 
-      prediction: '18% improvement', 
+    {
+      title: 'Operational Efficiency',
+      prediction: '18% improvement',
       confidence: 87,
-      icon: <Activity className="w-5 h-5" />
+      icon: <Activity className="h-5 w-5" />,
     },
-    { 
-      title: 'Market Expansion', 
-      prediction: '3 new segments', 
+    {
+      title: 'Market Expansion',
+      prediction: '3 new segments',
       confidence: 78,
-      icon: <Globe className="w-5 h-5" />
+      icon: <Globe className="h-5 w-5" />,
     },
   ]
-  
+
   return (
     <div className="space-y-4">
-      <h3 className="text-xl font-bold text-white mb-4">Predictive Intelligence</h3>
-      
+      <h3 className="mb-4 text-xl font-bold text-white">Predictive Intelligence</h3>
+
       {insights.map((insight, index) => (
         <motion.div
           key={insight.title}
-          className="p-4 rounded-lg bg-black/30 backdrop-blur-sm border border-consciousness-neural/20"
+          className="border-consciousness-neural/20 rounded-lg border bg-black/30 p-4 backdrop-blur-sm"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: index * 0.1 }}
         >
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-consciousness-neural/20 text-consciousness-neural">
+            <div className="bg-consciousness-neural/20 text-consciousness-neural rounded-lg p-2">
               {insight.icon}
             </div>
             <div className="flex-1">
-              <h4 className="text-sm font-medium text-white mb-1">{insight.title}</h4>
-              <p className="text-lg font-bold text-consciousness-neural">{insight.prediction}</p>
-              
+              <h4 className="mb-1 text-sm font-medium text-white">{insight.title}</h4>
+              <p className="text-consciousness-neural text-lg font-bold">{insight.prediction}</p>
+
               <div className="mt-2">
-                <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+                <div className="mb-1 flex items-center justify-between text-xs text-gray-400">
                   <span>AI Confidence</span>
                   <span>{insight.confidence}%</span>
                 </div>
-                <div className="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
+                <div className="h-1 w-full overflow-hidden rounded-full bg-gray-800">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-consciousness-neural to-consciousness-synaptic"
+                    className="from-consciousness-neural to-consciousness-synaptic h-full bg-gradient-to-r"
                     initial={{ width: 0 }}
                     animate={{ width: `${insight.confidence}%` }}
                     transition={{ duration: 1, delay: index * 0.1 + 0.5 }}
@@ -353,7 +387,7 @@ const PredictiveInsights: React.FC = () => {
 export default function QuantumEvolutionDashboard() {
   const [consciousnessLevel, setConsciousnessLevel] = useState(0)
   const [selectedTimeRange, setSelectedTimeRange] = useState('24h')
-  
+
   useEffect(() => {
     // Simulate consciousness level animation
     const timer = setTimeout(() => {
@@ -361,13 +395,13 @@ export default function QuantumEvolutionDashboard() {
     }, 500)
     return () => clearTimeout(timer)
   }, [])
-  
+
   const metrics = [
     {
       title: 'Active AI Agents',
       value: '24',
       change: 12,
-      icon: <Brain className="w-5 h-5 text-white" />,
+      icon: <Brain className="h-5 w-5 text-white" />,
       color: 'border-consciousness-neural/50',
       consciousnessLevel: 85,
     },
@@ -375,7 +409,7 @@ export default function QuantumEvolutionDashboard() {
       title: 'Process Automation',
       value: '87%',
       change: 8,
-      icon: <Zap className="w-5 h-5 text-white" />,
+      icon: <Zap className="h-5 w-5 text-white" />,
       color: 'border-consciousness-synaptic/50',
       consciousnessLevel: 92,
     },
@@ -383,7 +417,7 @@ export default function QuantumEvolutionDashboard() {
       title: 'Intelligence Score',
       value: '9.2',
       change: 15,
-      icon: <Sparkles className="w-5 h-5 text-white" />,
+      icon: <Sparkles className="h-5 w-5 text-white" />,
       color: 'border-consciousness-autonomous/50',
       consciousnessLevel: 78,
     },
@@ -391,32 +425,30 @@ export default function QuantumEvolutionDashboard() {
       title: 'System Health',
       value: '98%',
       change: 2,
-      icon: <Shield className="w-5 h-5 text-white" />,
+      icon: <Shield className="h-5 w-5 text-white" />,
       color: 'border-green-500/50',
       consciousnessLevel: 95,
     },
   ]
-  
+
   return (
     <div className="min-h-screen bg-black p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Quantum Evolution Dashboard
-          </h1>
+          <h1 className="mb-2 text-4xl font-bold text-white">Quantum Evolution Dashboard</h1>
           <p className="text-gray-400">
             Monitor your business consciousness evolution in real-time
           </p>
         </div>
-        
+
         {/* Time range selector */}
-        <div className="flex gap-2 mb-8">
+        <div className="mb-8 flex gap-2">
           {['24h', '7d', '30d', '90d'].map((range) => (
             <button
               key={range}
               onClick={() => setSelectedTimeRange(range)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                 selectedTimeRange === range
                   ? 'bg-consciousness-synaptic text-white'
                   : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
@@ -426,31 +458,31 @@ export default function QuantumEvolutionDashboard() {
             </button>
           ))}
         </div>
-        
+
         {/* Main grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Left column - Metrics */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             {/* Metric cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {metrics.map((metric) => (
                 <MetricCard key={metric.title} {...metric} />
               ))}
             </div>
-            
+
             {/* AI Evolution Tree */}
             <AIEvolutionTree />
           </div>
-          
+
           {/* Right column */}
           <div className="space-y-6">
             {/* Consciousness Meter */}
-            <div className="p-6 rounded-xl bg-black/50 backdrop-blur-md border border-consciousness-synaptic/30">
+            <div className="border-consciousness-synaptic/30 rounded-xl border bg-black/50 p-6 backdrop-blur-md">
               <ConsciousnessMeter level={consciousnessLevel} />
             </div>
-            
+
             {/* Predictive Insights */}
-            <div className="p-6 rounded-xl bg-black/50 backdrop-blur-md border border-consciousness-neural/30">
+            <div className="border-consciousness-neural/30 rounded-xl border bg-black/50 p-6 backdrop-blur-md">
               <PredictiveInsights />
             </div>
           </div>

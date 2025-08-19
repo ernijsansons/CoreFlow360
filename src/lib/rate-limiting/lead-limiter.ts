@@ -6,7 +6,11 @@
 import { Redis } from 'ioredis'
 
 // Skip initialization during build
-const isBuildTime = () => process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview'
+const isBuildTime = () =>
+  process.env.VERCEL ||
+  process.env.CI ||
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.VERCEL_ENV === 'preview'
 
 // Lazy Redis connection
 let redis: Redis | null = null
@@ -15,7 +19,7 @@ function getRedisConnection(): Redis | null {
   if (isBuildTime()) {
     return null
   }
-  
+
   if (!redis) {
     redis = new Redis({
       host: process.env.REDIS_HOST || 'localhost',
@@ -25,10 +29,10 @@ function getRedisConnection(): Redis | null {
       maxRetriesPerRequest: 3,
       retryDelayOnFailover: 50,
       lazyConnect: true,
-      enableOfflineQueue: false
+      enableOfflineQueue: false,
     })
   }
-  
+
   return redis
 }
 
@@ -53,7 +57,7 @@ export const rateLimiter = {
    * Check rate limit for lead webhook requests
    */
   async checkLimit(
-    clientKey: string, 
+    clientKey: string,
     config: RateLimitConfig = { max: 100, window: 60 }
   ): Promise<RateLimitResult> {
     const key = `rate_limit:leads:${clientKey}`
@@ -68,28 +72,28 @@ export const rateLimiter = {
         allowed: true,
         remaining: config.max,
         resetTime: now + window,
-        retryAfter: 0
+        retryAfter: 0,
       }
     }
 
     try {
       // Use Redis pipeline for atomic operations
       const pipeline = connection.pipeline()
-      
+
       // Remove old entries
       pipeline.zremrangebyscore(key, 0, windowStart)
-      
+
       // Count current requests in window
       pipeline.zcard(key)
-      
+
       // Add current request
       pipeline.zadd(key, now, `${now}-${Math.random()}`)
-      
+
       // Set expiry
       pipeline.expire(key, config.window)
-      
+
       const results = await pipeline.exec()
-      
+
       if (!results) {
         throw new Error('Redis pipeline failed')
       }
@@ -98,18 +102,18 @@ export const rateLimiter = {
       const allowed = currentCount < config.max
 
       // Handle burst capacity
-      if (!allowed && config.burst && currentCount < (config.max + config.burst)) {
+      if (!allowed && config.burst && currentCount < config.max + config.burst) {
         // Allow burst but with shorter window
         const burstKey = `rate_limit:burst:leads:${clientKey}`
         const burstCount = await connection.incr(burstKey)
         await connection.expire(burstKey, 10) // 10 second burst window
-        
+
         if (burstCount <= config.burst) {
           return {
             allowed: true,
             remaining: config.burst - burstCount,
-            resetTime: now + (10 * 1000),
-            retryAfter: 0
+            resetTime: now + 10 * 1000,
+            retryAfter: 0,
           }
         }
       }
@@ -121,17 +125,15 @@ export const rateLimiter = {
         allowed,
         remaining: Math.max(0, config.max - currentCount - 1),
         resetTime,
-        retryAfter
+        retryAfter,
       }
-
     } catch (error) {
-      console.error('Rate limit check error:', error)
       // Fail open - allow request if Redis is down
       return {
         allowed: true,
         remaining: config.max,
-        resetTime: now + (config.window * 1000),
-        retryAfter: 0
+        resetTime: now + config.window * 1000,
+        retryAfter: 0,
       }
     }
   },
@@ -139,17 +141,14 @@ export const rateLimiter = {
   /**
    * Check call limits with tiered restrictions
    */
-  async checkCallLimit(
-    tenantId: string,
-    priority: number = 3
-  ): Promise<RateLimitResult> {
+  async checkCallLimit(tenantId: string, priority: number = 3): Promise<RateLimitResult> {
     const configs = {
       // Per-minute limits
       minute: { max: parseInt(process.env.VOICE_CALLS_PER_MINUTE || '10'), window: 60 },
-      // Per-hour limits  
+      // Per-hour limits
       hour: { max: parseInt(process.env.VOICE_CALLS_PER_HOUR || '100'), window: 3600 },
       // Daily limits
-      day: { max: parseInt(process.env.VOICE_CALLS_PER_DAY || '1000'), window: 86400 }
+      day: { max: parseInt(process.env.VOICE_CALLS_PER_DAY || '1000'), window: 86400 },
     }
 
     // Priority adjustments (higher priority = more lenient limits)
@@ -160,32 +159,30 @@ export const rateLimiter = {
       const [minuteResult, hourResult, dayResult] = await Promise.all([
         this.checkTenantLimit(tenantId, 'minute', {
           ...configs.minute,
-          max: Math.floor(configs.minute.max * priorityMultiplier)
+          max: Math.floor(configs.minute.max * priorityMultiplier),
         }),
         this.checkTenantLimit(tenantId, 'hour', {
-          ...configs.hour, 
-          max: Math.floor(configs.hour.max * priorityMultiplier)
+          ...configs.hour,
+          max: Math.floor(configs.hour.max * priorityMultiplier),
         }),
         this.checkTenantLimit(tenantId, 'day', {
           ...configs.day,
-          max: Math.floor(configs.day.max * priorityMultiplier)
-        })
+          max: Math.floor(configs.day.max * priorityMultiplier),
+        }),
       ])
 
       // Return most restrictive result
       const results = [minuteResult, hourResult, dayResult]
-      const blockedResult = results.find(r => !r.allowed)
-      
-      return blockedResult || minuteResult
+      const blockedResult = results.find((r) => !r.allowed)
 
+      return blockedResult || minuteResult
     } catch (error) {
-      console.error('Call rate limit check error:', error)
       // Fail closed for calls - don't allow if error
       return {
         allowed: false,
         remaining: 0,
         resetTime: Date.now() + 60000,
-        retryAfter: 60
+        retryAfter: 60,
       }
     }
   },
@@ -210,26 +207,26 @@ export const rateLimiter = {
         allowed: true,
         remaining: config.max,
         resetTime: now + windowMs,
-        retryAfter: 0
+        retryAfter: 0,
       }
     }
 
     const pipeline = connection.pipeline()
-    
+
     // Remove old entries
     pipeline.zremrangebyscore(key, 0, windowStart)
-    
+
     // Count current calls
     pipeline.zcard(key)
-    
+
     // Add current call attempt
     pipeline.zadd(key, now, `${now}-${Math.random()}`)
-    
+
     // Set expiry
     pipeline.expire(key, config.window)
-    
+
     const results = await pipeline.exec()
-    
+
     if (!results) {
       throw new Error('Redis pipeline failed')
     }
@@ -241,7 +238,7 @@ export const rateLimiter = {
       allowed,
       remaining: Math.max(0, config.max - currentCount - 1),
       resetTime: now + windowMs,
-      retryAfter: allowed ? 0 : Math.ceil((windowStart + windowMs - now) / 1000)
+      retryAfter: allowed ? 0 : Math.ceil((windowStart + windowMs - now) / 1000),
     }
   },
 
@@ -250,50 +247,50 @@ export const rateLimiter = {
    */
   async getStatus(tenantId: string) {
     const now = Date.now()
-    
+
     const connection = getRedisConnection()
     if (!connection) {
       return {
         minute: {
           current: 0,
           limit: parseInt(process.env.VOICE_CALLS_PER_MINUTE || '10'),
-          remaining: parseInt(process.env.VOICE_CALLS_PER_MINUTE || '10')
+          remaining: parseInt(process.env.VOICE_CALLS_PER_MINUTE || '10'),
         },
         hour: {
           current: 0,
           limit: parseInt(process.env.VOICE_CALLS_PER_HOUR || '100'),
-          remaining: parseInt(process.env.VOICE_CALLS_PER_HOUR || '100')
+          remaining: parseInt(process.env.VOICE_CALLS_PER_HOUR || '100'),
         },
         day: {
           current: 0,
           limit: parseInt(process.env.VOICE_CALLS_PER_DAY || '1000'),
-          remaining: parseInt(process.env.VOICE_CALLS_PER_DAY || '1000')
-        }
+          remaining: parseInt(process.env.VOICE_CALLS_PER_DAY || '1000'),
+        },
       }
     }
-    
+
     const [minuteCount, hourCount, dayCount] = await Promise.all([
       connection.zcount(`rate_limit:calls:${tenantId}:minute`, now - 60000, now),
-      connection.zcount(`rate_limit:calls:${tenantId}:hour`, now - 3600000, now), 
-      connection.zcount(`rate_limit:calls:${tenantId}:day`, now - 86400000, now)
+      connection.zcount(`rate_limit:calls:${tenantId}:hour`, now - 3600000, now),
+      connection.zcount(`rate_limit:calls:${tenantId}:day`, now - 86400000, now),
     ])
 
     return {
       minute: {
         current: minuteCount,
         limit: parseInt(process.env.VOICE_CALLS_PER_MINUTE || '10'),
-        remaining: Math.max(0, parseInt(process.env.VOICE_CALLS_PER_MINUTE || '10') - minuteCount)
+        remaining: Math.max(0, parseInt(process.env.VOICE_CALLS_PER_MINUTE || '10') - minuteCount),
       },
       hour: {
         current: hourCount,
         limit: parseInt(process.env.VOICE_CALLS_PER_HOUR || '100'),
-        remaining: Math.max(0, parseInt(process.env.VOICE_CALLS_PER_HOUR || '100') - hourCount)
+        remaining: Math.max(0, parseInt(process.env.VOICE_CALLS_PER_HOUR || '100') - hourCount),
       },
       day: {
         current: dayCount,
         limit: parseInt(process.env.VOICE_CALLS_PER_DAY || '1000'),
-        remaining: Math.max(0, parseInt(process.env.VOICE_CALLS_PER_DAY || '1000') - dayCount)
-      }
+        remaining: Math.max(0, parseInt(process.env.VOICE_CALLS_PER_DAY || '1000') - dayCount),
+      },
     }
   },
 
@@ -304,18 +301,19 @@ export const rateLimiter = {
     try {
       // Get recent call success rate
       const successRate = await this.getCallSuccessRate(tenantId)
-      
+
       // Adjust limits based on success rate
       let multiplier = 1.0
-      if (successRate > 0.9) multiplier = 1.2      // Increase limit for high success
-      else if (successRate > 0.7) multiplier = 1.0  // Normal limit
-      else if (successRate > 0.5) multiplier = 0.8  // Reduce limit for poor success  
-      else multiplier = 0.5                          // Heavily restrict for very poor success
+      if (successRate > 0.9)
+        multiplier = 1.2 // Increase limit for high success
+      else if (successRate > 0.7)
+        multiplier = 1.0 // Normal limit
+      else if (successRate > 0.5)
+        multiplier = 0.8 // Reduce limit for poor success
+      else multiplier = 0.5 // Heavily restrict for very poor success
 
       return await this.checkCallLimit(tenantId, 3)
-      
     } catch (error) {
-      console.error('Adaptive rate limit check error:', error)
       // Fall back to standard rate limiting
       return await this.checkCallLimit(tenantId)
     }
@@ -326,17 +324,17 @@ export const rateLimiter = {
    */
   async getCallSuccessRate(tenantId: string): Promise<number> {
     const key = `call_success:${tenantId}`
-    
+
     const connection = getRedisConnection()
     if (!connection) {
       return 1.0 // Default to perfect if no Redis
     }
-    
+
     const results = await connection.hmget(key, 'successful', 'total')
-    
+
     const successful = parseInt(results[0] || '0')
     const total = parseInt(results[1] || '0')
-    
+
     return total > 0 ? successful / total : 1.0 // Default to perfect if no data
   },
 
@@ -345,22 +343,22 @@ export const rateLimiter = {
    */
   async recordCallResult(tenantId: string, success: boolean): Promise<void> {
     const key = `call_success:${tenantId}`
-    
+
     const connection = getRedisConnection()
     if (!connection) {
       return
     }
-    
+
     const pipeline = connection.pipeline()
-    
+
     if (success) {
       pipeline.hincrby(key, 'successful', 1)
     }
     pipeline.hincrby(key, 'total', 1)
     pipeline.expire(key, 86400) // 24 hour window for success rate
-    
+
     await pipeline.exec()
-  }
+  },
 }
 
 /**
@@ -371,9 +369,9 @@ export const callLimiter = {
    * Check if call should be queued or processed immediately
    */
   async shouldQueue(
-    tenantId: string, 
+    tenantId: string,
     priority: number,
-    leadData: any
+    leadData: unknown
   ): Promise<{
     shouldQueue: boolean
     queuePosition?: number
@@ -385,66 +383,64 @@ export const callLimiter = {
       if (!connection) {
         return {
           shouldQueue: false,
-          reason: 'redis_unavailable'
+          reason: 'redis_unavailable',
         }
       }
-      
+
       // Check current queue depth
       const queueDepth = await connection.llen(`call_queue:${tenantId}`)
-      
+
       // Check active calls
       const activeCalls = await connection.scard(`active_calls:${tenantId}`)
-      
+
       // Get tenant limits
       const maxConcurrent = parseInt(process.env.VOICE_MAX_CONCURRENT_CALLS || '5')
       const maxQueue = parseInt(process.env.VOICE_MAX_QUEUE_SIZE || '50')
-      
+
       // Priority calls get preferential treatment
       if (priority <= 2) {
         if (activeCalls < maxConcurrent) {
           return { shouldQueue: false }
         }
-        
+
         // High priority can jump queue
         if (queueDepth < maxQueue) {
           return {
             shouldQueue: true,
             queuePosition: Math.floor(queueDepth / 2), // Jump to front half
             estimatedDelay: Math.floor(queueDepth / 2) * 30, // 30 seconds per call
-            reason: 'high_priority_queued'
+            reason: 'high_priority_queued',
           }
         }
       }
-      
+
       // Normal priority processing
       if (activeCalls < maxConcurrent && queueDepth === 0) {
         return { shouldQueue: false }
       }
-      
+
       if (queueDepth >= maxQueue) {
         return {
           shouldQueue: true,
           queuePosition: -1,
           estimatedDelay: -1,
-          reason: 'queue_full'
+          reason: 'queue_full',
         }
       }
-      
+
       return {
         shouldQueue: true,
         queuePosition: queueDepth,
         estimatedDelay: queueDepth * 45, // 45 seconds average call time
-        reason: 'queue_processing'
+        reason: 'queue_processing',
       }
-      
     } catch (error) {
-      console.error('Queue check error:', error)
       // Default to queuing on error
       return {
         shouldQueue: true,
         queuePosition: 999,
         estimatedDelay: 300,
-        reason: 'error_default_queue'
+        reason: 'error_default_queue',
       }
     }
   },
@@ -452,39 +448,42 @@ export const callLimiter = {
   /**
    * Add call to processing queue
    */
-  async enqueueCall(tenantId: string, callData: any): Promise<string> {
+  async enqueueCall(tenantId: string, callData: unknown): Promise<string> {
     const queueKey = `call_queue:${tenantId}`
     const callId = `call_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    
+
     const connection = getRedisConnection()
     if (!connection) {
       throw new Error('Redis not available for enqueue')
     }
-    
-    await connection.lpush(queueKey, JSON.stringify({
-      id: callId,
-      ...callData,
-      queuedAt: Date.now()
-    }))
-    
+
+    await connection.lpush(
+      queueKey,
+      JSON.stringify({
+        id: callId,
+        ...callData,
+        queuedAt: Date.now(),
+      })
+    )
+
     return callId
   },
 
   /**
    * Process next call in queue
    */
-  async dequeueCall(tenantId: string): Promise<any | null> {
+  async dequeueCall(tenantId: string): Promise<unknown | null> {
     const queueKey = `call_queue:${tenantId}`
-    
+
     const connection = getRedisConnection()
     if (!connection) {
       return null
     }
-    
+
     const callData = await connection.rpop(queueKey)
-    
+
     if (!callData) return null
-    
+
     try {
       return JSON.parse(callData)
     } catch {
@@ -497,12 +496,12 @@ export const callLimiter = {
    */
   async trackActiveCall(tenantId: string, callSid: string): Promise<void> {
     const activeKey = `active_calls:${tenantId}`
-    
+
     const connection = getRedisConnection()
     if (!connection) {
       return
     }
-    
+
     await connection.sadd(activeKey, callSid)
     await connection.expire(activeKey, 3600) // 1 hour max call duration
   },
@@ -512,14 +511,14 @@ export const callLimiter = {
    */
   async removeActiveCall(tenantId: string, callSid: string): Promise<void> {
     const activeKey = `active_calls:${tenantId}`
-    
+
     const connection = getRedisConnection()
     if (!connection) {
       return
     }
-    
+
     await connection.srem(activeKey, callSid)
-  }
+  },
 }
 
 /**
@@ -535,35 +534,36 @@ export const globalLimiter = {
       if (!connection) {
         return { healthy: true, reason: 'redis_unavailable' }
       }
-      
+
       // Check Redis memory usage
       const memoryInfo = await connection.memory('usage')
       const memoryUsage = memoryInfo / (1024 * 1024) // Convert to MB
       const maxMemory = parseInt(process.env.REDIS_MAX_MEMORY_MB || '512')
-      
+
       if (memoryUsage > maxMemory * 0.9) {
         return { healthy: false, reason: 'redis_memory_high' }
       }
-      
+
       // Check total active calls across all tenants
-      const totalActive = await connection.eval(`
+      const totalActive = (await connection.eval(
+        `
         local total = 0
         for i, key in ipairs(redis.call('KEYS', 'active_calls:*')) do
           total = total + redis.call('SCARD', key)
         end
         return total
-      `, 0) as number
-      
+      `,
+        0
+      )) as number
+
       const maxSystemCalls = parseInt(process.env.VOICE_SYSTEM_MAX_CALLS || '100')
-      
+
       if (totalActive > maxSystemCalls) {
         return { healthy: false, reason: 'system_overload' }
       }
-      
+
       return { healthy: true }
-      
     } catch (error) {
-      console.error('System load check error:', error)
       return { healthy: false, reason: 'check_error' }
     }
   },
@@ -573,20 +573,21 @@ export const globalLimiter = {
    */
   async enableEmergencyMode(reason: string, duration: number = 300): Promise<void> {
     const key = 'system:emergency_mode'
-    
+
     const connection = getRedisConnection()
     if (!connection) {
-      console.warn('Cannot enable emergency mode - Redis unavailable')
       return
     }
-    
-    await connection.setex(key, duration, JSON.stringify({
-      enabled: true,
-      reason,
-      enabledAt: Date.now()
-    }))
-    
-    console.warn(`🚨 Emergency mode enabled: ${reason}`)
+
+    await connection.setex(
+      key,
+      duration,
+      JSON.stringify({
+        enabled: true,
+        reason,
+        enabledAt: Date.now(),
+      })
+    )
   },
 
   /**
@@ -594,13 +595,13 @@ export const globalLimiter = {
    */
   async isEmergencyMode(): Promise<boolean> {
     const key = 'system:emergency_mode'
-    
+
     const connection = getRedisConnection()
     if (!connection) {
       return false
     }
-    
+
     const result = await connection.get(key)
     return !!result
-  }
+  },
 }

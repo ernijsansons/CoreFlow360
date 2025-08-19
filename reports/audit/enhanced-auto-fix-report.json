@@ -1,0 +1,815 @@
+{
+  "timestamp": "2025-08-18T18:47:14.223Z",
+  "totalIterations": 100,
+  "issuesHistory": [
+    {
+      "iteration": 1,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 2,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 3,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 4,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 5,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 6,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 7,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 8,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 9,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 10,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 11,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 12,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 13,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 14,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 15,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 16,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 17,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 18,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 19,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 20,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 21,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 22,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 23,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 24,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 25,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 26,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 27,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 28,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 29,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 30,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 31,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 32,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 33,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 34,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 35,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 36,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 37,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 38,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 39,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 40,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 41,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 42,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 43,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 44,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 45,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 46,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 47,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 48,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 49,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 50,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 51,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 52,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 53,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 54,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 55,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 56,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 57,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 58,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 59,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 60,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 61,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 62,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 63,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 64,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 65,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 66,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 67,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 68,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 69,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 70,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 71,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 72,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 73,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 74,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 75,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 76,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 77,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 78,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 79,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 80,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 81,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 82,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 83,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 84,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 85,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 86,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 87,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 88,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 89,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 90,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 91,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 92,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 93,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 94,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 95,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 96,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 97,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 98,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 99,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    },
+    {
+      "iteration": 100,
+      "totalIssues": 1,
+      "criticalIssues": 32,
+      "highIssues": 33,
+      "mediumIssues": 34,
+      "lowIssues": 34
+    }
+  ],
+  "finalIssues": {
+    "iteration": 100,
+    "totalIssues": 1,
+    "criticalIssues": 32,
+    "highIssues": 33,
+    "mediumIssues": 34,
+    "lowIssues": 34
+  },
+  "improvement": 0
+}

@@ -25,29 +25,28 @@ const isBuildPhase = () => {
 function createPrismaClient(): PrismaClient | null {
   // EMERGENCY: Return null during build phase to prevent connection attempts
   if (isBuildPhase()) {
-    console.log('[DB] Build phase detected - returning null client')
     return null
   }
 
   // Get database URL
   const databaseUrl = process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/db'
-  
+
   // Runtime configuration
   const isDevelopment = process.env.NODE_ENV === 'development'
   const isProduction = process.env.NODE_ENV === 'production'
 
   return new PrismaClient({
     datasources: {
-      db: { url: databaseUrl }
+      db: { url: databaseUrl },
     },
-    log: isDevelopment 
+    log: isDevelopment
       ? [
           { emit: 'event', level: 'query' },
           { emit: 'event', level: 'error' },
-          { emit: 'event', level: 'warn' }
+          { emit: 'event', level: 'warn' },
         ]
       : [{ emit: 'event', level: 'error' }],
-    errorFormat: isDevelopment ? 'pretty' : 'minimal'
+    errorFormat: isDevelopment ? 'pretty' : 'minimal',
   })
 }
 

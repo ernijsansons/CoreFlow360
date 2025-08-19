@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Play, 
-  Pause, 
+import React, { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Play,
+  Pause,
   Square,
-  Calendar, 
+  Calendar,
   Clock,
-  AlertTriangle, 
-  CheckCircle, 
+  AlertTriangle,
+  CheckCircle,
   XCircle,
   Activity,
   Workflow,
@@ -23,73 +23,79 @@ import {
   Timer,
   Users,
   Target,
-  TrendingUp
-} from 'lucide-react';
+  TrendingUp,
+} from 'lucide-react'
 
 interface WorkflowExecution {
-  id: string;
-  workflowId: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'timeout';
-  startTime: Date;
-  endTime?: Date;
-  duration?: number;
+  id: string
+  workflowId: string
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'timeout'
+  startTime: Date
+  endTime?: Date
+  duration?: number
   triggeredBy: {
-    type: 'event' | 'schedule' | 'manual' | 'threshold' | 'api_call';
-    source: string;
-    metadata?: Record<string, any>;
-  };
+    type: 'event' | 'schedule' | 'manual' | 'threshold' | 'api_call'
+    source: string
+    metadata?: Record<string, unknown>
+  }
   actionResults: Array<{
-    actionId: string;
-    status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
-    startTime?: Date;
-    endTime?: Date;
-    result?: any;
-    error?: string;
-  }>;
+    actionId: string
+    status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped'
+    startTime?: Date
+    endTime?: Date
+    result?: unknown
+    error?: string
+  }>
   metrics: {
-    totalActions: number;
-    completedActions: number;
-    failedActions: number;
-    skippedActions: number;
-  };
+    totalActions: number
+    completedActions: number
+    failedActions: number
+    skippedActions: number
+  }
 }
 
 interface PrivacyWorkflow {
-  id: string;
-  name: string;
-  description: string;
-  triggerType: 'event' | 'schedule' | 'manual' | 'threshold' | 'api_call';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  isActive: boolean;
+  id: string
+  name: string
+  description: string
+  triggerType: 'event' | 'schedule' | 'manual' | 'threshold' | 'api_call'
+  priority: 'low' | 'medium' | 'high' | 'critical'
+  isActive: boolean
   schedule?: {
-    frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
-    nextRun?: Date;
-  };
+    frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly'
+    nextRun?: Date
+  }
   lastExecution?: {
-    status: string;
-    startTime: Date;
-    duration?: number;
-  };
+    status: string
+    startTime: Date
+    duration?: number
+  }
   metrics: {
-    totalExecutions: number;
-    successRate: number;
-    averageDuration: number;
-  };
+    totalExecutions: number
+    successRate: number
+    averageDuration: number
+  }
 }
 
 interface WorkflowTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: 'compliance' | 'risk_management' | 'incident_response' | 'data_subject_rights' | 'monitoring' | 'testing';
-  estimatedDuration: number;
-  tags: string[];
+  id: string
+  name: string
+  description: string
+  category:
+    | 'compliance'
+    | 'risk_management'
+    | 'incident_response'
+    | 'data_subject_rights'
+    | 'monitoring'
+    | 'testing'
+  estimatedDuration: number
+  tags: string[]
 }
 
 export function PrivacyWorkflowDashboard() {
-  const [workflows, setWorkflows] = useState<PrivacyWorkflow[]>([]);
-  const [activeExecutions, setActiveExecutions] = useState<WorkflowExecution[]>([]);
-  const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
+  const [workflows, setWorkflows] = useState<PrivacyWorkflow[]>([])
+  const [activeExecutions, setActiveExecutions] = useState<WorkflowExecution[]>([])
+  const [templates, setTemplates] = useState<WorkflowTemplate[]>([])
   const [dashboardMetrics, setDashboardMetrics] = useState({
     totalWorkflows: 0,
     activeWorkflows: 0,
@@ -97,14 +103,14 @@ export function PrivacyWorkflowDashboard() {
     todayExecutions: 0,
     successRate: 0,
     avgExecutionTime: 0,
-    recentActivity: []
-  });
+    recentActivity: [],
+  })
 
   useEffect(() => {
-    loadWorkflows();
-    loadTemplates();
-    loadDashboardMetrics();
-  }, []);
+    loadWorkflows()
+    loadTemplates()
+    loadDashboardMetrics()
+  }, [])
 
   const loadWorkflows = async () => {
     // Mock data - in production, fetch from API
@@ -112,24 +118,25 @@ export function PrivacyWorkflowDashboard() {
       {
         id: 'daily_health_check',
         name: 'Daily Privacy Health Check',
-        description: 'Daily automated privacy compliance health check including consent audits and risk assessment',
+        description:
+          'Daily automated privacy compliance health check including consent audits and risk assessment',
         triggerType: 'schedule',
         priority: 'medium',
         isActive: true,
         schedule: {
           frequency: 'daily',
-          nextRun: new Date(Date.now() + 8 * 60 * 60 * 1000) // 8 hours from now
+          nextRun: new Date(Date.now() + 8 * 60 * 60 * 1000), // 8 hours from now
         },
         lastExecution: {
           status: 'completed',
           startTime: new Date(Date.now() - 24 * 60 * 60 * 1000),
-          duration: 450000
+          duration: 450000,
         },
         metrics: {
           totalExecutions: 30,
           successRate: 96.7,
-          averageDuration: 420000
-        }
+          averageDuration: 420000,
+        },
       },
       {
         id: 'gdpr_compliance_check',
@@ -140,18 +147,18 @@ export function PrivacyWorkflowDashboard() {
         isActive: true,
         schedule: {
           frequency: 'weekly',
-          nextRun: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+          nextRun: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
         },
         lastExecution: {
           status: 'completed',
           startTime: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-          duration: 1200000
+          duration: 1200000,
         },
         metrics: {
           totalExecutions: 12,
           successRate: 100,
-          averageDuration: 1150000
-        }
+          averageDuration: 1150000,
+        },
       },
       {
         id: 'breach_response',
@@ -163,13 +170,13 @@ export function PrivacyWorkflowDashboard() {
         lastExecution: {
           status: 'completed',
           startTime: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
-          duration: 1800000
+          duration: 1800000,
         },
         metrics: {
           totalExecutions: 3,
           successRate: 100,
-          averageDuration: 1650000
-        }
+          averageDuration: 1650000,
+        },
       },
       {
         id: 'data_subject_requests',
@@ -180,17 +187,17 @@ export function PrivacyWorkflowDashboard() {
         isActive: true,
         lastExecution: {
           status: 'running',
-          startTime: new Date(Date.now() - 30 * 60 * 1000)
+          startTime: new Date(Date.now() - 30 * 60 * 1000),
         },
         metrics: {
           totalExecutions: 156,
           successRate: 94.2,
-          averageDuration: 900000
-        }
-      }
-    ];
+          averageDuration: 900000,
+        },
+      },
+    ]
 
-    setWorkflows(mockWorkflows);
+    setWorkflows(mockWorkflows)
 
     // Mock active executions
     const mockExecutions: WorkflowExecution[] = [
@@ -201,24 +208,24 @@ export function PrivacyWorkflowDashboard() {
         startTime: new Date(Date.now() - 30 * 60 * 1000),
         triggeredBy: {
           type: 'event',
-          source: 'data_subject_request_submitted'
+          source: 'data_subject_request_submitted',
         },
         actionResults: [
           { actionId: 'verify_identity', status: 'completed' },
           { actionId: 'process_request', status: 'running' },
-          { actionId: 'notify_completion', status: 'pending' }
+          { actionId: 'notify_completion', status: 'pending' },
         ],
         metrics: {
           totalActions: 3,
           completedActions: 1,
           failedActions: 0,
-          skippedActions: 0
-        }
-      }
-    ];
+          skippedActions: 0,
+        },
+      },
+    ]
 
-    setActiveExecutions(mockExecutions);
-  };
+    setActiveExecutions(mockExecutions)
+  }
 
   const loadTemplates = async () => {
     const mockTemplates: WorkflowTemplate[] = [
@@ -228,7 +235,7 @@ export function PrivacyWorkflowDashboard() {
         description: 'Automated workflow for GDPR data breach incident response',
         category: 'incident_response',
         estimatedDuration: 1800000,
-        tags: ['gdpr', 'incident', 'breach', 'notification']
+        tags: ['gdpr', 'incident', 'breach', 'notification'],
       },
       {
         id: 'consent_optimization',
@@ -236,7 +243,7 @@ export function PrivacyWorkflowDashboard() {
         description: 'Workflow to optimize consent collection and management',
         category: 'compliance',
         estimatedDuration: 900000,
-        tags: ['consent', 'optimization', 'gdpr', 'ccpa']
+        tags: ['consent', 'optimization', 'gdpr', 'ccpa'],
       },
       {
         id: 'vendor_assessment',
@@ -244,7 +251,7 @@ export function PrivacyWorkflowDashboard() {
         description: 'Automated privacy risk assessment for third-party vendors',
         category: 'risk_management',
         estimatedDuration: 1200000,
-        tags: ['vendor', 'risk', 'assessment', 'third-party']
+        tags: ['vendor', 'risk', 'assessment', 'third-party'],
       },
       {
         id: 'data_retention_cleanup',
@@ -252,12 +259,12 @@ export function PrivacyWorkflowDashboard() {
         description: 'Automated cleanup of data based on retention policies',
         category: 'compliance',
         estimatedDuration: 600000,
-        tags: ['retention', 'cleanup', 'gdpr', 'data_minimization']
-      }
-    ];
+        tags: ['retention', 'cleanup', 'gdpr', 'data_minimization'],
+      },
+    ]
 
-    setTemplates(mockTemplates);
-  };
+    setTemplates(mockTemplates)
+  }
 
   const loadDashboardMetrics = async () => {
     const metrics = {
@@ -268,89 +275,103 @@ export function PrivacyWorkflowDashboard() {
       successRate: 95.8,
       avgExecutionTime: 720000,
       recentActivity: [
-        { workflowName: 'Daily Privacy Health Check', status: 'completed', startTime: new Date(Date.now() - 2 * 60 * 60 * 1000), duration: 420000 },
-        { workflowName: 'Data Subject Request', status: 'running', startTime: new Date(Date.now() - 30 * 60 * 1000) },
-        { workflowName: 'Risk Assessment', status: 'completed', startTime: new Date(Date.now() - 4 * 60 * 60 * 1000), duration: 180000 },
-      ]
-    };
+        {
+          workflowName: 'Daily Privacy Health Check',
+          status: 'completed',
+          startTime: new Date(Date.now() - 2 * 60 * 60 * 1000),
+          duration: 420000,
+        },
+        {
+          workflowName: 'Data Subject Request',
+          status: 'running',
+          startTime: new Date(Date.now() - 30 * 60 * 1000),
+        },
+        {
+          workflowName: 'Risk Assessment',
+          status: 'completed',
+          startTime: new Date(Date.now() - 4 * 60 * 60 * 1000),
+          duration: 180000,
+        },
+      ],
+    }
 
-    setDashboardMetrics(metrics);
-  };
+    setDashboardMetrics(metrics)
+  }
 
   const executeWorkflow = async (workflowId: string) => {
-    console.log(`Executing workflow: ${workflowId}`);
     // Mock API call to execute workflow
-    
+
     // Update workflow status optimistically
-    setWorkflows(prev => prev.map(w => 
-      w.id === workflowId ? { ...w, lastExecution: { status: 'running', startTime: new Date() } } : w
-    ));
-  };
+    setWorkflows((prev) =>
+      prev.map((w) =>
+        w.id === workflowId
+          ? { ...w, lastExecution: { status: 'running', startTime: new Date() } }
+          : w
+      )
+    )
+  }
 
   const pauseWorkflow = async (workflowId: string) => {
-    setWorkflows(prev => prev.map(w => 
-      w.id === workflowId ? { ...w, isActive: false } : w
-    ));
-  };
+    setWorkflows((prev) => prev.map((w) => (w.id === workflowId ? { ...w, isActive: false } : w)))
+  }
 
   const resumeWorkflow = async (workflowId: string) => {
-    setWorkflows(prev => prev.map(w => 
-      w.id === workflowId ? { ...w, isActive: true } : w
-    ));
-  };
+    setWorkflows((prev) => prev.map((w) => (w.id === workflowId ? { ...w, isActive: true } : w)))
+  }
 
-  const createWorkflowFromTemplate = async (templateId: string) => {
-    console.log(`Creating workflow from template: ${templateId}`);
+  const createWorkflowFromTemplate = async (_templateId: string) => {
     // Mock workflow creation
-  };
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'running':
-        return <Activity className="h-4 w-4 text-blue-500 animate-pulse" />;
+        return <Activity className="h-4 w-4 animate-pulse text-blue-500" />
       case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-green-500" />
       case 'failed':
-        return <XCircle className="h-4 w-4 text-red-500" />;
+        return <XCircle className="h-4 w-4 text-red-500" />
       case 'timeout':
-        return <Timer className="h-4 w-4 text-orange-500" />;
+        return <Timer className="h-4 w-4 text-orange-500" />
       default:
-        return <Clock className="h-4 w-4 text-gray-400" />;
+        return <Clock className="h-4 w-4 text-gray-400" />
     }
-  };
+  }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800'
       case 'high':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-orange-100 text-orange-800'
       case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800'
       case 'low':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800'
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800'
     }
-  };
+  }
 
   const formatDuration = (ms?: number) => {
-    if (!ms) return 'N/A';
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    return `${minutes}m ${seconds}s`;
-  };
+    if (!ms) return 'N/A'
+    const minutes = Math.floor(ms / 60000)
+    const seconds = Math.floor((ms % 60000) / 1000)
+    return `${minutes}m ${seconds}s`
+  }
 
   const formatSuccessRate = (rate: number) => {
-    return `${rate.toFixed(1)}%`;
-  };
+    return `${rate.toFixed(1)}%`
+  }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Privacy Workflow Orchestration</h1>
-          <p className="text-gray-600 mt-2">Automated privacy compliance workflows and orchestration</p>
+          <p className="mt-2 text-gray-600">
+            Automated privacy compliance workflows and orchestration
+          </p>
         </div>
         <div className="flex gap-2">
           <Button className="flex items-center gap-2">
@@ -365,7 +386,7 @@ export function PrivacyWorkflowDashboard() {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -398,7 +419,9 @@ export function PrivacyWorkflowDashboard() {
               <Target className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm font-medium">Success Rate</p>
-                <p className="text-2xl font-bold text-green-600">{formatSuccessRate(dashboardMetrics.successRate)}</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {formatSuccessRate(dashboardMetrics.successRate)}
+                </p>
                 <p className="text-xs text-gray-600">Last 30 days</p>
               </div>
             </div>
@@ -411,7 +434,9 @@ export function PrivacyWorkflowDashboard() {
               <Timer className="h-5 w-5 text-orange-500" />
               <div>
                 <p className="text-sm font-medium">Avg Duration</p>
-                <p className="text-2xl font-bold">{formatDuration(dashboardMetrics.avgExecutionTime)}</p>
+                <p className="text-2xl font-bold">
+                  {formatDuration(dashboardMetrics.avgExecutionTime)}
+                </p>
                 <p className="text-xs text-gray-600">Per execution</p>
               </div>
             </div>
@@ -428,7 +453,7 @@ export function PrivacyWorkflowDashboard() {
         </TabsList>
 
         <TabsContent value="workflows" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {workflows.map((workflow) => (
               <Card key={workflow.id}>
                 <CardHeader className="pb-3">
@@ -457,9 +482,13 @@ export function PrivacyWorkflowDashboard() {
                       <span className="text-gray-500">Status:</span>
                       <div className="flex items-center gap-1">
                         {workflow.isActive ? (
-                          <Badge variant="outline" className="text-green-600 border-green-600">Active</Badge>
+                          <Badge variant="outline" className="border-green-600 text-green-600">
+                            Active
+                          </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-gray-600">Paused</Badge>
+                          <Badge variant="outline" className="text-gray-600">
+                            Paused
+                          </Badge>
                         )}
                       </div>
                     </div>
@@ -490,40 +519,44 @@ export function PrivacyWorkflowDashboard() {
                   )}
 
                   <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="p-2 bg-gray-50 rounded">
+                    <div className="rounded bg-gray-50 p-2">
                       <p className="font-medium">{workflow.metrics.totalExecutions}</p>
                       <p className="text-gray-600">Executions</p>
                     </div>
-                    <div className="p-2 bg-gray-50 rounded">
-                      <p className="font-medium text-green-600">{formatSuccessRate(workflow.metrics.successRate)}</p>
+                    <div className="rounded bg-gray-50 p-2">
+                      <p className="font-medium text-green-600">
+                        {formatSuccessRate(workflow.metrics.successRate)}
+                      </p>
                       <p className="text-gray-600">Success</p>
                     </div>
-                    <div className="p-2 bg-gray-50 rounded">
-                      <p className="font-medium">{formatDuration(workflow.metrics.averageDuration)}</p>
+                    <div className="rounded bg-gray-50 p-2">
+                      <p className="font-medium">
+                        {formatDuration(workflow.metrics.averageDuration)}
+                      </p>
                       <p className="text-gray-600">Avg Time</p>
                     </div>
                   </div>
 
                   <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       onClick={() => executeWorkflow(workflow.id)}
                       className="flex-1"
                     >
-                      <Play className="h-3 w-3 mr-1" />
+                      <Play className="mr-1 h-3 w-3" />
                       Run Now
                     </Button>
                     {workflow.isActive ? (
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => pauseWorkflow(workflow.id)}
                       >
                         <Pause className="h-3 w-3" />
                       </Button>
                     ) : (
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => resumeWorkflow(workflow.id)}
                       >
@@ -541,17 +574,21 @@ export function PrivacyWorkflowDashboard() {
           {activeExecutions.length > 0 ? (
             <div className="space-y-4">
               {activeExecutions.map((execution) => {
-                const workflow = workflows.find(w => w.id === execution.workflowId);
-                const progress = (execution.metrics.completedActions / execution.metrics.totalActions) * 100;
-                
+                const workflow = workflows.find((w) => w.id === execution.workflowId)
+                const progress =
+                  (execution.metrics.completedActions / execution.metrics.totalActions) * 100
+
                 return (
                   <Card key={execution.id}>
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
                         <div>
-                          <CardTitle className="text-lg">{workflow?.name || 'Unknown Workflow'}</CardTitle>
+                          <CardTitle className="text-lg">
+                            {workflow?.name || 'Unknown Workflow'}
+                          </CardTitle>
                           <p className="text-sm text-gray-600">
-                            Triggered by {execution.triggeredBy.type}: {execution.triggeredBy.source}
+                            Triggered by {execution.triggeredBy.type}:{' '}
+                            {execution.triggeredBy.source}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -564,9 +601,12 @@ export function PrivacyWorkflowDashboard() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
-                        <div className="flex justify-between text-sm mb-2">
+                        <div className="mb-2 flex justify-between text-sm">
                           <span>Progress</span>
-                          <span>{execution.metrics.completedActions}/{execution.metrics.totalActions} actions</span>
+                          <span>
+                            {execution.metrics.completedActions}/{execution.metrics.totalActions}{' '}
+                            actions
+                          </span>
                         </div>
                         <Progress value={progress} />
                       </div>
@@ -585,14 +625,14 @@ export function PrivacyWorkflowDashboard() {
                       </div>
 
                       <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Action Status</h4>
+                        <h4 className="text-sm font-medium">Action Status</h4>
                         {execution.actionResults.map((action, index) => (
                           <div key={action.actionId} className="flex items-center gap-2 text-sm">
-                            <div className="w-6 h-6 flex items-center justify-center">
+                            <div className="flex h-6 w-6 items-center justify-center">
                               {action.status === 'completed' ? (
                                 <CheckCircle className="h-4 w-4 text-green-500" />
                               ) : action.status === 'running' ? (
-                                <Activity className="h-4 w-4 text-blue-500 animate-pulse" />
+                                <Activity className="h-4 w-4 animate-pulse text-blue-500" />
                               ) : action.status === 'failed' ? (
                                 <XCircle className="h-4 w-4 text-red-500" />
                               ) : (
@@ -600,12 +640,18 @@ export function PrivacyWorkflowDashboard() {
                               )}
                             </div>
                             <span className="flex-1">Action {index + 1}</span>
-                            <Badge variant="outline" className={
-                              action.status === 'completed' ? 'text-green-600 border-green-600' :
-                              action.status === 'running' ? 'text-blue-600 border-blue-600' :
-                              action.status === 'failed' ? 'text-red-600 border-red-600' :
-                              'text-gray-600 border-gray-600'
-                            }>
+                            <Badge
+                              variant="outline"
+                              className={
+                                action.status === 'completed'
+                                  ? 'border-green-600 text-green-600'
+                                  : action.status === 'running'
+                                    ? 'border-blue-600 text-blue-600'
+                                    : action.status === 'failed'
+                                      ? 'border-red-600 text-red-600'
+                                      : 'border-gray-600 text-gray-600'
+                              }
+                            >
                               {action.status}
                             </Badge>
                           </div>
@@ -616,21 +662,21 @@ export function PrivacyWorkflowDashboard() {
                         <Button size="sm" variant="outline" className="flex-1">
                           View Details
                         </Button>
-                        <Button size="sm" variant="outline" className="text-red-600 border-red-600">
-                          <Square className="h-3 w-3 mr-1" />
+                        <Button size="sm" variant="outline" className="border-red-600 text-red-600">
+                          <Square className="mr-1 h-3 w-3" />
                           Cancel
                         </Button>
                       </div>
                     </CardContent>
                   </Card>
-                );
+                )
               })}
             </div>
           ) : (
             <Card>
               <CardContent className="p-8 text-center">
-                <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Executions</h3>
+                <Activity className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                <h3 className="mb-2 text-lg font-medium text-gray-900">No Active Executions</h3>
                 <p className="text-gray-600">All workflows are currently idle</p>
               </CardContent>
             </Card>
@@ -638,9 +684,9 @@ export function PrivacyWorkflowDashboard() {
         </TabsContent>
 
         <TabsContent value="templates" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {templates.map((template) => (
-              <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow">
+              <Card key={template.id} className="cursor-pointer transition-shadow hover:shadow-md">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">{template.name}</CardTitle>
                   <p className="text-sm text-gray-600">{template.description}</p>
@@ -663,12 +709,12 @@ export function PrivacyWorkflowDashboard() {
                     ))}
                   </div>
 
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     size="sm"
                     onClick={() => createWorkflowFromTemplate(template.id)}
                   >
-                    <Plus className="h-3 w-3 mr-1" />
+                    <Plus className="mr-1 h-3 w-3" />
                     Create Workflow
                   </Button>
                 </CardContent>
@@ -688,7 +734,10 @@ export function PrivacyWorkflowDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {dashboardMetrics.recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+                  >
                     <div className="flex items-center gap-3">
                       {getStatusIcon(activity.status)}
                       <div>
@@ -699,15 +748,19 @@ export function PrivacyWorkflowDashboard() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <Badge className={
-                        activity.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        activity.status === 'running' ? 'bg-blue-100 text-blue-800' :
-                        'bg-gray-100 text-gray-800'
-                      }>
+                      <Badge
+                        className={
+                          activity.status === 'completed'
+                            ? 'bg-green-100 text-green-800'
+                            : activity.status === 'running'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-gray-100 text-gray-800'
+                        }
+                      >
                         {activity.status}
                       </Badge>
                       {activity.duration && (
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="mt-1 text-sm text-gray-600">
                           {formatDuration(activity.duration)}
                         </p>
                       )}
@@ -720,5 +773,5 @@ export function PrivacyWorkflowDashboard() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

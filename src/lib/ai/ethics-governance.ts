@@ -69,23 +69,23 @@ const DEFAULT_ETHICAL_GUIDELINES: EthicalGuidelines = {
   fairness: {
     demographic_parity_threshold: 0.05, // 5% max difference
     equalized_odds_threshold: 0.05,
-    disparate_impact_threshold: 0.8 // 80% rule
+    disparate_impact_threshold: 0.8, // 80% rule
   },
   transparency: {
     model_explainability_required: true,
     decision_logging_required: true,
-    user_consent_required: true
+    user_consent_required: true,
   },
   privacy: {
     data_minimization: true,
     anonymization_required: true,
-    retention_limits: 365 // 1 year
+    retention_limits: 365, // 1 year
   },
   accountability: {
     human_oversight_required: true,
     appeal_process_available: true,
-    audit_frequency_days: 30
-  }
+    audit_frequency_days: 30,
+  },
 }
 
 export class AIEthicsGovernance {
@@ -95,7 +95,7 @@ export class AIEthicsGovernance {
   constructor(customGuidelines?: Partial<EthicalGuidelines>) {
     this.guidelines = {
       ...DEFAULT_ETHICAL_GUIDELINES,
-      ...customGuidelines
+      ...customGuidelines,
     }
   }
 
@@ -103,82 +103,96 @@ export class AIEthicsGovernance {
    * Perform comprehensive bias audit on AI model predictions
    */
   async auditModelBias(
-    predictions: Array<{ prediction: number; actual: number; protected_attributes: Record<string, any> }>,
+    predictions: Array<{
+      prediction: number
+      actual: number
+      protected_attributes: Record<string, unknown>
+    }>,
     protectedAttributes: string[]
   ): Promise<BiasAuditResult> {
-    return withPerformanceTracking(
-      'ai.ethics.auditBias',
-      async () => {
-        // Calculate fairness metrics
-        const fairnessMetrics = this.calculateFairnessMetrics(predictions, protectedAttributes)
-        
-        // Analyze protected attributes
-        const protectedAttributeAnalysis = await this.analyzeProtectedAttributes(
-          predictions,
-          protectedAttributes
-        )
-        
-        // Calculate model performance by group
-        const performanceByGroup = this.calculatePerformanceByGroup(predictions, protectedAttributes)
-        
-        // Calculate overall bias score (weighted combination of metrics)
-        const overallBiasScore = this.calculateOverallBiasScore(fairnessMetrics, protectedAttributeAnalysis)
-        
-        // Determine compliance status
-        const complianceStatus = this.determineComplianceStatus(overallBiasScore, protectedAttributeAnalysis)
-        
-        const auditResult: BiasAuditResult = {
-          overall_bias_score: overallBiasScore,
-          fairness_metrics: fairnessMetrics,
-          protected_attributes: protectedAttributeAnalysis,
-          model_performance: performanceByGroup,
-          audit_timestamp: new Date().toISOString(),
-          compliance_status: complianceStatus
-        }
-        
-        // Store audit result
-        this.auditHistory.push(auditResult)
-        
-        // Alert if bias detected
-        if (complianceStatus === 'violation' || overallBiasScore > 0.3) {
-          await this.triggerBiasAlert(auditResult)
-        }
-        
-        return auditResult
+    return withPerformanceTracking('ai.ethics.auditBias', async () => {
+      // Calculate fairness metrics
+      const fairnessMetrics = this.calculateFairnessMetrics(predictions, protectedAttributes)
+
+      // Analyze protected attributes
+      const protectedAttributeAnalysis = await this.analyzeProtectedAttributes(
+        predictions,
+        protectedAttributes
+      )
+
+      // Calculate model performance by group
+      const performanceByGroup = this.calculatePerformanceByGroup(predictions, protectedAttributes)
+
+      // Calculate overall bias score (weighted combination of metrics)
+      const overallBiasScore = this.calculateOverallBiasScore(
+        fairnessMetrics,
+        protectedAttributeAnalysis
+      )
+
+      // Determine compliance status
+      const complianceStatus = this.determineComplianceStatus(
+        overallBiasScore,
+        protectedAttributeAnalysis
+      )
+
+      const auditResult: BiasAuditResult = {
+        overall_bias_score: overallBiasScore,
+        fairness_metrics: fairnessMetrics,
+        protected_attributes: protectedAttributeAnalysis,
+        model_performance: performanceByGroup,
+        audit_timestamp: new Date().toISOString(),
+        compliance_status: complianceStatus,
       }
-    )
+
+      // Store audit result
+      this.auditHistory.push(auditResult)
+
+      // Alert if bias detected
+      if (complianceStatus === 'violation' || overallBiasScore > 0.3) {
+        await this.triggerBiasAlert(auditResult)
+      }
+
+      return auditResult
+    })
   }
 
   /**
    * Calculate fairness metrics
    */
   private calculateFairnessMetrics(
-    predictions: Array<{ prediction: number; actual: number; protected_attributes: Record<string, any> }>,
+    predictions: Array<{
+      prediction: number
+      actual: number
+      protected_attributes: Record<string, unknown>
+    }>,
     protectedAttributes: string[]
   ): FairnessMetrics {
     // Group predictions by protected attributes
     const groups = this.groupByProtectedAttributes(predictions, protectedAttributes)
-    
+
     // Calculate metrics for each pair of groups
     const metrics: FairnessMetrics = {
       demographicParity: 0,
       equalizedOdds: 0,
       equalOpportunity: 0,
       calibration: 0,
-      statisticalParityDifference: 0
+      statisticalParityDifference: 0,
     }
-    
+
     const groupKeys = Object.keys(groups)
     for (let i = 0; i < groupKeys.length; i++) {
       for (let j = i + 1; j < groupKeys.length; j++) {
         const group1 = groups[groupKeys[i]]
         const group2 = groups[groupKeys[j]]
-        
+
         // Demographic Parity: P(Y_hat = 1 | A = 0) - P(Y_hat = 1 | A = 1)
-        const posRate1 = group1.filter(p => p.prediction > 0.5).length / group1.length
-        const posRate2 = group2.filter(p => p.prediction > 0.5).length / group2.length
-        metrics.demographicParity = Math.max(metrics.demographicParity, Math.abs(posRate1 - posRate2))
-        
+        const posRate1 = group1.filter((p) => p.prediction > 0.5).length / group1.length
+        const posRate2 = group2.filter((p) => p.prediction > 0.5).length / group2.length
+        metrics.demographicParity = Math.max(
+          metrics.demographicParity,
+          Math.abs(posRate1 - posRate2)
+        )
+
         // Equalized Odds: Difference in TPR and FPR
         const tpr1 = this.calculateTPR(group1)
         const tpr2 = this.calculateTPR(group2)
@@ -188,10 +202,10 @@ export class AIEthicsGovernance {
           metrics.equalizedOdds,
           Math.max(Math.abs(tpr1 - tpr2), Math.abs(fpr1 - fpr2))
         )
-        
+
         // Equal Opportunity: Difference in TPR for positive cases
         metrics.equalOpportunity = Math.max(metrics.equalOpportunity, Math.abs(tpr1 - tpr2))
-        
+
         // Statistical Parity Difference
         metrics.statisticalParityDifference = Math.max(
           metrics.statisticalParityDifference,
@@ -199,10 +213,10 @@ export class AIEthicsGovernance {
         )
       }
     }
-    
+
     // Calibration (simplified - would need proper calibration curve analysis)
     metrics.calibration = this.calculateCalibrationError(predictions)
-    
+
     return metrics
   }
 
@@ -210,56 +224,66 @@ export class AIEthicsGovernance {
    * Analyze each protected attribute for bias
    */
   private async analyzeProtectedAttributes(
-    predictions: Array<{ prediction: number; actual: number; protected_attributes: Record<string, any> }>,
+    predictions: Array<{
+      prediction: number
+      actual: number
+      protected_attributes: Record<string, unknown>
+    }>,
     protectedAttributes: string[]
-  ): Promise<Array<{
-    attribute: string
-    bias_detected: boolean
-    severity: 'low' | 'medium' | 'high' | 'critical'
-    disparate_impact_ratio: number
-    recommendations: string[]
-  }>> {
+  ): Promise<
+    Array<{
+      attribute: string
+      bias_detected: boolean
+      severity: 'low' | 'medium' | 'high' | 'critical'
+      disparate_impact_ratio: number
+      recommendations: string[]
+    }>
+  > {
     const results = []
-    
+
     for (const attribute of protectedAttributes) {
       const groups = this.groupByAttribute(predictions, attribute)
       const groupKeys = Object.keys(groups)
-      
+
       if (groupKeys.length < 2) continue
-      
+
       // Calculate disparate impact ratio (80% rule)
-      const selectionRates = groupKeys.map(key => {
+      const selectionRates = groupKeys.map((key) => {
         const group = groups[key]
-        return group.filter(p => p.prediction > 0.5).length / group.length
+        return group.filter((p) => p.prediction > 0.5).length / group.length
       })
-      
+
       const minRate = Math.min(...selectionRates)
       const maxRate = Math.max(...selectionRates)
       const disparateImpactRatio = minRate / maxRate
-      
+
       // Determine bias severity
       let severity: 'low' | 'medium' | 'high' | 'critical' = 'low'
       let biasDetected = false
-      
+
       if (disparateImpactRatio < this.guidelines.fairness.disparate_impact_threshold) {
         biasDetected = true
         if (disparateImpactRatio < 0.5) severity = 'critical'
         else if (disparateImpactRatio < 0.65) severity = 'high'
         else if (disparateImpactRatio < 0.8) severity = 'medium'
       }
-      
+
       // Generate recommendations
-      const recommendations = this.generateBiasRecommendations(attribute, severity, disparateImpactRatio)
-      
+      const recommendations = this.generateBiasRecommendations(
+        attribute,
+        severity,
+        disparateImpactRatio
+      )
+
       results.push({
         attribute,
         bias_detected: biasDetected,
         severity,
         disparate_impact_ratio: disparateImpactRatio,
-        recommendations
+        recommendations,
       })
     }
-    
+
     return results
   }
 
@@ -272,9 +296,11 @@ export class AIEthicsGovernance {
     disparateImpactRatio: number
   ): string[] {
     const recommendations = []
-    
+
     if (severity === 'critical') {
-      recommendations.push(`URGENT: Immediately suspend model use for ${attribute}-related decisions`)
+      recommendations.push(
+        `URGENT: Immediately suspend model use for ${attribute}-related decisions`
+      )
       recommendations.push('Conduct thorough bias root cause analysis')
       recommendations.push('Implement adversarial debiasing techniques')
     } else if (severity === 'high') {
@@ -285,14 +311,14 @@ export class AIEthicsGovernance {
       recommendations.push('Monitor model performance more frequently')
       recommendations.push('Consider data augmentation to balance representation')
     }
-    
+
     // General recommendations
     if (disparateImpactRatio < 0.8) {
       recommendations.push('Collect more representative training data')
       recommendations.push('Apply fairness-aware machine learning techniques')
       recommendations.push('Implement human oversight for edge cases')
     }
-    
+
     return recommendations
   }
 
@@ -308,28 +334,29 @@ export class AIEthicsGovernance {
       demographicParity: 0.25,
       equalizedOdds: 0.25,
       disparateImpact: 0.3,
-      severity: 0.2
+      severity: 0.2,
     }
-    
+
     let score = 0
-    
+
     // Fairness metrics contribution
     score += fairnessMetrics.demographicParity * weights.demographicParity
     score += fairnessMetrics.equalizedOdds * weights.equalizedOdds
-    
+
     // Disparate impact contribution
-    const avgDisparateImpact = protectedAttributes.reduce((sum, attr) => 
-      sum + (1 - attr.disparate_impact_ratio), 0
-    ) / protectedAttributes.length
+    const avgDisparateImpact =
+      protectedAttributes.reduce((sum, attr) => sum + (1 - attr.disparate_impact_ratio), 0) /
+      protectedAttributes.length
     score += avgDisparateImpact * weights.disparateImpact
-    
+
     // Severity contribution
-    const severityScore = protectedAttributes.reduce((sum, attr) => {
-      const severityWeights = { low: 0.1, medium: 0.3, high: 0.7, critical: 1.0 }
-      return sum + (severityWeights[attr.severity as keyof typeof severityWeights] || 0)
-    }, 0) / protectedAttributes.length
+    const severityScore =
+      protectedAttributes.reduce((sum, attr) => {
+        const severityWeights = { low: 0.1, medium: 0.3, high: 0.7, critical: 1.0 }
+        return sum + (severityWeights[attr.severity as keyof typeof severityWeights] || 0)
+      }, 0) / protectedAttributes.length
     score += severityScore * weights.severity
-    
+
     return Math.min(score, 1.0) // Cap at 1.0
   }
 
@@ -337,47 +364,55 @@ export class AIEthicsGovernance {
    * Helper methods for statistical calculations
    */
   private groupByProtectedAttributes(
-    predictions: Array<{ prediction: number; actual: number; protected_attributes: Record<string, any> }>,
+    predictions: Array<{
+      prediction: number
+      actual: number
+      protected_attributes: Record<string, unknown>
+    }>,
     protectedAttributes: string[]
   ): Record<string, typeof predictions> {
     const groups: Record<string, typeof predictions> = {}
-    
-    predictions.forEach(pred => {
+
+    predictions.forEach((pred) => {
       const groupKey = protectedAttributes
-        .map(attr => `${attr}:${pred.protected_attributes[attr]}`)
+        .map((attr) => `${attr}:${pred.protected_attributes[attr]}`)
         .join('_')
-      
+
       if (!groups[groupKey]) groups[groupKey] = []
       groups[groupKey].push(pred)
     })
-    
+
     return groups
   }
 
   private groupByAttribute(
-    predictions: Array<{ prediction: number; actual: number; protected_attributes: Record<string, any> }>,
+    predictions: Array<{
+      prediction: number
+      actual: number
+      protected_attributes: Record<string, unknown>
+    }>,
     attribute: string
   ): Record<string, typeof predictions> {
     const groups: Record<string, typeof predictions> = {}
-    
-    predictions.forEach(pred => {
+
+    predictions.forEach((pred) => {
       const value = pred.protected_attributes[attribute]
       if (!groups[value]) groups[value] = []
       groups[value].push(pred)
     })
-    
+
     return groups
   }
 
   private calculateTPR(predictions: Array<{ prediction: number; actual: number }>): number {
-    const truePositives = predictions.filter(p => p.prediction > 0.5 && p.actual === 1).length
-    const actualPositives = predictions.filter(p => p.actual === 1).length
+    const truePositives = predictions.filter((p) => p.prediction > 0.5 && p.actual === 1).length
+    const actualPositives = predictions.filter((p) => p.actual === 1).length
     return actualPositives > 0 ? truePositives / actualPositives : 0
   }
 
   private calculateFPR(predictions: Array<{ prediction: number; actual: number }>): number {
-    const falsePositives = predictions.filter(p => p.prediction > 0.5 && p.actual === 0).length
-    const actualNegatives = predictions.filter(p => p.actual === 0).length
+    const falsePositives = predictions.filter((p) => p.prediction > 0.5 && p.actual === 0).length
+    const actualNegatives = predictions.filter((p) => p.actual === 0).length
     return actualNegatives > 0 ? falsePositives / actualNegatives : 0
   }
 
@@ -387,28 +422,35 @@ export class AIEthicsGovernance {
     // Simplified calibration error calculation
     const bins = 10
     let totalError = 0
-    
+
     for (let i = 0; i < bins; i++) {
       const lowerBound = i / bins
       const upperBound = (i + 1) / bins
-      
+
       const binPredictions = predictions.filter(
-        p => p.prediction >= lowerBound && p.prediction < upperBound
+        (p) => p.prediction >= lowerBound && p.prediction < upperBound
       )
-      
+
       if (binPredictions.length === 0) continue
-      
-      const meanPrediction = binPredictions.reduce((sum, p) => sum + p.prediction, 0) / binPredictions.length
-      const meanActual = binPredictions.reduce((sum, p) => sum + p.actual, 0) / binPredictions.length
-      
-      totalError += Math.abs(meanPrediction - meanActual) * (binPredictions.length / predictions.length)
+
+      const meanPrediction =
+        binPredictions.reduce((sum, p) => sum + p.prediction, 0) / binPredictions.length
+      const meanActual =
+        binPredictions.reduce((sum, p) => sum + p.actual, 0) / binPredictions.length
+
+      totalError +=
+        Math.abs(meanPrediction - meanActual) * (binPredictions.length / predictions.length)
     }
-    
+
     return totalError
   }
 
   private calculatePerformanceByGroup(
-    predictions: Array<{ prediction: number; actual: number; protected_attributes: Record<string, any> }>,
+    predictions: Array<{
+      prediction: number
+      actual: number
+      protected_attributes: Record<string, unknown>
+    }>,
     protectedAttributes: string[]
   ) {
     const groups = this.groupByProtectedAttributes(predictions, protectedAttributes)
@@ -419,32 +461,32 @@ export class AIEthicsGovernance {
     } = {
       accuracy_by_group: {},
       precision_by_group: {},
-      recall_by_group: {}
+      recall_by_group: {},
     }
-    
+
     Object.entries(groups).forEach(([groupKey, groupPreds]) => {
       const accuracy = this.calculateAccuracy(groupPreds)
       const precision = this.calculatePrecision(groupPreds)
       const recall = this.calculateTPR(groupPreds) // Same as recall
-      
+
       performance.accuracy_by_group[groupKey] = accuracy
       performance.precision_by_group[groupKey] = precision
       performance.recall_by_group[groupKey] = recall
     })
-    
+
     return performance
   }
 
   private calculateAccuracy(predictions: Array<{ prediction: number; actual: number }>): number {
-    const correct = predictions.filter(p => 
-      (p.prediction > 0.5 && p.actual === 1) || (p.prediction <= 0.5 && p.actual === 0)
+    const correct = predictions.filter(
+      (p) => (p.prediction > 0.5 && p.actual === 1) || (p.prediction <= 0.5 && p.actual === 0)
     ).length
     return correct / predictions.length
   }
 
   private calculatePrecision(predictions: Array<{ prediction: number; actual: number }>): number {
-    const truePositives = predictions.filter(p => p.prediction > 0.5 && p.actual === 1).length
-    const predictedPositives = predictions.filter(p => p.prediction > 0.5).length
+    const truePositives = predictions.filter((p) => p.prediction > 0.5 && p.actual === 1).length
+    const predictedPositives = predictions.filter((p) => p.prediction > 0.5).length
     return predictedPositives > 0 ? truePositives / predictedPositives : 0
   }
 
@@ -452,18 +494,18 @@ export class AIEthicsGovernance {
     overallBiasScore: number,
     protectedAttributes: Array<{ severity: string }>
   ): 'compliant' | 'warning' | 'violation' {
-    if (protectedAttributes.some(attr => attr.severity === 'critical')) {
+    if (protectedAttributes.some((attr) => attr.severity === 'critical')) {
       return 'violation'
     }
-    
-    if (overallBiasScore > 0.5 || protectedAttributes.some(attr => attr.severity === 'high')) {
+
+    if (overallBiasScore > 0.5 || protectedAttributes.some((attr) => attr.severity === 'high')) {
       return 'violation'
     }
-    
-    if (overallBiasScore > 0.3 || protectedAttributes.some(attr => attr.severity === 'medium')) {
+
+    if (overallBiasScore > 0.3 || protectedAttributes.some((attr) => attr.severity === 'medium')) {
       return 'warning'
     }
-    
+
     return 'compliant'
   }
 
@@ -471,11 +513,11 @@ export class AIEthicsGovernance {
     console.error('🚨 AI BIAS ALERT:', {
       bias_score: auditResult.overall_bias_score,
       compliance_status: auditResult.compliance_status,
-      critical_attributes: auditResult.protected_attributes.filter(attr => 
-        attr.severity === 'critical' || attr.severity === 'high'
-      )
+      critical_attributes: auditResult.protected_attributes.filter(
+        (attr) => attr.severity === 'critical' || attr.severity === 'high'
+      ),
     })
-    
+
     // In production, would send alerts via email, Slack, etc.
   }
 
@@ -492,16 +534,15 @@ export class AIEthicsGovernance {
   updateGuidelines(newGuidelines: Partial<EthicalGuidelines>): void {
     this.guidelines = {
       ...this.guidelines,
-      ...newGuidelines
+      ...newGuidelines,
     }
   }
 
   /**
    * Check if human oversight is required
    */
-  requiresHumanOversight(prediction: any): boolean {
-    return this.guidelines.accountability.human_oversight_required ||
-           prediction.confidence < 0.7 // Low confidence threshold
+  requiresHumanOversight(prediction: unknown): boolean {
+    return this.guidelines.accountability.human_oversight_required || prediction.confidence < 0.7 // Low confidence threshold
   }
 }
 

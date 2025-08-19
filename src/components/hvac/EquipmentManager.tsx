@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
+import {
   WrenchScrewdriverIcon,
   PlusIcon,
   MagnifyingGlassIcon,
@@ -24,7 +24,7 @@ import {
   BuildingOfficeIcon,
   ArrowPathIcon,
   PencilIcon,
-  TrashIcon
+  TrashIcon,
 } from '@heroicons/react/24/outline'
 import { MetricCard } from '@/components/ui/MetricCard'
 
@@ -45,8 +45,8 @@ interface Equipment {
   efficiency?: number
   refrigerantType?: string
   notes?: string
-  specifications: Record<string, any>
-  maintenanceHistory: any[]
+  specifications: Record<string, unknown>
+  maintenanceHistory: unknown[]
   customerId: string
   customerName?: string
   customerAddress?: string
@@ -67,19 +67,19 @@ interface EquipmentManagerProps {
   onScheduleService?: (equipment: Equipment) => void
 }
 
-const equipmentTypeIcons: Record<string, any> = {
+const equipmentTypeIcons: Record<string, unknown> = {
   FURNACE: FireIcon,
   AC_UNIT: BoltIcon,
   HEAT_PUMP: ArrowPathIcon,
   BOILER: FireIcon,
   WATER_HEATER: HomeIcon,
-  THERMOSTAT: CogIcon
+  THERMOSTAT: CogIcon,
 }
 
-export default function EquipmentManager({ 
-  onEquipmentSelect, 
+export default function EquipmentManager({
+  onEquipmentSelect,
   onAddEquipment,
-  onScheduleService 
+  onScheduleService,
 }: EquipmentManagerProps) {
   const [equipment, setEquipment] = useState<Equipment[]>([])
   const [summary, setSummary] = useState<EquipmentSummary | null>(null)
@@ -97,7 +97,7 @@ export default function EquipmentManager({
   const loadEquipment = async () => {
     try {
       setLoading(true)
-      
+
       // Mock data for demonstration
       const mockEquipment: Equipment[] = [
         {
@@ -120,19 +120,19 @@ export default function EquipmentManager({
           specifications: {
             afue: 95.5,
             stages: 2,
-            venting: 'Power Vent'
+            venting: 'Power Vent',
           },
           maintenanceHistory: [
             {
               date: '2024-06-15',
               type: 'Annual Service',
               technician: 'John Smith',
-              notes: 'Filter replaced, heat exchanger inspected, all systems normal'
-            }
+              notes: 'Filter replaced, heat exchanger inspected, all systems normal',
+            },
           ],
           customerId: 'cust-1',
           customerName: 'Johnson Residence',
-          customerAddress: '123 Main St, Springfield'
+          customerAddress: '123 Main St, Springfield',
         },
         {
           id: '2',
@@ -154,19 +154,19 @@ export default function EquipmentManager({
           specifications: {
             seer: 16.0,
             refrigerantCapacity: '8.5 lbs',
-            compressorType: 'Scroll'
+            compressorType: 'Scroll',
           },
           maintenanceHistory: [
             {
               date: '2024-04-10',
               type: 'Spring Service',
               technician: 'Mike Johnson',
-              notes: 'Refrigerant low, leak test performed, minor leak found and repaired'
-            }
+              notes: 'Refrigerant low, leak test performed, minor leak found and repaired',
+            },
           ],
           customerId: 'cust-2',
           customerName: 'Smith Commercial Building',
-          customerAddress: '456 Business Ave, Springfield'
+          customerAddress: '456 Business Ave, Springfield',
         },
         {
           id: '3',
@@ -187,20 +187,20 @@ export default function EquipmentManager({
           specifications: {
             seer: 19.5,
             hspf: 10.0,
-            stages: 2
+            stages: 2,
           },
           maintenanceHistory: [
             {
               date: '2024-07-20',
               type: 'Post-Installation Check',
               technician: 'Sarah Wilson',
-              notes: 'System operating perfectly, customer training completed'
-            }
+              notes: 'System operating perfectly, customer training completed',
+            },
           ],
           customerId: 'cust-3',
           customerName: 'Davis Family Home',
-          customerAddress: '789 Oak Street, Springfield'
-        }
+          customerAddress: '789 Oak Street, Springfield',
+        },
       ]
 
       const mockSummary: EquipmentSummary = {
@@ -209,29 +209,29 @@ export default function EquipmentManager({
         warrantyExpiring: 0,
         needsAttention: 1,
         averageAge: 1.8,
-        maintenanceCompliance: 88.5
+        maintenanceCompliance: 88.5,
       }
 
       setEquipment(mockEquipment)
       setSummary(mockSummary)
     } catch (error) {
-      console.error('Failed to load equipment:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const filteredEquipment = equipment.filter(eq => {
-    const matchesSearch = searchTerm === '' || 
+  const filteredEquipment = equipment.filter((eq) => {
+    const matchesSearch =
+      searchTerm === '' ||
       eq.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
       eq.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
       eq.serialNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       eq.customerName?.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesCustomer = selectedCustomer === 'all' || eq.customerId === selectedCustomer
     const matchesType = selectedType === 'all' || eq.equipmentType === selectedType
     const matchesCondition = selectedCondition === 'all' || eq.condition === selectedCondition
-    
+
     return matchesSearch && matchesCustomer && matchesType && matchesCondition
   })
 
@@ -267,13 +267,13 @@ export default function EquipmentManager({
   }
 
   const formatType = (type: string) => {
-    return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    return type.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -281,16 +281,18 @@ export default function EquipmentManager({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Equipment Management</h1>
-          <p className="text-gray-600 mt-1">Track and maintain HVAC equipment with service history</p>
+          <p className="mt-1 text-gray-600">
+            Track and maintain HVAC equipment with service history
+          </p>
         </div>
         <button
           onClick={onAddEquipment}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+          className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
         >
-          <PlusIcon className="h-4 w-4 mr-2" />
+          <PlusIcon className="mr-2 h-4 w-4" />
           Add Equipment
         </button>
       </div>
@@ -322,23 +324,23 @@ export default function EquipmentManager({
       )}
 
       {/* Filters and Search */}
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="rounded-lg bg-white p-4 shadow">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
           <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <MagnifyingGlassIcon className="absolute top-3 left-3 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search equipment..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full rounded-md border-gray-300 pl-10 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
-          
+
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="all">All Types</option>
             <option value="FURNACE">Furnace</option>
@@ -348,11 +350,11 @@ export default function EquipmentManager({
             <option value="WATER_HEATER">Water Heater</option>
             <option value="THERMOSTAT">Thermostat</option>
           </select>
-          
+
           <select
             value={selectedCondition}
             onChange={(e) => setSelectedCondition(e.target.value)}
-            className="block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="all">All Conditions</option>
             <option value="NEW">New</option>
@@ -361,22 +363,22 @@ export default function EquipmentManager({
             <option value="POOR">Poor</option>
             <option value="NEEDS_REPLACEMENT">Needs Replacement</option>
           </select>
-          
+
           <select
             value={selectedCustomer}
             onChange={(e) => setSelectedCustomer(e.target.value)}
-            className="block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="all">All Customers</option>
             <option value="cust-1">Johnson Residence</option>
             <option value="cust-2">Smith Commercial Building</option>
             <option value="cust-3">Davis Family Home</option>
           </select>
-          
+
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="nextServiceDue">Next Service Due</option>
             <option value="installDate">Install Date</option>
@@ -387,7 +389,7 @@ export default function EquipmentManager({
       </div>
 
       {/* Equipment List */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="overflow-hidden bg-white shadow sm:rounded-md">
         <ul className="divide-y divide-gray-200">
           {filteredEquipment.map((eq, index) => (
             <motion.li
@@ -395,69 +397,72 @@ export default function EquipmentManager({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="hover:bg-gray-50 cursor-pointer"
+              className="cursor-pointer hover:bg-gray-50"
               onClick={() => onEquipmentSelect?.(eq)}
             >
               <div className="px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0">
-                      <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                         {getEquipmentIcon(eq.equipmentType)}
                       </div>
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center space-x-2">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="truncate text-sm font-medium text-gray-900">
                           {eq.manufacturer} {eq.model}
                         </p>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getConditionColor(eq.condition)}`}>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getConditionColor(eq.condition)}`}
+                        >
                           {eq.condition}
                         </span>
                         {isServiceDue(eq.nextServiceDue) && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-orange-800 bg-orange-100">
-                            <ClockIcon className="h-3 w-3 mr-1" />
+                          <span className="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-800">
+                            <ClockIcon className="mr-1 h-3 w-3" />
                             Service Due
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center mt-1">
+                      <div className="mt-1 flex items-center">
                         <p className="text-sm text-gray-500">
-                          {formatType(eq.equipmentType)} • {eq.capacity || 'N/A'} • {eq.location || 'Location TBD'}
+                          {formatType(eq.equipmentType)} • {eq.capacity || 'N/A'} •{' '}
+                          {eq.location || 'Location TBD'}
                         </p>
                       </div>
-                      <div className="flex items-center mt-1 text-xs text-gray-400">
-                        <BuildingOfficeIcon className="h-3 w-3 mr-1" />
+                      <div className="mt-1 flex items-center text-xs text-gray-400">
+                        <BuildingOfficeIcon className="mr-1 h-3 w-3" />
                         <span>{eq.customerName}</span>
                         <span className="mx-2">•</span>
                         <span>SN: {eq.serialNumber || 'N/A'}</span>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">
-                        Next Service
-                      </p>
+                      <p className="text-sm font-medium text-gray-900">Next Service</p>
                       <p className="text-sm text-gray-500">
-                        {eq.nextServiceDue ? new Date(eq.nextServiceDue).toLocaleDateString() : 'Not scheduled'}
+                        {eq.nextServiceDue
+                          ? new Date(eq.nextServiceDue).toLocaleDateString()
+                          : 'Not scheduled'}
                       </p>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
                           onScheduleService?.(eq)
                         }}
-                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md"
+                        className="rounded-md p-2 text-gray-400 hover:bg-blue-50 hover:text-blue-600"
                         title="Schedule Service"
                       >
                         <CalendarIcon className="h-4 w-4" />
                       </button>
                       <button
-                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md"
+                        className="rounded-md p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
                         title="View Details"
                       >
                         <DocumentTextIcon className="h-4 w-4" />
@@ -473,7 +478,7 @@ export default function EquipmentManager({
 
       {/* Empty State */}
       {filteredEquipment.length === 0 && (
-        <div className="text-center py-12">
+        <div className="py-12 text-center">
           <WrenchScrewdriverIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No equipment found</h3>
           <p className="mt-1 text-sm text-gray-500">
@@ -482,9 +487,9 @@ export default function EquipmentManager({
           <div className="mt-6">
             <button
               onClick={onAddEquipment}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
             >
-              <PlusIcon className="h-4 w-4 mr-2" />
+              <PlusIcon className="mr-2 h-4 w-4" />
               Add Equipment
             </button>
           </div>

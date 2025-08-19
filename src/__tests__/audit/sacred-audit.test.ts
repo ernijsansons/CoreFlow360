@@ -8,12 +8,12 @@ import {
   SACREDAuditEngine,
   SACREDAuditRequest,
   SACREDAuditResponse,
-  EnhancedAuditFinding
+  EnhancedAuditFinding,
 } from '@/lib/audit/sacred-audit-engine'
 import {
   SACREDPromptTemplates,
   TripleLayerPromptBuilder,
-  PromptValidator
+  PromptValidator,
 } from '@/lib/audit/prompt-engineering'
 import { AuditOrchestrationSystem } from '@/lib/audit/audit-orchestration'
 import { logger } from '@/lib/logging/logger'
@@ -24,8 +24,8 @@ vi.mock('@/lib/logging/logger', () => ({
     info: vi.fn(),
     error: vi.fn(),
     warn: vi.fn(),
-    debug: vi.fn()
-  }
+    debug: vi.fn(),
+  },
 }))
 
 describe('SACRED Audit Framework', () => {
@@ -51,7 +51,7 @@ describe('SACRED Audit Framework', () => {
         expect.objectContaining({
           metric: 'Critical vulnerabilities',
           target: 0,
-          priority: 'critical'
+          priority: 'critical',
         })
       )
       expect(prompt.contextual.environment.compliance).toContain('SOC2')
@@ -66,7 +66,7 @@ describe('SACRED Audit Framework', () => {
         expect.objectContaining({
           metric: 'P95 response time',
           target: 200,
-          unit: 'milliseconds'
+          unit: 'milliseconds',
         })
       )
       expect(prompt.specific.scope).toContain('database_queries')
@@ -98,21 +98,21 @@ describe('SACRED Audit Framework', () => {
           outcomes: [],
           measurableCriteria: [],
           successThreshold: '',
-          scope: []
+          scope: [],
         },
         actionable: {
           requireImplementationSteps: false,
           stepDetailLevel: 'low',
           includeCodeExamples: false,
           timeEstimates: false,
-          dependencyMapping: false
+          dependencyMapping: false,
         },
         contextual: {} as any,
         reasoned: {
           steps: [],
           reasoningDepth: 'shallow',
           includeAlternatives: false,
-          explainTradeoffs: false
+          explainTradeoffs: false,
         },
         evidenceBased: {
           codeReferences: false,
@@ -120,15 +120,15 @@ describe('SACRED Audit Framework', () => {
           contextLines: 0,
           includeTests: false,
           performanceMetrics: false,
-          securityScans: false
+          securityScans: false,
         },
         deliverable: {
           format: 'json',
           includeExecutiveSummary: false,
           includeTechnicalDetails: false,
           includeImplementationPlan: false,
-          includeROIAnalysis: false
-        }
+          includeROIAnalysis: false,
+        },
       }
 
       const validation = PromptValidator.validateSACREDPrompt(incompletePrompt as any)
@@ -152,44 +152,48 @@ describe('SACRED Audit Framework', () => {
           codeMetrics: {
             totalFiles: 100,
             totalLines: 10000,
-            complexity: 'medium'
-          }
+            complexity: 'medium',
+          },
         },
-        businessRequirements: [{
-          id: 'REQ-001',
-          description: 'Security compliance',
-          priority: 'must_have' as const,
-          successCriteria: ['SOC2 compliance'],
-          constraints: ['6 month timeline']
-        }],
+        businessRequirements: [
+          {
+            id: 'REQ-001',
+            description: 'Security compliance',
+            priority: 'must_have' as const,
+            successCriteria: ['SOC2 compliance'],
+            constraints: ['6 month timeline'],
+          },
+        ],
         constraints: [],
         stakeholders: [],
         environment: {
           deployment: 'cloud' as const,
           scale: 'enterprise' as const,
           industry: 'SaaS',
-          compliance: ['SOC2']
-        }
+          compliance: ['SOC2'],
+        },
       }
 
       const task = {
         objective: 'Security audit',
         methodology: {
           approach: 'Systematic analysis',
-          steps: [{
-            action: 'Analyze auth',
-            reasoning: 'Security first',
-            expectedOutput: 'Vulnerabilities'
-          }]
+          steps: [
+            {
+              action: 'Analyze auth',
+              reasoning: 'Security first',
+              expectedOutput: 'Vulnerabilities',
+            },
+          ],
         },
         outputFormat: {
           structure: 'xml' as const,
           includeMetrics: true,
-          includeRecommendations: true
+          includeRecommendations: true,
         },
         analysisDepth: 'deep' as const,
         focusAreas: ['authentication'],
-        timeBudget: '2 hours'
+        timeBudget: '2 hours',
       }
 
       const prompt = builder
@@ -221,15 +225,15 @@ describe('SACRED Audit Framework', () => {
             codeMetrics: {
               totalFiles: 200,
               totalLines: 20000,
-              complexity: 'high'
-            }
-          }
+              complexity: 'high',
+            },
+          },
         },
         options: {
           includeRecommendations: true,
           generateReport: false,
-          outputFormat: 'json'
-        }
+          outputFormat: 'json',
+        },
       }
 
       const response = await sacredEngine.executeAudit(request)
@@ -250,8 +254,8 @@ describe('SACRED Audit Framework', () => {
         options: {
           includeRecommendations: true,
           generateReport: false,
-          outputFormat: 'json'
-        }
+          outputFormat: 'json',
+        },
       }
 
       const response = await sacredEngine.executeAudit(request)
@@ -271,8 +275,8 @@ describe('SACRED Audit Framework', () => {
         options: {
           includeRecommendations: true,
           generateReport: false,
-          outputFormat: 'json'
-        }
+          outputFormat: 'json',
+        },
       }
 
       const response = await sacredEngine.executeAudit(request)
@@ -296,8 +300,8 @@ describe('SACRED Audit Framework', () => {
         options: {
           includeRecommendations: true,
           generateReport: false,
-          outputFormat: 'json'
-        }
+          outputFormat: 'json',
+        },
       }
 
       const response = await sacredEngine.executeAudit(request)
@@ -316,13 +320,13 @@ describe('SACRED Audit Framework', () => {
       const scope = {
         security: ['authentication', 'authorization'],
         performance: ['database', 'api'],
-        architecture: ['patterns', 'dependencies']
+        architecture: ['patterns', 'dependencies'],
       }
 
       const criteria = {
         priority: 'critical' as const,
         maxFindings: 100,
-        includeRecommendations: true
+        includeRecommendations: true,
       }
 
       const contextId = await orchestrator.loadContext(scope, criteria)
@@ -344,13 +348,13 @@ describe('SACRED Audit Framework', () => {
     it('should prioritize findings by business impact', async () => {
       const scope = {
         security: ['all'],
-        performance: ['all']
+        performance: ['all'],
       }
 
       const criteria = {
         priority: 'all' as const,
         maxFindings: 50,
-        includeRecommendations: true
+        includeRecommendations: true,
       }
 
       const contextId = await orchestrator.loadContext(scope, criteria)
@@ -358,10 +362,15 @@ describe('SACRED Audit Framework', () => {
 
       // Verify findings are sorted by priority score
       let previousScore = Infinity
-      synthesis.prioritized_findings.forEach(finding => {
-        const currentScore = finding.severity === 'critical' ? 100 :
-                           finding.severity === 'high' ? 75 :
-                           finding.severity === 'medium' ? 50 : 25
+      synthesis.prioritized_findings.forEach((finding) => {
+        const currentScore =
+          finding.severity === 'critical'
+            ? 100
+            : finding.severity === 'high'
+              ? 75
+              : finding.severity === 'medium'
+                ? 50
+                : 25
         expect(currentScore).toBeLessThanOrEqual(previousScore)
         previousScore = currentScore
       })
@@ -377,8 +386,8 @@ describe('SACRED Audit Framework', () => {
         options: {
           includeRecommendations: false,
           generateReport: false,
-          outputFormat: 'json'
-        }
+          outputFormat: 'json',
+        },
       }
 
       const response = await sacredEngine.executeAudit(invalidRequest)
@@ -388,13 +397,13 @@ describe('SACRED Audit Framework', () => {
 
     it('should handle context loading failures', async () => {
       const scope = {
-        security: ['authentication']
+        security: ['authentication'],
       }
 
       const criteria = {
         priority: 'critical' as const,
         maxFindings: 10,
-        includeRecommendations: true
+        includeRecommendations: true,
       }
 
       // Force an error by mocking file system access
@@ -415,8 +424,8 @@ describe('SACRED Audit Framework', () => {
         options: {
           includeRecommendations: true,
           generateReport: false,
-          outputFormat: 'json'
-        }
+          outputFormat: 'json',
+        },
       }
 
       const startTime = Date.now()
@@ -432,13 +441,13 @@ describe('SACRED Audit Framework', () => {
         security: ['all'],
         performance: ['all'],
         architecture: ['all'],
-        business_logic: ['all']
+        business_logic: ['all'],
       }
 
       const criteria = {
         priority: 'all' as const,
         maxFindings: 1000,
-        includeRecommendations: true
+        includeRecommendations: true,
       }
 
       const contextId = await orchestrator.loadContext(scope, criteria)
@@ -446,7 +455,7 @@ describe('SACRED Audit Framework', () => {
 
       // Should batch efficiently
       expect(batches.length).toBeGreaterThan(1)
-      expect(batches.every(batch => batch.audits.length <= 20)).toBe(true)
+      expect(batches.every((batch) => batch.audits.length <= 20)).toBe(true)
     })
   })
 })

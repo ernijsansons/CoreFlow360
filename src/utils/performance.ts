@@ -21,7 +21,7 @@ export class PerformanceMonitor {
 
   startTimer(label: string): () => void {
     const start = performance.now()
-    
+
     return () => {
       const duration = performance.now() - start
       this.recordMetric(label, duration)
@@ -31,12 +31,12 @@ export class PerformanceMonitor {
   recordMetric(label: string, value: number): void {
     const samples = this.metrics.get(label) || []
     samples.push(value)
-    
+
     // Keep only recent samples
     if (samples.length > this.maxSamples) {
       samples.shift()
     }
-    
+
     this.metrics.set(label, samples)
   }
 
@@ -57,7 +57,7 @@ export class PerformanceMonitor {
     const sorted = [...samples].sort((a, b) => a - b)
     const count = sorted.length
     const sum = sorted.reduce((a, b) => a + b, 0)
-    
+
     return {
       count,
       mean: sum / count,
@@ -65,17 +65,17 @@ export class PerformanceMonitor {
       p95: sorted[Math.floor(count * 0.95)],
       p99: sorted[Math.floor(count * 0.99)],
       min: sorted[0],
-      max: sorted[count - 1]
+      max: sorted[count - 1],
     }
   }
 
   getAllStats(): Record<string, unknown> {
     const stats: Record<string, unknown> = {}
-    
+
     for (const [label, _] of this.metrics) {
       stats[label] = this.getStats(label)
     }
-    
+
     return stats
   }
 
@@ -88,19 +88,15 @@ export class PerformanceMonitor {
 export class CacheManager {
   private memoryCache: LRUCache<string, unknown>
   private redisClient?: Redis
-  
-  constructor(options?: {
-    maxMemoryItems?: number
-    ttl?: number
-    redis?: Redis
-  }) {
+
+  constructor(options?: { maxMemoryItems?: number; ttl?: number; redis?: Redis }) {
     this.memoryCache = new LRUCache({
       max: options?.maxMemoryItems || 1000,
       ttl: options?.ttl || 1000 * 60 * 5, // 5 minutes default
       updateAgeOnGet: true,
-      updateAgeOnHas: true
+      updateAgeOnHas: true,
     })
-    
+
     this.redisClient = options?.redis
   }
 
@@ -121,9 +117,7 @@ export class CacheManager {
           this.memoryCache.set(key, parsed)
           return parsed
         }
-      } catch (error) {
-        console.error('Redis get error:', error)
-      }
+      } catch (error) {}
     }
 
     return null
@@ -142,9 +136,7 @@ export class CacheManager {
         } else {
           await this.redisClient.set(key, serialized)
         }
-      } catch (error) {
-        console.error('Redis set error:', error)
-      }
+      } catch (error) {}
     }
   }
 
@@ -156,9 +148,7 @@ export class CacheManager {
     if (this.redisClient) {
       try {
         await this.redisClient.del(key)
-      } catch (error) {
-        console.error('Redis delete error:', error)
-      }
+      } catch (error) {}
     }
   }
 
@@ -170,9 +160,7 @@ export class CacheManager {
     if (this.redisClient) {
       try {
         await this.redisClient.flushdb()
-      } catch (error) {
-        console.error('Redis clear error:', error)
-      }
+      } catch (error) {}
     }
   }
 
@@ -186,12 +174,12 @@ export class CacheManager {
 export class QueryOptimizer {
   // Generate optimized Prisma includes based on required fields
   static generateIncludes(requiredFields: string[]): Record<string, unknown> {
-          const includes: Record<string, unknown> = {}
-    
+    const includes: Record<string, unknown> = {}
+
     for (const field of requiredFields) {
       const parts = field.split('.')
       let current = includes
-      
+
       for (let i = 0; i < parts.length; i++) {
         const part = parts[i]
         if (i === parts.length - 1) {
@@ -202,7 +190,7 @@ export class QueryOptimizer {
         }
       }
     }
-    
+
     return includes
   }
 
@@ -216,25 +204,25 @@ export class QueryOptimizer {
   ) {
     let batch: { item: T; resolve: (value: R) => void; reject: (error: Error) => void }[] = []
     let timeout: NodeJS.Timeout | null = null
-    
+
     const maxBatchSize = options?.maxBatchSize || 100
     const maxWaitTime = options?.maxWaitTime || 10 // ms
 
     const processBatch = async () => {
       if (batch.length === 0) return
-      
+
       const currentBatch = batch
       batch = []
-      
+
       if (timeout) {
         clearTimeout(timeout)
         timeout = null
       }
 
       try {
-        const items = currentBatch.map(b => b.item)
+        const items = currentBatch.map((b) => b.item)
         const results = await batchFn(items)
-        
+
         for (let i = 0; i < currentBatch.length; i++) {
           currentBatch[i].resolve(results[i])
         }
@@ -248,7 +236,7 @@ export class QueryOptimizer {
     return (item: T): Promise<R> => {
       return new Promise((resolve, reject) => {
         batch.push({ item, resolve, reject })
-        
+
         if (batch.length >= maxBatchSize) {
           processBatch()
         } else if (!timeout) {
@@ -264,7 +252,7 @@ export class ResourcePool<T> {
   private available: T[] = []
   private inUse: Set<T> = new Set()
   private waiting: ((resource: T) => void)[] = []
-  
+
   constructor(
     private factory: () => T | Promise<T>,
     private destroyer: (resource: T) => void | Promise<void>,
@@ -280,11 +268,11 @@ export class ResourcePool<T> {
 
   private async initialize(): Promise<void> {
     const promises: Promise<void>[] = []
-    
+
     for (let i = 0; i < this.options.min; i++) {
       promises.push(this.createResource())
     }
-    
+
     await Promise.all(promises)
   }
 
@@ -292,20 +280,18 @@ export class ResourcePool<T> {
     if (this.available.length + this.inUse.size >= this.options.max) {
       return
     }
-    
+
     try {
       const resource = await this.factory()
       this.available.push(resource)
-      
+
       if (this.waiting.length > 0) {
         const resolve = this.waiting.shift()!
         const resource = this.available.shift()!
         this.inUse.add(resource)
         resolve(resource)
       }
-    } catch (error) {
-      console.error('Failed to create resource:', error)
-    }
+    } catch (error) {}
   }
 
   async acquire(): Promise<T> {
@@ -323,7 +309,7 @@ export class ResourcePool<T> {
     // Wait for a resource to become available
     return new Promise((resolve, reject) => {
       const timeout = this.options.acquireTimeoutMs
-      
+
       if (timeout) {
         const timer = setTimeout(() => {
           const index = this.waiting.indexOf(resolve)
@@ -332,14 +318,14 @@ export class ResourcePool<T> {
             reject(new Error('Resource acquisition timeout'))
           }
         }, timeout)
-        
+
         const originalResolve = resolve
         resolve = (resource: T) => {
           clearTimeout(timer)
           originalResolve(resource)
         }
       }
-      
+
       this.waiting.push(resolve)
     })
   }
@@ -348,16 +334,16 @@ export class ResourcePool<T> {
     if (!this.inUse.has(resource)) {
       return
     }
-    
+
     this.inUse.delete(resource)
-    
+
     if (this.waiting.length > 0) {
       const resolve = this.waiting.shift()!
       this.inUse.add(resource)
       resolve(resource)
     } else {
       this.available.push(resource)
-      
+
       // Clean up excess resources
       if (this.available.length > this.options.min) {
         const excess = this.available.pop()!
@@ -371,19 +357,15 @@ export class ResourcePool<T> {
     this.available = []
     this.inUse.clear()
     this.waiting = []
-    
-    await Promise.all(
-      allResources.map(resource => this.destroyer(resource))
-    )
+
+    await Promise.all(allResources.map((resource) => this.destroyer(resource)))
   }
 }
 
 // Lazy loading helper
-export function lazyLoad<T>(
-  loader: () => Promise<T>
-): () => Promise<T> {
+export function lazyLoad<T>(loader: () => Promise<T>): () => Promise<T> {
   let promise: Promise<T> | null = null
-  
+
   return () => {
     if (!promise) {
       promise = loader()
@@ -402,7 +384,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   let lastArgs: Parameters<T> | null = null
   let lastThis: unknown = null
   let result: unknown
-  
+
   const leading = options?.leading ?? false
   const trailing = options?.trailing ?? true
 
@@ -416,9 +398,9 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
 
   return function debounced(this: unknown, ...args: Parameters<T>) {
     const isLeading = !timeout && leading
-    
+
     lastArgs = args
-    const currentThis = this
+    // Removed this aliasing
 
     if (timeout) {
       clearTimeout(timeout)
@@ -445,17 +427,17 @@ export function deduplicate<T extends (...args: unknown[]) => Promise<unknown>>(
   keyGenerator?: (...args: Parameters<T>) => string
 ): T {
   const pending = new Map<string, Promise<unknown>>()
-  
+
   return (async (...args: Parameters<T>) => {
     const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(args)
-    
+
     if (pending.has(key)) {
       return pending.get(key)!
     }
-    
+
     const promise = fn(...args)
     pending.set(key, promise)
-    
+
     try {
       const result = await promise
       return result

@@ -43,7 +43,7 @@ export const PRICING_TIERS: Record<string, PricingTier> = {
     features: ['core_crm', 'basic_sales', 'basic_finance'],
     aiCredits: 100,
     storageGB: 10,
-    apiCalls: 1000
+    apiCalls: 1000,
   },
   professional: {
     name: 'Professional',
@@ -54,7 +54,7 @@ export const PRICING_TIERS: Record<string, PricingTier> = {
     features: ['advanced_crm', 'sales_automation', 'full_finance', 'hr_basics'],
     aiCredits: 1000,
     storageGB: 100,
-    apiCalls: 10000
+    apiCalls: 10000,
   },
   enterprise: {
     name: 'Enterprise',
@@ -64,7 +64,7 @@ export const PRICING_TIERS: Record<string, PricingTier> = {
     features: ['all_features', 'custom_workflows', 'api_access', 'priority_support'],
     aiCredits: 10000,
     storageGB: 1000,
-    apiCalls: 100000
+    apiCalls: 100000,
   },
   ultimate: {
     name: 'Ultimate AI-First',
@@ -74,8 +74,8 @@ export const PRICING_TIERS: Record<string, PricingTier> = {
     features: ['all_features', 'ai_agents', 'custom_ai', 'white_label', 'dedicated_support'],
     aiCredits: -1, // Unlimited
     storageGB: -1, // Unlimited
-    apiCalls: -1 // Unlimited
-  }
+    apiCalls: -1, // Unlimited
+  },
 }
 
 // Bundle categories and their base modules
@@ -87,7 +87,7 @@ export const BUNDLE_CATEGORIES = {
   marketing: ['email_marketing', 'social_media', 'campaigns', 'surveys'],
   services: ['project', 'timesheet', 'field_service', 'helpdesk'],
   productivity: ['documents', 'sign', 'planning', 'approvals'],
-  ai_enhancement: ['ai_insights', 'predictive_analytics', 'automation', 'nlp']
+  ai_enhancement: ['ai_insights', 'predictive_analytics', 'automation', 'nlp'],
 }
 
 // Discount structure for multiple bundles
@@ -96,7 +96,7 @@ export const BUNDLE_DISCOUNTS: BundleDiscount[] = [
   { bundleCount: 3, discountPercent: 15 },
   { bundleCount: 4, discountPercent: 20 },
   { bundleCount: 5, discountPercent: 25 },
-  { bundleCount: 6, discountPercent: 30 }
+  { bundleCount: 6, discountPercent: 30 },
 ]
 
 export class PricingCalculator {
@@ -128,7 +128,7 @@ export class PricingCalculator {
 
     // Calculate bundle discount
     const bundleDiscount = this.getBundleDiscount(bundles.length)
-    const discountMultiplier = 1 - (bundleDiscount / 100)
+    const discountMultiplier = 1 - bundleDiscount / 100
 
     // Calculate monthly total
     let totalMonthly = (basePrice + userPrice) * discountMultiplier
@@ -163,7 +163,7 @@ export class PricingCalculator {
       totalAnnual: Math.round(totalAnnual * 100) / 100,
       savings: Math.round(savings * 100) / 100,
       recommendedBundles,
-      appliedDiscounts
+      appliedDiscounts,
     }
   }
 
@@ -171,7 +171,7 @@ export class PricingCalculator {
    * Get bundle discount percentage based on count
    */
   static getBundleDiscount(bundleCount: number): number {
-    const discount = BUNDLE_DISCOUNTS.find(d => d.bundleCount <= bundleCount)
+    const discount = BUNDLE_DISCOUNTS.find((d) => d.bundleCount <= bundleCount)
     return discount ? discount.discountPercent : 0
   }
 
@@ -217,7 +217,7 @@ export class PricingCalculator {
     }
 
     // Check if bundles exist
-    return bundles.every(bundle => Object.keys(BUNDLE_CATEGORIES).includes(bundle))
+    return bundles.every((bundle) => Object.keys(BUNDLE_CATEGORIES).includes(bundle))
   }
 
   /**
@@ -230,7 +230,7 @@ export class PricingCalculator {
     const features = [...tierConfig.features]
 
     // Add bundle-specific features
-    bundles.forEach(bundle => {
+    bundles.forEach((bundle) => {
       const bundleFeatures = BUNDLE_CATEGORIES[bundle as keyof typeof BUNDLE_CATEGORIES]
       if (bundleFeatures) {
         features.push(...bundleFeatures)
@@ -246,7 +246,7 @@ export class PricingCalculator {
   static compareTiers(users: number, bundles: string[]): Record<string, PricingResult> {
     const results: Record<string, PricingResult> = {}
 
-    Object.keys(PRICING_TIERS).forEach(tier => {
+    Object.keys(PRICING_TIERS).forEach((tier) => {
       try {
         results[tier] = this.calculate(tier, users, bundles, 'ANNUAL')
       } catch (error) {

@@ -113,7 +113,7 @@ export interface OutputFormat {
   includeTechnicalDetails: boolean
   includeImplementationPlan: boolean
   includeROIAnalysis: boolean
-  customSchema?: any
+  customSchema?: unknown
 }
 
 /**
@@ -179,18 +179,26 @@ ${this.systemRole}
   </codebase>
   
   <business_requirements>
-    ${this.context.businessRequirements.map(req => `
+    ${this.context.businessRequirements
+      .map(
+        (req) => `
     <requirement priority="${req.priority}">
       <description>${req.description}</description>
       <success_criteria>${req.successCriteria.join('; ')}</success_criteria>
-    </requirement>`).join('')}
+    </requirement>`
+      )
+      .join('')}
   </business_requirements>
   
   <constraints>
-    ${this.context.constraints.map(constraint => `
+    ${this.context.constraints
+      .map(
+        (constraint) => `
     <constraint type="${constraint.type}" impact="${constraint.impact}">
       ${constraint.description}
-    </constraint>`).join('')}
+    </constraint>`
+      )
+      .join('')}
   </constraints>
   
   <environment>
@@ -207,12 +215,16 @@ ${this.systemRole}
   <methodology>
     <approach>${this.task.methodology.approach}</approach>
     <chain_of_thought>
-      ${this.task.methodology.steps.map((step, index) => `
+      ${this.task.methodology.steps
+        .map(
+          (step, index) => `
       <step number="${index + 1}">
         <action>${step.action}</action>
         <reasoning>${step.reasoning}</reasoning>
         <expected_output>${step.expectedOutput}</expected_output>
-      </step>`).join('')}
+      </step>`
+        )
+        .join('')}
     </chain_of_thought>
   </methodology>
   
@@ -296,37 +308,37 @@ export class SACREDPromptTemplates {
         outcomes: [
           'Identify all security vulnerabilities with CVSS scores',
           'Map vulnerabilities to OWASP Top 10',
-          'Provide remediation timeline based on severity'
+          'Provide remediation timeline based on severity',
         ],
         measurableCriteria: [
           {
             metric: 'Critical vulnerabilities',
             target: 0,
             unit: 'count',
-            priority: 'critical'
+            priority: 'critical',
           },
           {
             metric: 'High severity issues resolution',
             target: 48,
             unit: 'hours',
-            priority: 'high'
+            priority: 'high',
           },
           {
             metric: 'Security score improvement',
             target: 90,
             unit: 'percent',
-            priority: 'high'
-          }
+            priority: 'high',
+          },
         ],
         successThreshold: 'Zero critical vulnerabilities and security score > 85%',
-        scope: ['authentication', 'authorization', 'input_validation', 'data_protection']
+        scope: ['authentication', 'authorization', 'input_validation', 'data_protection'],
       },
       actionable: {
         requireImplementationSteps: true,
         stepDetailLevel: 'high',
         includeCodeExamples: true,
         timeEstimates: true,
-        dependencyMapping: true
+        dependencyMapping: true,
       },
       contextual: {
         codebaseContext: {
@@ -337,8 +349,8 @@ export class SACREDPromptTemplates {
           codeMetrics: {
             totalFiles: 450,
             totalLines: 75000,
-            complexity: 'medium-high'
-          }
+            complexity: 'medium-high',
+          },
         },
         businessRequirements: [
           {
@@ -346,41 +358,41 @@ export class SACREDPromptTemplates {
             description: 'Achieve SOC2 Type II compliance',
             priority: 'must_have',
             successCriteria: ['Pass security audit', 'Implement required controls'],
-            constraints: ['6 month timeline', 'Limited security expertise']
-          }
+            constraints: ['6 month timeline', 'Limited security expertise'],
+          },
         ],
         constraints: [
           {
             type: 'time',
             description: 'Security fixes must be completed within Q1',
             impact: 'high',
-            flexibility: 'fixed'
+            flexibility: 'fixed',
           },
           {
             type: 'budget',
             description: 'Security tooling budget capped at $10k/year',
             impact: 'medium',
-            flexibility: 'negotiable'
-          }
+            flexibility: 'negotiable',
+          },
         ],
         stakeholders: [
           {
             role: 'CISO',
             concerns: ['Compliance', 'Data breach risk', 'Audit readiness'],
-            decisionPower: 'high'
+            decisionPower: 'high',
           },
           {
             role: 'Development Team',
             concerns: ['Implementation complexity', 'Performance impact'],
-            decisionPower: 'medium'
-          }
+            decisionPower: 'medium',
+          },
         ],
         environment: {
           deployment: 'cloud',
           scale: 'enterprise',
           industry: 'Financial Services',
-          compliance: ['SOC2', 'GDPR', 'PCI-DSS']
-        }
+          compliance: ['SOC2', 'GDPR', 'PCI-DSS'],
+        },
       },
       reasoned: {
         steps: [
@@ -390,26 +402,26 @@ export class SACREDPromptTemplates {
             reasoning: 'Authentication is the first line of defense',
             evidence: ['auth.config.ts', 'middleware.ts'],
             confidence: 0.95,
-            alternatives: ['OAuth only', 'Passwordless auth']
+            alternatives: ['OAuth only', 'Passwordless auth'],
           },
           {
             step: 2,
             description: 'Evaluate input validation coverage',
             reasoning: 'Prevents injection attacks and data corruption',
             evidence: ['API routes', 'Form handlers'],
-            confidence: 0.90
+            confidence: 0.9,
           },
           {
             step: 3,
             description: 'Assess data encryption practices',
             reasoning: 'Protects sensitive data at rest and in transit',
             evidence: ['Database configuration', 'API responses'],
-            confidence: 0.85
-          }
+            confidence: 0.85,
+          },
         ],
         reasoningDepth: 'deep',
         includeAlternatives: true,
-        explainTradeoffs: true
+        explainTradeoffs: true,
       },
       evidenceBased: {
         codeReferences: true,
@@ -417,7 +429,7 @@ export class SACREDPromptTemplates {
         contextLines: 5,
         includeTests: true,
         performanceMetrics: true,
-        securityScans: true
+        securityScans: true,
       },
       deliverable: {
         format: 'structured',
@@ -429,20 +441,20 @@ export class SACREDPromptTemplates {
           findings: {
             security_vulnerabilities: [],
             compliance_gaps: [],
-            best_practice_violations: []
+            best_practice_violations: [],
           },
           remediation_plan: {
             immediate_actions: [],
             short_term_fixes: [],
-            long_term_improvements: []
+            long_term_improvements: [],
           },
           risk_assessment: {
             current_risk_score: 0,
             projected_risk_score: 0,
-            risk_reduction_timeline: []
-          }
-        }
-      }
+            risk_reduction_timeline: [],
+          },
+        },
+      },
     }
   }
 
@@ -455,37 +467,37 @@ export class SACREDPromptTemplates {
         outcomes: [
           'Reduce API response time by 50%',
           'Eliminate N+1 query patterns',
-          'Optimize bundle size below 200KB'
+          'Optimize bundle size below 200KB',
         ],
         measurableCriteria: [
           {
             metric: 'P95 response time',
             target: 200,
             unit: 'milliseconds',
-            priority: 'critical'
+            priority: 'critical',
           },
           {
             metric: 'Database query count per request',
             target: 5,
             unit: 'queries',
-            priority: 'high'
+            priority: 'high',
           },
           {
             metric: 'Initial JS bundle size',
             target: 200,
             unit: 'kilobytes',
-            priority: 'medium'
-          }
+            priority: 'medium',
+          },
         ],
         successThreshold: 'All API endpoints < 200ms P95 and bundle < 200KB',
-        scope: ['database_queries', 'api_optimization', 'frontend_bundle', 'caching']
+        scope: ['database_queries', 'api_optimization', 'frontend_bundle', 'caching'],
       },
       actionable: {
         requireImplementationSteps: true,
         stepDetailLevel: 'high',
         includeCodeExamples: true,
         timeEstimates: true,
-        dependencyMapping: false
+        dependencyMapping: false,
       },
       contextual: {
         codebaseContext: {
@@ -496,8 +508,8 @@ export class SACREDPromptTemplates {
           codeMetrics: {
             totalFiles: 300,
             totalLines: 50000,
-            complexity: 'high'
-          }
+            complexity: 'high',
+          },
         },
         businessRequirements: [
           {
@@ -505,41 +517,41 @@ export class SACREDPromptTemplates {
             description: 'Support 10x user growth without infrastructure changes',
             priority: 'must_have',
             successCriteria: ['Sub-second response times', 'No timeout errors'],
-            constraints: ['Current infrastructure', 'No additional caching layers']
-          }
+            constraints: ['Current infrastructure', 'No additional caching layers'],
+          },
         ],
         constraints: [
           {
             type: 'technology',
             description: 'Must maintain backward compatibility',
             impact: 'high',
-            flexibility: 'fixed'
+            flexibility: 'fixed',
           },
           {
             type: 'resource',
             description: 'Limited to 2 developers for optimization',
             impact: 'medium',
-            flexibility: 'negotiable'
-          }
+            flexibility: 'negotiable',
+          },
         ],
         stakeholders: [
           {
             role: 'Product Manager',
             concerns: ['User experience', 'Feature delivery timeline'],
-            decisionPower: 'high'
+            decisionPower: 'high',
           },
           {
             role: 'Infrastructure Team',
             concerns: ['Resource utilization', 'Scaling costs'],
-            decisionPower: 'medium'
-          }
+            decisionPower: 'medium',
+          },
         ],
         environment: {
           deployment: 'cloud',
           scale: 'smb',
           industry: 'SaaS',
-          compliance: []
-        }
+          compliance: [],
+        },
       },
       reasoned: {
         steps: [
@@ -548,26 +560,26 @@ export class SACREDPromptTemplates {
             description: 'Profile current performance bottlenecks',
             reasoning: 'Cannot optimize what we cannot measure',
             evidence: ['APM data', 'Database logs'],
-            confidence: 1.0
+            confidence: 1.0,
           },
           {
             step: 2,
             description: 'Analyze database query patterns',
             reasoning: 'Database is often the primary bottleneck',
             evidence: ['Query logs', 'ORM usage patterns'],
-            confidence: 0.95
+            confidence: 0.95,
           },
           {
             step: 3,
             description: 'Evaluate caching opportunities',
             reasoning: 'Caching provides the highest ROI for read-heavy workloads',
             evidence: ['API usage patterns', 'Data volatility analysis'],
-            confidence: 0.90
-          }
+            confidence: 0.9,
+          },
         ],
         reasoningDepth: 'deep',
         includeAlternatives: true,
-        explainTradeoffs: true
+        explainTradeoffs: true,
       },
       evidenceBased: {
         codeReferences: true,
@@ -575,7 +587,7 @@ export class SACREDPromptTemplates {
         contextLines: 3,
         includeTests: false,
         performanceMetrics: true,
-        securityScans: false
+        securityScans: false,
       },
       deliverable: {
         format: 'structured',
@@ -587,20 +599,20 @@ export class SACREDPromptTemplates {
           performance_issues: {
             database: [],
             api: [],
-            frontend: []
+            frontend: [],
           },
           optimization_plan: {
             quick_wins: [],
             medium_term: [],
-            architectural_changes: []
+            architectural_changes: [],
           },
           expected_improvements: {
             response_time_reduction: '',
             throughput_increase: '',
-            resource_savings: ''
-          }
-        }
-      }
+            resource_savings: '',
+          },
+        },
+      },
     }
   }
 
@@ -613,37 +625,37 @@ export class SACREDPromptTemplates {
         outcomes: [
           'Identify architectural anti-patterns',
           'Assess scalability limitations',
-          'Provide modernization roadmap'
+          'Provide modernization roadmap',
         ],
         measurableCriteria: [
           {
             metric: 'Coupling score',
             target: 3,
             unit: 'scale 1-10',
-            priority: 'high'
+            priority: 'high',
           },
           {
             metric: 'Code duplication',
             target: 5,
             unit: 'percent',
-            priority: 'medium'
+            priority: 'medium',
           },
           {
             metric: 'Architectural debt',
             target: 20,
             unit: 'story points',
-            priority: 'medium'
-          }
+            priority: 'medium',
+          },
         ],
         successThreshold: 'Clean architecture with clear boundaries and < 5% duplication',
-        scope: ['layering', 'dependencies', 'patterns', 'modularity']
+        scope: ['layering', 'dependencies', 'patterns', 'modularity'],
       },
       actionable: {
         requireImplementationSteps: true,
         stepDetailLevel: 'medium',
         includeCodeExamples: true,
         timeEstimates: true,
-        dependencyMapping: true
+        dependencyMapping: true,
       },
       contextual: {
         codebaseContext: {
@@ -654,8 +666,8 @@ export class SACREDPromptTemplates {
           codeMetrics: {
             totalFiles: 500,
             totalLines: 80000,
-            complexity: 'very high'
-          }
+            complexity: 'very high',
+          },
         },
         businessRequirements: [
           {
@@ -663,41 +675,41 @@ export class SACREDPromptTemplates {
             description: 'Enable independent team scaling',
             priority: 'should_have',
             successCriteria: ['Clear module boundaries', 'Independent deployability'],
-            constraints: ['No full rewrite', 'Maintain uptime']
-          }
+            constraints: ['No full rewrite', 'Maintain uptime'],
+          },
         ],
         constraints: [
           {
             type: 'technology',
             description: 'Must remain on Next.js framework',
             impact: 'high',
-            flexibility: 'fixed'
+            flexibility: 'fixed',
           },
           {
             type: 'time',
             description: 'Architecture improvements spread over 6 months',
             impact: 'medium',
-            flexibility: 'flexible'
-          }
+            flexibility: 'flexible',
+          },
         ],
         stakeholders: [
           {
             role: 'CTO',
             concerns: ['Technical debt', 'Team productivity', 'Future flexibility'],
-            decisionPower: 'high'
+            decisionPower: 'high',
           },
           {
             role: 'Senior Developers',
             concerns: ['Code maintainability', 'Development speed'],
-            decisionPower: 'medium'
-          }
+            decisionPower: 'medium',
+          },
         ],
         environment: {
           deployment: 'hybrid',
           scale: 'enterprise',
           industry: 'Technology',
-          compliance: ['ISO27001']
-        }
+          compliance: ['ISO27001'],
+        },
       },
       reasoned: {
         steps: [
@@ -706,14 +718,14 @@ export class SACREDPromptTemplates {
             description: 'Map current architecture and dependencies',
             reasoning: 'Understanding current state is prerequisite for improvement',
             evidence: ['Package.json', 'Import graphs', 'Module structure'],
-            confidence: 1.0
+            confidence: 1.0,
           },
           {
             step: 2,
             description: 'Identify architectural smells and anti-patterns',
             reasoning: 'Anti-patterns are the primary source of technical debt',
             evidence: ['Circular dependencies', 'God objects', 'Anemic models'],
-            confidence: 0.90
+            confidence: 0.9,
           },
           {
             step: 3,
@@ -721,12 +733,12 @@ export class SACREDPromptTemplates {
             reasoning: 'Clear vision needed before refactoring',
             evidence: ['Industry best practices', 'Team capabilities'],
             confidence: 0.85,
-            alternatives: ['Microservices', 'Modular monolith', 'Serverless']
-          }
+            alternatives: ['Microservices', 'Modular monolith', 'Serverless'],
+          },
         ],
         reasoningDepth: 'deep',
         includeAlternatives: true,
-        explainTradeoffs: true
+        explainTradeoffs: true,
       },
       evidenceBased: {
         codeReferences: true,
@@ -734,7 +746,7 @@ export class SACREDPromptTemplates {
         contextLines: 0,
         includeTests: true,
         performanceMetrics: false,
-        securityScans: false
+        securityScans: false,
       },
       deliverable: {
         format: 'structured',
@@ -746,20 +758,20 @@ export class SACREDPromptTemplates {
           current_architecture: {
             patterns: [],
             anti_patterns: [],
-            technical_debt: []
+            technical_debt: [],
           },
           target_architecture: {
             vision: '',
             principles: [],
-            patterns: []
+            patterns: [],
           },
           migration_plan: {
             phases: [],
             risks: [],
-            milestones: []
-          }
-        }
-      }
+            milestones: [],
+          },
+        },
+      },
     }
   }
 }
@@ -811,8 +823,8 @@ export class PromptExecutionEngine {
       metadata: {
         timestamp: new Date().toISOString(),
         sacredCriteria: sacredPrompt.specific.measurableCriteria,
-        confidenceScore: this.calculateConfidence(result)
-      }
+        confidenceScore: this.calculateConfidence(result),
+      },
     }
   }
 
@@ -826,7 +838,7 @@ export class PromptExecutionEngine {
     // Merge custom context with SACRED context
     const context = {
       ...sacred.contextual,
-      ...customContext
+      ...customContext,
     }
 
     // Build task from SACRED components
@@ -834,28 +846,29 @@ export class PromptExecutionEngine {
       objective: sacred.specific.outcomes.join('; '),
       methodology: {
         approach: 'Chain-of-thought reasoning with evidence-based analysis',
-        steps: sacred.reasoned.steps.map(step => ({
+        steps: sacred.reasoned.steps.map((step) => ({
           action: step.description,
           reasoning: step.reasoning,
-          expectedOutput: `Evidence from ${step.evidence.join(', ')}`
-        }))
+          expectedOutput: `Evidence from ${step.evidence.join(', ')}`,
+        })),
       },
       outputFormat: {
         structure: sacred.deliverable.format as 'xml' | 'json' | 'markdown',
         includeMetrics: true,
-        includeRecommendations: true
+        includeRecommendations: true,
       },
       analysisDepth: sacred.reasoned.reasoningDepth === 'deep' ? 'deep' : 'standard',
       focusAreas: sacred.specific.scope,
-      timeBudget: '2 hours'
+      timeBudget: '2 hours',
     }
 
     return this.promptBuilder
-      .setSystemRole(
-        'SaaS Architecture and Security Auditor',
-        '20+',
-        ['Security', 'Performance', 'Architecture', 'Cloud Systems']
-      )
+      .setSystemRole('SaaS Architecture and Security Auditor', '20+', [
+        'Security',
+        'Performance',
+        'Architecture',
+        'Cloud Systems',
+      ])
       .setContext(context)
       .setTask(task)
       .build()
@@ -864,20 +877,20 @@ export class PromptExecutionEngine {
   /**
    * Execute the prompt (placeholder for AI integration)
    */
-  private async executePrompt(prompt: string): Promise<any> {
+  private async executePrompt(_prompt: string): Promise<unknown> {
     // This would integrate with the AI model
     // For now, return a mock result
     return {
       findings: [],
       summary: 'Audit completed successfully',
-      recommendations: []
+      recommendations: [],
     }
   }
 
   /**
    * Calculate confidence score for results
    */
-  private calculateConfidence(result: any): number {
+  private calculateConfidence(_result: unknown): number {
     // Implement confidence calculation based on:
     // - Evidence quality
     // - Finding consistency
@@ -889,7 +902,7 @@ export class PromptExecutionEngine {
 export interface AuditExecutionResult {
   auditType: string
   prompt: string
-  result: any
+  result: unknown
   executionTime: number
   metadata: {
     timestamp: string
@@ -926,7 +939,10 @@ export class PromptValidator {
     if (!prompt.contextual.codebaseContext) {
       errors.push('Missing codebase context')
     }
-    if (!prompt.contextual.businessRequirements || prompt.contextual.businessRequirements.length === 0) {
+    if (
+      !prompt.contextual.businessRequirements ||
+      prompt.contextual.businessRequirements.length === 0
+    ) {
       warnings.push('No business requirements specified')
     }
 
@@ -949,7 +965,7 @@ export class PromptValidator {
       isValid: errors.length === 0,
       errors,
       warnings,
-      completenessScore: this.calculateCompleteness(prompt)
+      completenessScore: this.calculateCompleteness(prompt),
     }
   }
 
@@ -959,12 +975,12 @@ export class PromptValidator {
   private static calculateCompleteness(prompt: SACREDPrompt): number {
     let score = 0
     const weights = {
-      specific: 0.20,
-      actionable: 0.20,
-      contextual: 0.20,
-      reasoned: 0.20,
-      evidenceBased: 0.10,
-      deliverable: 0.10
+      specific: 0.2,
+      actionable: 0.2,
+      contextual: 0.2,
+      reasoned: 0.2,
+      evidenceBased: 0.1,
+      deliverable: 0.1,
     }
 
     // Score each component

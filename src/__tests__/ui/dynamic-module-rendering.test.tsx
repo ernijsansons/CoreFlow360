@@ -10,7 +10,7 @@ import { describe, it, expect, beforeEach, vi } from '@jest/globals'
 import ModuleGatedFeature from '@/components/ui/ModuleGatedFeature'
 import DynamicModuleDashboard from '@/components/dashboard/DynamicModuleDashboard'
 import DynamicNavigation from '@/components/navigation/DynamicNavigation'
-import { useModuleAccess } from '@/hooks/useModuleAccess'
+import { useModuleAccess } from '@/lib/hooks/useModuleAccess'
 
 // Mock the module access hook
 vi.mock('@/hooks/useModuleAccess')
@@ -18,8 +18,58 @@ vi.mock('@/hooks/useModuleAccess')
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    button: ({ children, ...props }: any) => <button {...props}>{children}</button>
+    div: ({ children, ...props }: any) => (
+      <div
+        {...props}
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+        tabindex="0"
+      >
+        {children}
+      </div>
+    ),
+    button: ({ children, ...props }: any) => (
+      <button
+        {...props}
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+        aria-label="Button"
+      >
+        {children}
+      </button>
+    ),
   },
   AnimatePresence: ({ children }: any) => <>{children}</>,
 }))
@@ -37,14 +87,36 @@ describe('Dynamic Module UI Rendering', () => {
         error: null,
         subscriptionTier: 'professional',
         hasModule: (module: string) => module === 'crm',
-        hasAllModules: (modules: string[]) => modules.every(m => m === 'crm'),
-        hasAnyModule: (modules: string[]) => modules.some(m => m === 'crm'),
-        refreshModules: vi.fn()
+        hasAllModules: (modules: string[]) => modules.every((m) => m === 'crm'),
+        hasAnyModule: (modules: string[]) => modules.some((m) => m === 'crm'),
+        refreshModules: vi.fn(),
       })
 
       render(
         <ModuleGatedFeature requiredModule="crm">
-          <div>CRM Feature Content</div>
+          <div
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+          >
+            CRM Feature Content
+          </div>
         </ModuleGatedFeature>
       )
 
@@ -60,12 +132,34 @@ describe('Dynamic Module UI Rendering', () => {
         hasModule: () => false,
         hasAllModules: () => false,
         hasAnyModule: () => false,
-        refreshModules: vi.fn()
+        refreshModules: vi.fn(),
       })
 
       render(
         <ModuleGatedFeature requiredModule="accounting">
-          <div>Accounting Feature</div>
+          <div
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+          >
+            Accounting Feature
+          </div>
         </ModuleGatedFeature>
       )
 
@@ -83,15 +177,61 @@ describe('Dynamic Module UI Rendering', () => {
         hasModule: () => false,
         hasAllModules: () => false,
         hasAnyModule: () => false,
-        refreshModules: vi.fn()
+        refreshModules: vi.fn(),
       })
 
       render(
-        <ModuleGatedFeature 
+        <ModuleGatedFeature
           requiredModule="hr"
-          fallback={<div>Custom HR Upgrade Message</div>}
+          fallback={
+            <div
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+              tabindex="0"
+            >
+              Custom HR Upgrade Message
+            </div>
+          }
         >
-          <div>HR Feature</div>
+          <div
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+          >
+            HR Feature
+          </div>
         </ModuleGatedFeature>
       )
 
@@ -105,14 +245,36 @@ describe('Dynamic Module UI Rendering', () => {
         error: null,
         subscriptionTier: 'professional',
         hasModule: (module: string) => module === 'crm',
-        hasAllModules: (modules: string[]) => modules.every(m => m === 'crm'),
-        hasAnyModule: (modules: string[]) => modules.some(m => m === 'crm'),
-        refreshModules: vi.fn()
+        hasAllModules: (modules: string[]) => modules.every((m) => m === 'crm'),
+        hasAnyModule: (modules: string[]) => modules.some((m) => m === 'crm'),
+        refreshModules: vi.fn(),
       })
 
       render(
         <ModuleGatedFeature requiredModule={['crm', 'accounting']}>
-          <div>Cross-Module Feature</div>
+          <div
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+            tabindex="0"
+          >
+            Cross-Module Feature
+          </div>
         </ModuleGatedFeature>
       )
 
@@ -129,9 +291,10 @@ describe('Dynamic Module UI Rendering', () => {
         error: null,
         subscriptionTier: 'professional',
         hasModule: (module: string) => ['crm', 'accounting'].includes(module),
-        hasAllModules: (modules: string[]) => modules.every(m => ['crm', 'accounting'].includes(m)),
-        hasAnyModule: (modules: string[]) => modules.some(m => ['crm', 'accounting'].includes(m)),
-        refreshModules: vi.fn()
+        hasAllModules: (modules: string[]) =>
+          modules.every((m) => ['crm', 'accounting'].includes(m)),
+        hasAnyModule: (modules: string[]) => modules.some((m) => ['crm', 'accounting'].includes(m)),
+        refreshModules: vi.fn(),
       })
 
       render(<DynamicModuleDashboard />)
@@ -148,9 +311,10 @@ describe('Dynamic Module UI Rendering', () => {
         error: null,
         subscriptionTier: 'professional',
         hasModule: (module: string) => ['crm', 'accounting'].includes(module),
-        hasAllModules: (modules: string[]) => modules.every(m => ['crm', 'accounting'].includes(m)),
-        hasAnyModule: (modules: string[]) => modules.some(m => ['crm', 'accounting'].includes(m)),
-        refreshModules: vi.fn()
+        hasAllModules: (modules: string[]) =>
+          modules.every((m) => ['crm', 'accounting'].includes(m)),
+        hasAnyModule: (modules: string[]) => modules.some((m) => ['crm', 'accounting'].includes(m)),
+        refreshModules: vi.fn(),
       })
 
       render(<DynamicModuleDashboard />)
@@ -168,13 +332,15 @@ describe('Dynamic Module UI Rendering', () => {
         hasModule: () => false,
         hasAllModules: () => false,
         hasAnyModule: () => false,
-        refreshModules: vi.fn()
+        refreshModules: vi.fn(),
       })
 
       render(<DynamicModuleDashboard />)
 
       expect(screen.getByText('No Active Modules')).toBeInTheDocument()
-      expect(screen.getByText('Subscribe to modules to see your personalized dashboard')).toBeInTheDocument()
+      expect(
+        screen.getByText('Subscribe to modules to see your personalized dashboard')
+      ).toBeInTheDocument()
     })
 
     it('should handle loading state', () => {
@@ -186,7 +352,7 @@ describe('Dynamic Module UI Rendering', () => {
         hasModule: () => false,
         hasAllModules: () => false,
         hasAnyModule: () => false,
-        refreshModules: vi.fn()
+        refreshModules: vi.fn(),
       })
 
       render(<DynamicModuleDashboard />)
@@ -203,9 +369,9 @@ describe('Dynamic Module UI Rendering', () => {
         error: null,
         subscriptionTier: 'professional',
         hasModule: (module: string) => ['crm', 'hr'].includes(module),
-        hasAllModules: (modules: string[]) => modules.every(m => ['crm', 'hr'].includes(m)),
-        hasAnyModule: (modules: string[]) => modules.some(m => ['crm', 'hr'].includes(m)),
-        refreshModules: vi.fn()
+        hasAllModules: (modules: string[]) => modules.every((m) => ['crm', 'hr'].includes(m)),
+        hasAnyModule: (modules: string[]) => modules.some((m) => ['crm', 'hr'].includes(m)),
+        refreshModules: vi.fn(),
       })
 
       render(<DynamicNavigation variant="sidebar" />)
@@ -223,9 +389,10 @@ describe('Dynamic Module UI Rendering', () => {
         error: null,
         subscriptionTier: 'professional',
         hasModule: (module: string) => ['crm', 'accounting'].includes(module),
-        hasAllModules: (modules: string[]) => modules.every(m => ['crm', 'accounting'].includes(m)),
-        hasAnyModule: (modules: string[]) => modules.some(m => ['crm', 'accounting'].includes(m)),
-        refreshModules: vi.fn()
+        hasAllModules: (modules: string[]) =>
+          modules.every((m) => ['crm', 'accounting'].includes(m)),
+        hasAnyModule: (modules: string[]) => modules.some((m) => ['crm', 'accounting'].includes(m)),
+        refreshModules: vi.fn(),
       })
 
       render(<DynamicNavigation variant="sidebar" />)
@@ -242,7 +409,7 @@ describe('Dynamic Module UI Rendering', () => {
         hasModule: () => true,
         hasAllModules: () => true,
         hasAnyModule: () => true,
-        refreshModules: vi.fn()
+        refreshModules: vi.fn(),
       })
 
       render(<DynamicNavigation variant="sidebar" />)
@@ -257,9 +424,9 @@ describe('Dynamic Module UI Rendering', () => {
         error: null,
         subscriptionTier: 'basic',
         hasModule: (module: string) => module === 'crm',
-        hasAllModules: (modules: string[]) => modules.every(m => m === 'crm'),
-        hasAnyModule: (modules: string[]) => modules.some(m => m === 'crm'),
-        refreshModules: vi.fn()
+        hasAllModules: (modules: string[]) => modules.every((m) => m === 'crm'),
+        hasAnyModule: (modules: string[]) => modules.some((m) => m === 'crm'),
+        refreshModules: vi.fn(),
       }
 
       // Test top variant
@@ -275,7 +442,7 @@ describe('Dynamic Module UI Rendering', () => {
   describe('Integration Tests', () => {
     it('should update UI when modules are activated', async () => {
       const refreshModules = vi.fn()
-      
+
       vi.mocked(useModuleAccess).mockReturnValue({
         activeModules: [],
         loading: false,
@@ -284,11 +451,11 @@ describe('Dynamic Module UI Rendering', () => {
         hasModule: () => false,
         hasAllModules: () => false,
         hasAnyModule: () => false,
-        refreshModules
+        refreshModules,
       })
 
       const { rerender } = render(<DynamicModuleDashboard />)
-      
+
       expect(screen.getByText('No Active Modules')).toBeInTheDocument()
 
       // Simulate module activation
@@ -298,9 +465,9 @@ describe('Dynamic Module UI Rendering', () => {
         error: null,
         subscriptionTier: 'basic',
         hasModule: (module: string) => module === 'crm',
-        hasAllModules: (modules: string[]) => modules.every(m => m === 'crm'),
-        hasAnyModule: (modules: string[]) => modules.some(m => m === 'crm'),
-        refreshModules
+        hasAllModules: (modules: string[]) => modules.every((m) => m === 'crm'),
+        hasAnyModule: (modules: string[]) => modules.some((m) => m === 'crm'),
+        refreshModules,
       })
 
       rerender(<DynamicModuleDashboard />)

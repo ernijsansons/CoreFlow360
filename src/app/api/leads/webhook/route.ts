@@ -29,8 +29,8 @@ interface ParsedLead {
   industry?: string
   serviceType?: string
   urgency?: 'low' | 'medium' | 'high' | 'emergency'
-  customFields?: Record<string, any>
-  metadata?: Record<string, any>
+  customFields?: Record<string, unknown>
+  metadata?: Record<string, unknown>
 }
 
 // Supported lead sources with extensible configuration
@@ -38,45 +38,46 @@ const LEAD_SOURCES: Record<string, LeadSource> = {
   meta: {
     id: 'meta',
     name: 'Meta (Facebook/Instagram)',
-    validator: (payload) => payload.object === 'page' && payload.entry?.[0]?.changes?.[0]?.value?.leadgen_id,
+    validator: (payload: any) =>
+      payload.object === 'page' && payload.entry?.[0]?.changes?.[0]?.value?.leadgen_id,
     parser: parseMetaLead,
-    webhookSecret: process.env.META_WEBHOOK_SECRET
+    webhookSecret: process.env.META_WEBHOOK_SECRET,
   },
-  
+
   hubspot: {
     id: 'hubspot',
     name: 'HubSpot CRM',
-    validator: (payload) => payload.objectType && payload.subscriptionType,
-    parser: parseHubSpotLead
+    validator: (payload: any) => payload.objectType && payload.subscriptionType,
+    parser: parseHubSpotLead,
   },
-  
+
   salesforce: {
-    id: 'salesforce', 
+    id: 'salesforce',
     name: 'Salesforce CRM',
-    validator: (payload) => payload.sobjectType && payload.event?.type,
-    parser: parseSalesforceLead
+    validator: (payload: any) => payload.sobjectType && payload.event?.type,
+    parser: parseSalesforceLead,
   },
-  
+
   zapier: {
     id: 'zapier',
-    name: 'Zapier Integration', 
-    validator: (payload) => payload.trigger_source === 'zapier',
-    parser: parseZapierLead
+    name: 'Zapier Integration',
+    validator: (payload: any) => payload.trigger_source === 'zapier',
+    parser: parseZapierLead,
   },
-  
+
   webform: {
     id: 'webform',
     name: 'Website Contact Form',
-    validator: (payload) => payload.form_id && payload.contact_name,
-    parser: parseWebFormLead
+    validator: (payload: any) => payload.form_id && payload.contact_name,
+    parser: parseWebFormLead,
   },
-  
+
   api: {
     id: 'api',
     name: 'Direct API',
-    validator: (payload) => payload.lead_source === 'api' && payload.contact_name && payload.phone,
-    parser: parseAPILead
-  }
+    validator: (payload: any) => payload.lead_source === 'api' && payload.contact_name && payload.phone,
+    parser: parseAPILead,
+  },
 }
 
 /**
@@ -85,18 +86,18 @@ const LEAD_SOURCES: Record<string, LeadSource> = {
  */
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  
+
   try {
     // Rate limiting check
     const clientIp = request.headers.get('x-forwarded-for') || 'unknown'
     const rateLimitResult = await rateLimiter.checkLimit(clientIp)
-    
+
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
-        { 
+        {
           error: 'Rate limit exceeded',
-          retryAfter: rateLimitResult.retryAfter 
-        }, 
+          retryAfter: rateLimitResult.retryAfter,
+        },
         { status: 429 }
       )
     }
@@ -104,29 +105,23 @@ export async function POST(request: NextRequest) {
     // Parse request payload
     const payload = await request.json()
     const source = identifyLeadSource(payload)
-    
+
     if (!source) {
-      return NextResponse.json(
-        { error: 'Unsupported lead source' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Unsupported lead source' }, { status: 400 })
     }
 
     // Verify webhook signature if required
     if (source.webhookSecret) {
       const isValid = await verifyWebhookSignature(request, payload, source.webhookSecret)
       if (!isValid) {
-        console.error(`Invalid webhook signature for source: ${source.id}`)
-        return NextResponse.json(
-          { error: 'Invalid signature' },
-          { status: 401 }
-        )
+        
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
       }
     }
 
     // Parse lead data using source-specific parser
     const parsedLead = source.parser(payload)
-    
+
     // Validate required fields
     const validation = validateLeadData(parsedLead)
     if (!validation.valid) {
@@ -138,30 +133,29 @@ export async function POST(request: NextRequest) {
 
     // Process lead through pipeline
     const result = await processLeadIngestion(parsedLead)
-    
+
     // Log processing time for monitoring
     const processingTime = Date.now() - startTime
     console.log(`📥 Lead processed in ${processingTime}ms:`, {
       source: source.id,
       leadId: result.leadId,
       queuedForCall: result.queuedForCall,
-      processingTime
+      processingTime,
     })
 
     return NextResponse.json({
       success: true,
       leadId: result.leadId,
       queuedForCall: result.queuedForCall,
-      processingTime
+      processingTime,
     })
-    
   } catch (error) {
-    console.error('Lead webhook error:', error)
     
+
     return NextResponse.json(
-      { 
+      {
         error: 'Internal processing error',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       { status: 500 }
     )
@@ -177,13 +171,13 @@ export async function GET(request: NextRequest) {
   const mode = url.searchParams.get('hub.mode')
   const token = url.searchParams.get('hub.verify_token')
   const challenge = url.searchParams.get('hub.challenge')
-  
+
   // Meta webhook verification
   if (mode === 'subscribe' && token === process.env.META_WEBHOOK_VERIFY_TOKEN) {
-    console.log('✅ Meta webhook verified')
+    
     return new NextResponse(challenge, { status: 200 })
   }
-  
+
   return NextResponse.json({ error: 'Verification failed' }, { status: 403 })
 }
 
@@ -209,12 +203,12 @@ async function verifyWebhookSignature(
 ): Promise<boolean> {
   const signature = request.headers.get('x-hub-signature-256')
   if (!signature) return false
-  
+
   const expectedSignature = crypto
     .createHmac('sha256', secret)
     .update(JSON.stringify(payload))
     .digest('hex')
-    
+
   return signature === `sha256=${expectedSignature}`
 }
 
@@ -223,11 +217,11 @@ async function verifyWebhookSignature(
  */
 function validateLeadData(lead: ParsedLead): { valid: boolean; errors: string[] } {
   const errors: string[] = []
-  
+
   if (!lead.contactName?.trim()) {
     errors.push('Contact name is required')
   }
-  
+
   if (!lead.phone?.trim()) {
     errors.push('Phone number is required')
   } else {
@@ -240,14 +234,14 @@ function validateLeadData(lead: ParsedLead): { valid: boolean; errors: string[] 
       errors.push('Invalid phone number format')
     }
   }
-  
+
   if (!lead.source) {
     errors.push('Lead source is required')
   }
-  
+
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   }
 }
 
@@ -269,54 +263,56 @@ async function processLeadIngestion(parsedLead: ParsedLead) {
           serviceType: parsedLead.serviceType,
           urgency: parsedLead.urgency,
           sourceId: parsedLead.sourceId,
-          ...parsedLead.customFields
+          ...parsedLead.customFields,
         },
         metadata: parsedLead.metadata,
-        createdAt: new Date()
-      }
+        createdAt: new Date(),
+      },
     })
 
     // 2. Check consent and subscription status
     const consentCheck = await checkConsentAndBundle(lead)
-    
+
     if (!consentCheck.canCall) {
-      console.log(`⚠️ Lead ${lead.id} not eligible for calling:`, consentCheck.reason)
+      
       return {
         leadId: lead.id,
         queuedForCall: false,
-        reason: consentCheck.reason
+        reason: consentCheck.reason,
       }
     }
 
     // 3. Queue for AI voice call
-    const callJob = await leadQueue.add('process-lead-call', {
-      leadId: lead.id,
-      leadData: parsedLead,
-      priority: getCallPriority(parsedLead.urgency),
-      bundleLevel: consentCheck.bundleLevel,
-      tenantId: consentCheck.tenantId
-    }, {
-      priority: getJobPriority(parsedLead.urgency),
-      delay: getCallDelay(parsedLead.urgency),
-      attempts: 3,
-      backoff: {
-        type: 'exponential',
-        delay: 10000
+    const callJob = await leadQueue.add(
+      'process-lead-call',
+      {
+        leadId: lead.id,
+        leadData: parsedLead,
+        priority: getCallPriority(parsedLead.urgency),
+        bundleLevel: consentCheck.bundleLevel,
+        tenantId: consentCheck.tenantId,
+      },
+      {
+        priority: getJobPriority(parsedLead.urgency),
+        delay: getCallDelay(parsedLead.urgency),
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 10000,
+        },
       }
-    })
+    )
 
-    console.log(`📞 Lead ${lead.id} queued for AI call (Job: ${callJob.id})`)
-    
+    console.log(`🤖 Lead ${lead.id} queued for AI voice call`)
+
     return {
       leadId: lead.id,
       queuedForCall: true,
       jobId: callJob.id,
-      bundleLevel: consentCheck.bundleLevel
+      bundleLevel: consentCheck.bundleLevel,
     }
-    
   } catch (error) {
-    console.error('Lead processing error:', error)
-    throw new Error(`Failed to process lead: ${error.message}`)
+    throw new Error(`Failed to process lead: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
 
@@ -327,7 +323,7 @@ async function checkConsentAndBundle(lead: any) {
   try {
     // Find tenant from phone number or create default
     const tenant = await db.tenant.findFirst({
-      where: { 
+      where: {
         voiceFeaturesEnabled: true,
         // Add tenant matching logic based on your setup
       },
@@ -336,14 +332,14 @@ async function checkConsentAndBundle(lead: any) {
         voiceFeaturesEnabled: true,
         tcpaEnabled: true,
         consentRequired: true,
-        dailyCallLimit: true
-      }
+        dailyCallLimit: true,
+      },
     })
 
     if (!tenant) {
       return {
         canCall: false,
-        reason: 'No active voice-enabled tenant found'
+        reason: 'No active voice-enabled tenant found',
       }
     }
 
@@ -355,18 +351,15 @@ async function checkConsentAndBundle(lead: any) {
           phoneNumber: lead.phone,
           consentGiven: true,
           tcpaCompliant: true,
-          OR: [
-            { expiresAt: null },
-            { expiresAt: { gt: new Date() } }
-          ],
-          revokedAt: null
-        }
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+          revokedAt: null,
+        },
       })
 
       if (!hasConsent) {
         return {
           canCall: false,
-          reason: 'TCPA consent required but not found'
+          reason: 'TCPA consent required but not found',
         }
       }
     }
@@ -376,7 +369,7 @@ async function checkConsentAndBundle(lead: any) {
     if (isDNC) {
       return {
         canCall: false,
-        reason: 'Phone number on Do Not Call list'
+        reason: 'Phone number on Do Not Call list',
       }
     }
 
@@ -385,15 +378,15 @@ async function checkConsentAndBundle(lead: any) {
       where: {
         tenantId: tenant.id,
         startedAt: {
-          gte: new Date(new Date().setHours(0, 0, 0, 0))
-        }
-      }
+          gte: new Date(new Date().setHours(0, 0, 0, 0)),
+        },
+      },
     })
 
     if (todayCallCount >= (tenant.dailyCallLimit || 1000)) {
       return {
         canCall: false,
-        reason: 'Daily call limit reached'
+        reason: 'Daily call limit reached',
       }
     }
 
@@ -404,14 +397,13 @@ async function checkConsentAndBundle(lead: any) {
       canCall: true,
       tenantId: tenant.id,
       bundleLevel,
-      dailyCallsRemaining: (tenant.dailyCallLimit || 1000) - todayCallCount
+      dailyCallsRemaining: (tenant.dailyCallLimit || 1000) - todayCallCount,
     }
-    
   } catch (error) {
-    console.error('Consent/bundle check error:', error)
+    
     return {
       canCall: false,
-      reason: 'Error checking consent/bundle status'
+      reason: 'Error checking consent/bundle status',
     }
   }
 }
@@ -419,12 +411,12 @@ async function checkConsentAndBundle(lead: any) {
 /**
  * Check DNC list status
  */
-async function checkDNCList(phoneNumber: string): Promise<boolean> {
+async function checkDNCList(_phoneNumber: string): Promise<boolean> {
   // Implementation would check against DNC providers like:
   // - National DNC Registry
   // - Internal DNC list
   // - State-specific registries
-  
+
   // Mock implementation
   return false
 }
@@ -432,7 +424,7 @@ async function checkDNCList(phoneNumber: string): Promise<boolean> {
 /**
  * Determine subscription bundle level
  */
-function determineBundleLevel(tenantId: string): string {
+function determineBundleLevel(_tenantId: string): string {
   // Mock implementation - replace with actual subscription logic
   return 'professional' // starter, professional, enterprise
 }
@@ -445,7 +437,7 @@ function getCallPriority(urgency: string = 'medium'): number {
     emergency: 1,
     high: 2,
     medium: 3,
-    low: 4
+    low: 4,
   }
   return priorities[urgency] || 3
 }
@@ -458,7 +450,7 @@ function getJobPriority(urgency: string = 'medium'): number {
     emergency: 1,
     high: 5,
     medium: 10,
-    low: 15
+    low: 15,
   }
   return priorities[urgency] || 10
 }
@@ -468,10 +460,10 @@ function getJobPriority(urgency: string = 'medium'): number {
  */
 function getCallDelay(urgency: string = 'medium'): number {
   const delays = {
-    emergency: 0,        // Immediate
-    high: 30000,         // 30 seconds
-    medium: 300000,      // 5 minutes
-    low: 1800000         // 30 minutes
+    emergency: 0, // Immediate
+    high: 30000, // 30 seconds
+    medium: 300000, // 5 minutes
+    low: 1800000, // 30 minutes
   }
   return delays[urgency] || 300000
 }
@@ -484,9 +476,9 @@ function getCallDelay(urgency: string = 'medium'): number {
  * Parse Meta (Facebook/Instagram) lead
  */
 function parseMetaLead(payload: any): ParsedLead {
-  const leadData = payload.entry[0]?.changes[0]?.value
+  const leadData = payload.entry?.[0]?.changes?.[0]?.value
   const fieldData = leadData?.field_data || []
-  
+
   const getFieldValue = (name: string) => {
     const field = fieldData.find((f: any) => f.name === name)
     return field?.values?.[0] || ''
@@ -495,23 +487,27 @@ function parseMetaLead(payload: any): ParsedLead {
   return {
     source: 'meta',
     sourceId: leadData?.leadgen_id,
-    contactName: getFieldValue('full_name') || `${getFieldValue('first_name')} ${getFieldValue('last_name')}`.trim(),
+    contactName:
+      getFieldValue('full_name') ||
+      `${getFieldValue('first_name')} ${getFieldValue('last_name')}`.trim(),
     phone: getFieldValue('phone_number'),
     email: getFieldValue('email'),
     company: getFieldValue('company_name'),
     serviceType: getFieldValue('what_service_do_you_need'),
-    urgency: determineUrgency(getFieldValue('urgency_level') || getFieldValue('when_do_you_need_service')),
+    urgency: determineUrgency(
+      getFieldValue('urgency_level') || getFieldValue('when_do_you_need_service')
+    ),
     customFields: {
       adName: leadData?.ad_name,
       adId: leadData?.ad_id,
       formName: leadData?.form_name,
-      pageId: leadData?.page_id
+      pageId: leadData?.page_id,
     },
     metadata: {
       platform: leadData?.platform || 'facebook',
       createdTime: leadData?.created_time,
-      rawFieldData: fieldData
-    }
+      rawFieldData: fieldData,
+    },
   }
 }
 
@@ -530,12 +526,12 @@ function parseHubSpotLead(payload: any): ParsedLead {
     serviceType: payload.service_interest,
     customFields: {
       lifecycleStage: payload.lifecyclestage,
-      leadStatus: payload.hs_lead_status
+      leadStatus: payload.hs_lead_status,
     },
     metadata: {
       hubspotId: payload.objectId,
-      subscriptionType: payload.subscriptionType
-    }
+      subscriptionType: payload.subscriptionType,
+    },
   }
 }
 
@@ -554,12 +550,12 @@ function parseSalesforceLead(payload: any): ParsedLead {
     customFields: {
       leadSource: payload.sobject?.LeadSource,
       status: payload.sobject?.Status,
-      rating: payload.sobject?.Rating
+      rating: payload.sobject?.Rating,
     },
     metadata: {
       salesforceId: payload.sobject?.Id,
-      eventType: payload.event?.type
-    }
+      eventType: payload.event?.type,
+    },
   }
 }
 
@@ -580,8 +576,8 @@ function parseZapierLead(payload: any): ParsedLead {
     customFields: payload.custom_fields || {},
     metadata: {
       zapSource: payload.zap_source,
-      originalSource: payload.original_source
-    }
+      originalSource: payload.original_source,
+    },
   }
 }
 
@@ -602,13 +598,13 @@ function parseWebFormLead(payload: any): ParsedLead {
       formId: payload.form_id,
       formName: payload.form_name,
       pageUrl: payload.page_url,
-      message: payload.message
+      message: payload.message,
     },
     metadata: {
       userAgent: payload.user_agent,
       ipAddress: payload.ip_address,
-      referrer: payload.referrer
-    }
+      referrer: payload.referrer,
+    },
   }
 }
 
@@ -627,7 +623,7 @@ function parseAPILead(payload: any): ParsedLead {
     serviceType: payload.service_type,
     urgency: payload.urgency,
     customFields: payload.custom_fields || {},
-    metadata: payload.metadata || {}
+    metadata: payload.metadata || {},
   }
 }
 
@@ -636,18 +632,23 @@ function parseAPILead(payload: any): ParsedLead {
  */
 function determineUrgency(input: string = ''): 'low' | 'medium' | 'high' | 'emergency' {
   const lower = input.toLowerCase()
-  
-  if (lower.includes('emergency') || lower.includes('urgent') || lower.includes('asap') || lower.includes('immediately')) {
+
+  if (
+    lower.includes('emergency') ||
+    lower.includes('urgent') ||
+    lower.includes('asap') ||
+    lower.includes('immediately')
+  ) {
     return 'emergency'
   }
-  
+
   if (lower.includes('today') || lower.includes('this week') || lower.includes('soon')) {
     return 'high'
   }
-  
+
   if (lower.includes('next week') || lower.includes('next month')) {
     return 'medium'
   }
-  
+
   return 'low'
 }

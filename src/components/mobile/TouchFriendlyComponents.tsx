@@ -7,7 +7,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
-import { 
+import {
   ChevronRight,
   X,
   Check,
@@ -21,7 +21,7 @@ import {
   Share,
   ArrowLeft,
   Plus,
-  Minus
+  Minus,
 } from 'lucide-react'
 
 // Mobile Card Component
@@ -32,39 +32,39 @@ interface MobileCardProps {
   onSwipeLeft?: () => void
   onSwipeRight?: () => void
   swipeActions?: {
-    left?: { icon: any; color: string; action: () => void }
-    right?: { icon: any; color: string; action: () => void }
+    left?: { icon: unknown; color: string; action: () => void }
+    right?: { icon: unknown; color: string; action: () => void }
   }
 }
 
-export function MobileCard({ 
-  children, 
-  className = '', 
-  onTap, 
-  onSwipeLeft, 
+export function MobileCard({
+  children,
+  className = '',
+  onTap,
+  onSwipeLeft,
   onSwipeRight,
-  swipeActions 
+  swipeActions,
 }: MobileCardProps) {
   const [isPressed, setIsPressed] = useState(false)
   const x = useMotionValue(0)
   const opacity = useTransform(x, [-150, 0, 150], [0.5, 1, 0.5])
   const scale = useTransform(x, [-150, 0, 150], [0.9, 1, 0.9])
 
-  const handleDragEnd = (event: any, info: any) => {
+  const handleDragEnd = (event: unknown, info: unknown) => {
     const threshold = 100
-    
+
     if (info.offset.x > threshold && onSwipeRight) {
       onSwipeRight()
     } else if (info.offset.x < -threshold && onSwipeLeft) {
       onSwipeLeft()
     }
-    
+
     x.set(0)
   }
 
   return (
     <motion.div
-      className={`relative bg-gray-900/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-4 ${className}`}
+      className={`relative rounded-2xl border border-gray-800/50 bg-gray-900/60 p-4 backdrop-blur-sm ${className}`}
       style={{ x, opacity, scale }}
       drag="x"
       dragConstraints={{ left: -150, right: 150 }}
@@ -77,39 +77,39 @@ export function MobileCard({
       }}
       onTapCancel={() => setIsPressed(false)}
       whileTap={{ scale: 0.98 }}
-      animate={{ 
-        backgroundColor: isPressed ? 'rgba(17, 24, 39, 0.8)' : 'rgba(17, 24, 39, 0.6)' 
+      animate={{
+        backgroundColor: isPressed ? 'rgba(17, 24, 39, 0.8)' : 'rgba(17, 24, 39, 0.6)',
       }}
     >
       {/* Swipe Actions Background */}
       {swipeActions && (
         <>
           {swipeActions.left && (
-            <motion.div 
-              className={`absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full ${swipeActions.left.color}`}
-              style={{ 
+            <motion.div
+              className={`absolute top-1/2 left-4 -translate-y-1/2 rounded-full p-3 ${swipeActions.left.color}`}
+              style={{
                 opacity: useTransform(x, [0, 100], [0, 1]),
-                scale: useTransform(x, [0, 100], [0.5, 1])
+                scale: useTransform(x, [0, 100], [0.5, 1]),
               }}
             >
-              <swipeActions.left.icon className="w-5 h-5 text-white" />
+              <swipeActions.left.icon className="h-5 w-5 text-white" />
             </motion.div>
           )}
-          
+
           {swipeActions.right && (
-            <motion.div 
-              className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full ${swipeActions.right.color}`}
-              style={{ 
+            <motion.div
+              className={`absolute top-1/2 right-4 -translate-y-1/2 rounded-full p-3 ${swipeActions.right.color}`}
+              style={{
                 opacity: useTransform(x, [-100, 0], [1, 0]),
-                scale: useTransform(x, [-100, 0], [1, 0.5])
+                scale: useTransform(x, [-100, 0], [1, 0.5]),
               }}
             >
-              <swipeActions.right.icon className="w-5 h-5 text-white" />
+              <swipeActions.right.icon className="h-5 w-5 text-white" />
             </motion.div>
           )}
         </>
       )}
-      
+
       {children}
     </motion.div>
   )
@@ -135,38 +135,30 @@ export function TouchButton({
   loading = false,
   disabled = false,
   onClick,
-  className = ''
+  className = '',
 }: TouchButtonProps) {
   const variants = {
     primary: 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white',
     secondary: 'bg-gray-800 border border-gray-700 text-white',
     ghost: 'bg-transparent text-gray-300 hover:bg-gray-800',
-    danger: 'bg-gradient-to-r from-red-500 to-pink-500 text-white'
+    danger: 'bg-gradient-to-r from-red-500 to-pink-500 text-white',
   }
 
   const sizes = {
     sm: 'px-4 py-2 text-sm min-h-[44px]',
     md: 'px-6 py-3 text-base min-h-[48px]',
-    lg: 'px-8 py-4 text-lg min-h-[52px]'
+    lg: 'px-8 py-4 text-lg min-h-[52px]',
   }
 
   return (
     <motion.button
-      className={`
-        ${variants[variant]} 
-        ${sizes[size]} 
-        ${fullWidth ? 'w-full' : ''} 
-        rounded-xl font-semibold transition-all duration-200 
-        active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
-        flex items-center justify-center gap-2
-        ${className}
-      `}
+      className={` ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${className} `}
       onClick={onClick}
       disabled={disabled || loading}
       whileTap={{ scale: disabled ? 1 : 0.95 }}
     >
       {loading ? (
-        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
       ) : (
         children
       )}
@@ -183,27 +175,28 @@ interface BottomSheetProps {
   snapPoints?: number[]
 }
 
-export function BottomSheet({ 
-  isOpen, 
-  onClose, 
-  children, 
+export function BottomSheet({
+  isOpen,
+  onClose,
+  children,
   title,
-  snapPoints = [0.5, 0.9] 
+  snapPoints = [0.5, 0.9],
 }: BottomSheetProps) {
   const [snapPoint, setSnapPoint] = useState(snapPoints[0])
   const y = useMotionValue(0)
 
-  const handleDragEnd = (event: any, info: any) => {
+  const handleDragEnd = (event: unknown, info: unknown) => {
     const velocity = info.velocity.y
     const offset = info.offset.y
-    
+
     if (velocity > 500 || offset > 200) {
       onClose()
     } else {
       // Snap to closest snap point
       const targetSnap = snapPoints.reduce((prev, curr) => {
-        return Math.abs(curr - (1 - offset / window.innerHeight)) < Math.abs(prev - (1 - offset / window.innerHeight)) 
-          ? curr 
+        return Math.abs(curr - (1 - offset / window.innerHeight)) <
+          Math.abs(prev - (1 - offset / window.innerHeight))
+          ? curr
           : prev
       })
       setSnapPoint(targetSnap)
@@ -222,7 +215,7 @@ export function BottomSheet({
             className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
             onClick={onClose}
           />
-          
+
           {/* Sheet */}
           <motion.div
             initial={{ y: '100%' }}
@@ -233,31 +226,29 @@ export function BottomSheet({
             dragConstraints={{ top: 0 }}
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 rounded-t-3xl shadow-2xl"
+            className="fixed right-0 bottom-0 left-0 z-50 rounded-t-3xl bg-gray-900 shadow-2xl"
             style={{ height: '100vh' }}
           >
             {/* Handle */}
             <div className="flex justify-center pt-4 pb-2">
-              <div className="w-12 h-1 bg-gray-600 rounded-full" />
+              <div className="h-1 w-12 rounded-full bg-gray-600" />
             </div>
-            
+
             {/* Header */}
             {title && (
-              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+              <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
                 <h2 className="text-xl font-bold text-white">{title}</h2>
                 <button
                   onClick={onClose}
-                  className="p-2 text-gray-400 hover:text-white transition-colors"
+                  className="p-2 text-gray-400 transition-colors hover:text-white"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="h-6 w-6" />
                 </button>
               </div>
             )}
-            
+
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
-              {children}
-            </div>
+            <div className="flex-1 overflow-y-auto p-6">{children}</div>
           </motion.div>
         </>
       )}
@@ -283,7 +274,7 @@ export function MobileSearchBar({
   onFocus,
   onBlur,
   showFilter = false,
-  onFilterClick
+  onFilterClick,
 }: MobileSearchBarProps) {
   const [isFocused, setIsFocused] = useState(false)
 
@@ -292,12 +283,14 @@ export function MobileSearchBar({
       <motion.div
         animate={{
           scale: isFocused ? 1.02 : 1,
-          borderColor: isFocused ? '#8b5cf6' : '#374151'
+          borderColor: isFocused ? '#8b5cf6' : '#374151',
         }}
-        className="flex items-center gap-3 px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-2xl"
+        className="flex items-center gap-3 rounded-2xl border border-gray-700 bg-gray-800/50 px-4 py-3"
       >
-        <Search className={`w-5 h-5 transition-colors ${isFocused ? 'text-violet-400' : 'text-gray-400'}`} />
-        
+        <Search
+          className={`h-5 w-5 transition-colors ${isFocused ? 'text-violet-400' : 'text-gray-400'}`}
+        />
+
         <input
           type="text"
           value={value}
@@ -311,24 +304,24 @@ export function MobileSearchBar({
             onBlur?.()
           }}
           placeholder={placeholder}
-          className="flex-1 bg-transparent text-white placeholder-gray-400 outline-none text-base"
+          className="flex-1 bg-transparent text-base text-white placeholder-gray-400 outline-none"
         />
-        
+
         {value && (
           <button
             onClick={() => onChange('')}
-            className="p-1 text-gray-400 hover:text-white transition-colors"
+            className="p-1 text-gray-400 transition-colors hover:text-white"
           >
-            <X className="w-4 h-4" />
+            <X className="h-4 w-4" />
           </button>
         )}
-        
+
         {showFilter && (
           <button
             onClick={onFilterClick}
-            className="p-1 text-gray-400 hover:text-violet-400 transition-colors"
+            className="p-1 text-gray-400 transition-colors hover:text-violet-400"
           >
-            <Filter className="w-4 h-4" />
+            <Filter className="h-4 w-4" />
           </button>
         )}
       </motion.div>
@@ -342,7 +335,7 @@ interface ExpandableListItemProps {
   subtitle?: string
   children: React.ReactNode
   defaultExpanded?: boolean
-  icon?: any
+  icon?: unknown
 }
 
 export function ExpandableListItem({
@@ -350,20 +343,20 @@ export function ExpandableListItem({
   subtitle,
   children,
   defaultExpanded = false,
-  icon: Icon
+  icon: Icon,
 }: ExpandableListItemProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
   return (
-    <div className="border border-gray-800 rounded-2xl overflow-hidden bg-gray-900/60 backdrop-blur-sm">
+    <div className="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900/60 backdrop-blur-sm">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-800/50 transition-colors min-h-[64px]"
+        className="flex min-h-[64px] w-full items-center justify-between p-4 text-left transition-colors hover:bg-gray-800/50"
       >
         <div className="flex items-center gap-3">
           {Icon && (
-            <div className="p-2 bg-gray-800 rounded-lg">
-              <Icon className="w-5 h-5 text-gray-300" />
+            <div className="rounded-lg bg-gray-800 p-2">
+              <Icon className="h-5 w-5 text-gray-300" />
             </div>
           )}
           <div>
@@ -371,15 +364,12 @@ export function ExpandableListItem({
             {subtitle && <p className="text-sm text-gray-400">{subtitle}</p>}
           </div>
         </div>
-        
-        <motion.div
-          animate={{ rotate: isExpanded ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <ChevronDown className="w-5 h-5 text-gray-400" />
+
+        <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+          <ChevronDown className="h-5 w-5 text-gray-400" />
         </motion.div>
       </button>
-      
+
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -389,9 +379,7 @@ export function ExpandableListItem({
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="p-4 pt-0 border-t border-gray-800">
-              {children}
-            </div>
+            <div className="border-t border-gray-800 p-4 pt-0">{children}</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -409,27 +397,23 @@ interface TouchToggleProps {
 
 export function TouchToggle({ checked, onChange, label, disabled = false }: TouchToggleProps) {
   return (
-    <label className="flex items-center gap-3 cursor-pointer">
+    <label className="flex cursor-pointer items-center gap-3">
       <motion.div
-        className={`relative w-14 h-8 rounded-full transition-colors ${
+        className={`relative h-8 w-14 rounded-full transition-colors ${
           checked ? 'bg-gradient-to-r from-violet-500 to-cyan-500' : 'bg-gray-700'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        } ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
         onClick={() => !disabled && onChange(!checked)}
       >
         <motion.div
-          className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg"
+          className="absolute top-1 h-6 w-6 rounded-full bg-white shadow-lg"
           animate={{
-            x: checked ? 28 : 4
+            x: checked ? 28 : 4,
           }}
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
         />
       </motion.div>
-      
-      {label && (
-        <span className={`text-white ${disabled ? 'opacity-50' : ''}`}>
-          {label}
-        </span>
-      )}
+
+      {label && <span className={`text-white ${disabled ? 'opacity-50' : ''}`}>{label}</span>}
     </label>
   )
 }
@@ -450,7 +434,7 @@ export function MobileCounter({
   min = 0,
   max = 100,
   step = 1,
-  label
+  label,
 }: MobileCounterProps) {
   const increment = () => {
     const newValue = Math.min(value + step, max)
@@ -464,29 +448,29 @@ export function MobileCounter({
 
   return (
     <div className="flex items-center gap-4">
-      {label && <span className="text-white font-medium">{label}</span>}
-      
+      {label && <span className="font-medium text-white">{label}</span>}
+
       <div className="flex items-center gap-3">
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={decrement}
           disabled={value <= min}
-          className="w-12 h-12 bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex h-12 w-12 items-center justify-center rounded-xl border border-gray-700 bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Minus className="w-5 h-5 text-white" />
+          <Minus className="h-5 w-5 text-white" />
         </motion.button>
-        
+
         <div className="min-w-[3rem] text-center">
           <span className="text-xl font-bold text-white">{value}</span>
         </div>
-        
+
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={increment}
           disabled={value >= max}
-          className="w-12 h-12 bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex h-12 w-12 items-center justify-center rounded-xl border border-gray-700 bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Plus className="w-5 h-5 text-white" />
+          <Plus className="h-5 w-5 text-white" />
         </motion.button>
       </div>
     </div>
@@ -503,14 +487,14 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [pullDistance, setPullDistance] = useState(0)
   const y = useMotionValue(0)
-  
-  const handleDrag = (event: any, info: any) => {
+
+  const handleDrag = (event: unknown, info: unknown) => {
     if (info.offset.y > 0 && window.scrollY === 0) {
       setPullDistance(Math.min(info.offset.y, 100))
     }
   }
 
-  const handleDragEnd = async (event: any, info: any) => {
+  const handleDragEnd = async (event: unknown, info: unknown) => {
     if (info.offset.y > 80 && window.scrollY === 0) {
       setIsRefreshing(true)
       try {
@@ -545,8 +529,8 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
             <div className="flex items-center gap-2">
               {isRefreshing ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-violet-400/30 border-t-violet-400 rounded-full animate-spin" />
-                  <span className="text-violet-400 text-sm">Refreshing...</span>
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-violet-400/30 border-t-violet-400" />
+                  <span className="text-sm text-violet-400">Refreshing...</span>
                 </>
               ) : (
                 <>
@@ -554,9 +538,9 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
                     animate={{ rotate: pullDistance > 80 ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <ChevronDown className="w-5 h-5 text-violet-400" />
+                    <ChevronDown className="h-5 w-5 text-violet-400" />
                   </motion.div>
-                  <span className="text-violet-400 text-sm">
+                  <span className="text-sm text-violet-400">
                     {pullDistance > 80 ? 'Release to refresh' : 'Pull to refresh'}
                   </span>
                 </>
@@ -565,7 +549,7 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {children}
     </motion.div>
   )

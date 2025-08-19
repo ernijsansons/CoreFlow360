@@ -1,6 +1,6 @@
 /**
  * CoreFlow360 Partner Components
- * 
+ *
  * Comprehensive ecosystem for Intelligence Certified Consultants
  * to manage their consciousness transformation practice.
  */

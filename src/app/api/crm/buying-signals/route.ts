@@ -38,32 +38,35 @@ export async function GET(request: NextRequest) {
         status: 'ACTIVE',
         plan: {
           features: {
-            has: 'DECISION_MAKER_INTELLIGENCE'
-          }
-        }
-      }
+            has: 'DECISION_MAKER_INTELLIGENCE',
+          },
+        },
+      },
     })
 
     if (!subscription) {
-      return NextResponse.json({ 
-        error: 'Premium feature requires Decision Maker Intelligence subscription',
-        upgrade: {
-          feature: 'DECISION_MAKER_INTELLIGENCE',
-          price: 49,
-          currency: 'USD'
-        }
-      }, { status: 402 })
+      return NextResponse.json(
+        {
+          error: 'Premium feature requires Decision Maker Intelligence subscription',
+          upgrade: {
+            feature: 'DECISION_MAKER_INTELLIGENCE',
+            price: 49,
+            currency: 'USD',
+          },
+        },
+        { status: 402 }
+      )
     }
 
     // Build query filters
-    const where: any = {
+    const where: unknown = {
       executive: { tenantId },
       detectedDate: {
-        gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+        gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
       },
       relevanceScore: {
-        gte: minRelevanceScore
-      }
+        gte: minRelevanceScore,
+      },
     }
 
     if (companyId) where.companyId = companyId
@@ -87,8 +90,8 @@ export async function GET(request: NextRequest) {
             profilePictureUrl: true,
             influenceScore: true,
             connectionLevel: true,
-            reportingLevel: true
-          }
+            reportingLevel: true,
+          },
         },
         company: {
           select: {
@@ -96,17 +99,17 @@ export async function GET(request: NextRequest) {
             name: true,
             industry: true,
             size: true,
-            website: true
-          }
-        }
+            website: true,
+          },
+        },
       },
       orderBy: [
         { strength: 'desc' },
         { urgency: 'desc' },
         { relevanceScore: 'desc' },
-        { detectedDate: 'desc' }
+        { detectedDate: 'desc' },
       ],
-      take: limit
+      take: limit,
     })
 
     // Transform and enrich signals
@@ -114,58 +117,60 @@ export async function GET(request: NextRequest) {
       buyingSignals.map(async (signal) => {
         // Calculate opportunity assessment
         const opportunityAssessment = await this.calculateOpportunityAssessment(signal)
-        
+
         return {
           id: signal.id,
           executiveId: signal.executiveId,
           companyId: signal.companyId,
-          
-          executive: signal.executive ? {
-            id: signal.executive.id,
-            name: `${signal.executive.firstName} ${signal.executive.lastName}`,
-            title: signal.executive.currentTitle,
-            company: signal.executive.currentCompany,
-            profileUrl: signal.executive.profileUrl,
-            profilePictureUrl: signal.executive.profilePictureUrl,
-            influenceScore: signal.executive.influenceScore,
-            connectionLevel: signal.executive.connectionLevel,
-            reportingLevel: signal.executive.reportingLevel
-          } : null,
-          
+
+          executive: signal.executive
+            ? {
+                id: signal.executive.id,
+                name: `${signal.executive.firstName} ${signal.executive.lastName}`,
+                title: signal.executive.currentTitle,
+                company: signal.executive.currentCompany,
+                profileUrl: signal.executive.profileUrl,
+                profilePictureUrl: signal.executive.profilePictureUrl,
+                influenceScore: signal.executive.influenceScore,
+                connectionLevel: signal.executive.connectionLevel,
+                reportingLevel: signal.executive.reportingLevel,
+              }
+            : null,
+
           company: signal.company,
-          
+
           signalType: signal.signalType,
           signal: signal.signal,
           description: signal.description,
           strength: signal.strength,
           urgency: signal.urgency,
-          
+
           source: signal.source,
           sourceUrl: signal.sourceUrl,
           detectedDate: signal.detectedDate.toISOString(),
-          
+
           relevanceScore: Number(signal.relevanceScore),
           keywords: signal.keywords,
           sentiment: signal.sentiment,
-          
+
           opportunitySize: signal.opportunitySize,
           timeToDecision: signal.timeToDecision,
           competitionLevel: signal.competitionLevel,
-          
+
           // Enhanced assessments
           opportunityAssessment,
-          
+
           // Action tracking
           alertSent: signal.alertSent,
           actionTaken: signal.actionTaken,
           actionType: signal.actionType,
           outcome: signal.outcome,
-          
+
           // Timing analysis
           timingAnalysis: this.analyzeSignalTiming(signal),
-          
+
           // Recommended actions
-          recommendedActions: await this.generateRecommendedActions(signal)
+          recommendedActions: await this.generateRecommendedActions(signal),
         }
       })
     )
@@ -174,35 +179,41 @@ export async function GET(request: NextRequest) {
     const analytics = {
       total: transformedSignals.length,
       byStrength: {
-        CRITICAL: transformedSignals.filter(s => s.strength === 'CRITICAL').length,
-        HIGH: transformedSignals.filter(s => s.strength === 'HIGH').length,
-        MEDIUM: transformedSignals.filter(s => s.strength === 'MEDIUM').length,
-        LOW: transformedSignals.filter(s => s.strength === 'LOW').length
+        CRITICAL: transformedSignals.filter((s) => s.strength === 'CRITICAL').length,
+        HIGH: transformedSignals.filter((s) => s.strength === 'HIGH').length,
+        MEDIUM: transformedSignals.filter((s) => s.strength === 'MEDIUM').length,
+        LOW: transformedSignals.filter((s) => s.strength === 'LOW').length,
       },
-      byType: transformedSignals.reduce((acc, signal) => {
-        acc[signal.signalType] = (acc[signal.signalType] || 0) + 1
-        return acc
-      }, {} as Record<string, number>),
+      byType: transformedSignals.reduce(
+        (acc, signal) => {
+          acc[signal.signalType] = (acc[signal.signalType] || 0) + 1
+          return acc
+        },
+        {} as Record<string, number>
+      ),
       byUrgency: {
-        URGENT: transformedSignals.filter(s => s.urgency === 'URGENT').length,
-        HIGH: transformedSignals.filter(s => s.urgency === 'HIGH').length,
-        MEDIUM: transformedSignals.filter(s => s.urgency === 'MEDIUM').length,
-        LOW: transformedSignals.filter(s => s.urgency === 'LOW').length
+        URGENT: transformedSignals.filter((s) => s.urgency === 'URGENT').length,
+        HIGH: transformedSignals.filter((s) => s.urgency === 'HIGH').length,
+        MEDIUM: transformedSignals.filter((s) => s.urgency === 'MEDIUM').length,
+        LOW: transformedSignals.filter((s) => s.urgency === 'LOW').length,
       },
-      averageRelevanceScore: Math.round(
-        transformedSignals.reduce((sum, s) => sum + s.relevanceScore, 0) / 
-        transformedSignals.length * 100
-      ) / 100,
-      totalOpportunityValue: transformedSignals.reduce((sum, s) => 
-        sum + (s.opportunitySize?.max || 0), 0
+      averageRelevanceScore:
+        Math.round(
+          (transformedSignals.reduce((sum, s) => sum + s.relevanceScore, 0) /
+            transformedSignals.length) *
+            100
+        ) / 100,
+      totalOpportunityValue: transformedSignals.reduce(
+        (sum, s) => sum + (s.opportunitySize?.max || 0),
+        0
       ),
       actionStats: {
-        alertsSent: transformedSignals.filter(s => s.alertSent).length,
-        actionsStarted: transformedSignals.filter(s => s.actionTaken).length,
-        successfulOutcomes: transformedSignals.filter(s => 
-          s.outcome && ['MEETING_SCHEDULED', 'PROPOSAL_SENT', 'DEAL_WON'].includes(s.outcome)
-        ).length
-      }
+        alertsSent: transformedSignals.filter((s) => s.alertSent).length,
+        actionsStarted: transformedSignals.filter((s) => s.actionTaken).length,
+        successfulOutcomes: transformedSignals.filter(
+          (s) => s.outcome && ['MEETING_SCHEDULED', 'PROPOSAL_SENT', 'DEAL_WON'].includes(s.outcome)
+        ).length,
+      },
     }
 
     // Get trending signals
@@ -215,16 +226,11 @@ export async function GET(request: NextRequest) {
       pagination: {
         limit,
         total: transformedSignals.length,
-        hasMore: transformedSignals.length === limit
-      }
+        hasMore: transformedSignals.length === limit,
+      },
     })
-
   } catch (error) {
-    console.error('Error fetching buying signals:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch buying signals' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch buying signals' }, { status: 500 })
   }
 }
 
@@ -242,14 +248,11 @@ export async function POST(request: NextRequest) {
       companyIds = [],
       executiveIds = [],
       signalTypes = [],
-      forceRefresh = false
+      forceRefresh = false,
     } = body
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'Tenant ID required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Tenant ID required' }, { status: 400 })
     }
 
     // Check premium subscription
@@ -259,57 +262,60 @@ export async function POST(request: NextRequest) {
         status: 'ACTIVE',
         plan: {
           features: {
-            has: 'DECISION_MAKER_INTELLIGENCE'
-          }
-        }
-      }
+            has: 'DECISION_MAKER_INTELLIGENCE',
+          },
+        },
+      },
     })
 
     if (!subscription) {
-      return NextResponse.json({ 
-        error: 'Premium feature requires subscription' 
-      }, { status: 402 })
+      return NextResponse.json(
+        {
+          error: 'Premium feature requires subscription',
+        },
+        { status: 402 }
+      )
     }
 
     const intelligence = new DecisionMakerIntelligence()
 
     // Process each company
     const detectionResults = []
-    const companiesToProcess = companyIds.length > 0 ? companyIds : 
-      await this.getTrackedCompanies(tenantId)
+    const companiesToProcess =
+      companyIds.length > 0 ? companyIds : await this.getTrackedCompanies(tenantId)
 
     for (const companyId of companiesToProcess) {
       try {
-        const executivesToProcess = executiveIds.length > 0 ? executiveIds :
-          await this.getCompanyExecutives(companyId, tenantId)
+        const executivesToProcess =
+          executiveIds.length > 0
+            ? executiveIds
+            : await this.getCompanyExecutives(companyId, tenantId)
 
         const signals = await intelligence.detectBuyingSignals(companyId, executivesToProcess)
-        
+
         // Filter by signal types if specified
-        const filteredSignals = signalTypes.length > 0 
-          ? signals.filter(s => signalTypes.includes(s.signalType))
-          : signals
+        const filteredSignals =
+          signalTypes.length > 0
+            ? signals.filter((s) => signalTypes.includes(s.signalType))
+            : signals
 
         detectionResults.push({
           companyId,
           signalsDetected: filteredSignals.length,
-          signals: filteredSignals.map(s => ({
+          signals: filteredSignals.map((s) => ({
             id: s.id,
             signalType: s.signalType,
             strength: s.strength,
-            relevanceScore: s.relevanceScore
-          }))
+            relevanceScore: s.relevanceScore,
+          })),
         })
 
         // Send alerts for critical signals
-        const criticalSignals = filteredSignals.filter(s => s.strength === 'CRITICAL')
+        const criticalSignals = filteredSignals.filter((s) => s.strength === 'CRITICAL')
         for (const signal of criticalSignals) {
           await this.sendBuyingSignalAlert(signal, tenantId)
         }
-
-      } catch (companyError) {
-        console.error(`Error processing company ${companyId}:`, companyError)
-      }
+      } catch (companyError) {}
     }
 
     const totalSignals = detectionResults.reduce((sum, result) => sum + result.signalsDetected, 0)
@@ -318,11 +324,9 @@ export async function POST(request: NextRequest) {
       success: true,
       companiesProcessed: detectionResults.length,
       totalSignalsDetected: totalSignals,
-      results: detectionResults
+      results: detectionResults,
     })
-
   } catch (error) {
-    console.error('Error triggering buying signal detection:', error)
     return NextResponse.json(
       { error: 'Failed to trigger buying signal detection' },
       { status: 500 }
@@ -346,30 +350,24 @@ export async function PUT(request: NextRequest) {
       actionType,
       outcome,
       notes,
-      followUpDate
+      followUpDate,
     } = body
 
     if (!signalId || !tenantId) {
-      return NextResponse.json(
-        { error: 'Signal ID and tenant ID required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Signal ID and tenant ID required' }, { status: 400 })
     }
 
     // Verify access
     const signal = await prisma.buyingSignal.findFirst({
       where: {
         id: signalId,
-        executive: { tenantId }
+        executive: { tenantId },
       },
-      include: { executive: true }
+      include: { executive: true },
     })
 
     if (!signal) {
-      return NextResponse.json(
-        { error: 'Buying signal not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Buying signal not found' }, { status: 404 })
     }
 
     // Update signal
@@ -381,8 +379,8 @@ export async function PUT(request: NextRequest) {
         outcome,
         notes,
         followUpDate: followUpDate ? new Date(followUpDate) : null,
-        lastUpdated: new Date()
-      }
+        lastUpdated: new Date(),
+      },
     })
 
     // Log activity
@@ -398,9 +396,9 @@ export async function PUT(request: NextRequest) {
           signalType: signal.signalType,
           signalStrength: signal.strength,
           actionType,
-          outcome
-        }
-      }
+          outcome,
+        },
+      },
     })
 
     return NextResponse.json({
@@ -411,75 +409,86 @@ export async function PUT(request: NextRequest) {
         actionType: updatedSignal.actionType,
         outcome: updatedSignal.outcome,
         followUpDate: updatedSignal.followUpDate?.toISOString(),
-        lastUpdated: updatedSignal.lastUpdated.toISOString()
-      }
+        lastUpdated: updatedSignal.lastUpdated.toISOString(),
+      },
     })
-
   } catch (error) {
-    console.error('Error updating buying signal action:', error)
-    return NextResponse.json(
-      { error: 'Failed to update buying signal action' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to update buying signal action' }, { status: 500 })
   }
 }
 
 // Helper methods
-async function calculateOpportunityAssessment(signal: any) {
+async function calculateOpportunityAssessment(_signal: unknown) {
   return {
     dealProbability: this.calculateDealProbability(signal),
     timelineEstimate: this.estimateTimeline(signal),
     competitorRisk: this.assessCompetitorRisk(signal),
     budgetFit: this.assessBudgetFit(signal),
-    decisionMakerAccess: this.assessDecisionMakerAccess(signal)
+    decisionMakerAccess: this.assessDecisionMakerAccess(signal),
   }
 }
 
-function calculateDealProbability(signal: any): number {
+function calculateDealProbability(_signal: unknown): number {
   let probability = 0.5 // Base probability
 
   // Adjust based on signal strength
   switch (signal.strength) {
-    case 'CRITICAL': probability += 0.3; break
-    case 'HIGH': probability += 0.2; break
-    case 'MEDIUM': probability += 0.1; break
-    case 'LOW': probability -= 0.1; break
+    case 'CRITICAL':
+      probability += 0.3
+      break
+    case 'HIGH':
+      probability += 0.2
+      break
+    case 'MEDIUM':
+      probability += 0.1
+      break
+    case 'LOW':
+      probability -= 0.1
+      break
   }
 
   // Adjust based on urgency
   switch (signal.urgency) {
-    case 'URGENT': probability += 0.2; break
-    case 'HIGH': probability += 0.1; break
-    case 'MEDIUM': probability += 0.05; break
-    case 'LOW': probability -= 0.05; break
+    case 'URGENT':
+      probability += 0.2
+      break
+    case 'HIGH':
+      probability += 0.1
+      break
+    case 'MEDIUM':
+      probability += 0.05
+      break
+    case 'LOW':
+      probability -= 0.05
+      break
   }
 
   // Adjust based on executive influence
   if (signal.executive) {
-    const influenceBonus = (signal.executive.influenceScore - 50) / 100 * 0.2
+    const influenceBonus = ((signal.executive.influenceScore - 50) / 100) * 0.2
     probability += influenceBonus
   }
 
   return Math.max(0, Math.min(1, probability))
 }
 
-function estimateTimeline(signal: any): string {
+function estimateTimeline(_signal: unknown): string {
   const urgencyToTimeline = {
-    'URGENT': '1-2 weeks',
-    'HIGH': '1-2 months',
-    'MEDIUM': '3-6 months',
-    'LOW': '6+ months'
+    URGENT: '1-2 weeks',
+    HIGH: '1-2 months',
+    MEDIUM: '3-6 months',
+    LOW: '6+ months',
   }
   return urgencyToTimeline[signal.urgency as keyof typeof urgencyToTimeline] || '3-6 months'
 }
 
-function assessCompetitorRisk(signal: any): 'LOW' | 'MEDIUM' | 'HIGH' {
+function assessCompetitorRisk(_signal: unknown): 'LOW' | 'MEDIUM' | 'HIGH' {
   // Logic based on signal type and market conditions
   const highRiskSignalTypes = ['HIRING', 'FUNDING', 'RFP']
   return highRiskSignalTypes.includes(signal.signalType) ? 'HIGH' : 'MEDIUM'
 }
 
-function assessBudgetFit(signal: any): 'GOOD' | 'FAIR' | 'POOR' {
+function assessBudgetFit(_signal: unknown): 'GOOD' | 'FAIR' | 'POOR' {
   if (signal.opportunitySize) {
     const avgOpportunity = (signal.opportunitySize.min + signal.opportunitySize.max) / 2
     if (avgOpportunity >= 50000) return 'GOOD'
@@ -488,7 +497,7 @@ function assessBudgetFit(signal: any): 'GOOD' | 'FAIR' | 'POOR' {
   return 'POOR'
 }
 
-function assessDecisionMakerAccess(signal: any): 'DIRECT' | 'INDIRECT' | 'UNKNOWN' {
+function assessDecisionMakerAccess(_signal: unknown): 'DIRECT' | 'INDIRECT' | 'UNKNOWN' {
   if (signal.executive) {
     if (signal.executive.reportingLevel <= 2) return 'DIRECT'
     if (signal.executive.reportingLevel <= 4) return 'INDIRECT'
@@ -496,21 +505,21 @@ function assessDecisionMakerAccess(signal: any): 'DIRECT' | 'INDIRECT' | 'UNKNOW
   return 'UNKNOWN'
 }
 
-function analyzeSignalTiming(signal: any) {
+function analyzeSignalTiming(_signal: unknown) {
   const hoursAgo = Math.floor(
     (Date.now() - new Date(signal.detectedDate).getTime()) / (1000 * 60 * 60)
   )
-  
+
   return {
     hoursAgo,
     freshness: hoursAgo < 24 ? 'FRESH' : hoursAgo < 72 ? 'RECENT' : 'OLDER',
-    actionWindow: hoursAgo < 48 ? 'OPTIMAL' : hoursAgo < 168 ? 'GOOD' : 'DECLINING'
+    actionWindow: hoursAgo < 48 ? 'OPTIMAL' : hoursAgo < 168 ? 'GOOD' : 'DECLINING',
   }
 }
 
-async function generateRecommendedActions(signal: any): Promise<string[]> {
+async function generateRecommendedActions(_signal: unknown): Promise<string[]> {
   const actions = []
-  
+
   // Base actions based on signal type
   switch (signal.signalType) {
     case 'HIRING':
@@ -539,54 +548,55 @@ async function generateRecommendedActions(signal: any): Promise<string[]> {
   return actions
 }
 
-async function getTrendingSignalTypes(tenantId: string, days: number) {
+async function getTrendingSignalTypes(_tenantId: string, _days: number) {
   const signals = await prisma.buyingSignal.findMany({
     where: {
       executive: { tenantId },
       detectedDate: {
-        gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000)
-      }
+        gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
+      },
     },
-    select: { signalType: true }
+    select: { signalType: true },
   })
 
-  const counts = signals.reduce((acc, s) => {
-    acc[s.signalType] = (acc[s.signalType] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
+  const counts = signals.reduce(
+    (acc, s) => {
+      acc[s.signalType] = (acc[s.signalType] || 0) + 1
+      return acc
+    },
+    {} as Record<string, number>
+  )
 
   return Object.entries(counts)
-    .sort(([,a], [,b]) => b - a)
+    .sort(([, a], [, b]) => b - a)
     .slice(0, 5)
     .map(([type, count]) => ({ type, count }))
 }
 
-async function getTrackedCompanies(tenantId: string): Promise<string[]> {
+async function getTrackedCompanies(_tenantId: string): Promise<string[]> {
   const companies = await prisma.executiveProfile.findMany({
     where: { tenantId, monitoringEnabled: true },
     select: { currentCompanyId: true },
-    distinct: ['currentCompanyId']
+    distinct: ['currentCompanyId'],
   })
-  
-  return companies
-    .map(c => c.currentCompanyId)
-    .filter((id): id is string => id !== null)
+
+  return companies.map((c) => c.currentCompanyId).filter((id): id is string => id !== null)
 }
 
-async function getCompanyExecutives(companyId: string, tenantId: string): Promise<string[]> {
+async function getCompanyExecutives(_companyId: string, _tenantId: string): Promise<string[]> {
   const executives = await prisma.executiveProfile.findMany({
-    where: { 
+    where: {
       tenantId,
       currentCompanyId: companyId,
-      monitoringEnabled: true
+      monitoringEnabled: true,
     },
-    select: { id: true }
+    select: { id: true },
   })
-  
-  return executives.map(e => e.id)
+
+  return executives.map((e) => e.id)
 }
 
-async function sendBuyingSignalAlert(signal: any, tenantId: string): Promise<void> {
+async function sendBuyingSignalAlert(_signal: unknown, _tenantId: string): Promise<void> {
   await prisma.notification.create({
     data: {
       tenantId,
@@ -600,8 +610,8 @@ async function sendBuyingSignalAlert(signal: any, tenantId: string): Promise<voi
       metadata: {
         executiveId: signal.executiveId,
         signalType: signal.signalType,
-        relevanceScore: signal.relevanceScore
-      }
-    }
+        relevanceScore: signal.relevanceScore,
+      },
+    },
   })
 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   // This endpoint helps diagnose build-time vs runtime issues
-  
+
   const buildInfo = {
     timestamp: new Date().toISOString(),
     environment: {
@@ -33,12 +33,12 @@ export async function GET(request: NextRequest) {
       host: request.headers.get('host'),
       'x-forwarded-host': request.headers.get('x-forwarded-host'),
       'x-vercel-deployment-url': request.headers.get('x-vercel-deployment-url'),
-    }
+    },
   }
-  
+
   return NextResponse.json(buildInfo, {
     headers: {
       'Cache-Control': 'no-store, no-cache, must-revalidate',
-    }
+    },
   })
 }

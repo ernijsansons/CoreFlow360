@@ -5,10 +5,10 @@
 
 import { fieldEncryption } from '@/lib/encryption/field-encryption'
 import { prisma } from '@/lib/db'
-import { 
-  APIKey, 
-  CreateAPIKeyRequest, 
-  UpdateAPIKeyRequest, 
+import {
+  APIKey,
+  CreateAPIKeyRequest,
+  UpdateAPIKeyRequest,
   RotateAPIKeyRequest,
   APIKeyStatus,
   APIKeyListResponse,
@@ -18,13 +18,13 @@ import {
   APIKeyMetrics,
   SecurityLevel,
   APIKeyAuditEvent,
-  AISecurityAssessment
+  AISecurityAssessment,
 } from '@/types/api-keys'
-import { 
-  validateAPIKeyFormat, 
-  calculateSecurityScore, 
+import {
+  validateAPIKeyFormat,
+  calculateSecurityScore,
   generateSecurityRecommendations,
-  validateAPIKeyPermissions 
+  validateAPIKeyPermissions,
 } from '@/lib/api-keys/validation'
 
 interface CredentialConfig {
@@ -45,21 +45,21 @@ interface DecryptedCredential {
 export class SecureCredentialManager {
   private cache = new Map<string, { credential: string; cachedAt: number }>()
   private readonly CACHE_TTL = 5 * 60 * 1000 // 5 minutes
-  
+
   /**
    * Store encrypted credential in database
    */
   async storeCredential(
-    service: string, 
-    credential: string, 
+    service: string,
+    credential: string,
     tenantId?: string,
     rotationDays: number = 90
   ): Promise<void> {
     const encryptedCredential = fieldEncryption.encrypt(credential)
-    
+
     // Store in database (create table if doesn't exist)
     await this.ensureCredentialTable()
-    
+
     await prisma.$executeRaw`
       INSERT INTO secure_credentials (service, encrypted_credential, tenant_id, rotation_days, created_at, updated_at)
       VALUES (${service}, ${encryptedCredential}, ${tenantId || null}, ${rotationDays}, NOW(), NOW())
@@ -69,26 +69,26 @@ export class SecureCredentialManager {
         rotation_days = ${rotationDays},
         updated_at = NOW()
     `
-    
+
     // Clear cache for this service
     this.clearCache(service, tenantId)
   }
-  
+
   /**
    * Retrieve and decrypt credential
    */
   async getCredential(service: string, tenantId?: string): Promise<string | null> {
     const cacheKey = `${service}:${tenantId || 'global'}`
-    
+
     // Check cache first
     const cached = this.cache.get(cacheKey)
     if (cached && Date.now() - cached.cachedAt < this.CACHE_TTL) {
       return cached.credential
     }
-    
+
     try {
       await this.ensureCredentialTable()
-      
+
       const result = await prisma.$queryRaw<Array<{ encrypted_credential: string }>>`
         SELECT encrypted_credential 
         FROM secure_credentials 
@@ -97,36 +97,35 @@ export class SecureCredentialManager {
         ORDER BY tenant_id DESC NULLS LAST
         LIMIT 1
       `
-      
+
       if (result.length === 0) {
         return null
       }
-      
+
       const decryptedCredential = fieldEncryption.decrypt(result[0].encrypted_credential)
-      
+
       // Cache the decrypted credential
       this.cache.set(cacheKey, {
         credential: decryptedCredential,
-        cachedAt: Date.now()
+        cachedAt: Date.now(),
       })
-      
+
       return decryptedCredential
     } catch (error) {
-      console.error('Failed to retrieve credential:', error)
       return null
     }
   }
-  
+
   /**
    * Get OpenAI API key with fallback to environment variable
    */
   async getOpenAIKey(tenantId?: string): Promise<string> {
     const storedKey = await this.getCredential('openai_api_key', tenantId)
-    
+
     if (storedKey) {
       return storedKey
     }
-    
+
     // Fallback to environment variable
     const envKey = process.env.OPENAI_API_KEY
     if (envKey) {
@@ -134,35 +133,37 @@ export class SecureCredentialManager {
       await this.storeCredential('openai_api_key', envKey, tenantId)
       return envKey
     }
-    
+
     throw new Error('OpenAI API key not found in secure storage or environment variables')
   }
-  
+
   /**
    * Rotate credential (generate new one if possible)
    */
   async rotateCredential(service: string, newCredential: string, tenantId?: string): Promise<void> {
     // Archive old credential first
     await this.archiveCredential(service, tenantId)
-    
+
     // Store new credential
     await this.storeCredential(service, newCredential, tenantId)
-    
+
     // Log rotation event
     console.info(`Credential rotated for service: ${service}`)
   }
-  
+
   /**
    * Check if credential needs rotation
    */
   async needsRotation(service: string, tenantId?: string): Promise<boolean> {
     try {
       await this.ensureCredentialTable()
-      
-      const result = await prisma.$queryRaw<Array<{ 
-        rotation_days: number; 
-        updated_at: Date 
-      }>>`
+
+      const result = await prisma.$queryRaw<
+        Array<{
+          rotation_days: number
+          updated_at: Date
+        }>
+      >`
         SELECT rotation_days, updated_at 
         FROM secure_credentials 
         WHERE service = ${service} 
@@ -170,72 +171,70 @@ export class SecureCredentialManager {
         ORDER BY tenant_id DESC NULLS LAST
         LIMIT 1
       `
-      
+
       if (result.length === 0) {
         return false
       }
-      
+
       const { rotation_days, updated_at } = result[0]
       const daysSinceUpdate = Math.floor(
         (Date.now() - updated_at.getTime()) / (1000 * 60 * 60 * 24)
       )
-      
+
       return daysSinceUpdate >= rotation_days
     } catch (error) {
-      console.error('Failed to check rotation status:', error)
       return false
     }
   }
-  
+
   /**
    * List all credentials that need rotation
    */
   async getCredentialsNeedingRotation(): Promise<CredentialConfig[]> {
     try {
       await this.ensureCredentialTable()
-      
-      const result = await prisma.$queryRaw<Array<{
-        service: string;
-        tenant_id: string | null;
-        rotation_days: number;
-        updated_at: Date;
-      }>>`
+
+      const result = await prisma.$queryRaw<
+        Array<{
+          service: string
+          tenant_id: string | null
+          rotation_days: number
+          updated_at: Date
+        }>
+      >`
         SELECT service, tenant_id, rotation_days, updated_at
         FROM secure_credentials
         WHERE updated_at + INTERVAL rotation_days || ' days' < NOW()
       `
-      
-      return result.map(row => ({
+
+      return result.map((row) => ({
         service: row.service,
         key: `${row.service}:${row.tenant_id || 'global'}`,
         encrypted: true,
         rotationDays: row.rotation_days,
-        lastRotated: row.updated_at
+        lastRotated: row.updated_at,
       }))
     } catch (error) {
-      console.error('Failed to get credentials needing rotation:', error)
       return []
     }
   }
-  
+
   /**
    * Archive old credential
    */
   private async archiveCredential(service: string, tenantId?: string): Promise<void> {
     try {
       await this.ensureCredentialArchiveTable()
-      
+
       await prisma.$executeRaw`
         INSERT INTO secure_credentials_archive (service, encrypted_credential, tenant_id, archived_at)
         SELECT service, encrypted_credential, tenant_id, NOW()
         FROM secure_credentials
         WHERE service = ${service} AND (tenant_id = ${tenantId || null} OR tenant_id IS NULL)
       `
-    } catch (error) {
-      console.error('Failed to archive credential:', error)
-    }
+    } catch (error) {}
   }
-  
+
   /**
    * Clear cache for service
    */
@@ -243,7 +242,7 @@ export class SecureCredentialManager {
     const cacheKey = `${service}:${tenantId || 'global'}`
     this.cache.delete(cacheKey)
   }
-  
+
   /**
    * Create credentials table if it doesn't exist
    */
@@ -260,24 +259,24 @@ export class SecureCredentialManager {
         UNIQUE(service, tenant_id)
       )
     `
-    
+
     // Create indexes for performance
     await prisma.$executeRaw`
       CREATE INDEX IF NOT EXISTS idx_secure_credentials_service 
       ON secure_credentials(service)
     `
-    
+
     await prisma.$executeRaw`
       CREATE INDEX IF NOT EXISTS idx_secure_credentials_tenant 
       ON secure_credentials(tenant_id)
     `
-    
+
     await prisma.$executeRaw`
       CREATE INDEX IF NOT EXISTS idx_secure_credentials_rotation 
       ON secure_credentials(updated_at, rotation_days)
     `
   }
-  
+
   /**
    * Create credentials archive table if it doesn't exist
    */
@@ -408,22 +407,24 @@ export class SecureCredentialManager {
     await this.ensureAPIKeyTables()
 
     // Build WHERE clause
-    let whereConditions = [`tenant_id = '${tenantId}'`]
-    
+    const whereConditions = [`tenant_id = '${tenantId}'`]
+
     if (filter.status && filter.status.length > 0) {
-      const statusList = filter.status.map(s => `'${s}'`).join(',')
+      const statusList = filter.status.map((s) => `'${s}'`).join(',')
       whereConditions.push(`status IN (${statusList})`)
     }
-    
+
     if (filter.vendor && filter.vendor.length > 0) {
-      const vendorList = filter.vendor.map(v => `'${v}'`).join(',')
+      const vendorList = filter.vendor.map((v) => `'${v}'`).join(',')
       whereConditions.push(`vendor_id IN (${vendorList})`)
     }
-    
+
     if (filter.searchTerm) {
-      whereConditions.push(`(name ILIKE '%${filter.searchTerm}%' OR service ILIKE '%${filter.searchTerm}%')`)
+      whereConditions.push(
+        `(name ILIKE '%${filter.searchTerm}%' OR service ILIKE '%${filter.searchTerm}%')`
+      )
     }
-    
+
     if (filter.lastUsedSince) {
       whereConditions.push(`last_used_at >= '${filter.lastUsedSince.toISOString()}'`)
     }
@@ -441,7 +442,7 @@ export class SecureCredentialManager {
     const total = Number(countResult[0].count)
 
     // Get keys
-    const keys = await prisma.$queryRaw<any[]>`
+    const keys = await prisma.$queryRaw<unknown[]>`
       SELECT 
         id, service, name, description, key_preview, status,
         last_used_at, created_at, updated_at, expires_at,
@@ -457,21 +458,26 @@ export class SecureCredentialManager {
     const metrics = await this.calculateAPIKeyMetrics(tenantId)
 
     return {
-      keys: keys.map(key => this.mapDatabaseRowToAPIKey(key)),
+      keys: keys.map((key) => this.mapDatabaseRowToAPIKey(key)),
       total,
       pagination: {
         page: Math.floor(offset / limit) + 1,
         limit,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / limit),
       },
-      metrics
+      metrics,
     }
   }
 
   /**
    * Get single API key with details
    */
-  async getAPIKey(keyId: string, tenantId: string, userRole: string, userPermissions: string[]): Promise<APIKeyResponse> {
+  async getAPIKey(
+    keyId: string,
+    tenantId: string,
+    userRole: string,
+    userPermissions: string[]
+  ): Promise<APIKeyResponse> {
     // Check permissions
     const permissionCheck = validateAPIKeyPermissions(userRole, userPermissions, 'read')
     if (!permissionCheck.allowed) {
@@ -480,7 +486,7 @@ export class SecureCredentialManager {
 
     await this.ensureAPIKeyTables()
 
-    const keyResult = await prisma.$queryRaw<any[]>`
+    const keyResult = await prisma.$queryRaw<unknown[]>`
       SELECT 
         id, service, name, description, key_preview, status,
         last_used_at, created_at, updated_at, expires_at,
@@ -501,7 +507,7 @@ export class SecureCredentialManager {
 
     return {
       key,
-      auditLog
+      auditLog,
     }
   }
 
@@ -509,14 +515,19 @@ export class SecureCredentialManager {
    * Create new API key
    */
   async createAPIKey(
-    request: CreateAPIKeyRequest, 
-    tenantId: string, 
+    request: CreateAPIKeyRequest,
+    tenantId: string,
     userId: string,
     userRole: string,
     userPermissions: string[]
   ): Promise<APIKeyOperationResponse> {
     // Check permissions
-    const permissionCheck = validateAPIKeyPermissions(userRole, userPermissions, 'create', request.service)
+    const permissionCheck = validateAPIKeyPermissions(
+      userRole,
+      userPermissions,
+      'create',
+      request.service
+    )
     if (!permissionCheck.allowed) {
       throw new Error(permissionCheck.reason || 'Insufficient permissions')
     }
@@ -529,7 +540,7 @@ export class SecureCredentialManager {
       return {
         success: false,
         message: 'API key validation failed',
-        errors: validation.errors
+        errors: validation.errors,
       }
     }
 
@@ -544,7 +555,7 @@ export class SecureCredentialManager {
       daysSinceCreated: 0,
       daysSinceLastRotation: 0,
       errorRate: 0,
-      rotationDays: request.rotationDays || 90
+      rotationDays: request.rotationDays || 90,
     })
 
     const securityLevel = this.getSecurityLevel(securityScore)
@@ -569,19 +580,20 @@ export class SecureCredentialManager {
       // Log creation
       await this.logAPIKeyAudit(keyId, 'CREATED', userId, tenantId, {
         service: request.service,
-        name: request.name
+        name: request.name,
       })
 
       return {
         success: true,
         message: 'API key created successfully',
-        data: { keyId }
+        data: { keyId },
       }
-    } catch (error: any) {
-      if (error.code === '23505') { // Unique constraint violation
+    } catch (error: unknown) {
+      if (error.code === '23505') {
+        // Unique constraint violation
         return {
           success: false,
-          message: 'API key with this name already exists for this service'
+          message: 'API key with this name already exists for this service',
         }
       }
       throw error
@@ -608,7 +620,7 @@ export class SecureCredentialManager {
     await this.ensureAPIKeyTables()
 
     // Get current key data
-    const currentKey = await prisma.$queryRaw<any[]>`
+    const currentKey = await prisma.$queryRaw<unknown[]>`
       SELECT service, encrypted_key FROM api_keys 
       WHERE id = ${keyId} AND tenant_id = ${tenantId}
     `
@@ -618,7 +630,7 @@ export class SecureCredentialManager {
     }
 
     const updates: string[] = []
-    const values: any[] = []
+    const values: unknown[] = []
     let paramIndex = 1
 
     if (request.name !== undefined) {
@@ -640,7 +652,7 @@ export class SecureCredentialManager {
         return {
           success: false,
           message: 'API key validation failed',
-          errors: validation.errors
+          errors: validation.errors,
         }
       }
 
@@ -677,7 +689,7 @@ export class SecureCredentialManager {
     if (updates.length === 0) {
       return {
         success: false,
-        message: 'No updates provided'
+        message: 'No updates provided',
       }
     }
 
@@ -697,7 +709,7 @@ export class SecureCredentialManager {
 
     return {
       success: true,
-      message: 'API key updated successfully'
+      message: 'API key updated successfully',
     }
   }
 
@@ -721,7 +733,7 @@ export class SecureCredentialManager {
     await this.ensureAPIKeyTables()
 
     // Get current key data
-    const currentKey = await prisma.$queryRaw<any[]>`
+    const currentKey = await prisma.$queryRaw<unknown[]>`
       SELECT service, encrypted_key FROM api_keys 
       WHERE id = ${keyId} AND tenant_id = ${tenantId}
     `
@@ -736,7 +748,7 @@ export class SecureCredentialManager {
       return {
         success: false,
         message: 'New API key validation failed',
-        errors: validation.errors
+        errors: validation.errors,
       }
     }
 
@@ -763,12 +775,12 @@ export class SecureCredentialManager {
     // Log rotation
     await this.logAPIKeyAudit(keyId, 'ROTATED', userId, tenantId, {
       reason: request.reason,
-      scheduled: request.scheduleRotation
+      scheduled: request.scheduleRotation,
     })
 
     return {
       success: true,
-      message: 'API key rotated successfully'
+      message: 'API key rotated successfully',
     }
   }
 
@@ -791,7 +803,7 @@ export class SecureCredentialManager {
     await this.ensureAPIKeyTables()
 
     // Archive the key before deletion
-    const keyData = await prisma.$queryRaw<any[]>`
+    const keyData = await prisma.$queryRaw<unknown[]>`
       SELECT service, encrypted_key FROM api_keys 
       WHERE id = ${keyId} AND tenant_id = ${tenantId}
     `
@@ -815,7 +827,7 @@ export class SecureCredentialManager {
 
     return {
       success: true,
-      message: 'API key deleted successfully'
+      message: 'API key deleted successfully',
     }
   }
 
@@ -825,7 +837,7 @@ export class SecureCredentialManager {
   async getDecryptedAPIKey(keyId: string, tenantId: string): Promise<string | null> {
     await this.ensureAPIKeyTables()
 
-    const result = await prisma.$queryRaw<any[]>`
+    const result = await prisma.$queryRaw<unknown[]>`
       SELECT encrypted_key, status FROM api_keys 
       WHERE id = ${keyId} AND tenant_id = ${tenantId}
     `
@@ -850,7 +862,7 @@ export class SecureCredentialManager {
   private async calculateAPIKeyMetrics(tenantId: string): Promise<APIKeyMetrics> {
     await this.ensureAPIKeyTables()
 
-    const results = await prisma.$queryRaw<any[]>`
+    const results = await prisma.$queryRaw<unknown[]>`
       SELECT 
         COUNT(*) as total,
         COUNT(CASE WHEN status = 'ACTIVE' THEN 1 END) as active,
@@ -876,7 +888,7 @@ export class SecureCredentialManager {
         EXPIRED: Number(data.expired || 0),
         ROTATION_REQUIRED: Number(data.rotation_required || 0),
         COMPROMISED: Number(data.compromised || 0),
-        PENDING_VALIDATION: 0
+        PENDING_VALIDATION: 0,
       },
       byVendor: {}, // TODO: Implement vendor grouping
       securityDistribution: {
@@ -884,19 +896,22 @@ export class SecureCredentialManager {
         LOW: 0,
         MEDIUM: 0,
         HIGH: 0,
-        EXCELLENT: 0
+        EXCELLENT: 0,
       }, // TODO: Implement security level grouping
       rotationHealth: {
         onSchedule: 0,
         overdue: 0,
-        critical: 0
+        critical: 0,
       }, // TODO: Implement rotation health calculation
       usageMetrics: {
         activeKeys: Number(data.active_keys || 0),
         totalRequests: Number(data.total_requests || 0),
-        errorRate: Number(data.total_requests || 0) > 0 ? Number(data.total_errors || 0) / Number(data.total_requests || 0) : 0,
-        avgSecurityScore: Number(data.avg_security_score || 0)
-      }
+        errorRate:
+          Number(data.total_requests || 0) > 0
+            ? Number(data.total_errors || 0) / Number(data.total_requests || 0)
+            : 0,
+        avgSecurityScore: Number(data.avg_security_score || 0),
+      },
     }
   }
 
@@ -906,7 +921,7 @@ export class SecureCredentialManager {
   private async getAPIKeyAuditLog(keyId: string): Promise<APIKeyAuditEvent[]> {
     await this.ensureAPIKeyTables()
 
-    const results = await prisma.$queryRaw<any[]>`
+    const results = await prisma.$queryRaw<unknown[]>`
       SELECT id, api_key_id, action, user_id, timestamp, metadata, ip_address, user_agent
       FROM api_key_audit 
       WHERE api_key_id = ${keyId}
@@ -914,7 +929,7 @@ export class SecureCredentialManager {
       LIMIT 50
     `
 
-    return results.map(row => ({
+    return results.map((row) => ({
       id: row.id,
       keyId: row.api_key_id,
       action: row.action,
@@ -922,7 +937,7 @@ export class SecureCredentialManager {
       timestamp: row.timestamp,
       metadata: row.metadata || {},
       ipAddress: row.ip_address,
-      userAgent: row.user_agent
+      userAgent: row.user_agent,
     }))
   }
 
@@ -930,11 +945,11 @@ export class SecureCredentialManager {
    * Log API key audit event
    */
   private async logAPIKeyAudit(
-    keyId: string, 
-    action: string, 
-    userId: string, 
-    tenantId: string, 
-    metadata: any = {},
+    keyId: string,
+    action: string,
+    userId: string,
+    tenantId: string,
+    metadata: unknown = {},
     ipAddress?: string,
     userAgent?: string
   ): Promise<void> {
@@ -949,7 +964,7 @@ export class SecureCredentialManager {
   /**
    * Map database row to API key object
    */
-  private mapDatabaseRowToAPIKey(row: any): APIKey {
+  private mapDatabaseRowToAPIKey(row: unknown): APIKey {
     return {
       id: row.id,
       service: row.service,
@@ -966,22 +981,22 @@ export class SecureCredentialManager {
         totalRequests: row.usage_count || 0,
         successfulRequests: (row.usage_count || 0) - (row.error_count || 0),
         failedRequests: row.error_count || 0,
-        lastRequestAt: row.last_used_at
+        lastRequestAt: row.last_used_at,
       },
       securityScore: {
         score: row.security_score || 0,
-        level: row.security_level as SecurityLevel || 'MEDIUM',
+        level: (row.security_level as SecurityLevel) || 'MEDIUM',
         factors: [], // TODO: Implement factor calculation
         lastAssessment: row.updated_at,
-        recommendations: [] // TODO: Implement recommendations
+        recommendations: [], // TODO: Implement recommendations
       },
       vendor: {
         id: row.vendor_id || '',
         name: '', // TODO: Join with vendor table
-        category: 'OTHER' as any, // TODO: Get from vendor table
+        category: 'OTHER' as unknown, // TODO: Get from vendor table
         supportedKeyFormats: [],
-        requiredPermissions: []
-      }
+        requiredPermissions: [],
+      },
     }
   }
 

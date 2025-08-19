@@ -1,6 +1,6 @@
 /**
  * CoreFlow360 Marketing Components
- * 
+ *
  * Revolutionary consciousness-based marketing components that guide prospects
  * through awakening stages rather than traditional sales funnels.
  */

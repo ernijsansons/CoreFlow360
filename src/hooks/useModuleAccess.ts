@@ -30,13 +30,13 @@ export function useModuleAccess(tenantId?: string): ModuleAccessState {
       // API-first approach: Try freemium status API first
       try {
         const freemiumResponse = await fetch('/api/freemium/status')
-        
+
         if (freemiumResponse.ok) {
           const freemiumData = await freemiumResponse.json()
-          
+
           let apiModules: string[] = []
           let apiTier = 'free'
-          
+
           // Map API response to module access
           if (freemiumData.subscriptionStatus === 'FREE' && freemiumData.selectedAgent) {
             apiModules = [freemiumData.selectedAgent]
@@ -45,54 +45,65 @@ export function useModuleAccess(tenantId?: string): ModuleAccessState {
             apiModules = freemiumData.activeModules || ['crm', 'sales', 'finance']
             apiTier = 'starter'
           } else if (freemiumData.subscriptionStatus === 'BUSINESS') {
-            apiModules = freemiumData.activeModules || ['crm', 'sales', 'finance', 'operations', 'analytics', 'hr']
+            apiModules = freemiumData.activeModules || [
+              'crm',
+              'sales',
+              'finance',
+              'operations',
+              'analytics',
+              'hr',
+            ]
             apiTier = 'business'
           } else if (freemiumData.subscriptionStatus === 'ENTERPRISE') {
-            apiModules = freemiumData.activeModules || ['crm', 'sales', 'finance', 'operations', 'analytics', 'hr', 'custom']
+            apiModules = freemiumData.activeModules || [
+              'crm',
+              'sales',
+              'finance',
+              'operations',
+              'analytics',
+              'hr',
+              'custom',
+            ]
             apiTier = 'enterprise'
           }
-          
+
           setActiveModules(apiModules)
           setSubscriptionTier(apiTier)
-          
+
           // Update localStorage for consistency (but don't depend on it)
           localStorage.setItem('activeModules', JSON.stringify(apiModules))
           localStorage.setItem('subscriptionTier', apiTier)
-          
+
           return // Successfully got data from API
         }
-      } catch (apiError) {
-        console.warn('API fetch failed, falling back to localStorage:', apiError)
-      }
+      } catch (apiError) {}
 
       // If we have tenantId, try subscription API
       if (tenantId) {
         try {
           const response = await fetch(`/api/subscriptions/status?tenantId=${tenantId}`)
-          
+
           if (response.ok) {
             const data = await response.json()
             if (data.success && data.activeModules) {
               setActiveModules(data.activeModules)
               setSubscriptionTier(data.subscriptionTier || 'basic')
-              
+
               // Update localStorage for consistency
               localStorage.setItem('activeModules', JSON.stringify(data.activeModules))
               localStorage.setItem('subscriptionTier', data.subscriptionTier || 'basic')
-              
+
               return // Successfully got data from API
             }
           }
-        } catch (tenantApiError) {
-          console.warn('Tenant API fetch failed:', tenantApiError)
-        }
+        } catch (tenantApiError) {}
       }
 
       // Fallback to localStorage only if API calls fail
-      console.warn('Using localStorage fallback for module access')
+
       const storedModules = localStorage.getItem('activeModules')
       const storedTier = localStorage.getItem('subscriptionTier')
-      
+
       if (storedModules) {
         const modules = JSON.parse(storedModules)
         setActiveModules(modules)
@@ -102,16 +113,14 @@ export function useModuleAccess(tenantId?: string): ModuleAccessState {
         const defaultModules = ['crm']
         setActiveModules(defaultModules)
         setSubscriptionTier('free')
-        
+
         // Store for consistency
         localStorage.setItem('activeModules', JSON.stringify(defaultModules))
         localStorage.setItem('subscriptionTier', 'free')
       }
-
     } catch (err) {
-      console.error('Error fetching module access:', err)
       setError(err instanceof Error ? err.message : 'Failed to load module access')
-      
+
       // Emergency fallback to basic CRM access
       setActiveModules(['crm'])
       setSubscriptionTier('free')
@@ -131,12 +140,12 @@ export function useModuleAccess(tenantId?: string): ModuleAccessState {
     }
 
     window.addEventListener('storage', handleStorageChange)
-    
+
     // Custom event for module updates
     const handleModuleUpdate = () => {
       fetchModuleAccess()
     }
-    
+
     window.addEventListener('moduleUpdate', handleModuleUpdate)
 
     return () => {
@@ -145,17 +154,26 @@ export function useModuleAccess(tenantId?: string): ModuleAccessState {
     }
   }, [fetchModuleAccess])
 
-  const hasModule = useCallback((module: string): boolean => {
-    return activeModules.includes(module)
-  }, [activeModules])
+  const hasModule = useCallback(
+    (module: string): boolean => {
+      return activeModules.includes(module)
+    },
+    [activeModules]
+  )
 
-  const hasAllModules = useCallback((modules: string[]): boolean => {
-    return modules.every(module => activeModules.includes(module))
-  }, [activeModules])
+  const hasAllModules = useCallback(
+    (modules: string[]): boolean => {
+      return modules.every((module) => activeModules.includes(module))
+    },
+    [activeModules]
+  )
 
-  const hasAnyModule = useCallback((modules: string[]): boolean => {
-    return modules.some(module => activeModules.includes(module))
-  }, [activeModules])
+  const hasAnyModule = useCallback(
+    (modules: string[]): boolean => {
+      return modules.some((module) => activeModules.includes(module))
+    },
+    [activeModules]
+  )
 
   const refreshModules = useCallback(async () => {
     await fetchModuleAccess()
@@ -169,7 +187,7 @@ export function useModuleAccess(tenantId?: string): ModuleAccessState {
     hasModule,
     hasAllModules,
     hasAnyModule,
-    refreshModules
+    refreshModules,
   }
 }
 
@@ -183,26 +201,23 @@ export async function updateActiveModules(modules: string[], tier?: string, tena
       body: JSON.stringify({
         modules,
         tier,
-        tenantId
-      })
+        tenantId,
+      }),
     })
 
     if (response.ok) {
       // API update successful
-      console.log('Modules updated via API')
     } else {
       throw new Error('API update failed')
     }
   } catch (error) {
-    console.warn('API module update failed, using localStorage fallback:', error)
-    
     // Fallback to localStorage
     localStorage.setItem('activeModules', JSON.stringify(modules))
     if (tier) {
       localStorage.setItem('subscriptionTier', tier)
     }
   }
-  
+
   // Always dispatch custom event for immediate UI updates
   window.dispatchEvent(new Event('moduleUpdate'))
 }
@@ -216,17 +231,15 @@ export async function activateModule(module: string, tenantId?: string) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         module,
-        tenantId
-      })
+        tenantId,
+      }),
     })
 
     if (response.ok) {
       window.dispatchEvent(new Event('moduleUpdate'))
       return
     }
-  } catch (error) {
-    console.warn('API module activation failed:', error)
-  }
+  } catch (error) {}
 
   // Fallback to localStorage
   const current = JSON.parse(localStorage.getItem('activeModules') || '[]')
@@ -244,19 +257,21 @@ export async function deactivateModule(module: string, tenantId?: string) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         module,
-        tenantId
-      })
+        tenantId,
+      }),
     })
 
     if (response.ok) {
       window.dispatchEvent(new Event('moduleUpdate'))
       return
     }
-  } catch (error) {
-    console.warn('API module deactivation failed:', error)
-  }
+  } catch (error) {}
 
   // Fallback to localStorage
   const current = JSON.parse(localStorage.getItem('activeModules') || '[]')
-  await updateActiveModules(current.filter((m: string) => m !== module), undefined, tenantId)
+  await updateActiveModules(
+    current.filter((m: string) => m !== module),
+    undefined,
+    tenantId
+  )
 }

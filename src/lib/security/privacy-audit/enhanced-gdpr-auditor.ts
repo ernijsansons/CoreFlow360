@@ -75,7 +75,7 @@ export interface CCPAComplianceAudit {
 
 class EnhancedGDPRAuditor {
   private consentMapper: ConsentMapper
-  
+
   constructor(private tenantId: string) {
     this.consentMapper = new ConsentMapper(tenantId)
   }
@@ -85,22 +85,22 @@ class EnhancedGDPRAuditor {
 
     // 1. Consent and Legal Basis Audit
     const consentAudit = await this.consentMapper.mapConsents()
-    
+
     // 2. Data Flow Mapping
     const dataFlows = await this.mapDataFlows()
-    
+
     // 3. Subject Rights Assessment
     const subjectRights = await this.auditSubjectRights()
-    
+
     // 4. DPO and Governance Audit
     const dpoAudit = await this.auditDataProtectionOfficer()
-    
+
     // 5. CCPA Specific Requirements
     const ccpaAudit = await this.auditCCPACompliance()
-    
+
     // 6. Technical and Organizational Measures
     const tomAudit = await this.auditTechnicalMeasures()
-    
+
     // 7. International Transfer Assessment
     const transferAudit = await this.auditInternationalTransfers()
 
@@ -121,14 +121,14 @@ class EnhancedGDPRAuditor {
     const result: GDPRComplianceResult = {
       overallScore,
       criticalViolations: complianceGaps
-        .filter(gap => gap.severity === 'CRITICAL')
-        .map(gap => gap.description),
+        .filter((gap) => gap.severity === 'CRITICAL')
+        .map((gap) => gap.description),
       recommendations: this.generateRecommendations(complianceGaps),
       legalRisk,
       estimatedFines,
       complianceGaps,
       dataFlowMappings: dataFlows,
-      xmlReport: this.generateXMLReport(complianceGaps, dataFlows, overallScore)
+      xmlReport: this.generateXMLReport(complianceGaps, dataFlows, overallScore),
     }
 
     await this.saveAuditResults(result)
@@ -147,7 +147,7 @@ class EnhancedGDPRAuditor {
         thirdCountryTransfer: false,
         adequacyDecision: true,
         safeguards: ['Encryption at rest', 'Access controls'],
-        riskLevel: 'LOW'
+        riskLevel: 'LOW',
       },
       {
         dataType: 'AI Training Data',
@@ -158,7 +158,7 @@ class EnhancedGDPRAuditor {
         thirdCountryTransfer: true,
         adequacyDecision: false,
         safeguards: ['Standard Contractual Clauses', 'Data minimization'],
-        riskLevel: 'HIGH'
+        riskLevel: 'HIGH',
       },
       {
         dataType: 'Voice Recordings',
@@ -169,7 +169,7 @@ class EnhancedGDPRAuditor {
         thirdCountryTransfer: true,
         adequacyDecision: false,
         safeguards: ['End-to-end encryption', 'Automatic deletion'],
-        riskLevel: 'CRITICAL'
+        riskLevel: 'CRITICAL',
       },
       {
         dataType: 'Business Analytics',
@@ -180,7 +180,7 @@ class EnhancedGDPRAuditor {
         thirdCountryTransfer: true,
         adequacyDecision: false,
         safeguards: ['Anonymization', 'Data aggregation'],
-        riskLevel: 'MEDIUM'
+        riskLevel: 'MEDIUM',
       },
       {
         dataType: 'Customer Data',
@@ -191,8 +191,8 @@ class EnhancedGDPRAuditor {
         thirdCountryTransfer: true,
         adequacyDecision: false,
         safeguards: ['Binding Corporate Rules', 'Regular audits'],
-        riskLevel: 'HIGH'
-      }
+        riskLevel: 'HIGH',
+      },
     ]
 
     return mappings
@@ -209,7 +209,7 @@ class EnhancedGDPRAuditor {
       rightToRestrictProcessing: false, // No processing restriction controls
       automatedDecisionMaking: true, // AI systems make business decisions
       responseTimeCompliance: false, // No 30-day response tracking
-      verificationProcess: false // No identity verification for requests
+      verificationProcess: false, // No identity verification for requests
     }
   }
 
@@ -221,7 +221,7 @@ class EnhancedGDPRAuditor {
       contactDetails: false, // No DPO contact info published
       registered: false, // Not registered with supervisory authority
       training: false,
-      resources: false
+      resources: false,
     }
   }
 
@@ -234,7 +234,7 @@ class EnhancedGDPRAuditor {
       doNotSellMechanism: false, // No "Do Not Sell" implementation
       verifiableConsumerRequests: false, // No verification process
       privacyPolicyCompliance: false, // Privacy policy missing CCPA disclosures
-      thirdPartyDisclosures: false // No list of third-party data sharing
+      thirdPartyDisclosures: false, // No list of third-party data sharing
     }
   }
 
@@ -256,7 +256,7 @@ class EnhancedGDPRAuditor {
       dataMinimization: false, // Collecting more data than necessary
       pseudonymization: false, // No pseudonymization techniques
       backupSecurity: true, // Encrypted backups
-      incidentResponse: false // No formal incident response plan
+      incidentResponse: false, // No formal incident response plan
     }
   }
 
@@ -272,17 +272,17 @@ class EnhancedGDPRAuditor {
       standardContractualClauses: false, // Not implemented
       bindingCorporateRules: false,
       transferImpactAssessment: false, // No TIA conducted
-      onwardTransferRestrictions: false // No restrictions on sub-processors
+      onwardTransferRestrictions: false, // No restrictions on sub-processors
     }
   }
 
   private identifyComplianceGaps(
-    consentAudit: any,
+    consentAudit: unknown,
     subjectRights: SubjectRightsAudit,
     dpoAudit: DataProtectionOfficerAudit,
     ccpaAudit: CCPAComplianceAudit,
-    tomAudit: any,
-    transferAudit: any
+    tomAudit: unknown,
+    transferAudit: unknown
   ): ComplianceGap[] {
     const gaps: ComplianceGap[] = []
 
@@ -295,7 +295,7 @@ class EnhancedGDPRAuditor {
         impact: 'Unlawful processing of personal data',
         remediation: 'Establish valid lawful basis and obtain consent where required',
         timeline: 30,
-        cost: 15000
+        cost: 15000,
       })
     }
 
@@ -308,7 +308,7 @@ class EnhancedGDPRAuditor {
         impact: 'Invalid consent affecting data processing legitimacy',
         remediation: 'Implement GDPR-compliant consent management system',
         timeline: 60,
-        cost: 25000
+        cost: 25000,
       })
     }
 
@@ -321,7 +321,7 @@ class EnhancedGDPRAuditor {
         impact: 'Cannot fulfill data subject access requests efficiently',
         remediation: 'Implement automated data export and access portal',
         timeline: 90,
-        cost: 35000
+        cost: 35000,
       })
     }
 
@@ -333,7 +333,7 @@ class EnhancedGDPRAuditor {
         impact: 'Cannot delete user data upon request',
         remediation: 'Implement automated data deletion across all systems',
         timeline: 120,
-        cost: 45000
+        cost: 45000,
       })
     }
 
@@ -346,7 +346,7 @@ class EnhancedGDPRAuditor {
         impact: 'Mandatory DPO requirement not met for AI processing',
         remediation: 'Appoint qualified DPO and register with supervisory authority',
         timeline: 30,
-        cost: 60000 // Annual DPO cost
+        cost: 60000, // Annual DPO cost
       })
     }
 
@@ -359,7 +359,7 @@ class EnhancedGDPRAuditor {
         impact: 'Unlawful international data transfers to US cloud providers',
         remediation: 'Conduct TIA and implement appropriate safeguards',
         timeline: 45,
-        cost: 20000
+        cost: 20000,
       })
     }
 
@@ -372,7 +372,7 @@ class EnhancedGDPRAuditor {
         impact: 'CCPA violation for California residents',
         remediation: 'Implement Do Not Sell mechanism and privacy controls',
         timeline: 30,
-        cost: 10000
+        cost: 10000,
       })
     }
 
@@ -381,18 +381,18 @@ class EnhancedGDPRAuditor {
 
   private calculateComplianceScore(gaps: ComplianceGap[]): number {
     const totalPossiblePoints = 100
-    const criticalPenalty = gaps.filter(g => g.severity === 'CRITICAL').length * 25
-    const highPenalty = gaps.filter(g => g.severity === 'HIGH').length * 15
-    const mediumPenalty = gaps.filter(g => g.severity === 'MEDIUM').length * 8
-    const lowPenalty = gaps.filter(g => g.severity === 'LOW').length * 3
+    const criticalPenalty = gaps.filter((g) => g.severity === 'CRITICAL').length * 25
+    const highPenalty = gaps.filter((g) => g.severity === 'HIGH').length * 15
+    const mediumPenalty = gaps.filter((g) => g.severity === 'MEDIUM').length * 8
+    const lowPenalty = gaps.filter((g) => g.severity === 'LOW').length * 3
 
     const totalPenalty = criticalPenalty + highPenalty + mediumPenalty + lowPenalty
     return Math.max(0, totalPossiblePoints - totalPenalty)
   }
 
   private assessLegalRisk(gaps: ComplianceGap[]): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    const criticalCount = gaps.filter(g => g.severity === 'CRITICAL').length
-    const highCount = gaps.filter(g => g.severity === 'HIGH').length
+    const criticalCount = gaps.filter((g) => g.severity === 'CRITICAL').length
+    const highCount = gaps.filter((g) => g.severity === 'HIGH').length
 
     if (criticalCount > 0) return 'CRITICAL'
     if (highCount > 2) return 'HIGH'
@@ -403,10 +403,10 @@ class EnhancedGDPRAuditor {
   private calculatePotentialFines(gaps: ComplianceGap[], riskLevel: string): number {
     // GDPR fines: up to 4% of global annual revenue or €20M, whichever is higher
     // CCPA fines: up to $7,500 per violation
-    
+
     const estimatedRevenue = 10000000 // $10M estimated revenue
     const maxGDPRFine = Math.max(estimatedRevenue * 0.04, 20000000)
-    
+
     switch (riskLevel) {
       case 'CRITICAL':
         return maxGDPRFine * 0.8 // 80% of maximum fine
@@ -430,11 +430,11 @@ class EnhancedGDPRAuditor {
       'MEDIUM PRIORITY: Implement data minimization across all data collection',
       'ONGOING: Regular privacy training for all staff',
       'ONGOING: Quarterly privacy compliance audits',
-      'ONGOING: Monitor regulatory changes in all jurisdictions'
+      'ONGOING: Monitor regulatory changes in all jurisdictions',
     ]
 
     // Add specific recommendations based on gaps
-    gaps.forEach(gap => {
+    gaps.forEach((gap) => {
       if (!recommendations.includes(gap.remediation)) {
         recommendations.push(gap.remediation)
       }
@@ -448,7 +448,9 @@ class EnhancedGDPRAuditor {
     dataFlows: DataFlowMapping[],
     overallScore: number
   ): string {
-    const gapsXML = gaps.map(gap => `
+    const gapsXML = gaps
+      .map(
+        (gap) => `
       <gap>
         <article>${gap.article}</article>
         <severity>${gap.severity}</severity>
@@ -458,9 +460,13 @@ class EnhancedGDPRAuditor {
         <timeline>${gap.timeline}</timeline>
         <cost>${gap.cost}</cost>
       </gap>
-    `).join('')
+    `
+      )
+      .join('')
 
-    const flowsXML = dataFlows.map(flow => `
+    const flowsXML = dataFlows
+      .map(
+        (flow) => `
       <dataflow>
         <type>${flow.dataType}</type>
         <source>${flow.source}</source>
@@ -471,15 +477,17 @@ class EnhancedGDPRAuditor {
         <risk>${flow.riskLevel}</risk>
         <safeguards>${flow.safeguards.join(', ')}</safeguards>
       </dataflow>
-    `).join('')
+    `
+      )
+      .join('')
 
     return `
       <privacy-audit>
         <summary>
           <score>${overallScore}</score>
           <total-gaps>${gaps.length}</total-gaps>
-          <critical-gaps>${gaps.filter(g => g.severity === 'CRITICAL').length}</critical-gaps>
-          <high-gaps>${gaps.filter(g => g.severity === 'HIGH').length}</high-gaps>
+          <critical-gaps>${gaps.filter((g) => g.severity === 'CRITICAL').length}</critical-gaps>
+          <high-gaps>${gaps.filter((g) => g.severity === 'HIGH').length}</high-gaps>
         </summary>
         <compliance-gaps>${gapsXML}</compliance-gaps>
         <data-flows>${flowsXML}</data-flows>
@@ -500,20 +508,20 @@ class EnhancedGDPRAuditor {
             estimatedFines: result.estimatedFines,
             criticalViolations: result.criticalViolations.length,
             complianceGaps: result.complianceGaps.length,
-            timestamp: new Date().toISOString()
-          })
-        }
+            timestamp: new Date().toISOString(),
+          }),
+        },
       })
-      
-      logger.info('Privacy compliance audit results saved', { 
+
+      logger.info('Privacy compliance audit results saved', {
         tenantId: this.tenantId,
         score: result.overallScore,
-        risk: result.legalRisk
+        risk: result.legalRisk,
       })
     } catch (error) {
-      logger.error('Failed to save privacy audit results', { 
+      logger.error('Failed to save privacy audit results', {
         tenantId: this.tenantId,
-        error 
+        error,
       })
     }
   }

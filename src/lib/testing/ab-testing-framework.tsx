@@ -34,7 +34,7 @@ export interface ABTestVariant {
   name: string
   description: string
   weight: number // 0-100, traffic allocation percentage
-  config: Record<string, any> // Variant-specific configuration
+  config: Record<string, unknown> // Variant-specific configuration
 }
 
 export interface ABTestMetric {
@@ -70,20 +70,20 @@ const activeTests: ABTestConfig[] = [
         name: 'Current Onboarding',
         description: 'Existing 4-step onboarding flow',
         weight: 50,
-        config: { steps: 4, aiPersonalization: false }
+        config: { steps: 4, aiPersonalization: false },
       },
       {
         id: 'enhanced',
         name: 'AI-Enhanced Onboarding',
         description: 'New 3-step flow with AI recommendations',
         weight: 50,
-        config: { steps: 3, aiPersonalization: true, predictiveSetup: true }
-      }
+        config: { steps: 3, aiPersonalization: true, predictiveSetup: true },
+      },
     ],
     targetAudience: {
       percentage: 100,
       userRoles: ['admin', 'manager'],
-      deviceTypes: ['desktop', 'mobile']
+      deviceTypes: ['desktop', 'mobile'],
     },
     metrics: [
       {
@@ -92,7 +92,7 @@ const activeTests: ABTestConfig[] = [
         type: 'conversion',
         target: 85,
         unit: '%',
-        description: 'Percentage of users who complete the full onboarding'
+        description: 'Percentage of users who complete the full onboarding',
       },
       {
         id: 'time_to_complete',
@@ -100,7 +100,7 @@ const activeTests: ABTestConfig[] = [
         type: 'engagement',
         target: 300,
         unit: 'seconds',
-        description: 'Average time to complete onboarding'
+        description: 'Average time to complete onboarding',
       },
       {
         id: 'user_satisfaction',
@@ -108,8 +108,8 @@ const activeTests: ABTestConfig[] = [
         type: 'satisfaction',
         target: 4.5,
         unit: '/5',
-        description: 'Post-onboarding satisfaction rating'
-      }
+        description: 'Post-onboarding satisfaction rating',
+      },
     ],
     startDate: new Date('2024-01-01'),
     endDate: new Date('2024-02-01'),
@@ -118,8 +118,8 @@ const activeTests: ABTestConfig[] = [
     successCriteria: [
       'Completion rate increases by 10%+',
       'Time to complete decreases by 20%+',
-      'Satisfaction score increases by 0.3+ points'
-    ]
+      'Satisfaction score increases by 0.3+ points',
+    ],
   },
   {
     id: 'dashboard-layout-test',
@@ -131,27 +131,27 @@ const activeTests: ABTestConfig[] = [
         name: 'Grid Layout',
         description: 'Traditional grid-based widget layout',
         weight: 33,
-        config: { layout: 'grid', columns: 3 }
+        config: { layout: 'grid', columns: 3 },
       },
       {
         id: 'masonry',
         name: 'Masonry Layout',
         description: 'Pinterest-style masonry layout',
         weight: 33,
-        config: { layout: 'masonry', adaptiveHeight: true }
+        config: { layout: 'masonry', adaptiveHeight: true },
       },
       {
         id: 'priority',
         name: 'Priority-Based Layout',
         description: 'AI-driven priority-based widget arrangement',
         weight: 34,
-        config: { layout: 'priority', aiRanking: true, personalizedOrder: true }
-      }
+        config: { layout: 'priority', aiRanking: true, personalizedOrder: true },
+      },
     ],
     targetAudience: {
       percentage: 75,
       userRoles: ['admin', 'manager'],
-      deviceTypes: ['desktop']
+      deviceTypes: ['desktop'],
     },
     metrics: [
       {
@@ -160,7 +160,7 @@ const activeTests: ABTestConfig[] = [
         type: 'engagement',
         target: 15,
         unit: 'clicks/session',
-        description: 'Average widget interactions per session'
+        description: 'Average widget interactions per session',
       },
       {
         id: 'session_duration',
@@ -168,7 +168,7 @@ const activeTests: ABTestConfig[] = [
         type: 'engagement',
         target: 420,
         unit: 'seconds',
-        description: 'Average time spent on dashboard'
+        description: 'Average time spent on dashboard',
       },
       {
         id: 'feature_discovery',
@@ -176,8 +176,8 @@ const activeTests: ABTestConfig[] = [
         type: 'conversion',
         target: 65,
         unit: '%',
-        description: 'Percentage of users who discover new features'
-      }
+        description: 'Percentage of users who discover new features',
+      },
     ],
     startDate: new Date('2024-01-15'),
     endDate: new Date('2024-03-15'),
@@ -186,9 +186,9 @@ const activeTests: ABTestConfig[] = [
     successCriteria: [
       'Widget interactions increase by 25%+',
       'Session duration increases by 30%+',
-      'Feature discovery rate increases by 15%+'
-    ]
-  }
+      'Feature discovery rate increases by 15%+',
+    ],
+  },
 ]
 
 // A/B Testing Context
@@ -196,7 +196,7 @@ interface ABTestingContextType {
   activeTests: ABTestConfig[]
   getVariant: (testId: string) => ABTestVariant | null
   trackConversion: (testId: string, metricId: string, value: number) => void
-  trackEvent: (testId: string, eventName: string, properties?: Record<string, any>) => void
+  trackEvent: (testId: string, eventName: string, properties?: Record<string, unknown>) => void
   isUserInTest: (testId: string) => boolean
   getUserTests: () => string[]
 }
@@ -217,7 +217,7 @@ export function ABTestingProvider({
   userId,
   userRole,
   industry,
-  deviceType
+  deviceType,
 }: ABTestingProviderProps) {
   const [userVariants, setUserVariants] = useState<Record<string, string>>({})
   const [sessionId] = useState(() => Math.random().toString(36).substr(2, 9))
@@ -226,34 +226,34 @@ export function ABTestingProvider({
   // Initialize user variants on mount
   useEffect(() => {
     const variants: Record<string, string> = {}
-    
-    activeTests.forEach(test => {
+
+    activeTests.forEach((test) => {
       if (shouldIncludeUser(test, userRole, industry, deviceType)) {
         const variant = assignUserToVariant(test, userId)
         if (variant) {
           variants[test.id] = variant.id
-          
+
           // Track test participation
           trackEvent('ab_test_participation', {
             test_id: test.id,
             variant_id: variant.id,
             user_role: userRole,
             industry: industry,
-            device_type: deviceType
+            device_type: deviceType,
           })
         }
       }
     })
-    
+
     setUserVariants(variants)
   }, [userId, userRole, industry, deviceType, trackEvent])
 
   const getVariant = (testId: string): ABTestVariant | null => {
     const variantId = userVariants[testId]
     if (!variantId) return null
-    
-    const test = activeTests.find(t => t.id === testId)
-    return test?.variants.find(v => v.id === variantId) || null
+
+    const test = activeTests.find((t) => t.id === testId)
+    return test?.variants.find((v) => v.id === variantId) || null
   }
 
   const trackConversion = (testId: string, metricId: string, value: number) => {
@@ -269,7 +269,7 @@ export function ABTestingProvider({
       user_role: userRole,
       industry: industry,
       device_type: deviceType,
-      session_id: sessionId
+      session_id: sessionId,
     })
 
     // Store result (in real app, would send to API)
@@ -281,16 +281,20 @@ export function ABTestingProvider({
       timestamp: new Date(),
       sessionId,
       userAgent: navigator.userAgent,
-      deviceType
+      deviceType,
     }
-    
+
     // Store in localStorage for demo purposes
     const existingResults = JSON.parse(localStorage.getItem('ab_test_results') || '[]')
     existingResults.push(result)
     localStorage.setItem('ab_test_results', JSON.stringify(existingResults))
   }
 
-  const trackTestEvent = (testId: string, eventName: string, properties?: Record<string, any>) => {
+  const trackTestEvent = (
+    testId: string,
+    eventName: string,
+    properties?: Record<string, unknown>
+  ) => {
     const variant = getVariant(testId)
     if (!variant) return
 
@@ -302,7 +306,7 @@ export function ABTestingProvider({
       user_role: userRole,
       industry: industry,
       device_type: deviceType,
-      session_id: sessionId
+      session_id: sessionId,
     })
   }
 
@@ -315,14 +319,16 @@ export function ABTestingProvider({
   }
 
   return (
-    <ABTestingContext.Provider value={{
-      activeTests,
-      getVariant,
-      trackConversion,
-      trackEvent: trackTestEvent,
-      isUserInTest,
-      getUserTests
-    }}>
+    <ABTestingContext.Provider
+      value={{
+        activeTests,
+        getVariant,
+        trackConversion,
+        trackEvent: trackTestEvent,
+        isUserInTest,
+        getUserTests,
+      }}
+    >
       {children}
     </ABTestingContext.Provider>
   )
@@ -345,7 +351,7 @@ function shouldIncludeUser(
   deviceType: 'mobile' | 'desktop' | 'tablet'
 ): boolean {
   const { targetAudience } = test
-  
+
   if (!targetAudience) return true
   if (!test.isActive) return false
   if (test.endDate && new Date() > test.endDate) return false
@@ -399,20 +405,20 @@ function hashString(str: string): number {
   let hash = 0
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
+    hash = (hash << 5) - hash + char
     hash = hash & hash // Convert to 32-bit integer
   }
   return Math.abs(hash)
 }
 
 // Hook for specific test variants
-export function useABTestVariant<T extends Record<string, any>>(
+export function useABTestVariant<T extends Record<string, unknown>>(
   testId: string,
   defaultConfig: T
 ): T {
   const { getVariant } = useABTesting()
   const variant = getVariant(testId)
-  
+
   if (!variant) {
     return defaultConfig
   }
@@ -428,15 +434,15 @@ interface ABTestVariantProps<T> {
   props: T
 }
 
-export function ABTestVariant<T extends Record<string, any>>({
+export function ABTestVariant<T extends Record<string, unknown>>({
   testId,
   variants,
   fallback: Fallback,
-  props
+  props,
 }: ABTestVariantProps<T>) {
   const { getVariant } = useABTesting()
   const variant = getVariant(testId)
-  
+
   if (!variant || !variants[variant.id]) {
     return <Fallback {...props} />
   }
@@ -456,17 +462,17 @@ export function useABTestAnalytics() {
 
   const calculateConversionRate = (testId: string, metricId: string): Record<string, number> => {
     const results = getTestResults(testId)
-    const test = activeTests.find(t => t.id === testId)
-    
+    const test = activeTests.find((t) => t.id === testId)
+
     if (!test) return {}
 
     const conversionRates: Record<string, number> = {}
-    
-    test.variants.forEach(variant => {
-      const variantResults = results.filter(r => r.variantId === variant.id)
-      const conversions = variantResults.filter(r => r.metrics[metricId] > 0).length
+
+    test.variants.forEach((variant) => {
+      const variantResults = results.filter((r) => r.variantId === variant.id)
+      const conversions = variantResults.filter((r) => r.metrics[metricId] > 0).length
       const total = variantResults.length
-      
+
       conversionRates[variant.id] = total > 0 ? (conversions / total) * 100 : 0
     })
 
@@ -475,23 +481,25 @@ export function useABTestAnalytics() {
 
   const getTestSummary = (testId: string) => {
     const results = getTestResults(testId)
-    const test = activeTests.find(t => t.id === testId)
-    
+    const test = activeTests.find((t) => t.id === testId)
+
     if (!test) return null
 
     const summary = {
       totalParticipants: results.length,
       variantBreakdown: {} as Record<string, number>,
-      metrics: {} as Record<string, Record<string, number>>
+      metrics: {} as Record<string, Record<string, number>>,
     }
 
     // Calculate variant breakdown
-    test.variants.forEach(variant => {
-      summary.variantBreakdown[variant.id] = results.filter(r => r.variantId === variant.id).length
+    test.variants.forEach((variant) => {
+      summary.variantBreakdown[variant.id] = results.filter(
+        (r) => r.variantId === variant.id
+      ).length
     })
 
     // Calculate metrics for each variant
-    test.metrics.forEach(metric => {
+    test.metrics.forEach((metric) => {
       summary.metrics[metric.id] = calculateConversionRate(testId, metric.id)
     })
 
@@ -502,7 +510,7 @@ export function useABTestAnalytics() {
     getTestResults,
     calculateConversionRate,
     getTestSummary,
-    activeTests
+    activeTests,
   }
 }
 
@@ -527,30 +535,30 @@ const featureFlags: FeatureFlag[] = [
     enabled: true,
     rolloutPercentage: 25,
     targetAudience: {
-      userRoles: ['admin', 'manager']
-    }
+      userRoles: ['admin', 'manager'],
+    },
   },
   {
     id: 'voice-commands',
     name: 'Voice Commands',
     description: 'Enable voice-activated navigation and commands',
     enabled: true,
-    rolloutPercentage: 10
+    rolloutPercentage: 10,
   },
   {
     id: 'dark-mode-v2',
     name: 'Enhanced Dark Mode',
     description: 'New dark mode with better contrast and colors',
     enabled: false,
-    rolloutPercentage: 50
-  }
+    rolloutPercentage: 50,
+  },
 ]
 
 export function useFeatureFlag(flagId: string): boolean {
   const { trackEvent } = useTrackEvent()
   const [userId] = useState(() => 'user_' + Math.random().toString(36).substr(2, 9))
 
-  const flag = featureFlags.find(f => f.id === flagId)
+  const flag = featureFlags.find((f) => f.id === flagId)
   if (!flag || !flag.enabled) return false
 
   // Check rollout percentage
@@ -563,7 +571,7 @@ export function useFeatureFlag(flagId: string): boolean {
     if (isEnabled) {
       trackEvent('feature_flag_enabled', {
         flag_id: flagId,
-        rollout_percentage: flag.rolloutPercentage
+        rollout_percentage: flag.rolloutPercentage,
       })
     }
   }, [isEnabled, flagId, flag.rolloutPercentage, trackEvent])

@@ -19,7 +19,7 @@ export function InteractiveROICalculator() {
     totalSavings: 0,
     coreflowCost: 0,
     netSavings: 0,
-    roi: 0
+    roi: 0,
   })
 
   // Calculate results
@@ -33,12 +33,12 @@ export function InteractiveROICalculator() {
     const softwareSavingsAnnual = currentCost * 12 * 0.6 // 60% reduction
     const productivityGainsAnnual = emp * 3500 // $3500 per employee annually
     const totalSavings = timeSavingsAnnual + softwareSavingsAnnual + productivityGainsAnnual
-    
+
     // CoreFlow360 cost (average $85/user/month)
     const coreflowAnnualCost = emp * 85 * 12
-    
+
     const netSavings = totalSavings - coreflowAnnualCost
-    const roi = ((netSavings / coreflowAnnualCost) * 100)
+    const roi = (netSavings / coreflowAnnualCost) * 100
 
     return {
       timeSavings: timeSavingsAnnual,
@@ -47,7 +47,7 @@ export function InteractiveROICalculator() {
       totalSavings,
       coreflowCost: coreflowAnnualCost,
       netSavings: Math.max(0, netSavings),
-      roi: Math.max(0, roi)
+      roi: Math.max(0, roi),
     }
   }
 
@@ -74,7 +74,7 @@ export function InteractiveROICalculator() {
         totalSavings: Math.round(results.totalSavings * progress),
         coreflowCost: Math.round(results.coreflowCost * progress),
         netSavings: Math.round(results.netSavings * progress),
-        roi: Math.round(results.roi * progress)
+        roi: Math.round(results.roi * progress),
       })
 
       step++
@@ -88,38 +88,39 @@ export function InteractiveROICalculator() {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount)
   }
 
   return (
-    <section className="py-24 bg-gradient-to-b from-black to-gray-950">
+    <section className="bg-gradient-to-b from-black to-gray-950 py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
-          className="text-center mb-16"
+          className="mb-16 text-center"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <div className="inline-flex items-center gap-2 bg-emerald-900/30 border border-emerald-500/50 px-6 py-3 rounded-full mb-6">
-            <Calculator className="w-5 h-5 text-emerald-400" />
-            <span className="text-emerald-300 font-semibold">Interactive ROI Calculator</span>
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/50 bg-emerald-900/30 px-6 py-3">
+            <Calculator className="h-5 w-5 text-emerald-400" />
+            <span className="font-semibold text-emerald-300">Interactive ROI Calculator</span>
           </div>
-          
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+
+          <h2 className="mb-6 text-4xl font-bold text-white md:text-5xl">
             Calculate Your <span className="text-emerald-400">Exact Savings</span>
-            <br />With CoreFlow360
+            <br />
+            With CoreFlow360
           </h2>
-          
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            See your potential ROI in real-time. Adjust the sliders below to match your business 
-            and discover how much you could save with intelligent automation.
+
+          <p className="mx-auto max-w-3xl text-xl text-gray-400">
+            See your potential ROI in real-time. Adjust the sliders below to match your business and
+            discover how much you could save with intelligent automation.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
           {/* Controls */}
           <motion.div
             className="space-y-8"
@@ -128,18 +129,18 @@ export function InteractiveROICalculator() {
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <Card className="bg-gray-900/50 border-gray-800">
+            <Card className="border-gray-800 bg-gray-900/50">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Target className="w-5 h-5 text-violet-400" />
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Target className="h-5 w-5 text-violet-400" />
                   Your Business Details
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-8">
                 {/* Employees */}
                 <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <label className="text-gray-300 font-medium">Number of Employees</label>
+                  <div className="mb-4 flex items-center justify-between">
+                    <label className="font-medium text-gray-300">Number of Employees</label>
                     <span className="text-2xl font-bold text-violet-400">{employees[0]}</span>
                   </div>
                   <Slider
@@ -150,7 +151,7 @@ export function InteractiveROICalculator() {
                     step={1}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-sm text-gray-500 mt-2">
+                  <div className="mt-2 flex justify-between text-sm text-gray-500">
                     <span>1</span>
                     <span>500+</span>
                   </div>
@@ -158,8 +159,10 @@ export function InteractiveROICalculator() {
 
                 {/* Current Software Cost */}
                 <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <label className="text-gray-300 font-medium">Current Software Costs/Month</label>
+                  <div className="mb-4 flex items-center justify-between">
+                    <label className="font-medium text-gray-300">
+                      Current Software Costs/Month
+                    </label>
                     <span className="text-2xl font-bold text-cyan-400">
                       {formatCurrency(currentSoftwareCost[0])}
                     </span>
@@ -172,7 +175,7 @@ export function InteractiveROICalculator() {
                     step={100}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-sm text-gray-500 mt-2">
+                  <div className="mt-2 flex justify-between text-sm text-gray-500">
                     <span>$500</span>
                     <span>$25,000+</span>
                   </div>
@@ -180,9 +183,13 @@ export function InteractiveROICalculator() {
 
                 {/* Hours Lost Per Week */}
                 <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <label className="text-gray-300 font-medium">Hours Lost to Manual Tasks/Week</label>
-                    <span className="text-2xl font-bold text-orange-400">{hoursLostPerWeek[0]}h</span>
+                  <div className="mb-4 flex items-center justify-between">
+                    <label className="font-medium text-gray-300">
+                      Hours Lost to Manual Tasks/Week
+                    </label>
+                    <span className="text-2xl font-bold text-orange-400">
+                      {hoursLostPerWeek[0]}h
+                    </span>
                   </div>
                   <Slider
                     value={hoursLostPerWeek}
@@ -192,7 +199,7 @@ export function InteractiveROICalculator() {
                     step={1}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-sm text-gray-500 mt-2">
+                  <div className="mt-2 flex justify-between text-sm text-gray-500">
                     <span>1h</span>
                     <span>80h+</span>
                   </div>
@@ -210,81 +217,79 @@ export function InteractiveROICalculator() {
             viewport={{ once: true }}
           >
             {/* ROI Highlight */}
-            <Card className="bg-gradient-to-br from-emerald-900/50 to-green-900/50 border-emerald-500/50">
+            <Card className="border-emerald-500/50 bg-gradient-to-br from-emerald-900/50 to-green-900/50">
               <CardHeader className="text-center">
-                <CardTitle className="text-white text-2xl">Your Annual ROI</CardTitle>
+                <CardTitle className="text-2xl text-white">Your Annual ROI</CardTitle>
               </CardHeader>
               <CardContent className="text-center">
-                <div className="text-6xl md:text-7xl font-black text-emerald-400 mb-4">
+                <div className="mb-4 text-6xl font-black text-emerald-400 md:text-7xl">
                   {animatedResults.roi.toLocaleString()}%
                 </div>
-                <div className="text-emerald-300 text-lg">
-                  Return on Investment
-                </div>
+                <div className="text-lg text-emerald-300">Return on Investment</div>
               </CardContent>
             </Card>
 
             {/* Savings Breakdown */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Card className="bg-cyan-900/30 border-cyan-500/50">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Card className="border-cyan-500/50 bg-cyan-900/30">
                 <CardContent className="p-4 text-center">
-                  <Clock className="w-6 h-6 text-cyan-400 mx-auto mb-2" />
+                  <Clock className="mx-auto mb-2 h-6 w-6 text-cyan-400" />
                   <div className="text-2xl font-bold text-cyan-400">
                     {formatCurrency(animatedResults.timeSavings)}
                   </div>
-                  <div className="text-cyan-300 text-sm">Time Savings</div>
+                  <div className="text-sm text-cyan-300">Time Savings</div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-violet-900/30 border-violet-500/50">
+              <Card className="border-violet-500/50 bg-violet-900/30">
                 <CardContent className="p-4 text-center">
-                  <DollarSign className="w-6 h-6 text-violet-400 mx-auto mb-2" />
+                  <DollarSign className="mx-auto mb-2 h-6 w-6 text-violet-400" />
                   <div className="text-2xl font-bold text-violet-400">
                     {formatCurrency(animatedResults.softwareSavings)}
                   </div>
-                  <div className="text-violet-300 text-sm">Software Savings</div>
+                  <div className="text-sm text-violet-300">Software Savings</div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-orange-900/30 border-orange-500/50">
+              <Card className="border-orange-500/50 bg-orange-900/30">
                 <CardContent className="p-4 text-center">
-                  <TrendingUp className="w-6 h-6 text-orange-400 mx-auto mb-2" />
+                  <TrendingUp className="mx-auto mb-2 h-6 w-6 text-orange-400" />
                   <div className="text-2xl font-bold text-orange-400">
                     {formatCurrency(animatedResults.productivityGains)}
                   </div>
-                  <div className="text-orange-300 text-sm">Productivity Gains</div>
+                  <div className="text-sm text-orange-300">Productivity Gains</div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-emerald-900/30 border-emerald-500/50">
+              <Card className="border-emerald-500/50 bg-emerald-900/30">
                 <CardContent className="p-4 text-center">
-                  <Zap className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
+                  <Zap className="mx-auto mb-2 h-6 w-6 text-emerald-400" />
                   <div className="text-2xl font-bold text-emerald-400">
                     {formatCurrency(animatedResults.netSavings)}
                   </div>
-                  <div className="text-emerald-300 text-sm">Net Annual Savings</div>
+                  <div className="text-sm text-emerald-300">Net Annual Savings</div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Cost Comparison */}
-            <Card className="bg-gray-900/50 border-gray-800">
+            <Card className="border-gray-800 bg-gray-900/50">
               <CardContent className="p-6">
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4 flex items-center justify-between">
                   <span className="text-gray-300">Total Annual Savings</span>
                   <span className="text-2xl font-bold text-emerald-400">
                     {formatCurrency(animatedResults.totalSavings)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4 flex items-center justify-between">
                   <span className="text-gray-300">CoreFlow360 Annual Cost</span>
                   <span className="text-xl font-semibold text-gray-400">
                     -{formatCurrency(animatedResults.coreflowCost)}
                   </span>
                 </div>
                 <div className="border-t border-gray-700 pt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white font-semibold text-lg">Net Profit</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-semibold text-white">Net Profit</span>
                     <span className="text-3xl font-bold text-emerald-400">
                       {formatCurrency(animatedResults.netSavings)}
                     </span>
@@ -294,14 +299,16 @@ export function InteractiveROICalculator() {
             </Card>
 
             {/* CTA */}
-            <button 
-              className="w-full bg-gradient-to-r from-violet-600 to-emerald-600 hover:from-violet-700 hover:to-emerald-700 text-white py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105"
-              onClick={() => trackEvent('roi_calculator_cta_clicked', {
-                employees: employees[0],
-                currentCost: currentSoftwareCost[0],
-                hoursLost: hoursLostPerWeek[0],
-                roi: animatedResults.roi
-              })}
+            <button
+              className="w-full transform rounded-xl bg-gradient-to-r from-violet-600 to-emerald-600 px-6 py-4 text-lg font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-violet-700 hover:to-emerald-700"
+              onClick={() =>
+                trackEvent('roi_calculator_cta_clicked', {
+                  employees: employees[0],
+                  currentCost: currentSoftwareCost[0],
+                  hoursLost: hoursLostPerWeek[0],
+                  roi: animatedResults.roi,
+                })
+              }
             >
               Lock In These Savings - Start Free Trial
             </button>
@@ -310,16 +317,16 @@ export function InteractiveROICalculator() {
 
         {/* Bottom Disclaimer */}
         <motion.div
-          className="mt-16 text-center text-xs text-gray-500 max-w-3xl mx-auto"
+          className="mx-auto mt-16 max-w-3xl text-center text-xs text-gray-500"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
           viewport={{ once: true }}
         >
-          *Calculations are estimates based on industry averages and customer data. 
-          Actual results may vary depending on business model, implementation, and market conditions. 
-          ROI projections are examples and not guarantees of future performance. 
-          Consult with our team for personalized analysis.
+          *Calculations are estimates based on industry averages and customer data. Actual results
+          may vary depending on business model, implementation, and market conditions. ROI
+          projections are examples and not guarantees of future performance. Consult with our team
+          for personalized analysis.
         </motion.div>
       </div>
     </section>

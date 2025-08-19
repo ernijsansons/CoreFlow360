@@ -9,7 +9,10 @@ interface IndustryToggleProps {
   onIndustryChange?: (industryId: string) => void
 }
 
-export function IndustryToggle({ currentIndustry = 'hvac', onIndustryChange }: IndustryToggleProps) {
+export function IndustryToggle({
+  currentIndustry = 'hvac',
+  onIndustryChange,
+}: IndustryToggleProps) {
   const [isOpen, setIsOpen] = useState(false)
   const industries = getAllIndustries()
   const current = industries.find((i) => i.id === currentIndustry) || industries[0]

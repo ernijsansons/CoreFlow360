@@ -3,13 +3,17 @@
  * Comprehensive testing of the ML model retraining pipeline
  */
 
-import { ModelRetrainingPipeline, type ModelConfig, type TrainingData } from '@/lib/ml/model-retraining-pipeline'
+import {
+  ModelRetrainingPipeline,
+  type ModelConfig,
+  type TrainingData,
+} from '@/lib/ml/model-retraining-pipeline'
 
 interface TestResult {
   testName: string
   passed: boolean
   details: string
-  metrics?: any
+  metrics?: unknown
   duration?: number
 }
 
@@ -17,11 +21,15 @@ class MLPipelineTestSuite {
   private results: TestResult[] = []
   private pipeline: ModelRetrainingPipeline | null = null
 
-  log(message: string) {
-    console.log(`[ML PIPELINE TEST] ${message}`)
-  }
+  log(_message: string) {}
 
-  addResult(testName: string, passed: boolean, details: string, metrics?: any, duration?: number) {
+  addResult(
+    testName: string,
+    passed: boolean,
+    details: string,
+    metrics?: unknown,
+    duration?: number
+  ) {
     this.results.push({ testName, passed, details, metrics, duration })
     const status = passed ? '✅ PASS' : '❌ FAIL'
     this.log(`${status}: ${testName} - ${details}${duration ? ` (${duration}ms)` : ''}`)
@@ -29,7 +37,7 @@ class MLPipelineTestSuite {
 
   async runAllTests() {
     this.log('Starting ML Pipeline Test Suite...')
-    
+
     await this.testPipelineInitialization()
     await this.testModelRegistration()
     await this.testDataLoading()
@@ -38,21 +46,21 @@ class MLPipelineTestSuite {
     await this.testPerformanceMonitoring()
     await this.testHyperparameterOptimization()
     await this.testPipelineStatus()
-    
+
     this.generateReport()
   }
 
   async testPipelineInitialization() {
     this.log('Testing pipeline initialization...')
-    
+
     const startTime = Date.now()
     try {
       this.pipeline = new ModelRetrainingPipeline()
-      
+
       // Check if default models are loaded
       const models = this.pipeline.getAllModels()
       const hasDefaultModels = models.length > 0
-      
+
       // Check if pipeline status is available
       const status = this.pipeline.getPipelineStatus()
       const hasValidStatus = status && typeof status.models === 'number'
@@ -64,14 +72,13 @@ class MLPipelineTestSuite {
         'Pipeline Initialization',
         success,
         `Initialized with ${models.length} default models`,
-        { 
+        {
           defaultModels: models.length,
           status: status,
-          hasScheduler: true
+          hasScheduler: true,
         },
         duration
       )
-
     } catch (error) {
       this.addResult(
         'Pipeline Initialization',
@@ -83,7 +90,7 @@ class MLPipelineTestSuite {
 
   async testModelRegistration() {
     this.log('Testing model registration...')
-    
+
     if (!this.pipeline) {
       this.addResult('Model Registration', false, 'Pipeline not initialized')
       return
@@ -102,7 +109,7 @@ class MLPipelineTestSuite {
         performance_threshold: 0.85,
         retrain_frequency: 'weekly',
         data_source: 'test_data',
-        version: '1.0.0'
+        version: '1.0.0',
       }
 
       const beforeCount = this.pipeline.getAllModels().length
@@ -119,15 +126,14 @@ class MLPipelineTestSuite {
         'Model Registration',
         registered && correctlyStored,
         `Model registered successfully. Count: ${beforeCount} → ${afterCount}`,
-        { 
+        {
           modelsBefore: beforeCount,
           modelsAfter: afterCount,
           modelId: testModel.id,
-          correctlyStored
+          correctlyStored,
         },
         duration
       )
-
     } catch (error) {
       this.addResult(
         'Model Registration',
@@ -139,7 +145,7 @@ class MLPipelineTestSuite {
 
   async testDataLoading() {
     this.log('Testing data loading...')
-    
+
     if (!this.pipeline) {
       this.addResult('Data Loading', false, 'Pipeline not initialized')
       return
@@ -148,22 +154,22 @@ class MLPipelineTestSuite {
     const startTime = Date.now()
     try {
       // Use private method through type assertion for testing
-      const loadMethod = (this.pipeline as any).loadTrainingData
+      const loadMethod = (this.pipeline as unknown).loadTrainingData
       if (typeof loadMethod !== 'function') {
         this.addResult('Data Loading', false, 'Load method not accessible')
         return
       }
 
-      const trainingData: TrainingData = await loadMethod.call(
-        this.pipeline,
-        'test_data_source',
-        ['feature1', 'feature2', 'feature3']
-      )
+      const trainingData: TrainingData = await loadMethod.call(this.pipeline, 'test_data_source', [
+        'feature1',
+        'feature2',
+        'feature3',
+      ])
 
       const hasFeatures = trainingData.features && trainingData.features.length > 0
       const hasLabels = trainingData.labels && trainingData.labels.length > 0
       const hasMetadata = trainingData.metadata && trainingData.metadata.source
-      const correctDimensions = trainingData.features.every(row => row.length === 3)
+      const correctDimensions = trainingData.features.every((row) => row.length === 3)
 
       const duration = Date.now() - startTime
 
@@ -176,11 +182,10 @@ class MLPipelineTestSuite {
           features: trainingData.features[0]?.length || 0,
           hasLabels,
           hasMetadata,
-          correctDimensions
+          correctDimensions,
         },
         duration
       )
-
     } catch (error) {
       this.addResult(
         'Data Loading',
@@ -192,7 +197,7 @@ class MLPipelineTestSuite {
 
   async testTrainingExecution() {
     this.log('Testing training execution...')
-    
+
     if (!this.pipeline) {
       this.addResult('Training Execution', false, 'Pipeline not initialized')
       return
@@ -211,7 +216,7 @@ class MLPipelineTestSuite {
       const jobId = await this.pipeline.startRetraining(testModel.id, 'manual', false)
 
       // Wait for job to start
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
       const job = this.pipeline.getTrainingJob(jobId)
       const jobStarted = job && job.status !== 'pending'
@@ -222,7 +227,7 @@ class MLPipelineTestSuite {
       const maxAttempts = 10
 
       while (attempts < maxAttempts && !jobCompleted) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 1000))
         const updatedJob = this.pipeline.getTrainingJob(jobId)
         jobCompleted = updatedJob?.status === 'completed' || updatedJob?.status === 'failed'
         attempts++
@@ -240,11 +245,10 @@ class MLPipelineTestSuite {
           jobStarted,
           finalStatus: finalJob?.status,
           dataPointsUsed: finalJob?.data_points_used || 0,
-          improvement: finalJob?.improvement_achieved || 0
+          improvement: finalJob?.improvement_achieved || 0,
         },
         duration
       )
-
     } catch (error) {
       this.addResult(
         'Training Execution',
@@ -256,7 +260,7 @@ class MLPipelineTestSuite {
 
   async testDriftDetection() {
     this.log('Testing drift detection...')
-    
+
     if (!this.pipeline) {
       this.addResult('Drift Detection', false, 'Pipeline not initialized')
       return
@@ -285,11 +289,10 @@ class MLPipelineTestSuite {
         {
           modelId: testModel.id,
           hasDrift,
-          resultType: typeof hasDrift
+          resultType: typeof hasDrift,
         },
         duration
       )
-
     } catch (error) {
       this.addResult(
         'Drift Detection',
@@ -301,7 +304,7 @@ class MLPipelineTestSuite {
 
   async testPerformanceMonitoring() {
     this.log('Testing performance monitoring...')
-    
+
     if (!this.pipeline) {
       this.addResult('Performance Monitoring', false, 'Pipeline not initialized')
       return
@@ -327,11 +330,10 @@ class MLPipelineTestSuite {
         `Performance monitoring completed for ${testModel.id}`,
         {
           modelId: testModel.id,
-          threshold: testModel.performance_threshold
+          threshold: testModel.performance_threshold,
         },
         duration
       )
-
     } catch (error) {
       this.addResult(
         'Performance Monitoring',
@@ -343,7 +345,7 @@ class MLPipelineTestSuite {
 
   async testHyperparameterOptimization() {
     this.log('Testing hyperparameter optimization...')
-    
+
     if (!this.pipeline) {
       this.addResult('Hyperparameter Optimization', false, 'Pipeline not initialized')
       return
@@ -352,7 +354,7 @@ class MLPipelineTestSuite {
     const startTime = Date.now()
     try {
       // Access the optimizer through type assertion for testing
-      const optimizer = (this.pipeline as any).optimizer
+      const optimizer = (this.pipeline as unknown).optimizer
       if (!optimizer) {
         this.addResult('Hyperparameter Optimization', false, 'Optimizer not accessible')
         return
@@ -360,23 +362,31 @@ class MLPipelineTestSuite {
 
       // Create mock training data
       const mockTrainingData: TrainingData = {
-        features: Array(100).fill(0).map(() => [Math.random(), Math.random(), Math.random()]),
-        labels: Array(100).fill(0).map(() => Math.random() > 0.5 ? 1 : 0),
+        features: Array(100)
+          .fill(0)
+          .map(() => [Math.random(), Math.random(), Math.random()]),
+        labels: Array(100)
+          .fill(0)
+          .map(() => (Math.random() > 0.5 ? 1 : 0)),
         metadata: {
           timestamp: new Date(),
           source: 'test',
-          quality_score: 1.0
-        }
+          quality_score: 1.0,
+        },
       }
 
       const mockValidationData: TrainingData = {
-        features: Array(20).fill(0).map(() => [Math.random(), Math.random(), Math.random()]),
-        labels: Array(20).fill(0).map(() => Math.random() > 0.5 ? 1 : 0),
+        features: Array(20)
+          .fill(0)
+          .map(() => [Math.random(), Math.random(), Math.random()]),
+        labels: Array(20)
+          .fill(0)
+          .map(() => (Math.random() > 0.5 ? 1 : 0)),
         metadata: {
           timestamp: new Date(),
           source: 'test',
-          quality_score: 1.0
-        }
+          quality_score: 1.0,
+        },
       }
 
       const result = await optimizer.optimize(
@@ -399,11 +409,10 @@ class MLPipelineTestSuite {
           bestParams: result.bestParams,
           bestScore: result.bestScore,
           hasValidParams: hasParams,
-          hasValidScore: hasScore
+          hasValidScore: hasScore,
         },
         duration
       )
-
     } catch (error) {
       this.addResult(
         'Hyperparameter Optimization',
@@ -415,7 +424,7 @@ class MLPipelineTestSuite {
 
   async testPipelineStatus() {
     this.log('Testing pipeline status and metrics...')
-    
+
     if (!this.pipeline) {
       this.addResult('Pipeline Status', false, 'Pipeline not initialized')
       return
@@ -441,11 +450,10 @@ class MLPipelineTestSuite {
           status,
           modelsCount: allModels.length,
           jobsCount: recentJobs.length,
-          avgImprovement: status.avgImprovement
+          avgImprovement: status.avgImprovement,
         },
         duration
       )
-
     } catch (error) {
       this.addResult(
         'Pipeline Status',
@@ -459,19 +467,19 @@ class MLPipelineTestSuite {
     this.log('\n' + '='.repeat(60))
     this.log('ML PIPELINE TEST REPORT')
     this.log('='.repeat(60))
-    
+
     const totalTests = this.results.length
-    const passedTests = this.results.filter(r => r.passed).length
+    const passedTests = this.results.filter((r) => r.passed).length
     const failedTests = totalTests - passedTests
-    const successRate = (passedTests / totalTests * 100).toFixed(1)
+    const successRate = ((passedTests / totalTests) * 100).toFixed(1)
     const totalDuration = this.results.reduce((sum, r) => sum + (r.duration || 0), 0)
-    
+
     this.log(`Total Tests: ${totalTests}`)
     this.log(`Passed: ${passedTests}`)
     this.log(`Failed: ${failedTests}`)
     this.log(`Success Rate: ${successRate}%`)
     this.log(`Total Duration: ${totalDuration}ms`)
-    
+
     if (this.pipeline) {
       const finalStatus = this.pipeline.getPipelineStatus()
       this.log(`\nFinal Pipeline State:`)
@@ -481,10 +489,10 @@ class MLPipelineTestSuite {
       this.log(`- Failed Jobs: ${finalStatus.failedJobs}`)
       this.log(`- Average Improvement: ${finalStatus.avgImprovement.toFixed(2)}%`)
     }
-    
+
     this.log('\nDETAILED RESULTS:')
     this.log('-'.repeat(40))
-    
+
     this.results.forEach((result, index) => {
       const status = result.passed ? '✅' : '❌'
       this.log(`${index + 1}. ${status} ${result.testName}`)
@@ -497,13 +505,13 @@ class MLPipelineTestSuite {
       }
       this.log('')
     })
-    
+
     if (failedTests > 0) {
       this.log('⚠️  SOME TESTS FAILED - Please review the ML pipeline implementation')
     } else {
       this.log('🎉 ALL TESTS PASSED - ML retraining pipeline is working correctly!')
     }
-    
+
     this.log('='.repeat(60))
   }
 }

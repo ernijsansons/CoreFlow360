@@ -5,25 +5,26 @@ import { OrchestratorCard } from './OrchestratorCard'
 
 export function IndustryShowcase() {
   return (
-    <section className="py-24 bg-gradient-to-b from-gray-950 to-black">
+    <section className="bg-gradient-to-b from-gray-950 to-black py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          className="text-center mb-20"
+        <motion.div
+          className="mb-20 text-center"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="heading-section text-white mb-6">
+          <h2 className="heading-section mb-6 text-white">
             8 ERP Systems. <span className="gradient-text-ai">One AI Mind.</span>
           </h2>
-          <p className="text-body-large text-gray-400 max-w-3xl mx-auto">
-            We've integrated the world's leading open-source ERP systems into a single AI-orchestrated platform. 
-            NocoBase coordinates everything while specialized AI agents run each module autonomously.
+          <p className="text-body-large mx-auto max-w-3xl text-gray-400">
+            We've integrated the world's leading open-source ERP systems into a single
+            AI-orchestrated platform. NocoBase coordinates everything while specialized AI agents
+            run each module autonomously.
           </p>
         </motion.div>
 
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mb-16">
+        <div className="mb-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           <OrchestratorCard
             icon="🎭"
             title="NocoBase Central"
@@ -50,7 +51,7 @@ export function IndustryShowcase() {
           />
         </div>
 
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           <OrchestratorCard
             icon="📋"
             title="Plane Projects"

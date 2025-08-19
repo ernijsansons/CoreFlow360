@@ -10,7 +10,7 @@ const TEST_USER = {
   name: 'Test User',
   email: 'test@example.com',
   password: testConfig.auth.defaultPassword,
-  companyName: 'Test Company Inc'
+  companyName: 'Test Company Inc',
 }
 
 test.describe('Authentication Flow', () => {
@@ -35,10 +35,10 @@ test.describe('Authentication Flow', () => {
     await page.fill('input[name="password"]', TEST_USER.password)
     await page.fill('input[name="confirmPassword"]', TEST_USER.password)
     await page.fill('input[name="companyName"]', TEST_USER.companyName)
-    
+
     // Select industry
     await page.selectOption('select[name="industryType"]', 'GENERAL')
-    
+
     // Agree to terms
     await page.check('input[name="agreeToTerms"]')
 
@@ -51,7 +51,7 @@ test.describe('Authentication Flow', () => {
 
     // Click sign in button
     await page.click('text=Sign In to Continue')
-    
+
     // Should redirect to login page
     await expect(page).toHaveURL('/login')
   })
@@ -111,7 +111,7 @@ test.describe('Authentication Flow', () => {
 
     await page.click('button[type="submit"]')
 
-    await expect(page.locator('text=Passwords don\'t match')).toBeVisible()
+    await expect(page.locator("text=Passwords don't match")).toBeVisible()
   })
 
   test('should require terms agreement', async () => {
@@ -122,7 +122,7 @@ test.describe('Authentication Flow', () => {
     await page.fill('input[name="password"]', TEST_USER.password)
     await page.fill('input[name="confirmPassword"]', TEST_USER.password)
     await page.fill('input[name="companyName"]', TEST_USER.companyName)
-    
+
     // Don't check terms
     await page.click('button[type="submit"]')
 
@@ -152,7 +152,7 @@ test.describe('Authentication Flow', () => {
 test.describe('Dashboard Access', () => {
   test('should protect dashboard from unauthenticated users', async ({ page }) => {
     await page.goto('/dashboard')
-    
+
     // Should redirect to login with callback URL
     await expect(page).toHaveURL(/\/login\?callbackUrl=/)
   })
@@ -163,7 +163,7 @@ test.describe('Dashboard Access', () => {
     await page.fill('input[name="email"]', testConfig.auth.adminEmail)
     await page.fill('input[name="password"]', testConfig.auth.demoPassword)
     await page.click('button[type="submit"]')
-    
+
     // Check dashboard content
     await expect(page.locator('text=Welcome back')).toBeVisible()
     await expect(page.locator('text=ADMIN')).toBeVisible() // Role should be displayed
@@ -214,7 +214,7 @@ test.describe('Admin Interface', () => {
 test.describe('Error Handling', () => {
   test('should display network error gracefully', async ({ page }) => {
     // Intercept network requests and simulate failure
-    await page.route('**/api/auth/register', route => {
+    await page.route('**/api/auth/register', (route) => {
       route.abort('failed')
     })
 
@@ -234,7 +234,7 @@ test.describe('Error Handling', () => {
 
   test('should handle API errors gracefully', async ({ page }) => {
     // Intercept API and return error
-    await page.route('**/api/auth/register', route => {
+    await page.route('**/api/auth/register', (route) => {
       route.fulfill({
         status: 400,
         contentType: 'application/json',
@@ -243,9 +243,9 @@ test.describe('Error Handling', () => {
           error: {
             type: 'VALIDATION_ERROR',
             code: 'EMAIL_EXISTS',
-            message: 'User with this email already exists'
-          }
-        })
+            message: 'User with this email already exists',
+          },
+        }),
       })
     })
 
@@ -292,7 +292,7 @@ test.describe('UI Responsiveness', () => {
 
     // Check layout is appropriate for tablet
     await expect(page.locator('form')).toBeVisible()
-    
+
     // Grid should work on tablet
     const nameInput = page.locator('input[name="name"]')
     const emailInput = page.locator('input[name="email"]')

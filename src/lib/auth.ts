@@ -3,9 +3,9 @@
  * Ultimate production-ready auth with complete error handling
  */
 
-import NextAuth from "next-auth"
-import type { Session } from "next-auth"
-import { createAuthConfig, isBuildPhase } from "./auth-build-safe"
+import NextAuth from 'next-auth'
+import type { Session } from 'next-auth'
+import { createAuthConfig, isBuildPhase } from './auth-build-safe'
 
 // Extended session type
 export interface ExtendedSession extends Session {
@@ -29,29 +29,36 @@ function getAuthInstance() {
       auth: async () => null,
       handlers: {
         GET: async () => new Response('Build time', { status: 200 }),
-        POST: async () => new Response('Build time', { status: 200 })
+        POST: async () => new Response('Build time', { status: 200 }),
       },
-      signIn: async () => { throw new Error('Build time') },
-      signOut: async () => { throw new Error('Build time') }
-    } as any
+      signIn: async () => {
+        throw new Error('Build time')
+      },
+      signOut: async () => {
+        throw new Error('Build time')
+      },
+    } as unknown
   }
-  
+
   if (!authInstance) {
     try {
       const config = createAuthConfig()
       authInstance = NextAuth(config)
     } catch (error) {
-      console.error('[Auth] Failed to create NextAuth instance:', error)
       // Return a mock instance that always returns null/error
       authInstance = {
         auth: async () => null,
         handlers: {
           GET: async () => new Response('Auth service unavailable', { status: 503 }),
-          POST: async () => new Response('Auth service unavailable', { status: 503 })
+          POST: async () => new Response('Auth service unavailable', { status: 503 }),
         },
-        signIn: async () => { throw new Error('Auth service unavailable') },
-        signOut: async () => { throw new Error('Auth service unavailable') }
-      } as any
+        signIn: async () => {
+          throw new Error('Auth service unavailable')
+        },
+        signOut: async () => {
+          throw new Error('Auth service unavailable')
+        },
+      } as unknown
     }
   }
   return authInstance
@@ -62,19 +69,18 @@ export const auth = async (): Promise<Session | null> => {
   if (isBuildPhase()) {
     return null
   }
-  
+
   try {
     const instance = getAuthInstance()
     const session = await instance.auth()
-    
+
     // Validate session structure
     if (session && typeof session === 'object' && 'user' in session) {
       return session
     }
-    
+
     return null
   } catch (error) {
-    console.error('[Auth] Session error:', error)
     return null
   }
 }
@@ -86,14 +92,10 @@ export const handlers = {
       const instance = getAuthInstance()
       return await instance.handlers.GET(req)
     } catch (error) {
-      console.error('[Auth] GET handler error:', error)
-      return new Response(
-        JSON.stringify({ error: 'Authentication service error' }),
-        { 
-          status: 503, 
-          headers: { 'Content-Type': 'application/json' }
-        }
-      )
+      return new Response(JSON.stringify({ error: 'Authentication service error' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
   },
   POST: async (req: Request) => {
@@ -101,43 +103,37 @@ export const handlers = {
       const instance = getAuthInstance()
       return await instance.handlers.POST(req)
     } catch (error) {
-      console.error('[Auth] POST handler error:', error)
-      return new Response(
-        JSON.stringify({ error: 'Authentication service error' }),
-        { 
-          status: 503, 
-          headers: { 'Content-Type': 'application/json' }
-        }
-      )
+      return new Response(JSON.stringify({ error: 'Authentication service error' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
-  }
+  },
 }
 
 // Export auth actions with error handling
-export const signIn = async (...args: any[]) => {
+export const signIn = async (...args: unknown[]) => {
   if (isBuildPhase()) {
-    throw new Error('Cannot sign in during build time')
+    return { error: 'Cannot sign in during build time' }
   }
-  
+
   try {
     const instance = getAuthInstance()
     return await instance.signIn(...args)
   } catch (error) {
-    console.error('[Auth] Sign in error:', error)
     throw error
   }
 }
 
-export const signOut = async (...args: any[]) => {
+export const signOut = async (...args: unknown[]) => {
   if (isBuildPhase()) {
-    throw new Error('Cannot sign out during build time')
+    return { success: false }
   }
-  
+
   try {
     const instance = getAuthInstance()
     return await instance.signOut(...args)
   } catch (error) {
-    console.error('[Auth] Sign out error:', error)
     throw error
   }
 }
@@ -145,24 +141,26 @@ export const signOut = async (...args: any[]) => {
 // Export handlers for route.ts
 export const { GET, POST } = handlers
 
+// Re-export for convenience
+export { createAuthConfig, isBuildPhase }
+
 // Helper functions
 export async function getServerSession(): Promise<ExtendedSession | null> {
   if (isBuildPhase()) {
     return null
   }
-  
+
   try {
     const session = await auth()
     if (!session) return null
-    
+
     // Type assertion with validation
     if ('user' in session && session.user) {
       return session as ExtendedSession
     }
-    
+
     return null
   } catch (error) {
-    console.error('[Auth] Get server session error:', error)
     return null
   }
 }
@@ -198,7 +196,7 @@ export async function hashPassword(password: string): Promise<string> {
   if (isBuildPhase()) {
     return 'build-time-hash'
   }
-  const bcryptjs = await import("bcryptjs")
+  const bcryptjs = await import('bcryptjs')
   return bcryptjs.default.hash(password, 12)
 }
 
@@ -206,6 +204,6 @@ export async function verifyPassword(password: string, hashedPassword: string): 
   if (isBuildPhase()) {
     return false
   }
-  const bcryptjs = await import("bcryptjs")
+  const bcryptjs = await import('bcryptjs')
   return bcryptjs.default.compare(password, hashedPassword)
 }

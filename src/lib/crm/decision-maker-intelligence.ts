@@ -11,23 +11,23 @@ export interface ExecutiveProfile {
   currentTitle: string
   currentCompany: string
   currentCompanyId: string
-  
+
   // Professional details
   headline: string
   location: string
   profileUrl: string
   profilePictureUrl?: string
-  
+
   // Career progression
   experience: ExecutiveExperience[]
   education: ExecutiveEducation[]
-  
+
   // Influence metrics
   influenceScore: number
   connectionLevel: number
   mutualConnections: number
   followerCount: number
-  
+
   // Decision making power
   budgetAuthority?: {
     min: number
@@ -37,7 +37,7 @@ export interface ExecutiveProfile {
   }
   decisionAreas: string[]
   reportingLevel: number // 1 = C-suite, 2 = VP, 3 = Director, etc.
-  
+
   // Change tracking
   lastJobChangeDate?: Date
   jobChangeHistory: JobChange[]
@@ -46,22 +46,22 @@ export interface ExecutiveProfile {
     timeframe: string
     reasons: string[]
   }
-  
+
   // Buying signals
   buyingSignals: BuyingSignal[]
   lastSignalDate?: Date
   signalStrength: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
-  
+
   // Engagement data
   lastActivityDate?: Date
   contentEngagement: ContentEngagement[]
   responseHistory: ResponseHistory[]
-  
+
   // AI insights
   personalityProfile?: PersonalityInsights
   communicationStyle?: CommunicationStyle
   decisionMakingStyle?: DecisionMakingStyle
-  
+
   createdAt: Date
   updatedAt: Date
 }
@@ -70,30 +70,30 @@ export interface CompanyOrgChart {
   id: string
   companyId: string
   companyName: string
-  
+
   // Org structure
   departments: OrgDepartment[]
   executiveTeam: ExecutiveProfile[]
   totalEmployees: number
-  
+
   // Decision hierarchy
   decisionHierarchy: DecisionNode[]
   budgetHierarchy: BudgetNode[]
-  
+
   // Intelligence insights
   keyDecisionMakers: ExecutiveProfile[]
   influencers: ExecutiveProfile[]
   champions: ExecutiveProfile[]
   detractors: ExecutiveProfile[]
-  
+
   // Change tracking
   recentChanges: OrgChange[]
   changeFrequency: 'LOW' | 'MEDIUM' | 'HIGH'
   stabilityScore: number
-  
+
   // Buying committee
   likelyBuyingCommittee: BuyingCommitteeMember[]
-  
+
   lastUpdated: Date
   dataConfidence: number
 }
@@ -102,24 +102,24 @@ export interface JobChange {
   id: string
   executiveId: string
   changeType: 'PROMOTION' | 'LATERAL_MOVE' | 'NEW_COMPANY' | 'DEPARTURE'
-  
+
   previousTitle: string
   previousCompany: string
   newTitle: string
   newCompany: string
-  
+
   changeDate: Date
   detectedDate: Date
-  
+
   // Impact analysis
   impactLevel: 'LOW' | 'MEDIUM' | 'HIGH'
   opportunityScore: number
-  
+
   // Context
   changeReason?: string
   announcementSource: string
   announcementText?: string
-  
+
   // Follow-up tracking
   outreachSent: boolean
   responseReceived: boolean
@@ -130,24 +130,40 @@ export interface BuyingSignal {
   id: string
   executiveId: string
   companyId: string
-  
-  signalType: 'HIRING' | 'FUNDING' | 'EXPANSION' | 'PROBLEM_POST' | 'COMPETITOR_MENTION' | 'TECHNOLOGY_DISCUSSION' | 'BUDGET_DISCUSSION' | 'RFP' | 'INITIATIVE_LAUNCH'
-  
+
+  signalType:
+    | 'HIRING'
+    | 'FUNDING'
+    | 'EXPANSION'
+    | 'PROBLEM_POST'
+    | 'COMPETITOR_MENTION'
+    | 'TECHNOLOGY_DISCUSSION'
+    | 'BUDGET_DISCUSSION'
+    | 'RFP'
+    | 'INITIATIVE_LAUNCH'
+
   signal: string
   description: string
   strength: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
   urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
-  
+
   // Source information
-  source: 'LINKEDIN_POST' | 'LINKEDIN_ARTICLE' | 'NEWS' | 'EARNINGS_CALL' | 'JOB_POSTING' | 'PRESS_RELEASE' | 'SOCIAL_MEDIA'
+  source:
+    | 'LINKEDIN_POST'
+    | 'LINKEDIN_ARTICLE'
+    | 'NEWS'
+    | 'EARNINGS_CALL'
+    | 'JOB_POSTING'
+    | 'PRESS_RELEASE'
+    | 'SOCIAL_MEDIA'
   sourceUrl?: string
   detectedDate: Date
-  
+
   // AI analysis
   relevanceScore: number
   keywords: string[]
   sentiment: 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE'
-  
+
   // Opportunity assessment
   opportunitySize?: {
     min: number
@@ -156,7 +172,7 @@ export interface BuyingSignal {
   }
   timeToDecision?: string
   competitionLevel: 'LOW' | 'MEDIUM' | 'HIGH'
-  
+
   // Action tracking
   alertSent: boolean
   actionTaken: boolean
@@ -168,27 +184,36 @@ export interface NewsUpdate {
   id: string
   companyId: string
   executiveIds: string[]
-  
+
   title: string
   summary: string
   content: string
   source: string
   publishedDate: Date
-  
-  category: 'FUNDING' | 'LEADERSHIP_CHANGE' | 'PRODUCT_LAUNCH' | 'PARTNERSHIP' | 'ACQUISITION' | 'FINANCIAL_RESULTS' | 'EXPANSION' | 'REGULATORY' | 'OTHER'
-  
+
+  category:
+    | 'FUNDING'
+    | 'LEADERSHIP_CHANGE'
+    | 'PRODUCT_LAUNCH'
+    | 'PARTNERSHIP'
+    | 'ACQUISITION'
+    | 'FINANCIAL_RESULTS'
+    | 'EXPANSION'
+    | 'REGULATORY'
+    | 'OTHER'
+
   // Impact analysis
   businessImpact: 'LOW' | 'MEDIUM' | 'HIGH'
   salesImpact: 'NEGATIVE' | 'NEUTRAL' | 'POSITIVE'
   urgency: 'LOW' | 'MEDIUM' | 'HIGH'
-  
+
   // Buying signals extracted
   buyingSignals: BuyingSignal[]
-  
+
   // Recommendations
   actionRecommendations: string[]
   talkingPoints: string[]
-  
+
   processed: boolean
   alertSent: boolean
 }
@@ -313,16 +338,16 @@ export class DecisionMakerIntelligence {
    */
   async monitorJobChanges(): Promise<JobChange[]> {
     const recentChanges: JobChange[] = []
-    
+
     try {
       // Get all tracked executives
       const executives = await this.getAllTrackedExecutives()
-      
+
       for (const executive of executives) {
         const changes = await this.detectJobChange(executive)
         if (changes.length > 0) {
           recentChanges.push(...changes)
-          
+
           // Send alerts for high-impact changes
           for (const change of changes) {
             if (change.impactLevel === 'HIGH') {
@@ -334,10 +359,9 @@ export class DecisionMakerIntelligence {
 
       // Store changes in database
       await this.storeJobChanges(recentChanges)
-      
+
       return recentChanges
     } catch (error) {
-      console.error('Error monitoring job changes:', error)
       return []
     }
   }
@@ -351,7 +375,7 @@ export class DecisionMakerIntelligence {
       const [linkedinExecs, apolloExecs, newsExecs] = await Promise.all([
         this.getLinkedInExecutives(companyId),
         this.getApolloExecutives(companyId),
-        this.getNewsExecutives(companyId)
+        this.getNewsExecutives(companyId),
       ])
 
       // Merge and deduplicate executives
@@ -375,25 +399,24 @@ export class DecisionMakerIntelligence {
         companyId,
         companyName: await this.getCompanyName(companyId),
         departments: hierarchy.departments,
-        executiveTeam: allExecutives.filter(exec => exec.reportingLevel <= 2),
+        executiveTeam: allExecutives.filter((exec) => exec.reportingLevel <= 2),
         totalEmployees: await this.getEmployeeCount(companyId),
         decisionHierarchy: hierarchy.decisionNodes,
         budgetHierarchy: hierarchy.budgetNodes,
         keyDecisionMakers,
         influencers,
-        champions: allExecutives.filter(exec => this.isChampion(exec)),
-        detractors: allExecutives.filter(exec => this.isDetractor(exec)),
+        champions: allExecutives.filter((exec) => this.isChampion(exec)),
+        detractors: allExecutives.filter((exec) => this.isDetractor(exec)),
         recentChanges,
         changeFrequency: this.calculateChangeFrequency(recentChanges),
         stabilityScore: this.calculateStabilityScore(recentChanges, allExecutives),
         likelyBuyingCommittee: buyingCommittee,
         lastUpdated: new Date(),
-        dataConfidence: this.calculateDataConfidence(allExecutives)
+        dataConfidence: this.calculateDataConfidence(allExecutives),
       }
 
       return orgChart
     } catch (error) {
-      console.error('Error building org chart:', error)
       throw new Error('Failed to build organizational chart')
     }
   }
@@ -422,20 +445,19 @@ export class DecisionMakerIntelligence {
       signals.push(...techSignals)
 
       // Score and prioritize signals
-      const scoredSignals = signals.map(signal => ({
+      const scoredSignals = signals.map((signal) => ({
         ...signal,
         relevanceScore: this.calculateRelevanceScore(signal),
-        opportunitySize: this.estimateOpportunitySize(signal)
+        opportunitySize: this.estimateOpportunitySize(signal),
       }))
 
       // Filter out low-quality signals
-      const qualitySignals = scoredSignals.filter(signal => 
-        signal.relevanceScore > 0.6 && signal.strength !== 'LOW'
+      const qualitySignals = scoredSignals.filter(
+        (signal) => signal.relevanceScore > 0.6 && signal.strength !== 'LOW'
       )
 
       return qualitySignals.sort((a, b) => b.relevanceScore - a.relevanceScore)
     } catch (error) {
-      console.error('Error detecting buying signals:', error)
       return []
     }
   }
@@ -450,17 +472,17 @@ export class DecisionMakerIntelligence {
       for (const companyId of companyIds) {
         // Get recent news for each company
         const companyNews = await this.getCompanyNews(companyId)
-        
+
         for (const news of companyNews) {
           // Analyze news for business impact
           const analysis = await this.analyzeNewsImpact(news)
-          
+
           // Extract buying signals
           const signals = await this.extractBuyingSignalsFromNews(news, companyId)
-          
+
           // Generate action recommendations
           const recommendations = await this.generateActionRecommendations(news, analysis)
-          
+
           const processedNews: NewsUpdate = {
             id: `news_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             companyId,
@@ -478,25 +500,24 @@ export class DecisionMakerIntelligence {
             actionRecommendations: recommendations.actions,
             talkingPoints: recommendations.talkingPoints,
             processed: true,
-            alertSent: false
+            alertSent: false,
           }
-          
+
           newsUpdates.push(processedNews)
         }
       }
 
       // Sort by urgency and impact
       return newsUpdates.sort((a, b) => {
-        const urgencyWeight = { 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 }
-        const impactWeight = { 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 }
-        
+        const urgencyWeight = { HIGH: 3, MEDIUM: 2, LOW: 1 }
+        const impactWeight = { HIGH: 3, MEDIUM: 2, LOW: 1 }
+
         const aScore = urgencyWeight[a.urgency] * impactWeight[a.businessImpact]
         const bScore = urgencyWeight[b.urgency] * impactWeight[b.businessImpact]
-        
+
         return bScore - aScore
       })
     } catch (error) {
-      console.error('Error generating market intelligence:', error)
       return []
     }
   }
@@ -513,19 +534,21 @@ export class DecisionMakerIntelligence {
       // Get executive's LinkedIn content and interactions
       const contentHistory = await this.getExecutiveContent(executiveId)
       const interactionHistory = await this.getExecutiveInteractions(executiveId)
-      
+
       // Analyze personality from content
       const personality = await this.analyzePersonality(contentHistory)
-      
+
       // Analyze communication patterns
       const communication = await this.analyzeCommunicationStyle(interactionHistory)
-      
+
       // Analyze decision-making style
-      const decisionMaking = await this.analyzeDecisionMakingStyle(contentHistory, interactionHistory)
-      
+      const decisionMaking = await this.analyzeDecisionMakingStyle(
+        contentHistory,
+        interactionHistory
+      )
+
       return { personality, communication, decisionMaking }
     } catch (error) {
-      console.error('Error analyzing executive profile:', error)
       throw new Error('Failed to analyze executive profile')
     }
   }
@@ -546,7 +569,7 @@ export class DecisionMakerIntelligence {
       const profile = await this.analyzeExecutiveProfile(executiveId)
       const buyingSignals = await this.getExecutiveBuyingSignals(executiveId)
       const recentActivity = await this.getRecentActivity(executiveId)
-      
+
       return {
         recommendedApproach: this.determineApproach(profile, buyingSignals),
         bestChannels: this.identifyBestChannels(profile.communication),
@@ -554,10 +577,9 @@ export class DecisionMakerIntelligence {
         messagingStyle: this.recommendMessagingStyle(profile),
         keyTopics: this.identifyKeyTopics(buyingSignals, recentActivity),
         iceBreakers: await this.generateIceBreakers(executiveId, recentActivity),
-        warnings: this.identifyWarnings(profile, recentActivity)
+        warnings: this.identifyWarnings(profile, recentActivity),
       }
     } catch (error) {
-      console.error('Error generating engagement strategy:', error)
       throw new Error('Failed to generate engagement strategy')
     }
   }
@@ -568,40 +590,40 @@ export class DecisionMakerIntelligence {
     return []
   }
 
-  private async detectJobChange(executive: ExecutiveProfile): Promise<JobChange[]> {
+  private async detectJobChange(_executive: ExecutiveProfile): Promise<JobChange[]> {
     // Implementation would check LinkedIn for job changes
     return []
   }
 
-  private async sendJobChangeAlert(change: JobChange): Promise<void> {
+  private async sendJobChangeAlert(_change: JobChange): Promise<void> {
     // Implementation would send alerts via email/Slack
   }
 
-  private async storeJobChanges(changes: JobChange[]): Promise<void> {
+  private async storeJobChanges(_changes: JobChange[]): Promise<void> {
     // Implementation would store in database
   }
 
-  private async getLinkedInExecutives(companyId: string): Promise<ExecutiveProfile[]> {
+  private async getLinkedInExecutives(_companyId: string): Promise<ExecutiveProfile[]> {
     // Implementation would call LinkedIn API
     return []
   }
 
-  private async getApolloExecutives(companyId: string): Promise<ExecutiveProfile[]> {
+  private async getApolloExecutives(_companyId: string): Promise<ExecutiveProfile[]> {
     // Implementation would call Apollo API
     return []
   }
 
-  private async getNewsExecutives(companyId: string): Promise<ExecutiveProfile[]> {
+  private async getNewsExecutives(_companyId: string): Promise<ExecutiveProfile[]> {
     // Implementation would extract from news
     return []
   }
 
-  private mergeExecutiveData(...sources: ExecutiveProfile[][]): ExecutiveProfile[] {
+  private mergeExecutiveData(..._sources: ExecutiveProfile[][]): ExecutiveProfile[] {
     // Implementation would merge and deduplicate
     return []
   }
 
-  private async analyzeReportingStructure(executives: ExecutiveProfile[]): Promise<{
+  private async analyzeReportingStructure(_executives: ExecutiveProfile[]): Promise<{
     departments: OrgDepartment[]
     decisionNodes: DecisionNode[]
     budgetNodes: BudgetNode[]
@@ -610,114 +632,127 @@ export class DecisionMakerIntelligence {
     return {
       departments: [],
       decisionNodes: [],
-      budgetNodes: []
+      budgetNodes: [],
     }
   }
 
   private identifyDecisionMakers(executives: ExecutiveProfile[]): ExecutiveProfile[] {
-    return executives.filter(exec => exec.reportingLevel <= 2 && exec.budgetAuthority)
+    return executives.filter((exec) => exec.reportingLevel <= 2 && exec.budgetAuthority)
   }
 
   private identifyInfluencers(executives: ExecutiveProfile[]): ExecutiveProfile[] {
-    return executives.filter(exec => exec.influenceScore > 70)
+    return executives.filter((exec) => exec.influenceScore > 70)
   }
 
-  private async predictBuyingCommittee(executives: ExecutiveProfile[], companyId: string): Promise<BuyingCommitteeMember[]> {
+  private async predictBuyingCommittee(
+    _executives: ExecutiveProfile[],
+    companyId: string
+  ): Promise<BuyingCommitteeMember[]> {
     // Implementation would predict buying committee
     return []
   }
 
-  private isChampion(executive: ExecutiveProfile): boolean {
+  private isChampion(_executive: ExecutiveProfile): boolean {
     // Implementation would determine if executive is a champion
     return false
   }
 
-  private isDetractor(executive: ExecutiveProfile): boolean {
+  private isDetractor(_executive: ExecutiveProfile): boolean {
     // Implementation would determine if executive is a detractor
     return false
   }
 
-  private async getRecentOrgChanges(companyId: string): Promise<OrgChange[]> {
+  private async getRecentOrgChanges(_companyId: string): Promise<OrgChange[]> {
     // Implementation would get recent changes
     return []
   }
 
   private calculateChangeFrequency(changes: OrgChange[]): 'LOW' | 'MEDIUM' | 'HIGH' {
-    const recentChanges = changes.filter(c => 
-      c.date > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+    const recentChanges = changes.filter(
+      (c) => c.date > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
     ).length
-    
+
     if (recentChanges > 10) return 'HIGH'
     if (recentChanges > 5) return 'MEDIUM'
     return 'LOW'
   }
 
-  private calculateStabilityScore(changes: OrgChange[], executives: ExecutiveProfile[]): number {
+  private calculateStabilityScore(_changes: OrgChange[], _executives: ExecutiveProfile[]): number {
     // Implementation would calculate stability
     return 0.75
   }
 
-  private calculateDataConfidence(executives: ExecutiveProfile[]): number {
+  private calculateDataConfidence(_executives: ExecutiveProfile[]): number {
     // Implementation would calculate confidence
     return 0.85
   }
 
-  private async getCompanyName(companyId: string): Promise<string> {
+  private async getCompanyName(_companyId: string): Promise<string> {
     // Implementation would get company name
     return 'Company Name'
   }
 
-  private async getEmployeeCount(companyId: string): Promise<number> {
+  private async getEmployeeCount(_companyId: string): Promise<number> {
     // Implementation would get employee count
     return 500
   }
 
-  private async detectLinkedInBuyingSignals(executiveIds: string[]): Promise<BuyingSignal[]> {
+  private async detectLinkedInBuyingSignals(_executiveIds: string[]): Promise<BuyingSignal[]> {
     // Implementation would analyze LinkedIn activity
     return []
   }
 
-  private async detectNewsBasedSignals(companyId: string): Promise<BuyingSignal[]> {
+  private async detectNewsBasedSignals(_companyId: string): Promise<BuyingSignal[]> {
     // Implementation would analyze news
     return []
   }
 
-  private async detectHiringSignals(companyId: string): Promise<BuyingSignal[]> {
+  private async detectHiringSignals(_companyId: string): Promise<BuyingSignal[]> {
     // Implementation would analyze job postings
     return []
   }
 
-  private async detectTechnologySignals(executiveIds: string[]): Promise<BuyingSignal[]> {
+  private async detectTechnologySignals(_executiveIds: string[]): Promise<BuyingSignal[]> {
     // Implementation would analyze tech discussions
     return []
   }
 
-  private calculateRelevanceScore(signal: BuyingSignal): number {
+  private calculateRelevanceScore(_signal: BuyingSignal): number {
     // Implementation would calculate relevance
     return 0.8
   }
 
-  private estimateOpportunitySize(signal: BuyingSignal): { min: number; max: number; currency: string } {
+  private estimateOpportunitySize(_signal: BuyingSignal): {
+    min: number
+    max: number
+    currency: string
+  } {
     // Implementation would estimate size
     return { min: 10000, max: 100000, currency: 'USD' }
   }
 
-  private async getCompanyNews(companyId: string): Promise<any[]> {
+  private async getCompanyNews(_companyId: string): Promise<unknown[]> {
     // Implementation would fetch news
     return []
   }
 
-  private async analyzeNewsImpact(news: any): Promise<any> {
+  private async analyzeNewsImpact(_news: unknown): Promise<unknown> {
     // Implementation would analyze impact
     return {}
   }
 
-  private async extractBuyingSignalsFromNews(news: any, companyId: string): Promise<BuyingSignal[]> {
+  private async extractBuyingSignalsFromNews(
+    _news: unknown,
+    companyId: string
+  ): Promise<BuyingSignal[]> {
     // Implementation would extract signals
     return []
   }
 
-  private async generateActionRecommendations(news: any, analysis: any): Promise<{
+  private async generateActionRecommendations(
+    _news: unknown,
+    analysis: unknown
+  ): Promise<{
     actions: string[]
     talkingPoints: string[]
   }> {
@@ -725,22 +760,22 @@ export class DecisionMakerIntelligence {
     return { actions: [], talkingPoints: [] }
   }
 
-  private async getRelevantExecutives(companyId: string, news: any): Promise<string[]> {
+  private async getRelevantExecutives(_companyId: string, _news: unknown): Promise<string[]> {
     // Implementation would find relevant executives
     return []
   }
 
-  private async getExecutiveContent(executiveId: string): Promise<any[]> {
+  private async getExecutiveContent(_executiveId: string): Promise<unknown[]> {
     // Implementation would get content
     return []
   }
 
-  private async getExecutiveInteractions(executiveId: string): Promise<any[]> {
+  private async getExecutiveInteractions(_executiveId: string): Promise<unknown[]> {
     // Implementation would get interactions
     return []
   }
 
-  private async analyzePersonality(content: any[]): Promise<PersonalityInsights> {
+  private async analyzePersonality(_content: unknown[]): Promise<PersonalityInsights> {
     // Implementation would analyze personality
     return {
       traits: {
@@ -748,84 +783,84 @@ export class DecisionMakerIntelligence {
         conscientiousness: 0.8,
         extraversion: 0.6,
         agreeableness: 0.7,
-        emotionalStability: 0.8
+        emotionalStability: 0.8,
       },
       workStyle: 'ANALYTICAL',
       motivators: ['Data-driven decisions', 'Innovation'],
-      stressors: ['Unclear requirements', 'Rushing decisions']
+      stressors: ['Unclear requirements', 'Rushing decisions'],
     }
   }
 
-  private async analyzeCommunicationStyle(interactions: any[]): Promise<CommunicationStyle> {
+  private async analyzeCommunicationStyle(_interactions: unknown[]): Promise<CommunicationStyle> {
     // Implementation would analyze communication
     return {
       preferredChannel: 'EMAIL',
       responseTime: 'SAME_DAY',
       formality: 'PROFESSIONAL',
       detail: 'MODERATE',
-      tone: 'DIRECT'
+      tone: 'DIRECT',
     }
   }
 
-  private async analyzeDecisionMakingStyle(content: any[], interactions: any[]): Promise<DecisionMakingStyle> {
+  private async analyzeDecisionMakingStyle(
+    _content: unknown[],
+    interactions: unknown[]
+  ): Promise<DecisionMakingStyle> {
     // Implementation would analyze decision making
     return {
       speed: 'MODERATE',
       riskTolerance: 'MEDIUM',
       dataReliance: 'DATA_DRIVEN',
-      involvement: 'HANDS_ON'
+      involvement: 'HANDS_ON',
     }
   }
 
-  private async getExecutiveBuyingSignals(executiveId: string): Promise<BuyingSignal[]> {
+  private async getExecutiveBuyingSignals(_executiveId: string): Promise<BuyingSignal[]> {
     // Implementation would get signals
     return []
   }
 
-  private async getRecentActivity(executiveId: string): Promise<any[]> {
+  private async getRecentActivity(_executiveId: string): Promise<unknown[]> {
     // Implementation would get activity
     return []
   }
 
-  private determineApproach(profile: any, signals: BuyingSignal[]): string {
+  private determineApproach(_profile: unknown, _signals: BuyingSignal[]): string {
     // Implementation would determine approach
     return 'Direct, data-driven approach focusing on ROI and efficiency gains'
   }
 
-  private identifyBestChannels(communication: CommunicationStyle): string[] {
+  private identifyBestChannels(_communication: CommunicationStyle): string[] {
     // Implementation would identify channels
     return ['LinkedIn', 'Email']
   }
 
-  private calculateOptimalTiming(activity: any[]): string {
+  private calculateOptimalTiming(_activity: unknown[]): string {
     // Implementation would calculate timing
     return 'Tuesday-Thursday, 9-11 AM EST'
   }
 
-  private recommendMessagingStyle(profile: any): string {
+  private recommendMessagingStyle(_profile: unknown): string {
     // Implementation would recommend style
     return 'Professional, concise, data-backed'
   }
 
-  private identifyKeyTopics(signals: BuyingSignal[], activity: any[]): string[] {
+  private identifyKeyTopics(_signals: BuyingSignal[], _activity: unknown[]): string[] {
     // Implementation would identify topics
     return ['Operational efficiency', 'Cost reduction', 'Digital transformation']
   }
 
-  private async generateIceBreakers(executiveId: string, activity: any[]): Promise<string[]> {
+  private async generateIceBreakers(_executiveId: string, _activity: unknown[]): Promise<string[]> {
     // Implementation would generate ice breakers
     return [
       'Saw your recent post about digital transformation challenges',
-      'Congratulations on the new product launch'
+      'Congratulations on the new product launch',
     ]
   }
 
-  private identifyWarnings(profile: any, activity: any[]): string[] {
+  private identifyWarnings(_profile: unknown, _activity: unknown[]): string[] {
     // Implementation would identify warnings
-    return [
-      'Prefers detailed technical discussions',
-      'Skeptical of unsubstantiated claims'
-    ]
+    return ['Prefers detailed technical discussions', 'Skeptical of unsubstantiated claims']
   }
 }
 

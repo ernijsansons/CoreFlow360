@@ -18,13 +18,13 @@ import { telemetry } from '@/lib/monitoring/opentelemetry'
 // Log levels with numeric values for filtering
 export enum LogLevel {
   EMERGENCY = 0, // System is unusable
-  ALERT = 1,     // Action must be taken immediately
-  CRITICAL = 2,  // Critical conditions
-  ERROR = 3,     // Error conditions
-  WARNING = 4,   // Warning conditions
-  NOTICE = 5,    // Normal but significant condition
-  INFO = 6,      // Informational messages
-  DEBUG = 7      // Debug-level messages
+  ALERT = 1, // Action must be taken immediately
+  CRITICAL = 2, // Critical conditions
+  ERROR = 3, // Error conditions
+  WARNING = 4, // Warning conditions
+  NOTICE = 5, // Normal but significant condition
+  INFO = 6, // Informational messages
+  DEBUG = 7, // Debug-level messages
 }
 
 // Log categories for structured organization
@@ -40,7 +40,7 @@ export enum LogCategory {
   AUTHORIZATION = 'authz',
   PAYMENT = 'payment',
   AI = 'ai',
-  EXTERNAL = 'external'
+  EXTERNAL = 'external',
 }
 
 // Compliance frameworks
@@ -50,7 +50,7 @@ export enum ComplianceFramework {
   GDPR = 'gdpr',
   PCI_DSS = 'pci-dss',
   ISO27001 = 'iso27001',
-  NIST = 'nist'
+  NIST = 'nist',
 }
 
 export interface LogEntry {
@@ -59,7 +59,7 @@ export interface LogEntry {
   level: LogLevel
   category: LogCategory
   message: string
-  data?: Record<string, any>
+  data?: Record<string, unknown>
   context: {
     requestId?: string
     traceId?: string
@@ -98,14 +98,22 @@ export interface AuditEvent extends LogEntry {
   }
   outcome: 'success' | 'failure' | 'partial'
   changes?: {
-    before?: Record<string, any>
-    after?: Record<string, any>
+    before?: Record<string, unknown>
+    after?: Record<string, unknown>
   }
   risk: 'low' | 'medium' | 'high' | 'critical'
 }
 
 export interface SecurityEvent extends LogEntry {
-  threatType: 'xss' | 'sql_injection' | 'brute_force' | 'unauthorized_access' | 'data_breach' | 'malware' | 'ddos' | 'other'
+  threatType:
+    | 'xss'
+    | 'sql_injection'
+    | 'brute_force'
+    | 'unauthorized_access'
+    | 'data_breach'
+    | 'malware'
+    | 'ddos'
+    | 'other'
   severity: 'low' | 'medium' | 'high' | 'critical'
   source: {
     ip: string
@@ -155,15 +163,9 @@ export class ComprehensiveLogger {
   }
 
   private initializeLogStreams() {
-    const streams = [
-      'application.log',
-      'security.log', 
-      'audit.log',
-      'performance.log',
-      'error.log'
-    ]
+    const streams = ['application.log', 'security.log', 'audit.log', 'performance.log', 'error.log']
 
-    streams.forEach(streamName => {
+    streams.forEach((streamName) => {
       const logPath = join(this.logDirectory, streamName)
       const stream = createWriteStream(logPath, { flags: 'a' })
       this.logStreams.set(streamName.split('.')[0], stream)
@@ -182,7 +184,7 @@ export class ComprehensiveLogger {
     const entriesToFlush = [...this.logBuffer]
     this.logBuffer = []
 
-    entriesToFlush.forEach(entry => {
+    entriesToFlush.forEach((entry) => {
       this.writeLogEntry(entry)
     })
 
@@ -192,11 +194,11 @@ export class ComprehensiveLogger {
 
   private writeLogEntry(entry: LogEntry) {
     const logLine = this.formatLogEntry(entry)
-    
+
     // Write to appropriate streams
     const streamName = this.getStreamName(entry)
     const stream = this.logStreams.get(streamName)
-    
+
     if (stream) {
       stream.write(logLine + '\n')
     }
@@ -218,7 +220,6 @@ export class ComprehensiveLogger {
     // Console output in development
     if (this.config.NODE_ENV === 'development') {
       const colorCode = this.getLogColor(entry.level)
-      console.log(`${colorCode}${logLine}\x1b[0m`)
     }
   }
 
@@ -227,7 +228,7 @@ export class ComprehensiveLogger {
       case LogCategory.SECURITY:
         return 'security'
       case LogCategory.AUDIT:
-        return 'audit'  
+        return 'audit'
       case LogCategory.PERFORMANCE:
         return 'performance'
       default:
@@ -239,24 +240,24 @@ export class ComprehensiveLogger {
     // Create structured JSON log entry
     const logData = {
       ...entry,
-      data: this.sanitizeSensitiveData(entry.data)
+      data: this.sanitizeSensitiveData(entry.data),
     }
 
     return JSON.stringify(logData, null, 0)
   }
 
-  private sanitizeSensitiveData(data: any): any {
+  private sanitizeSensitiveData(data: unknown): unknown {
     if (!data || typeof data !== 'object') return data
 
     const sanitized = Array.isArray(data) ? [] : {}
 
     for (const [key, value] of Object.entries(data)) {
       if (this.sensitiveFields.has(key.toLowerCase())) {
-        (sanitized as any)[key] = '[REDACTED]'
+        ;(sanitized as unknown)[key] = '[REDACTED]'
       } else if (typeof value === 'object' && value !== null) {
-        (sanitized as any)[key] = this.sanitizeSensitiveData(value)
+        ;(sanitized as unknown)[key] = this.sanitizeSensitiveData(value)
       } else {
-        (sanitized as any)[key] = value
+        ;(sanitized as unknown)[key] = value
       }
     }
 
@@ -266,13 +267,13 @@ export class ComprehensiveLogger {
   private getLogColor(level: LogLevel): string {
     const colors = {
       [LogLevel.EMERGENCY]: '\x1b[41m', // Red background
-      [LogLevel.ALERT]: '\x1b[91m',     // Bright red
-      [LogLevel.CRITICAL]: '\x1b[31m',  // Red
-      [LogLevel.ERROR]: '\x1b[31m',     // Red
-      [LogLevel.WARNING]: '\x1b[33m',   // Yellow
-      [LogLevel.NOTICE]: '\x1b[36m',    // Cyan
-      [LogLevel.INFO]: '\x1b[32m',      // Green
-      [LogLevel.DEBUG]: '\x1b[90m'      // Gray
+      [LogLevel.ALERT]: '\x1b[91m', // Bright red
+      [LogLevel.CRITICAL]: '\x1b[31m', // Red
+      [LogLevel.ERROR]: '\x1b[31m', // Red
+      [LogLevel.WARNING]: '\x1b[33m', // Yellow
+      [LogLevel.NOTICE]: '\x1b[36m', // Cyan
+      [LogLevel.INFO]: '\x1b[32m', // Green
+      [LogLevel.DEBUG]: '\x1b[90m', // Gray
     }
     return colors[level] || '\x1b[0m'
   }
@@ -285,7 +286,7 @@ export class ComprehensiveLogger {
     level: LogLevel,
     category: LogCategory,
     message: string,
-    data?: Record<string, any>,
+    data?: Record<string, unknown>,
     context?: Partial<LogEntry['context']>
   ): LogEntry {
     return {
@@ -304,15 +305,15 @@ export class ComprehensiveLogger {
         ip: context?.ip,
         userAgent: context?.userAgent,
         endpoint: context?.endpoint,
-        method: context?.method
+        method: context?.method,
       },
       metadata: {
         hostname: process.env.HOSTNAME || 'localhost',
         service: 'coreflow360',
         version: '2.0.0',
         environment: this.config.NODE_ENV,
-        processId: process.pid
-      }
+        processId: process.pid,
+      },
     }
   }
 
@@ -323,42 +324,82 @@ export class ComprehensiveLogger {
     level: LogLevel,
     category: LogCategory,
     message: string,
-    data?: Record<string, any>,
+    data?: Record<string, unknown>,
     context?: Partial<LogEntry['context']>
   ): void {
     const entry = this.createBaseLogEntry(level, category, message, data, context)
     this.addToBuffer(entry)
   }
 
-  emergency(category: LogCategory, message: string, data?: Record<string, any>, context?: Partial<LogEntry['context']>) {
+  emergency(
+    category: LogCategory,
+    message: string,
+    data?: Record<string, unknown>,
+    context?: Partial<LogEntry['context']>
+  ) {
     this.log(LogLevel.EMERGENCY, category, message, data, context)
   }
 
-  alert(category: LogCategory, message: string, data?: Record<string, any>, context?: Partial<LogEntry['context']>) {
+  alert(
+    category: LogCategory,
+    message: string,
+    data?: Record<string, unknown>,
+    context?: Partial<LogEntry['context']>
+  ) {
     this.log(LogLevel.ALERT, category, message, data, context)
   }
 
-  critical(category: LogCategory, message: string, data?: Record<string, any>, context?: Partial<LogEntry['context']>) {
+  critical(
+    category: LogCategory,
+    message: string,
+    data?: Record<string, unknown>,
+    context?: Partial<LogEntry['context']>
+  ) {
     this.log(LogLevel.CRITICAL, category, message, data, context)
   }
 
-  error(category: LogCategory, message: string, data?: Record<string, any>, context?: Partial<LogEntry['context']>) {
+  error(
+    category: LogCategory,
+    message: string,
+    data?: Record<string, unknown>,
+    context?: Partial<LogEntry['context']>
+  ) {
     this.log(LogLevel.ERROR, category, message, data, context)
   }
 
-  warning(category: LogCategory, message: string, data?: Record<string, any>, context?: Partial<LogEntry['context']>) {
+  warning(
+    category: LogCategory,
+    message: string,
+    data?: Record<string, unknown>,
+    context?: Partial<LogEntry['context']>
+  ) {
     this.log(LogLevel.WARNING, category, message, data, context)
   }
 
-  notice(category: LogCategory, message: string, data?: Record<string, any>, context?: Partial<LogEntry['context']>) {
+  notice(
+    category: LogCategory,
+    message: string,
+    data?: Record<string, unknown>,
+    context?: Partial<LogEntry['context']>
+  ) {
     this.log(LogLevel.NOTICE, category, message, data, context)
   }
 
-  info(category: LogCategory, message: string, data?: Record<string, any>, context?: Partial<LogEntry['context']>) {
+  info(
+    category: LogCategory,
+    message: string,
+    data?: Record<string, unknown>,
+    context?: Partial<LogEntry['context']>
+  ) {
     this.log(LogLevel.INFO, category, message, data, context)
   }
 
-  debug(category: LogCategory, message: string, data?: Record<string, any>, context?: Partial<LogEntry['context']>) {
+  debug(
+    category: LogCategory,
+    message: string,
+    data?: Record<string, unknown>,
+    context?: Partial<LogEntry['context']>
+  ) {
     if (this.config.NODE_ENV === 'development') {
       this.log(LogLevel.DEBUG, category, message, data, context)
     }
@@ -382,7 +423,7 @@ export class ComprehensiveLogger {
       outcome: event.outcome || 'success',
       changes: event.changes,
       risk: event.risk || 'low',
-      compliance: [ComplianceFramework.SOX, ComplianceFramework.ISO27001]
+      compliance: [ComplianceFramework.SOX, ComplianceFramework.ISO27001],
     }
 
     this.addToBuffer(auditEntry)
@@ -392,7 +433,7 @@ export class ComprehensiveLogger {
       action: event.action!,
       resource_type: event.resource?.type!,
       outcome: event.outcome || 'success',
-      risk: event.risk || 'low'
+      risk: event.risk || 'low',
     })
   }
 
@@ -402,9 +443,13 @@ export class ComprehensiveLogger {
   security(event: Partial<SecurityEvent>): void {
     const securityEntry: SecurityEvent = {
       ...this.createBaseLogEntry(
-        event.severity === 'critical' ? LogLevel.CRITICAL : 
-        event.severity === 'high' ? LogLevel.ERROR :
-        event.severity === 'medium' ? LogLevel.WARNING : LogLevel.INFO,
+        event.severity === 'critical'
+          ? LogLevel.CRITICAL
+          : event.severity === 'high'
+            ? LogLevel.ERROR
+            : event.severity === 'medium'
+              ? LogLevel.WARNING
+              : LogLevel.INFO,
         LogCategory.SECURITY,
         `Security threat detected: ${event.threatType} from ${event.source?.ip}`,
         { indicators: event.indicators, blocked: event.blocked },
@@ -417,7 +462,7 @@ export class ComprehensiveLogger {
       indicators: event.indicators || [],
       blocked: event.blocked || false,
       response: event.response || 'monitor',
-      compliance: [ComplianceFramework.ISO27001, ComplianceFramework.NIST]
+      compliance: [ComplianceFramework.ISO27001, ComplianceFramework.NIST],
     }
 
     this.addToBuffer(securityEntry)
@@ -427,7 +472,7 @@ export class ComprehensiveLogger {
       threat_type: event.threatType!,
       severity: event.severity!,
       blocked: event.blocked ? 'true' : 'false',
-      response: event.response || 'monitor'
+      response: event.response || 'monitor',
     })
 
     // Immediate alert for critical security events
@@ -446,28 +491,34 @@ export class ComprehensiveLogger {
     responseTime: number,
     context: Partial<LogEntry['context']>
   ): void {
-    const level = statusCode >= 500 ? LogLevel.ERROR :
-                 statusCode >= 400 ? LogLevel.WARNING : LogLevel.INFO
+    const level =
+      statusCode >= 500 ? LogLevel.ERROR : statusCode >= 400 ? LogLevel.WARNING : LogLevel.INFO
 
-    this.log(level, LogCategory.API, `${method} ${endpoint} - ${statusCode} (${responseTime}ms)`, {
-      http: {
-        method,
-        endpoint,
-        status_code: statusCode,
-        response_time_ms: responseTime
-      }
-    }, context)
+    this.log(
+      level,
+      LogCategory.API,
+      `${method} ${endpoint} - ${statusCode} (${responseTime}ms)`,
+      {
+        http: {
+          method,
+          endpoint,
+          status_code: statusCode,
+          response_time_ms: responseTime,
+        },
+      },
+      context
+    )
 
     // Record API metrics
     telemetry.recordCounter('api_requests_total', 1, {
       method,
       endpoint: endpoint.replace(/\/[0-9a-f-]{36}/g, '/:id'), // Sanitize IDs
-      status: statusCode.toString()
+      status: statusCode.toString(),
     })
 
     telemetry.recordHistogram('api_request_duration_ms', responseTime, {
       method,
-      endpoint: endpoint.replace(/\/[0-9a-f-]{36}/g, '/:id')
+      endpoint: endpoint.replace(/\/[0-9a-f-]{36}/g, '/:id'),
     })
   }
 
@@ -477,21 +528,27 @@ export class ComprehensiveLogger {
   business(
     action: string,
     result: 'success' | 'failure',
-    data?: Record<string, any>,
+    data?: Record<string, unknown>,
     context?: Partial<LogEntry['context']>
   ): void {
     const level = result === 'failure' ? LogLevel.ERROR : LogLevel.INFO
 
-    this.log(level, LogCategory.BUSINESS, `Business action: ${action} - ${result}`, {
-      action,
-      result,
-      ...data
-    }, context)
+    this.log(
+      level,
+      LogCategory.BUSINESS,
+      `Business action: ${action} - ${result}`,
+      {
+        action,
+        result,
+        ...data,
+      },
+      context
+    )
 
     // Record business metrics
     telemetry.recordCounter('business_actions_total', 1, {
       action,
-      result
+      result,
     })
   }
 
@@ -501,21 +558,27 @@ export class ComprehensiveLogger {
   performance(
     operation: string,
     duration: number,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
     context?: Partial<LogEntry['context']>
   ): void {
-    const level = duration > 5000 ? LogLevel.WARNING :
-                 duration > 1000 ? LogLevel.NOTICE : LogLevel.INFO
+    const level =
+      duration > 5000 ? LogLevel.WARNING : duration > 1000 ? LogLevel.NOTICE : LogLevel.INFO
 
-    this.log(level, LogCategory.PERFORMANCE, `Performance: ${operation} took ${duration}ms`, {
-      operation,
-      duration_ms: duration,
-      ...metadata
-    }, context)
+    this.log(
+      level,
+      LogCategory.PERFORMANCE,
+      `Performance: ${operation} took ${duration}ms`,
+      {
+        operation,
+        duration_ms: duration,
+        ...metadata,
+      },
+      context
+    )
 
     // Record performance metrics
     telemetry.recordHistogram('operation_duration_ms', duration, {
-      operation
+      operation,
     })
   }
 
@@ -540,12 +603,12 @@ export class ComprehensiveLogger {
       source: event.source.ip,
       target: event.target.endpoint,
       indicators: event.indicators,
-      blocked: event.blocked
+      blocked: event.blocked,
     })
 
     // In production, send to security team via:
     // - Email alerts
-    // - Slack notifications  
+    // - Slack notifications
     // - SIEM integration
     // - Incident management system
   }
@@ -565,10 +628,10 @@ export class ComprehensiveLogger {
     return {
       bufferSize: this.logBuffer.length,
       totalLogged: 0, // Would track
-      errorCount: 0,  // Would track
+      errorCount: 0, // Would track
       warningCount: 0, // Would track
       securityEvents: 0, // Would track
-      auditEvents: 0    // Would track
+      auditEvents: 0, // Would track
     }
   }
 
@@ -585,7 +648,7 @@ export class ComprehensiveLogger {
     }
 
     // Close all streams
-    this.logStreams.forEach(stream => {
+    this.logStreams.forEach((stream) => {
       stream.end()
     })
 
@@ -596,14 +659,14 @@ export class ComprehensiveLogger {
    * Create structured logger with context
    */
   createContextualLogger(context: Partial<LogEntry['context']>): {
-    emergency: (category: LogCategory, message: string, data?: Record<string, any>) => void
-    alert: (category: LogCategory, message: string, data?: Record<string, any>) => void
-    critical: (category: LogCategory, message: string, data?: Record<string, any>) => void
-    error: (category: LogCategory, message: string, data?: Record<string, any>) => void
-    warning: (category: LogCategory, message: string, data?: Record<string, any>) => void
-    notice: (category: LogCategory, message: string, data?: Record<string, any>) => void
-    info: (category: LogCategory, message: string, data?: Record<string, any>) => void
-    debug: (category: LogCategory, message: string, data?: Record<string, any>) => void
+    emergency: (category: LogCategory, message: string, data?: Record<string, unknown>) => void
+    alert: (category: LogCategory, message: string, data?: Record<string, unknown>) => void
+    critical: (category: LogCategory, message: string, data?: Record<string, unknown>) => void
+    error: (category: LogCategory, message: string, data?: Record<string, unknown>) => void
+    warning: (category: LogCategory, message: string, data?: Record<string, unknown>) => void
+    notice: (category: LogCategory, message: string, data?: Record<string, unknown>) => void
+    info: (category: LogCategory, message: string, data?: Record<string, unknown>) => void
+    debug: (category: LogCategory, message: string, data?: Record<string, unknown>) => void
   } {
     return {
       emergency: (category, message, data) => this.emergency(category, message, data, context),
@@ -613,7 +676,7 @@ export class ComprehensiveLogger {
       warning: (category, message, data) => this.warning(category, message, data, context),
       notice: (category, message, data) => this.notice(category, message, data, context),
       info: (category, message, data) => this.info(category, message, data, context),
-      debug: (category, message, data) => this.debug(category, message, data, context)
+      debug: (category, message, data) => this.debug(category, message, data, context),
     }
   }
 }
@@ -622,15 +685,17 @@ export class ComprehensiveLogger {
 export const logger = ComprehensiveLogger.getInstance()
 
 // Utility functions for middleware integration
-export function createLoggingMiddleware(options: {
-  logRequests?: boolean
-  logResponses?: boolean
-  sensitiveHeaders?: string[]
-} = {}) {
-  return (req: any, res: any, next: any) => {
+export function createLoggingMiddleware(
+  options: {
+    logRequests?: boolean
+    logResponses?: boolean
+    sensitiveHeaders?: string[]
+  } = {}
+) {
+  return (req: unknown, res: unknown, next: unknown) => {
     const startTime = Date.now()
     const requestId = req.headers['x-request-id'] || logger.generateLogId()
-    
+
     // Add request ID to response headers
     res.setHeader('X-Request-ID', requestId)
 
@@ -642,7 +707,7 @@ export function createLoggingMiddleware(options: {
       endpoint: req.path,
       method: req.method,
       userId: req.user?.id,
-      tenantId: req.headers['x-tenant-id']
+      tenantId: req.headers['x-tenant-id'],
     })
 
     // Log incoming request
@@ -650,22 +715,22 @@ export function createLoggingMiddleware(options: {
       contextLogger.info(LogCategory.API, `Incoming request: ${req.method} ${req.path}`, {
         headers: req.headers,
         query: req.query,
-        body: req.body
+        body: req.body,
       })
     }
 
     // Intercept response
     const originalSend = res.send
-    res.send = function(data: any) {
+    res.send = function (data: unknown) {
       const responseTime = Date.now() - startTime
-      
+
       // Log API response
       logger.apiLog(req.method, req.path, res.statusCode, responseTime, {
         requestId,
         ip: req.ip || req.connection?.remoteAddress,
         userAgent: req.headers['user-agent'],
         userId: req.user?.id,
-        tenantId: req.headers['x-tenant-id']
+        tenantId: req.headers['x-tenant-id'],
       })
 
       return originalSend.call(this, data)

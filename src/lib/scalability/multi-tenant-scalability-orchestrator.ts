@@ -176,11 +176,9 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
       urgency: 'LOW' | 'MEDIUM' | 'HIGH'
     }>
   }> {
-    console.log('📊 Analyzing multi-tenant scalability requirements...')
-
     const totalTenants = this.tenants.size
     const activeTenants = Array.from(this.tenants.values()).filter(
-      t => t.lastActive > new Date(Date.now() - 24 * 60 * 60 * 1000)
+      (t) => t.lastActive > new Date(Date.now() - 24 * 60 * 60 * 1000)
     ).length
 
     // Calculate aggregate resource utilization
@@ -189,14 +187,14 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
         cpu: acc.cpu + tenant.resources.cpu,
         memory: acc.memory + tenant.resources.memory,
         storage: acc.storage + tenant.resources.storage,
-        bandwidth: acc.bandwidth + tenant.resources.bandwidth
+        bandwidth: acc.bandwidth + tenant.resources.bandwidth,
       }),
       { cpu: 0, memory: 0, storage: 0, bandwidth: 0 }
     )
 
     // Generate scaling recommendations
     const scalingRecommendations = await this.generateScalingRecommendations()
-    
+
     // Analyze infrastructure needs
     const infrastructureNeeds = this.analyzeInfrastructureNeeds()
 
@@ -204,7 +202,9 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
       cpu: Math.round((totalResources.cpu / this.getTotalPoolCapacity('cpu')) * 100),
       memory: Math.round((totalResources.memory / this.getTotalPoolCapacity('memory')) * 100),
       storage: Math.round((totalResources.storage / this.getTotalPoolCapacity('storage')) * 100),
-      bandwidth: Math.round((totalResources.bandwidth / this.getTotalPoolCapacity('bandwidth')) * 100)
+      bandwidth: Math.round(
+        (totalResources.bandwidth / this.getTotalPoolCapacity('bandwidth')) * 100
+      ),
     }
 
     return {
@@ -212,7 +212,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
       activeTenants,
       resourceUtilization,
       scalingRecommendations,
-      infrastructureNeeds
+      infrastructureNeeds,
     }
   }
 
@@ -241,15 +241,13 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
       resourceEfficiency: number
     }
   }> {
-    console.log('🔄 Optimizing tenant distribution and sharding...')
-
     // Analyze current shard distribution
-    const currentDistribution = this.shardingStrategy.shards.map(shard => ({
+    const currentDistribution = this.shardingStrategy.shards.map((shard) => ({
       shardId: shard.id,
       tenantCount: shard.tenants.length,
       loadPercentage: Math.round((shard.currentLoad / shard.capacity) * 100),
       region: shard.region,
-      recommendation: this.generateShardRecommendation(shard)
+      recommendation: this.generateShardRecommendation(shard),
     }))
 
     // Generate rebalancing plan
@@ -261,7 +259,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
     return {
       currentDistribution,
       rebalancingPlan,
-      performanceImpact
+      performanceImpact,
     }
   }
 
@@ -279,8 +277,6 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
       error: string
     }>
   }> {
-    console.log('⚡ Executing auto-scaling operations...')
-
     let scaleUpActions = 0
     let scaleDownActions = 0
     let migratedTenants = 0
@@ -288,17 +284,16 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
     const failedActions: Array<{ tenantId: string; action: string; error: string }> = []
 
     if (!this.autoScalingEnabled) {
-      console.log('Auto-scaling is disabled')
       return { scaleUpActions, scaleDownActions, migratedTenants, totalCostImpact, failedActions }
     }
 
     for (const [tenantId, tenant] of this.tenants.entries()) {
       try {
         const scalingDecision = this.evaluateScalingDecision(tenant)
-        
+
         if (scalingDecision.action !== 'NONE') {
           const scalingEvent = await this.executeScalingAction(tenant, scalingDecision)
-          
+
           switch (scalingDecision.action) {
             case 'SCALE_UP':
               scaleUpActions++
@@ -310,14 +305,14 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
               migratedTenants++
               break
           }
-          
+
           totalCostImpact += scalingEvent.metadata.costImpact || 0
         }
       } catch (error) {
         failedActions.push({
           tenantId,
           action: 'AUTO_SCALE',
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         })
       }
     }
@@ -326,7 +321,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
       scaleUpActions,
       scaleDownActions,
       migratedTenants,
-      totalCostImpact
+      totalCostImpact,
     })
 
     return { scaleUpActions, scaleDownActions, migratedTenants, totalCostImpact, failedActions }
@@ -343,17 +338,16 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
 
       // Check for threshold violations
       this.checkResourceThresholds(tenant)
-      
+
       // Update tenant tier based on activity
       this.updateTenantTier(tenant)
     }
 
     // Update resource pool utilization
     this.updateResourcePools()
-    
+
     // Check for rebalancing needs
     if (this.shouldRebalanceShards()) {
-      console.log('🔄 Shard rebalancing needed')
       this.emit('rebalancingRequired')
     }
   }
@@ -361,14 +355,16 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
   /**
    * Generate scaling recommendations for tenants
    */
-  private async generateScalingRecommendations(): Promise<Array<{
-    tenantId: string
-    action: 'SCALE_UP' | 'SCALE_DOWN' | 'MIGRATE' | 'OPTIMIZE'
-    reason: string
-    impact: 'LOW' | 'MEDIUM' | 'HIGH'
-    costChange: number
-    timeline: string
-  }>> {
+  private async generateScalingRecommendations(): Promise<
+    Array<{
+      tenantId: string
+      action: 'SCALE_UP' | 'SCALE_DOWN' | 'MIGRATE' | 'OPTIMIZE'
+      reason: string
+      impact: 'LOW' | 'MEDIUM' | 'HIGH'
+      costChange: number
+      timeline: string
+    }>
+  > {
     const recommendations = []
 
     for (const [tenantId, tenant] of this.tenants.entries()) {
@@ -380,7 +376,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           reason: `CPU utilization at ${tenant.resources.cpu}% - needs additional resources`,
           impact: 'HIGH' as const,
           costChange: this.calculateCostChange(tenant, 'SCALE_UP'),
-          timeline: 'Immediate'
+          timeline: 'Immediate',
         })
       } else if (tenant.resources.cpu < 20 && tenant.plan !== 'STARTER') {
         recommendations.push({
@@ -389,7 +385,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           reason: `CPU utilization at ${tenant.resources.cpu}% - over-provisioned`,
           impact: 'LOW' as const,
           costChange: this.calculateCostChange(tenant, 'SCALE_DOWN'),
-          timeline: '1-2 weeks'
+          timeline: '1-2 weeks',
         })
       }
 
@@ -401,7 +397,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           reason: `Memory usage at ${Math.round((tenant.resources.memory / tenant.limits.maxStorage) * 100)}% of limit`,
           impact: 'HIGH' as const,
           costChange: this.calculateCostChange(tenant, 'SCALE_UP'),
-          timeline: 'Immediate'
+          timeline: 'Immediate',
         })
       }
 
@@ -413,7 +409,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           reason: `High latency (${tenant.averageResponseTime}ms) - consider regional migration`,
           impact: 'MEDIUM' as const,
           costChange: 0,
-          timeline: '2-4 weeks'
+          timeline: '2-4 weeks',
         })
       }
 
@@ -425,7 +421,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           reason: `High error rate (${tenant.errorRate}%) with heavy usage - optimization needed`,
           impact: 'MEDIUM' as const,
           costChange: -50, // Cost savings through optimization
-          timeline: '1 week'
+          timeline: '1 week',
         })
       }
     }
@@ -446,7 +442,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
       return {
         action: 'SCALE_UP',
         reason: 'CPU utilization critical',
-        urgency: 'HIGH'
+        urgency: 'HIGH',
       }
     }
 
@@ -455,7 +451,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
       return {
         action: 'SCALE_UP',
         reason: 'Memory approaching limit',
-        urgency: 'HIGH'
+        urgency: 'HIGH',
       }
     }
 
@@ -464,18 +460,20 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
       return {
         action: 'SCALE_UP',
         reason: 'Request rate approaching limit',
-        urgency: 'MEDIUM'
+        urgency: 'MEDIUM',
       }
     }
 
     // Under-utilization (only for paid plans)
-    if (tenant.plan !== 'STARTER' && 
-        tenant.resources.cpu < 15 && 
-        tenant.resources.memory < tenant.limits.maxStorage * 0.3) {
+    if (
+      tenant.plan !== 'STARTER' &&
+      tenant.resources.cpu < 15 &&
+      tenant.resources.memory < tenant.limits.maxStorage * 0.3
+    ) {
       return {
         action: 'SCALE_DOWN',
         reason: 'Resources under-utilized',
-        urgency: 'LOW'
+        urgency: 'LOW',
       }
     }
 
@@ -484,14 +482,14 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
       return {
         action: 'MIGRATE',
         reason: 'High latency requiring resource optimization',
-        urgency: 'MEDIUM'
+        urgency: 'MEDIUM',
       }
     }
 
     return {
       action: 'NONE',
       reason: 'No scaling action needed',
-      urgency: 'LOW'
+      urgency: 'LOW',
     }
   }
 
@@ -505,15 +503,15 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
     const scalingEvent: ScalingEvent = {
       id: `scale_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       tenantId: tenant.tenantId,
-      type: decision.action as any,
+      type: decision.action as unknown,
       trigger: this.determineTrigger(decision.reason),
       timestamp: new Date(),
       metadata: {
         previousResources: { ...tenant.resources },
         reason: decision.reason,
-        autoScaled: true
+        autoScaled: true,
       },
-      status: 'PENDING'
+      status: 'PENDING',
     }
 
     try {
@@ -532,13 +530,9 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
       const endTime = performance.now()
       scalingEvent.duration = endTime - startTime
       scalingEvent.status = 'COMPLETED'
-
-      console.log(`✅ Scaling completed for tenant ${tenant.tenantId}: ${decision.action}`)
-
     } catch (error) {
       scalingEvent.status = 'FAILED'
       scalingEvent.metadata.error = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`❌ Scaling failed for tenant ${tenant.tenantId}:`, error)
     }
 
     this.scalingEvents.push(scalingEvent)
@@ -551,8 +545,8 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
 
   private initializeResourcePools(): void {
     const regions = ['us-east-1', 'us-west-2', 'eu-west-1', 'ap-southeast-1']
-    
-    regions.forEach(region => {
+
+    regions.forEach((region) => {
       this.resourcePools.set(region, {
         region,
         tier: 'HOT',
@@ -560,22 +554,22 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           cpu: 1000, // cores
           memory: 4000, // GB
           storage: 100, // TB
-          bandwidth: 10 // GB/s
+          bandwidth: 10, // GB/s
         },
         allocated: {
           cpu: Math.floor(Math.random() * 700) + 200,
           memory: Math.floor(Math.random() * 2800) + 800,
           storage: Math.floor(Math.random() * 70) + 20,
-          bandwidth: Math.floor(Math.random() * 7) + 2
+          bandwidth: Math.floor(Math.random() * 7) + 2,
         },
         available: { cpu: 0, memory: 0, storage: 0, bandwidth: 0 },
         cost: {
           cpuPerHour: 0.05,
           memoryPerGBHour: 0.01,
           storagePerGBMonth: 0.001,
-          bandwidthPerGB: 0.09
+          bandwidthPerGB: 0.09,
         },
-        health: 'HEALTHY'
+        health: 'HEALTHY',
       })
     })
 
@@ -592,14 +586,14 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
         capacity: 1000,
         currentLoad: Math.floor(Math.random() * 600) + 200,
         region: ['us-east-1', 'us-west-2', 'eu-west-1', 'ap-southeast-1'][i % 4],
-        status: 'ACTIVE' as const
+        status: 'ACTIVE' as const,
       })),
       rebalancing: {
         enabled: true,
         lastRebalance: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
         nextScheduled: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        threshold: 20 // 20% imbalance threshold
-      }
+        threshold: 20, // 20% imbalance threshold
+      },
     }
   }
 
@@ -612,7 +606,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           ttl: 300, // 5 minutes
           maxSize: 1024, // 1GB
           hitRate: 85,
-          regions: ['us-east-1', 'us-west-2', 'eu-west-1']
+          regions: ['us-east-1', 'us-west-2', 'eu-west-1'],
         },
         {
           name: 'Session Cache',
@@ -620,7 +614,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           ttl: 1800, // 30 minutes
           maxSize: 512, // 512MB
           hitRate: 95,
-          regions: ['us-east-1', 'us-west-2', 'eu-west-1']
+          regions: ['us-east-1', 'us-west-2', 'eu-west-1'],
         },
         {
           name: 'CDN',
@@ -628,35 +622,33 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           ttl: 86400, // 24 hours
           maxSize: 10240, // 10GB
           hitRate: 90,
-          regions: ['global']
-        }
+          regions: ['global'],
+        },
       ],
       policies: {
         tenantData: 'PER_TENANT',
         sessionData: 'DISTRIBUTED',
-        staticAssets: 'GLOBAL_CDN'
+        staticAssets: 'GLOBAL_CDN',
       },
       invalidation: {
         strategy: 'EVENT_DRIVEN',
         crossRegionSync: true,
-        batchUpdates: true
-      }
+        batchUpdates: true,
+      },
     }
   }
 
   private startMonitoring(): void {
     this.isMonitoring = true
-    
+
     // Generate sample tenant data
     this.generateSampleTenants()
-    
+
     this.monitoringInterval = setInterval(async () => {
       if (this.isMonitoring) {
         await this.monitorTenants()
       }
     }, 30000) // Every 30 seconds
-
-    console.log('📊 Multi-tenant scalability monitoring started')
   }
 
   private generateSampleTenants(): void {
@@ -668,7 +660,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
       const plan = plans[Math.floor(Math.random() * plans.length)]
       const region = regions[Math.floor(Math.random() * regions.length)]
       const tier = tiers[Math.floor(Math.random() * tiers.length)]
-      
+
       const tenant: TenantMetrics = {
         tenantId: `tenant_${i + 1}`,
         name: `Company ${i + 1}`,
@@ -687,10 +679,10 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           cpu: Math.floor(Math.random() * 80) + 10,
           memory: Math.floor(Math.random() * 2000) + 500,
           bandwidth: Math.floor(Math.random() * 100) + 10,
-          storage: Math.floor(Math.random() * 5000) + 1000
+          storage: Math.floor(Math.random() * 5000) + 1000,
         },
         limits: this.getPlanLimits(plan),
-        features: this.getPlanFeatures(plan)
+        features: this.getPlanFeatures(plan),
       }
 
       this.tenants.set(tenant.tenantId, tenant)
@@ -704,28 +696,28 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           maxUsers: 10,
           maxStorage: 1000, // 1GB
           maxRequestsPerMinute: 100,
-          maxConnections: 10
+          maxConnections: 10,
         }
       case 'PROFESSIONAL':
         return {
           maxUsers: 100,
           maxStorage: 10000, // 10GB
           maxRequestsPerMinute: 1000,
-          maxConnections: 50
+          maxConnections: 50,
         }
       case 'ENTERPRISE':
         return {
           maxUsers: 1000,
           maxStorage: 100000, // 100GB
           maxRequestsPerMinute: 10000,
-          maxConnections: 200
+          maxConnections: 200,
         }
       case 'CUSTOM':
         return {
           maxUsers: 10000,
           maxStorage: 1000000, // 1TB
           maxRequestsPerMinute: 100000,
-          maxConnections: 1000
+          maxConnections: 1000,
         }
     }
   }
@@ -739,7 +731,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           customDomains: false,
           whiteLabeling: false,
           sso: false,
-          auditLogs: false
+          auditLogs: false,
         }
       case 'PROFESSIONAL':
         return {
@@ -748,7 +740,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           customDomains: true,
           whiteLabeling: false,
           sso: false,
-          auditLogs: true
+          auditLogs: true,
         }
       case 'ENTERPRISE':
         return {
@@ -757,7 +749,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           customDomains: true,
           whiteLabeling: true,
           sso: true,
-          auditLogs: true
+          auditLogs: true,
         }
       case 'CUSTOM':
         return {
@@ -766,12 +758,12 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           customDomains: true,
           whiteLabeling: true,
           sso: true,
-          auditLogs: true
+          auditLogs: true,
         }
     }
   }
 
-  private collectTenantMetrics(tenantId: string): Partial<TenantMetrics> {
+  private collectTenantMetrics(_tenantId: string): Partial<TenantMetrics> {
     // Simulate real-time metrics with some variation
     return {
       requestsPerMinute: Math.floor(Math.random() * 200) + 50,
@@ -782,9 +774,9 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
         cpu: Math.floor(Math.random() * 30) + 30,
         memory: Math.floor(Math.random() * 500) + 500,
         bandwidth: Math.floor(Math.random() * 50) + 10,
-        storage: Math.floor(Math.random() * 1000) + 1000
+        storage: Math.floor(Math.random() * 1000) + 1000,
       },
-      lastActive: new Date()
+      lastActive: new Date(),
     }
   }
 
@@ -795,7 +787,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
         tenantId: tenant.tenantId,
         type: 'CPU_HIGH',
         value: tenant.resources.cpu,
-        threshold: 90
+        threshold: 90,
       })
     }
 
@@ -805,7 +797,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
         tenantId: tenant.tenantId,
         type: 'MEMORY_HIGH',
         value: tenant.resources.memory,
-        threshold: tenant.limits.maxStorage * 0.9
+        threshold: tenant.limits.maxStorage * 0.9,
       })
     }
 
@@ -815,17 +807,19 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
         tenantId: tenant.tenantId,
         type: 'REQUEST_RATE_HIGH',
         value: tenant.requestsPerMinute,
-        threshold: tenant.limits.maxRequestsPerMinute * 0.8
+        threshold: tenant.limits.maxRequestsPerMinute * 0.8,
       })
     }
   }
 
   private updateTenantTier(tenant: TenantMetrics): void {
     const hoursInactive = (Date.now() - tenant.lastActive.getTime()) / (1000 * 60 * 60)
-    
-    if (hoursInactive > 168) { // 1 week
+
+    if (hoursInactive > 168) {
+      // 1 week
       tenant.tier = 'COLD'
-    } else if (hoursInactive > 24) { // 1 day
+    } else if (hoursInactive > 24) {
+      // 1 day
       tenant.tier = 'WARM'
     } else {
       tenant.tier = 'HOT'
@@ -838,7 +832,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
         cpu: pool.total.cpu - pool.allocated.cpu,
         memory: pool.total.memory - pool.allocated.memory,
         storage: pool.total.storage - pool.allocated.storage,
-        bandwidth: pool.total.bandwidth - pool.allocated.bandwidth
+        bandwidth: pool.total.bandwidth - pool.allocated.bandwidth,
       }
 
       // Update health status
@@ -859,7 +853,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
   }
 
   private shouldRebalanceShards(): boolean {
-    const loads = this.shardingStrategy.shards.map(s => s.currentLoad / s.capacity)
+    const loads = this.shardingStrategy.shards.map((s) => s.currentLoad / s.capacity)
     const maxLoad = Math.max(...loads)
     const minLoad = Math.min(...loads)
     const imbalance = ((maxLoad - minLoad) / maxLoad) * 100
@@ -867,7 +861,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
     return imbalance > this.shardingStrategy.rebalancing.threshold
   }
 
-  private generateShardRecommendation(shard: typeof this.shardingStrategy.shards[0]): string {
+  private generateShardRecommendation(shard: (typeof this.shardingStrategy.shards)[0]): string {
     const loadPercent = (shard.currentLoad / shard.capacity) * 100
 
     if (loadPercent > 85) {
@@ -890,11 +884,11 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
     complexity: 'LOW' | 'MEDIUM' | 'HIGH'
   }> {
     const plan = []
-    const overloadedShards = this.shardingStrategy.shards.filter(s => 
-      (s.currentLoad / s.capacity) > 0.8
+    const overloadedShards = this.shardingStrategy.shards.filter(
+      (s) => s.currentLoad / s.capacity > 0.8
     )
-    const underloadedShards = this.shardingStrategy.shards.filter(s => 
-      (s.currentLoad / s.capacity) < 0.4
+    const underloadedShards = this.shardingStrategy.shards.filter(
+      (s) => s.currentLoad / s.capacity < 0.4
     )
 
     // Simulate tenant migrations from overloaded to underloaded shards
@@ -907,7 +901,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           toShard: targetShard.id,
           reason: 'Load balancing - redistribute from overloaded shard',
           estimatedDowntime: 300, // 5 minutes
-          complexity: 'MEDIUM' as const
+          complexity: 'MEDIUM' as const,
         })
       }
     }
@@ -915,11 +909,13 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
     return plan
   }
 
-  private estimatePerformanceImpact(rebalancingPlan: ReturnType<typeof this.generateRebalancingPlan>) {
+  private estimatePerformanceImpact(
+    rebalancingPlan: ReturnType<typeof this.generateRebalancingPlan>
+  ) {
     return {
       queryLatencyImprovement: rebalancingPlan.length * 15, // 15% per migration
       throughputIncrease: rebalancingPlan.length * 10, // 10% per migration
-      resourceEfficiency: rebalancingPlan.length * 8 // 8% per migration
+      resourceEfficiency: rebalancingPlan.length * 8, // 8% per migration
     }
   }
 
@@ -942,7 +938,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           resourceType: 'CPU' as const,
           currentCapacity: pool.total.cpu,
           projectedNeed: pool.total.cpu * 1.5,
-          urgency: cpuUtilization > 90 ? 'HIGH' as const : 'MEDIUM' as const
+          urgency: cpuUtilization > 90 ? ('HIGH' as const) : ('MEDIUM' as const),
         })
       }
 
@@ -952,7 +948,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
           resourceType: 'MEMORY' as const,
           currentCapacity: pool.total.memory,
           projectedNeed: pool.total.memory * 1.3,
-          urgency: memoryUtilization > 90 ? 'HIGH' as const : 'MEDIUM' as const
+          urgency: memoryUtilization > 90 ? ('HIGH' as const) : ('MEDIUM' as const),
         })
       }
     }
@@ -961,13 +957,15 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
   }
 
   private getTotalPoolCapacity(resourceType: keyof ResourcePool['total']): number {
-    return Array.from(this.resourcePools.values())
-      .reduce((total, pool) => total + pool.total[resourceType], 0)
+    return Array.from(this.resourcePools.values()).reduce(
+      (total, pool) => total + pool.total[resourceType],
+      0
+    )
   }
 
   private calculateCostChange(tenant: TenantMetrics, action: string): number {
     const baseHourlyCost = this.calculateTenantHourlyCost(tenant)
-    
+
     switch (action) {
       case 'SCALE_UP':
         return baseHourlyCost * 0.5 // 50% cost increase
@@ -985,32 +983,29 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
     if (!pool) return 50 // Fallback cost
 
     return (
-      (tenant.resources.cpu * pool.cost.cpuPerHour) +
-      (tenant.resources.memory / 1024 * pool.cost.memoryPerGBHour) +
-      (tenant.resources.bandwidth * pool.cost.bandwidthPerGB)
+      tenant.resources.cpu * pool.cost.cpuPerHour +
+      (tenant.resources.memory / 1024) * pool.cost.memoryPerGBHour +
+      tenant.resources.bandwidth * pool.cost.bandwidthPerGB
     )
   }
 
-  private calculateNewResources(
-    tenant: TenantMetrics, 
-    action: string
-  ): TenantMetrics['resources'] {
+  private calculateNewResources(tenant: TenantMetrics, action: string): TenantMetrics['resources'] {
     const current = tenant.resources
-    
+
     switch (action) {
       case 'SCALE_UP':
         return {
           cpu: Math.min(current.cpu * 1.5, 100),
           memory: current.memory * 1.3,
           bandwidth: current.bandwidth * 1.2,
-          storage: current.storage
+          storage: current.storage,
         }
       case 'SCALE_DOWN':
         return {
           cpu: Math.max(current.cpu * 0.7, 10),
           memory: Math.max(current.memory * 0.8, 256),
           bandwidth: Math.max(current.bandwidth * 0.8, 5),
-          storage: current.storage
+          storage: current.storage,
         }
       default:
         return current
@@ -1049,7 +1044,7 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
    */
   getScalingEvents(tenantId?: string): ScalingEvent[] {
     if (tenantId) {
-      return this.scalingEvents.filter(event => event.tenantId === tenantId)
+      return this.scalingEvents.filter((event) => event.tenantId === tenantId)
     }
     return this.scalingEvents
   }
@@ -1073,7 +1068,6 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
    */
   setAutoScaling(enabled: boolean): void {
     this.autoScalingEnabled = enabled
-    console.log(`Auto-scaling ${enabled ? 'enabled' : 'disabled'}`)
   }
 
   /**
@@ -1081,13 +1075,12 @@ export class MultiTenantScalabilityOrchestrator extends EventEmitter {
    */
   async cleanup(): Promise<void> {
     this.isMonitoring = false
-    
+
     if (this.monitoringInterval) {
       clearInterval(this.monitoringInterval)
     }
 
     this.removeAllListeners()
-    console.log('✅ Multi-Tenant Scalability Orchestrator cleanup completed')
   }
 }
 

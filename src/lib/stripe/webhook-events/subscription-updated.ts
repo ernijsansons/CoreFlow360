@@ -8,15 +8,10 @@ import { moduleManager } from '@/services/subscription/module-manager'
 import { publishModuleEvent } from '@/services/events/subscription-aware-event-bus'
 import { extractTenantId } from '../webhook-signature'
 
-
-
 export async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   try {
-    console.log(`🔄 Subscription updated: ${subscription.id}`)
-    
     const tenantId = extractTenantId({ data: { object: subscription } } as Stripe.Event)
     if (!tenantId) {
-      console.error('No tenant ID in subscription metadata')
       return
     }
 
@@ -38,68 +33,71 @@ export async function handleSubscriptionUpdated(subscription: Stripe.Subscriptio
     if (subscription.status === 'canceled') {
       await createCancellationBillingEvent(subscription, tenantId)
     }
-
-    console.log(`✅ Subscription ${subscription.id} updated for tenant ${tenantId}`)
-
-  } catch (error) {
-    console.error('Error handling subscription update:', error)
-  }
+  } catch (error) {}
 }
 
 async function updateTenantStatus(subscription: Stripe.Subscription) {
   await prisma.tenant.updateMany({
-    where: { 
-      stripeSubscriptionId: subscription.id
+    where: {
+      stripeSubscriptionId: subscription.id,
     },
     data: {
-      subscriptionStatus: subscription.status === 'active' ? 'ACTIVE' : 
-                         subscription.status === 'canceled' ? 'CANCELLED' : 'PENDING'
-    }
+      subscriptionStatus:
+        subscription.status === 'active'
+          ? 'ACTIVE'
+          : subscription.status === 'canceled'
+            ? 'CANCELLED'
+            : 'PENDING',
+    },
   })
 }
 
 async function updateLegacySubscription(subscription: Stripe.Subscription) {
   await prisma.legacyTenantSubscription.updateMany({
-    where: { 
-      stripeSubscriptionId: subscription.id
+    where: {
+      stripeSubscriptionId: subscription.id,
     },
     data: {
-      status: subscription.status === 'active' ? 'active' : 
-              subscription.status === 'canceled' ? 'cancelled' : 'pending',
+      status:
+        subscription.status === 'active'
+          ? 'active'
+          : subscription.status === 'canceled'
+            ? 'cancelled'
+            : 'pending',
       currentPeriodStart: new Date(subscription.current_period_start * 1000),
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
       nextBillingDate: new Date(subscription.current_period_end * 1000),
-      updatedAt: new Date()
-    }
+      updatedAt: new Date(),
+    },
   })
 }
 
-async function handleCancellation(subscription: Stripe.Subscription, tenantId: string) {
+async function handleCancellation(_subscription: Stripe.Subscription, _tenantId: string) {
   // Deactivate all modules
   const legacySubscription = await prisma.legacyTenantSubscription.findFirst({
-    where: { stripeSubscriptionId: subscription.id }
+    where: { stripeSubscriptionId: subscription.id },
   })
-  
+
   if (legacySubscription) {
     const activeModules = JSON.parse(legacySubscription.activeModules)
     for (const moduleKey of Object.keys(activeModules)) {
       await moduleManager.deactivateModule(legacySubscription.tenantId, moduleKey)
     }
-    
+
     // Update bundle subscriptions
     await prisma.tenantBundleSubscription.updateMany({
-      where: { 
+      where: {
         tenantId: legacySubscription.tenantId,
-        externalServiceId: subscription.id
+        externalServiceId: subscription.id,
       },
       data: {
         status: 'cancelled',
         endDate: new Date(),
         deactivatedAt: new Date(),
-        cancellationReason: 'stripe_cancellation'
-      }
+        cancellationReason: 'stripe_cancellation',
+      },
     })
-    
+
     // Publish cancellation event
     await publishModuleEvent(
       'subscription',
@@ -112,7 +110,7 @@ async function handleCancellation(subscription: Stripe.Subscription, tenantId: s
 
 async function logUpdateEvent(subscription: Stripe.Subscription) {
   const legacySubscription = await prisma.legacyTenantSubscription.findFirst({
-    where: { stripeSubscriptionId: subscription.id }
+    where: { stripeSubscriptionId: subscription.id },
   })
 
   if (legacySubscription) {
@@ -124,10 +122,10 @@ async function logUpdateEvent(subscription: Stripe.Subscription) {
           subscription_id: subscription.id,
           status: subscription.status,
           current_period_start: subscription.current_period_start,
-          current_period_end: subscription.current_period_end
+          current_period_end: subscription.current_period_end,
         }),
-        effectiveDate: new Date()
-      }
+        effectiveDate: new Date(),
+      },
     })
   }
 }
@@ -146,8 +144,8 @@ async function createCancellationBillingEvent(subscription: Stripe.Subscription,
       paymentStatus: 'cancelled',
       metadata: JSON.stringify({
         cancellation_reason: subscription.cancellation_details?.reason,
-        cancelled_at: subscription.canceled_at
-      })
-    }
+        cancelled_at: subscription.canceled_at,
+      }),
+    },
   })
 }

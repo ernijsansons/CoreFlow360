@@ -35,7 +35,7 @@ export default function VoiceNoteRecorder({
   customerId,
   leadId,
   onNoteSaved,
-  className = ''
+  className = '',
 }: VoiceNoteRecorderProps) {
   // State management
   const [isRecording, setIsRecording] = useState(false)
@@ -46,7 +46,9 @@ export default function VoiceNoteRecorder({
   const [duration, setDuration] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [micPermission, setMicPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt')
-  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
+  const [connectionStatus, setConnectionStatus] = useState<
+    'disconnected' | 'connecting' | 'connected'
+  >('disconnected')
   const [audioLevel, setAudioLevel] = useState(0)
 
   // Refs
@@ -72,7 +74,7 @@ export default function VoiceNoteRecorder({
   useEffect(() => {
     if (isRecording && !isPaused) {
       timerRef.current = setInterval(() => {
-        setDuration(prev => prev + 1)
+        setDuration((prev) => prev + 1)
       }, 1000)
     } else {
       if (timerRef.current) {
@@ -93,13 +95,11 @@ export default function VoiceNoteRecorder({
     try {
       const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
       setMicPermission(result.state as 'granted' | 'denied' | 'prompt')
-      
+
       result.addEventListener('change', () => {
         setMicPermission(result.state as 'granted' | 'denied' | 'prompt')
       })
-    } catch (err) {
-      console.error('Error checking microphone permission:', err)
-    }
+    } catch (err) {}
   }
 
   /**
@@ -111,8 +111,9 @@ export default function VoiceNoteRecorder({
     }
 
     setConnectionStatus('connecting')
-    
-    const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL || 'wss://api.deepgram.com'}/v1/listen?` + 
+
+    const wsUrl =
+      `${process.env.NEXT_PUBLIC_WS_URL || 'wss://api.deepgram.com'}/v1/listen?` +
       new URLSearchParams({
         encoding: 'linear16',
         sample_rate: '16000',
@@ -122,17 +123,16 @@ export default function VoiceNoteRecorder({
         punctuate: 'true',
         interim_results: 'true',
         endpointing: '300',
-        vad_events: 'true'
+        vad_events: 'true',
       }).toString()
 
     const ws = new WebSocket(wsUrl, {
       headers: {
-        'Authorization': `Token ${process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY}`
-      }
+        Authorization: `Token ${process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY}`,
+      },
     })
 
     ws.onopen = () => {
-      console.log('🔗 WebSocket connected to Deepgram')
       setConnectionStatus('connected')
       setError(null)
     }
@@ -140,22 +140,22 @@ export default function VoiceNoteRecorder({
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data)
-        
+
         if (data.type === 'Results') {
           const result = data.channel.alternatives[0]
-          
+
           if (result.transcript) {
             const segment: TranscriptionSegment = {
               text: result.transcript,
               confidence: result.confidence || 0,
               isFinal: data.is_final || false,
-              timestamp: Date.now()
+              timestamp: Date.now(),
             }
 
             if (data.is_final) {
               // Final transcript - add to main transcript
               transcriptSegmentsRef.current.push(segment)
-              setTranscript(prev => prev ? `${prev} ${result.transcript}` : result.transcript)
+              setTranscript((prev) => (prev ? `${prev} ${result.transcript}` : result.transcript))
               setInterimTranscript('')
             } else {
               // Interim result - show as preview
@@ -163,22 +163,18 @@ export default function VoiceNoteRecorder({
             }
           }
         }
-      } catch (err) {
-        console.error('Error parsing WebSocket message:', err)
-      }
+      } catch (err) {}
     }
 
     ws.onerror = (event) => {
-      console.error('WebSocket error:', event)
       setError('Connection error - retrying...')
       setConnectionStatus('disconnected')
       scheduleReconnect()
     }
 
     ws.onclose = () => {
-      console.log('WebSocket closed')
       setConnectionStatus('disconnected')
-      
+
       if (isRecording) {
         scheduleReconnect()
       }
@@ -197,7 +193,6 @@ export default function VoiceNoteRecorder({
 
     reconnectTimeoutRef.current = setTimeout(() => {
       if (isRecording) {
-        console.log('Attempting to reconnect WebSocket...')
         initializeWebSocket()
       }
     }, 3000)
@@ -209,7 +204,7 @@ export default function VoiceNoteRecorder({
   const startRecording = async () => {
     try {
       setError(null)
-      
+
       // Request microphone access
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -217,18 +212,19 @@ export default function VoiceNoteRecorder({
           channelCount: 1,
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
-        }
+          autoGainControl: true,
+        },
       })
 
       streamRef.current = stream
       setMicPermission('granted')
 
       // Initialize audio context for visualization
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+      audioContextRef.current = new (window.AudioContext ||
+        (window as unknown).webkitAudioContext)()
       analyserRef.current = audioContextRef.current.createAnalyser()
       analyserRef.current.fftSize = 256
-      
+
       const source = audioContextRef.current.createMediaStreamSource(stream)
       source.connect(analyserRef.current)
 
@@ -242,16 +238,16 @@ export default function VoiceNoteRecorder({
       const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg'
       mediaRecorderRef.current = new MediaRecorder(stream, {
         mimeType,
-        audioBitsPerSecond: 128000
+        audioBitsPerSecond: 128000,
       })
 
       mediaRecorderRef.current.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data)
-          
+
           // Send audio data to WebSocket if connected
           if (websocketRef.current?.readyState === WebSocket.OPEN) {
-            event.data.arrayBuffer().then(buffer => {
+            event.data.arrayBuffer().then((buffer) => {
               const int16Array = convertFloat32ToInt16(new Float32Array(buffer))
               websocketRef.current?.send(int16Array)
             })
@@ -260,7 +256,6 @@ export default function VoiceNoteRecorder({
       }
 
       mediaRecorderRef.current.onerror = (event) => {
-        console.error('MediaRecorder error:', event)
         setError('Recording error occurred')
         stopRecording()
       }
@@ -273,10 +268,7 @@ export default function VoiceNoteRecorder({
       setInterimTranscript('')
       audioChunksRef.current = []
       transcriptSegmentsRef.current = []
-
-    } catch (err: any) {
-      console.error('Error starting recording:', err)
-      
+    } catch (err: unknown) {
       if (err.name === 'NotAllowedError') {
         setError('Microphone access denied. Please enable microphone permissions.')
         setMicPermission('denied')
@@ -312,7 +304,7 @@ export default function VoiceNoteRecorder({
 
       // Stop audio stream
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop())
+        streamRef.current.getTracks().forEach((track) => track.stop())
         streamRef.current = null
       }
 
@@ -329,9 +321,7 @@ export default function VoiceNoteRecorder({
         setError('No audio recorded or transcribed')
         setIsProcessing(false)
       }
-
     } catch (err) {
-      console.error('Error stopping recording:', err)
       setError('Failed to save recording')
       setIsProcessing(false)
     }
@@ -359,7 +349,7 @@ export default function VoiceNoteRecorder({
     if (!analyserRef.current) return
 
     const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount)
-    
+
     const checkLevel = () => {
       if (!isRecording || !analyserRef.current) return
 
@@ -380,7 +370,7 @@ export default function VoiceNoteRecorder({
     const int16 = new Int16Array(buffer.length)
     for (let i = 0; i < buffer.length; i++) {
       const s = Math.max(-1, Math.min(1, buffer[i]))
-      int16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF
+      int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff
     }
     return int16
   }
@@ -391,16 +381,18 @@ export default function VoiceNoteRecorder({
   const saveVoiceNote = async () => {
     try {
       const finalTranscript = transcript + (interimTranscript ? ` ${interimTranscript}` : '')
-      
+
       // Create audio blob
-      const audioBlob = new Blob(audioChunksRef.current, { 
-        type: mediaRecorderRef.current?.mimeType || 'audio/webm' 
+      const audioBlob = new Blob(audioChunksRef.current, {
+        type: mediaRecorderRef.current?.mimeType || 'audio/webm',
       })
 
       // Calculate average confidence
-      const avgConfidence = transcriptSegmentsRef.current.length > 0
-        ? transcriptSegmentsRef.current.reduce((sum, seg) => sum + seg.confidence, 0) / transcriptSegmentsRef.current.length
-        : 0.8
+      const avgConfidence =
+        transcriptSegmentsRef.current.length > 0
+          ? transcriptSegmentsRef.current.reduce((sum, seg) => sum + seg.confidence, 0) /
+            transcriptSegmentsRef.current.length
+          : 0.8
 
       // Prepare form data
       const formData = new FormData()
@@ -408,14 +400,14 @@ export default function VoiceNoteRecorder({
       formData.append('transcript', finalTranscript)
       formData.append('duration', duration.toString())
       formData.append('confidence', avgConfidence.toString())
-      
+
       if (customerId) formData.append('customerId', customerId)
       if (leadId) formData.append('leadId', leadId)
 
       // Save to database
       const response = await fetch('/api/voice-notes', {
         method: 'POST',
-        body: formData
+        body: formData,
       })
 
       if (!response.ok) {
@@ -439,9 +431,7 @@ export default function VoiceNoteRecorder({
 
       // Show success message
       showSuccessNotification()
-
     } catch (err) {
-      console.error('Error saving voice note:', err)
       setError('Failed to save voice note')
       setIsProcessing(false)
     }
@@ -452,7 +442,6 @@ export default function VoiceNoteRecorder({
    */
   const showSuccessNotification = () => {
     // Implementation depends on your notification system
-    console.log('✅ Voice note saved successfully!')
   }
 
   /**
@@ -495,30 +484,34 @@ export default function VoiceNoteRecorder({
     <div className={`voice-note-recorder ${className}`}>
       {/* Error Display */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm" role="alert">
+        <div
+          className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+          role="alert"
+        >
           <span className="font-medium">Error:</span> {error}
         </div>
       )}
 
       {/* Permission Warning */}
       {micPermission === 'denied' && (
-        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm">
-          <span className="font-medium">Microphone access denied.</span> Please enable microphone permissions in your browser settings.
+        <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-700">
+          <span className="font-medium">Microphone access denied.</span> Please enable microphone
+          permissions in your browser settings.
         </div>
       )}
 
       {/* Main Recording Interface */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
         {/* Recording Controls */}
-        <div className="flex items-center justify-center mb-6">
+        <div className="mb-6 flex items-center justify-center">
           <div className="relative">
             {/* Audio Level Visualizer */}
             {isRecording && !isPaused && (
-              <div 
-                className="absolute inset-0 rounded-full bg-blue-500 animate-pulse"
+              <div
+                className="absolute inset-0 animate-pulse rounded-full bg-blue-500"
                 style={{
                   transform: `scale(${1 + audioLevel * 0.3})`,
-                  opacity: 0.3
+                  opacity: 0.3,
                 }}
               />
             )}
@@ -527,33 +520,36 @@ export default function VoiceNoteRecorder({
             <button
               onClick={isRecording ? stopRecording : startRecording}
               disabled={isProcessing || micPermission === 'denied'}
-              className={`
-                relative w-20 h-20 rounded-full flex items-center justify-center
-                transition-all duration-200 transform active:scale-95
-                ${isRecording 
-                  ? 'bg-red-500 hover:bg-red-600' 
-                  : 'bg-blue-500 hover:bg-blue-600'
-                }
-                ${isProcessing || micPermission === 'denied' 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : ''
-                }
-                focus:outline-none focus:ring-4 focus:ring-blue-300
-              `}
+              className={`relative flex h-20 w-20 transform items-center justify-center rounded-full transition-all duration-200 active:scale-95 ${
+                isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
+              } ${
+                isProcessing || micPermission === 'denied' ? 'cursor-not-allowed opacity-50' : ''
+              } focus:ring-4 focus:ring-blue-300 focus:outline-none`}
               aria-label={getRecordButtonLabel()}
               aria-pressed={isRecording}
             >
               {isProcessing ? (
-                <svg className="animate-spin h-8 w-8 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <svg className="h-8 w-8 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
               ) : isRecording ? (
-                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <rect x="6" y="6" width="8" height="8" rx="1" />
                 </svg>
               ) : (
-                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <circle cx="10" cy="10" r="6" />
                 </svg>
               )}
@@ -563,15 +559,15 @@ export default function VoiceNoteRecorder({
             {isRecording && !isProcessing && (
               <button
                 onClick={togglePause}
-                className="absolute -right-16 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                className="absolute top-1/2 -right-16 flex h-12 w-12 -translate-y-1/2 transform items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-none"
                 aria-label={isPaused ? 'Resume recording' : 'Pause recording'}
               >
                 {isPaused ? (
-                  <svg className="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="h-5 w-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M6 4v12l8-6z" />
                   </svg>
                 ) : (
-                  <svg className="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="h-5 w-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
                     <rect x="6" y="4" width="3" height="12" />
                     <rect x="11" y="4" width="3" height="12" />
                   </svg>
@@ -583,31 +579,23 @@ export default function VoiceNoteRecorder({
 
         {/* Duration Display */}
         {(isRecording || duration > 0) && (
-          <div className="text-center mb-4">
-            <span className="text-2xl font-mono text-gray-700" aria-live="polite">
+          <div className="mb-4 text-center">
+            <span className="font-mono text-2xl text-gray-700" aria-live="polite">
               {formatDuration(duration)}
             </span>
-            {isPaused && (
-              <span className="ml-2 text-sm text-gray-500">(Paused)</span>
-            )}
+            {isPaused && <span className="ml-2 text-sm text-gray-500">(Paused)</span>}
           </div>
         )}
 
         {/* Connection Status */}
         {isRecording && (
-          <div className="flex items-center justify-center mb-4">
-            <div className={`
-              flex items-center text-sm
-              ${connectionStatus === 'connected' ? 'text-green-600' : ''}
-              ${connectionStatus === 'connecting' ? 'text-yellow-600' : ''}
-              ${connectionStatus === 'disconnected' ? 'text-red-600' : ''}
-            `}>
-              <div className={`
-                w-2 h-2 rounded-full mr-2
-                ${connectionStatus === 'connected' ? 'bg-green-600' : ''}
-                ${connectionStatus === 'connecting' ? 'bg-yellow-600 animate-pulse' : ''}
-                ${connectionStatus === 'disconnected' ? 'bg-red-600' : ''}
-              `} />
+          <div className="mb-4 flex items-center justify-center">
+            <div
+              className={`flex items-center text-sm ${connectionStatus === 'connected' ? 'text-green-600' : ''} ${connectionStatus === 'connecting' ? 'text-yellow-600' : ''} ${connectionStatus === 'disconnected' ? 'text-red-600' : ''} `}
+            >
+              <div
+                className={`mr-2 h-2 w-2 rounded-full ${connectionStatus === 'connected' ? 'bg-green-600' : ''} ${connectionStatus === 'connecting' ? 'animate-pulse bg-yellow-600' : ''} ${connectionStatus === 'disconnected' ? 'bg-red-600' : ''} `}
+              />
               {connectionStatus === 'connected' && 'Connected'}
               {connectionStatus === 'connecting' && 'Connecting...'}
               {connectionStatus === 'disconnected' && 'Disconnected'}
@@ -618,15 +606,13 @@ export default function VoiceNoteRecorder({
         {/* Transcription Display */}
         {(transcript || interimTranscript || isRecording) && (
           <div className="mt-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">
-              Transcription
-            </h3>
-            <div 
-              className="bg-gray-50 rounded-lg p-4 min-h-[100px] max-h-[200px] overflow-y-auto"
+            <h3 className="mb-2 text-sm font-medium text-gray-700">Transcription</h3>
+            <div
+              className="max-h-[200px] min-h-[100px] overflow-y-auto rounded-lg bg-gray-50 p-4"
               aria-live="polite"
               aria-label="Voice note transcription"
             >
-              <p className="text-gray-800 whitespace-pre-wrap">
+              <p className="whitespace-pre-wrap text-gray-800">
                 {transcript}
                 {interimTranscript && (
                   <span className="text-gray-500 italic"> {interimTranscript}</span>
@@ -642,18 +628,17 @@ export default function VoiceNoteRecorder({
         {/* Mobile Instructions */}
         <div className="mt-4 text-center">
           <p className="text-xs text-gray-500">
-            {isRecording 
-              ? 'Speak clearly into your microphone' 
-              : 'Tap the button to start recording your voice note'
-            }
+            {isRecording
+              ? 'Speak clearly into your microphone'
+              : 'Tap the button to start recording your voice note'}
           </p>
         </div>
       </div>
 
       {/* Keyboard Shortcuts Info */}
       <div className="mt-4 text-center text-xs text-gray-400">
-        <kbd className="px-2 py-1 bg-gray-100 rounded">Space</kbd> to start/stop • 
-        <kbd className="px-2 py-1 bg-gray-100 rounded ml-2">P</kbd> to pause/resume
+        <kbd className="rounded bg-gray-100 px-2 py-1">Space</kbd> to start/stop •
+        <kbd className="ml-2 rounded bg-gray-100 px-2 py-1">P</kbd> to pause/resume
       </div>
 
       {/* Hidden Live Region for Screen Readers */}

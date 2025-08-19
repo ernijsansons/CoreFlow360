@@ -13,9 +13,13 @@ import { redis, aiCache, cacheKey } from '@/lib/redis'
 import { prisma } from '@/lib/db'
 
 // Mock implementations for services that aren't fully implemented yet
-const mockLangChainManager = { /* LangChain integration */ }
-const mockAIServiceManager = { /* AI services integration */ }
-const mockAuditLogger = { log: (msg: string, data?: any) => console.log('AUDIT:', msg, data) }
+const mockLangChainManager = {
+  /* LangChain integration */
+}
+const mockAIServiceManager = {
+  /* AI services integration */
+}
+const mockAuditLogger = { log: (msg: string, data?: unknown) => {} }
 const mockRedis = redis // Use real Redis instance
 
 // Initialize orchestrator (in production, this would be a singleton)
@@ -24,7 +28,7 @@ let orchestrator: SubscriptionAwareAIOrchestrator | null = null
 const OrchestrationRequestSchema = z.object({
   taskType: z.enum([
     'ANALYZE_CUSTOMER',
-    'PREDICT_CHURN', 
+    'PREDICT_CHURN',
     'RECOMMEND_ACTION',
     'OPTIMIZE_PRICING',
     'FORECAST_DEMAND',
@@ -32,19 +36,22 @@ const OrchestrationRequestSchema = z.object({
     'AUTOMATE_WORKFLOW',
     'CROSS_MODULE_SYNC',
     'COMPLIANCE_CHECK',
-    'PERFORMANCE_ANALYSIS'
+    'PERFORMANCE_ANALYSIS',
   ]),
   input: z.record(z.unknown()),
   context: z.record(z.unknown()).optional().default({}),
-  requirements: z.object({
-    maxExecutionTime: z.number().optional().default(30000),
-    accuracyThreshold: z.number().min(0).max(1).optional().default(0.8),
-    costBudget: z.number().positive().optional(),
-    explainability: z.boolean().optional().default(true),
-    realTime: z.boolean().optional().default(false),
-    crossModule: z.boolean().optional().default(true)
-  }).optional().default({}),
-  priority: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']).optional().default('MEDIUM')
+  requirements: z
+    .object({
+      maxExecutionTime: z.number().optional().default(30000),
+      accuracyThreshold: z.number().min(0).max(1).optional().default(0.8),
+      costBudget: z.number().positive().optional(),
+      explainability: z.boolean().optional().default(true),
+      realTime: z.boolean().optional().default(false),
+      crossModule: z.boolean().optional().default(true),
+    })
+    .optional()
+    .default({}),
+  priority: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']).optional().default('MEDIUM'),
 })
 
 async function getOrchestrator(): Promise<SubscriptionAwareAIOrchestrator> {
@@ -57,32 +64,26 @@ async function getOrchestrator(): Promise<SubscriptionAwareAIOrchestrator> {
       mockRedis
     )
   }
-  
+
   return orchestrator
 }
 
 const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
   const { request, user, tenantId } = context
-  
+
   const body = await request.json()
   const validatedData = OrchestrationRequestSchema.parse(body)
-  
-  const {
-    taskType,
-    input,
-    context: requestContext,
-    requirements,
-    priority
-  } = validatedData
+
+  const { taskType, input, context: requestContext, requirements, priority } = validatedData
 
   // Generate cache key for this request
   const requestHash = crypto
     .createHash('sha256')
     .update(JSON.stringify({ taskType, input, requirements, tenantId }))
     .digest('hex')
-  
+
   const aiCacheKey = cacheKey('orchestration', taskType, requestHash)
-  
+
   // Try to get from cache first (for non-real-time requests)
   if (!requirements?.realTime) {
     const cached = await aiCache.get(aiCacheKey, tenantId!)
@@ -90,14 +91,14 @@ const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
       return NextResponse.json({
         ...cached,
         cached: true,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })
     }
   }
 
   // Get orchestrator instance
   const aiOrchestrator = await getOrchestrator()
-  
+
   // Convert string enums to proper types
   const taskTypeEnum = TaskType[taskType as keyof typeof TaskType]
   const priorityEnum = TaskPriority[priority as keyof typeof TaskPriority]
@@ -111,10 +112,10 @@ const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
       ...requestContext,
       userId: user.id,
       userRole: user.role,
-      requestTimestamp: new Date().toISOString()
+      requestTimestamp: new Date().toISOString(),
     },
     requirements,
-    userId: user.id
+    userId: user.id,
   })
 
   const response = {
@@ -129,10 +130,10 @@ const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
       crossModuleInsights: result.crossModuleInsights,
       subscriptionLimitations: result.subscriptionLimitations,
       upgradeSuggestions: result.upgradeSuggestions,
-      executionMetadata: result.executionMetadata
+      executionMetadata: result.executionMetadata,
     },
     cached: false,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   }
 
   // Cache successful results (for 30 minutes)
@@ -148,21 +149,23 @@ const handleGET = async (context: ApiContext): Promise<NextResponse> => {
 
   // Cache key for tenant AI capabilities
   const capabilitiesCacheKey = cacheKey('ai-capabilities', tenantId!)
-  
+
   // Try to get from cache first (cached for 5 minutes)
   const cached = await redis.get(capabilitiesCacheKey, { tenantId: tenantId!, ttl: 300 })
   if (cached) {
     return NextResponse.json({
       ...cached,
       cached: true,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
   }
 
   // Get available agents and capabilities for tenant
   const aiOrchestrator = await getOrchestrator()
-  const subscriptionDetails = await (aiOrchestrator as any).getTenantSubscriptionDetails(tenantId)
-  const availableAgents = await (aiOrchestrator as any).getAvailableAgentsForSubscription(
+  const subscriptionDetails = await (aiOrchestrator as unknown).getTenantSubscriptionDetails(
+    tenantId
+  )
+  const availableAgents = await (aiOrchestrator as unknown).getAvailableAgentsForSubscription(
     subscriptionDetails.activeModules,
     subscriptionDetails.subscriptionTier
   )
@@ -172,34 +175,39 @@ const handleGET = async (context: ApiContext): Promise<NextResponse> => {
     subscription: {
       tier: subscriptionDetails.subscriptionTier,
       activeModules: subscriptionDetails.activeModules,
-      moduleCount: subscriptionDetails.activeModules.length
+      moduleCount: subscriptionDetails.activeModules.length,
     },
     aiCapabilities: {
-      availableAgents: availableAgents.map((agent: any) => ({
+      availableAgents: availableAgents.map((agent: unknown) => ({
         id: agent.id,
         name: agent.name,
         type: agent.type,
-        capabilities: agent.capabilities
+        capabilities: agent.capabilities,
       })),
-      crossModuleCapabilities: (aiOrchestrator as any).getCrossModuleCapabilities(
+      crossModuleCapabilities: (aiOrchestrator as unknown).getCrossModuleCapabilities(
         subscriptionDetails.activeModules,
         TaskType.ANALYZE_CUSTOMER
       ),
-      supportedTaskTypes: availableAgents.reduce((tasks: string[], agent: any) => {
+      _supportedTaskTypes: availableAgents.reduce((tasks: string[], _agent: unknown) => {
         // Add task types this agent can handle
         return tasks
-      }, [])
+      }, []),
     },
     limits: {
-      maxConcurrentTasks: availableAgents.reduce((sum: number, agent: any) => 
-        sum + agent.maxConcurrentTasks, 0),
-      estimatedCostPerOperation: availableAgents.length > 0 
-        ? availableAgents.reduce((sum: number, agent: any) => 
-            sum + agent.performanceTargets.costPerOperation, 0) / availableAgents.length
-        : 0
+      maxConcurrentTasks: availableAgents.reduce(
+        (sum: number, agent: unknown) => sum + agent.maxConcurrentTasks,
+        0
+      ),
+      estimatedCostPerOperation:
+        availableAgents.length > 0
+          ? availableAgents.reduce(
+              (sum: number, agent: unknown) => sum + agent.performanceTargets.costPerOperation,
+              0
+            ) / availableAgents.length
+          : 0,
     },
     cached: false,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   }
 
   // Cache the response

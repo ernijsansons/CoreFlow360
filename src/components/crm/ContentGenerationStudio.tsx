@@ -33,9 +33,14 @@ import {
   StarIcon,
   SwatchIcon,
   CpuChipIcon,
-  RocketLaunchIcon
+  RocketLaunchIcon,
 } from '@heroicons/react/24/outline'
-import { AccessibleButton, AccessibleInput, AccessibleSelect, AccessibleTextarea } from '@/components/accessibility/AccessibleComponents'
+import {
+  AccessibleButton,
+  AccessibleInput,
+  AccessibleSelect,
+  AccessibleTextarea,
+} from '@/components/accessibility/AccessibleComponents'
 
 interface ContentTemplate {
   id: string
@@ -89,14 +94,16 @@ interface BrandSettings {
 }
 
 export default function ContentGenerationStudio() {
-  const [activeTab, setActiveTab] = useState<'templates' | 'infographics' | 'proposals' | 'social' | 'brand'>('templates')
+  const [activeTab, setActiveTab] = useState<
+    'templates' | 'infographics' | 'proposals' | 'social' | 'brand'
+  >('templates')
   const [templates, setTemplates] = useState<ContentTemplate[]>([])
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>([])
   const [proposals, setProposals] = useState<ProposalProject[]>([])
   const [brandSettings, setBrandSettings] = useState<BrandSettings>({
     companyName: '',
     primaryColor: '#6366F1',
-    secondaryColor: '#8B5CF6'
+    secondaryColor: '#8B5CF6',
   })
   const [selectedTemplate, setSelectedTemplate] = useState<ContentTemplate | null>(null)
   const [showGenerateModal, setShowGenerateModal] = useState(false)
@@ -112,7 +119,7 @@ export default function ContentGenerationStudio() {
   const loadData = async () => {
     try {
       setLoading(true)
-      
+
       // Mock data - in real app, fetch from API
       const mockTemplates: ContentTemplate[] = [
         {
@@ -124,7 +131,7 @@ export default function ContentGenerationStudio() {
           popularity: 95,
           premium: false,
           industries: ['Technology', 'SaaS', 'Finance'],
-          useCases: ['Product Launch', 'Annual Report', 'Sales Pitch']
+          useCases: ['Product Launch', 'Annual Report', 'Sales Pitch'],
         },
         {
           id: 'inf-comparison',
@@ -135,7 +142,7 @@ export default function ContentGenerationStudio() {
           popularity: 88,
           premium: false,
           industries: ['All'],
-          useCases: ['Competitive Analysis', 'Product Comparison']
+          useCases: ['Competitive Analysis', 'Product Comparison'],
         },
         {
           id: 'social-linkedin',
@@ -146,7 +153,7 @@ export default function ContentGenerationStudio() {
           popularity: 92,
           premium: false,
           industries: ['B2B', 'Professional Services'],
-          useCases: ['Thought Leadership', 'Company Updates']
+          useCases: ['Thought Leadership', 'Company Updates'],
         },
         {
           id: 'prop-executive',
@@ -157,7 +164,7 @@ export default function ContentGenerationStudio() {
           popularity: 87,
           premium: true,
           industries: ['Enterprise', 'B2B'],
-          useCases: ['Enterprise Sales', 'C-Suite Presentations']
+          useCases: ['Enterprise Sales', 'C-Suite Presentations'],
         },
         {
           id: 'one-pager-saas',
@@ -168,8 +175,8 @@ export default function ContentGenerationStudio() {
           popularity: 90,
           premium: false,
           industries: ['SaaS', 'Technology'],
-          useCases: ['Sales Enablement', 'Trade Shows']
-        }
+          useCases: ['Sales Enablement', 'Trade Shows'],
+        },
       ]
 
       const mockGeneratedContent: GeneratedContent[] = [
@@ -181,18 +188,18 @@ export default function ContentGenerationStudio() {
           previewUrl: '/generated/q4-metrics-preview.png',
           assets: [
             { format: 'PNG', url: '/generated/q4-metrics.png', size: '1080x1920' },
-            { format: 'PDF', url: '/generated/q4-metrics.pdf', size: 'A4' }
+            { format: 'PDF', url: '/generated/q4-metrics.pdf', size: 'A4' },
           ],
           createdAt: '2024-08-08T10:00:00Z',
-          metrics: { views: 145, downloads: 23, shares: 8 }
+          metrics: { views: 145, downloads: 23, shares: 8 },
         },
         {
           id: 'gen-002',
           type: 'SOCIAL',
           title: 'Product Launch Announcement',
           status: 'GENERATING',
-          createdAt: '2024-08-09T14:30:00Z'
-        }
+          createdAt: '2024-08-09T14:30:00Z',
+        },
       ]
 
       const mockProposals: ProposalProject[] = [
@@ -205,7 +212,7 @@ export default function ContentGenerationStudio() {
           includesVideo: true,
           createdAt: '2024-08-07T09:00:00Z',
           documentUrl: '/proposals/techcorp-proposal.pdf',
-          videoUrl: '/proposals/techcorp-video.mp4'
+          videoUrl: '/proposals/techcorp-video.mp4',
         },
         {
           id: 'prop-002',
@@ -214,53 +221,59 @@ export default function ContentGenerationStudio() {
           value: 85000,
           products: ['CRM Pro'],
           includesVideo: false,
-          createdAt: '2024-08-09T11:00:00Z'
-        }
+          createdAt: '2024-08-09T11:00:00Z',
+        },
       ]
 
       setTemplates(mockTemplates)
       setGeneratedContent(mockGeneratedContent)
       setProposals(mockProposals)
     } catch (error) {
-      console.error('Failed to load data:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const filteredTemplates = templates.filter(template => {
+  const filteredTemplates = templates.filter((template) => {
     const matchesCategory = filterCategory === 'ALL' || template.category === filterCategory
-    const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         template.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesSearch =
+      template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.description.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
 
   const getCategoryIcon = (category: string) => {
-    const icons: Record<string, any> = {
-      'INFOGRAPHIC': PhotoIcon,
-      'PROPOSAL': DocumentTextIcon,
-      'SOCIAL': ShareIcon,
-      'ONE_PAGER': DocumentDuplicateIcon,
-      'PRESENTATION': PresentationChartLineIcon,
-      'VIDEO': FilmIcon
+    const icons: Record<string, unknown> = {
+      INFOGRAPHIC: PhotoIcon,
+      PROPOSAL: DocumentTextIcon,
+      SOCIAL: ShareIcon,
+      ONE_PAGER: DocumentDuplicateIcon,
+      PRESENTATION: PresentationChartLineIcon,
+      VIDEO: FilmIcon,
     }
     return icons[category] || DocumentTextIcon
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'READY': return 'bg-green-500/20 text-green-300 border-green-500/30'
-      case 'GENERATING': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
-      case 'DRAFT': return 'bg-gray-500/20 text-gray-300 border-gray-500/30'
-      case 'SENT': return 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-      case 'FAILED': return 'bg-red-500/20 text-red-300 border-red-500/30'
-      default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30'
+      case 'READY':
+        return 'bg-green-500/20 text-green-300 border-green-500/30'
+      case 'GENERATING':
+        return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
+      case 'DRAFT':
+        return 'bg-gray-500/20 text-gray-300 border-gray-500/30'
+      case 'SENT':
+        return 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+      case 'FAILED':
+        return 'bg-red-500/20 text-red-300 border-red-500/30'
+      default:
+        return 'bg-gray-500/20 text-gray-300 border-gray-500/30'
     }
   }
 
   const handleGenerateContent = async (template: ContentTemplate) => {
     setSelectedTemplate(template)
-    
+
     if (template.category === 'PROPOSAL') {
       setShowProposalModal(true)
     } else {
@@ -268,14 +281,14 @@ export default function ContentGenerationStudio() {
     }
   }
 
-  const handleCreateContent = async (data: any) => {
+  const handleCreateContent = async (data: unknown) => {
     try {
       const newContent: GeneratedContent = {
         id: `gen-${Date.now()}`,
         type: selectedTemplate?.category || 'INFOGRAPHIC',
         title: data.title,
         status: 'GENERATING',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       }
 
       setGeneratedContent([newContent, ...generatedContent])
@@ -283,28 +296,26 @@ export default function ContentGenerationStudio() {
 
       // Simulate generation
       setTimeout(() => {
-        setGeneratedContent(prev => prev.map(content => 
-          content.id === newContent.id
-            ? {
-                ...content,
-                status: 'READY',
-                previewUrl: '/generated/preview.png',
-                assets: [
-                  { format: 'PNG', url: '/generated/content.png', size: '1080x1920' }
-                ]
-              }
-            : content
-        ))
+        setGeneratedContent((prev) =>
+          prev.map((content) =>
+            content.id === newContent.id
+              ? {
+                  ...content,
+                  status: 'READY',
+                  previewUrl: '/generated/preview.png',
+                  assets: [{ format: 'PNG', url: '/generated/content.png', size: '1080x1920' }],
+                }
+              : content
+          )
+        )
       }, 5000)
-    } catch (error) {
-      console.error('Failed to generate content:', error)
-    }
+    } catch (error) {}
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-violet-600"></div>
       </div>
     )
   }
@@ -312,38 +323,38 @@ export default function ContentGenerationStudio() {
   return (
     <div className="space-y-6">
       {/* Header with Premium Badge */}
-      <div className="flex justify-between items-start">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Content Generation Studio</h1>
-          <p className="text-gray-400 mt-1">Create stunning marketing materials with AI</p>
+          <p className="mt-1 text-gray-400">Create stunning marketing materials with AI</p>
         </div>
         <div className="flex items-center space-x-3">
-          <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-lg px-4 py-2">
+          <div className="rounded-lg border border-purple-500/30 bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-4 py-2">
             <div className="flex items-center space-x-2">
-              <StarIcon className="w-5 h-5 text-purple-400" />
-              <span className="text-purple-300 font-medium">Visual Studio - $29/month</span>
+              <StarIcon className="h-5 w-5 text-purple-400" />
+              <span className="font-medium text-purple-300">Visual Studio - $29/month</span>
             </div>
           </div>
           <AccessibleButton className="bg-gradient-to-r from-purple-500 to-pink-600">
-            <RocketLaunchIcon className="w-4 h-4 mr-2" />
+            <RocketLaunchIcon className="mr-2 h-4 w-4" />
             Upgrade Now
           </AccessibleButton>
         </div>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid md:grid-cols-4 gap-4">
+      <div className="grid gap-4 md:grid-cols-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-900/60 border border-gray-800 rounded-xl p-4"
+          className="rounded-xl border border-gray-800 bg-gray-900/60 p-4"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-400">Templates Available</p>
               <p className="text-2xl font-bold text-white">500+</p>
             </div>
-            <DocumentDuplicateIcon className="w-8 h-8 text-purple-400" />
+            <DocumentDuplicateIcon className="h-8 w-8 text-purple-400" />
           </div>
         </motion.div>
 
@@ -351,14 +362,14 @@ export default function ContentGenerationStudio() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gray-900/60 border border-gray-800 rounded-xl p-4"
+          className="rounded-xl border border-gray-800 bg-gray-900/60 p-4"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-400">Content Generated</p>
               <p className="text-2xl font-bold text-white">{generatedContent.length}</p>
             </div>
-            <SparklesIcon className="w-8 h-8 text-green-400" />
+            <SparklesIcon className="h-8 w-8 text-green-400" />
           </div>
         </motion.div>
 
@@ -366,14 +377,14 @@ export default function ContentGenerationStudio() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-gray-900/60 border border-gray-800 rounded-xl p-4"
+          className="rounded-xl border border-gray-800 bg-gray-900/60 p-4"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-400">Active Proposals</p>
               <p className="text-2xl font-bold text-white">{proposals.length}</p>
             </div>
-            <DocumentTextIcon className="w-8 h-8 text-blue-400" />
+            <DocumentTextIcon className="h-8 w-8 text-blue-400" />
           </div>
         </motion.div>
 
@@ -381,7 +392,7 @@ export default function ContentGenerationStudio() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-gray-900/60 border border-gray-800 rounded-xl p-4"
+          className="rounded-xl border border-gray-800 bg-gray-900/60 p-4"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -390,7 +401,7 @@ export default function ContentGenerationStudio() {
                 {generatedContent.reduce((sum, c) => sum + (c.metrics?.downloads || 0), 0)}
               </p>
             </div>
-            <DownloadIcon className="w-8 h-8 text-orange-400" />
+            <DownloadIcon className="h-8 w-8 text-orange-400" />
           </div>
         </motion.div>
       </div>
@@ -403,20 +414,20 @@ export default function ContentGenerationStudio() {
             { id: 'infographics', name: 'Generated Content', icon: PhotoIcon },
             { id: 'proposals', name: 'Proposals', icon: DocumentTextIcon },
             { id: 'social', name: 'Social Media', icon: ShareIcon },
-            { id: 'brand', name: 'Brand Settings', icon: SwatchIcon }
+            { id: 'brand', name: 'Brand Settings', icon: SwatchIcon },
           ].map((tab) => {
             const Icon = tab.icon
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
+                onClick={() => setActiveTab(tab.id as unknown)}
+                className={`flex items-center border-b-2 px-1 py-2 text-sm font-medium ${
                   activeTab === tab.id
                     ? 'border-purple-500 text-purple-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'
+                    : 'border-transparent text-gray-400 hover:border-gray-600 hover:text-gray-300'
                 }`}
               >
-                <Icon className="w-4 h-4 mr-2" />
+                <Icon className="mr-2 h-4 w-4" />
                 {tab.name}
               </button>
             )
@@ -444,7 +455,7 @@ export default function ContentGenerationStudio() {
                     { value: 'INFOGRAPHIC', label: 'Infographics' },
                     { value: 'PROPOSAL', label: 'Proposals' },
                     { value: 'SOCIAL', label: 'Social Media' },
-                    { value: 'ONE_PAGER', label: 'One-Pagers' }
+                    { value: 'ONE_PAGER', label: 'One-Pagers' },
                   ]}
                 />
                 <AccessibleInput
@@ -455,39 +466,39 @@ export default function ContentGenerationStudio() {
                 />
               </div>
               <AccessibleButton variant="secondary">
-                <AdjustmentsHorizontalIcon className="w-4 h-4 mr-2" />
+                <AdjustmentsHorizontalIcon className="mr-2 h-4 w-4" />
                 Filters
               </AccessibleButton>
             </div>
 
             {/* Template Grid */}
-            <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
               {filteredTemplates.map((template, index) => {
                 const CategoryIcon = getCategoryIcon(template.category)
-                
+
                 return (
                   <motion.div
                     key={template.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="bg-gray-900/60 border border-gray-800 rounded-xl overflow-hidden hover:border-purple-500/50 transition-colors cursor-pointer"
+                    className="cursor-pointer overflow-hidden rounded-xl border border-gray-800 bg-gray-900/60 transition-colors hover:border-purple-500/50"
                     onClick={() => handleGenerateContent(template)}
                   >
-                    <div className="aspect-[4/3] bg-gray-800 relative">
+                    <div className="relative aspect-[4/3] bg-gray-800">
                       {template.thumbnailUrl ? (
                         <img
                           src={template.thumbnailUrl}
                           alt={template.name}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <CategoryIcon className="w-16 h-16 text-gray-600" />
+                        <div className="flex h-full items-center justify-center">
+                          <CategoryIcon className="h-16 w-16 text-gray-600" />
                         </div>
                       )}
                       {template.premium && (
-                        <div className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs px-2 py-1 rounded">
+                        <div className="absolute top-2 right-2 rounded bg-gradient-to-r from-amber-500 to-orange-500 px-2 py-1 text-xs text-white">
                           PREMIUM
                         </div>
                       )}
@@ -495,26 +506,26 @@ export default function ContentGenerationStudio() {
                         {[...Array(5)].map((_, i) => (
                           <StarIcon
                             key={i}
-                            className={`w-3 h-3 ${
+                            className={`h-3 w-3 ${
                               i < Math.round(template.popularity / 20)
-                                ? 'text-yellow-400 fill-current'
+                                ? 'fill-current text-yellow-400'
                                 : 'text-gray-600'
                             }`}
                           />
                         ))}
                       </div>
                     </div>
-                    
+
                     <div className="p-4">
-                      <h3 className="font-semibold text-white mb-1">{template.name}</h3>
-                      <p className="text-sm text-gray-400 mb-3">{template.description}</p>
-                      
+                      <h3 className="mb-1 font-semibold text-white">{template.name}</h3>
+                      <p className="mb-3 text-sm text-gray-400">{template.description}</p>
+
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-purple-400 capitalize">
                           {template.category.replace('_', ' ').toLowerCase()}
                         </span>
                         <AccessibleButton size="sm" variant="ghost">
-                          <SparklesIcon className="w-4 h-4 mr-1" />
+                          <SparklesIcon className="mr-1 h-4 w-4" />
                           Use
                         </AccessibleButton>
                       </div>
@@ -535,65 +546,70 @@ export default function ContentGenerationStudio() {
           >
             {generatedContent.map((content, index) => {
               const CategoryIcon = getCategoryIcon(content.type)
-              
+
               return (
                 <motion.div
                   key={content.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-gray-900/60 border border-gray-800 rounded-xl p-6"
+                  className="rounded-xl border border-gray-800 bg-gray-900/60 p-6"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4">
-                      <div className="w-20 h-20 bg-gray-800 rounded-lg flex items-center justify-center">
+                      <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-gray-800">
                         {content.previewUrl ? (
                           <img
                             src={content.previewUrl}
                             alt={content.title}
-                            className="w-full h-full object-cover rounded-lg"
+                            className="h-full w-full rounded-lg object-cover"
                           />
                         ) : content.status === 'GENERATING' ? (
-                          <ArrowPathIcon className="w-8 h-8 text-purple-400 animate-spin" />
+                          <ArrowPathIcon className="h-8 w-8 animate-spin text-purple-400" />
                         ) : (
-                          <CategoryIcon className="w-8 h-8 text-gray-600" />
+                          <CategoryIcon className="h-8 w-8 text-gray-600" />
                         )}
                       </div>
-                      
+
                       <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
+                        <div className="mb-2 flex items-center space-x-3">
                           <h3 className="text-lg font-semibold text-white">{content.title}</h3>
-                          <span className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(content.status)}`}>
+                          <span
+                            className={`rounded border px-2 py-1 text-xs font-medium ${getStatusColor(content.status)}`}
+                          >
                             {content.status}
                           </span>
                         </div>
-                        
-                        <div className="flex items-center space-x-4 text-sm text-gray-400 mb-3">
+
+                        <div className="mb-3 flex items-center space-x-4 text-sm text-gray-400">
                           <span className="capitalize">{content.type.toLowerCase()}</span>
                           <span>Created {new Date(content.createdAt).toLocaleDateString()}</span>
                         </div>
-                        
+
                         {content.metrics && (
                           <div className="flex items-center space-x-6 text-sm">
                             <span className="text-gray-300">
-                              <EyeIcon className="w-4 h-4 inline mr-1" />
+                              <EyeIcon className="mr-1 inline h-4 w-4" />
                               {content.metrics.views} views
                             </span>
                             <span className="text-gray-300">
-                              <DownloadIcon className="w-4 h-4 inline mr-1" />
+                              <DownloadIcon className="mr-1 inline h-4 w-4" />
                               {content.metrics.downloads} downloads
                             </span>
                             <span className="text-gray-300">
-                              <ShareIcon className="w-4 h-4 inline mr-1" />
+                              <ShareIcon className="mr-1 inline h-4 w-4" />
                               {content.metrics.shares} shares
                             </span>
                           </div>
                         )}
-                        
+
                         {content.assets && content.assets.length > 0 && (
                           <div className="mt-3 flex items-center space-x-2">
                             {content.assets.map((asset, i) => (
-                              <span key={i} className="bg-gray-800 text-gray-300 px-2 py-1 rounded text-xs">
+                              <span
+                                key={i}
+                                className="rounded bg-gray-800 px-2 py-1 text-xs text-gray-300"
+                              >
                                 {asset.format} • {asset.size}
                               </span>
                             ))}
@@ -601,21 +617,21 @@ export default function ContentGenerationStudio() {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       {content.status === 'READY' && (
                         <>
                           <AccessibleButton variant="ghost" size="sm">
-                            <EyeIcon className="w-4 h-4" />
+                            <EyeIcon className="h-4 w-4" />
                           </AccessibleButton>
                           <AccessibleButton variant="ghost" size="sm">
-                            <PencilIcon className="w-4 h-4" />
+                            <PencilIcon className="h-4 w-4" />
                           </AccessibleButton>
                           <AccessibleButton variant="ghost" size="sm">
-                            <ShareIcon className="w-4 h-4" />
+                            <ShareIcon className="h-4 w-4" />
                           </AccessibleButton>
                           <AccessibleButton variant="ghost" size="sm">
-                            <DownloadIcon className="w-4 h-4" />
+                            <DownloadIcon className="h-4 w-4" />
                           </AccessibleButton>
                         </>
                       )}
@@ -634,37 +650,39 @@ export default function ContentGenerationStudio() {
             exit={{ opacity: 0, y: -20 }}
             className="space-y-4"
           >
-            <div className="flex justify-end mb-4">
+            <div className="mb-4 flex justify-end">
               <AccessibleButton onClick={() => setShowProposalModal(true)}>
-                <PlusIcon className="w-4 h-4 mr-2" />
+                <PlusIcon className="mr-2 h-4 w-4" />
                 New Proposal
               </AccessibleButton>
             </div>
-            
+
             {proposals.map((proposal, index) => (
               <motion.div
                 key={proposal.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-gray-900/60 border border-gray-800 rounded-xl p-6"
+                className="rounded-xl border border-gray-800 bg-gray-900/60 p-6"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
+                    <div className="mb-2 flex items-center space-x-3">
                       <h3 className="text-lg font-semibold text-white">{proposal.clientName}</h3>
-                      <span className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(proposal.status)}`}>
+                      <span
+                        className={`rounded border px-2 py-1 text-xs font-medium ${getStatusColor(proposal.status)}`}
+                      >
                         {proposal.status}
                       </span>
                       {proposal.includesVideo && (
-                        <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-1 rounded text-xs">
-                          <FilmIcon className="w-3 h-3 inline mr-1" />
+                        <span className="rounded border border-purple-500/30 bg-purple-500/20 px-2 py-1 text-xs text-purple-300">
+                          <FilmIcon className="mr-1 inline h-3 w-3" />
                           VIDEO
                         </span>
                       )}
                     </div>
-                    
-                    <div className="grid md:grid-cols-3 gap-4 mb-4">
+
+                    <div className="mb-4 grid gap-4 md:grid-cols-3">
                       <div>
                         <p className="text-sm text-gray-400">Deal Value</p>
                         <p className="text-xl font-semibold text-green-400">
@@ -677,10 +695,12 @@ export default function ContentGenerationStudio() {
                       </div>
                       <div>
                         <p className="text-sm text-gray-400">Created</p>
-                        <p className="text-white">{new Date(proposal.createdAt).toLocaleDateString()}</p>
+                        <p className="text-white">
+                          {new Date(proposal.createdAt).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
-                    
+
                     {proposal.status === 'READY' && (
                       <div className="flex items-center space-x-4">
                         {proposal.documentUrl && (
@@ -688,7 +708,7 @@ export default function ContentGenerationStudio() {
                             href={proposal.documentUrl}
                             className="text-sm text-blue-400 hover:text-blue-300"
                           >
-                            <DocumentTextIcon className="w-4 h-4 inline mr-1" />
+                            <DocumentTextIcon className="mr-1 inline h-4 w-4" />
                             View Proposal
                           </a>
                         )}
@@ -697,26 +717,24 @@ export default function ContentGenerationStudio() {
                             href={proposal.videoUrl}
                             className="text-sm text-purple-400 hover:text-purple-300"
                           >
-                            <FilmIcon className="w-4 h-4 inline mr-1" />
+                            <FilmIcon className="mr-1 inline h-4 w-4" />
                             Watch Video
                           </a>
                         )}
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     {proposal.status === 'READY' && (
                       <>
                         <AccessibleButton variant="ghost" size="sm">
-                          <EyeIcon className="w-4 h-4" />
+                          <EyeIcon className="h-4 w-4" />
                         </AccessibleButton>
                         <AccessibleButton variant="ghost" size="sm">
-                          <ShareIcon className="w-4 h-4" />
+                          <ShareIcon className="h-4 w-4" />
                         </AccessibleButton>
-                        <AccessibleButton size="sm">
-                          Send to Client
-                        </AccessibleButton>
+                        <AccessibleButton size="sm">Send to Client</AccessibleButton>
                       </>
                     )}
                   </div>
@@ -733,58 +751,70 @@ export default function ContentGenerationStudio() {
             exit={{ opacity: 0, y: -20 }}
             className="max-w-2xl"
           >
-            <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-6">Brand Settings</h2>
-              
+            <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-6">
+              <h2 className="mb-6 text-xl font-semibold text-white">Brand Settings</h2>
+
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Company Name</label>
+                  <label className="mb-2 block text-sm font-medium text-white">Company Name</label>
                   <AccessibleInput
                     value={brandSettings.companyName}
-                    onChange={(value) => setBrandSettings({...brandSettings, companyName: value})}
+                    onChange={(value) => setBrandSettings({ ...brandSettings, companyName: value })}
                     placeholder="Enter your company name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Tagline</label>
+                  <label className="mb-2 block text-sm font-medium text-white">Tagline</label>
                   <AccessibleInput
                     value={brandSettings.tagline || ''}
-                    onChange={(value) => setBrandSettings({...brandSettings, tagline: value})}
+                    onChange={(value) => setBrandSettings({ ...brandSettings, tagline: value })}
                     placeholder="Your company tagline"
                   />
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">Primary Color</label>
+                    <label className="mb-2 block text-sm font-medium text-white">
+                      Primary Color
+                    </label>
                     <div className="flex items-center space-x-2">
                       <input
                         type="color"
                         value={brandSettings.primaryColor}
-                        onChange={(e) => setBrandSettings({...brandSettings, primaryColor: e.target.value})}
-                        className="w-12 h-12 rounded border-2 border-gray-700"
+                        onChange={(e) =>
+                          setBrandSettings({ ...brandSettings, primaryColor: e.target.value })
+                        }
+                        className="h-12 w-12 rounded border-2 border-gray-700"
                       />
                       <AccessibleInput
                         value={brandSettings.primaryColor}
-                        onChange={(value) => setBrandSettings({...brandSettings, primaryColor: value})}
+                        onChange={(value) =>
+                          setBrandSettings({ ...brandSettings, primaryColor: value })
+                        }
                         placeholder="#6366F1"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">Secondary Color</label>
+                    <label className="mb-2 block text-sm font-medium text-white">
+                      Secondary Color
+                    </label>
                     <div className="flex items-center space-x-2">
                       <input
                         type="color"
                         value={brandSettings.secondaryColor}
-                        onChange={(e) => setBrandSettings({...brandSettings, secondaryColor: e.target.value})}
-                        className="w-12 h-12 rounded border-2 border-gray-700"
+                        onChange={(e) =>
+                          setBrandSettings({ ...brandSettings, secondaryColor: e.target.value })
+                        }
+                        className="h-12 w-12 rounded border-2 border-gray-700"
                       />
                       <AccessibleInput
                         value={brandSettings.secondaryColor}
-                        onChange={(value) => setBrandSettings({...brandSettings, secondaryColor: value})}
+                        onChange={(value) =>
+                          setBrandSettings({ ...brandSettings, secondaryColor: value })
+                        }
                         placeholder="#8B5CF6"
                       />
                     </div>
@@ -792,10 +822,10 @@ export default function ContentGenerationStudio() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Logo</label>
-                  <div className="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center">
-                    <PhotoIcon className="w-8 h-8 text-gray-500 mx-auto mb-2" />
-                    <p className="text-sm text-gray-400 mb-2">Upload your company logo</p>
+                  <label className="mb-2 block text-sm font-medium text-white">Logo</label>
+                  <div className="rounded-lg border-2 border-dashed border-gray-700 p-6 text-center">
+                    <PhotoIcon className="mx-auto mb-2 h-8 w-8 text-gray-500" />
+                    <p className="mb-2 text-sm text-gray-400">Upload your company logo</p>
                     <AccessibleButton variant="secondary" size="sm">
                       Choose File
                     </AccessibleButton>
@@ -803,12 +833,8 @@ export default function ContentGenerationStudio() {
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">
-                  <AccessibleButton variant="secondary">
-                    Reset
-                  </AccessibleButton>
-                  <AccessibleButton>
-                    Save Brand Settings
-                  </AccessibleButton>
+                  <AccessibleButton variant="secondary">Reset</AccessibleButton>
+                  <AccessibleButton>Save Brand Settings</AccessibleButton>
                 </div>
               </div>
             </div>
@@ -823,73 +849,70 @@ export default function ContentGenerationStudio() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
             onClick={() => setShowGenerateModal(false)}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-2xl"
+              className="w-full max-w-2xl rounded-2xl border border-gray-700 bg-gray-900 p-6"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">
-                  Generate {selectedTemplate.name}
-                </h2>
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white">Generate {selectedTemplate.name}</h2>
                 <button
                   onClick={() => setShowGenerateModal(false)}
                   className="text-gray-400 hover:text-white"
                 >
-                  <XMarkIcon className="w-6 h-6" />
+                  <XMarkIcon className="h-6 w-6" />
                 </button>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Title</label>
-                  <AccessibleInput
-                    placeholder="Enter content title"
-                  />
+                  <label className="mb-2 block text-sm font-medium text-white">Title</label>
+                  <AccessibleInput placeholder="Enter content title" />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Key Points</label>
-                  <AccessibleTextarea
-                    placeholder="Enter key points, one per line"
-                    rows={4}
-                  />
+                  <label className="mb-2 block text-sm font-medium text-white">Key Points</label>
+                  <AccessibleTextarea placeholder="Enter key points, one per line" rows={4} />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Target Audience</label>
+                  <label className="mb-2 block text-sm font-medium text-white">
+                    Target Audience
+                  </label>
                   <AccessibleSelect
                     options={[
                       { value: 'executives', label: 'C-Suite Executives' },
                       { value: 'managers', label: 'Department Managers' },
                       { value: 'technical', label: 'Technical Teams' },
-                      { value: 'general', label: 'General Business' }
+                      { value: 'general', label: 'General Business' },
                     ]}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Visual Style</label>
+                  <label className="mb-2 block text-sm font-medium text-white">Visual Style</label>
                   <div className="grid grid-cols-3 gap-2">
-                    {['Modern', 'Corporate', 'Playful', 'Minimal', 'Bold', 'Elegant'].map((style) => (
-                      <button
-                        key={style}
-                        className="p-2 text-sm border border-gray-700 rounded-lg hover:border-purple-500 hover:bg-purple-500/10 text-gray-300 hover:text-white transition-colors"
-                      >
-                        {style}
-                      </button>
-                    ))}
+                    {['Modern', 'Corporate', 'Playful', 'Minimal', 'Bold', 'Elegant'].map(
+                      (style) => (
+                        <button
+                          key={style}
+                          className="rounded-lg border border-gray-700 p-2 text-sm text-gray-300 transition-colors hover:border-purple-500 hover:bg-purple-500/10 hover:text-white"
+                        >
+                          {style}
+                        </button>
+                      )
+                    )}
                   </div>
                 </div>
 
-                <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CpuChipIcon className="w-5 h-5 text-purple-400" />
+                <div className="rounded-lg border border-purple-500/30 bg-purple-900/20 p-4">
+                  <div className="mb-2 flex items-center gap-2">
+                    <CpuChipIcon className="h-5 w-5 text-purple-400" />
                     <span className="font-medium text-purple-300">AI Enhancement</span>
                   </div>
                   <p className="text-sm text-purple-200">
@@ -898,16 +921,11 @@ export default function ContentGenerationStudio() {
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">
-                  <AccessibleButton
-                    variant="secondary"
-                    onClick={() => setShowGenerateModal(false)}
-                  >
+                  <AccessibleButton variant="secondary" onClick={() => setShowGenerateModal(false)}>
                     Cancel
                   </AccessibleButton>
-                  <AccessibleButton
-                    onClick={() => handleCreateContent({ title: 'New Content' })}
-                  >
-                    <SparklesIcon className="w-4 h-4 mr-2" />
+                  <AccessibleButton onClick={() => handleCreateContent({ title: 'New Content' })}>
+                    <SparklesIcon className="mr-2 h-4 w-4" />
                     Generate Content
                   </AccessibleButton>
                 </div>

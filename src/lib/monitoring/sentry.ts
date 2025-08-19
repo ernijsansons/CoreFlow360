@@ -24,13 +24,13 @@ const sentryConfig = {
         return null
       }
     }
-    
+
     // Sanitize sensitive data
     if (event.request?.data) {
       const sanitized = sanitizeData(event.request.data)
       event.request.data = sanitized
     }
-    
+
     return event
   },
   beforeSendTransaction: (event: Sentry.TransactionEvent) => {
@@ -38,9 +38,9 @@ const sentryConfig = {
     if (event.transaction?.includes('/api/health')) {
       return Math.random() < 0.01 ? event : null // 1% sampling
     }
-    
+
     return event
-  }
+  },
 }
 
 /**
@@ -48,38 +48,45 @@ const sentryConfig = {
  */
 export function initSentry() {
   if (!process.env.SENTRY_DSN) {
-    console.warn('⚠️ Sentry DSN not configured, error tracking disabled')
     return
   }
-  
+
   Sentry.init(sentryConfig)
-  console.log('✅ Sentry initialized')
 }
 
 /**
  * Sanitize sensitive data from error reports
  */
-function sanitizeData(data: any): any {
+function sanitizeData(data: unknown): unknown {
   if (!data || typeof data !== 'object') {
     return data
   }
-  
+
   const sensitiveFields = [
-    'password', 'token', 'secret', 'key', 'auth',
-    'authorization', 'cookie', 'session', 'csrf',
-    'credit_card', 'ssn', 'social_security'
+    'password',
+    'token',
+    'secret',
+    'key',
+    'auth',
+    'authorization',
+    'cookie',
+    'session',
+    'csrf',
+    'credit_card',
+    'ssn',
+    'social_security',
   ]
-  
+
   const sanitized = { ...data }
-  
+
   for (const key in sanitized) {
-    if (sensitiveFields.some(field => key.toLowerCase().includes(field))) {
+    if (sensitiveFields.some((field) => key.toLowerCase().includes(field))) {
       sanitized[key] = '[Redacted]'
     } else if (typeof sanitized[key] === 'object') {
       sanitized[key] = sanitizeData(sanitized[key])
     }
   }
-  
+
   return sanitized
 }
 
@@ -97,7 +104,7 @@ export const errorTracker = {
       tenant?: string
       level?: Sentry.SeverityLevel
       tags?: Record<string, string>
-      extra?: Record<string, any>
+      extra?: Record<string, unknown>
     }
   ) {
     Sentry.withScope((scope) => {
@@ -105,35 +112,35 @@ export const errorTracker = {
         scope.setUser({
           id: context.user.id,
           email: context.user.email,
-          username: context.user.name
+          username: context.user.name,
         })
       }
-      
+
       if (context?.tenant) {
         scope.setTag('tenant', context.tenant)
       }
-      
+
       if (context?.level) {
         scope.setLevel(context.level)
       }
-      
+
       if (context?.tags) {
         Object.entries(context.tags).forEach(([key, value]) => {
           scope.setTag(key, value)
         })
       }
-      
+
       if (context?.extra) {
         Object.entries(context.extra).forEach(([key, value]) => {
           scope.setExtra(key, value)
         })
       }
-      
+
       scope.setContext('runtime', {
         name: 'node',
-        version: process.version
+        version: process.version,
       })
-      
+
       if (typeof error === 'string') {
         Sentry.captureMessage(error, context?.level || 'error')
       } else {
@@ -141,7 +148,7 @@ export const errorTracker = {
       }
     })
   },
-  
+
   /**
    * Capture API error
    */
@@ -153,8 +160,8 @@ export const errorTracker = {
       userId?: string
       tenantId?: string
       statusCode?: number
-      requestBody?: any
-      queryParams?: any
+      requestBody?: unknown
+      queryParams?: unknown
     }
   ) {
     this.captureException(error, {
@@ -163,7 +170,7 @@ export const errorTracker = {
         component: 'api',
         endpoint: context.endpoint,
         method: context.method,
-        status_code: context.statusCode?.toString() || 'unknown'
+        status_code: context.statusCode?.toString() || 'unknown',
       },
       extra: {
         endpoint: context.endpoint,
@@ -172,11 +179,11 @@ export const errorTracker = {
         requestBody: sanitizeData(context.requestBody),
         queryParams: context.queryParams,
         userId: context.userId,
-        tenantId: context.tenantId
-      }
+        tenantId: context.tenantId,
+      },
     })
   },
-  
+
   /**
    * Capture database error
    */
@@ -195,18 +202,18 @@ export const errorTracker = {
       tags: {
         component: 'database',
         operation: context.operation,
-        model: context.model || 'unknown'
+        model: context.model || 'unknown',
       },
       extra: {
         operation: context.operation,
         model: context.model,
         query: context.query,
         userId: context.userId,
-        tenantId: context.tenantId
-      }
+        tenantId: context.tenantId,
+      },
     })
   },
-  
+
   /**
    * Capture queue job error
    */
@@ -216,7 +223,7 @@ export const errorTracker = {
       jobName: string
       queueName: string
       jobId?: string
-      data?: any
+      data?: unknown
       attempt?: number
     }
   ) {
@@ -225,18 +232,18 @@ export const errorTracker = {
       tags: {
         component: 'queue',
         queue: context.queueName,
-        job: context.jobName
+        job: context.jobName,
       },
       extra: {
         jobName: context.jobName,
         queueName: context.queueName,
         jobId: context.jobId,
         attempt: context.attempt,
-        jobData: sanitizeData(context.data)
-      }
+        jobData: sanitizeData(context.data),
+      },
     })
   },
-  
+
   /**
    * Capture business logic error
    */
@@ -247,7 +254,7 @@ export const errorTracker = {
       action: string
       userId?: string
       tenantId?: string
-      data?: any
+      data?: unknown
     }
   ) {
     this.captureException(error, {
@@ -255,17 +262,17 @@ export const errorTracker = {
       tags: {
         component: 'business_logic',
         feature: context.feature,
-        action: context.action
+        action: context.action,
       },
       extra: {
         feature: context.feature,
         action: context.action,
         userId: context.userId,
         tenantId: context.tenantId,
-        data: sanitizeData(context.data)
-      }
+        data: sanitizeData(context.data),
+      },
     })
-  }
+  },
 }
 
 /**
@@ -278,10 +285,10 @@ export const performanceTracker = {
   startTransaction(name: string, op?: string): Sentry.Transaction {
     return Sentry.startTransaction({
       name,
-      op: op || 'function'
+      op: op || 'function',
     })
   },
-  
+
   /**
    * Track API request
    */
@@ -295,18 +302,18 @@ export const performanceTracker = {
     }
   ): Promise<T> {
     const transaction = this.startTransaction(`${method} ${endpoint}`, 'http.request')
-    
+
     transaction.setData('endpoint', endpoint)
     transaction.setData('method', method)
-    
+
     if (context?.userId) {
       transaction.setData('userId', context.userId)
     }
-    
+
     if (context?.tenantId) {
       transaction.setData('tenantId', context.tenantId)
     }
-    
+
     try {
       const result = await fn()
       transaction.setStatus('ok')
@@ -318,20 +325,16 @@ export const performanceTracker = {
       transaction.finish()
     }
   },
-  
+
   /**
    * Track database query
    */
-  async trackDBQuery<T>(
-    operation: string,
-    model: string,
-    fn: () => Promise<T>
-  ): Promise<T> {
+  async trackDBQuery<T>(operation: string, model: string, fn: () => Promise<T>): Promise<T> {
     const transaction = this.startTransaction(`${model}.${operation}`, 'db.query')
-    
+
     transaction.setData('operation', operation)
     transaction.setData('model', model)
-    
+
     try {
       const result = await fn()
       transaction.setStatus('ok')
@@ -343,7 +346,7 @@ export const performanceTracker = {
       transaction.finish()
     }
   },
-  
+
   /**
    * Track AI operation
    */
@@ -353,10 +356,10 @@ export const performanceTracker = {
     fn: () => Promise<T>
   ): Promise<T> {
     const transaction = this.startTransaction(`ai.${operation}`, 'ai.inference')
-    
+
     transaction.setData('operation', operation)
     transaction.setData('agentType', agentType)
-    
+
     try {
       const result = await fn()
       transaction.setStatus('ok')
@@ -367,7 +370,7 @@ export const performanceTracker = {
     } finally {
       transaction.finish()
     }
-  }
+  },
 }
 
 /**
@@ -382,7 +385,7 @@ export const feedbackTracker = {
       Sentry.showReportDialog({ eventId })
     }
   },
-  
+
   /**
    * Capture user feedback
    */
@@ -398,9 +401,9 @@ export const feedbackTracker = {
       event_id: eventId || Sentry.lastEventId() || '',
       name: feedback.name,
       email: feedback.email,
-      comments: feedback.comments
+      comments: feedback.comments,
     })
-  }
+  },
 }
 
 /**
@@ -412,30 +415,30 @@ export const customIntegrations = {
    */
   QueueIntegration: class implements Sentry.Integration {
     name = 'QueueIntegration'
-    
+
     setupOnce() {
       // This would integrate with the queue system to automatically
       // track job performance and errors
     }
   },
-  
+
   /**
    * Database tracking integration
    */
   DatabaseIntegration: class implements Sentry.Integration {
     name = 'DatabaseIntegration'
-    
+
     setupOnce() {
       // This would integrate with Prisma to automatically
       // track query performance and errors
     }
-  }
+  },
 }
 
 /**
  * Error boundaries and wrappers
  */
-export function withSentry<T extends (...args: any[]) => any>(
+export function withSentry<T extends (...args: unknown[]) => unknown>(
   fn: T,
   context?: {
     component?: string
@@ -445,27 +448,27 @@ export function withSentry<T extends (...args: any[]) => any>(
   return ((...args: Parameters<T>): ReturnType<T> => {
     try {
       const result = fn(...args)
-      
+
       // Handle async functions
       if (result instanceof Promise) {
         return result.catch((error) => {
           errorTracker.captureException(error, {
             tags: {
               component: context?.component || 'unknown',
-              operation: context?.operation || 'unknown'
-            }
+              operation: context?.operation || 'unknown',
+            },
           })
           throw error
         }) as ReturnType<T>
       }
-      
+
       return result
     } catch (error) {
       errorTracker.captureException(error as Error, {
         tags: {
           component: context?.component || 'unknown',
-          operation: context?.operation || 'unknown'
-        }
+          operation: context?.operation || 'unknown',
+        },
       })
       throw error
     }
@@ -480,7 +483,7 @@ export function sentryErrorHandler() {
     shouldHandleError(error) {
       // Only capture 500+ errors
       return error.status >= 500
-    }
+    },
   })
 }
 

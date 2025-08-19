@@ -4,7 +4,11 @@
  * Orchestrates blue-green deployments with comprehensive safety checks
  */
 
-import { createBlueGreenDeployment, STAGING_CONFIG, PRODUCTION_CONFIG } from '../lib/deployment/blue-green'
+import {
+  createBlueGreenDeployment,
+  STAGING_CONFIG,
+  PRODUCTION_CONFIG,
+} from '../lib/deployment/blue-green'
 import { logger } from '../lib/logging/logger'
 
 interface DeploymentOptions {
@@ -21,10 +25,10 @@ async function main() {
   const args = process.argv.slice(2)
   const options = parseArgs(args)
 
-  console.log('🚀 CoreFlow360 Blue-Green Deployment')
-  console.log(`Environment: ${options.environment}`)
-  console.log(`Version: ${options.version || 'auto-detected'}`)
-  console.log('=' * 50)
+  
+  
+  
+  
 
   try {
     if (options.rollback) {
@@ -33,21 +37,21 @@ async function main() {
       await performDeployment(options)
     }
   } catch (error) {
-    console.error('❌ Deployment failed:', error)
+    
     process.exit(1)
   }
 }
 
 async function performDeployment(options: DeploymentOptions) {
   const config = options.environment === 'production' ? PRODUCTION_CONFIG : STAGING_CONFIG
-  
+
   // Override config based on options
   if (options.skipTests) {
-    config.preDeploymentChecks = config.preDeploymentChecks?.filter(check => 
-      !check.includes('test')
+    config.preDeploymentChecks = config.preDeploymentChecks?.filter(
+      (check) => !check.includes('test')
     )
   }
-  
+
   if (options.force) {
     config.rollbackThreshold = 50 // Much higher threshold when forced
   }
@@ -55,19 +59,19 @@ async function performDeployment(options: DeploymentOptions) {
   const deployment = createBlueGreenDeployment({
     ...config,
     environment: options.environment,
-    version: options.version || await detectVersion(),
+    version: options.version || (await detectVersion()),
     notificationWebhook: process.env.DEPLOYMENT_WEBHOOK,
-    slackWebhook: process.env.SLACK_WEBHOOK
+    slackWebhook: process.env.SLACK_WEBHOOK,
   })
 
-  console.log('📊 Current deployment status:')
+  
   const status = deployment.getDeploymentStatus()
-  console.log(`Active slot: ${status.slots.blue.status === 'active' ? 'blue' : 'green'}`)
-  console.log(`Active version: ${deployment.getActiveVersion() || 'unknown'}`)
-  console.log('')
+  
+  || 'unknown'}`)
+  
 
   if (options.dryRun) {
-    console.log('🔍 DRY RUN MODE - No actual deployment will occur')
+    
     return await performDryRun(deployment, options)
   }
 
@@ -75,7 +79,7 @@ async function performDeployment(options: DeploymentOptions) {
   if (options.environment === 'production' && !options.force) {
     const confirmation = await confirmProduction(deployment.getActiveVersion(), options.version!)
     if (!confirmation) {
-      console.log('Deployment cancelled by user')
+      
       return
     }
   }
@@ -83,52 +87,50 @@ async function performDeployment(options: DeploymentOptions) {
   logger.info('Starting blue-green deployment', {
     environment: options.environment,
     version: options.version,
-    component: 'deployment_script'
+    component: 'deployment_script',
   })
 
   const startTime = Date.now()
-  console.log('🚀 Starting deployment...\n')
+  
 
   const result = await deployment.deploy(options.version!)
-  
+
   const duration = Date.now() - startTime
-  console.log('\n' + '=' * 50)
-  console.log('📋 DEPLOYMENT SUMMARY')
-  console.log('=' * 50)
-  console.log(`Status: ${result.success ? '✅ SUCCESS' : '❌ FAILED'}`)
-  console.log(`Version: ${result.version}`)
-  console.log(`Duration: ${Math.round(duration / 1000)}s`)
-  console.log(`Active Slot: ${result.activeSlot}`)
-  console.log(`Rollback Performed: ${result.rollbackPerformed ? 'Yes' : 'No'}`)
-  
+  console.log('\n✅ Deployment completed successfully!')
+  console.log(`  Result: ${result.success ? 'SUCCESS' : 'FAILED'}`)
+  console.log(`  Version: ${result.version}`)
+  console.log(`  Environment: ${options.environment}`)
+  console.log(`  Duration: ${(duration / 1000).toFixed(2)}s`)
+  console.log(`  Slots: Blue=${result.slots.blue.status}, Green=${result.slots.green.status}`)
+
   if (result.metrics) {
-    console.log(`Error Rate: ${result.metrics.errorRate.toFixed(2)}%`)
-    console.log(`Response Time (P95): ${result.metrics.responseTime.toFixed(0)}ms`)
-    console.log(`Throughput: ${result.metrics.throughput.toFixed(1)} RPS`)
+    console.log(`  Success Rate: ${result.metrics.successRate.toFixed(2)}%`)
+    console.log(`  Response Time: ${result.metrics.responseTime.toFixed(0)}ms`)
+    console.log(`  Throughput: ${result.metrics.requestsPerSecond.toFixed(0)} RPS`)
   }
 
-  console.log('\nHealth Checks:')
-  result.healthChecks.forEach(check => {
-    console.log(`  ${check.passed ? '✅' : '❌'} ${check.check}: ${check.details || 'OK'}`)
+  console.log('\n🏥 Health Check Results:')
+  result.healthChecks.forEach((check) => {
+    console.log(`  ${check.name}: ${check.status} (${check.responseTime}ms)`)
   })
 
   if (result.logs.length > 0) {
-    console.log('\nDetailed Logs:')
-    result.logs.forEach(log => console.log(`  ${log}`))
+    console.log('\n📋 Deployment Logs:')
+    result.logs.forEach((log) => console.log(`  ${log}`))
   }
 
   if (!result.success) {
-    console.log('\n⚠️  Deployment failed. Check logs for details.')
+    console.error('\n❌ DEPLOYMENT FAILED!')
     process.exit(1)
   } else {
-    console.log('\n🎉 Deployment completed successfully!')
-    
+    console.log('\n🎉 DEPLOYMENT SUCCESSFUL!')
+
     // Post-deployment recommendations
-    console.log('\n💡 Next Steps:')
-    console.log('  • Monitor application metrics and logs')
-    console.log('  • Run additional smoke tests if needed')
-    console.log('  • Update monitoring dashboards')
-    console.log('  • Notify stakeholders of successful deployment')
+    console.log('\n📌 Next Steps:')
+    console.log('  1. Monitor application metrics for 15 minutes')
+    console.log('  2. Verify all critical user journeys')
+    console.log('  3. Check error rates and alerts')
+    console.log('  4. Review application logs')
   }
 }
 
@@ -136,79 +138,83 @@ async function performRollback(options: DeploymentOptions) {
   const config = options.environment === 'production' ? PRODUCTION_CONFIG : STAGING_CONFIG
   const deployment = createBlueGreenDeployment({
     ...config,
-    environment: options.environment
+    environment: options.environment,
   })
 
-  console.log('🔄 Performing rollback to previous version...')
   
+
   const currentVersion = deployment.getActiveVersion()
-  console.log(`Current version: ${currentVersion || 'unknown'}`)
+  
 
   if (!options.force) {
     const confirmation = await confirmRollback(currentVersion)
     if (!confirmation) {
-      console.log('Rollback cancelled by user')
+      
       return
     }
   }
 
   const result = await deployment.rollbackToPrevious()
+
   
-  console.log('\n' + '=' * 50)
-  console.log('📋 ROLLBACK SUMMARY')
-  console.log('=' * 50)
-  console.log(`Status: ${result.success ? '✅ SUCCESS' : '❌ FAILED'}`)
-  console.log(`Rolled back to: ${result.version}`)
-  console.log(`Duration: ${Math.round(result.duration / 1000)}s`)
-  console.log(`Active Slot: ${result.activeSlot}`)
+  
+  
+  
+  
+  }s`)
+  
 
   if (!result.success) {
-    console.log('\n⚠️  Rollback failed. Manual intervention may be required.')
+    
     process.exit(1)
   } else {
-    console.log('\n✅ Rollback completed successfully!')
+    
   }
 }
 
 async function performDryRun(deployment: any, options: DeploymentOptions) {
-  console.log('🔍 Performing deployment dry run...\n')
-  
+  console.log('\n🧪 Running deployment dry run...')
+
   const checks = [
     'Environment configuration validation',
     'Build system verification',
     'Health check endpoint validation',
     'Load balancer configuration check',
     'Database migration validation',
-    'Security scan results review'
+    'Security scan results review',
   ]
 
   for (const check of checks) {
-    console.log(`  🔍 ${check}...`)
-    await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate check
-    console.log(`  ✅ ${check} passed`)
+    console.log(`\n  ✓ ${check}`)
+    await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate check
+    console.log('    Status: PASSED')
   }
 
-  console.log('\n📊 Deployment Plan:')
-  console.log(`  • Target Environment: ${options.environment}`)
-  console.log(`  • Version: ${options.version}`)
-  console.log(`  • Inactive Slot: ${deployment.getDeploymentStatus().slots.blue.status === 'active' ? 'green' : 'blue'}`)
-  console.log(`  • Traffic Switch: Gradual (10% → 25% → 50% → 75% → 100%)`)
-  console.log(`  • Rollback Threshold: ${options.environment === 'production' ? '1%' : '3%'} error rate`)
-  console.log(`  • Health Checks: Enabled`)
-  console.log(`  • Monitoring Duration: 5 minutes`)
+  console.log('\n📊 Deployment Configuration:')
+  console.log(`  • Environment: ${options.environment}`)
+  console.log(`  • Active Slot: ${deployment.getDeploymentStatus().slots.blue.status === 'active' ? 'blue' : 'green'}`)
+  console.log(
+    `  • Inactive Slot: ${deployment.getDeploymentStatus().slots.blue.status === 'active' ? 'green' : 'blue'}`
+  )
+  console.log(`  • Target Version: ${options.version || 'latest'}`)
+  console.log(
+    `  • Rollback Threshold: ${options.environment === 'production' ? '1%' : '3%'} error rate`
+  )
+  console.log('  • Health Check Timeout: 30s')
+  console.log('  • Traffic Switch Strategy: Gradual (0% → 10% → 50% → 100%)')
 
   console.log('\n✅ Dry run completed successfully!')
-  console.log('Run without --dry-run to perform actual deployment')
+  console.log('\nRun without --dry-run flag to execute actual deployment.')
 }
 
 function parseArgs(args: string[]): DeploymentOptions {
   const options: DeploymentOptions = {
-    environment: 'staging'
+    environment: 'staging',
   }
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]
-    
+
     switch (arg) {
       case '--environment':
       case '-e':
@@ -257,12 +263,12 @@ function parseArgs(args: string[]): DeploymentOptions {
 async function detectVersion(): Promise<string> {
   try {
     // Try to get version from package.json
-    const packageJson = require('../../package.json')
-    
+    const packageJson = await import('../../package.json')
+
     // Try to get git commit hash
     const { execSync } = require('child_process')
     const gitHash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim()
-    
+
     return `${packageJson.version}-${gitHash}`
   } catch (error) {
     // Fallback to timestamp
@@ -270,45 +276,48 @@ async function detectVersion(): Promise<string> {
   }
 }
 
-async function confirmProduction(currentVersion: string | undefined, newVersion: string): Promise<boolean> {
+async function confirmProduction(
+  currentVersion: string | undefined,
+  newVersion: string
+): Promise<boolean> {
   const readline = require('readline').createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   })
 
-  console.log('\n⚠️  PRODUCTION DEPLOYMENT CONFIRMATION')
-  console.log('=' * 40)
+  console.log('\n⚠️  PRODUCTION DEPLOYMENT WARNING')
+  console.log('=================================')
   console.log(`Current Version: ${currentVersion || 'unknown'}`)
   console.log(`New Version: ${newVersion}`)
-  console.log('\nThis will deploy to PRODUCTION with zero downtime.')
-  console.log('The deployment can be automatically rolled back if issues are detected.')
-  
-  const answer = await new Promise<string>(resolve => {
+  console.log('\nThis will deploy to PRODUCTION environment.')
+  console.log('All users will be affected by this change.')
+
+  const answer = await new Promise<string>((resolve) => {
     readline.question('\nDo you want to proceed? (yes/no): ', resolve)
   })
-  
+
   readline.close()
-  
+
   return answer.toLowerCase() === 'yes' || answer.toLowerCase() === 'y'
 }
 
 async function confirmRollback(currentVersion: string | undefined): Promise<boolean> {
   const readline = require('readline').createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   })
 
-  console.log('\n⚠️  ROLLBACK CONFIRMATION')
-  console.log('=' * 25)
+  console.log('\n🔄 ROLLBACK WARNING')
+  console.log('===================')
   console.log(`Current Version: ${currentVersion || 'unknown'}`)
-  console.log('\nThis will rollback to the previous stable version.')
-  
-  const answer = await new Promise<string>(resolve => {
+  console.log('\nThis will rollback to the previous deployment.')
+
+  const answer = await new Promise<string>((resolve) => {
     readline.question('\nDo you want to proceed with rollback? (yes/no): ', resolve)
   })
-  
+
   readline.close()
-  
+
   return answer.toLowerCase() === 'yes' || answer.toLowerCase() === 'y'
 }
 

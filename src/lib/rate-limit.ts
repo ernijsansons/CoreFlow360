@@ -5,11 +5,11 @@
 
 import { LRUCache } from 'lru-cache'
 import { NextRequest } from 'next/server'
-import { 
-  enhancedRateLimiter, 
-  withEnhancedRateLimit, 
+import {
+  enhancedRateLimiter,
+  withEnhancedRateLimit,
   ENHANCED_RATE_LIMITS,
-  EnhancedRateLimitConfig 
+  EnhancedRateLimitConfig,
 } from './security/enhanced-rate-limit'
 
 export type RateLimitOptions = {
@@ -28,20 +28,20 @@ export type RateLimitResult = {
 export const RATE_LIMITS = {
   auth: {
     uniqueTokenPerInterval: 5,
-    interval: 15 * 60 * 1000 // 15 minutes
+    interval: 15 * 60 * 1000, // 15 minutes
   },
   api: {
     uniqueTokenPerInterval: 100,
-    interval: 60 * 1000 // 1 minute
+    interval: 60 * 1000, // 1 minute
   },
   public: {
     uniqueTokenPerInterval: 30,
-    interval: 60 * 1000 // 1 minute
+    interval: 60 * 1000, // 1 minute
   },
   upload: {
     uniqueTokenPerInterval: 10,
-    interval: 60 * 60 * 1000 // 1 hour
-  }
+    interval: 60 * 60 * 1000, // 1 hour
+  },
 } as const
 
 export function rateLimit(options?: RateLimitOptions) {
@@ -55,34 +55,32 @@ export function rateLimit(options?: RateLimitOptions) {
       const limit = options?.uniqueTokenPerInterval || 100
       const interval = options?.interval || 60 * 1000
       const now = Date.now()
-      
+
       // Get the token's request history
       const timestamps = tokenCache.get(token) || []
-      const validTimestamps = timestamps.filter(
-        timestamp => now - timestamp < interval
-      )
-      
+      const validTimestamps = timestamps.filter((timestamp) => now - timestamp < interval)
+
       // Check if limit exceeded
       if (validTimestamps.length >= limit) {
         return {
           success: false,
           limit,
           remaining: 0,
-          reset: Math.min(...validTimestamps) + interval
+          reset: Math.min(...validTimestamps) + interval,
         }
       }
-      
+
       // Add current request timestamp
       validTimestamps.push(now)
       tokenCache.set(token, validTimestamps)
-      
+
       return {
         success: true,
         limit,
         remaining: limit - validTimestamps.length,
-        reset: now + interval
+        reset: now + interval,
       }
-    }
+    },
   }
 }
 
@@ -94,12 +92,12 @@ export function getRateLimitKey(request: NextRequest, prefix: string = 'api'): s
     const tenantId = request.headers.get('x-tenant-id')
     return tenantId ? `${prefix}:${tenantId}:${userId}` : `${prefix}:user:${userId}`
   }
-  
+
   // Fall back to IP address
   const forwardedFor = request.headers.get('x-forwarded-for')
   const realIp = request.headers.get('x-real-ip')
   const ip = forwardedFor?.split(',')[0] || realIp || 'unknown'
-  
+
   return `${prefix}:ip:${ip}`
 }
 
@@ -118,7 +116,7 @@ export function rateLimitResponse(result: RateLimitResult) {
       'X-RateLimit-Remaining': result.remaining.toString(),
       'X-RateLimit-Reset': new Date(result.reset).toISOString(),
       'Retry-After': Math.ceil((result.reset - Date.now()) / 1000).toString(),
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     // @ts-ignore - Body is valid
     body: JSON.stringify({
@@ -126,8 +124,8 @@ export function rateLimitResponse(result: RateLimitResult) {
       message: 'Rate limit exceeded. Please try again later.',
       limit: result.limit,
       remaining: result.remaining,
-      reset: new Date(result.reset).toISOString()
-    })
+      reset: new Date(result.reset).toISOString(),
+    }),
   })
 }
 
@@ -145,31 +143,31 @@ export async function withRateLimit(
       limit: options?.uniqueTokenPerInterval || RATE_LIMITS.api.uniqueTokenPerInterval,
       window: options?.interval || RATE_LIMITS.api.interval,
     }
-    
+
     // Extract tenant context if available
     const tenantId = request.headers.get('x-tenant-id') || undefined
     const tenantTier = request.headers.get('x-tenant-tier') || undefined
-    
+
     return withEnhancedRateLimit(request, handler, enhancedConfig, {
       tenantId,
-      tenantTier
+      tenantTier,
     })
   }
-  
+
   // Fallback to local rate limiting
   const limiter = rateLimit(options || RATE_LIMITS.api)
   const key = getRateLimitKey(request)
   const result = await limiter.check(request, key)
-  
+
   if (!result.success) {
     return rateLimitResponse(result)
   }
-  
+
   // Add rate limit headers to successful responses
   const response = await handler()
   response.headers.set('X-RateLimit-Limit', result.limit.toString())
   response.headers.set('X-RateLimit-Remaining', result.remaining.toString())
   response.headers.set('X-RateLimit-Reset', new Date(result.reset).toISOString())
-  
+
   return response
 }

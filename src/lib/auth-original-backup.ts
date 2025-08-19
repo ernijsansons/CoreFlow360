@@ -1,35 +1,41 @@
-import NextAuth, { Session } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import GoogleProvider from "next-auth/providers/google"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import bcryptjs from "bcryptjs"
-import { z } from "zod"
+import NextAuth, { Session } from 'next-auth'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import GoogleProvider from 'next-auth/providers/google'
+import { PrismaAdapter } from '@auth/prisma-adapter'
+import bcryptjs from 'bcryptjs'
+import { z } from 'zod'
 
 // Lazy load prisma to prevent module-level database connections
 const getPrisma = () => {
   // Skip during build time
-  if (process.env.NEXT_PHASE === 'phase-production-build' || 
-      process.env.BUILDING_FOR_VERCEL === '1' ||
-      process.env.VERCEL || 
-      process.env.CI) {
+  if (
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.BUILDING_FOR_VERCEL === '1' ||
+    process.env.VERCEL ||
+    process.env.CI
+  ) {
     return null
   }
-  const { prisma } = require("./db")
+  const { prisma } = require('./db')
   return prisma
 }
 
 // Enhanced login schema with security validations
 const loginSchema = z.object({
-  email: z.string()
+  email: z
+    .string()
     .email('Invalid email format')
     .max(255, 'Email too long')
-    .transform(val => val.toLowerCase().trim()),
-  password: z.string()
+    .transform((val) => val.toLowerCase().trim()),
+  password: z
+    .string()
     .min(8, 'Password must be at least 8 characters')
     .max(128, 'Password too long')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
-           'Password must contain uppercase, lowercase, number, and special character'),
-  tenantId: z.string().uuid('Invalid tenant ID format').optional()
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      'Password must contain uppercase, lowercase, number, and special character'
+    ),
+  tenantId: z.string().uuid('Invalid tenant ID format').optional(),
 })
 
 // Extended session type
@@ -48,16 +54,19 @@ const authConfig = () => {
   const isProd = process.env.NODE_ENV === 'production'
   const authUrl = process.env.NEXTAUTH_URL
   const domain = isProd && authUrl ? authUrl.replace(/https?:\/\//, '') : undefined
-  
+
   // Check if we're in build time
-  const isBuildTime = process.env.VERCEL || process.env.BUILDING_FOR_VERCEL === '1' || 
-                      process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
-  
+  const isBuildTime =
+    process.env.VERCEL ||
+    process.env.BUILDING_FOR_VERCEL === '1' ||
+    process.env.CI ||
+    process.env.NEXT_PHASE === 'phase-production-build'
+
   return {
     // Only use PrismaAdapter at runtime, not during build
     ...(isBuildTime || !getPrisma() ? {} : { adapter: PrismaAdapter(getPrisma()) }),
-    session: { 
-      strategy: "jwt", // Changed from "database" to "jwt" for build compatibility
+    session: {
+      strategy: 'jwt', // Changed from "database" to "jwt" for build compatibility
       maxAge: 8 * 60 * 60, // 8 hours for security
       updateAge: 60 * 60, // Update session every hour
     },
@@ -69,8 +78,8 @@ const authConfig = () => {
           sameSite: 'strict',
           path: '/',
           secure: isProd,
-          domain: domain
-        }
+          domain: domain,
+        },
       },
       callbackUrl: {
         name: isProd ? `__Host-next-auth.callback-url` : 'next-auth.callback-url',
@@ -78,8 +87,8 @@ const authConfig = () => {
           httpOnly: true,
           sameSite: 'strict',
           path: '/',
-          secure: isProd
-        }
+          secure: isProd,
+        },
       },
       csrfToken: {
         name: isProd ? `__Host-next-auth.csrf-token` : 'next-auth.csrf-token',
@@ -87,101 +96,196 @@ const authConfig = () => {
           httpOnly: true,
           sameSite: 'strict',
           path: '/',
-          secure: isProd
-        }
-      }
-    },
-  pages: {
-    signIn: "/login",
-    signOut: "/logout",
-    error: "/auth/error",
-    verifyRequest: "/auth/verify-request",
-    newUser: "/onboarding"
-  },
-  providers: [
-    CredentialsProvider({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-        tenantId: { label: "Tenant ID", type: "text" }
+          secure: isProd,
+        },
       },
-      async authorize(credentials) {
-        try {
-          // Validate credentials
-          const { email, password, tenantId } = loginSchema.parse(credentials)
+    },
+    pages: {
+      signIn: '/login',
+      signOut: '/logout',
+      error: '/auth/error',
+      verifyRequest: '/auth/verify-request',
+      newUser: '/onboarding',
+    },
+    providers: [
+      CredentialsProvider({
+        name: 'credentials',
+        credentials: {
+          email: { label: 'Email', type: 'email' },
+          password: { label: 'Password', type: 'password' },
+          tenantId: { label: 'Tenant ID', type: 'text' },
+        },
+        async authorize(credentials) {
+          try {
+            // Validate credentials
+            const { email, password, tenantId } = loginSchema.parse(credentials)
 
-          // Find user with tenant
-          const prisma = getPrisma()
-          if (!prisma) return null
-          
-          const user = await prisma.user.findFirst({
-            where: {
-              email,
-              ...(tenantId && { tenantId })
-            },
-            include: {
-              tenant: true,
-              department: true
+            // Find user with tenant
+            const prisma = getPrisma()
+            if (!prisma) return null
+
+            const user = await prisma.user.findFirst({
+              where: {
+                email,
+                ...(tenantId && { tenantId }),
+              },
+              include: {
+                tenant: true,
+                department: true,
+              },
+            })
+
+            if (!user || !user.password) {
+              // Don't log sensitive information - use structured logging
+              return null
             }
-          })
 
-          if (!user || !user.password) {
-            // Don't log sensitive information - use structured logging
+            // Check if user is active
+            if (user.status !== 'ACTIVE') {
+              return null
+            }
+
+            // Check if tenant is active
+            if (!user.tenant || !user.tenant.isActive) {
+              return null
+            }
+
+            // Check if account is locked
+            if (user.lockoutUntil && user.lockoutUntil > new Date()) {
+              return null
+            }
+
+            // Verify password
+            const isPasswordValid = await bcryptjs.compare(password, user.password)
+            if (!isPasswordValid) {
+              // Increment login attempts
+              await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                  loginAttempts: { increment: 1 },
+                  ...(user.loginAttempts >= 4 && {
+                    lockoutUntil: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+                  }),
+                },
+              })
+              return null
+            }
+
+            // Reset login attempts and update last login
+            await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                loginAttempts: 0,
+                lockoutUntil: null,
+                lastLoginAt: new Date(),
+              },
+            })
+
+            // Return user data for session
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              image: user.avatar,
+              tenantId: user.tenantId,
+              role: user.role,
+              departmentId: user.departmentId,
+              permissions: (() => {
+                try {
+                  return JSON.parse(user.permissions || '[]')
+                } catch {
+                  return []
+                }
+              })(),
+            }
+          } catch (error) {
+            // Log error without sensitive data
+            if (process.env.NODE_ENV === 'development') {
+              console.error(
+                'Authorization error:',
+                error instanceof Error ? error.message : 'Unknown error'
+              )
+            }
             return null
           }
+        },
+      }),
+      ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+        ? [
+            GoogleProvider({
+              clientId: process.env.GOOGLE_CLIENT_ID,
+              clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+              authorization: {
+                params: {
+                  prompt: 'consent',
+                  access_type: 'offline',
+                  response_type: 'code',
+                },
+              },
+            }),
+          ]
+        : []),
+    ],
+    callbacks: {
+      async signIn({ user, account, profile, email, credentials }) {
+        // For OAuth providers, ensure user is associated with a tenant
+        if (account?.provider !== 'credentials') {
+          const prisma = getPrisma()
+          if (!prisma) return true // Allow during build
 
-          // Check if user is active
-          if (user.status !== 'ACTIVE') {
-            return null
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+            include: { tenant: true },
+          })
+
+          if (!existingUser) {
+            // For new OAuth users, redirect to tenant selection
+            return '/onboarding/select-tenant'
           }
 
           // Check if tenant is active
-          if (!user.tenant || !user.tenant.isActive) {
-            return null
+          if (!existingUser.tenant || !existingUser.tenant.isActive) {
+            return false
           }
 
-          // Check if account is locked
-          if (user.lockoutUntil && user.lockoutUntil > new Date()) {
-            return null
-          }
-
-          // Verify password
-          const isPasswordValid = await bcryptjs.compare(password, user.password)
-          if (!isPasswordValid) {
-            // Increment login attempts
-            await prisma.user.update({
-              where: { id: user.id },
-              data: { 
-                loginAttempts: { increment: 1 },
-                ...(user.loginAttempts >= 4 && {
-                  lockoutUntil: new Date(Date.now() + 30 * 60 * 1000) // 30 minutes
-                })
-              }
-            })
-            return null
-          }
-
-          // Reset login attempts and update last login
+          // Update last login
           await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              loginAttempts: 0,
-              lockoutUntil: null,
-              lastLoginAt: new Date()
-            }
+            where: { id: existingUser.id },
+            data: { lastLoginAt: new Date() },
+          })
+        }
+
+        return true
+      },
+      async jwt({ token, user, account, trigger, session }) {
+        // Initial sign in
+        if (user) {
+          token.id = user.id
+          token.tenantId = user.tenantId
+          token.role = user.role
+          token.departmentId = user.departmentId
+          token.permissions = user.permissions
+        }
+
+        // Update token if session is updated
+        if (trigger === 'update' && session) {
+          token = { ...token, ...session }
+        }
+
+        // Refresh tenant data periodically (every 5 minutes)
+        if (token.tenantId && token.iat && Date.now() - token.iat * 1000 > 5 * 60 * 1000) {
+          const prisma = getPrisma()
+          if (!prisma) return token
+
+          const user = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            include: { tenant: true },
           })
 
-          // Return user data for session
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            image: user.avatar,
-            tenantId: user.tenantId,
-            role: user.role,
-            departmentId: user.departmentId,
-            permissions: (() => {
+          if (user && user.tenant && user.tenant.isActive) {
+            token.tenantId = user.tenantId
+            token.role = user.role
+            token.permissions = (() => {
               try {
                 return JSON.parse(user.permissions || '[]')
               } catch {
@@ -189,164 +293,78 @@ const authConfig = () => {
               }
             })()
           }
-        } catch (error) {
-          // Log error without sensitive data
-          if (process.env.NODE_ENV === 'development') {
-            console.error('Authorization error:', error instanceof Error ? error.message : 'Unknown error')
-          }
-          return null
-        }
-      }
-    }),
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
-      GoogleProvider({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        authorization: {
-          params: {
-            prompt: 'consent',
-            access_type: 'offline',
-            response_type: 'code'
-          }
-        }
-      })
-    ] : [])
-  ],
-  callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
-      // For OAuth providers, ensure user is associated with a tenant
-      if (account?.provider !== 'credentials') {
-        const prisma = getPrisma()
-        if (!prisma) return true // Allow during build
-        
-        const existingUser = await prisma.user.findUnique({
-          where: { email: user.email! },
-          include: { tenant: true }
-        })
-
-        if (!existingUser) {
-          // For new OAuth users, redirect to tenant selection
-          return '/onboarding/select-tenant'
         }
 
-        // Check if tenant is active
-        if (!existingUser.tenant || !existingUser.tenant.isActive) {
-          return false
+        return token
+      },
+      async session({ session, token }) {
+        if (token && session.user) {
+          session.user.id = token.id as string
+          session.user.tenantId = token.tenantId as string
+          session.user.role = token.role as string
+          session.user.departmentId = token.departmentId as string
+          session.user.permissions = token.permissions as string[]
         }
 
-        // Update last login
-        await prisma.user.update({
-          where: { id: existingUser.id },
-          data: { lastLoginAt: new Date() }
-        })
-      }
-
-      return true
+        // CSRF token generation removed from here to avoid Edge Runtime issues
+        // CSRF tokens should be generated in API routes or server components
+        return session as ExtendedSession
+      },
+      async redirect({ url, baseUrl }) {
+        // Redirect to dashboard after successful login
+        if (url.startsWith('/')) {
+          return `${baseUrl}${url}`
+        } else if (new URL(url).origin === baseUrl) {
+          return url
+        }
+        return `${baseUrl}/dashboard`
+      },
     },
-    async jwt({ token, user, account, trigger, session }) {
-      // Initial sign in
-      if (user) {
-        token.id = user.id
-        token.tenantId = user.tenantId
-        token.role = user.role
-        token.departmentId = user.departmentId
-        token.permissions = user.permissions
-      }
-
-      // Update token if session is updated
-      if (trigger === 'update' && session) {
-        token = { ...token, ...session }
-      }
-
-      // Refresh tenant data periodically (every 5 minutes)
-      if (token.tenantId && token.iat && Date.now() - token.iat * 1000 > 5 * 60 * 1000) {
-        const prisma = getPrisma()
-        if (!prisma) return token
-        
-        const user = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          include: { tenant: true }
-        })
-
-        if (user && user.tenant && user.tenant.isActive) {
-          token.tenantId = user.tenantId
-          token.role = user.role
-          token.permissions = (() => {
-            try {
-              return JSON.parse(user.permissions || '[]')
-            } catch {
-              return []
-            }
-          })()
-        }
-      }
-
-      return token
-    },
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id as string
-        session.user.tenantId = token.tenantId as string
-        session.user.role = token.role as string
-        session.user.departmentId = token.departmentId as string
-        session.user.permissions = token.permissions as string[]
-      }
-
-      // CSRF token generation removed from here to avoid Edge Runtime issues
-      // CSRF tokens should be generated in API routes or server components
-      return session as ExtendedSession
-    },
-    async redirect({ url, baseUrl }) {
-      // Redirect to dashboard after successful login
-      if (url.startsWith('/')) {
-        return `${baseUrl}${url}`
-      } else if (new URL(url).origin === baseUrl) {
-        return url
-      }
-      return `${baseUrl}/dashboard`
-    }
-  },
-  events: {
-    async signIn({ user, account, profile, isNewUser }) {
-      // Log sign in event
-      if (user.id && user.tenantId) {
-        const prisma = getPrisma()
-        if (prisma) {
-          await prisma.auditLog.create({
-            data: {
-              tenantId: user.tenantId,
-              userId: user.id,
-              action: 'LOGIN',
-              entityType: 'user',
-              entityId: user.id,
-              metadata: JSON.stringify({
-                provider: account?.provider || 'credentials',
-                isNewUser
+    events: {
+      async signIn({ user, account, profile, isNewUser }) {
+        // Log sign in event
+        if (user.id && user.tenantId) {
+          const prisma = getPrisma()
+          if (prisma) {
+            await prisma.auditLog
+              .create({
+                data: {
+                  tenantId: user.tenantId,
+                  userId: user.id,
+                  action: 'LOGIN',
+                  entityType: 'user',
+                  entityId: user.id,
+                  metadata: JSON.stringify({
+                    provider: account?.provider || 'credentials',
+                    isNewUser,
+                  }),
+                },
               })
-            }
-          }).catch(console.error) // Don't fail auth if audit log fails
+              .catch(console.error) // Don't fail auth if audit log fails
+          }
         }
-      }
+      },
+      async signOut({ token }) {
+        // Log sign out event
+        if (token?.id && token?.tenantId) {
+          const prisma = getPrisma()
+          if (prisma) {
+            await prisma.auditLog
+              .create({
+                data: {
+                  tenantId: token.tenantId as string,
+                  userId: token.id as string,
+                  action: 'LOGOUT',
+                  entityType: 'user',
+                  entityId: token.id as string,
+                },
+              })
+              .catch(console.error) // Don't fail signout if audit log fails
+          }
+        }
+      },
     },
-    async signOut({ token }) {
-      // Log sign out event
-      if (token?.id && token?.tenantId) {
-        const prisma = getPrisma()
-        if (prisma) {
-          await prisma.auditLog.create({
-            data: {
-              tenantId: token.tenantId as string,
-              userId: token.id as string,
-              action: 'LOGOUT',
-              entityType: 'user',
-              entityId: token.id as string
-            }
-          }).catch(console.error) // Don't fail signout if audit log fails
-        }
-      }
-    }
-  },
-  debug: false // Disable debug in all environments for security
+    debug: false, // Disable debug in all environments for security
   }
 }
 
@@ -354,38 +372,38 @@ const authConfig = () => {
 const createAuth = () => {
   try {
     // Check if we're in build time
-    const isBuildTime = process.env.VERCEL || process.env.CI || 
-                        process.env.NEXT_PHASE === 'phase-production-build' ||
-                        process.env.BUILDING_FOR_VERCEL === '1';
-    
+    const isBuildTime =
+      process.env.VERCEL ||
+      process.env.CI ||
+      process.env.NEXT_PHASE === 'phase-production-build' ||
+      process.env.BUILDING_FOR_VERCEL === '1'
+
     // Ensure NEXTAUTH_SECRET is available
     if (!process.env.NEXTAUTH_SECRET) {
       if (isBuildTime) {
         process.env.NEXTAUTH_SECRET = 'build-time-placeholder-this-is-not-secure-and-only-for-build'
       } else if (process.env.NODE_ENV === 'production') {
-        console.error('NEXTAUTH_SECRET is not set in production')
       }
     }
-    
+
     // Ensure NEXTAUTH_URL is available
     if (!process.env.NEXTAUTH_URL && isBuildTime) {
-      process.env.NEXTAUTH_URL = process.env.VERCEL_URL 
+      process.env.NEXTAUTH_URL = process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}`
         : 'https://coreflow360.vercel.app'
     }
-    
+
     return NextAuth(authConfig())
   } catch (error) {
-    console.error('Failed to initialize NextAuth:', error)
     // Return a minimal auth object for build time
     return {
-      handlers: { 
+      handlers: {
         GET: async () => new Response('Auth not configured', { status: 500 }),
-        POST: async () => new Response('Auth not configured', { status: 500 })
+        POST: async () => new Response('Auth not configured', { status: 500 }),
       },
       auth: async () => null,
       signIn: async () => ({ error: 'Auth not configured' }),
-      signOut: async () => {}
+      signOut: async () => {},
     }
   }
 }
@@ -395,7 +413,7 @@ export const {
   handlers: { GET, POST },
   auth,
   signIn,
-  signOut
+  signOut,
 } = createAuth()
 
 /**
@@ -418,16 +436,19 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 export async function getServerSession(): Promise<ExtendedSession | null> {
   const session = await auth()
   if (!session) return null
-  
+
   // Type guard to ensure session has required properties
-  if ('user' in session && session.user && 
-      'id' in session.user && 
-      'tenantId' in session.user && 
-      'role' in session.user &&
-      'permissions' in session.user) {
+  if (
+    'user' in session &&
+    session.user &&
+    'id' in session.user &&
+    'tenantId' in session.user &&
+    'role' in session.user &&
+    'permissions' in session.user
+  ) {
     return session as ExtendedSession
   }
-  
+
   return null
 }
 
@@ -436,11 +457,11 @@ export async function getServerSession(): Promise<ExtendedSession | null> {
  */
 export async function requireAuth() {
   const session = await getServerSession()
-  
+
   if (!session) {
     throw new Error('Unauthorized')
   }
-  
+
   return session
 }
 
@@ -462,10 +483,10 @@ export function hasPermission(session: ExtendedSession, permission: string): boo
  */
 export async function requirePermission(permission: string) {
   const session = await requireAuth()
-  
+
   if (!hasPermission(session, permission)) {
     throw new Error('Forbidden')
   }
-  
+
   return session
 }

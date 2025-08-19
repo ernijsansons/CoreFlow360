@@ -1,7 +1,7 @@
 /**
  * CoreFlow360 - Hyperscale Performance Tracking
  * MATHEMATICALLY PERFECT, ALGORITHMICALLY OPTIMAL, PROVABLY CORRECT
- * 
+ *
  * Sub-millisecond response time monitoring with comprehensive metrics
  */
 
@@ -11,9 +11,9 @@ import { prisma } from '@/lib/db'
 const PERFORMANCE_CONFIG = {
   thresholds: {
     excellent: 50, // < 50ms
-    good: 100,     // < 100ms
+    good: 100, // < 100ms
     acceptable: 500, // < 500ms
-    poor: 1000,    // < 1000ms
+    poor: 1000, // < 1000ms
     // > 1000ms is critical
   },
   sampling: {
@@ -24,7 +24,7 @@ const PERFORMANCE_CONFIG = {
   alerts: {
     criticalThreshold: 1000, // 1 second
     consecutiveFailures: 3,
-  }
+  },
 } as const
 
 export interface PerformanceMetrics {
@@ -76,12 +76,12 @@ class PerformanceMetricsStore {
 
   add(metric: PerformanceMetrics): void {
     this.metrics.push(metric)
-    
+
     // Check for critical performance issues
     if (metric.duration > PERFORMANCE_CONFIG.alerts.criticalThreshold) {
       this.alertCriticalPerformance(metric)
     }
-    
+
     // Flush if batch size reached
     if (this.metrics.length >= PERFORMANCE_CONFIG.sampling.batchSize) {
       this.flush()
@@ -103,7 +103,6 @@ class PerformanceMetricsStore {
     try {
       await this.persistMetrics(metricsToFlush)
     } catch (error) {
-      console.error('PERFORMANCE_ERROR: Failed to flush metrics:', error)
       // In production, would use circuit breaker pattern
     }
   }
@@ -111,7 +110,7 @@ class PerformanceMetricsStore {
   private async persistMetrics(metrics: PerformanceMetrics[]): Promise<void> {
     // Aggregate metrics by operation for storage efficiency
     const aggregated = this.aggregateMetrics(metrics)
-    
+
     for (const [operation, data] of aggregated.entries()) {
       await prisma.systemHealth.create({
         data: {
@@ -126,12 +125,13 @@ class PerformanceMetricsStore {
             maxDuration: data.maxDuration,
             successRate: data.successRate,
             timestamp: Date.now(),
-            memoryImpact: data.memoryImpact
+            memoryImpact: data.memoryImpact,
           }),
-          message: data.avgDuration > PERFORMANCE_CONFIG.thresholds.poor 
-            ? `Slow operation detected: ${operation} (${data.avgDuration}ms avg)`
-            : undefined
-        }
+          message:
+            data.avgDuration > PERFORMANCE_CONFIG.thresholds.poor
+              ? `Slow operation detected: ${operation} (${data.avgDuration}ms avg)`
+              : undefined,
+        },
       })
     }
   }
@@ -153,8 +153,8 @@ class PerformanceMetricsStore {
           memoryImpact: {
             heapUsed: 0,
             heapTotal: 0,
-            external: 0
-          }
+            external: 0,
+          },
         })
       }
 
@@ -163,23 +163,23 @@ class PerformanceMetricsStore {
       agg.totalDuration += metric.duration
       agg.minDuration = Math.min(agg.minDuration, metric.duration)
       agg.maxDuration = Math.max(agg.maxDuration, metric.duration)
-      
+
       if (metric.success) agg.successes++
       else agg.failures++
 
       const memoryDelta = {
         heapUsed: metric.memoryAfter.heapUsed - metric.memoryBefore.heapUsed,
         heapTotal: metric.memoryAfter.heapTotal - metric.memoryBefore.heapTotal,
-        external: metric.memoryAfter.external - metric.memoryBefore.external
+        external: metric.memoryAfter.external - metric.memoryBefore.external,
       }
-      
+
       agg.memoryImpact.heapUsed += memoryDelta.heapUsed
       agg.memoryImpact.heapTotal += memoryDelta.heapTotal
       agg.memoryImpact.external += memoryDelta.external
     }
 
     // Calculate averages
-    for (const [_key, agg] of aggregated.entries()) {
+    for (const [_unusedKey, agg] of aggregated.entries()) {
       agg.avgDuration = agg.totalDuration / agg.calls
       agg.successRate = agg.successes / agg.calls
       agg.memoryImpact.heapUsed /= agg.calls
@@ -205,9 +205,9 @@ class PerformanceMetricsStore {
       threshold: PERFORMANCE_CONFIG.alerts.criticalThreshold,
       tenantId: metric.tenantId,
       userId: metric.userId,
-      timestamp: new Date(metric.timestamp).toISOString()
+      timestamp: new Date(metric.timestamp).toISOString(),
     })
-    
+
     // In production, would:
     // 1. Send alerts to operations team
     // 2. Trigger auto-scaling
@@ -245,7 +245,7 @@ export function withPerformanceTracking<T extends unknown[], R>(
       // Extract context from args if available
       tenantId: extractTenantId(args),
       userId: extractUserId(args),
-      metadata: extractMetadata(args)
+      metadata: extractMetadata(args),
     }
 
     return trackPerformance(context, fn, ...args)
@@ -292,7 +292,7 @@ export async function trackPerformance<T extends unknown[], R>(
       userId: context.userId,
       success,
       error,
-      metadata: context.metadata
+      metadata: context.metadata,
     }
 
     metricsStore.add(metrics)
@@ -300,7 +300,7 @@ export async function trackPerformance<T extends unknown[], R>(
     // Log performance in development
     if (process.env.NODE_ENV === 'development') {
       const status = getPerformanceLevel(duration)
-      console.log(`PERF [${status}]: ${context.operation} - ${duration.toFixed(2)}ms`)
+      console.log(`⚡ ${operation}: ${status} (${duration}ms)`)
     }
   }
 }
@@ -313,7 +313,7 @@ export async function getPerformanceReport(
   tenantId?: string,
   hours = 24
 ): Promise<PerformanceReport | null> {
-  const since = new Date(Date.now() - (hours * 60 * 60 * 1000))
+  const since = new Date(Date.now() - hours * 60 * 60 * 1000)
 
   const healthRecords = await prisma.systemHealth.findMany({
     where: {
@@ -322,10 +322,10 @@ export async function getPerformanceReport(
       createdAt: { gte: since },
       metrics: {
         path: ['operation'],
-        equals: operation
-      }
+        equals: operation,
+      },
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
   })
 
   if (healthRecords.length === 0) {
@@ -348,7 +348,7 @@ export async function getPerformanceReport(
     minDuration = Math.min(minDuration, metrics.minDuration || Infinity)
     maxDuration = Math.max(maxDuration, metrics.maxDuration || 0)
     totalSuccesses += (metrics.totalCalls || 0) * (metrics.successRate || 1)
-    
+
     // Add to durations array for percentile calculations
     for (let i = 0; i < (metrics.totalCalls || 0); i++) {
       durations.push(metrics.avgDuration || 0)
@@ -373,12 +373,12 @@ export async function getPerformanceReport(
     p95Duration: percentile(durations, 0.95),
     p99Duration: percentile(durations, 0.99),
     successRate: totalSuccesses / totalCalls,
-    errorRate: 1 - (totalSuccesses / totalCalls),
+    errorRate: 1 - totalSuccesses / totalCalls,
     memoryImpact: {
       avgHeapUsed: totalMemoryImpact.heapUsed / healthRecords.length,
       avgHeapTotal: totalMemoryImpact.heapTotal / healthRecords.length,
-      avgExternal: totalMemoryImpact.external / healthRecords.length
-    }
+      avgExternal: totalMemoryImpact.external / healthRecords.length,
+    },
   }
 }
 

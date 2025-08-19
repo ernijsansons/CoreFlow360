@@ -32,18 +32,15 @@ async function handleWebhook(request: NextRequest): Promise<NextResponse> {
     // Initialize Stripe client
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
-    
+
     if (!stripeSecretKey || !endpointSecret) {
-      return NextResponse.json(
-        { error: 'Stripe webhook not configured' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Stripe webhook not configured' }, { status: 500 })
     }
-    
+
     const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2023-10-16'
+      apiVersion: '2023-10-16',
     })
-    
+
     const body = await request.text()
     const headersList = headers()
     const signature = headersList.get('stripe-signature')!
@@ -53,7 +50,7 @@ async function handleWebhook(request: NextRequest): Promise<NextResponse> {
       body,
       headers: Object.fromEntries(headersList.entries()),
       method: request.method,
-      url: request.url
+      url: request.url,
     })
 
     if (!securityResult.isValid) {
@@ -61,9 +58,9 @@ async function handleWebhook(request: NextRequest): Promise<NextResponse> {
         error: securityResult.error,
         metadata: securityResult.metadata,
         userAgent: headersList.get('user-agent'),
-        ip: headersList.get('x-forwarded-for') || headersList.get('x-real-ip')
+        ip: headersList.get('x-forwarded-for') || headersList.get('x-real-ip'),
       })
-      
+
       return NextResponse.json(
         { error: securityResult.error || 'Security validation failed' },
         { status: 400 }
@@ -71,12 +68,7 @@ async function handleWebhook(request: NextRequest): Promise<NextResponse> {
     }
 
     // Fallback to original Stripe signature verification for event parsing
-    const verificationResult = await verifyWebhookSignature(
-      body,
-      signature,
-      endpointSecret,
-      stripe
-    )
+    const verificationResult = await verifyWebhookSignature(body, signature, endpointSecret, stripe)
 
     if (!verificationResult.success || !verificationResult.event) {
       return NextResponse.json(
@@ -95,23 +87,23 @@ async function handleWebhook(request: NextRequest): Promise<NextResponse> {
       case 'checkout.session.completed':
         await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session)
         break
-        
+
       case 'customer.subscription.created':
         await handleSubscriptionCreated(event.data.object as Stripe.Subscription)
         break
-        
+
       case 'customer.subscription.updated':
         await handleSubscriptionUpdated(event.data.object as Stripe.Subscription)
         break
-        
+
       case 'customer.subscription.deleted':
         await handleSubscriptionDeleted(event.data.object as Stripe.Subscription)
         break
-        
+
       case 'invoice.payment_succeeded':
         await handlePaymentSucceeded(event.data.object as Stripe.Invoice)
         break
-        
+
       case 'invoice.payment_failed':
         await handlePaymentFailed(event.data.object as Stripe.Invoice)
         break
@@ -121,29 +113,24 @@ async function handleWebhook(request: NextRequest): Promise<NextResponse> {
         await trackUnhandledEvent(event)
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       received: true,
       eventId: event.id,
-      eventType: event.type 
+      eventType: event.type,
     })
-
   } catch (error) {
-    console.error('Webhook processing error:', error)
-    return NextResponse.json(
-      { error: 'Webhook processing failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 })
   }
 }
 
 // Enhanced payment event tracking with fraud detection
-async function trackPaymentEventWithAnalytics(event: Stripe.Event, headersList: any) {
+async function trackPaymentEventWithAnalytics(event: Stripe.Event, headersList: unknown) {
   try {
     let userId = ''
-    let tenantId = ''
+    const tenantId = ''
     let amount = 0
     let subscriptionId = ''
-    let paymentMethodId = ''
+    const paymentMethodId = ''
     let eventType = 'payment_processing'
     let failureCode = ''
     let failureMessage = ''
@@ -152,15 +139,15 @@ async function trackPaymentEventWithAnalytics(event: Stripe.Event, headersList: 
     switch (event.type) {
       case 'checkout.session.completed':
         const session = event.data.object as Stripe.Checkout.Session
-        userId = session.customer as string || ''
+        userId = (session.customer as string) || ''
         amount = (session.amount_total || 0) / 100 // Convert cents to dollars
-        subscriptionId = session.subscription as string || ''
+        subscriptionId = (session.subscription as string) || ''
         eventType = 'payment_succeeded'
         break
 
       case 'customer.subscription.created':
         const subCreated = event.data.object as Stripe.Subscription
-        userId = subCreated.customer as string || ''
+        userId = (subCreated.customer as string) || ''
         subscriptionId = subCreated.id
         amount = (subCreated.items.data[0]?.price.unit_amount || 0) / 100
         eventType = 'subscription_created'
@@ -168,7 +155,7 @@ async function trackPaymentEventWithAnalytics(event: Stripe.Event, headersList: 
 
       case 'customer.subscription.updated':
         const subUpdated = event.data.object as Stripe.Subscription
-        userId = subUpdated.customer as string || ''
+        userId = (subUpdated.customer as string) || ''
         subscriptionId = subUpdated.id
         amount = (subUpdated.items.data[0]?.price.unit_amount || 0) / 100
         eventType = 'subscription_upgraded'
@@ -176,24 +163,24 @@ async function trackPaymentEventWithAnalytics(event: Stripe.Event, headersList: 
 
       case 'customer.subscription.deleted':
         const subDeleted = event.data.object as Stripe.Subscription
-        userId = subDeleted.customer as string || ''
+        userId = (subDeleted.customer as string) || ''
         subscriptionId = subDeleted.id
         eventType = 'subscription_cancelled'
         break
 
       case 'invoice.payment_succeeded':
         const invoiceSuccess = event.data.object as Stripe.Invoice
-        userId = invoiceSuccess.customer as string || ''
+        userId = (invoiceSuccess.customer as string) || ''
         amount = (invoiceSuccess.amount_paid || 0) / 100
-        subscriptionId = invoiceSuccess.subscription as string || ''
+        subscriptionId = (invoiceSuccess.subscription as string) || ''
         eventType = 'payment_succeeded'
         break
 
       case 'invoice.payment_failed':
         const invoiceFailed = event.data.object as Stripe.Invoice
-        userId = invoiceFailed.customer as string || ''
+        userId = (invoiceFailed.customer as string) || ''
         amount = (invoiceFailed.amount_due || 0) / 100
-        subscriptionId = invoiceFailed.subscription as string || ''
+        subscriptionId = (invoiceFailed.subscription as string) || ''
         eventType = 'payment_failed'
         failureCode = 'stripe_failure'
         failureMessage = 'Payment failed via Stripe'
@@ -206,7 +193,7 @@ async function trackPaymentEventWithAnalytics(event: Stripe.Event, headersList: 
       userId,
       tenantId,
       sessionId: `stripe_${event.id}`,
-      eventType: eventType as any,
+      eventType: eventType as unknown,
       timestamp: new Date(event.created * 1000),
       amount,
       subscriptionId,
@@ -217,8 +204,8 @@ async function trackPaymentEventWithAnalytics(event: Stripe.Event, headersList: 
       metadata: {
         source: 'stripe_webhook',
         userAgent: headersList.get('user-agent') || '',
-        ipAddress: headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || ''
-      }
+        ipAddress: headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || '',
+      },
     })
 
     // Run fraud detection for high-value or failed payments
@@ -227,7 +214,7 @@ async function trackPaymentEventWithAnalytics(event: Stripe.Event, headersList: 
         eventId: event.id,
         userId,
         tenantId,
-        eventType: eventType as any,
+        eventType: eventType as unknown,
         timestamp: new Date(event.created * 1000),
         amount,
         paymentMethodId,
@@ -235,13 +222,11 @@ async function trackPaymentEventWithAnalytics(event: Stripe.Event, headersList: 
         userAgent: headersList.get('user-agent') || '',
         metadata: {
           stripeEventType: event.type,
-          stripeEventId: event.id
-        }
+          stripeEventId: event.id,
+        },
       })
     }
-
   } catch (error) {
-    console.error('Payment event tracking failed:', error)
     // Don't fail the webhook for tracking errors
   }
 }
@@ -252,11 +237,9 @@ async function trackUnhandledEvent(event: Stripe.Event) {
     console.log(`Unhandled Stripe event: ${event.type}`, {
       eventId: event.id,
       eventType: event.type,
-      created: event.created
+      created: event.created,
     })
-  } catch (error) {
-    console.error('Unhandled event tracking failed:', error)
-  }
+  } catch (error) {}
 }
 
 // Export POST with signature validation and idempotency middleware
@@ -265,11 +248,11 @@ export const POST = withSignatureValidation(
     keyHeader: 'stripe-signature',
     keyExtractor: extractStripeIdempotencyKey,
     ttlMinutes: 120, // 2 hours for webhook replay protection
-    methods: ['POST']
+    methods: ['POST'],
   }),
-  { 
+  {
     highSecurity: true,
-    skipInDevelopment: false // Always require signatures for payment webhooks
+    skipInDevelopment: false, // Always require signatures for payment webhooks
   }
 )
 
@@ -279,10 +262,10 @@ export async function GET() {
     supportedEvents: [
       'checkout.session.completed',
       'customer.subscription.created',
-      'customer.subscription.updated', 
+      'customer.subscription.updated',
       'customer.subscription.deleted',
       'invoice.payment_succeeded',
-      'invoice.payment_failed'
-    ]
+      'invoice.payment_failed',
+    ],
   })
 }

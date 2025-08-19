@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  MapIcon, 
-  StarIcon, 
+import {
+  MapIcon,
+  StarIcon,
   CurrencyDollarIcon,
   ExclamationTriangleIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline'
 // import OpenStreetMapComponent from './OpenStreetMapComponent' // Disabled - missing dependency
 // import GoogleMapsComponent from './GoogleMapsComponent' // Disabled - missing dependency
@@ -34,7 +34,7 @@ export default function HybridMapComponent({
   className = '',
   tenantConfig,
   onUpgrade,
-  showProviderSwitch = true
+  showProviderSwitch = true,
 }: HybridMapComponentProps) {
   const [activeProvider, setActiveProvider] = useState<'openstreetmap' | 'google'>('openstreetmap')
   const [isLoading, setIsLoading] = useState(false)
@@ -55,7 +55,8 @@ export default function HybridMapComponent({
     // Check usage warnings
     if (isPremium && tenantConfig) {
       const creditsUsed = tenantConfig.monthlyMapCredits || 0
-      if (creditsUsed > 800) { // 80% of 1000 credit limit
+      if (creditsUsed > 800) {
+        // 80% of 1000 credit limit
         setUsageWarning('Approaching monthly Google Maps credit limit')
       } else if (creditsUsed >= 1000) {
         setUsageWarning('Monthly Google Maps credit limit exceeded')
@@ -78,7 +79,7 @@ export default function HybridMapComponent({
     }
 
     setIsLoading(true)
-    
+
     // Simulate loading time for provider switch
     setTimeout(() => {
       setActiveProvider(provider)
@@ -88,26 +89,21 @@ export default function HybridMapComponent({
 
   const formatCenter = () => {
     if (!center) return undefined
-    
+
     if (Array.isArray(center)) {
-      return activeProvider === 'google' 
+      return activeProvider === 'google'
         ? { lat: center[0], lng: center[1] }
-        : center as [number, number]
+        : (center as [number, number])
     }
-    
+
     return activeProvider === 'google'
-      ? center as { lat: number; lng: number }
-      : [center.lat, center.lng] as [number, number]
+      ? (center as { lat: number; lng: number })
+      : ([center.lat, center.lng] as [number, number])
   }
 
   const getProviderFeatures = (provider: 'openstreetmap' | 'google') => {
     if (provider === 'openstreetmap') {
-      return [
-        'Free to use',
-        'Basic mapping',
-        'Customer locations',
-        'Territory visualization'
-      ]
+      return ['Free to use', 'Basic mapping', 'Customer locations', 'Territory visualization']
     } else {
       return [
         'Premium features',
@@ -115,7 +111,7 @@ export default function HybridMapComponent({
         'Street View',
         'Route optimization',
         'Advanced geocoding',
-        'Satellite imagery'
+        'Satellite imagery',
       ]
     }
   }
@@ -124,39 +120,39 @@ export default function HybridMapComponent({
     <div className={`space-y-4 ${className}`}>
       {/* Provider Selection & Status */}
       {showProviderSwitch && (
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="rounded-lg bg-white p-4 shadow">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <h3 className="text-lg font-medium text-gray-900 flex items-center">
-                <MapIcon className="h-5 w-5 mr-2 text-blue-600" />
+              <h3 className="flex items-center text-lg font-medium text-gray-900">
+                <MapIcon className="mr-2 h-5 w-5 text-blue-600" />
                 Map Provider
               </h3>
-              
+
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => handleProviderSwitch('openstreetmap')}
                   disabled={isLoading}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                  className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
                     activeProvider === 'openstreetmap'
-                      ? 'bg-blue-100 text-blue-800 border-2 border-blue-200'
-                      : 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
+                      ? 'border-2 border-blue-200 bg-blue-100 text-blue-800'
+                      : 'border-2 border-transparent bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
                   OpenStreetMap (Free)
                 </button>
-                
+
                 <button
                   onClick={() => handleProviderSwitch('google')}
                   disabled={isLoading || (!isPremium && !onUpgrade)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors relative ${
+                  className={`relative rounded-full px-3 py-1 text-sm font-medium transition-colors ${
                     activeProvider === 'google'
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-2 border-blue-300'
+                      ? 'border-2 border-blue-300 bg-gradient-to-r from-blue-500 to-purple-600 text-white'
                       : isPremium
-                        ? 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
-                        : 'bg-gradient-to-r from-gray-300 to-gray-400 text-gray-500 cursor-not-allowed'
+                        ? 'border-2 border-transparent bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'cursor-not-allowed bg-gradient-to-r from-gray-300 to-gray-400 text-gray-500'
                   }`}
                 >
-                  {!isPremium && <StarIcon className="h-3 w-3 inline mr-1" />}
+                  {!isPremium && <StarIcon className="mr-1 inline h-3 w-3" />}
                   Google Maps {!isPremium && '(Premium)'}
                 </button>
               </div>
@@ -177,10 +173,10 @@ export default function HybridMapComponent({
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md"
+                className="mt-3 rounded-md border border-yellow-200 bg-yellow-50 p-3"
               >
                 <div className="flex items-center">
-                  <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 mr-2" />
+                  <ExclamationTriangleIcon className="mr-2 h-5 w-5 text-yellow-600" />
                   <span className="text-sm text-yellow-800">{usageWarning}</span>
                 </div>
               </motion.div>
@@ -192,28 +188,30 @@ export default function HybridMapComponent({
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="mt-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg"
+              className="mt-3 rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50 p-4"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 flex items-center">
-                    <StarIcon className="h-4 w-4 text-blue-600 mr-1" />
+                  <h4 className="flex items-center text-sm font-semibold text-gray-900">
+                    <StarIcon className="mr-1 h-4 w-4 text-blue-600" />
                     Unlock Premium Mapping Features
                   </h4>
-                  <ul className="mt-2 text-sm text-gray-600 space-y-1">
-                    {getProviderFeatures('google').slice(1, 4).map((feature, index) => (
-                      <li key={index} className="flex items-center">
-                        <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                        {feature}
-                      </li>
-                    ))}
+                  <ul className="mt-2 space-y-1 text-sm text-gray-600">
+                    {getProviderFeatures('google')
+                      .slice(1, 4)
+                      .map((feature, index) => (
+                        <li key={index} className="flex items-center">
+                          <span className="mr-2 h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+                          {feature}
+                        </li>
+                      ))}
                   </ul>
                 </div>
                 <button
                   onClick={onUpgrade}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg text-sm font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg"
+                  className="rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-700 hover:to-purple-700"
                 >
-                  <CurrencyDollarIcon className="h-4 w-4 inline mr-1" />
+                  <CurrencyDollarIcon className="mr-1 inline h-4 w-4" />
                   Upgrade
                 </button>
               </div>
@@ -231,11 +229,11 @@ export default function HybridMapComponent({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex items-center justify-center bg-gray-100 rounded-lg"
+              className="flex items-center justify-center rounded-lg bg-gray-100"
               style={{ height }}
             >
               <div className="text-center">
-                <ArrowPathIcon className="h-8 w-8 text-blue-600 animate-spin mx-auto mb-2" />
+                <ArrowPathIcon className="mx-auto mb-2 h-8 w-8 animate-spin text-blue-600" />
                 <div className="text-gray-600">Switching map provider...</div>
               </div>
             </motion.div>
@@ -254,9 +252,12 @@ export default function HybridMapComponent({
                 height={height}
                 onLocationClick={onLocationClick}
               /> */}
-              <div className="flex items-center justify-center bg-gray-100 rounded-lg text-gray-500" style={{ height }}>
+              <div
+                className="flex items-center justify-center rounded-lg bg-gray-100 text-gray-500"
+                style={{ height }}
+              >
                 <div className="text-center">
-                  <MapIcon className="h-12 w-12 mx-auto mb-2" />
+                  <MapIcon className="mx-auto mb-2 h-12 w-12" />
                   <p>OpenStreetMap temporarily disabled</p>
                 </div>
               </div>
@@ -283,9 +284,12 @@ export default function HybridMapComponent({
                   streetView: isPremium
                 }}
               /> */}
-              <div className="flex items-center justify-center bg-gray-100 rounded-lg text-gray-500" style={{ height }}>
+              <div
+                className="flex items-center justify-center rounded-lg bg-gray-100 text-gray-500"
+                style={{ height }}
+              >
                 <div className="text-center">
-                  <MapIcon className="h-12 w-12 mx-auto mb-2" />
+                  <MapIcon className="mx-auto mb-2 h-12 w-12" />
                   <p>Google Maps temporarily disabled</p>
                 </div>
               </div>
@@ -296,31 +300,35 @@ export default function HybridMapComponent({
 
       {/* Feature Comparison */}
       {showProviderSwitch && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white rounded-lg shadow p-4">
-            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg bg-white p-4 shadow">
+            <h4 className="mb-3 flex items-center font-semibold text-gray-900">
               OpenStreetMap Features
-              <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Free</span>
+              <span className="ml-2 rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">
+                Free
+              </span>
             </h4>
             <ul className="space-y-2 text-sm text-gray-600">
               {getProviderFeatures('openstreetmap').map((feature, index) => (
                 <li key={index} className="flex items-center">
-                  <span className="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
+                  <span className="mr-3 h-2 w-2 rounded-full bg-green-400"></span>
                   {feature}
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-4">
-            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+          <div className="rounded-lg bg-white p-4 shadow">
+            <h4 className="mb-3 flex items-center font-semibold text-gray-900">
               Google Maps Features
-              <span className="ml-2 px-2 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 text-xs rounded-full">Premium</span>
+              <span className="ml-2 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 px-2 py-1 text-xs text-blue-800">
+                Premium
+              </span>
             </h4>
             <ul className="space-y-2 text-sm text-gray-600">
               {getProviderFeatures('google').map((feature, index) => (
                 <li key={index} className="flex items-center">
-                  <span className="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
+                  <span className="mr-3 h-2 w-2 rounded-full bg-blue-400"></span>
                   {feature}
                 </li>
               ))}

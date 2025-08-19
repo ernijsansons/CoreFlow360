@@ -9,7 +9,7 @@ import { SubscriptionDashboard } from '@/components/subscription/SubscriptionDas
 
 export default function SubscriptionPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 dark:bg-gray-900">
       <SubscriptionDashboard />
     </div>
   )
@@ -17,5 +17,5 @@ export default function SubscriptionPage() {
 
 export const metadata = {
   title: 'Subscription Management | CoreFlow360',
-  description: 'Manage your CoreFlow360 bundles, billing, and subscription preferences'
+  description: 'Manage your CoreFlow360 bundles, billing, and subscription preferences',
 }

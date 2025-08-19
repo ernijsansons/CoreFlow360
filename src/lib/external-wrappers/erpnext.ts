@@ -171,21 +171,28 @@ export interface ERPNextPayrollService {
   getEmployee(id: string): Promise<Employee>
   updateEmployee(id: string, updates: Partial<Employee>): Promise<Employee>
   listEmployees(filters?: { department?: string; status?: string }): Promise<Employee[]>
-  
+
   // Payroll Processing
-  processPayroll(periodStart: string, periodEnd: string, employeeIds?: string[]): Promise<PayrollProcess>
+  processPayroll(
+    periodStart: string,
+    periodEnd: string,
+    employeeIds?: string[]
+  ): Promise<PayrollProcess>
   getPayrollEntry(id: string): Promise<PayrollEntry>
   approvePayroll(processId: string): Promise<PayrollProcess>
-  generatePaySlips(processId: string): Promise<Array<{ employeeId: string; payslipData: any }>>
-  
+  generatePaySlips(processId: string): Promise<Array<{ employeeId: string; payslipData: unknown }>>
+
   // Tax and Compliance
-  calculateTaxes(grossPay: number, employeeId: string): Promise<{
+  calculateTaxes(
+    grossPay: number,
+    employeeId: string
+  ): Promise<{
     federalTax: number
     stateTax: number
     socialSecurity: number
     medicare: number
   }>
-  generateTaxForms(year: number, employeeIds?: string[]): Promise<any>
+  generateTaxForms(year: number, employeeIds?: string[]): Promise<unknown>
 }
 
 export interface ERPNextBOMService {
@@ -194,22 +201,28 @@ export interface ERPNextBOMService {
   getItem(id: string): Promise<Item>
   updateItemStock(id: string, quantity: number, operation: 'add' | 'subtract'): Promise<Item>
   listItems(filters?: { category?: string; status?: string }): Promise<Item[]>
-  
+
   // BOM Management
-  createBOM(bom: Omit<BillOfMaterials, 'id' | 'bomNo' | 'createdAt' | 'updatedAt'>): Promise<BillOfMaterials>
+  createBOM(
+    bom: Omit<BillOfMaterials, 'id' | 'bomNo' | 'createdAt' | 'updatedAt'>
+  ): Promise<BillOfMaterials>
   getBOM(id: string): Promise<BillOfMaterials>
   updateBOM(id: string, updates: Partial<BillOfMaterials>): Promise<BillOfMaterials>
   validateBOM(bomId: string): Promise<{ isValid: boolean; errors: string[] }>
   listBOMs(filters?: { itemCode?: string; status?: string }): Promise<BillOfMaterials[]>
-  
+
   // Work Order Management
-  createWorkOrder(workOrder: Omit<WorkOrder, 'id' | 'workOrderNo' | 'totalCost'>): Promise<WorkOrder>
+  createWorkOrder(
+    workOrder: Omit<WorkOrder, 'id' | 'workOrderNo' | 'totalCost'>
+  ): Promise<WorkOrder>
   getWorkOrder(id: string): Promise<WorkOrder>
   updateWorkOrderStatus(id: string, status: WorkOrder['status']): Promise<WorkOrder>
   recordProduction(id: string, quantity: number): Promise<WorkOrder>
-  
+
   // Cost Analysis
-  calculateBOMCost(bomId: string): Promise<{ rawMaterial: number; operating: number; total: number }>
+  calculateBOMCost(
+    bomId: string
+  ): Promise<{ rawMaterial: number; operating: number; total: number }>
   optimizeBOM(bomId: string, criteria: 'cost' | 'quality' | 'time'): Promise<BillOfMaterials>
 }
 
@@ -227,20 +240,24 @@ const EmployeeSchema = z.object({
     basic: z.number().positive(),
     allowances: z.record(z.number()),
     deductions: z.record(z.number()),
-    currency: z.string().length(3)
-  })
+    currency: z.string().length(3),
+  }),
 })
 
 const BOMSchema = z.object({
   itemId: z.string().uuid(),
   itemCode: z.string().min(1),
   quantity: z.number().positive(),
-  items: z.array(z.object({
-    itemId: z.string().uuid(),
-    quantity: z.number().positive(),
-    rate: z.number().positive()
-  })).min(1),
-  validFrom: z.string().datetime()
+  items: z
+    .array(
+      z.object({
+        itemId: z.string().uuid(),
+        quantity: z.number().positive(),
+        rate: z.number().positive(),
+      })
+    )
+    .min(1),
+  validFrom: z.string().datetime(),
 })
 
 // Mock Implementation
@@ -270,24 +287,24 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
         allowances: {
           housing: 12000,
           transport: 6000,
-          medical: 3000
+          medical: 3000,
         },
         deductions: {
           retirement: 4800,
-          insurance: 2400
+          insurance: 2400,
         },
-        currency: 'USD'
+        currency: 'USD',
       },
       taxInfo: {
         taxId: '123-45-6789',
         exemptions: 2,
-        filingStatus: 'married'
+        filingStatus: 'married',
       },
       bankDetails: {
         accountNumber: '1234567890',
         routingNumber: '021000021',
-        bankName: 'First National Bank'
-      }
+        bankName: 'First National Bank',
+      },
     }
 
     this.employees.set(employee1.id, employee1)
@@ -298,13 +315,13 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
 
     const employee: Employee = {
       id: `emp-${Date.now()}`,
-      ...employeeData
+      ...employeeData,
     }
 
     this.employees.set(employee.id, employee)
 
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
     return employee
   }
@@ -334,10 +351,10 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
 
     if (filters) {
       if (filters.department) {
-        employees = employees.filter(emp => emp.department === filters.department)
+        employees = employees.filter((emp) => emp.department === filters.department)
       }
       if (filters.status) {
-        employees = employees.filter(emp => emp.status === filters.status)
+        employees = employees.filter((emp) => emp.status === filters.status)
       }
     }
 
@@ -353,11 +370,11 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
     let employees = Array.from(this.employees.values())
 
     if (employeeIds) {
-      employees = employees.filter(emp => employeeIds.includes(emp.id))
+      employees = employees.filter((emp) => employeeIds.includes(emp.id))
     }
 
     // Filter active employees only
-    employees = employees.filter(emp => emp.status === 'active')
+    employees = employees.filter((emp) => emp.status === 'active')
 
     const entries: PayrollEntry[] = []
     let totalGrossPay = 0
@@ -365,13 +382,17 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
     let totalTaxes = 0
 
     for (const employee of employees) {
-      const grossPay = employee.salary.basic + 
+      const grossPay =
+        employee.salary.basic +
         Object.values(employee.salary.allowances).reduce((sum, val) => sum + val, 0)
 
       const taxes = await this.calculateTaxes(grossPay, employee.id)
       const totalTaxDeductions = Object.values(taxes).reduce((sum, val) => sum + val, 0)
-      
-      const otherDeductions = Object.values(employee.salary.deductions).reduce((sum, val) => sum + val, 0)
+
+      const otherDeductions = Object.values(employee.salary.deductions).reduce(
+        (sum, val) => sum + val,
+        0
+      )
       const totalDeductions = totalTaxDeductions + otherDeductions
       const netPay = grossPay - totalDeductions
 
@@ -382,13 +403,16 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
         grossPay,
         netPay,
         totalDeductions,
-        totalAllowances: Object.values(employee.salary.allowances).reduce((sum, val) => sum + val, 0),
+        totalAllowances: Object.values(employee.salary.allowances).reduce(
+          (sum, val) => sum + val,
+          0
+        ),
         taxDeductions: taxes,
         otherDeductions: employee.salary.deductions,
         hoursWorked: 160, // Standard monthly hours
         overtimeHours: Math.random() * 20,
         status: 'draft',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       }
 
       entries.push(entry)
@@ -409,13 +433,13 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
       totalNetPay,
       totalTaxes,
       entries,
-      processedAt: new Date().toISOString()
+      processedAt: new Date().toISOString(),
     }
 
     this.payrollProcesses.set(processId, process)
 
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise((resolve) => setTimeout(resolve, 2000))
 
     return process
   }
@@ -435,7 +459,7 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
     }
 
     // Update all entries to submitted status
-    process.entries.forEach(entry => {
+    process.entries.forEach((entry) => {
       entry.status = 'submitted'
       this.payrollEntries.set(entry.id, entry)
     })
@@ -446,13 +470,15 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
     return updatedProcess
   }
 
-  async generatePaySlips(processId: string): Promise<Array<{ employeeId: string; payslipData: any }>> {
+  async generatePaySlips(
+    processId: string
+  ): Promise<Array<{ employeeId: string; payslipData: unknown }>> {
     const process = this.payrollProcesses.get(processId)
     if (!process) {
       throw new Error('Payroll process not found')
     }
 
-    return process.entries.map(entry => ({
+    return process.entries.map((entry) => ({
       employeeId: entry.employeeId,
       payslipData: {
         payrollPeriod: entry.payrollPeriod,
@@ -460,15 +486,18 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
         netPay: entry.netPay,
         deductions: {
           ...entry.taxDeductions,
-          ...entry.otherDeductions
+          ...entry.otherDeductions,
         },
         hoursWorked: entry.hoursWorked,
-        generatedAt: new Date().toISOString()
-      }
+        generatedAt: new Date().toISOString(),
+      },
     }))
   }
 
-  async calculateTaxes(grossPay: number, employeeId: string): Promise<{
+  async calculateTaxes(
+    grossPay: number,
+    employeeId: string
+  ): Promise<{
     federalTax: number
     stateTax: number
     socialSecurity: number
@@ -489,31 +518,31 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
       federalTax: Math.round(grossPay * federalRate),
       stateTax: Math.round(grossPay * stateRate),
       socialSecurity: Math.round(grossPay * socialSecurityRate),
-      medicare: Math.round(grossPay * medicareRate)
+      medicare: Math.round(grossPay * medicareRate),
     }
   }
 
-  async generateTaxForms(year: number, employeeIds?: string[]): Promise<any> {
+  async generateTaxForms(year: number, employeeIds?: string[]): Promise<unknown> {
     // Simulate tax form generation
-    await new Promise(resolve => setTimeout(resolve, 3000))
+    await new Promise((resolve) => setTimeout(resolve, 3000))
 
     let employees = Array.from(this.employees.values())
     if (employeeIds) {
-      employees = employees.filter(emp => employeeIds.includes(emp.id))
+      employees = employees.filter((emp) => employeeIds.includes(emp.id))
     }
 
     return {
       year,
       formsGenerated: employees.length,
-      forms: employees.map(emp => ({
+      forms: employees.map((emp) => ({
         employeeId: emp.id,
         employeeName: `${emp.firstName} ${emp.lastName}`,
         formType: 'W-2',
         totalWages: emp.salary.basic,
-        federalTaxWithheld: emp.salary.basic * 0.20,
+        federalTaxWithheld: emp.salary.basic * 0.2,
         stateTaxWithheld: emp.salary.basic * 0.05,
-        generatedAt: new Date().toISOString()
-      }))
+        generatedAt: new Date().toISOString(),
+      })),
     }
   }
 }
@@ -543,10 +572,10 @@ export class MockERPNextBOMService implements ERPNextBOMService {
         currentStock: 50,
         reservedStock: 5,
         availableStock: 45,
-        reorderLevel: 10
+        reorderLevel: 10,
       },
       supplier: 'Tech Supplier Inc',
-      leadTime: 7
+      leadTime: 7,
     }
 
     const item2: Item = {
@@ -562,9 +591,9 @@ export class MockERPNextBOMService implements ERPNextBOMService {
         currentStock: 200,
         reservedStock: 20,
         availableStock: 180,
-        reorderLevel: 50
+        reorderLevel: 50,
       },
-      leadTime: 3
+      leadTime: 3,
     }
 
     this.items.set(item1.id, item1)
@@ -574,12 +603,12 @@ export class MockERPNextBOMService implements ERPNextBOMService {
   async createItem(itemData: Omit<Item, 'id'>): Promise<Item> {
     const item: Item = {
       id: `item-${Date.now()}`,
-      ...itemData
+      ...itemData,
     }
 
     this.items.set(item.id, item)
 
-    await new Promise(resolve => setTimeout(resolve, 400))
+    await new Promise((resolve) => setTimeout(resolve, 400))
     return item
   }
 
@@ -591,15 +620,20 @@ export class MockERPNextBOMService implements ERPNextBOMService {
     return { ...item }
   }
 
-  async updateItemStock(id: string, quantity: number, operation: 'add' | 'subtract'): Promise<Item> {
+  async updateItemStock(
+    id: string,
+    quantity: number,
+    operation: 'add' | 'subtract'
+  ): Promise<Item> {
     const item = this.items.get(id)
     if (!item) {
       throw new Error('Item not found')
     }
 
-    const currentStock = operation === 'add' 
-      ? item.stockInfo.currentStock + quantity
-      : item.stockInfo.currentStock - quantity
+    const currentStock =
+      operation === 'add'
+        ? item.stockInfo.currentStock + quantity
+        : item.stockInfo.currentStock - quantity
 
     if (currentStock < 0) {
       throw new Error('Insufficient stock')
@@ -610,8 +644,8 @@ export class MockERPNextBOMService implements ERPNextBOMService {
       stockInfo: {
         ...item.stockInfo,
         currentStock,
-        availableStock: currentStock - item.stockInfo.reservedStock
-      }
+        availableStock: currentStock - item.stockInfo.reservedStock,
+      },
     }
 
     this.items.set(id, updatedItem)
@@ -623,17 +657,19 @@ export class MockERPNextBOMService implements ERPNextBOMService {
 
     if (filters) {
       if (filters.category) {
-        items = items.filter(item => item.category === filters.category)
+        items = items.filter((item) => item.category === filters.category)
       }
       if (filters.status) {
-        items = items.filter(item => item.status === filters.status)
+        items = items.filter((item) => item.status === filters.status)
       }
     }
 
     return items
   }
 
-  async createBOM(bomData: Omit<BillOfMaterials, 'id' | 'bomNo' | 'createdAt' | 'updatedAt'>): Promise<BillOfMaterials> {
+  async createBOM(
+    bomData: Omit<BillOfMaterials, 'id' | 'bomNo' | 'createdAt' | 'updatedAt'>
+  ): Promise<BillOfMaterials> {
     BOMSchema.parse(bomData)
 
     // Validate that all required items exist
@@ -654,12 +690,12 @@ export class MockERPNextBOMService implements ERPNextBOMService {
       totalCost: rawMaterialCost + bomData.operatingCost,
       version: 1,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     this.boms.set(bom.id, bom)
 
-    await new Promise(resolve => setTimeout(resolve, 600))
+    await new Promise((resolve) => setTimeout(resolve, 600))
     return bom
   }
 
@@ -680,7 +716,7 @@ export class MockERPNextBOMService implements ERPNextBOMService {
     const updatedBom: BillOfMaterials = {
       ...bom,
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     // Recalculate costs if items changed
@@ -715,18 +751,20 @@ export class MockERPNextBOMService implements ERPNextBOMService {
 
       const requiredQty = bomItem.quantity * bom.quantity
       if (item.stockInfo.availableStock < requiredQty) {
-        errors.push(`Insufficient stock for ${bomItem.itemCode}. Required: ${requiredQty}, Available: ${item.stockInfo.availableStock}`)
+        errors.push(
+          `Insufficient stock for ${bomItem.itemCode}. Required: ${requiredQty}, Available: ${item.stockInfo.availableStock}`
+        )
       }
     }
 
     // Check for circular dependencies (simplified)
-    if (bom.items.some(item => item.itemId === bom.itemId)) {
+    if (bom.items.some((item) => item.itemId === bom.itemId)) {
       errors.push('Circular dependency detected in BOM')
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     }
   }
 
@@ -735,19 +773,21 @@ export class MockERPNextBOMService implements ERPNextBOMService {
 
     if (filters) {
       if (filters.itemCode) {
-        boms = boms.filter(bom => bom.itemCode === filters.itemCode)
+        boms = boms.filter((bom) => bom.itemCode === filters.itemCode)
       }
       if (filters.status) {
-        boms = boms.filter(bom => bom.status === filters.status)
+        boms = boms.filter((bom) => bom.status === filters.status)
       }
     }
 
     return boms
   }
 
-  async createWorkOrder(workOrderData: Omit<WorkOrder, 'id' | 'workOrderNo' | 'totalCost'>): Promise<WorkOrder> {
+  async createWorkOrder(
+    workOrderData: Omit<WorkOrder, 'id' | 'workOrderNo' | 'totalCost'>
+  ): Promise<WorkOrder> {
     const workOrderNo = `WO-${Date.now()}`
-    
+
     // Calculate total cost
     const operationsCost = workOrderData.operations.reduce((sum, op) => sum + op.cost, 0)
     const materialsCost = workOrderData.requiredItems.reduce((sum, item) => {
@@ -759,12 +799,12 @@ export class MockERPNextBOMService implements ERPNextBOMService {
       id: `wo-${Date.now()}`,
       workOrderNo,
       ...workOrderData,
-      totalCost: operationsCost + materialsCost
+      totalCost: operationsCost + materialsCost,
     }
 
     this.workOrders.set(workOrder.id, workOrder)
 
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500))
     return workOrder
   }
 
@@ -785,12 +825,11 @@ export class MockERPNextBOMService implements ERPNextBOMService {
     const updatedWorkOrder: WorkOrder = {
       ...workOrder,
       status,
-      actualStartDate: status === 'in_progress' && !workOrder.actualStartDate 
-        ? new Date().toISOString() 
-        : workOrder.actualStartDate,
-      actualEndDate: status === 'completed' 
-        ? new Date().toISOString() 
-        : workOrder.actualEndDate
+      actualStartDate:
+        status === 'in_progress' && !workOrder.actualStartDate
+          ? new Date().toISOString()
+          : workOrder.actualStartDate,
+      actualEndDate: status === 'completed' ? new Date().toISOString() : workOrder.actualEndDate,
     }
 
     this.workOrders.set(id, updatedWorkOrder)
@@ -810,14 +849,17 @@ export class MockERPNextBOMService implements ERPNextBOMService {
     const updatedWorkOrder: WorkOrder = {
       ...workOrder,
       producedQty: workOrder.producedQty + quantity,
-      status: (workOrder.producedQty + quantity) >= workOrder.plannedQty ? 'completed' : workOrder.status
+      status:
+        workOrder.producedQty + quantity >= workOrder.plannedQty ? 'completed' : workOrder.status,
     }
 
     this.workOrders.set(id, updatedWorkOrder)
     return updatedWorkOrder
   }
 
-  async calculateBOMCost(bomId: string): Promise<{ rawMaterial: number; operating: number; total: number }> {
+  async calculateBOMCost(
+    bomId: string
+  ): Promise<{ rawMaterial: number; operating: number; total: number }> {
     const bom = this.boms.get(bomId)
     if (!bom) {
       throw new Error('BOM not found')
@@ -826,18 +868,21 @@ export class MockERPNextBOMService implements ERPNextBOMService {
     return {
       rawMaterial: bom.rawMaterialCost,
       operating: bom.operatingCost,
-      total: bom.totalCost
+      total: bom.totalCost,
     }
   }
 
-  async optimizeBOM(bomId: string, criteria: 'cost' | 'quality' | 'time'): Promise<BillOfMaterials> {
+  async optimizeBOM(
+    bomId: string,
+    criteria: 'cost' | 'quality' | 'time'
+  ): Promise<BillOfMaterials> {
     const bom = this.boms.get(bomId)
     if (!bom) {
       throw new Error('BOM not found')
     }
 
     // Simulate optimization
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise((resolve) => setTimeout(resolve, 2000))
 
     let optimizationFactor = 1.0
     let optimizationNote = ''
@@ -862,9 +907,9 @@ export class MockERPNextBOMService implements ERPNextBOMService {
       id: `bom-opt-${Date.now()}`,
       bomNo: `${bom.bomNo}-OPT`,
       rawMaterialCost: bom.rawMaterialCost * optimizationFactor,
-      totalCost: (bom.rawMaterialCost * optimizationFactor) + bom.operatingCost,
+      totalCost: bom.rawMaterialCost * optimizationFactor + bom.operatingCost,
       version: bom.version + 1,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     this.boms.set(optimizedBOM.id, optimizedBOM)

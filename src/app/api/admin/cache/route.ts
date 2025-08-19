@@ -12,7 +12,7 @@ const CacheOperationSchema = z.object({
   operation: z.enum(['flush', 'invalidate', 'stats', 'ping']),
   tenantId: z.string().optional(),
   pattern: z.string().optional(),
-  key: z.string().optional()
+  key: z.string().optional(),
 })
 
 const handleGET = async (context: ApiContext): Promise<NextResponse> => {
@@ -20,23 +20,20 @@ const handleGET = async (context: ApiContext): Promise<NextResponse> => {
 
   // Only super admins can access cache management
   if (user.role !== 'SUPER_ADMIN') {
-    return NextResponse.json(
-      { error: 'Insufficient permissions' },
-      { status: 403 }
-    )
+    return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
   try {
     const cacheStats = redis.getStats()
     const isAvailable = redis.isAvailable()
     const hitRate = redis.getHitRate()
-    
+
     return NextResponse.json({
       cache: {
         available: isAvailable,
         stats: cacheStats,
         hitRate: Math.round(hitRate * 100) / 100,
-        connection: isAvailable ? 'healthy' : 'unavailable'
+        connection: isAvailable ? 'healthy' : 'unavailable',
       },
       operations: {
         available: ['flush', 'invalidate', 'stats', 'ping'],
@@ -44,11 +41,11 @@ const handleGET = async (context: ApiContext): Promise<NextResponse> => {
           flush: 'Clear all cache for a tenant',
           invalidate: 'Remove cache entries matching a pattern',
           stats: 'Get detailed cache statistics',
-          ping: 'Test Redis connection'
-        }
-      }
+          ping: 'Test Redis connection',
+        },
+      },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: 'Failed to get cache status', details: error.message },
       { status: 500 }
@@ -61,16 +58,13 @@ const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
 
   // Only super admins can perform cache operations
   if (user.role !== 'SUPER_ADMIN') {
-    return NextResponse.json(
-      { error: 'Insufficient permissions' },
-      { status: 403 }
-    )
+    return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
   try {
     const body = await request.json()
     const validatedData = CacheOperationSchema.parse(body)
-    
+
     const { operation, tenantId, pattern, key } = validatedData
 
     switch (operation) {
@@ -79,7 +73,7 @@ const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
         return NextResponse.json({
           operation: 'ping',
           result: isHealthy ? 'PONG' : 'FAILED',
-          success: isHealthy
+          success: isHealthy,
         })
 
       case 'stats':
@@ -90,9 +84,9 @@ const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
           result: {
             ...stats,
             hitRate: Math.round(hitRate * 100) / 100,
-            available: redis.isAvailable()
+            available: redis.isAvailable(),
           },
-          success: true
+          success: true,
         })
 
       case 'flush':
@@ -102,13 +96,13 @@ const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
             { status: 400 }
           )
         }
-        
+
         const flushed = await redis.invalidateTenant(tenantId)
         return NextResponse.json({
           operation: 'flush',
           tenantId,
           result: `Flushed ${flushed} cache entries`,
-          success: true
+          success: true,
         })
 
       case 'invalidate':
@@ -120,31 +114,27 @@ const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
         }
 
         const invalidated = await redis.invalidatePattern(
-          pattern, 
+          pattern,
           tenantId ? { tenantId } : undefined
         )
-        
+
         return NextResponse.json({
           operation: 'invalidate',
           pattern,
           tenantId,
           result: `Invalidated ${invalidated} cache entries`,
-          success: true
+          success: true,
         })
 
       default:
-        return NextResponse.json(
-          { error: `Unknown operation: ${operation}` },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: `Unknown operation: ${operation}` }, { status: 400 })
     }
-  } catch (error: any) {
-    console.error('Cache operation error:', error)
+  } catch (error: unknown) {
     return NextResponse.json(
-      { 
-        error: 'Cache operation failed', 
+      {
+        error: 'Cache operation failed',
         details: error.message,
-        success: false
+        success: false,
       },
       { status: 500 }
     )
@@ -156,10 +146,7 @@ const handleDELETE = async (context: ApiContext): Promise<NextResponse> => {
 
   // Only super admins can delete cache entries
   if (user.role !== 'SUPER_ADMIN') {
-    return NextResponse.json(
-      { error: 'Insufficient permissions' },
-      { status: 403 }
-    )
+    return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
   try {
@@ -168,27 +155,24 @@ const handleDELETE = async (context: ApiContext): Promise<NextResponse> => {
     const tenantId = searchParams.get('tenantId')
 
     if (!key) {
-      return NextResponse.json(
-        { error: 'key parameter is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'key parameter is required' }, { status: 400 })
     }
 
     const deleted = await redis.del(key, tenantId ? { tenantId } : undefined)
-    
+
     return NextResponse.json({
       operation: 'delete',
       key,
       tenantId,
       result: deleted ? 'Key deleted successfully' : 'Key not found',
-      success: deleted
+      success: deleted,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { 
-        error: 'Failed to delete cache key', 
+      {
+        error: 'Failed to delete cache key',
         details: error.message,
-        success: false
+        success: false,
       },
       { status: 500 }
     )

@@ -1,7 +1,7 @@
 /**
  * CoreFlow360 - Security Sanitization Utilities
  * MATHEMATICALLY PERFECT, ALGORITHMICALLY OPTIMAL, PROVABLY CORRECT
- * 
+ *
  * Enterprise-grade data sanitization for security and compliance
  */
 
@@ -19,7 +19,7 @@ const SENSITIVE_FIELDS = [
   'bank_account',
   'private_key',
   'encryption_key',
-  'auth_token'
+  'auth_token',
 ]
 
 // Patterns for detecting sensitive data
@@ -52,21 +52,19 @@ export function sanitizeObject<T extends Record<string, unknown>>(
   for (const key in result) {
     if (result.hasOwnProperty(key)) {
       // Check if field name is sensitive
-      const isSensitiveField = sensitiveFields.some(field => 
+      const isSensitiveField = sensitiveFields.some((field) =>
         key.toLowerCase().includes(field.toLowerCase())
       )
 
       // Check if field name matches sensitive patterns
-      const matchesPattern = SENSITIVE_PATTERNS.some(pattern => 
-        pattern.test(key)
-      )
+      const matchesPattern = SENSITIVE_PATTERNS.some((pattern) => pattern.test(key))
 
       if (isSensitiveField || matchesPattern) {
         result[key] = '[REDACTED]'
       } else if (typeof result[key] === 'object' && result[key] !== null) {
         // Recursively sanitize nested objects
         if (Array.isArray(result[key])) {
-          result[key] = result[key].map((item: unknown) => 
+          result[key] = result[key].map((item: unknown) =>
             typeof item === 'object' ? sanitizeObject(item, customSensitiveFields) : item
           )
         } else {
@@ -178,7 +176,7 @@ export function sanitizeEmail(email: string): string | null {
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
   const trimmed = email.trim().toLowerCase()
-  
+
   if (!emailPattern.test(trimmed)) {
     return null
   }
@@ -209,7 +207,7 @@ export function sanitizeErrorMessage(error: unknown): string {
     if (errorWithCode.code === 'ENOTFOUND') {
       return 'Service not found'
     }
-    
+
     return 'An error occurred while processing your request'
   }
 

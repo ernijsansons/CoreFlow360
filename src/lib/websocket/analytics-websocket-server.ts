@@ -14,20 +14,20 @@ import { redis } from '@/lib/cache/unified-redis'
 export const SubscriptionSchema = z.object({
   channel: z.enum([
     'analytics:revenue',
-    'analytics:users', 
+    'analytics:users',
     'analytics:performance',
     'analytics:anomalies',
     'analytics:conversions',
     'dashboard:metrics',
     'dashboard:alerts',
-    'events:realtime'
+    'events:realtime',
   ]),
   filters: z.object({
     tenantId: z.string(),
     timeframe: z.enum(['1m', '5m', '15m', '1h', '24h']).default('5m'),
     metrics: z.array(z.string()).optional(),
-    departments: z.array(z.string()).optional()
-  })
+    departments: z.array(z.string()).optional(),
+  }),
 })
 
 export const StreamDataSchema = z.object({
@@ -37,8 +37,8 @@ export const StreamDataSchema = z.object({
   metadata: z.object({
     tenantId: z.string(),
     source: z.string(),
-    version: z.string().default('1.0')
-  })
+    version: z.string().default('1.0'),
+  }),
 })
 
 export type SubscriptionRequest = z.infer<typeof SubscriptionSchema>
@@ -65,19 +65,19 @@ export class AnalyticsWebSocketServer {
     connectedClients: 0,
     messagesPerSecond: 0,
     subscriptionsCount: 0,
-    dataPointsStreamed: 0
+    dataPointsStreamed: 0,
   }
 
   constructor(httpServer: HTTPServer) {
     this.io = new SocketIOServer(httpServer, {
       cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:3000",
-        methods: ["GET", "POST"],
-        credentials: true
+        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        methods: ['GET', 'POST'],
+        credentials: true,
       },
       transports: ['websocket', 'polling'],
       pingTimeout: 60000,
-      pingInterval: 25000
+      pingInterval: 25000,
     })
 
     this.initializeEventHandlers()
@@ -87,8 +87,6 @@ export class AnalyticsWebSocketServer {
 
   private initializeEventHandlers() {
     this.io.on('connection', (socket) => {
-      console.log(`[WebSocket] Client connected: ${socket.id}`)
-      
       // Handle authentication
       socket.on('authenticate', async (authData) => {
         try {
@@ -96,25 +94,24 @@ export class AnalyticsWebSocketServer {
           if (session) {
             this.clients.set(socket.id, session)
             this.metrics.connectedClients++
-            
-            socket.emit('authenticated', { 
-              success: true, 
+
+            socket.emit('authenticated', {
+              success: true,
               clientId: socket.id,
-              capabilities: this.getClientCapabilities(session)
+              capabilities: this.getClientCapabilities(session),
             })
-            
+
             // Track connection
             await this.trackEvent('websocket_connected', {
               clientId: socket.id,
               tenantId: session.tenantId,
-              userId: session.userId
+              userId: session.userId,
             })
           } else {
             socket.emit('authentication_failed', { error: 'Invalid credentials' })
             socket.disconnect()
           }
         } catch (error) {
-          console.error('[WebSocket] Authentication error:', error)
           socket.emit('authentication_failed', { error: 'Authentication failed' })
           socket.disconnect()
         }
@@ -125,14 +122,14 @@ export class AnalyticsWebSocketServer {
         try {
           const parsed = SubscriptionSchema.parse(subscription)
           await this.handleSubscription(socket.id, parsed)
-          
+
           socket.emit('subscription_confirmed', {
             channel: parsed.channel,
-            filters: parsed.filters
+            filters: parsed.filters,
           })
         } catch (error) {
           socket.emit('subscription_error', {
-            error: error instanceof Error ? error.message : 'Subscription failed'
+            error: error instanceof Error ? error.message : 'Subscription failed',
           })
         }
       })
@@ -153,7 +150,6 @@ export class AnalyticsWebSocketServer {
 
       // Handle disconnection
       socket.on('disconnect', async (reason) => {
-        console.log(`[WebSocket] Client disconnected: ${socket.id}, reason: ${reason}`)
         await this.handleDisconnection(socket.id)
       })
 
@@ -168,11 +164,14 @@ export class AnalyticsWebSocketServer {
     })
   }
 
-  private async authenticateClient(socketId: string, authData: any): Promise<ClientSession | null> {
+  private async authenticateClient(
+    socketId: string,
+    authData: unknown
+  ): Promise<ClientSession | null> {
     try {
       // In production, validate JWT token or session
       const { token, tenantId, userId } = authData
-      
+
       if (!token || !tenantId || !userId) {
         return null
       }
@@ -192,11 +191,10 @@ export class AnalyticsWebSocketServer {
         metadata: {
           userAgent: authData.userAgent,
           ip: authData.ip,
-          department: authData.department
-        }
+          department: authData.department,
+        },
       }
     } catch (error) {
-      console.error('[WebSocket] Authentication error:', error)
       return null
     }
   }
@@ -220,8 +218,8 @@ export class AnalyticsWebSocketServer {
         'analytics:conversions',
         'dashboard:metrics',
         'dashboard:alerts',
-        'events:realtime'
-      ]
+        'events:realtime',
+      ],
     }
   }
 
@@ -247,7 +245,7 @@ export class AnalyticsWebSocketServer {
       clientId: socketId,
       channel: subscription.channel,
       tenantId: client.tenantId,
-      filters: subscription.filters
+      filters: subscription.filters,
     })
   }
 
@@ -265,31 +263,29 @@ export class AnalyticsWebSocketServer {
     }
   }
 
-  private async handleRealTimeEvent(client: ClientSession, eventData: any) {
+  private async handleRealTimeEvent(client: ClientSession, eventData: unknown) {
     try {
       // Process and broadcast real-time event
       const processedEvent = {
         ...eventData,
         timestamp: new Date(),
         tenantId: client.tenantId,
-        userId: client.userId
+        userId: client.userId,
       }
 
       // Track the event
       await eventTracker.track({
         type: eventData.type || 'realtime_event',
         category: 'websocket',
-        properties: processedEvent
+        properties: processedEvent,
       })
 
       // Broadcast to relevant subscribers
       const channelKey = `events:realtime:${client.tenantId}`
       this.io.to(channelKey).emit('realtime_event', processedEvent)
-      
+
       this.metrics.messagesPerSecond++
-    } catch (error) {
-      console.error('[WebSocket] Real-time event error:', error)
-    }
+    } catch (error) {}
   }
 
   private async handleDisconnection(socketId: string) {
@@ -297,14 +293,14 @@ export class AnalyticsWebSocketServer {
     if (client) {
       this.metrics.connectedClients--
       this.metrics.subscriptionsCount -= client.subscriptions.size
-      
+
       // Track disconnection
       await this.trackEvent('websocket_disconnected', {
         clientId: socketId,
         tenantId: client.tenantId,
-        sessionDuration: Date.now() - client.lastActivity.getTime()
+        sessionDuration: Date.now() - client.lastActivity.getTime(),
       })
-      
+
       this.clients.delete(socketId)
     }
   }
@@ -314,7 +310,7 @@ export class AnalyticsWebSocketServer {
       const socket = this.io.sockets.sockets.get(socketId)
       if (!socket) return
 
-      let initialData: any
+      let initialData: unknown
 
       switch (subscription.channel) {
         case 'analytics:revenue':
@@ -336,11 +332,9 @@ export class AnalyticsWebSocketServer {
       socket.emit('initial_data', {
         channel: subscription.channel,
         data: initialData,
-        timestamp: new Date()
+        timestamp: new Date(),
       })
-    } catch (error) {
-      console.error('[WebSocket] Initial data error:', error)
-    }
+    } catch (error) {}
   }
 
   private startDataStreaming() {
@@ -368,7 +362,7 @@ export class AnalyticsWebSocketServer {
     try {
       // Get all tenants with active subscriptions
       const activeTenants = new Set<string>()
-      this.clients.forEach(client => {
+      this.clients.forEach((client) => {
         if (client.subscriptions.size > 0) {
           activeTenants.add(client.tenantId)
         }
@@ -379,75 +373,69 @@ export class AnalyticsWebSocketServer {
         const [revenueData, userdata, performanceData] = await Promise.all([
           this.getRevenueAnalytics(tenantId),
           this.getUserAnalytics(tenantId),
-          this.getPerformanceAnalytics(tenantId)
+          this.getPerformanceAnalytics(tenantId),
         ])
 
         // Broadcast to subscribers
         this.io.to(`analytics:revenue:${tenantId}`).emit('analytics_update', {
           channel: 'analytics:revenue',
           data: revenueData,
-          timestamp: new Date()
+          timestamp: new Date(),
         })
 
         this.io.to(`analytics:users:${tenantId}`).emit('analytics_update', {
           channel: 'analytics:users',
           data: userdata,
-          timestamp: new Date()
+          timestamp: new Date(),
         })
 
         this.io.to(`analytics:performance:${tenantId}`).emit('analytics_update', {
-          channel: 'analytics:performance', 
+          channel: 'analytics:performance',
           data: performanceData,
-          timestamp: new Date()
+          timestamp: new Date(),
         })
 
         this.metrics.dataPointsStreamed += 3
       }
-    } catch (error) {
-      console.error('[WebSocket] Analytics streaming error:', error)
-    }
+    } catch (error) {}
   }
 
   private async streamMetricsData() {
     try {
       const activeTenants = new Set<string>()
-      this.clients.forEach(client => activeTenants.add(client.tenantId))
+      this.clients.forEach((client) => activeTenants.add(client.tenantId))
 
       for (const tenantId of activeTenants) {
         const metricsData = await this.getDashboardMetrics(tenantId)
-        
+
         this.io.to(`dashboard:metrics:${tenantId}`).emit('metrics_update', {
           channel: 'dashboard:metrics',
           data: metricsData,
-          timestamp: new Date()
+          timestamp: new Date(),
         })
 
         this.metrics.dataPointsStreamed++
       }
-    } catch (error) {
-      console.error('[WebSocket] Metrics streaming error:', error)
-    }
+    } catch (error) {}
   }
 
   private async streamRealtimeEvents() {
     try {
       // Get recent events from the last 5 seconds
       const recentEvents = await this.getRecentEvents(5000)
-      
+
       for (const event of recentEvents) {
         if (event.tenantId) {
           this.io.to(`events:realtime:${event.tenantId}`).emit('realtime_event', {
             channel: 'events:realtime',
             data: event,
-            timestamp: new Date()
+            timestamp: new Date(),
           })
         }
       }
 
       this.metrics.dataPointsStreamed += recentEvents.length
-    } catch (error) {
-      console.error('[WebSocket] Real-time events streaming error:', error)
-    }
+    } catch (error) {}
   }
 
   private async getRevenueAnalytics(tenantId: string) {
@@ -460,26 +448,25 @@ export class AnalyticsWebSocketServer {
         conversionRate: analytics.overview.conversionRate,
         churnRate: analytics.overview.churnRate,
         trend: 'up', // Would calculate from historical data
-        change: 12.5 // Would calculate from historical data
+        change: 12.5, // Would calculate from historical data
       }
     } catch (error) {
-      console.error('[WebSocket] Revenue analytics error:', error)
       return { error: 'Failed to fetch revenue analytics' }
     }
   }
 
-  private async getUserAnalytics(tenantId: string) {
+  private async getUserAnalytics(_tenantId: string) {
     // Mock user analytics - in production, query from database
     return {
       activeUsers: 5000 + Math.floor(Math.random() * 1000),
       newUsers: 50 + Math.floor(Math.random() * 20),
       sessionDuration: 15 + Math.random() * 10,
       bounceRate: 0.3 + Math.random() * 0.2,
-      userGrowth: 8.5 + Math.random() * 5
+      userGrowth: 8.5 + Math.random() * 5,
     }
   }
 
-  private async getPerformanceAnalytics(tenantId: string) {
+  private async getPerformanceAnalytics(_tenantId: string) {
     // Mock performance analytics - in production, query from monitoring systems
     return {
       responseTime: 200 + Math.random() * 100,
@@ -487,7 +474,7 @@ export class AnalyticsWebSocketServer {
       uptime: 99.9,
       throughput: 1000 + Math.random() * 500,
       cpuUsage: 30 + Math.random() * 40,
-      memoryUsage: 60 + Math.random() * 20
+      memoryUsage: 60 + Math.random() * 20,
     }
   }
 
@@ -496,7 +483,7 @@ export class AnalyticsWebSocketServer {
     const [revenue, users, performance] = await Promise.all([
       this.getRevenueAnalytics(tenantId),
       this.getUserAnalytics(tenantId),
-      this.getPerformanceAnalytics(tenantId)
+      this.getPerformanceAnalytics(tenantId),
     ])
 
     return {
@@ -504,17 +491,17 @@ export class AnalyticsWebSocketServer {
       users,
       performance,
       alerts: await this.getActiveAlerts(tenantId),
-      systemHealth: this.calculateSystemHealth()
+      systemHealth: this.calculateSystemHealth(),
     }
   }
 
-  private async getActiveAlerts(tenantId: string) {
+  private async getActiveAlerts(_tenantId: string) {
     // Mock alerts - in production, query from alert system
     return {
       critical: Math.floor(Math.random() * 2),
       high: Math.floor(Math.random() * 3),
       medium: Math.floor(Math.random() * 5),
-      low: Math.floor(Math.random() * 10)
+      low: Math.floor(Math.random() * 10),
     }
   }
 
@@ -522,11 +509,11 @@ export class AnalyticsWebSocketServer {
     return {
       status: 'healthy',
       score: 95 + Math.random() * 5,
-      uptime: 99.9
+      uptime: 99.9,
     }
   }
 
-  private async getRecentEvents(milliseconds: number) {
+  private async getRecentEvents(_milliseconds: number) {
     // Mock recent events - in production, query from event store
     return [
       {
@@ -534,8 +521,8 @@ export class AnalyticsWebSocketServer {
         type: 'user_action',
         tenantId: 'tenant_1',
         timestamp: new Date(),
-        data: { action: 'page_view', page: '/dashboard' }
-      }
+        data: { action: 'page_view', page: '/dashboard' },
+      },
     ]
   }
 
@@ -546,58 +533,52 @@ export class AnalyticsWebSocketServer {
     }, 1000)
 
     // Log metrics every 30 seconds
-    setInterval(() => {
-      console.log('[WebSocket] Metrics:', this.metrics)
-    }, 30000)
+    setInterval(() => {}, 30000)
   }
 
-  private async trackEvent(type: string, properties: any) {
+  private async trackEvent(type: string, properties: unknown) {
     try {
       await eventTracker.track({
         type,
         category: 'websocket',
-        properties
+        properties,
       })
-    } catch (error) {
-      console.error('[WebSocket] Event tracking error:', error)
-    }
+    } catch (error) {}
   }
 
   // Public methods
   public getMetrics() {
     return {
       ...this.metrics,
-      timestamp: new Date()
+      timestamp: new Date(),
     }
   }
 
   public getConnectedClients() {
-    return Array.from(this.clients.values()).map(client => ({
+    return Array.from(this.clients.values()).map((client) => ({
       id: client.id,
       tenantId: client.tenantId,
       subscriptions: Array.from(client.subscriptions),
-      lastActivity: client.lastActivity
+      lastActivity: client.lastActivity,
     }))
   }
 
-  public async broadcastToTenant(tenantId: string, channel: string, data: any) {
+  public async broadcastToTenant(tenantId: string, channel: string, data: unknown) {
     const channelKey = `${channel}:${tenantId}`
     this.io.to(channelKey).emit('broadcast', {
       channel,
       data,
-      timestamp: new Date()
+      timestamp: new Date(),
     })
   }
 
   public shutdown() {
     // Clear all intervals
-    this.streamIntervals.forEach(interval => clearInterval(interval))
+    this.streamIntervals.forEach((interval) => clearInterval(interval))
     this.streamIntervals.clear()
-    
+
     // Disconnect all clients
     this.io.disconnectSockets(true)
-    
-    console.log('[WebSocket] Server shutdown complete')
   }
 }
 

@@ -9,13 +9,17 @@ import { prisma } from './db'
 // Pricing calculation request schema
 const PricingRequestSchema = z.object({
   modules: z.array(z.string()).min(1, 'At least one module required'),
-  userCount: z.number().int().min(1, 'User count must be at least 1').max(10000, 'User count too high'),
+  userCount: z
+    .number()
+    .int()
+    .min(1, 'User count must be at least 1')
+    .max(10000, 'User count too high'),
   billingCycle: z.enum(['monthly', 'annual']).default('monthly'),
   tenantId: z.string().optional(),
   billingOrder: z.number().int().min(1).default(1),
   industry: z.string().optional(),
   applyDiscounts: z.boolean().default(true),
-  includeSetupFees: z.boolean().default(true)
+  includeSetupFees: z.boolean().default(true),
 })
 
 // Pricing calculation result
@@ -67,51 +71,49 @@ export class UnifiedPricingEngine {
   /**
    * Calculate pricing for a subscription request
    */
-  async calculatePricing(request: z.infer<typeof PricingRequestSchema>): Promise<PricingCalculation> {
+  async calculatePricing(
+    request: z.infer<typeof PricingRequestSchema>
+  ): Promise<PricingCalculation> {
     // Validate request
     const validatedRequest = PricingRequestSchema.parse(request)
-    
+
     // Get module definitions
     const moduleDefinitions = await this.getModuleDefinitions(validatedRequest.modules)
-    
+
     // Validate dependencies
     await this.validateModuleDependencies(moduleDefinitions, validatedRequest.modules)
-    
+
     // Calculate base pricing
     const breakdown = this.calculateModuleBreakdown(moduleDefinitions, validatedRequest.userCount)
-    
+
     // Calculate setup fees
-    const setupFees = validatedRequest.includeSetupFees 
+    const setupFees = validatedRequest.includeSetupFees
       ? breakdown.reduce((sum, module) => sum + module.setupFee, 0)
       : 0
-    
+
     // Calculate subtotal
     const subtotal = breakdown.reduce((sum, module) => sum + module.subtotal, 0) + setupFees
-    
+
     // Apply discounts
     const discounts = await this.calculateDiscounts(validatedRequest, subtotal, breakdown)
     const totalDiscount = discounts.reduce((sum, discount) => sum + discount.amount, 0)
-    
+
     // Calculate final price
     const finalPrice = Math.max(0, subtotal - totalDiscount)
-    
+
     // Calculate monthly/annual prices
-    const monthlyPrice = validatedRequest.billingCycle === 'annual' 
-      ? finalPrice / 12 
-      : finalPrice
-    const annualPrice = validatedRequest.billingCycle === 'annual' 
-      ? finalPrice 
-      : finalPrice * 12
-    
+    const monthlyPrice = validatedRequest.billingCycle === 'annual' ? finalPrice / 12 : finalPrice
+    const annualPrice = validatedRequest.billingCycle === 'annual' ? finalPrice : finalPrice * 12
+
     // Generate recommendations
     const recommendations = this.generateRecommendations(validatedRequest, breakdown)
-    
+
     // Generate warnings
     const warnings = this.generateWarnings(validatedRequest, breakdown)
-    
+
     return {
       basePrice: breakdown.reduce((sum, module) => sum + module.basePrice, 0),
-      userPrice: breakdown.reduce((sum, module) => sum + (module.perUserPrice * module.userCount), 0),
+      userPrice: breakdown.reduce((sum, module) => sum + module.perUserPrice * module.userCount, 0),
       setupFees,
       subtotal,
       discounts,
@@ -121,7 +123,7 @@ export class UnifiedPricingEngine {
       annualPrice,
       breakdown,
       recommendations,
-      warnings
+      warnings,
     }
   }
 
@@ -132,13 +134,13 @@ export class UnifiedPricingEngine {
     const modules = await prisma.moduleDefinition.findMany({
       where: {
         moduleKey: { in: moduleKeys },
-        isActive: true
-      }
+        isActive: true,
+      },
     })
 
     if (modules.length !== moduleKeys.length) {
-      const foundModules = modules.map(m => m.moduleKey)
-      const missingModules = moduleKeys.filter(key => !foundModules.includes(key))
+      const foundModules = modules.map((m) => m.moduleKey)
+      const missingModules = moduleKeys.filter((key) => !foundModules.includes(key))
       throw new Error(`Invalid modules: ${missingModules.join(', ')}`)
     }
 
@@ -148,7 +150,7 @@ export class UnifiedPricingEngine {
   /**
    * Validate module dependencies
    */
-  private async validateModuleDependencies(modules: any[], selectedModules: string[]) {
+  private async validateModuleDependencies(modules: unknown[], selectedModules: string[]) {
     const errors: string[] = []
 
     for (const module of modules) {
@@ -178,15 +180,15 @@ export class UnifiedPricingEngine {
   /**
    * Calculate module breakdown
    */
-  private calculateModuleBreakdown(modules: any[], userCount: number): ModuleBreakdown[] {
-    return modules.map(module => {
+  private calculateModuleBreakdown(modules: unknown[], userCount: number): ModuleBreakdown[] {
+    return modules.map((module) => {
       const basePrice = parseFloat(module.basePrice)
       const perUserPrice = parseFloat(module.perUserPrice)
       const setupFee = parseFloat(module.setupFee || '0')
-      
+
       // Use consistent pricing formula: max(basePrice, perUserPrice * userCount)
       const subtotal = Math.max(basePrice, perUserPrice * userCount)
-      
+
       return {
         moduleKey: module.moduleKey,
         moduleName: module.name,
@@ -194,7 +196,7 @@ export class UnifiedPricingEngine {
         perUserPrice,
         userCount,
         subtotal,
-        setupFee
+        setupFee,
       }
     })
   }
@@ -236,9 +238,9 @@ export class UnifiedPricingEngine {
       discounts.push({
         type: 'annual',
         name: 'Annual Billing Discount',
-        amount: subtotal * 0.10, // 10% discount
-        percentage: 0.10,
-        description: '10% discount for annual billing'
+        amount: subtotal * 0.1, // 10% discount
+        percentage: 0.1,
+        description: '10% discount for annual billing',
       })
     }
 
@@ -250,31 +252,31 @@ export class UnifiedPricingEngine {
    */
   private calculateBundleDiscount(modules: string[], subtotal: number): Discount | null {
     const bundles = {
-      'core_bundle': {
+      core_bundle: {
         name: 'Core Business Bundle',
         modules: ['crm', 'accounting', 'projects'],
-        discount: 0.15
+        discount: 0.15,
       },
-      'manufacturing_bundle': {
+      manufacturing_bundle: {
         name: 'Manufacturing Suite',
         modules: ['inventory', 'manufacturing', 'projects', 'accounting'],
-        discount: 0.25
+        discount: 0.25,
       },
-      'professional_services': {
+      professional_services: {
         name: 'Professional Services Bundle',
         modules: ['crm', 'projects', 'hr', 'accounting'],
-        discount: 0.20
-      }
+        discount: 0.2,
+      },
     }
 
     for (const [key, bundle] of Object.entries(bundles)) {
-      if (bundle.modules.every(module => modules.includes(module))) {
+      if (bundle.modules.every((module) => modules.includes(module))) {
         return {
           type: 'bundle',
           name: bundle.name,
           amount: subtotal * bundle.discount,
           percentage: bundle.discount,
-          description: `${bundle.discount * 100}% discount for ${bundle.name}`
+          description: `${bundle.discount * 100}% discount for ${bundle.name}`,
         }
       }
     }
@@ -287,11 +289,11 @@ export class UnifiedPricingEngine {
    */
   private calculateVolumeDiscount(userCount: number, subtotal: number): Discount | null {
     const volumeTiers = {
-      10: 0.05,   // 5% off for 10+ users
-      25: 0.10,   // 10% off for 25+ users
-      50: 0.15,   // 15% off for 50+ users
-      100: 0.20,  // 20% off for 100+ users
-      250: 0.25   // 25% off for 250+ users
+      10: 0.05, // 5% off for 10+ users
+      25: 0.1, // 10% off for 25+ users
+      50: 0.15, // 15% off for 50+ users
+      100: 0.2, // 20% off for 100+ users
+      250: 0.25, // 25% off for 250+ users
     }
 
     let applicableDiscount = 0
@@ -307,7 +309,7 @@ export class UnifiedPricingEngine {
         name: 'Volume Discount',
         amount: subtotal * applicableDiscount,
         percentage: applicableDiscount,
-        description: `${applicableDiscount * 100}% volume discount for ${userCount}+ users`
+        description: `${applicableDiscount * 100}% volume discount for ${userCount}+ users`,
       }
     }
 
@@ -319,14 +321,14 @@ export class UnifiedPricingEngine {
    */
   private calculateProgressiveDiscount(billingOrder: number, subtotal: number): Discount | null {
     const progressiveDiscounts = {
-      1: 0,      // First business - no discount
-      2: 0.20,   // Second business - 20% off
-      3: 0.35,   // Third business - 35% off
-      4: 0.45,   // Fourth business - 45% off
-      5: 0.50    // Fifth+ business - 50% off
+      1: 0, // First business - no discount
+      2: 0.2, // Second business - 20% off
+      3: 0.35, // Third business - 35% off
+      4: 0.45, // Fourth business - 45% off
+      5: 0.5, // Fifth+ business - 50% off
     }
 
-    const discount = progressiveDiscounts[Math.min(billingOrder, 5)] || 0.50
+    const discount = progressiveDiscounts[Math.min(billingOrder, 5)] || 0.5
 
     if (discount > 0) {
       return {
@@ -334,7 +336,7 @@ export class UnifiedPricingEngine {
         name: 'Multi-Business Discount',
         amount: subtotal * discount,
         percentage: discount,
-        description: `${discount * 100}% discount for ${billingOrder}${this.getOrdinalSuffix(billingOrder)} business`
+        description: `${discount * 100}% discount for ${billingOrder}${this.getOrdinalSuffix(billingOrder)} business`,
       }
     }
 

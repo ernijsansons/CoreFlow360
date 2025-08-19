@@ -12,7 +12,7 @@ export interface ApiError {
 }
 
 export interface ErrorHandlingOptions {
-  fallbackData?: any
+  fallbackData?: unknown
   retryAttempts?: number
   retryDelay?: number
   showUserError?: boolean
@@ -23,44 +23,40 @@ export interface ErrorHandlingOptions {
  * Standardized API error handler
  */
 export class ApiErrorHandler {
-  static createError(
-    error: unknown,
-    context?: string,
-    statusCode?: number
-  ): ApiError {
+  static createError(error: unknown, context?: string, statusCode?: number): ApiError {
     const timestamp = new Date().toISOString()
-    
+
     if (error instanceof Response) {
       return {
         message: `API request failed: ${error.status} ${error.statusText}`,
         code: 'API_ERROR',
         statusCode: error.status,
         isNetworkError: false,
-        timestamp
+        timestamp,
       }
     }
-    
+
     if (error instanceof Error) {
-      const isNetworkError = 
+      const isNetworkError =
         error.message.includes('fetch') ||
         error.message.includes('network') ||
         error.message.includes('Failed to fetch')
-        
+
       return {
         message: context ? `${context}: ${error.message}` : error.message,
         code: 'CLIENT_ERROR',
         statusCode: statusCode || 500,
         isNetworkError,
-        timestamp
+        timestamp,
       }
     }
-    
+
     return {
       message: context ? `${context}: Unknown error` : 'Unknown error occurred',
       code: 'UNKNOWN_ERROR',
       statusCode: statusCode || 500,
       isNetworkError: false,
-      timestamp
+      timestamp,
     }
   }
 
@@ -68,33 +64,27 @@ export class ApiErrorHandler {
     apiCall: () => Promise<T>,
     options: ErrorHandlingOptions = {}
   ): Promise<{ data: T | null; error: ApiError | null }> {
-    const {
-      fallbackData = null,
-      retryAttempts = 0,
-      retryDelay = 1000,
-      logError = true
-    } = options
+    const { fallbackData = null, retryAttempts = 0, retryDelay = 1000, logError = true } = options
 
     let lastError: ApiError | null = null
-    
+
     for (let attempt = 0; attempt <= retryAttempts; attempt++) {
       try {
         const data = await apiCall()
         return { data, error: null }
       } catch (error) {
         lastError = this.createError(error, 'API call failed')
-        
+
         if (logError) {
-          console.error(`API call attempt ${attempt + 1} failed:`, lastError)
         }
-        
+
         // If not the last attempt, wait before retrying
         if (attempt < retryAttempts) {
-          await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt + 1)))
+          await new Promise((resolve) => setTimeout(resolve, retryDelay * (attempt + 1)))
         }
       }
     }
-    
+
     return { data: fallbackData, error: lastError }
   }
 
@@ -102,27 +92,27 @@ export class ApiErrorHandler {
     if (error.isNetworkError) {
       return 'Network connection issue. Please check your internet connection.'
     }
-    
+
     if (error.statusCode === 401) {
       return 'Authentication required. Please log in again.'
     }
-    
+
     if (error.statusCode === 403) {
       return 'You do not have permission to perform this action.'
     }
-    
+
     if (error.statusCode === 404) {
       return 'The requested resource was not found.'
     }
-    
+
     if (error.statusCode === 429) {
       return 'Too many requests. Please try again in a moment.'
     }
-    
+
     if (error.statusCode && error.statusCode >= 500) {
       return 'Server error. Please try again later.'
     }
-    
+
     return error.message || 'An unexpected error occurred.'
   }
 
@@ -136,10 +126,8 @@ export class ApiErrorHandler {
  * React hook for API error handling
  */
 export function useApiErrorHandler() {
-  const handleError = (error: ApiError) => {
+  const handleError = (_error: ApiError) => {
     // You could integrate with toast notifications, error reporting services, etc.
-    console.error('API Error:', error)
-    
     // Example: Track error with analytics service
     // analytics.track('api_error', {
     //   code: error.code,
@@ -166,22 +154,25 @@ export async function apiRequest<T>(
     ...fetchOptions
   } = options
 
-  return ApiErrorHandler.handleApiCall(async () => {
-    const response = await fetch(url, {
-      ...fetchOptions,
-      headers: {
-        'Content-Type': 'application/json',
-        ...fetchOptions.headers
+  return ApiErrorHandler.handleApiCall(
+    async () => {
+      const response = await fetch(url, {
+        ...fetchOptions,
+        headers: {
+          'Content-Type': 'application/json',
+          ...fetchOptions.headers,
+        },
+      })
+
+      if (!response.ok) {
+        throw response
       }
-    })
 
-    if (!response.ok) {
-      throw response
-    }
-
-    const data = await response.json()
-    return data as T
-  }, { fallbackData, retryAttempts, retryDelay, logError })
+      const data = await response.json()
+      return data as T
+    },
+    { fallbackData, retryAttempts, retryDelay, logError }
+  )
 }
 
 /**
@@ -190,11 +181,10 @@ export async function apiRequest<T>(
 export function useErrorBoundary() {
   return (error: unknown, context?: string) => {
     const apiError = ApiErrorHandler.createError(error, context)
-    console.error('Component Error:', apiError)
-    
+
     // You could integrate with error reporting services here
     // errorReporting.captureException(error, { context, ...apiError })
-    
+
     return apiError
   }
 }
@@ -211,8 +201,8 @@ export const ErrorPatterns = {
       subscriptionStatus: 'FREE',
       selectedAgent: 'crm',
       dailyUsageCount: 0,
-      dailyLimit: 10
-    }
+      dailyLimit: 10,
+    },
   },
 
   // For live metrics API calls
@@ -223,21 +213,21 @@ export const ErrorPatterns = {
       responseTime: 45,
       activeUsers: 1247,
       successRate: 98.5,
-      aiProcessesPerSecond: 180
-    }
+      aiProcessesPerSecond: 180,
+    },
   },
 
   // For conversion tracking (fire-and-forget)
   conversionTracking: {
     retryAttempts: 0,
     retryDelay: 0,
-    logError: false // Don't spam logs for non-critical tracking
+    logError: false, // Don't spam logs for non-critical tracking
   },
 
   // For onboarding APIs
   onboarding: {
     retryAttempts: 1,
     retryDelay: 1000,
-    fallbackData: null
-  }
+    fallbackData: null,
+  },
 }

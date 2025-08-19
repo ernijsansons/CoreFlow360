@@ -14,7 +14,7 @@ import {
   ExclamationTriangleIcon,
   ArrowPathIcon,
   CalendarIcon,
-  FunnelIcon
+  FunnelIcon,
 } from '@heroicons/react/24/outline'
 import { Territory, TerritoryAnalytics } from '@/types/territory'
 
@@ -57,14 +57,18 @@ export default function TerritoryPerformanceAnalytics({
   territories,
   userId,
   tenantId,
-  className = ''
+  className = '',
 }: TerritoryPerformanceAnalyticsProps) {
   const [performanceData, setPerformanceData] = useState<PerformanceMetrics[]>([])
   const [competitiveData, setCompetitiveData] = useState<CompetitiveAnalysis[]>([])
-  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month')
+  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>(
+    'month'
+  )
   const [selectedTerritory, setSelectedTerritory] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [viewMode, setViewMode] = useState<'overview' | 'detailed' | 'competitive' | 'forecasting'>('overview')
+  const [viewMode, setViewMode] = useState<'overview' | 'detailed' | 'competitive' | 'forecasting'>(
+    'overview'
+  )
 
   useEffect(() => {
     loadPerformanceAnalytics()
@@ -73,11 +77,11 @@ export default function TerritoryPerformanceAnalytics({
   const loadPerformanceAnalytics = async () => {
     try {
       setLoading(true)
-      
+
       // Simulate AI-powered analytics processing
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      const mockPerformanceData: PerformanceMetrics[] = territories.map(territory => ({
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      const mockPerformanceData: PerformanceMetrics[] = territories.map((territory) => ({
         territory,
         analytics: {
           id: `analytics-${territory.id}`,
@@ -109,55 +113,61 @@ export default function TerritoryPerformanceAnalytics({
           improvementAreas: [
             'Follow-up response time',
             'Competitive positioning',
-            'Territory coverage depth'
+            'Territory coverage depth',
           ],
           recommendations: {
             frequency: 'Consider weekly visits for high-potential accounts',
             focus: 'Target enterprise segment for Q4',
-            efficiency: 'Optimize route planning to reduce travel time'
+            efficiency: 'Optimize route planning to reduce travel time',
           },
-          recordedAt: '2024-08-11T12:00:00Z'
+          recordedAt: '2024-08-11T12:00:00Z',
         },
         trends: {
-          revenue: (Math.random() * 0.6 - 0.1), // -10% to +50%
-          conversion: (Math.random() * 0.4 - 0.1), // -10% to +30%
-          efficiency: (Math.random() * 0.3 - 0.05), // -5% to +25%
-          satisfaction: (Math.random() * 0.2 - 0.05) // -5% to +15%
+          revenue: Math.random() * 0.6 - 0.1, // -10% to +50%
+          conversion: Math.random() * 0.4 - 0.1, // -10% to +30%
+          efficiency: Math.random() * 0.3 - 0.05, // -5% to +25%
+          satisfaction: Math.random() * 0.2 - 0.05, // -5% to +15%
         },
         benchmarks: {
           revenuePerVisit: Math.floor(Math.random() * 5000) + 8000,
           conversionRate: 0.28,
           customerSatisfaction: 4.2,
-          territoryEfficiency: 0.85
+          territoryEfficiency: 0.85,
         },
         insights: [
           'Territory shows 25% above-average conversion rate',
           'Customer satisfaction trending upward (+12%)',
           'Competitive activity increasing in Q4',
-          'High-value prospects concentrated in tech corridor'
+          'High-value prospects concentrated in tech corridor',
         ],
         recommendations: [
           'Increase visit frequency to capitalize on momentum',
           'Focus on enterprise accounts for higher deal values',
           'Implement competitive battle cards for key accounts',
-          'Schedule territory deep-dive session with manager'
-        ]
+          'Schedule territory deep-dive session with manager',
+        ],
       }))
 
-      const mockCompetitiveData: CompetitiveAnalysis[] = territories.map(territory => ({
+      const mockCompetitiveData: CompetitiveAnalysis[] = territories.map((territory) => ({
         territoryId: territory.id,
         competitorActivity: territory.competitiveActivity,
         marketShare: Math.random() * 0.3 + 0.15, // 15-45% market share
         winRate: Math.random() * 0.4 + 0.5, // 50-90% win rate
-        threatLevel: territory.competitiveActivity > 7 ? 'high' : territory.competitiveActivity > 4 ? 'medium' : 'low',
-        keyCompetitors: ['Salesforce', 'HubSpot', 'Microsoft Dynamics', 'Pipedrive'].slice(0, Math.floor(Math.random() * 3) + 2)
+        threatLevel:
+          territory.competitiveActivity > 7
+            ? 'high'
+            : territory.competitiveActivity > 4
+              ? 'medium'
+              : 'low',
+        keyCompetitors: ['Salesforce', 'HubSpot', 'Microsoft Dynamics', 'Pipedrive'].slice(
+          0,
+          Math.floor(Math.random() * 3) + 2
+        ),
       }))
 
       setPerformanceData(mockPerformanceData)
       setCompetitiveData(mockCompetitiveData)
-      
     } catch (error) {
-      console.error('Failed to load performance analytics:', error)
     } finally {
       setLoading(false)
     }
@@ -167,7 +177,7 @@ export default function TerritoryPerformanceAnalytics({
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount)
   }
 
@@ -189,21 +199,27 @@ export default function TerritoryPerformanceAnalytics({
 
   const getThreatLevelColor = (level: string) => {
     switch (level) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200'
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'low': return 'bg-green-100 text-green-800 border-green-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'high':
+        return 'bg-red-100 text-red-800 border-red-200'
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case 'low':
+        return 'bg-green-100 text-green-800 border-green-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
   if (loading) {
     return (
-      <div className={`bg-white rounded-lg shadow-lg p-8 ${className}`}>
-        <div className="flex items-center justify-center h-64">
+      <div className={`rounded-lg bg-white p-8 shadow-lg ${className}`}>
+        <div className="flex h-64 items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 font-medium">Analyzing territory performance...</p>
-            <p className="text-sm text-gray-500 mt-2">Processing analytics • Calculating trends • Generating insights</p>
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
+            <p className="font-medium text-gray-600">Analyzing territory performance...</p>
+            <p className="mt-2 text-sm text-gray-500">
+              Processing analytics • Calculating trends • Generating insights
+            </p>
           </div>
         </div>
       </div>
@@ -213,22 +229,22 @@ export default function TerritoryPerformanceAnalytics({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header & Controls */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="rounded-lg bg-white p-6 shadow-lg">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-              <ChartBarIcon className="h-8 w-8 mr-3 text-blue-600" />
+            <h2 className="flex items-center text-2xl font-bold text-gray-900">
+              <ChartBarIcon className="mr-3 h-8 w-8 text-blue-600" />
               Territory Performance Analytics
             </h2>
-            <p className="text-gray-600 mt-1">AI-powered insights and competitive intelligence</p>
+            <p className="mt-1 text-gray-600">AI-powered insights and competitive intelligence</p>
           </div>
 
           <div className="flex items-center space-x-4">
             {/* Period Selection */}
             <select
               value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value as any)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              onChange={(e) => setSelectedPeriod(e.target.value as unknown)}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
             >
               <option value="week">This Week</option>
               <option value="month">This Month</option>
@@ -238,28 +254,28 @@ export default function TerritoryPerformanceAnalytics({
 
             {/* View Mode Toggle */}
             <div className="inline-flex rounded-lg shadow-sm">
-              {(['overview', 'detailed', 'competitive', 'forecasting'] as const).map((mode, index) => (
-                <button
-                  key={mode}
-                  onClick={() => setViewMode(mode)}
-                  className={`px-4 py-2 text-sm font-medium border ${
-                    viewMode === mode
-                      ? 'bg-blue-600 text-white border-blue-600 z-10'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  } ${
-                    index === 0 ? 'rounded-l-lg' : index === 3 ? 'rounded-r-lg' : ''
-                  }`}
-                >
-                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                </button>
-              ))}
+              {(['overview', 'detailed', 'competitive', 'forecasting'] as const).map(
+                (mode, index) => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className={`border px-4 py-2 text-sm font-medium ${
+                      viewMode === mode
+                        ? 'z-10 border-blue-600 bg-blue-600 text-white'
+                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                    } ${index === 0 ? 'rounded-l-lg' : index === 3 ? 'rounded-r-lg' : ''}`}
+                  >
+                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  </button>
+                )
+              )}
             </div>
 
             <button
               onClick={loadPerformanceAnalytics}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center"
+              className="flex items-center rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
             >
-              <ArrowPathIcon className="h-4 w-4 mr-2" />
+              <ArrowPathIcon className="mr-2 h-4 w-4" />
               Refresh
             </button>
           </div>
@@ -277,22 +293,26 @@ export default function TerritoryPerformanceAnalytics({
             className="space-y-6"
           >
             {/* Overall Performance Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
               {performanceData.map((data, index) => (
                 <motion.div
                   key={data.territory.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-white rounded-lg shadow p-6"
+                  className="rounded-lg bg-white p-6 shadow"
                 >
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="mb-4 flex items-center justify-between">
                     <h3 className="font-semibold text-gray-900">{data.territory.name}</h3>
-                    <div className={`px-2 py-1 text-xs rounded-full ${
-                      data.analytics.performanceScore > 0.8 ? 'bg-green-100 text-green-800' :
-                      data.analytics.performanceScore > 0.6 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
+                    <div
+                      className={`rounded-full px-2 py-1 text-xs ${
+                        data.analytics.performanceScore > 0.8
+                          ? 'bg-green-100 text-green-800'
+                          : data.analytics.performanceScore > 0.6
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                      }`}
+                    >
                       {Math.round(data.analytics.performanceScore * 100)}% Performance
                     </div>
                   </div>
@@ -301,7 +321,9 @@ export default function TerritoryPerformanceAnalytics({
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Revenue</span>
                       <div className="flex items-center space-x-2">
-                        <span className="font-semibold">{formatCurrency(data.analytics.closedRevenue)}</span>
+                        <span className="font-semibold">
+                          {formatCurrency(data.analytics.closedRevenue)}
+                        </span>
                         <div className="flex items-center">
                           {getTrendIcon(data.trends.revenue)}
                           <span className={`text-xs ${getTrendColor(data.trends.revenue)}`}>
@@ -314,7 +336,9 @@ export default function TerritoryPerformanceAnalytics({
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Conversion Rate</span>
                       <div className="flex items-center space-x-2">
-                        <span className="font-semibold">{Math.round(data.analytics.conversionRate * 100)}%</span>
+                        <span className="font-semibold">
+                          {Math.round(data.analytics.conversionRate * 100)}%
+                        </span>
                         <div className="flex items-center">
                           {getTrendIcon(data.trends.conversion)}
                           <span className={`text-xs ${getTrendColor(data.trends.conversion)}`}>
@@ -327,7 +351,9 @@ export default function TerritoryPerformanceAnalytics({
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Efficiency</span>
                       <div className="flex items-center space-x-2">
-                        <span className="font-semibold">{Math.round(data.analytics.timeUtilization * 100)}%</span>
+                        <span className="font-semibold">
+                          {Math.round(data.analytics.timeUtilization * 100)}%
+                        </span>
                         <div className="flex items-center">
                           {getTrendIcon(data.trends.efficiency)}
                           <span className={`text-xs ${getTrendColor(data.trends.efficiency)}`}>
@@ -340,7 +366,9 @@ export default function TerritoryPerformanceAnalytics({
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Satisfaction</span>
                       <div className="flex items-center space-x-2">
-                        <span className="font-semibold">{data.analytics.satisfactionScore.toFixed(1)}/5</span>
+                        <span className="font-semibold">
+                          {data.analytics.satisfactionScore.toFixed(1)}/5
+                        </span>
                         <div className="flex items-center">
                           {getTrendIcon(data.trends.satisfaction)}
                           <span className={`text-xs ${getTrendColor(data.trends.satisfaction)}`}>
@@ -353,7 +381,7 @@ export default function TerritoryPerformanceAnalytics({
 
                   <button
                     onClick={() => setSelectedTerritory(data.territory.id)}
-                    className="w-full mt-4 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-sm font-medium"
+                    className="mt-4 w-full rounded-lg bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-200"
                   >
                     View Details
                   </button>
@@ -362,13 +390,15 @@ export default function TerritoryPerformanceAnalytics({
             </div>
 
             {/* Territory Comparison Chart Placeholder */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold mb-4">Territory Performance Comparison</h3>
-              <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h3 className="mb-4 text-lg font-semibold">Territory Performance Comparison</h3>
+              <div className="flex h-64 items-center justify-center rounded-lg bg-gray-50">
                 <div className="text-center">
-                  <ChartBarIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                  <ChartBarIcon className="mx-auto mb-2 h-12 w-12 text-gray-400" />
                   <p className="text-gray-500">Interactive Performance Chart</p>
-                  <p className="text-sm text-gray-400">Revenue, conversion, and efficiency trends</p>
+                  <p className="text-sm text-gray-400">
+                    Revenue, conversion, and efficiency trends
+                  </p>
                 </div>
               </div>
             </div>
@@ -384,55 +414,82 @@ export default function TerritoryPerformanceAnalytics({
             exit={{ opacity: 0, y: -20 }}
             className="space-y-6"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {competitiveData.map((data) => {
-                const territoryData = performanceData.find(p => p.territory.id === data.territoryId)
+                const territoryData = performanceData.find(
+                  (p) => p.territory.id === data.territoryId
+                )
                 if (!territoryData) return null
 
                 return (
-                  <div key={data.territoryId} className="bg-white rounded-lg shadow p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-gray-900">{territoryData.territory.name}</h3>
-                      <span className={`px-3 py-1 text-sm rounded-full border ${getThreatLevelColor(data.threatLevel)}`}>
-                        {data.threatLevel.charAt(0).toUpperCase() + data.threatLevel.slice(1)} Threat
+                  <div key={data.territoryId} className="rounded-lg bg-white p-6 shadow">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-900">
+                        {territoryData.territory.name}
+                      </h3>
+                      <span
+                        className={`rounded-full border px-3 py-1 text-sm ${getThreatLevelColor(data.threatLevel)}`}
+                      >
+                        {data.threatLevel.charAt(0).toUpperCase() + data.threatLevel.slice(1)}{' '}
+                        Threat
                       </span>
                     </div>
 
                     <div className="space-y-4">
                       <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
-                          <div className="text-2xl font-bold text-blue-600">{Math.round(data.marketShare * 100)}%</div>
+                          <div className="text-2xl font-bold text-blue-600">
+                            {Math.round(data.marketShare * 100)}%
+                          </div>
                           <div className="text-xs text-gray-600">Market Share</div>
                         </div>
                         <div>
-                          <div className="text-2xl font-bold text-green-600">{Math.round(data.winRate * 100)}%</div>
+                          <div className="text-2xl font-bold text-green-600">
+                            {Math.round(data.winRate * 100)}%
+                          </div>
                           <div className="text-xs text-gray-600">Win Rate</div>
                         </div>
                         <div>
-                          <div className="text-2xl font-bold text-orange-600">{data.competitorActivity}</div>
+                          <div className="text-2xl font-bold text-orange-600">
+                            {data.competitorActivity}
+                          </div>
                           <div className="text-xs text-gray-600">Activity Level</div>
                         </div>
                       </div>
 
                       <div>
-                        <h4 className="font-medium text-gray-700 mb-2">Key Competitors</h4>
+                        <h4 className="mb-2 font-medium text-gray-700">Key Competitors</h4>
                         <div className="flex flex-wrap gap-2">
                           {data.keyCompetitors.map((competitor) => (
-                            <span key={competitor} className="px-2 py-1 bg-gray-100 text-gray-700 text-sm rounded">
+                            <span
+                              key={competitor}
+                              className="rounded bg-gray-100 px-2 py-1 text-sm text-gray-700"
+                            >
                               {competitor}
                             </span>
                           ))}
                         </div>
                       </div>
 
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="font-medium text-gray-700 mb-2">Competitive Insights</h4>
-                        <ul className="text-sm text-gray-600 space-y-1">
-                          <li>• {territoryData.analytics.competitiveWins} wins vs {territoryData.analytics.lostToCompetitors} losses this period</li>
-                          <li>• {territoryData.analytics.competitorMentions} competitor mentions in sales calls</li>
-                          <li>• {data.threatLevel === 'high' ? 'High competitive pressure requires aggressive response' : 
-                               data.threatLevel === 'medium' ? 'Moderate competition - maintain vigilance' : 
-                               'Low competitive threat - focus on market expansion'}</li>
+                      <div className="rounded-lg bg-gray-50 p-4">
+                        <h4 className="mb-2 font-medium text-gray-700">Competitive Insights</h4>
+                        <ul className="space-y-1 text-sm text-gray-600">
+                          <li>
+                            • {territoryData.analytics.competitiveWins} wins vs{' '}
+                            {territoryData.analytics.lostToCompetitors} losses this period
+                          </li>
+                          <li>
+                            • {territoryData.analytics.competitorMentions} competitor mentions in
+                            sales calls
+                          </li>
+                          <li>
+                            •{' '}
+                            {data.threatLevel === 'high'
+                              ? 'High competitive pressure requires aggressive response'
+                              : data.threatLevel === 'medium'
+                                ? 'Moderate competition - maintain vigilance'
+                                : 'Low competitive threat - focus on market expansion'}
+                          </li>
                         </ul>
                       </div>
                     </div>
@@ -453,20 +510,22 @@ export default function TerritoryPerformanceAnalytics({
             className="space-y-6"
           >
             {performanceData.map((data) => (
-              <div key={data.territory.id} className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-6">{data.territory.name} - Detailed Analysis</h3>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div key={data.territory.id} className="rounded-lg bg-white p-6 shadow">
+                <h3 className="mb-6 text-lg font-semibold">
+                  {data.territory.name} - Detailed Analysis
+                </h3>
+
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   {/* AI Insights */}
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
-                      <TrophyIcon className="h-5 w-5 mr-2" />
+                  <div className="rounded-lg bg-blue-50 p-4">
+                    <h4 className="mb-3 flex items-center font-semibold text-blue-900">
+                      <TrophyIcon className="mr-2 h-5 w-5" />
                       AI Performance Insights
                     </h4>
                     <ul className="space-y-2 text-sm">
                       {data.insights.map((insight, index) => (
-                        <li key={index} className="text-blue-800 flex items-start">
-                          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                        <li key={index} className="flex items-start text-blue-800">
+                          <span className="mt-2 mr-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-600"></span>
                           {insight}
                         </li>
                       ))}
@@ -474,15 +533,15 @@ export default function TerritoryPerformanceAnalytics({
                   </div>
 
                   {/* Recommendations */}
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
-                      <ExclamationTriangleIcon className="h-5 w-5 mr-2" />
+                  <div className="rounded-lg bg-green-50 p-4">
+                    <h4 className="mb-3 flex items-center font-semibold text-green-900">
+                      <ExclamationTriangleIcon className="mr-2 h-5 w-5" />
                       AI Recommendations
                     </h4>
                     <ul className="space-y-2 text-sm">
                       {data.recommendations.map((rec, index) => (
-                        <li key={index} className="text-green-800 flex items-start">
-                          <span className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                        <li key={index} className="flex items-start text-green-800">
+                          <span className="mt-2 mr-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-600"></span>
                           {rec}
                         </li>
                       ))}
@@ -491,21 +550,29 @@ export default function TerritoryPerformanceAnalytics({
                 </div>
 
                 {/* Key Metrics Grid */}
-                <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-gray-50 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-gray-900">{data.analytics.visitsCompleted}/{data.analytics.visitsPlanned}</div>
+                <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+                  <div className="rounded-lg bg-gray-50 p-3 text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {data.analytics.visitsCompleted}/{data.analytics.visitsPlanned}
+                    </div>
                     <div className="text-xs text-gray-600">Visits Completed</div>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-gray-900">{data.analytics.newLeads}</div>
+                  <div className="rounded-lg bg-gray-50 p-3 text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {data.analytics.newLeads}
+                    </div>
                     <div className="text-xs text-gray-600">New Leads</div>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-gray-900">{formatCurrency(data.analytics.avgDealSize)}</div>
+                  <div className="rounded-lg bg-gray-50 p-3 text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {formatCurrency(data.analytics.avgDealSize)}
+                    </div>
                     <div className="text-xs text-gray-600">Avg Deal Size</div>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-gray-900">{Math.round(data.analytics.timeUtilization * 100)}%</div>
+                  <div className="rounded-lg bg-gray-50 p-3 text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {Math.round(data.analytics.timeUtilization * 100)}%
+                    </div>
                     <div className="text-xs text-gray-600">Time Utilization</div>
                   </div>
                 </div>

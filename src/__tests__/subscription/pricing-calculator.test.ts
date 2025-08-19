@@ -15,7 +15,7 @@ describe('Pricing Calculator Test Suite', () => {
       { modules: ['hr'], userCount: 10, expectedMonthly: 90 },
       { modules: ['inventory'], userCount: 10, expectedMonthly: 100 },
       { modules: ['projects'], userCount: 10, expectedMonthly: 110 },
-      { modules: ['marketing'], userCount: 10, expectedMonthly: 120 }
+      { modules: ['marketing'], userCount: 10, expectedMonthly: 120 },
     ]
 
     testCases.forEach(({ modules, userCount, expectedMonthly }) => {
@@ -27,12 +27,12 @@ describe('Pricing Calculator Test Suite', () => {
             modules,
             userCount,
             billingCycle: 'monthly',
-            applyBundleDiscounts: false
-          })
+            applyBundleDiscounts: false,
+          }),
         })
 
         const pricing = await response.json()
-        
+
         expect(pricing.totalMonthlyPrice).toBe(expectedMonthly)
         expect(pricing.breakdown).toHaveLength(1)
         expect(pricing.breakdown[0].moduleKey).toBe(modules[0])
@@ -49,12 +49,12 @@ describe('Pricing Calculator Test Suite', () => {
           modules: ['crm', 'accounting'],
           userCount: 10,
           billingCycle: 'monthly',
-          applyBundleDiscounts: true
-        })
+          applyBundleDiscounts: true,
+        }),
       })
 
       const pricing = await response.json()
-      
+
       // Should match starter bundle price (120)
       expect(pricing.totalMonthlyPrice).toBe(120)
       expect(pricing.discounts).toBeDefined()
@@ -69,12 +69,12 @@ describe('Pricing Calculator Test Suite', () => {
           modules: ['crm'],
           userCount: 100,
           billingCycle: 'monthly',
-          applyBundleDiscounts: false
-        })
+          applyBundleDiscounts: false,
+        }),
       })
 
       const pricing = await response.json()
-      
+
       // Should be less than linear scaling (100 * 7 = 700)
       expect(pricing.totalMonthlyPrice).toBeLessThan(700)
       expect(pricing.discounts).toBeDefined()
@@ -86,7 +86,11 @@ describe('Pricing Calculator Test Suite', () => {
     const bundles = [
       { key: 'starter', modules: ['crm', 'accounting'], expectedPrice: 120 },
       { key: 'professional', modules: ['crm', 'accounting', 'hr', 'projects'], expectedPrice: 300 },
-      { key: 'enterprise', modules: ['crm', 'accounting', 'hr', 'inventory', 'projects', 'marketing'], expectedPrice: 450 }
+      {
+        key: 'enterprise',
+        modules: ['crm', 'accounting', 'hr', 'inventory', 'projects', 'marketing'],
+        expectedPrice: 450,
+      },
     ]
 
     bundles.forEach(({ key, modules, expectedPrice }) => {
@@ -98,12 +102,12 @@ describe('Pricing Calculator Test Suite', () => {
             modules,
             userCount: 10,
             billingCycle: 'monthly',
-            applyBundleDiscounts: true
-          })
+            applyBundleDiscounts: true,
+          }),
         })
 
         const pricing = await response.json()
-        
+
         expect(pricing.totalMonthlyPrice).toBe(expectedPrice)
         expect(pricing.appliedBundle).toBe(key)
       })
@@ -119,15 +123,15 @@ describe('Pricing Calculator Test Suite', () => {
           modules: ['crm'],
           userCount: 10,
           billingCycle: 'annual',
-          applyBundleDiscounts: false
-        })
+          applyBundleDiscounts: false,
+        }),
       })
 
       const pricing = await response.json()
-      
+
       const monthlyTotal = 70
       const expectedAnnual = monthlyTotal * 12 * 0.9 // 10% discount
-      
+
       expect(pricing.totalAnnualPrice).toBe(expectedAnnual)
       expect(pricing.billingDetails.annualDiscount).toBe(monthlyTotal * 12 * 0.1)
     })
@@ -142,12 +146,12 @@ describe('Pricing Calculator Test Suite', () => {
           modules: ['projects'], // Has $500 setup fee
           userCount: 10,
           billingCycle: 'monthly',
-          includeSetupFees: true
-        })
+          includeSetupFees: true,
+        }),
       })
 
       const pricing = await response.json()
-      
+
       expect(pricing.billingDetails.setupFeesTotal).toBe(500)
       expect(pricing.billingDetails.totalFirstMonth).toBe(110 + 500)
     })
@@ -160,12 +164,12 @@ describe('Pricing Calculator Test Suite', () => {
           modules: ['projects'],
           userCount: 10,
           billingCycle: 'monthly',
-          includeSetupFees: false
-        })
+          includeSetupFees: false,
+        }),
       })
 
       const pricing = await response.json()
-      
+
       expect(pricing.billingDetails.setupFeesTotal).toBe(0)
     })
   })
@@ -178,8 +182,8 @@ describe('Pricing Calculator Test Suite', () => {
         body: JSON.stringify({
           modules: [],
           userCount: 10,
-          billingCycle: 'monthly'
-        })
+          billingCycle: 'monthly',
+        }),
       })
 
       expect(response.status).toBe(400)
@@ -192,12 +196,12 @@ describe('Pricing Calculator Test Suite', () => {
         body: JSON.stringify({
           modules: ['invalid-module'],
           userCount: 10,
-          billingCycle: 'monthly'
-        })
+          billingCycle: 'monthly',
+        }),
       })
 
       const pricing = await response.json()
-      
+
       expect(pricing.error).toBeDefined()
     })
 
@@ -208,12 +212,12 @@ describe('Pricing Calculator Test Suite', () => {
         body: JSON.stringify({
           modules: ['crm'],
           userCount: 10000,
-          billingCycle: 'monthly'
-        })
+          billingCycle: 'monthly',
+        }),
       })
 
       const pricing = await response.json()
-      
+
       expect(pricing.totalMonthlyPrice).toBeGreaterThan(0)
       expect(pricing.totalMonthlyPrice).toBeLessThan(70000) // Should have significant volume discount
     })
@@ -225,12 +229,12 @@ describe('Pricing Calculator Test Suite', () => {
         body: JSON.stringify({
           modules: ['crm'],
           userCount: 1,
-          billingCycle: 'monthly'
-        })
+          billingCycle: 'monthly',
+        }),
       })
 
       const pricing = await response.json()
-      
+
       expect(pricing.totalMonthlyPrice).toBe(7)
     })
   })
@@ -247,13 +251,13 @@ describe('Pricing Calculator Test Suite', () => {
           customerInfo: {
             company: 'Test Company',
             email: 'test@example.com',
-            name: 'Test User'
-          }
-        })
+            name: 'Test User',
+          },
+        }),
       })
 
       const quote = await response.json()
-      
+
       expect(quote.quoteNumber).toBeDefined()
       expect(quote.validUntil).toBeDefined()
       expect(quote.pricing).toBeDefined()

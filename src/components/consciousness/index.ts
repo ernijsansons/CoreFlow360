@@ -1,6 +1,6 @@
 /**
  * CoreFlow360 Consciousness Components
- * 
+ *
  * Interactive WebGL components that make abstract business intelligence
  * tangible through particle systems, neural networks, and consciousness
  * visualization.

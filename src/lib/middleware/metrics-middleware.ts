@@ -18,14 +18,7 @@ const defaultConfig: MetricsConfig = {
   collectHttpMetrics: true,
   collectErrorMetrics: true,
   collectPerformanceMetrics: true,
-  excludePaths: [
-    '/metrics', 
-    '/health', 
-    '/_next',
-    '/favicon.ico',
-    '/robots.txt',
-    '/sitemap.xml'
-  ]
+  excludePaths: ['/metrics', '/health', '/_next', '/favicon.ico', '/robots.txt', '/sitemap.xml'],
 }
 
 /**
@@ -41,30 +34,27 @@ export function withMetrics(
     const startTime = Date.now()
     const pathname = request.nextUrl.pathname
     const method = request.method
-    
+
     // Check if this path should be excluded from metrics
-    const shouldExclude = finalConfig.excludePaths.some(path => 
-      pathname.startsWith(path)
-    )
-    
+    const shouldExclude = finalConfig.excludePaths.some((path) => pathname.startsWith(path))
+
     if (shouldExclude) {
       return handler(request)
     }
 
     // Check if this path should be included (if includePaths is specified)
     if (finalConfig.includePaths && finalConfig.includePaths.length > 0) {
-      const shouldInclude = finalConfig.includePaths.some(path =>
-        pathname.startsWith(path)
-      )
+      const shouldInclude = finalConfig.includePaths.some((path) => pathname.startsWith(path))
       if (!shouldInclude) {
         return handler(request)
       }
     }
 
     // Extract tenant ID from headers or session
-    const tenantId = request.headers.get('x-tenant-id') || 
-                    request.cookies.get('tenant-id')?.value ||
-                    extractTenantFromPath(pathname)
+    const tenantId =
+      request.headers.get('x-tenant-id') ||
+      request.cookies.get('tenant-id')?.value ||
+      extractTenantFromPath(pathname)
 
     // Get request size
     const requestSize = getRequestSize(request)
@@ -77,13 +67,10 @@ export function withMetrics(
       response = await handler(request)
     } catch (err) {
       error = err as Error
-      
+
       // Create error response
-      response = NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
-      )
-      
+      response = NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
       // Record error metrics
       if (finalConfig.collectErrorMetrics) {
         metricsCollector.recordError(
@@ -99,7 +86,7 @@ export function withMetrics(
     const duration = Date.now() - startTime
     const responseSize = getResponseSize(response)
     const statusCode = response.status
-    
+
     // Normalize route for metrics (remove dynamic segments)
     const normalizedRoute = normalizeRoute(pathname)
 
@@ -117,8 +104,8 @@ export function withMetrics(
     }
 
     // Record performance metrics for slow requests
-    if (finalConfig.collectPerformanceMetrics && duration > 1000) { // > 1 second
-      console.warn(`Slow request detected: ${method} ${pathname} - ${duration}ms`)
+    if (finalConfig.collectPerformanceMetrics && duration > 1000) {
+      // > 1 second
     }
 
     // Add metrics headers for debugging (in development)
@@ -143,8 +130,8 @@ function extractTenantFromPath(pathname: string): string | null {
   const patterns = [
     /^\/api\/tenant\/([^\/]+)/, // /api/tenant/:id
     /^\/api\/([^\/]+)\/tenant/, // /api/:tenant/...
-    /^\/tenant\/([^\/]+)/,      // /tenant/:id
-    /^\/([^\/]+)\/api/          // /:tenant/api/...
+    /^\/tenant\/([^\/]+)/, // /tenant/:id
+    /^\/([^\/]+)\/api/, // /:tenant/api/...
   ]
 
   for (const pattern of patterns) {
@@ -165,13 +152,13 @@ function getRequestSize(request: NextRequest): number {
   if (contentLength) {
     return parseInt(contentLength, 10)
   }
-  
+
   // Estimate size from headers
   let headerSize = 0
   request.headers.forEach((value, key) => {
     headerSize += key.length + value.length + 4 // +4 for ": " and "\r\n"
   })
-  
+
   return headerSize
 }
 
@@ -183,13 +170,13 @@ function getResponseSize(response: NextResponse): number {
   if (contentLength) {
     return parseInt(contentLength, 10)
   }
-  
+
   // Estimate size from headers
   let headerSize = 0
   response.headers.forEach((value, key) => {
     headerSize += key.length + value.length + 4
   })
-  
+
   return headerSize
 }
 
@@ -197,28 +184,33 @@ function getResponseSize(response: NextResponse): number {
  * Normalize route for metrics (remove dynamic segments)
  */
 function normalizeRoute(pathname: string): string {
-  return pathname
-    // Replace UUIDs with :id
-    .replace(/\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g, '/:id')
-    // Replace numeric IDs with :id
-    .replace(/\/\d+/g, '/:id')
-    // Replace other dynamic segments
-    .replace(/\/[^\/]+\.(jpg|jpeg|png|gif|webp|svg|ico|css|js|json|xml|txt)$/i, '/:file')
-    // Truncate very long paths
-    .substring(0, 100)
+  return (
+    pathname
+      // Replace UUIDs with :id
+      .replace(/\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g, '/:id')
+      // Replace numeric IDs with :id
+      .replace(/\/\d+/g, '/:id')
+      // Replace other dynamic segments
+      .replace(/\/[^\/]+\.(jpg|jpeg|png|gif|webp|svg|ico|css|js|json|xml|txt)$/i, '/:file')
+      // Truncate very long paths
+      .substring(0, 100)
+  )
 }
 
 /**
  * Custom metrics middleware for specific routes
  */
 export class RouteMetricsCollector {
-  private routeMetrics = new Map<string, {
-    count: number
-    totalDuration: number
-    maxDuration: number
-    minDuration: number
-    errors: number
-  }>()
+  private routeMetrics = new Map<
+    string,
+    {
+      count: number
+      totalDuration: number
+      maxDuration: number
+      minDuration: number
+      errors: number
+    }
+  >()
 
   recordRoute(route: string, duration: number, success: boolean) {
     const existing = this.routeMetrics.get(route) || {
@@ -226,14 +218,14 @@ export class RouteMetricsCollector {
       totalDuration: 0,
       maxDuration: 0,
       minDuration: Infinity,
-      errors: 0
+      errors: 0,
     }
 
     existing.count++
     existing.totalDuration += duration
     existing.maxDuration = Math.max(existing.maxDuration, duration)
     existing.minDuration = Math.min(existing.minDuration, duration)
-    
+
     if (!success) {
       existing.errors++
     }
@@ -249,19 +241,19 @@ export class RouteMetricsCollector {
       ...metrics,
       averageDuration: metrics.totalDuration / metrics.count,
       errorRate: metrics.errors / metrics.count,
-      successRate: (metrics.count - metrics.errors) / metrics.count
+      successRate: (metrics.count - metrics.errors) / metrics.count,
     }
   }
 
   getAllMetrics() {
-    const result: Record<string, any> = {}
-    
+    const result: Record<string, unknown> = {}
+
     for (const [route, metrics] of this.routeMetrics) {
       result[route] = {
         ...metrics,
         averageDuration: metrics.totalDuration / metrics.count,
         errorRate: metrics.errors / metrics.count,
-        successRate: (metrics.count - metrics.errors) / metrics.count
+        successRate: (metrics.count - metrics.errors) / metrics.count,
       }
     }
 
@@ -285,15 +277,15 @@ export function withBusinessMetrics(
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
     const startTime = Date.now()
-    
+
     try {
       const response = await handler(request)
       const duration = Date.now() - startTime
-      
+
       // Extract user info from session/token
       const tenantId = request.headers.get('x-tenant-id')
       const userId = request.headers.get('x-user-id')
-      
+
       // Record feature usage
       if (response.status >= 200 && response.status < 300) {
         metricsCollector.recordFeatureUsage(
@@ -313,7 +305,7 @@ export function withBusinessMetrics(
         'business_logic',
         request.headers.get('x-tenant-id') || undefined
       )
-      
+
       throw error
     }
   }
@@ -331,9 +323,9 @@ export function withDatabaseMetrics<T>(
   }
 ): Promise<T> {
   const startTime = Date.now()
-  
+
   return operation()
-    .then(result => {
+    .then((result) => {
       const duration = Date.now() - startTime
       metricsCollector.recordDbQuery(
         queryInfo.operation,
@@ -344,7 +336,7 @@ export function withDatabaseMetrics<T>(
       )
       return result
     })
-    .catch(error => {
+    .catch((error) => {
       const duration = Date.now() - startTime
       metricsCollector.recordDbQuery(
         queryInfo.operation,
@@ -370,14 +362,13 @@ export function withCacheMetrics<T>(
   }
 ): Promise<T> {
   const startTime = Date.now()
-  
+
   return operation()
-    .then(result => {
+    .then((result) => {
       const duration = Date.now() - startTime
-      const hitOrMiss = cacheInfo.operation === 'get' ? 
-        (result ? 'hit' : 'miss') : 
-        cacheInfo.operation
-      
+      const hitOrMiss =
+        cacheInfo.operation === 'get' ? (result ? 'hit' : 'miss') : cacheInfo.operation
+
       metricsCollector.recordCacheOperation(
         hitOrMiss as 'hit' | 'miss' | 'set' | 'delete',
         cacheInfo.cacheType,
@@ -387,7 +378,7 @@ export function withCacheMetrics<T>(
       )
       return result
     })
-    .catch(error => {
+    .catch((error) => {
       const duration = Date.now() - startTime
       metricsCollector.recordCacheOperation(
         'miss', // Cache errors count as misses

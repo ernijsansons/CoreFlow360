@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { motion } from 'framer-motion'
-import { 
+import {
   ChartBarIcon,
   ArrowTrendingUpIcon as TrendingUpIcon,
   ArrowTrendingDownIcon as TrendingDownIcon,
@@ -21,7 +21,7 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   EyeIcon,
-  ArrowTopRightOnSquareIcon
+  ArrowTopRightOnSquareIcon,
 } from '@heroicons/react/24/outline'
 import { MetricCard } from '@/components/ui/MetricCard'
 
@@ -32,14 +32,14 @@ interface CRMMetrics {
   leadConversionRate: number
   avgLeadScore: number
   hotLeads: number
-  
+
   // Customer Metrics
   totalCustomers: number
   activeCustomers: number
   customerGrowthRate: number
   avgCustomerValue: number
   customerChurnRate: number
-  
+
   // Deal Metrics
   totalDeals: number
   activeDeals: number
@@ -47,14 +47,14 @@ interface CRMMetrics {
   avgDealSize: number
   avgSalesCycle: number
   winRate: number
-  
+
   // Revenue Metrics
   totalRevenue: number
   revenueThisPeriod: number
   revenueGrowthRate: number
   forecastAccuracy: number
   pipelineValue: number
-  
+
   // Activity Metrics
   totalActivities: number
   activitiesThisPeriod: number
@@ -91,14 +91,14 @@ interface LeaderboardItem {
 
 interface CRMAnalyticsDashboardProps {
   timeframe?: 'week' | 'month' | 'quarter' | 'year'
-  onMetricClick?: (metric: string, data: any) => void
+  onMetricClick?: (metric: string, data: unknown) => void
   onExportReport?: () => void
 }
 
-const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({ 
+const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
   timeframe = 'month',
   onMetricClick,
-  onExportReport 
+  onExportReport,
 }: CRMAnalyticsDashboardProps) {
   const [metrics, setMetrics] = useState<CRMMetrics | null>(null)
   const [pipelineStages, setPipelineStages] = useState<PipelineStageMetrics[]>([])
@@ -111,10 +111,13 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
   useEffect(() => {
     loadAnalyticsData()
     // Set up auto-refresh every 5 minutes
-    const interval = setInterval(() => {
-      loadAnalyticsData()
-      setRefreshTime(new Date())
-    }, 5 * 60 * 1000)
+    const interval = setInterval(
+      () => {
+        loadAnalyticsData()
+        setRefreshTime(new Date())
+      },
+      5 * 60 * 1000
+    )
 
     return () => clearInterval(interval)
   }, [selectedTimeframe])
@@ -122,7 +125,7 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
   const loadAnalyticsData = useCallback(async () => {
     try {
       setLoading(true)
-      
+
       // Mock data for demonstration
       const mockMetrics: CRMMetrics = {
         totalLeads: 234,
@@ -130,65 +133,100 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
         leadConversionRate: 28.5,
         avgLeadScore: 72,
         hotLeads: 23,
-        
+
         totalCustomers: 156,
         activeCustomers: 142,
         customerGrowthRate: 12.3,
         avgCustomerValue: 125000,
         customerChurnRate: 4.2,
-        
+
         totalDeals: 89,
         activeDeals: 34,
         dealsClosedThisPeriod: 18,
         avgDealSize: 48500,
         avgSalesCycle: 45,
         winRate: 68.5,
-        
+
         totalRevenue: 2850000,
         revenueThisPeriod: 875000,
         revenueGrowthRate: 15.2,
         forecastAccuracy: 87.5,
         pipelineValue: 1650000,
-        
+
         totalActivities: 1247,
         activitiesThisPeriod: 312,
         avgResponseTime: 2.3,
-        taskCompletionRate: 85.7
+        taskCompletionRate: 85.7,
       }
 
       const mockPipelineStages: PipelineStageMetrics[] = [
-        { stageName: 'Lead', dealCount: 15, totalValue: 450000, avgDaysInStage: 7, conversionRate: 45.2, color: '#6B7280' },
-        { stageName: 'Qualified', dealCount: 12, totalValue: 520000, avgDaysInStage: 14, conversionRate: 58.3, color: '#3B82F6' },
-        { stageName: 'Proposal', dealCount: 8, totalValue: 380000, avgDaysInStage: 21, conversionRate: 72.1, color: '#F59E0B' },
-        { stageName: 'Negotiation', dealCount: 5, totalValue: 285000, avgDaysInStage: 14, conversionRate: 84.6, color: '#8B5CF6' },
-        { stageName: 'Closed Won', dealCount: 18, totalValue: 875000, avgDaysInStage: 0, conversionRate: 100, color: '#10B981' }
+        {
+          stageName: 'Lead',
+          dealCount: 15,
+          totalValue: 450000,
+          avgDaysInStage: 7,
+          conversionRate: 45.2,
+          color: '#6B7280',
+        },
+        {
+          stageName: 'Qualified',
+          dealCount: 12,
+          totalValue: 520000,
+          avgDaysInStage: 14,
+          conversionRate: 58.3,
+          color: '#3B82F6',
+        },
+        {
+          stageName: 'Proposal',
+          dealCount: 8,
+          totalValue: 380000,
+          avgDaysInStage: 21,
+          conversionRate: 72.1,
+          color: '#F59E0B',
+        },
+        {
+          stageName: 'Negotiation',
+          dealCount: 5,
+          totalValue: 285000,
+          avgDaysInStage: 14,
+          conversionRate: 84.6,
+          color: '#8B5CF6',
+        },
+        {
+          stageName: 'Closed Won',
+          dealCount: 18,
+          totalValue: 875000,
+          avgDaysInStage: 0,
+          conversionRate: 100,
+          color: '#10B981',
+        },
       ]
 
       const mockTopPerformers: TopPerformer[] = [
-        { 
-          id: '1', 
-          name: 'Alex Morgan', 
-          dealsWon: 8, 
-          revenue: 385000, 
-          conversionRate: 72, 
-          trend: 'up' 
+        {
+          id: '1',
+          name: 'Alex Morgan',
+          dealsWon: 8,
+          revenue: 385000,
+          conversionRate: 72,
+          trend: 'up',
         },
-        { 
-          id: '2', 
-          name: 'Jordan Lee', 
-          dealsWon: 6, 
-          revenue: 290000, 
-          conversionRate: 68, 
-          trend: 'up' 
+        {
+          id: '2',
+          name: 'Jordan Lee',
+          dealsWon: 6,
+          revenue: 290000,
+          conversionRate: 68,
+          trend: 'up',
         },
-        { 
-          id: '3', 
-          name: 'Sam Wilson', 
-          dealsWon: 4, 
-          revenue: 200000, 
-          conversionRate: 65, 
-          trend: 'stable' 
-        }
+        {
+          id: '3',
+          name: 'Sam Wilson',
+          dealsWon: 4,
+          revenue: 200000,
+          conversionRate: 65,
+          trend: 'stable',
+        },
       ]
 
       const mockLeaderboard: LeaderboardItem[] = [
@@ -197,7 +235,7 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
         { rank: 3, name: 'SMB', value: 450000, change: 8.7, metric: 'Revenue' },
         { rank: 1, name: 'Website', value: 89, change: 25.4, metric: 'Leads' },
         { rank: 2, name: 'Referral', value: 67, change: 15.2, metric: 'Leads' },
-        { rank: 3, name: 'Events', value: 34, change: -5.3, metric: 'Leads' }
+        { rank: 3, name: 'Events', value: 34, change: -5.3, metric: 'Leads' },
       ]
 
       setMetrics(mockMetrics)
@@ -205,7 +243,6 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
       setTopPerformers(mockTopPerformers)
       setLeaderboard(mockLeaderboard)
     } catch (error) {
-      console.error('Failed to load analytics data:', error)
     } finally {
       setLoading(false)
     }
@@ -242,8 +279,8 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -251,18 +288,21 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">CRM Analytics</h1>
-          <p className="text-gray-600 mt-1">
-            Real-time insights and performance metrics · Last updated: {refreshTime.toLocaleTimeString()}
+          <p className="mt-1 text-gray-600">
+            Real-time insights and performance metrics · Last updated:{' '}
+            {refreshTime.toLocaleTimeString()}
           </p>
         </div>
         <div className="flex items-center space-x-3">
           <select
             value={selectedTimeframe}
-            onChange={(e) => setSelectedTimeframe(e.target.value as 'week' | 'month' | 'quarter' | 'year')}
-            className="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
+            onChange={(e) =>
+              setSelectedTimeframe(e.target.value as 'week' | 'month' | 'quarter' | 'year')
+            }
+            className="block rounded-md border-gray-300 py-2 pr-10 pl-3 text-base focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
           >
             <option value="week">This Week</option>
             <option value="month">This Month</option>
@@ -271,14 +311,14 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
           </select>
           <button
             onClick={onExportReport}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
           >
-            <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-2" />
+            <ArrowTopRightOnSquareIcon className="mr-2 h-4 w-4" />
             Export Report
           </button>
           <button
             onClick={() => loadAnalyticsData()}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
           >
             <ArrowPathIcon className="h-4 w-4" />
           </button>
@@ -363,14 +403,14 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
       )}
 
       {/* Pipeline Analysis & Performance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Pipeline Stages */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center justify-between mb-6">
+        <div className="rounded-lg bg-white p-6 shadow">
+          <div className="mb-6 flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900">Pipeline Analysis</h3>
             <button
               onClick={() => onMetricClick?.('pipeline-detail', pipelineStages)}
-              className="text-blue-600 hover:text-blue-800 text-sm"
+              className="text-sm text-blue-600 hover:text-blue-800"
             >
               View Details
             </button>
@@ -382,13 +422,10 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between rounded-lg bg-gray-50 p-4"
               >
                 <div className="flex items-center space-x-3">
-                  <div
-                    className="w-4 h-4 rounded-full"
-                    style={{ backgroundColor: stage.color }}
-                  />
+                  <div className="h-4 w-4 rounded-full" style={{ backgroundColor: stage.color }} />
                   <div>
                     <p className="font-medium text-gray-900">{stage.stageName}</p>
                     <p className="text-sm text-gray-500">
@@ -406,12 +443,12 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
         </div>
 
         {/* Top Performers */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center justify-between mb-6">
+        <div className="rounded-lg bg-white p-6 shadow">
+          <div className="mb-6 flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900">Top Performers</h3>
             <button
               onClick={() => onMetricClick?.('performers', topPerformers)}
-              className="text-blue-600 hover:text-blue-800 text-sm"
+              className="text-sm text-blue-600 hover:text-blue-800"
             >
               View All
             </button>
@@ -423,21 +460,22 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between rounded-lg bg-gray-50 p-4"
               >
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0">
-                    <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300">
                       <span className="text-sm font-medium text-gray-700">
-                        {performer.name.split(' ').map(n => n[0]).join('')}
+                        {performer.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')}
                       </span>
                     </div>
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">{performer.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {performer.dealsWon} deals won
-                    </p>
+                    <p className="text-sm text-gray-500">{performer.dealsWon} deals won</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -456,76 +494,88 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
       </div>
 
       {/* Leaderboards & Activity Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Revenue Leaderboard */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Revenue Leaders</h3>
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h3 className="mb-4 text-lg font-medium text-gray-900">Revenue Leaders</h3>
           <div className="space-y-3">
-            {leaderboard.filter(item => item.metric === 'Revenue').map((item, index) => (
-              <div key={`revenue-${index}`} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-medium text-blue-600">{item.rank}</span>
+            {leaderboard
+              .filter((item) => item.metric === 'Revenue')
+              .map((item, index) => (
+                <div key={`revenue-${index}`} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
+                      <span className="text-xs font-medium text-blue-600">{item.rank}</span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">{item.name}</span>
                   </div>
-                  <span className="text-sm font-medium text-gray-900">{item.name}</span>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-900">
+                      {formatCurrency(item.value)}
+                    </p>
+                    <p className={`text-xs ${item.change > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {item.change > 0 ? '+' : ''}
+                      {item.change}%
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{formatCurrency(item.value)}</p>
-                  <p className={`text-xs ${item.change > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {item.change > 0 ? '+' : ''}{item.change}%
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
 
         {/* Lead Sources */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Lead Sources</h3>
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h3 className="mb-4 text-lg font-medium text-gray-900">Lead Sources</h3>
           <div className="space-y-3">
-            {leaderboard.filter(item => item.metric === 'Leads').map((item, index) => (
-              <div key={`leads-${index}`} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-medium text-green-600">{item.rank}</span>
+            {leaderboard
+              .filter((item) => item.metric === 'Leads')
+              .map((item, index) => (
+                <div key={`leads-${index}`} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
+                      <span className="text-xs font-medium text-green-600">{item.rank}</span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">{item.name}</span>
                   </div>
-                  <span className="text-sm font-medium text-gray-900">{item.name}</span>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-900">{item.value}</p>
+                    <p className={`text-xs ${item.change > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {item.change > 0 ? '+' : ''}
+                      {item.change}%
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{item.value}</p>
-                  <p className={`text-xs ${item.change > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {item.change > 0 ? '+' : ''}{item.change}%
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
 
         {/* Activity Summary */}
         {metrics && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Activity Summary</h3>
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h3 className="mb-4 text-lg font-medium text-gray-900">Activity Summary</h3>
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Total Activities</span>
-                <span className="font-medium text-gray-900">{formatNumber(metrics.totalActivities)}</span>
+                <span className="font-medium text-gray-900">
+                  {formatNumber(metrics.totalActivities)}
+                </span>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">This Period</span>
-                <span className="font-medium text-gray-900">{formatNumber(metrics.activitiesThisPeriod)}</span>
+                <span className="font-medium text-gray-900">
+                  {formatNumber(metrics.activitiesThisPeriod)}
+                </span>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Completion Rate</span>
                 <span className="font-medium text-green-600">{metrics.taskCompletionRate}%</span>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Avg Response Time</span>
                 <span className="font-medium text-gray-900">{metrics.avgResponseTime}h</span>
               </div>
-              <div className="pt-3 border-t border-gray-200">
-                <div className="flex justify-between items-center">
+              <div className="border-t border-gray-200 pt-3">
+                <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Forecast Accuracy</span>
                   <div className="flex items-center space-x-2">
                     <span className="font-medium text-purple-600">{metrics.forecastAccuracy}%</span>
@@ -543,15 +593,15 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-6"
+        className="rounded-lg border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-6"
       >
-        <div className="flex items-center space-x-2 mb-4">
+        <div className="mb-4 flex items-center space-x-2">
           <SparklesIcon className="h-6 w-6 text-purple-600" />
           <h3 className="text-lg font-medium text-purple-900">AI-Generated Insights</h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white/60 rounded-lg p-4">
-            <div className="flex items-center space-x-2 mb-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="rounded-lg bg-white/60 p-4">
+            <div className="mb-2 flex items-center space-x-2">
               <TrendingUpIcon className="h-4 w-4 text-green-600" />
               <span className="text-sm font-medium text-green-800">Growth Opportunity</span>
             </div>
@@ -559,8 +609,8 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
               Enterprise segment showing 18.5% growth. Consider increasing sales resources for Q4.
             </p>
           </div>
-          <div className="bg-white/60 rounded-lg p-4">
-            <div className="flex items-center space-x-2 mb-2">
+          <div className="rounded-lg bg-white/60 p-4">
+            <div className="mb-2 flex items-center space-x-2">
               <ExclamationTriangleIcon className="h-4 w-4 text-yellow-600" />
               <span className="text-sm font-medium text-yellow-800">Risk Alert</span>
             </div>
@@ -568,8 +618,8 @@ const CRMAnalyticsDashboard = memo(function CRMAnalyticsDashboard({
               Average sales cycle increased by 3 days. Review qualification process for efficiency.
             </p>
           </div>
-          <div className="bg-white/60 rounded-lg p-4">
-            <div className="flex items-center space-x-2 mb-2">
+          <div className="rounded-lg bg-white/60 p-4">
+            <div className="mb-2 flex items-center space-x-2">
               <CheckCircleIcon className="h-4 w-4 text-blue-600" />
               <span className="text-sm font-medium text-blue-800">Performance Win</span>
             </div>

@@ -14,14 +14,14 @@ export interface ProblemIntelligence {
   detectedAt: Date
   source: ProblemSource[]
   confidence: number // 0-100
-  
+
   // Problem Classification
   category: ProblemCategory
   subCategory: string
   industry: string
   department: string[]
   severity: ProblemSeverity
-  
+
   // Business Impact Analysis
   impactAnalysis: {
     revenueImpact: number // $ lost per month
@@ -31,7 +31,7 @@ export interface ProblemIntelligence {
     competitiveVulnerability: boolean
     scalabilityBlock: boolean
   }
-  
+
   // Timing Intelligence
   timing: {
     urgency: number // 1-100
@@ -39,7 +39,7 @@ export interface ProblemIntelligence {
     decisionWindow: number // days until decision
     implementationComplexity: 'LOW' | 'MEDIUM' | 'HIGH' | 'ENTERPRISE'
   }
-  
+
   // Solution Mapping
   solutionFit: {
     ourSolutionMatch: number // 0-100
@@ -48,7 +48,7 @@ export interface ProblemIntelligence {
     implementationTimeframe: string
     estimatedDealSize: DealSizeRange
   }
-  
+
   // Stakeholder Analysis
   stakeholders: {
     champion?: StakeholderProfile
@@ -102,7 +102,7 @@ export interface DataIngestionSource {
   type: ProblemSource
   endpoint?: string
   apiKey?: string
-  config: Record<string, any>
+  config: Record<string, unknown>
   isActive: boolean
   lastSync?: Date
 }
@@ -116,7 +116,7 @@ export class ProblemDiscoveryEngine {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     })
-    
+
     this.industryProblems = new Map()
     this.activeSources = new Map()
     this.initializeIndustryProblems()
@@ -131,40 +131,37 @@ export class ProblemDiscoveryEngine {
     companyId?: string
     content: string
     source: ProblemSource
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   }): Promise<ProblemIntelligence[]> {
     try {
-      console.log('🔍 Analyzing content for problems:', input.source)
-      
       // Step 1: AI-powered problem extraction
       const extractedProblems = await this.extractProblemsWithAI(input.content, input.source)
-      
+
       // Step 2: Classify and enrich each problem
       const intelligenceResults: ProblemIntelligence[] = []
-      
+
       for (const rawProblem of extractedProblems) {
         const intelligence = await this.enrichProblemIntelligence({
           tenantId: input.tenantId,
           companyId: input.companyId,
           rawProblem,
           source: input.source,
-          metadata: input.metadata
+          metadata: input.metadata,
         })
-        
+
         if (intelligence) {
           intelligenceResults.push(intelligence)
-          
+
           // Store in database
           await this.storeProblemIntelligence(intelligence, input.tenantId)
         }
       }
 
-      console.log(`✅ Detected ${intelligenceResults.length} problems from ${input.source}`)
       return intelligenceResults
-      
     } catch (error) {
-      console.error('❌ Problem detection failed:', error)
-      throw new Error(`Problem detection failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Problem detection failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -185,25 +182,25 @@ export class ProblemDiscoveryEngine {
         where: {
           tenantId_companyDomain: {
             tenantId: config.tenantId,
-            companyDomain: config.companyDomain
-          }
+            companyDomain: config.companyDomain,
+          },
         },
         update: {
           monitoringStatus: 'ACTIVE',
           dataSourcesEnabled: config.dataSources,
           analysisFrequency: config.frequency,
-          lastAnalyzedAt: new Date()
+          lastAnalyzedAt: new Date(),
         },
         create: {
           tenantId: config.tenantId,
           companyName: config.companyName,
           companyDomain: config.companyDomain,
-          industryType: config.industryType as any,
+          industryType: config.industryType as unknown,
           companySize: 'MEDIUM', // Default, will be enriched
           monitoringStatus: 'ACTIVE',
           dataSourcesEnabled: config.dataSources,
-          analysisFrequency: config.frequency
-        }
+          analysisFrequency: config.frequency,
+        },
       })
 
       // Initialize monitoring agents for each data source
@@ -211,11 +208,11 @@ export class ProblemDiscoveryEngine {
         await this.initializeSourceMonitoring(companyIntelligence.id, source, config.companyDomain)
       }
 
-      console.log(`🎯 Started monitoring ${config.companyName} with ${config.dataSources.length} sources`)
+      console.log(
+        `🎯 Started monitoring ${config.companyName} with ${config.dataSources.length} sources`
+      )
       return companyIntelligence.id
-      
     } catch (error) {
-      console.error('❌ Failed to start company monitoring:', error)
       throw error
     }
   }
@@ -227,7 +224,7 @@ export class ProblemDiscoveryEngine {
     companyIntelligenceId: string
     source: ProblemSource
     content: string
-    metadata: Record<string, any>
+    metadata: Record<string, unknown>
   }): Promise<ProblemIntelligence[]> {
     try {
       // Get company context
@@ -237,9 +234,9 @@ export class ProblemDiscoveryEngine {
           problems: {
             where: { status: { notIn: ['RESOLVED'] } },
             orderBy: { detectedAt: 'desc' },
-            take: 50
-          }
-        }
+            take: 50,
+          },
+        },
       })
 
       if (!companyIntelligence) {
@@ -252,7 +249,7 @@ export class ProblemDiscoveryEngine {
         companyId: data.companyIntelligenceId,
         content: data.content,
         source: data.source,
-        metadata: data.metadata
+        metadata: data.metadata,
       })
 
       // Check for problem evolution or escalation
@@ -264,9 +261,7 @@ export class ProblemDiscoveryEngine {
       await this.updateCompanyIntelligenceScores(companyIntelligence.id)
 
       return problems
-      
     } catch (error) {
-      console.error('❌ Real-time data processing failed:', error)
       throw error
     }
   }
@@ -274,15 +269,20 @@ export class ProblemDiscoveryEngine {
   /**
    * AI-powered problem extraction from text content
    */
-  private async extractProblemsWithAI(content: string, source: ProblemSource): Promise<Array<{
-    title: string
-    description: string
-    category: string
-    severity: ProblemSeverity
-    confidence: number
-    keyPhrases: string[]
-    sentiment: number
-  }>> {
+  private async extractProblemsWithAI(
+    content: string,
+    source: ProblemSource
+  ): Promise<
+    Array<{
+      title: string
+      description: string
+      category: string
+      severity: ProblemSeverity
+      confidence: number
+      keyPhrases: string[]
+      sentiment: number
+    }>
+  > {
     try {
       const prompt = `
         Analyze the following ${source.toLowerCase()} content and identify business problems, pain points, challenges, or inefficiencies. 
@@ -327,7 +327,7 @@ export class ProblemDiscoveryEngine {
         model: 'gpt-4',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.1,
-        max_tokens: 2000
+        max_tokens: 2000,
       })
 
       const result = response.choices[0]?.message?.content
@@ -337,9 +337,7 @@ export class ProblemDiscoveryEngine {
 
       const parsed = JSON.parse(result)
       return parsed.problems || []
-      
     } catch (error) {
-      console.error('❌ AI problem extraction failed:', error)
       return []
     }
   }
@@ -350,9 +348,9 @@ export class ProblemDiscoveryEngine {
   private async enrichProblemIntelligence(params: {
     tenantId: string
     companyId?: string
-    rawProblem: any
+    rawProblem: unknown
     source: ProblemSource
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   }): Promise<ProblemIntelligence | null> {
     try {
       const { tenantId, companyId, rawProblem, source, metadata } = params
@@ -363,10 +361,10 @@ export class ProblemDiscoveryEngine {
       // Get industry context if available
       let industry = 'GENERAL'
       let companySize = 'MEDIUM'
-      
+
       if (companyId) {
         const companyIntel = await prisma.companyIntelligence.findUnique({
-          where: { id: companyId }
+          where: { id: companyId },
         })
         if (companyIntel) {
           industry = companyIntel.industryType
@@ -376,19 +374,19 @@ export class ProblemDiscoveryEngine {
 
       // Calculate business impact
       const impactAnalysis = await this.calculateBusinessImpact(rawProblem, industry, companySize)
-      
+
       // Determine timing intelligence
       const timing = await this.analyzeTimingIntelligence(rawProblem, industry)
-      
+
       // Calculate solution fit
       const solutionFit = await this.calculateSolutionFit(rawProblem, industry)
-      
+
       // Identify stakeholders
       const stakeholders = await this.identifyAffectedStakeholders(rawProblem, companyId)
 
       // Get problem category
       const problemCategories = this.industryProblems.get(industry) || []
-      const category = problemCategories.find(cat => 
+      const category = problemCategories.find((cat) =>
         cat.name.toLowerCase().includes(rawProblem.category.toLowerCase())
       ) || {
         id: 'general',
@@ -397,7 +395,7 @@ export class ProblemDiscoveryEngine {
         industrySpecific: false,
         commonSolutions: [],
         averageUrgency: 50,
-        typicalDealSize: { min: 10000, max: 100000, mostLikely: 50000, factors: [] }
+        typicalDealSize: { min: 10000, max: 100000, mostLikely: 50000, factors: [] },
       }
 
       const intelligence: ProblemIntelligence = {
@@ -406,23 +404,21 @@ export class ProblemDiscoveryEngine {
         detectedAt: new Date(),
         source: [source],
         confidence: rawProblem.confidence,
-        
+
         category,
         subCategory: rawProblem.category,
         industry,
         department: await this.inferAffectedDepartments(rawProblem),
         severity: rawProblem.severity,
-        
+
         impactAnalysis,
         timing,
         solutionFit,
-        stakeholders
+        stakeholders,
       }
 
       return intelligence
-      
     } catch (error) {
-      console.error('❌ Problem enrichment failed:', error)
       return null
     }
   }
@@ -430,16 +426,20 @@ export class ProblemDiscoveryEngine {
   /**
    * Calculate business impact of a problem
    */
-  private async calculateBusinessImpact(problem: any, industry: string, companySize: string): Promise<ProblemIntelligence['impactAnalysis']> {
+  private async calculateBusinessImpact(
+    problem: unknown,
+    industry: string,
+    companySize: string
+  ): Promise<ProblemIntelligence['impactAnalysis']> {
     // Industry and size-based impact multipliers
     const sizeMultipliers = {
-      'STARTUP': 0.5,
-      'SMALL': 1,
-      'MEDIUM': 2.5,
-      'LARGE': 5,
-      'ENTERPRISE': 10
+      STARTUP: 0.5,
+      SMALL: 1,
+      MEDIUM: 2.5,
+      LARGE: 5,
+      ENTERPRISE: 10,
     }
-    
+
     const baseMultiplier = sizeMultipliers[companySize as keyof typeof sizeMultipliers] || 1
 
     // Estimate revenue impact based on problem category and severity
@@ -467,30 +467,41 @@ export class ProblemDiscoveryEngine {
       customerImpact: this.calculateCustomerImpact(problem),
       complianceRisk: this.assessComplianceRisk(problem),
       competitiveVulnerability: this.assessCompetitiveVulnerability(problem),
-      scalabilityBlock: this.assessScalabilityBlock(problem)
+      scalabilityBlock: this.assessScalabilityBlock(problem),
     }
   }
 
   /**
    * Analyze timing intelligence for a problem
    */
-  private async analyzeTimingIntelligence(problem: any, industry: string): Promise<ProblemIntelligence['timing']> {
+  private async analyzeTimingIntelligence(
+    problem: unknown,
+    industry: string
+  ): Promise<ProblemIntelligence['timing']> {
     // Calculate urgency based on severity and keywords
     let urgency = 30 // Base urgency
-    
+
     // Severity contribution
     const severityUrgency = {
-      'EXISTENTIAL': 95,
-      'CRITICAL': 80,
-      'MAJOR': 60,
-      'MODERATE': 40,
-      'MINOR': 20
+      EXISTENTIAL: 95,
+      CRITICAL: 80,
+      MAJOR: 60,
+      MODERATE: 40,
+      MINOR: 20,
     }
     urgency = severityUrgency[problem.severity as keyof typeof severityUrgency] || 30
 
     // Keyword-based urgency boost
-    const urgentKeywords = ['urgent', 'asap', 'immediately', 'critical', 'emergency', 'deadline', 'failing']
-    const hasUrgentKeywords = urgentKeywords.some(keyword => 
+    const urgentKeywords = [
+      'urgent',
+      'asap',
+      'immediately',
+      'critical',
+      'emergency',
+      'deadline',
+      'failing',
+    ]
+    const hasUrgentKeywords = urgentKeywords.some((keyword) =>
       problem.description.toLowerCase().includes(keyword)
     )
     if (hasUrgentKeywords) urgency = Math.min(100, urgency + 20)
@@ -506,25 +517,37 @@ export class ProblemDiscoveryEngine {
       urgency,
       budgetCycle,
       decisionWindow,
-      implementationComplexity: this.assessImplementationComplexity(problem)
+      implementationComplexity: this.assessImplementationComplexity(problem),
     }
   }
 
   /**
    * Calculate how well our solution fits this problem
    */
-  private async calculateSolutionFit(problem: any, industry: string): Promise<ProblemIntelligence['solutionFit']> {
+  private async calculateSolutionFit(
+    problem: unknown,
+    industry: string
+  ): Promise<ProblemIntelligence['solutionFit']> {
     // Analyze problem description for solution fit
     const ourCapabilities = [
-      'crm', 'customer management', 'sales automation', 'marketing automation',
-      'lead management', 'pipeline management', 'analytics', 'reporting',
-      'integration', 'workflow', 'ai', 'artificial intelligence'
+      'crm',
+      'customer management',
+      'sales automation',
+      'marketing automation',
+      'lead management',
+      'pipeline management',
+      'analytics',
+      'reporting',
+      'integration',
+      'workflow',
+      'ai',
+      'artificial intelligence',
     ]
 
     let matchScore = 0
     const problemText = problem.description.toLowerCase()
-    
-    ourCapabilities.forEach(capability => {
+
+    ourCapabilities.forEach((capability) => {
       if (problemText.includes(capability)) {
         matchScore += 15
       }
@@ -532,14 +555,14 @@ export class ProblemDiscoveryEngine {
 
     // Category-based fit scoring
     const categoryFit = {
-      'sales': 90,
-      'marketing': 85,
-      'customer': 88,
-      'crm': 95,
-      'lead': 92,
-      'pipeline': 94,
-      'analytics': 80,
-      'reporting': 75
+      sales: 90,
+      marketing: 85,
+      customer: 88,
+      crm: 95,
+      lead: 92,
+      pipeline: 94,
+      analytics: 80,
+      reporting: 75,
     }
 
     Object.entries(categoryFit).forEach(([category, score]) => {
@@ -555,14 +578,17 @@ export class ProblemDiscoveryEngine {
       competitorSolutions: await this.identifyCompetitorSolutions(problem),
       customSolutionRequired: matchScore < 70,
       implementationTimeframe: this.estimateImplementationTimeframe(problem, matchScore),
-      estimatedDealSize: this.estimateDealSize(problem, industry, matchScore)
+      estimatedDealSize: this.estimateDealSize(problem, industry, matchScore),
     }
   }
 
   /**
    * Store problem intelligence in database
    */
-  private async storeProblemIntelligence(intelligence: ProblemIntelligence, tenantId: string): Promise<void> {
+  private async storeProblemIntelligence(
+    intelligence: ProblemIntelligence,
+    tenantId: string
+  ): Promise<void> {
     try {
       await prisma.customerProblem.create({
         data: {
@@ -585,50 +611,55 @@ export class ProblemDiscoveryEngine {
           aiInsights: {
             timing: intelligence.timing,
             stakeholders: intelligence.stakeholders,
-            competitorSolutions: intelligence.solutionFit.competitorSolutions
-          }
-        }
+            competitorSolutions: intelligence.solutionFit.competitorSolutions,
+          },
+        },
       })
     } catch (error) {
-      console.error('❌ Failed to store problem intelligence:', error)
       throw error
     }
   }
 
   // Helper methods
-  private calculateEfficiencyImpact(problem: any): number {
+  private calculateEfficiencyImpact(problem: unknown): number {
     const keywords = ['manual', 'slow', 'inefficient', 'waste', 'delay', 'bottleneck']
-    const impactKeywords = keywords.filter(keyword => 
+    const impactKeywords = keywords.filter((keyword) =>
       problem.description.toLowerCase().includes(keyword)
     )
     return Math.min(50, impactKeywords.length * 10)
   }
 
-  private calculateCustomerImpact(problem: any): number {
+  private calculateCustomerImpact(problem: unknown): number {
     const keywords = ['customer', 'client', 'satisfaction', 'experience', 'churn']
-    const impactKeywords = keywords.filter(keyword => 
+    const impactKeywords = keywords.filter((keyword) =>
       problem.description.toLowerCase().includes(keyword)
     )
     return Math.min(100, impactKeywords.length * 20)
   }
 
-  private assessComplianceRisk(problem: any): boolean {
-    const complianceKeywords = ['compliance', 'regulation', 'audit', 'legal', 'gdpr', 'hipaa', 'sox']
-    return complianceKeywords.some(keyword => 
-      problem.description.toLowerCase().includes(keyword)
-    )
+  private assessComplianceRisk(problem: unknown): boolean {
+    const complianceKeywords = [
+      'compliance',
+      'regulation',
+      'audit',
+      'legal',
+      'gdpr',
+      'hipaa',
+      'sox',
+    ]
+    return complianceKeywords.some((keyword) => problem.description.toLowerCase().includes(keyword))
   }
 
-  private assessCompetitiveVulnerability(problem: any): boolean {
+  private assessCompetitiveVulnerability(problem: unknown): boolean {
     const competitiveKeywords = ['competitor', 'behind', 'losing', 'advantage', 'market share']
-    return competitiveKeywords.some(keyword => 
+    return competitiveKeywords.some((keyword) =>
       problem.description.toLowerCase().includes(keyword)
     )
   }
 
-  private assessScalabilityBlock(problem: any): boolean {
+  private assessScalabilityBlock(problem: unknown): boolean {
     const scalabilityKeywords = ['scale', 'growth', 'capacity', 'limit', 'bottleneck', 'constraint']
-    return scalabilityKeywords.some(keyword => 
+    return scalabilityKeywords.some((keyword) =>
       problem.description.toLowerCase().includes(keyword)
     )
   }
@@ -641,38 +672,40 @@ export class ProblemDiscoveryEngine {
     return 'YEAR_END'
   }
 
-  private assessImplementationComplexity(problem: any): 'LOW' | 'MEDIUM' | 'HIGH' | 'ENTERPRISE' {
+  private assessImplementationComplexity(
+    problem: unknown
+  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'ENTERPRISE' {
     const complexityKeywords = {
-      'enterprise': ['enterprise', 'large-scale', 'complex', 'integration'],
-      'high': ['custom', 'complex', 'multiple', 'systems'],
-      'medium': ['standard', 'typical', 'normal'],
-      'low': ['simple', 'basic', 'straightforward', 'easy']
+      enterprise: ['enterprise', 'large-scale', 'complex', 'integration'],
+      high: ['custom', 'complex', 'multiple', 'systems'],
+      medium: ['standard', 'typical', 'normal'],
+      low: ['simple', 'basic', 'straightforward', 'easy'],
     }
 
     const problemText = problem.description.toLowerCase()
-    
-    if (complexityKeywords.enterprise.some(kw => problemText.includes(kw))) return 'ENTERPRISE'
-    if (complexityKeywords.high.some(kw => problemText.includes(kw))) return 'HIGH'
-    if (complexityKeywords.low.some(kw => problemText.includes(kw))) return 'LOW'
+
+    if (complexityKeywords.enterprise.some((kw) => problemText.includes(kw))) return 'ENTERPRISE'
+    if (complexityKeywords.high.some((kw) => problemText.includes(kw))) return 'HIGH'
+    if (complexityKeywords.low.some((kw) => problemText.includes(kw))) return 'LOW'
     return 'MEDIUM'
   }
 
-  private async inferAffectedDepartments(problem: any): Promise<string[]> {
+  private async inferAffectedDepartments(problem: unknown): Promise<string[]> {
     const departmentKeywords = {
-      'Sales': ['sales', 'selling', 'revenue', 'deal', 'lead', 'prospect'],
-      'Marketing': ['marketing', 'campaign', 'brand', 'promotion', 'advertising'],
-      'IT': ['technology', 'system', 'software', 'infrastructure', 'integration'],
-      'Operations': ['operations', 'process', 'workflow', 'efficiency', 'productivity'],
-      'Finance': ['finance', 'accounting', 'budget', 'cost', 'expense', 'financial'],
-      'HR': ['hr', 'human resources', 'employee', 'staff', 'hiring', 'training'],
-      'Customer Service': ['support', 'service', 'customer', 'help', 'assistance']
+      Sales: ['sales', 'selling', 'revenue', 'deal', 'lead', 'prospect'],
+      Marketing: ['marketing', 'campaign', 'brand', 'promotion', 'advertising'],
+      IT: ['technology', 'system', 'software', 'infrastructure', 'integration'],
+      Operations: ['operations', 'process', 'workflow', 'efficiency', 'productivity'],
+      Finance: ['finance', 'accounting', 'budget', 'cost', 'expense', 'financial'],
+      HR: ['hr', 'human resources', 'employee', 'staff', 'hiring', 'training'],
+      'Customer Service': ['support', 'service', 'customer', 'help', 'assistance'],
     }
 
     const departments: string[] = []
     const problemText = problem.description.toLowerCase()
 
     Object.entries(departmentKeywords).forEach(([dept, keywords]) => {
-      if (keywords.some(keyword => problemText.includes(keyword))) {
+      if (keywords.some((keyword) => problemText.includes(keyword))) {
         departments.push(dept)
       }
     })
@@ -680,7 +713,7 @@ export class ProblemDiscoveryEngine {
     return departments.length > 0 ? departments : ['General']
   }
 
-  private async identifyCompetitorSolutions(problem: any): Promise<CompetitorSolution[]> {
+  private async identifyCompetitorSolutions(_problem: unknown): Promise<CompetitorSolution[]> {
     // Simplified competitor analysis - in production this would use comprehensive market intelligence
     const commonCompetitors = [
       {
@@ -689,7 +722,7 @@ export class ProblemDiscoveryEngine {
         marketShare: 23,
         satisfaction: 72,
         weaknesses: ['Complex setup', 'High cost', 'Over-engineering'],
-        switchingLikelihood: 0.3
+        switchingLikelihood: 0.3,
       },
       {
         competitor: 'HubSpot',
@@ -697,47 +730,53 @@ export class ProblemDiscoveryEngine {
         marketShare: 15,
         satisfaction: 78,
         weaknesses: ['Limited customization', 'Pricing tiers'],
-        switchingLikelihood: 0.4
-      }
+        switchingLikelihood: 0.4,
+      },
     ]
 
     return commonCompetitors
   }
 
-  private estimateImplementationTimeframe(problem: any, matchScore: number): string {
+  private estimateImplementationTimeframe(problem: unknown, matchScore: number): string {
     if (matchScore > 90) return '2-4 weeks'
     if (matchScore > 70) return '1-2 months'
     if (matchScore > 50) return '2-4 months'
     return '4-6 months'
   }
 
-  private estimateDealSize(problem: any, industry: string, matchScore: number): DealSizeRange {
+  private estimateDealSize(problem: unknown, industry: string, matchScore: number): DealSizeRange {
     const baseSize = 25000
     const industryMultiplier = industry === 'FINANCE' || industry === 'HEALTHCARE' ? 2 : 1
     const matchMultiplier = matchScore / 100
-    
+
     const mostLikely = Math.round(baseSize * industryMultiplier * matchMultiplier)
-    
+
     return {
       min: Math.round(mostLikely * 0.6),
       max: Math.round(mostLikely * 2),
       mostLikely,
-      factors: ['Industry type', 'Solution fit', 'Problem severity']
+      factors: ['Industry type', 'Solution fit', 'Problem severity'],
     }
   }
 
-  private async identifyAffectedStakeholders(problem: any, companyId?: string): Promise<ProblemIntelligence['stakeholders']> {
+  private async identifyAffectedStakeholders(
+    _problem: unknown,
+    companyId?: string
+  ): Promise<ProblemIntelligence['stakeholders']> {
     // In production, this would analyze company org chart and communication patterns
     return {
       champion: undefined,
       decisionMaker: undefined,
       influencers: [],
       blockers: [],
-      budgetOwner: undefined
+      budgetOwner: undefined,
     }
   }
 
-  private async checkProblemEvolution(problem: ProblemIntelligence, existingProblems: any[]): Promise<void> {
+  private async checkProblemEvolution(
+    _problem: ProblemIntelligence,
+    existingProblems: unknown[]
+  ): Promise<void> {
     // Check if this problem is related to existing problems or represents escalation
     // Implementation would compare problem signatures and track evolution
   }
@@ -746,18 +785,21 @@ export class ProblemDiscoveryEngine {
     // Update overall health, risk, and opportunity scores based on detected problems
     const problems = await prisma.customerProblem.findMany({
       where: { companyIntelligenceId },
-      select: { severity: true, urgencyScore: true, solutionFitScore: true }
+      select: { severity: true, urgencyScore: true, solutionFitScore: true },
     })
 
     if (problems.length === 0) return
 
     const avgUrgency = problems.reduce((sum, p) => sum + p.urgencyScore, 0) / problems.length
-    const avgSolutionFit = problems.reduce((sum, p) => sum + (p.solutionFitScore || 0), 0) / problems.length
-    const criticalProblems = problems.filter(p => p.severity === 'CRITICAL' || p.severity === 'EXISTENTIAL').length
+    const avgSolutionFit =
+      problems.reduce((sum, p) => sum + (p.solutionFitScore || 0), 0) / problems.length
+    const criticalProblems = problems.filter(
+      (p) => p.severity === 'CRITICAL' || p.severity === 'EXISTENTIAL'
+    ).length
 
     const healthScore = Math.max(0, 100 - avgUrgency)
-    const riskScore = Math.min(100, avgUrgency + (criticalProblems * 20))
-    const opportunityScore = Math.min(100, avgSolutionFit + (problems.length * 5))
+    const riskScore = Math.min(100, avgUrgency + criticalProblems * 20)
+    const opportunityScore = Math.min(100, avgSolutionFit + problems.length * 5)
 
     await prisma.companyIntelligence.update({
       where: { id: companyIntelligenceId },
@@ -765,15 +807,17 @@ export class ProblemDiscoveryEngine {
         overallHealthScore: Math.round(healthScore),
         problemRiskScore: Math.round(riskScore),
         opportunityScore: Math.round(opportunityScore),
-        lastAnalyzedAt: new Date()
-      }
+        lastAnalyzedAt: new Date(),
+      },
     })
   }
 
-  private async initializeSourceMonitoring(companyIntelligenceId: string, source: ProblemSource, domain: string): Promise<void> {
+  private async initializeSourceMonitoring(
+    _companyIntelligenceId: string,
+    _source: ProblemSource,
+    domain: string
+  ): Promise<void> {
     // Initialize monitoring agents for each source
-    console.log(`🤖 Initializing ${source} monitoring for ${domain}`)
-    
     // This would set up:
     // - Social media monitoring
     // - News alerts
@@ -793,8 +837,13 @@ export class ProblemDiscoveryEngine {
         industrySpecific: true,
         commonSolutions: ['Compliance Management', 'Audit Trail', 'Risk Management'],
         averageUrgency: 85,
-        typicalDealSize: { min: 50000, max: 500000, mostLikely: 150000, factors: ['Regulatory complexity'] }
-      }
+        typicalDealSize: {
+          min: 50000,
+          max: 500000,
+          mostLikely: 150000,
+          factors: ['Regulatory complexity'],
+        },
+      },
     ])
 
     this.industryProblems.set('HEALTHCARE', [
@@ -805,8 +854,13 @@ export class ProblemDiscoveryEngine {
         industrySpecific: true,
         commonSolutions: ['HIPAA Compliance', 'Data Security', 'Patient Portal'],
         averageUrgency: 90,
-        typicalDealSize: { min: 75000, max: 750000, mostLikely: 200000, factors: ['Patient volume'] }
-      }
+        typicalDealSize: {
+          min: 75000,
+          max: 750000,
+          mostLikely: 200000,
+          factors: ['Patient volume'],
+        },
+      },
     ])
 
     // Add more industries...
@@ -818,14 +872,14 @@ export class ProblemDiscoveryEngine {
       id: 'social_media',
       type: 'SOCIAL_MEDIA',
       config: { platforms: ['twitter', 'linkedin', 'reddit'] },
-      isActive: true
+      isActive: true,
     })
 
     this.activeSources.set('news', {
       id: 'news',
       type: 'NEWS_ARTICLE',
       config: { sources: ['google_news', 'business_insider', 'techcrunch'] },
-      isActive: true
+      isActive: true,
     })
 
     // Add more sources...

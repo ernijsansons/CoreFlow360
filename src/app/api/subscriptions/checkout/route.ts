@@ -8,7 +8,12 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { createOrGetCustomer, createCheckoutSession } from '@/lib/stripe/stripe'
 import { PricingCalculator } from '@/lib/pricing/calculator'
-import { handleError, handleAuthError, handleValidationError, ErrorContext } from '@/lib/error-handler'
+import {
+  handleError,
+  handleAuthError,
+  handleValidationError,
+  ErrorContext,
+} from '@/lib/error-handler'
 import { withRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { withIdempotency } from '@/middleware/idempotency'
 import { transactionManager } from '@/lib/db/transaction-manager'
@@ -18,95 +23,104 @@ const checkoutRequestSchema = z.object({
   tier: z.enum(['starter', 'professional', 'enterprise', 'ultimate']),
   users: z.number().min(1).max(10000),
   bundles: z.array(z.string()).min(1),
-  billingCycle: z.enum(['monthly', 'annual']).default('monthly')
+  billingCycle: z.enum(['monthly', 'annual']).default('monthly'),
 })
 
 async function postHandler(request: NextRequest) {
-  return withRateLimit(request, async () => {
-    const context: ErrorContext = {
-      endpoint: '/api/subscriptions/checkout',
-      method: 'POST',
-      userAgent: request.headers.get('user-agent') || undefined,
-      ip: request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || undefined,
-      requestId: request.headers.get('x-request-id') || undefined
-    }
-
-    try {
-      const session = await auth()
-      if (!session?.user?.tenantId) {
-        return handleAuthError('Authentication required', context)
+  return withRateLimit(
+    request,
+    async () => {
+      const context: ErrorContext = {
+        endpoint: '/api/subscriptions/checkout',
+        method: 'POST',
+        userAgent: request.headers.get('user-agent') || undefined,
+        ip: request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || undefined,
+        requestId: request.headers.get('x-request-id') || undefined,
       }
 
-      context.userId = session.user.id
-      context.tenantId = session.user.tenantId
-
-      const body = await request.json()
-      
-      // Validate request
-      const validationResult = checkoutRequestSchema.safeParse(body)
-      if (!validationResult.success) {
-        return handleValidationError(validationResult.error, context)
-      }
-
-      const { tier, users, bundles, billingCycle } = validationResult.data
-
-      // Get tenant details
-      const tenant = await prisma.tenant.findUnique({
-        where: { id: session.user.tenantId },
-        include: {
-          users: {
-            where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } },
-            take: 1
-          }
+      try {
+        const session = await auth()
+        if (!session?.user?.tenantId) {
+          return handleAuthError('Authentication required', context)
         }
-      })
 
-      if (!tenant) {
-        return NextResponse.json({
-          success: false,
-          error: 'Tenant not found'
-        }, { status: 404 })
-      }
+        context.userId = session.user.id
+        context.tenantId = session.user.tenantId
 
-      const adminUser = tenant.users[0]
-      if (!adminUser?.email) {
-        return NextResponse.json({
-          success: false,
-          error: 'Admin user email not found'
-        }, { status: 400 })
-      }
+        const body = await request.json()
 
-      // Calculate pricing
-      const pricing = PricingCalculator.calculate(
-        tier,
-        users,
-        bundles,
-        billingCycle === 'annual' ? 'ANNUAL' : 'MONTHLY'
-      )
-
-      // Use transactional checkout process
-      const checkoutResult = await createSubscriptionCheckoutTransaction({
-        tenantId: session.user.tenantId,
-        adminUser,
-        tier,
-        users,
-        bundles,
-        billingCycle,
-        pricing
-      })
-
-      return NextResponse.json({
-        success: true,
-        data: {
-          checkoutUrl: checkoutResult.checkoutSession.url,
-          sessionId: checkoutResult.checkoutSession.id
+        // Validate request
+        const validationResult = checkoutRequestSchema.safeParse(body)
+        if (!validationResult.success) {
+          return handleValidationError(validationResult.error, context)
         }
-      })
 
-    } catch (error) {
-      return handleError(error, context)
-    }
-  }, RATE_LIMITS.api)
+        const { tier, users, bundles, billingCycle } = validationResult.data
+
+        // Get tenant details
+        const tenant = await prisma.tenant.findUnique({
+          where: { id: session.user.tenantId },
+          include: {
+            users: {
+              where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } },
+              take: 1,
+            },
+          },
+        })
+
+        if (!tenant) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'Tenant not found',
+            },
+            { status: 404 }
+          )
+        }
+
+        const adminUser = tenant.users[0]
+        if (!adminUser?.email) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'Admin user email not found',
+            },
+            { status: 400 }
+          )
+        }
+
+        // Calculate pricing
+        const pricing = PricingCalculator.calculate(
+          tier,
+          users,
+          bundles,
+          billingCycle === 'annual' ? 'ANNUAL' : 'MONTHLY'
+        )
+
+        // Use transactional checkout process
+        const checkoutResult = await createSubscriptionCheckoutTransaction({
+          tenantId: session.user.tenantId,
+          adminUser,
+          tier,
+          users,
+          bundles,
+          billingCycle,
+          pricing,
+        })
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            checkoutUrl: checkoutResult.checkoutSession.url,
+            sessionId: checkoutResult.checkoutSession.id,
+          },
+        })
+      } catch (error) {
+        return handleError(error, context)
+      }
+    },
+    RATE_LIMITS.api
+  )
 }
 
 /**
@@ -115,13 +129,13 @@ async function postHandler(request: NextRequest) {
 async function getOrCreateBundle(
   tier: string,
   category: string,
-  pricing: any
+  pricing: unknown
 ): Promise<string> {
   const bundleName = `${tier.charAt(0).toUpperCase() + tier.slice(1)} ${category.charAt(0).toUpperCase() + category.slice(1)}`
 
   const bundle = await prisma.bundle.upsert({
     where: {
-      name: bundleName
+      name: bundleName,
     },
     create: {
       name: bundleName,
@@ -129,21 +143,19 @@ async function getOrCreateBundle(
       tier,
       category,
       basePrice: pricing.basePrice,
-      perUserPrice: pricing.userPrice / pricing.totalMonthly * pricing.basePrice, // Approximate
+      perUserPrice: (pricing.userPrice / pricing.totalMonthly) * pricing.basePrice, // Approximate
       features: JSON.stringify(PricingCalculator.getFeatures(tier, [category])),
       limits: JSON.stringify({
         users: tier === 'starter' ? 5 : tier === 'professional' ? 50 : -1,
         apiCalls: tier === 'starter' ? 1000 : tier === 'professional' ? 10000 : -1,
-        storage: tier === 'starter' ? 10 : tier === 'professional' ? 100 : -1
+        storage: tier === 'starter' ? 10 : tier === 'professional' ? 100 : -1,
       }),
-      aiCapabilities: JSON.stringify([
-        tier === 'ultimate' ? 'unlimited' : 'basic'
-      ])
+      aiCapabilities: JSON.stringify([tier === 'ultimate' ? 'unlimited' : 'basic']),
     },
     update: {
       basePrice: pricing.basePrice,
-      perUserPrice: pricing.userPrice / pricing.totalMonthly * pricing.basePrice
-    }
+      perUserPrice: (pricing.userPrice / pricing.totalMonthly) * pricing.basePrice,
+    },
   })
 
   return bundle.id
@@ -173,20 +185,20 @@ async function createSubscriptionCheckoutTransaction({
   users,
   bundles,
   billingCycle,
-  pricing
+  pricing,
 }: {
   tenantId: string
-  adminUser: any
+  adminUser: unknown
   tier: string
   users: number
   bundles: string[]
   billingCycle: string
-  pricing: any
+  pricing: unknown
 }) {
   let bundleId: string
-  let stripeCustomer: any
+  let stripeCustomer: unknown
   let stripePriceId: string
-  let checkoutSession: any
+  let checkoutSession: unknown
 
   const result = await transactionManager.executeSaga({
     transactionType: 'subscription_checkout',
@@ -199,7 +211,7 @@ async function createSubscriptionCheckoutTransaction({
         operation: async () => {
           bundleId = await getOrCreateBundle(tier, bundles[0], pricing)
           return { bundleId }
-        }
+        },
       },
       {
         stepId: 'create_stripe_customer',
@@ -211,7 +223,7 @@ async function createSubscriptionCheckoutTransaction({
             adminUser.name || undefined
           )
           return stripeCustomer
-        }
+        },
       },
       {
         stepId: 'create_stripe_price',
@@ -223,7 +235,7 @@ async function createSubscriptionCheckoutTransaction({
             billingCycle
           )
           return { stripePriceId }
-        }
+        },
       },
       {
         stepId: 'create_checkout_session',
@@ -241,11 +253,11 @@ async function createSubscriptionCheckoutTransaction({
               tier,
               users: users.toString(),
               bundles: bundles.join(','),
-              billingCycle
-            }
+              billingCycle,
+            },
           })
           return checkoutSession
-        }
+        },
       },
       {
         stepId: 'cancel_existing_pending',
@@ -254,16 +266,16 @@ async function createSubscriptionCheckoutTransaction({
           await prisma.tenantSubscription.updateMany({
             where: {
               tenantId,
-              status: 'PENDING'
+              status: 'PENDING',
             },
             data: {
               status: 'CANCELLED',
               cancelledAt: new Date(),
-              version: { increment: 1 }
-            }
+              version: { increment: 1 },
+            },
           })
           return { cancelled: true }
-        }
+        },
       },
       {
         stepId: 'create_pending_subscription',
@@ -277,17 +289,19 @@ async function createSubscriptionCheckoutTransaction({
               price: pricing.totalMonthly,
               status: 'PENDING',
               startDate: new Date(),
-              endDate: new Date(Date.now() + (billingCycle === 'annual' ? 365 : 30) * 24 * 60 * 60 * 1000),
+              endDate: new Date(
+                Date.now() + (billingCycle === 'annual' ? 365 : 30) * 24 * 60 * 60 * 1000
+              ),
               billingCycle: billingCycle === 'annual' ? 'ANNUAL' : 'MONTHLY',
               stripeCustomerId: stripeCustomer.id,
               enabledFeatures: JSON.stringify(bundles),
               customLimits: JSON.stringify({
                 checkoutSessionId: checkoutSession.id,
                 tier,
-                originalRequest: { tier, users, bundles, billingCycle }
+                originalRequest: { tier, users, bundles, billingCycle },
               }),
-              version: 1
-            }
+              version: 1,
+            },
           })
         },
         compensation: async () => {
@@ -297,18 +311,18 @@ async function createSubscriptionCheckoutTransaction({
               where: {
                 tenantId,
                 customLimits: {
-                  contains: checkoutSession.id
-                }
+                  contains: checkoutSession.id,
+                },
               },
               data: {
                 status: 'CANCELLED',
-                cancelledAt: new Date()
-              }
+                cancelledAt: new Date(),
+              },
             })
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   })
 
   return {
@@ -316,7 +330,7 @@ async function createSubscriptionCheckoutTransaction({
     stripeCustomer,
     stripePriceId,
     checkoutSession,
-    subscription: result
+    subscription: result,
   }
 }
 
@@ -332,7 +346,7 @@ async function createPendingSubscription({
   billingCycle,
   pricing,
   stripeCustomerId,
-  checkoutSessionId
+  checkoutSessionId,
 }: {
   tenantId: string
   bundleId: string
@@ -340,7 +354,7 @@ async function createPendingSubscription({
   users: number
   bundles: string[]
   billingCycle: string
-  pricing: any
+  pricing: unknown
   stripeCustomerId: string
   checkoutSessionId: string
 }) {
@@ -348,12 +362,12 @@ async function createPendingSubscription({
   await prisma.tenantSubscription.updateMany({
     where: {
       tenantId,
-      status: 'PENDING'
+      status: 'PENDING',
     },
     data: {
       status: 'CANCELLED',
-      cancelledAt: new Date()
-    }
+      cancelledAt: new Date(),
+    },
   })
 
   // Create new pending subscription
@@ -372,14 +386,14 @@ async function createPendingSubscription({
       customLimits: JSON.stringify({
         checkoutSessionId,
         tier,
-        originalRequest: { tier, users, bundles, billingCycle }
-      })
-    }
+        originalRequest: { tier, users, bundles, billingCycle },
+      }),
+    },
   })
 }
 
 // Export with idempotency protection
 export const POST = withIdempotency(postHandler, {
   ttlMinutes: 120, // 2 hours for checkout sessions
-  methods: ['POST']
+  methods: ['POST'],
 })

@@ -21,15 +21,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
-import { 
-  Check, 
-  Zap, 
-  TrendingUp,
-  Users,
-  Package,
-  CreditCard,
-  Loader2
-} from 'lucide-react'
+import { Check, Zap, TrendingUp, Users, Package, CreditCard, Loader2 } from 'lucide-react'
 
 interface UpgradeModalProps {
   open: boolean
@@ -61,8 +53,8 @@ const PRICING_TIERS: PricingOption[] = [
       'Core CRM & Sales',
       'Basic Finance',
       '100 AI credits/month',
-      '10GB storage'
-    ]
+      '10GB storage',
+    ],
   },
   {
     tier: 'professional',
@@ -76,9 +68,9 @@ const PRICING_TIERS: PricingOption[] = [
       'Full Finance Suite',
       'HR Basics',
       '1,000 AI credits/month',
-      '100GB storage'
+      '100GB storage',
     ],
-    highlighted: true
+    highlighted: true,
   },
   {
     tier: 'enterprise',
@@ -93,8 +85,8 @@ const PRICING_TIERS: PricingOption[] = [
       'API access',
       '10,000 AI credits/month',
       '1TB storage',
-      'Priority support'
-    ]
+      'Priority support',
+    ],
   },
   {
     tier: 'ultimate',
@@ -110,9 +102,9 @@ const PRICING_TIERS: PricingOption[] = [
       'Unlimited AI credits',
       'Unlimited storage',
       'Dedicated support',
-      'Custom integrations'
-    ]
-  }
+      'Custom integrations',
+    ],
+  },
 ]
 
 const BUNDLE_OPTIONS = [
@@ -120,7 +112,7 @@ const BUNDLE_OPTIONS = [
   { id: 'hr', name: 'Human Resources', description: 'Employees, payroll, time tracking' },
   { id: 'sales', name: 'Sales & Marketing', description: 'CRM, campaigns, automation' },
   { id: 'operations', name: 'Operations', description: 'Inventory, manufacturing, quality' },
-  { id: 'ai_enhancement', name: 'AI Enhancement', description: 'Advanced AI capabilities' }
+  { id: 'ai_enhancement', name: 'AI Enhancement', description: 'Advanced AI capabilities' },
 ]
 
 export function UpgradeModal({
@@ -128,13 +120,13 @@ export function UpgradeModal({
   onClose,
   currentTier,
   currentUsers,
-  currentBundles
+  currentBundles,
 }: UpgradeModalProps) {
   const [selectedTier, setSelectedTier] = useState(currentTier)
   const [userCount, setUserCount] = useState(currentUsers)
   const [selectedBundles, setSelectedBundles] = useState<string[]>(currentBundles)
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
-  const [pricing, setPricing] = useState<any>(null)
+  const [pricing, setPricing] = useState<unknown>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -152,24 +144,20 @@ export function UpgradeModal({
           tier: selectedTier,
           users: userCount,
           bundles: selectedBundles,
-          billingCycle: billingCycle === 'annual' ? 'ANNUAL' : 'MONTHLY'
-        })
+          billingCycle: billingCycle === 'annual' ? 'ANNUAL' : 'MONTHLY',
+        }),
       })
 
       const data = await response.json()
       if (data.success) {
         setPricing(data.data.pricing)
       }
-    } catch (error) {
-      console.error('Failed to calculate pricing:', error)
-    }
+    } catch (error) {}
   }
 
   const handleBundleToggle = (bundleId: string) => {
-    setSelectedBundles(prev => 
-      prev.includes(bundleId)
-        ? prev.filter(id => id !== bundleId)
-        : [...prev, bundleId]
+    setSelectedBundles((prev) =>
+      prev.includes(bundleId) ? prev.filter((id) => id !== bundleId) : [...prev, bundleId]
     )
   }
 
@@ -181,68 +169,64 @@ export function UpgradeModal({
         tier: selectedTier,
         users: userCount,
         bundles: selectedBundles,
-        billingCycle
+        billingCycle,
       })
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
       onClose()
     } catch (error) {
-      console.error('Upgrade failed:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const isDowngrade = PRICING_TIERS.findIndex(t => t.tier === selectedTier) < 
-                      PRICING_TIERS.findIndex(t => t.tier === currentTier)
+  const isDowngrade =
+    PRICING_TIERS.findIndex((t) => t.tier === selectedTier) <
+    PRICING_TIERS.findIndex((t) => t.tier === currentTier)
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Upgrade Your Subscription</DialogTitle>
-          <DialogDescription>
-            Choose the perfect plan for your growing business
-          </DialogDescription>
+          <DialogDescription>Choose the perfect plan for your growing business</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-6 py-6">
           {/* Tier Selection */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Select Your Plan</h3>
+            <h3 className="mb-4 text-lg font-semibold">Select Your Plan</h3>
             <RadioGroup value={selectedTier} onValueChange={setSelectedTier}>
               <div className="grid grid-cols-2 gap-4">
                 {PRICING_TIERS.map((tier) => (
                   <label
                     key={tier.tier}
                     htmlFor={tier.tier}
-                    className={`relative cursor-pointer rounded-lg border p-4 hover:bg-accent ${
+                    className={`hover:bg-accent relative cursor-pointer rounded-lg border p-4 ${
                       selectedTier === tier.tier ? 'border-primary bg-primary/5' : ''
-                    } ${tier.highlighted ? 'ring-2 ring-primary' : ''}`}
+                    } ${tier.highlighted ? 'ring-primary ring-2' : ''}`}
                   >
-                    <RadioGroupItem
-                      value={tier.tier}
-                      id={tier.tier}
-                      className="sr-only"
-                    />
+                    <RadioGroupItem value={tier.tier} id={tier.tier} className="sr-only" />
                     {tier.highlighted && (
                       <Badge className="absolute -top-2 right-4">Most Popular</Badge>
                     )}
                     <div className="space-y-2">
                       <div>
                         <h4 className="font-semibold">{tier.name}</h4>
-                        <p className="text-sm text-muted-foreground">{tier.description}</p>
+                        <p className="text-muted-foreground text-sm">{tier.description}</p>
                       </div>
                       <div className="text-2xl font-bold">
                         ${tier.perUserPrice}
-                        <span className="text-sm font-normal text-muted-foreground">/user/month</span>
+                        <span className="text-muted-foreground text-sm font-normal">
+                          /user/month
+                        </span>
                       </div>
                       <ul className="space-y-1 text-sm">
                         {tier.features.slice(0, 3).map((feature, i) => (
                           <li key={i} className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-primary" />
+                            <Check className="text-primary h-4 w-4" />
                             {feature}
                           </li>
                         ))}
@@ -256,10 +240,10 @@ export function UpgradeModal({
 
           {/* User Count */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Number of Users</h3>
+            <h3 className="mb-4 text-lg font-semibold">Number of Users</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Users</span>
+                <span className="text-muted-foreground text-sm">Users</span>
                 <span className="font-semibold">{userCount}</span>
               </div>
               <Slider
@@ -275,23 +259,27 @@ export function UpgradeModal({
 
           {/* Bundle Selection */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Select Bundles</h3>
+            <h3 className="mb-4 text-lg font-semibold">Select Bundles</h3>
             <div className="grid grid-cols-2 gap-3">
               {BUNDLE_OPTIONS.map((bundle) => (
                 <div
                   key={bundle.id}
-                  className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-accent ${
+                  className={`hover:bg-accent flex cursor-pointer items-center justify-between rounded-lg border p-3 ${
                     selectedBundles.includes(bundle.id) ? 'border-primary bg-primary/5' : ''
                   }`}
                   onClick={() => handleBundleToggle(bundle.id)}
                 >
                   <div className="flex items-center gap-3">
-                    <Package className={`h-5 w-5 ${
-                      selectedBundles.includes(bundle.id) ? 'text-primary' : 'text-muted-foreground'
-                    }`} />
+                    <Package
+                      className={`h-5 w-5 ${
+                        selectedBundles.includes(bundle.id)
+                          ? 'text-primary'
+                          : 'text-muted-foreground'
+                      }`}
+                    />
                     <div>
                       <p className="font-medium">{bundle.name}</p>
-                      <p className="text-xs text-muted-foreground">{bundle.description}</p>
+                      <p className="text-muted-foreground text-xs">{bundle.description}</p>
                     </div>
                   </div>
                   <Switch
@@ -305,8 +293,8 @@ export function UpgradeModal({
 
           {/* Billing Cycle */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Billing Cycle</h3>
-            <RadioGroup value={billingCycle} onValueChange={(v: any) => setBillingCycle(v)}>
+            <h3 className="mb-4 text-lg font-semibold">Billing Cycle</h3>
+            <RadioGroup value={billingCycle} onValueChange={(v: unknown) => setBillingCycle(v)}>
               <div className="grid grid-cols-2 gap-4">
                 <label
                   htmlFor="monthly"
@@ -317,7 +305,7 @@ export function UpgradeModal({
                   <RadioGroupItem value="monthly" id="monthly" className="sr-only" />
                   <div>
                     <h4 className="font-semibold">Monthly</h4>
-                    <p className="text-sm text-muted-foreground">Pay as you go</p>
+                    <p className="text-muted-foreground text-sm">Pay as you go</p>
                   </div>
                 </label>
                 <label
@@ -329,7 +317,7 @@ export function UpgradeModal({
                   <RadioGroupItem value="annual" id="annual" className="sr-only" />
                   <div>
                     <h4 className="font-semibold">Annual</h4>
-                    <p className="text-sm text-muted-foreground">Save 20%</p>
+                    <p className="text-muted-foreground text-sm">Save 20%</p>
                   </div>
                 </label>
               </div>
@@ -340,7 +328,7 @@ export function UpgradeModal({
           {pricing && (
             <Card>
               <CardContent className="pt-6">
-                <h3 className="text-lg font-semibold mb-4">Pricing Summary</h3>
+                <h3 className="mb-4 text-lg font-semibold">Pricing Summary</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Base price</span>
@@ -356,13 +344,13 @@ export function UpgradeModal({
                       <span>-${Math.round(pricing.savings / 12)}/month</span>
                     </div>
                   ))}
-                  <div className="border-t pt-2 mt-2">
+                  <div className="mt-2 border-t pt-2">
                     <div className="flex justify-between text-lg font-semibold">
                       <span>Total</span>
                       <div className="text-right">
                         <div>${pricing.totalMonthly}/month</div>
                         {billingCycle === 'annual' && (
-                          <div className="text-sm font-normal text-muted-foreground">
+                          <div className="text-muted-foreground text-sm font-normal">
                             ${pricing.totalAnnual} billed annually
                           </div>
                         )}

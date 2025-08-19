@@ -24,7 +24,7 @@ import {
   ArrowDownRight,
   Clock,
   Users,
-  DollarSign
+  DollarSign,
 } from 'lucide-react'
 
 export interface KPICardProps {
@@ -56,37 +56,39 @@ const CATEGORY_CONFIG = {
   FINANCIAL: { icon: DollarSign, color: 'text-green-600 bg-green-50' },
   OPERATIONAL: { icon: Activity, color: 'text-blue-600 bg-blue-50' },
   GROWTH: { icon: TrendingUp, color: 'text-purple-600 bg-purple-50' },
-  CUSTOMER: { icon: Users, color: 'text-orange-600 bg-orange-50' }
+  CUSTOMER: { icon: Users, color: 'text-orange-600 bg-orange-50' },
 }
 
-export function KPICard({ 
-  kpi, 
-  size = 'medium', 
+export function KPICard({
+  kpi,
+  size = 'medium',
   showChart = false,
   onDrillDown,
-  className = '' 
+  className = '',
 }: KPICardProps) {
   const [showDetails, setShowDetails] = useState(false)
 
   const formatValue = (value: number) => {
     if (kpi.displayValue) return kpi.displayValue
-    
+
     switch (kpi.format) {
       case 'currency':
-        return new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-          minimumFractionDigits: value >= 1000000 ? 1 : 0,
-          maximumFractionDigits: value >= 1000000 ? 1 : 0
-        }).format(value >= 1000000 ? value / 1000000 : value >= 1000 ? value / 1000 : value) + 
-        (value >= 1000000 ? 'M' : value >= 1000 ? 'K' : '')
-      
+        return (
+          new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: value >= 1000000 ? 1 : 0,
+            maximumFractionDigits: value >= 1000000 ? 1 : 0,
+          }).format(value >= 1000000 ? value / 1000000 : value >= 1000 ? value / 1000 : value) +
+          (value >= 1000000 ? 'M' : value >= 1000 ? 'K' : '')
+        )
+
       case 'percentage':
         return `${value.toFixed(1)}%`
-      
+
       case 'ratio':
         return `${value.toFixed(2)}:1`
-      
+
       default:
         return value.toLocaleString()
     }
@@ -94,19 +96,22 @@ export function KPICard({
 
   const getTrendIcon = () => {
     switch (kpi.trend) {
-      case 'up': return <TrendingUp className="w-4 h-4" />
-      case 'down': return <TrendingDown className="w-4 h-4" />
-      default: return <Minus className="w-4 h-4" />
+      case 'up':
+        return <TrendingUp className="h-4 w-4" />
+      case 'down':
+        return <TrendingDown className="h-4 w-4" />
+      default:
+        return <Minus className="h-4 w-4" />
     }
   }
 
   const getTrendColor = () => {
     // For some metrics, down is good (like churn rate, costs)
     const reverseTrendMetrics = ['churn', 'cost', 'bounce', 'abandon']
-    const isReverseTrend = reverseTrendMetrics.some(term => 
-      kpi.key.toLowerCase().includes(term) || kpi.name.toLowerCase().includes(term)
+    const isReverseTrend = reverseTrendMetrics.some(
+      (term) => kpi.key.toLowerCase().includes(term) || kpi.name.toLowerCase().includes(term)
     )
-    
+
     if (kpi.trend === 'up') {
       return isReverseTrend ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50'
     } else if (kpi.trend === 'down') {
@@ -121,25 +126,25 @@ export function KPICard({
         return {
           icon: CheckCircle,
           color: 'text-green-600 bg-green-50',
-          border: 'border-green-200'
+          border: 'border-green-200',
         }
       case 'warning':
         return {
           icon: AlertTriangle,
           color: 'text-yellow-600 bg-yellow-50',
-          border: 'border-yellow-200'
+          border: 'border-yellow-200',
         }
       case 'critical':
         return {
           icon: AlertTriangle,
           color: 'text-red-600 bg-red-50',
-          border: 'border-red-200'
+          border: 'border-red-200',
         }
       default:
         return {
           icon: Info,
           color: 'text-blue-600 bg-blue-50',
-          border: 'border-blue-200'
+          border: 'border-blue-200',
         }
     }
   }
@@ -157,65 +162,60 @@ export function KPICard({
   const sizeClasses = {
     small: 'p-4',
     medium: 'p-6',
-    large: 'p-8'
+    large: 'p-8',
   }
 
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border ${statusConfig.border} hover:shadow-md transition-all duration-200 ${sizeClasses[size]} ${className}`}
+      className={`rounded-xl border bg-white shadow-sm dark:bg-gray-800 ${statusConfig.border} transition-all duration-200 hover:shadow-md ${sizeClasses[size]} ${className}`}
     >
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="mb-4 flex items-start justify-between">
         <div className="flex-1">
-          <div className="flex items-center space-x-2 mb-2">
+          <div className="mb-2 flex items-center space-x-2">
             {categoryConfig && (
-              <div className={`p-1 rounded ${categoryConfig.color}`}>
-                <categoryConfig.icon className="w-3 h-3" />
+              <div className={`rounded p-1 ${categoryConfig.color}`}>
+                <categoryConfig.icon className="h-3 w-3" />
               </div>
             )}
-            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              {kpi.name}
-            </h3>
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{kpi.name}</h3>
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+              className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
-              <Info className="w-3 h-3 text-gray-400" />
+              <Info className="h-3 w-3 text-gray-400" />
             </button>
           </div>
-          
+
           {kpi.description && showDetails && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-              {kpi.description}
-            </p>
+            <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">{kpi.description}</p>
           )}
         </div>
 
-        <div className={`p-2 rounded-full ${statusConfig.color}`}>
-          <statusConfig.icon className="w-4 h-4" />
+        <div className={`rounded-full p-2 ${statusConfig.color}`}>
+          <statusConfig.icon className="h-4 w-4" />
         </div>
       </div>
 
       {/* Main Value */}
       <div className="mb-4">
-        <p className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+        <p className="text-2xl font-bold text-gray-900 md:text-3xl dark:text-white">
           {formatValue(kpi.value)}
         </p>
-        
-        {kpi.unit && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {kpi.unit}
-          </p>
-        )}
+
+        {kpi.unit && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{kpi.unit}</p>}
       </div>
 
       {/* Change Indicator */}
       {kpi.changePercent !== undefined && (
-        <div className={`inline-flex items-center space-x-2 px-2 py-1 rounded-full text-sm font-medium ${trendColor} mb-3`}>
+        <div
+          className={`inline-flex items-center space-x-2 rounded-full px-2 py-1 text-sm font-medium ${trendColor} mb-3`}
+        >
           {getTrendIcon()}
           <span>
-            {kpi.changePercent > 0 ? '+' : ''}{kpi.changePercent.toFixed(1)}%
+            {kpi.changePercent > 0 ? '+' : ''}
+            {kpi.changePercent.toFixed(1)}%
           </span>
           <span className="text-xs opacity-75">vs last period</span>
         </div>
@@ -224,19 +224,23 @@ export function KPICard({
       {/* Target Progress */}
       {kpi.target && (
         <div className="mb-4">
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
+          <div className="mb-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
             <span>Progress to Target</span>
             <span>{formatValue(kpi.target)}</span>
           </div>
-          <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${targetProgress}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              transition={{ duration: 1, ease: 'easeOut' }}
               className={`h-full rounded-full ${
-                targetProgress >= 100 ? 'bg-green-500' :
-                targetProgress >= 75 ? 'bg-blue-500' :
-                targetProgress >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                targetProgress >= 100
+                  ? 'bg-green-500'
+                  : targetProgress >= 75
+                    ? 'bg-blue-500'
+                    : targetProgress >= 50
+                      ? 'bg-yellow-500'
+                      : 'bg-red-500'
               }`}
             />
           </div>
@@ -245,14 +249,14 @@ export function KPICard({
 
       {/* Benchmark Comparison */}
       {kpi.benchmark && showDetails && (
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-3">
+        <div className="mb-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
           <span>Industry Benchmark</span>
           <div className="flex items-center space-x-2">
             <span>{formatValue(kpi.benchmark)}</span>
             {kpi.value > kpi.benchmark ? (
-              <ArrowUpRight className="w-3 h-3 text-green-500" />
+              <ArrowUpRight className="h-3 w-3 text-green-500" />
             ) : (
-              <ArrowDownRight className="w-3 h-3 text-red-500" />
+              <ArrowDownRight className="h-3 w-3 text-red-500" />
             )}
           </div>
         </div>
@@ -260,27 +264,27 @@ export function KPICard({
 
       {/* Mini Chart Placeholder */}
       {showChart && (
-        <div className="h-12 flex items-center justify-center text-gray-400 border border-gray-200 dark:border-gray-700 rounded mb-3">
-          <LineChart className="w-6 h-6 mr-2" />
+        <div className="mb-3 flex h-12 items-center justify-center rounded border border-gray-200 text-gray-400 dark:border-gray-700">
+          <LineChart className="mr-2 h-6 w-6" />
           <span className="text-xs">Mini chart would go here</span>
         </div>
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between border-t border-gray-200 pt-3 dark:border-gray-700">
         {kpi.lastUpdated && (
           <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
-            <Clock className="w-3 h-3" />
+            <Clock className="h-3 w-3" />
             <span>Updated {kpi.lastUpdated.toLocaleDateString()}</span>
           </div>
         )}
-        
+
         {onDrillDown && (
           <button
             onClick={() => onDrillDown(kpi.key)}
-            className="flex items-center space-x-1 text-xs text-purple-600 hover:text-purple-700 font-medium"
+            className="flex items-center space-x-1 text-xs font-medium text-purple-600 hover:text-purple-700"
           >
-            <BarChart3 className="w-3 h-3" />
+            <BarChart3 className="h-3 w-3" />
             <span>Drill Down</span>
           </button>
         )}
@@ -293,7 +297,7 @@ export function KPICard({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
+            className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700"
           >
             <div className="grid grid-cols-2 gap-3 text-xs">
               {kpi.previousValue && (
@@ -304,26 +308,27 @@ export function KPICard({
                   </p>
                 </div>
               )}
-              
+
               {kpi.change && (
                 <div>
                   <p className="text-gray-500 dark:text-gray-400">Absolute Change</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {kpi.change > 0 ? '+' : ''}{formatValue(kpi.change)}
+                    {kpi.change > 0 ? '+' : ''}
+                    {formatValue(kpi.change)}
                   </p>
                 </div>
               )}
 
               <div>
                 <p className="text-gray-500 dark:text-gray-400">Status</p>
-                <p className="font-semibold capitalize text-gray-900 dark:text-white">
+                <p className="font-semibold text-gray-900 capitalize dark:text-white">
                   {kpi.status}
                 </p>
               </div>
 
               <div>
                 <p className="text-gray-500 dark:text-gray-400">Category</p>
-                <p className="font-semibold capitalize text-gray-900 dark:text-white">
+                <p className="font-semibold text-gray-900 capitalize dark:text-white">
                   {kpi.category?.toLowerCase().replace('_', ' ')}
                 </p>
               </div>

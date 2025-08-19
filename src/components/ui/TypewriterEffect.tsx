@@ -18,7 +18,7 @@ export function TypewriterEffect({
   speed = 100,
   deleteSpeed = 50,
   delayBetweenWords = 2000,
-  loop = true
+  loop = true,
 }: TypewriterEffectProps) {
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
   const [currentText, setCurrentText] = useState('')
@@ -27,50 +27,63 @@ export function TypewriterEffect({
 
   useEffect(() => {
     const currentWord = words[currentWordIndex]
-    
+
     if (isPaused) {
       const pauseTimer = setTimeout(() => {
         setIsPaused(false)
         setIsDeleting(true)
       }, delayBetweenWords)
-      
+
       return () => clearTimeout(pauseTimer)
     }
 
-    const typeTimer = setTimeout(() => {
-      if (!isDeleting) {
-        // Typing
-        if (currentText.length < currentWord.length) {
-          setCurrentText(currentWord.substring(0, currentText.length + 1))
+    const typeTimer = setTimeout(
+      () => {
+        if (!isDeleting) {
+          // Typing
+          if (currentText.length < currentWord.length) {
+            setCurrentText(currentWord.substring(0, currentText.length + 1))
+          } else {
+            // Finished typing current word
+            if (loop || currentWordIndex < words.length - 1) {
+              setIsPaused(true)
+            }
+          }
         } else {
-          // Finished typing current word
-          if (loop || currentWordIndex < words.length - 1) {
-            setIsPaused(true)
+          // Deleting
+          if (currentText.length > 0) {
+            setCurrentText(currentText.substring(0, currentText.length - 1))
+          } else {
+            // Finished deleting
+            setIsDeleting(false)
+            setCurrentWordIndex((prev) =>
+              loop ? (prev + 1) % words.length : Math.min(prev + 1, words.length - 1)
+            )
           }
         }
-      } else {
-        // Deleting
-        if (currentText.length > 0) {
-          setCurrentText(currentText.substring(0, currentText.length - 1))
-        } else {
-          // Finished deleting
-          setIsDeleting(false)
-          setCurrentWordIndex((prev) => 
-            loop ? (prev + 1) % words.length : Math.min(prev + 1, words.length - 1)
-          )
-        }
-      }
-    }, isDeleting ? deleteSpeed : speed)
+      },
+      isDeleting ? deleteSpeed : speed
+    )
 
     return () => clearTimeout(typeTimer)
-  }, [currentText, currentWordIndex, isDeleting, isPaused, words, speed, deleteSpeed, delayBetweenWords, loop])
+  }, [
+    currentText,
+    currentWordIndex,
+    isDeleting,
+    isPaused,
+    words,
+    speed,
+    deleteSpeed,
+    delayBetweenWords,
+    loop,
+  ])
 
   return (
     <span className={`inline-flex ${className}`}>
       <span className="relative">
         {currentText}
         <motion.span
-          className="inline-block w-[3px] h-[1.2em] bg-violet-500 ml-1"
+          className="ml-1 inline-block h-[1.2em] w-[3px] bg-violet-500"
           animate={{ opacity: [0, 1, 0] }}
           transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
         />

@@ -11,7 +11,7 @@ export interface ApiError {
     type: string
     code: string
     message: string
-    details?: Record<string, any>
+    details?: Record<string, unknown>
     timestamp: string
     requestId?: string
   }
@@ -50,7 +50,7 @@ class ClientErrorHandler {
   /**
    * Handle API response errors
    */
-  handleApiError(response: Response, data?: any): ApiError | null {
+  handleApiError(response: Response, data?: unknown): ApiError | null {
     if (response.ok) return null
 
     // Try to parse error response
@@ -66,8 +66,8 @@ class ClientErrorHandler {
             type: 'HTTP_ERROR',
             code: `HTTP_${response.status}`,
             message: this.getStatusMessage(response.status),
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         }
       }
     } catch (e) {
@@ -78,18 +78,16 @@ class ClientErrorHandler {
           type: 'PARSE_ERROR',
           code: 'RESPONSE_PARSE_FAILED',
           message: 'Failed to parse error response',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     }
 
     // Notify error callbacks
-    this.errorCallbacks.forEach(callback => {
+    this.errorCallbacks.forEach((callback) => {
       try {
         callback(errorData!)
-      } catch (e) {
-        console.error('Error callback failed:', e)
-      }
+      } catch (e) {}
     })
 
     // Create user-friendly toast
@@ -110,19 +108,17 @@ class ClientErrorHandler {
         message: 'Network request failed. Please check your connection.',
         details: {
           originalMessage: error.message,
-          url
+          url,
         },
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     }
 
     // Notify error callbacks
-    this.errorCallbacks.forEach(callback => {
+    this.errorCallbacks.forEach((callback) => {
       try {
         callback(errorData)
-      } catch (e) {
-        console.error('Error callback failed:', e)
-      }
+      } catch (e) {}
     })
 
     // Show network error toast
@@ -141,7 +137,7 @@ class ClientErrorHandler {
       type: 'error',
       title: 'Form Validation Failed',
       message: `Please fix ${errorCount} error${errorCount > 1 ? 's' : ''} and try again.`,
-      duration: 5000
+      duration: 5000,
     }
 
     this.showToast(toast)
@@ -156,24 +152,24 @@ class ClientErrorHandler {
       type: this.getToastType(statusCode),
       title: this.getErrorTitle(error.error.type, statusCode),
       message: error.error.message,
-      duration: this.getToastDuration(statusCode)
+      duration: this.getToastDuration(statusCode),
     }
 
     // Add action for certain error types
     if (statusCode === 401) {
       toast.action = {
         label: 'Sign In',
-        onClick: () => window.location.href = '/login'
+        onClick: () => (window.location.href = '/login'),
       }
     } else if (statusCode === 402 && error.error.type === 'SUBSCRIPTION_LIMIT') {
       toast.action = {
         label: 'Upgrade',
-        onClick: () => window.location.href = '/pricing'
+        onClick: () => (window.location.href = '/pricing'),
       }
     } else if (statusCode >= 500) {
       toast.action = {
         label: 'Retry',
-        onClick: () => window.location.reload()
+        onClick: () => window.location.reload(),
       }
     }
 
@@ -184,17 +180,14 @@ class ClientErrorHandler {
    * Show toast notification
    */
   private showToast(toast: ErrorToast): void {
-    this.toastCallbacks.forEach(callback => {
+    this.toastCallbacks.forEach((callback) => {
       try {
         callback(toast)
-      } catch (e) {
-        console.error('Toast callback failed:', e)
-      }
+      } catch (e) {}
     })
 
     // Fallback to console if no toast system is connected
     if (this.toastCallbacks.length === 0) {
-      console.error(`${toast.title}: ${toast.message}`)
     }
   }
 
@@ -227,17 +220,20 @@ class ClientErrorHandler {
   /**
    * Enhanced fetch wrapper with error handling
    */
-  async safeFetch(url: string, options: RequestInit = {}): Promise<{ data: any; error: ApiError | null }> {
+  async safeFetch(
+    url: string,
+    options: RequestInit = {}
+  ): Promise<{ data: unknown; error: ApiError | null }> {
     try {
       const response = await fetch(url, {
         ...options,
         headers: {
           'Content-Type': 'application/json',
-          ...options.headers
-        }
+          ...options.headers,
+        },
       })
 
-      let data: any = null
+      let data: unknown = null
       try {
         data = await response.json()
       } catch (e) {
@@ -246,16 +242,16 @@ class ClientErrorHandler {
       }
 
       const error = this.handleApiError(response, data)
-      
+
       return {
         data: error ? null : data,
-        error
+        error,
       }
     } catch (fetchError) {
       const error = this.handleNetworkError(fetchError as Error, url)
       return {
         data: null,
-        error
+        error,
       }
     }
   }
@@ -267,7 +263,7 @@ class ClientErrorHandler {
     const messages: Record<number, string> = {
       400: 'Invalid request. Please check your input.',
       401: 'Authentication required. Please sign in.',
-      403: 'Access denied. You don\'t have permission for this action.',
+      403: "Access denied. You don't have permission for this action.",
       404: 'The requested resource was not found.',
       409: 'Conflict with existing data.',
       422: 'Invalid data provided.',
@@ -275,7 +271,7 @@ class ClientErrorHandler {
       500: 'Internal server error. Please try again later.',
       502: 'Service temporarily unavailable.',
       503: 'Service temporarily unavailable.',
-      504: 'Request timeout. Please try again.'
+      504: 'Request timeout. Please try again.',
     }
 
     return messages[status] || 'An unexpected error occurred.'
@@ -294,12 +290,12 @@ class ClientErrorHandler {
     if (statusCode === 409) return 'Conflict'
     if (statusCode === 429) return 'Rate Limited'
     if (statusCode >= 500) return 'Server Error'
-    
+
     const titleMap: Record<string, string> = {
       VALIDATION_ERROR: 'Validation Error',
       NETWORK_ERROR: 'Connection Error',
       SUBSCRIPTION_LIMIT: 'Subscription Limit',
-      EXTERNAL_SERVICE_ERROR: 'Service Unavailable'
+      EXTERNAL_SERVICE_ERROR: 'Service Unavailable',
     }
 
     return titleMap[errorType] || 'Error'
@@ -323,7 +319,7 @@ export function useErrorHandler() {
     handleValidationError: clientErrorHandler.handleValidationError.bind(clientErrorHandler),
     safeFetch: clientErrorHandler.safeFetch.bind(clientErrorHandler),
     onError: clientErrorHandler.onError.bind(clientErrorHandler),
-    onToast: clientErrorHandler.onToast.bind(clientErrorHandler)
+    onToast: clientErrorHandler.onToast.bind(clientErrorHandler),
   }
 }
 

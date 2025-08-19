@@ -6,17 +6,13 @@ import Stripe from 'stripe'
 import { prisma } from '@/lib/db'
 import { publishModuleEvent } from '@/services/events/subscription-aware-event-bus'
 
-
-
 export async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
-    console.log(`💰 Payment succeeded: ${invoice.id}`)
-    
     if (!invoice.subscription) return
 
     // Find legacy tenant subscription
     const legacySubscription = await prisma.legacyTenantSubscription.findFirst({
-      where: { stripeSubscriptionId: invoice.subscription as string }
+      where: { stripeSubscriptionId: invoice.subscription as string },
     })
 
     if (!legacySubscription) return
@@ -31,22 +27,12 @@ export async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     await updateLegacySubscriptionDates(invoice, legacySubscription.id)
 
     // Publish payment success event
-    await publishModuleEvent(
-      'subscription',
-      'payment.succeeded',
-      legacySubscription.tenantId,
-      {
-        invoiceId: invoice.id,
-        amount: invoice.amount_paid / 100,
-        currency: invoice.currency
-      }
-    )
-
-    console.log(`✅ Payment processed for tenant ${legacySubscription.tenantId}`)
-
-  } catch (error) {
-    console.error('Error handling payment success:', error)
-  }
+    await publishModuleEvent('subscription', 'payment.succeeded', legacySubscription.tenantId, {
+      invoiceId: invoice.id,
+      amount: invoice.amount_paid / 100,
+      currency: invoice.currency,
+    })
+  } catch (error) {}
 }
 
 async function createPaymentBillingEvent(invoice: Stripe.Invoice, tenantId: string) {
@@ -66,9 +52,9 @@ async function createPaymentBillingEvent(invoice: Stripe.Invoice, tenantId: stri
       stripeChargeId: invoice.charge as string,
       metadata: JSON.stringify({
         invoice_number: invoice.number,
-        receipt_url: invoice.hosted_invoice_url
-      })
-    }
+        receipt_url: invoice.hosted_invoice_url,
+      }),
+    },
   })
 }
 
@@ -76,12 +62,12 @@ async function updateBundleSubscriptionDates(invoice: Stripe.Invoice, tenantId: 
   await prisma.tenantBundleSubscription.updateMany({
     where: {
       tenantId,
-      externalServiceId: invoice.subscription as string
+      externalServiceId: invoice.subscription as string,
     },
     data: {
       lastBillingDate: new Date(),
-      nextBillingDate: new Date(invoice.period_end * 1000)
-    }
+      nextBillingDate: new Date(invoice.period_end * 1000),
+    },
   })
 }
 
@@ -91,7 +77,7 @@ async function updateLegacySubscriptionDates(invoice: Stripe.Invoice, subscripti
     data: {
       currentPeriodStart: new Date(invoice.period_start * 1000),
       currentPeriodEnd: new Date(invoice.period_end * 1000),
-      nextBillingDate: new Date(invoice.period_end * 1000)
-    }
+      nextBillingDate: new Date(invoice.period_end * 1000),
+    },
   })
 }

@@ -15,7 +15,7 @@ export enum TestErrorType {
   NOT_FOUND = 'NotFoundError',
   CONFLICT = 'ConflictError',
   RATE_LIMIT = 'RateLimitError',
-  INTERNAL = 'InternalError'
+  INTERNAL = 'InternalError',
 }
 
 /**
@@ -30,7 +30,7 @@ export const TestErrorMessages = {
   TENANT_MISMATCH: 'Unauthorized: Cannot access resource from different tenant',
   MISSING_REQUIRED_FIELD: (field: string) => `${field} is required`,
   INVALID_FORMAT: (field: string) => `Invalid ${field} format`,
-  DUPLICATE_ENTRY: (resource: string) => `${resource} already exists`
+  DUPLICATE_ENTRY: (resource: string) => `${resource} already exists`,
 }
 
 /**
@@ -46,25 +46,18 @@ export async function expectAsyncError(
 /**
  * Test helper for sync functions that should throw
  */
-export function expectSyncError(
-  syncFn: () => any,
-  expectedError: string | RegExp
-) {
+export function expectSyncError(syncFn: () => any, expectedError: string | RegExp) {
   expect(syncFn).toThrow(expectedError)
 }
 
 /**
  * Creates a standardized error object for testing
  */
-export function createTestError(
-  type: TestErrorType,
-  message: string,
-  statusCode?: number
-) {
+export function createTestError(type: TestErrorType, message: string, statusCode?: number) {
   const error = new Error(message)
   error.name = type
   if (statusCode) {
-    (error as any).statusCode = statusCode
+    ;(error as any).statusCode = statusCode
   }
   return error
 }
@@ -78,7 +71,7 @@ export function validateErrorResponse(
   expectedMessage?: string | RegExp
 ) {
   expect(response.status).toBe(expectedStatus)
-  
+
   if (expectedMessage) {
     if (typeof expectedMessage === 'string') {
       expect(response.error).toBe(expectedMessage)
@@ -113,6 +106,6 @@ export function createMockErrorHandler() {
         return { status: 429, error: error.message }
       }
       return { status: 500, error: 'Internal server error' }
-    }
+    },
   }
 }

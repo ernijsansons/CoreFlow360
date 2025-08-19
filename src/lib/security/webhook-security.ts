@@ -1,6 +1,6 @@
 /**
  * CoreFlow360 - Webhook Security Module
- * 
+ *
  * Comprehensive webhook security with timestamp validation, replay attack prevention,
  * and cryptographic signature verification for multiple providers
  */
@@ -43,7 +43,7 @@ const rateLimitCache = new Map<string, { count: number; resetTime: number }>()
 export class WebhookSecurityValidator {
   private config: WebhookSecurityConfig
   private CACHE_CLEANUP_INTERVAL = 5 * 60 * 1000 // 5 minutes
-  
+
   constructor(config: WebhookSecurityConfig) {
     this.config = config
     this.startCacheCleanup()
@@ -59,8 +59,8 @@ export class WebhookSecurityValidator {
         provider: this.config.provider,
         replayProtected: false,
         signatureValid: false,
-        rateLimited: false
-      }
+        rateLimited: false,
+      },
     }
 
     try {
@@ -68,7 +68,7 @@ export class WebhookSecurityValidator {
       if (this.config.enableRateLimit) {
         const rateLimitResult = this.checkRateLimit(payload)
         result.metadata.rateLimited = rateLimitResult.limited
-        
+
         if (rateLimitResult.limited) {
           result.error = `Rate limit exceeded: ${rateLimitResult.message}`
           return result
@@ -80,7 +80,7 @@ export class WebhookSecurityValidator {
         const timestampResult = this.validateTimestamp(payload)
         result.metadata.timestamp = timestampResult.timestamp
         result.metadata.replayProtected = timestampResult.valid
-        
+
         if (!timestampResult.valid) {
           result.error = timestampResult.error
           return result
@@ -90,7 +90,7 @@ export class WebhookSecurityValidator {
       // 3. Signature verification
       const signatureResult = await this.verifySignature(payload)
       result.metadata.signatureValid = signatureResult.valid
-      
+
       if (!signatureResult.valid) {
         result.error = signatureResult.error
         return result
@@ -105,7 +105,6 @@ export class WebhookSecurityValidator {
 
       result.isValid = true
       return result
-
     } catch (error) {
       result.error = `Webhook validation failed: ${error.message}`
       return result
@@ -126,27 +125,26 @@ export class WebhookSecurityValidator {
     // Extract timestamp based on provider
     switch (this.config.provider) {
       case 'stripe':
-        timestampStr = payload.headers['stripe-signature']
-          ?.split(',')
-          .find(pair => pair.startsWith('t='))
-          ?.substring(2) || ''
+        timestampStr =
+          payload.headers['stripe-signature']
+            ?.split(',')
+            .find((pair) => pair.startsWith('t='))
+            ?.substring(2) || ''
         break
-        
+
       case 'twilio':
         // Twilio doesn't provide timestamp in signature, use current time with tolerance
         timestampStr = Math.floor(Date.now() / 1000).toString()
         break
-        
+
       case 'vapi':
-        timestampStr = payload.headers['x-vapi-timestamp'] || 
-                      payload.headers['x-timestamp'] || ''
+        timestampStr = payload.headers['x-vapi-timestamp'] || payload.headers['x-timestamp'] || ''
         break
-        
+
       case 'generic':
-        timestampStr = payload.headers['x-timestamp'] || 
-                      payload.headers['timestamp'] || ''
+        timestampStr = payload.headers['x-timestamp'] || payload.headers['timestamp'] || ''
         break
-        
+
       default:
         return { valid: false, error: 'Unknown provider for timestamp validation' }
     }
@@ -169,7 +167,7 @@ export class WebhookSecurityValidator {
     if (timeDiff > this.config.timestampTolerance) {
       return {
         valid: false,
-        error: `Timestamp outside tolerance: ${timeDiff}s > ${this.config.timestampTolerance}s`
+        error: `Timestamp outside tolerance: ${timeDiff}s > ${this.config.timestampTolerance}s`,
       }
     }
 
@@ -177,15 +175,15 @@ export class WebhookSecurityValidator {
     if (this.config.enableReplayProtection) {
       const replayKey = this.generateReplayKey(payload, timestampStr)
       const cached = replayCache.get(replayKey)
-      
+
       if (cached && cached.used) {
         return { valid: false, error: 'Potential replay attack detected' }
       }
-      
+
       // Mark as used
       replayCache.set(replayKey, {
         timestamp: timestampSeconds,
-        used: true
+        used: true,
       })
     }
 
@@ -214,16 +212,16 @@ export class WebhookSecurityValidator {
       switch (this.config.provider) {
         case 'stripe':
           return this.verifyStripeSignature(payload, secret)
-          
+
         case 'twilio':
           return this.verifyTwilioSignature(payload, secret)
-          
+
         case 'vapi':
           return this.verifyVapiSignature(payload, secret)
-          
+
         case 'generic':
           return this.verifyGenericSignature(payload, secret)
-          
+
         default:
           return { valid: false, error: 'Unknown provider for signature verification' }
       }
@@ -235,7 +233,10 @@ export class WebhookSecurityValidator {
   /**
    * Stripe signature verification (HMAC SHA256)
    */
-  private verifyStripeSignature(payload: WebhookPayload, secret: string): {
+  private verifyStripeSignature(
+    payload: WebhookPayload,
+    secret: string
+  ): {
     valid: boolean
     error?: string
   } {
@@ -247,8 +248,8 @@ export class WebhookSecurityValidator {
     try {
       // Parse signature components
       const elements = signature.split(',')
-      const signatureHash = elements.find(el => el.startsWith('v1='))?.substring(3)
-      const timestamp = elements.find(el => el.startsWith('t='))?.substring(2)
+      const signatureHash = elements.find((el) => el.startsWith('v1='))?.substring(3)
+      const timestamp = elements.find((el) => el.startsWith('t='))?.substring(2)
 
       if (!signatureHash || !timestamp) {
         return { valid: false, error: 'Invalid Stripe signature format' }
@@ -276,7 +277,10 @@ export class WebhookSecurityValidator {
   /**
    * Twilio signature verification (SHA1)
    */
-  private verifyTwilioSignature(payload: WebhookPayload, secret: string): {
+  private verifyTwilioSignature(
+    payload: WebhookPayload,
+    secret: string
+  ): {
     valid: boolean
     error?: string
   } {
@@ -310,7 +314,10 @@ export class WebhookSecurityValidator {
   /**
    * Vapi signature verification (HMAC SHA256)
    */
-  private verifyVapiSignature(payload: WebhookPayload, secret: string): {
+  private verifyVapiSignature(
+    payload: WebhookPayload,
+    secret: string
+  ): {
     valid: boolean
     error?: string
   } {
@@ -343,14 +350,18 @@ export class WebhookSecurityValidator {
   /**
    * Generic HMAC SHA256 signature verification
    */
-  private verifyGenericSignature(payload: WebhookPayload, secret: string): {
+  private verifyGenericSignature(
+    payload: WebhookPayload,
+    secret: string
+  ): {
     valid: boolean
     error?: string
   } {
-    const signature = payload.headers['x-signature'] || 
-                     payload.headers['x-hub-signature-256'] ||
-                     payload.headers['signature']
-    
+    const signature =
+      payload.headers['x-signature'] ||
+      payload.headers['x-hub-signature-256'] ||
+      payload.headers['signature']
+
     if (!signature) {
       return { valid: false, error: 'Missing signature header' }
     }
@@ -385,20 +396,20 @@ export class WebhookSecurityValidator {
     const clientId = this.getClientIdentifier(payload)
     const now = Date.now()
     const windowStart = Math.floor(now / 60000) * 60000 // 1-minute windows
-    
+
     const key = `${clientId}:${windowStart}`
     const current = rateLimitCache.get(key) || { count: 0, resetTime: windowStart + 60000 }
-    
+
     if (current.count >= this.config.maxRequestsPerMinute) {
       return {
         limited: true,
-        message: `Rate limit exceeded: ${current.count}/${this.config.maxRequestsPerMinute} requests per minute`
+        message: `Rate limit exceeded: ${current.count}/${this.config.maxRequestsPerMinute} requests per minute`,
       }
     }
-    
+
     current.count++
     rateLimitCache.set(key, current)
-    
+
     return { limited: false }
   }
 
@@ -416,7 +427,7 @@ export class WebhookSecurityValidator {
           return { valid: false, error: 'Missing Stripe signature header' }
         }
         break
-        
+
       case 'twilio':
         // Validate Twilio-specific headers and content
         if (!payload.headers['x-twilio-signature']) {
@@ -426,7 +437,7 @@ export class WebhookSecurityValidator {
           return { valid: false, error: 'Invalid Twilio content type' }
         }
         break
-        
+
       case 'vapi':
         // Validate Vapi-specific headers
         if (!payload.headers['x-vapi-signature']) {
@@ -434,7 +445,7 @@ export class WebhookSecurityValidator {
         }
         break
     }
-    
+
     return { valid: true }
   }
 
@@ -454,7 +465,6 @@ export class WebhookSecurityValidator {
           return null
       }
     } catch (error) {
-      console.error('Failed to get webhook secret from credential manager:', error)
       return null
     }
   }
@@ -466,11 +476,13 @@ export class WebhookSecurityValidator {
 
   private getClientIdentifier(payload: WebhookPayload): string {
     // Use IP address, user agent, or provider-specific identifier
-    return payload.headers['x-forwarded-for'] || 
-           payload.headers['x-real-ip'] || 
-           payload.headers['remote-addr'] ||
-           payload.headers['user-agent'] ||
-           'unknown'
+    return (
+      payload.headers['x-forwarded-for'] ||
+      payload.headers['x-real-ip'] ||
+      payload.headers['remote-addr'] ||
+      payload.headers['user-agent'] ||
+      'unknown'
+    )
   }
 
   private getSortedParams(body: string): string {
@@ -499,7 +511,7 @@ export class WebhookSecurityValidator {
 
     // Clean replay cache
     for (const [key, value] of replayCache.entries()) {
-      if (now - (value.timestamp * 1000) > maxAge) {
+      if (now - value.timestamp * 1000 > maxAge) {
         replayCache.delete(key)
       }
     }
@@ -529,30 +541,30 @@ export const WEBHOOK_CONFIGS = {
     timestampTolerance: 300, // 5 minutes
     enableReplayProtection: true,
     enableRateLimit: true,
-    maxRequestsPerMinute: 100
+    maxRequestsPerMinute: 100,
   },
-  
+
   twilio: {
     provider: 'twilio' as const,
     timestampTolerance: 600, // 10 minutes (Twilio doesn't provide exact timestamp)
     enableReplayProtection: true,
     enableRateLimit: true,
-    maxRequestsPerMinute: 200
+    maxRequestsPerMinute: 200,
   },
-  
+
   vapi: {
     provider: 'vapi' as const,
     timestampTolerance: 300, // 5 minutes
     enableReplayProtection: true,
     enableRateLimit: true,
-    maxRequestsPerMinute: 500
+    maxRequestsPerMinute: 500,
   },
-  
+
   generic: {
     provider: 'generic' as const,
     timestampTolerance: 300, // 5 minutes
     enableReplayProtection: true,
     enableRateLimit: true,
-    maxRequestsPerMinute: 100
-  }
+    maxRequestsPerMinute: 100,
+  },
 } as const

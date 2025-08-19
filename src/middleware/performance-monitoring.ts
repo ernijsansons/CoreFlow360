@@ -25,7 +25,7 @@ const PERFORMANCE_THRESHOLDS = {
   FAST: 100,
   NORMAL: 300,
   SLOW: 1000,
-  CRITICAL: 3000
+  CRITICAL: 3000,
 }
 
 /**
@@ -33,7 +33,7 @@ const PERFORMANCE_THRESHOLDS = {
  */
 function storeMetric(metric: PerformanceMetrics) {
   recentMetrics.push(metric)
-  
+
   // Keep only the last MAX_METRICS entries
   if (recentMetrics.length > MAX_METRICS) {
     recentMetrics.shift()
@@ -41,12 +41,13 @@ function storeMetric(metric: PerformanceMetrics) {
 
   // Log slow requests
   if (metric.duration > PERFORMANCE_THRESHOLDS.SLOW) {
-    console.warn(`Slow API request: ${metric.method} ${metric.path} took ${metric.duration}ms`)
   }
 
   // Log critical performance issues
   if (metric.duration > PERFORMANCE_THRESHOLDS.CRITICAL) {
-    console.error(`Critical performance issue: ${metric.method} ${metric.path} took ${metric.duration}ms`)
+    console.error(
+      `Critical performance issue: ${metric.method} ${metric.path} took ${metric.duration}ms`
+    )
   }
 }
 
@@ -64,40 +65,48 @@ export function getPerformanceStats() {
       slowRequests: 0,
       criticalRequests: 0,
       requestsByPath: {},
-      requestsByStatus: {}
+      requestsByStatus: {},
     }
   }
 
   const sortedByDuration = [...recentMetrics].sort((a, b) => a.duration - b.duration)
   const totalDuration = recentMetrics.reduce((sum, m) => sum + m.duration, 0)
-  
+
   // Calculate percentiles
   const p95Index = Math.floor(sortedByDuration.length * 0.95)
   const p99Index = Math.floor(sortedByDuration.length * 0.99)
   const medianIndex = Math.floor(sortedByDuration.length / 2)
 
   // Count slow and critical requests
-  const slowRequests = recentMetrics.filter(m => m.duration > PERFORMANCE_THRESHOLDS.SLOW).length
-  const criticalRequests = recentMetrics.filter(m => m.duration > PERFORMANCE_THRESHOLDS.CRITICAL).length
+  const slowRequests = recentMetrics.filter((m) => m.duration > PERFORMANCE_THRESHOLDS.SLOW).length
+  const criticalRequests = recentMetrics.filter(
+    (m) => m.duration > PERFORMANCE_THRESHOLDS.CRITICAL
+  ).length
 
   // Group by path
-  const requestsByPath = recentMetrics.reduce((acc, m) => {
-    const key = `${m.method} ${m.path}`
-    if (!acc[key]) {
-      acc[key] = { count: 0, totalDuration: 0, avgDuration: 0 }
-    }
-    acc[key].count++
-    acc[key].totalDuration += m.duration
-    acc[key].avgDuration = acc[key].totalDuration / acc[key].count
-    return acc
-  }, {} as Record<string, { count: number; totalDuration: number; avgDuration: number }>)
+  const requestsByPath = recentMetrics.reduce(
+    (acc, m) => {
+      const key = `${m.method} ${m.path}`
+      if (!acc[key]) {
+        acc[key] = { count: 0, totalDuration: 0, avgDuration: 0 }
+      }
+      acc[key].count++
+      acc[key].totalDuration += m.duration
+      acc[key].avgDuration = acc[key].totalDuration / acc[key].count
+      return acc
+    },
+    {} as Record<string, { count: number; totalDuration: number; avgDuration: number }>
+  )
 
   // Group by status code
-  const requestsByStatus = recentMetrics.reduce((acc, m) => {
-    const status = m.statusCode.toString()
-    acc[status] = (acc[status] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
+  const requestsByStatus = recentMetrics.reduce(
+    (acc, m) => {
+      const status = m.statusCode.toString()
+      acc[status] = (acc[status] || 0) + 1
+      return acc
+    },
+    {} as Record<string, number>
+  )
 
   return {
     totalRequests: recentMetrics.length,
@@ -108,7 +117,7 @@ export function getPerformanceStats() {
     slowRequests,
     criticalRequests,
     requestsByPath,
-    requestsByStatus
+    requestsByStatus,
   }
 }
 
@@ -126,16 +135,14 @@ export async function performanceMonitoring(
   try {
     // Execute the handler
     const response = await handler()
-    
+
     // Calculate duration
     const duration = Date.now() - startTime
-    
+
     // Get additional request info
     const headersList = headers()
     const userAgent = headersList.get('user-agent') || undefined
-    const ip = headersList.get('x-forwarded-for') || 
-                headersList.get('x-real-ip') || 
-                undefined
+    const ip = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || undefined
 
     // Store metrics
     storeMetric({
@@ -145,18 +152,15 @@ export async function performanceMonitoring(
       duration,
       timestamp: Date.now(),
       userAgent,
-      ip
+      ip,
     })
 
     // Add performance headers to response
-    const modifiedResponse = NextResponse.json(
-      response.body,
-      {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers
-      }
-    )
+    const modifiedResponse = NextResponse.json(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    })
 
     modifiedResponse.headers.set('X-Response-Time', `${duration}ms`)
     modifiedResponse.headers.set('X-Performance-Category', getPerformanceCategory(duration))
@@ -165,13 +169,13 @@ export async function performanceMonitoring(
   } catch (error) {
     // Still track performance for errors
     const duration = Date.now() - startTime
-    
+
     storeMetric({
       path,
       method,
       statusCode: 500,
       duration,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
 
     throw error

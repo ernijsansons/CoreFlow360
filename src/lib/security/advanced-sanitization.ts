@@ -31,9 +31,9 @@ const THREAT_PATTERNS = {
     /<embed[^>]*>/gi,
     /<applet[^>]*>/gi,
     /<meta[^>]*>/gi,
-    /<link[^>]*>/gi
+    /<link[^>]*>/gi,
   ],
-  
+
   // SQL injection patterns
   sql: [
     /(union|select|insert|update|delete|drop|create|alter|exec|execute)\s+/gi,
@@ -44,9 +44,9 @@ const THREAT_PATTERNS = {
     /xp_cmdshell/gi,
     /sp_executesql/gi,
     /1=1/gi,
-    /'\s*or\s*'1'\s*=\s*'1/gi
+    /'\s*or\s*'1'\s*=\s*'1/gi,
   ],
-  
+
   // NoSQL injection patterns
   nosql: [
     /\$where/gi,
@@ -60,9 +60,9 @@ const THREAT_PATTERNS = {
     /\$gt/gi,
     /\$lt/gi,
     /this\./gi,
-    /sleep\(/gi
+    /sleep\(/gi,
   ],
-  
+
   // Path traversal patterns
   pathTraversal: [
     /\.\.\//gi,
@@ -71,9 +71,9 @@ const THREAT_PATTERNS = {
     /%2e%2e%5c/gi,
     /\.\.%2f/gi,
     /\.\.%5c/gi,
-    /%252e%252e%252f/gi
+    /%252e%252e%252f/gi,
   ],
-  
+
   // Command injection patterns
   commandInjection: [
     /[;&|`$]/g,
@@ -81,56 +81,43 @@ const THREAT_PATTERNS = {
     /;\s*(rm|del|format)\s+/gi,
     /`[^`]*`/g,
     /\$\([^)]*\)/g,
-    /\${[^}]*}/g
+    /\${[^}]*}/g,
   ],
-  
+
   // LDAP injection patterns
-  ldap: [
-    /\(\|/gi,
-    /\)\(/gi,
-    /\*\)/gi,
-    /\|\(/gi,
-    /&\(/gi,
-    /!\(/gi
-  ],
-  
-  // XML injection patterns  
-  xml: [
-    /<!entity/gi,
-    /<!doctype/gi,
-    /<\?xml/gi,
-    /&\w+;/gi,
-    /%\w+;/gi
-  ]
+  ldap: [/\(\|/gi, /\)\(/gi, /\*\)/gi, /\|\(/gi, /&\(/gi, /!\(/gi],
+
+  // XML injection patterns
+  xml: [/<!entity/gi, /<!doctype/gi, /<\?xml/gi, /&\w+;/gi, /%\w+;/gi],
 }
 
 // Content Security Policy configuration
 const CSP_POLICIES = {
   strict: {
-    "default-src": ["'self'"],
-    "script-src": ["'self'", "'unsafe-inline'"],
-    "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-    "img-src": ["'self'", "data:", "https:", "blob:"],
-    "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
-    "connect-src": ["'self'", "https://api.stripe.com"],
-    "frame-src": ["'self'", "https://js.stripe.com"],
-    "object-src": ["'none'"],
-    "base-uri": ["'self'"],
-    "form-action": ["'self'"],
-    "frame-ancestors": ["'none'"],
-    "upgrade-insecure-requests": []
+    'default-src': ["'self'"],
+    'script-src': ["'self'", "'unsafe-inline'"],
+    'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+    'img-src': ["'self'", 'data:', 'https:', 'blob:'],
+    'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
+    'connect-src': ["'self'", 'https://api.stripe.com'],
+    'frame-src': ["'self'", 'https://js.stripe.com'],
+    'object-src': ["'none'"],
+    'base-uri': ["'self'"],
+    'form-action': ["'self'"],
+    'frame-ancestors': ["'none'"],
+    'upgrade-insecure-requests': [],
   },
-  
+
   development: {
-    "default-src": ["'self'"],
-    "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-    "style-src": ["'self'", "'unsafe-inline'"],
-    "img-src": ["'self'", "data:", "https:", "http:", "blob:"],
-    "connect-src": ["'self'", "ws:", "wss:", "https:", "http:"],
-    "font-src": ["'self'", "data:", "https:"],
-    "frame-src": ["'self'"],
-    "object-src": ["'none'"]
-  }
+    'default-src': ["'self'"],
+    'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+    'style-src': ["'self'", "'unsafe-inline'"],
+    'img-src': ["'self'", 'data:', 'https:', 'http:', 'blob:'],
+    'connect-src': ["'self'", 'ws:', 'wss:', 'https:', 'http:'],
+    'font-src': ["'self'", 'data:', 'https:'],
+    'frame-src': ["'self'"],
+    'object-src': ["'none'"],
+  },
 }
 
 export interface ThreatDetectionResult {
@@ -146,7 +133,7 @@ export class AdvancedSanitizer {
   private static instance: AdvancedSanitizer
   private config = getConfig()
   private threatIntelligence = new Map<string, number>()
-  
+
   constructor() {
     this.initializeThreatIntelligence()
   }
@@ -161,22 +148,37 @@ export class AdvancedSanitizer {
   private initializeThreatIntelligence() {
     // Initialize known threat patterns with confidence scores
     const commonThreats = [
-      'alert(', 'confirm(', 'prompt(',
-      'document.cookie', 'window.location', 
-      'eval(', 'setTimeout(', 'setInterval(',
-      'XMLHttpRequest', 'fetch(',
-      'innerHTML', 'outerHTML',
-      'script>', '/script>',
-      'DROP TABLE', 'SELECT * FROM',
-      'UNION SELECT', '--',
-      '/*', '*/',
-      '${', '`',
-      '../', '..\\',
-      '&lt;script', '&gt;',
-      '%3Cscript', '%3E'
+      'alert(',
+      'confirm(',
+      'prompt(',
+      'document.cookie',
+      'window.location',
+      'eval(',
+      'setTimeout(',
+      'setInterval(',
+      'XMLHttpRequest',
+      'fetch(',
+      'innerHTML',
+      'outerHTML',
+      'script>',
+      '/script>',
+      'DROP TABLE',
+      'SELECT * FROM',
+      'UNION SELECT',
+      '--',
+      '/*',
+      '*/',
+      '${',
+      '`',
+      '../',
+      '..\\',
+      '&lt;script',
+      '&gt;',
+      '%3Cscript',
+      '%3E',
     ]
 
-    commonThreats.forEach(threat => {
+    commonThreats.forEach((threat) => {
       this.threatIntelligence.set(threat.toLowerCase(), 0.8)
     })
   }
@@ -184,12 +186,15 @@ export class AdvancedSanitizer {
   /**
    * Comprehensive threat detection and sanitization
    */
-  sanitizeAndDetectThreats(input: string, options: {
-    allowHtml?: boolean
-    strictMode?: boolean
-    maxLength?: number
-    logThreats?: boolean
-  } = {}): ThreatDetectionResult {
+  sanitizeAndDetectThreats(
+    input: string,
+    options: {
+      allowHtml?: boolean
+      strictMode?: boolean
+      maxLength?: number
+      logThreats?: boolean
+    } = {}
+  ): ThreatDetectionResult {
     const originalLength = input.length
     let sanitized = input
     const threatTypes: string[] = []
@@ -204,18 +209,18 @@ export class AdvancedSanitizer {
 
     // Decode common encodings to detect obfuscated attacks
     const decodedInput = this.decodeInput(input)
-    
+
     // Check all threat patterns
     for (const [category, patterns] of Object.entries(THREAT_PATTERNS)) {
       for (const pattern of patterns) {
         if (pattern.test(decodedInput) || pattern.test(input)) {
           threatTypes.push(category)
           confidence = Math.max(confidence, 0.7)
-          
+
           if (options.logThreats) {
             telemetry.recordCounter('security_threats_detected', 1, {
               type: category,
-              severity: 'high'
+              severity: 'high',
             })
           }
         }
@@ -241,24 +246,25 @@ export class AdvancedSanitizer {
           ALLOW_DATA_ATTR: false,
           ALLOW_UNKNOWN_PROTOCOLS: false,
           SANITIZE_DOM: true,
-          KEEP_CONTENT: true
+          KEEP_CONTENT: true,
         })
       } else {
         // Complete HTML removal
-        sanitized = DOMPurify.sanitize(sanitized, { 
+        sanitized = DOMPurify.sanitize(sanitized, {
           ALLOWED_TAGS: [],
-          ALLOWED_ATTR: []
+          ALLOWED_ATTR: [],
         })
       }
-      
+
       // Additional sanitization layers
       sanitized = this.applyAdvancedSanitization(sanitized)
     }
 
     // Normalize whitespace and control characters
-    sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-                        .replace(/\s+/g, ' ')
-                        .trim()
+    sanitized = sanitized
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
 
     const result: ThreatDetectionResult = {
       isThreat: threatTypes.length > 0,
@@ -266,7 +272,7 @@ export class AdvancedSanitizer {
       confidence,
       sanitized,
       originalLength,
-      sanitizedLength: sanitized.length
+      sanitizedLength: sanitized.length,
     }
 
     // Log significant threats
@@ -275,7 +281,7 @@ export class AdvancedSanitizer {
         types: result.threatTypes,
         confidence: result.confidence,
         originalLength: result.originalLength,
-        sanitizedLength: result.sanitizedLength
+        sanitizedLength: result.sanitizedLength,
       })
     }
 
@@ -328,28 +334,30 @@ export class AdvancedSanitizer {
   }
 
   private applyAdvancedSanitization(input: string): string {
-    return input
-      // Remove null bytes and control characters
-      .replace(/\x00/g, '')
-      .replace(/[\x01-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-      
-      // Remove potentially dangerous Unicode characters
-      .replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u206F]/g, '')
-      
-      // Remove invisible characters that could be used for obfuscation
-      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-      
-      // Remove suspicious character sequences
-      .replace(/javascript:/gi, 'java-script:')
-      .replace(/vbscript:/gi, 'vb-script:')
-      .replace(/data:/gi, 'data-:')
-      
-      // Neutralize common injection patterns
-      .replace(/[<>]/g, '')
-      .replace(/[{}]/g, '')
-      .replace(/\$\(/g, '$(')
-      .replace(/`/g, "'")
-      .replace(/\\/g, '/')
+    return (
+      input
+        // Remove null bytes and control characters
+        .replace(/\x00/g, '')
+        .replace(/[\x01-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+
+        // Remove potentially dangerous Unicode characters
+        .replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u206F]/g, '')
+
+        // Remove invisible characters that could be used for obfuscation
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+
+        // Remove suspicious character sequences
+        .replace(/javascript:/gi, 'java-script:')
+        .replace(/vbscript:/gi, 'vb-script:')
+        .replace(/data:/gi, 'data-:')
+
+        // Neutralize common injection patterns
+        .replace(/[<>]/g, '')
+        .replace(/[{}]/g, '')
+        .replace(/\$\(/g, '$(')
+        .replace(/`/g, "'")
+        .replace(/\\/g, '/')
+    )
   }
 
   /**
@@ -357,7 +365,7 @@ export class AdvancedSanitizer {
    */
   generateCSPHeader(environment: 'production' | 'development' = 'production'): string {
     const policy = environment === 'production' ? CSP_POLICIES.strict : CSP_POLICIES.development
-    
+
     const cspString = Object.entries(policy)
       .map(([directive, values]) => {
         if (values.length === 0) {
@@ -376,13 +384,15 @@ export class AdvancedSanitizer {
   generateCORSHeaders(origin?: string): Record<string, string> {
     const config = this.config
     const allowedOrigins = config.CORS_ORIGINS
-    
+
     const headers: Record<string, string> = {
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Tenant-ID, X-API-Version, X-Request-ID',
-      'Access-Control-Expose-Headers': 'X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-Request-ID',
+      'Access-Control-Allow-Headers':
+        'Content-Type, Authorization, X-Tenant-ID, X-API-Version, X-Request-ID',
+      'Access-Control-Expose-Headers':
+        'X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-Request-ID',
       'Access-Control-Max-Age': '86400', // 24 hours
-      'Access-Control-Allow-Credentials': 'true'
+      'Access-Control-Allow-Credentials': 'true',
     }
 
     if (origin) {
@@ -403,21 +413,16 @@ export class AdvancedSanitizer {
   /**
    * Validate and sanitize file upload
    */
-  sanitizeFileUpload(file: {
-    name: string
-    type: string
-    size: number
-    data?: Buffer
-  }): {
+  sanitizeFileUpload(file: { name: string; type: string; size: number; data?: Buffer }): {
     isValid: boolean
     sanitizedName: string
     threats: string[]
     reason?: string
   } {
     const threats: string[] = []
-    
+
     // Sanitize filename
-    let sanitizedName = file.name
+    const sanitizedName = file.name
       .replace(/[^a-zA-Z0-9._-]/g, '_') // Replace special chars
       .replace(/\.{2,}/g, '.') // Replace multiple dots
       .replace(/^\.+|\.+$/g, '') // Remove leading/trailing dots
@@ -425,21 +430,41 @@ export class AdvancedSanitizer {
 
     // Check for dangerous extensions
     const dangerousExtensions = [
-      '.exe', '.bat', '.cmd', '.scr', '.pif', '.com',
-      '.js', '.jar', '.app', '.deb', '.pkg', '.dmg',
-      '.php', '.asp', '.jsp', '.py', '.rb', '.pl'
+      '.exe',
+      '.bat',
+      '.cmd',
+      '.scr',
+      '.pif',
+      '.com',
+      '.js',
+      '.jar',
+      '.app',
+      '.deb',
+      '.pkg',
+      '.dmg',
+      '.php',
+      '.asp',
+      '.jsp',
+      '.py',
+      '.rb',
+      '.pl',
     ]
 
     const extension = sanitizedName.toLowerCase().split('.').pop()
-    if (extension && dangerousExtensions.some(ext => ext.includes(extension))) {
+    if (extension && dangerousExtensions.some((ext) => ext.includes(extension))) {
       threats.push('dangerous_extension')
     }
 
     // Check MIME type
     const allowedTypes = [
-      'image/jpeg', 'image/png', 'image/webp', 'image/gif',
-      'application/pdf', 'text/csv', 'text/plain',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+      'application/pdf',
+      'text/csv',
+      'text/plain',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ]
 
     if (!allowedTypes.includes(file.type)) {
@@ -456,19 +481,20 @@ export class AdvancedSanitizer {
     if (file.data) {
       const fileContent = file.data.toString('utf8', 0, Math.min(1024, file.data.length))
       const threatResult = this.sanitizeAndDetectThreats(fileContent, { strictMode: true })
-      
+
       if (threatResult.isThreat) {
         threats.push(...threatResult.threatTypes)
       }
     }
 
     const isValid = threats.length === 0
-    const reason = threats.length > 0 ? `Security threats detected: ${threats.join(', ')}` : undefined
+    const reason =
+      threats.length > 0 ? `Security threats detected: ${threats.join(', ')}` : undefined
 
     if (!isValid) {
       telemetry.recordCounter('file_upload_threats', 1, {
         threats: threats.join(','),
-        filename: sanitizedName
+        filename: sanitizedName,
       })
     }
 
@@ -476,23 +502,25 @@ export class AdvancedSanitizer {
       isValid,
       sanitizedName,
       threats,
-      reason
+      reason,
     }
   }
 
   /**
    * Rate limiting with threat scoring
    */
-  calculateThreatScore(requests: Array<{
-    timestamp: number
-    endpoint: string
-    userAgent: string
-    ip: string
-    success: boolean
-  }>): number {
+  calculateThreatScore(
+    requests: Array<{
+      timestamp: number
+      endpoint: string
+      userAgent: string
+      ip: string
+      success: boolean
+    }>
+  ): number {
     let score = 0
     const now = Date.now()
-    const recentRequests = requests.filter(r => now - r.timestamp < 300000) // 5 minutes
+    const recentRequests = requests.filter((r) => now - r.timestamp < 300000) // 5 minutes
 
     // High request frequency
     if (recentRequests.length > 100) {
@@ -502,7 +530,7 @@ export class AdvancedSanitizer {
     }
 
     // High error rate
-    const errorRate = recentRequests.filter(r => !r.success).length / recentRequests.length
+    const errorRate = recentRequests.filter((r) => !r.success).length / recentRequests.length
     if (errorRate > 0.5) {
       score += 0.3
     } else if (errorRate > 0.2) {
@@ -510,15 +538,20 @@ export class AdvancedSanitizer {
     }
 
     // Suspicious patterns
-    const uniqueEndpoints = new Set(recentRequests.map(r => r.endpoint)).size
+    const uniqueEndpoints = new Set(recentRequests.map((r) => r.endpoint)).size
     if (uniqueEndpoints > 20) {
       score += 0.2 // Scanning behavior
     }
 
     // Suspicious user agents
-    const userAgents = new Set(recentRequests.map(r => r.userAgent))
+    const userAgents = new Set(recentRequests.map((r) => r.userAgent))
     for (const ua of userAgents) {
-      if (ua.includes('bot') || ua.includes('crawler') || ua.includes('scanner') || ua.length < 10) {
+      if (
+        ua.includes('bot') ||
+        ua.includes('crawler') ||
+        ua.includes('scanner') ||
+        ua.length < 10
+      ) {
         score += 0.1
         break
       }
@@ -532,30 +565,33 @@ export class AdvancedSanitizer {
 export const advancedSanitizer = AdvancedSanitizer.getInstance()
 
 // Utility functions for middleware integration
-export function sanitizeUserInput(input: any, options: {
-  allowHtml?: boolean
-  strictMode?: boolean
-  maxLength?: number
-} = {}): any {
+export function sanitizeUserInput(
+  input: unknown,
+  options: {
+    allowHtml?: boolean
+    strictMode?: boolean
+    maxLength?: number
+  } = {}
+): unknown {
   if (typeof input === 'string') {
     const result = advancedSanitizer.sanitizeAndDetectThreats(input, {
       ...options,
-      logThreats: true
+      logThreats: true,
     })
-    
+
     if (result.isThreat && result.confidence > 0.7) {
       throw new Error(`Security threat detected: ${result.threatTypes.join(', ')}`)
     }
-    
+
     return result.sanitized
   }
 
   if (Array.isArray(input)) {
-    return input.map(item => sanitizeUserInput(item, options))
+    return input.map((item) => sanitizeUserInput(item, options))
   }
 
   if (typeof input === 'object' && input !== null) {
-    const sanitized: any = {}
+    const sanitized: unknown = {}
     for (const [key, value] of Object.entries(input)) {
       const sanitizedKey = sanitizeUserInput(key, { strictMode: true, maxLength: 100 })
       sanitized[sanitizedKey] = sanitizeUserInput(value, options)
@@ -566,13 +602,15 @@ export function sanitizeUserInput(input: any, options: {
   return input
 }
 
-export function createSecurityMiddleware(options: {
-  enableCSP?: boolean
-  enableCORS?: boolean
-  enableSanitization?: boolean
-  strictMode?: boolean
-} = {}) {
-  return (req: any, res: any, next: any) => {
+export function createSecurityMiddleware(
+  options: {
+    enableCSP?: boolean
+    enableCORS?: boolean
+    enableSanitization?: boolean
+    strictMode?: boolean
+  } = {}
+) {
+  return (req: unknown, res: unknown, next: unknown) => {
     // Add CSP headers
     if (options.enableCSP !== false) {
       const csp = advancedSanitizer.generateCSPHeader(
@@ -605,7 +643,7 @@ export function createSecurityMiddleware(options: {
       } catch (error) {
         return res.status(400).json({
           error: 'Security Violation',
-          message: error instanceof Error ? error.message : 'Invalid input detected'
+          message: error instanceof Error ? error.message : 'Invalid input detected',
         })
       }
     }

@@ -23,8 +23,8 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           users: 5,
           annual: false,
           businessCount: 1,
-          region: 'US'
-        })
+          region: 'US',
+        }),
       })
 
       const response = await POST(request)
@@ -45,8 +45,8 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           users: 5,
           annual: false,
           businessCount: 1,
-          region: 'US'
-        })
+          region: 'US',
+        }),
       })
 
       const response = await POST(request)
@@ -54,7 +54,7 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
 
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      
+
       // FinGPT: 0 + (15 * 5) = 75
       // IDURAR: 15 + (10 * 5) = 65
       // Total: 140, with 5% compatibility discount = 133
@@ -70,8 +70,8 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           users: 25, // Should trigger 10% volume discount
           annual: false,
           businessCount: 1,
-          region: 'US'
-        })
+          region: 'US',
+        }),
       })
 
       const response = await POST(request)
@@ -79,11 +79,11 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
 
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      
+
       // Base calculation: 0 + (15 * 25) = 375
       // With 10% volume discount: 375 * 0.9 = 337.5
       expect(data.data.pricing.monthlyTotal).toBe(337.5)
-      expect(data.data.discounts.volumeDiscount).toBe(0.10)
+      expect(data.data.discounts.volumeDiscount).toBe(0.1)
     })
 
     it('applies multi-business discounts', async () => {
@@ -94,8 +94,8 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           users: 5,
           annual: false,
           businessCount: 3, // Should trigger 35% multi-business discount
-          region: 'US'
-        })
+          region: 'US',
+        }),
       })
 
       const response = await POST(request)
@@ -103,7 +103,7 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
 
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      
+
       // Base: 75, with 35% multi-business discount
       expect(data.data.pricing.monthlyTotal).toBe(48.75)
       expect(data.data.discounts.multiBusinessDiscount).toBe(0.35)
@@ -117,8 +117,8 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           users: 5,
           annual: true,
           businessCount: 1,
-          region: 'US'
-        })
+          region: 'US',
+        }),
       })
 
       const response = await POST(request)
@@ -126,7 +126,7 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
 
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      
+
       // Base: 75, with 15% annual discount = 63.75
       expect(data.data.pricing.monthlyTotal).toBe(63.75)
       expect(data.data.discounts.annualDiscount).toBe(0.15)
@@ -142,8 +142,8 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           users: 50, // Volume discount tier
           annual: true,
           businessCount: 5, // Max multi-business discount
-          region: 'US'
-        })
+          region: 'US',
+        }),
       })
 
       const response = await POST(request)
@@ -152,19 +152,19 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
       expect(data.data.breakdown).toHaveLength(3)
-      
+
       // Should have compound discounts:
       // - Bundle compatibility: 10% (3 bundles)
       // - Volume: 15% (50+ users)
       // - Multi-business: 50% (5+ businesses)
       // - Annual: 15%
-      expect(data.data.discounts.bundleCompatibilityDiscount).toBe(0.10)
+      expect(data.data.discounts.bundleCompatibilityDiscount).toBe(0.1)
       expect(data.data.discounts.volumeDiscount).toBe(0.15)
-      expect(data.data.discounts.multiBusinessDiscount).toBe(0.50)
+      expect(data.data.discounts.multiBusinessDiscount).toBe(0.5)
       expect(data.data.discounts.annualDiscount).toBe(0.15)
-      
+
       // Verify compound discount calculation
-      const expectedTotalDiscount = 1 - ((1 - 0.10) * (1 - 0.15) * (1 - 0.50) * (1 - 0.15))
+      const expectedTotalDiscount = 1 - (1 - 0.1) * (1 - 0.15) * (1 - 0.5) * (1 - 0.15)
       expect(data.data.discounts.totalDiscount).toBeCloseTo(expectedTotalDiscount, 4)
     })
 
@@ -176,8 +176,8 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           users: 8,
           annual: false,
           businessCount: 1,
-          region: 'US'
-        })
+          region: 'US',
+        }),
       })
 
       const response = await POST(request)
@@ -187,9 +187,9 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
       // Check that recommendations are provided
       expect(Array.isArray(data.data.recommendations)).toBe(true)
       expect(data.data.recommendations.length).toBeGreaterThan(0)
-      
+
       // At least one recommendation should be about annual billing since annual=false
-      const hasAnnualRec = data.data.recommendations.some(rec => rec.includes('annual'))
+      const hasAnnualRec = data.data.recommendations.some((rec) => rec.includes('annual'))
       expect(hasAnnualRec).toBe(true)
     })
   })
@@ -203,8 +203,8 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           users: 3,
           annual: false,
           businessCount: 1,
-          region: 'US'
-        })
+          region: 'US',
+        }),
       })
 
       const response = await POST(request)
@@ -223,8 +223,8 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           users: 5,
           annual: false,
           businessCount: 1,
-          region: 'US'
-        })
+          region: 'US',
+        }),
       })
 
       const response = await POST(request)
@@ -242,8 +242,8 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           bundles: [],
           users: -1,
           annual: 'not-a-boolean',
-          region: 'INVALID'
-        })
+          region: 'INVALID',
+        }),
       })
 
       const response = await POST(request)
@@ -263,8 +263,8 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           users: 5,
           annual: false,
           businessCount: 1,
-          region: 'US'
-        })
+          region: 'US',
+        }),
       })
 
       const response = await POST(request)
@@ -279,7 +279,7 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
   describe('Performance and Caching', () => {
     it('calculates pricing within performance budget', async () => {
       const startTime = Date.now()
-      
+
       const request = new NextRequest('http://localhost:3000/api/subscriptions/calculate', {
         method: 'POST',
         body: JSON.stringify({
@@ -287,13 +287,13 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           users: 100,
           annual: true,
           businessCount: 3,
-          region: 'US'
-        })
+          region: 'US',
+        }),
       })
 
       const response = await POST(request)
       const endTime = Date.now()
-      
+
       expect(response.status).toBe(200)
       expect(endTime - startTime).toBeLessThan(100) // Sub-100ms requirement
     })
@@ -306,8 +306,8 @@ describe('Bundle Pricing Calculator Integration Tests', () => {
           users: 5,
           annual: false,
           businessCount: 1,
-          region: 'US'
-        })
+          region: 'US',
+        }),
       })
 
       const response = await POST(request)

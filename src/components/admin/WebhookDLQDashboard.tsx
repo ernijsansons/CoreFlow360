@@ -12,13 +12,22 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { RefreshCw, AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Play, Eye } from 'lucide-react'
+import {
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Trash2,
+  Play,
+  Eye,
+} from 'lucide-react'
 
 interface DLQEvent {
   id: string
   eventType: string
   sourceProvider: string
-  payload: Record<string, any>
+  payload: Record<string, unknown>
   originalHeaders: Record<string, string>
   failureReason: string
   stackTrace?: string
@@ -70,14 +79,14 @@ export default function WebhookDLQDashboard() {
         fetch('/api/admin/webhook-dlq/metrics'),
         fetch('/api/admin/webhook-dlq/events?status=pending'),
         fetch('/api/admin/webhook-dlq/events?status=recovered&limit=20'),
-        fetch('/api/admin/webhook-dlq/events?status=abandoned&limit=20')
+        fetch('/api/admin/webhook-dlq/events?status=abandoned&limit=20'),
       ])
 
       const [metricsData, pendingData, recoveredData, abandonedData] = await Promise.all([
         metricsRes.json(),
         pendingRes.json(),
         recoveredRes.json(),
-        abandonedRes.json()
+        abandonedRes.json(),
       ])
 
       setMetrics(metricsData)
@@ -85,7 +94,6 @@ export default function WebhookDLQDashboard() {
       setRecoveredEvents(recoveredData)
       setAbandonedEvents(abandonedData)
     } catch (error) {
-      console.error('Failed to load DLQ dashboard data:', error)
     } finally {
       setIsLoading(false)
     }
@@ -95,16 +103,14 @@ export default function WebhookDLQDashboard() {
     try {
       setProcessingEvent(eventId)
       const response = await fetch(`/api/admin/webhook-dlq/retry/${eventId}`, {
-        method: 'POST'
+        method: 'POST',
       })
-      
+
       if (response.ok) {
         await loadDashboardData() // Refresh data
       } else {
-        console.error('Failed to retry event')
       }
     } catch (error) {
-      console.error('Error retrying event:', error)
     } finally {
       setProcessingEvent(null)
     }
@@ -116,16 +122,14 @@ export default function WebhookDLQDashboard() {
       const response = await fetch(`/api/admin/webhook-dlq/abandon/${eventId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason })
+        body: JSON.stringify({ reason }),
       })
-      
+
       if (response.ok) {
         await loadDashboardData() // Refresh data
       } else {
-        console.error('Failed to abandon event')
       }
     } catch (error) {
-      console.error('Error abandoning event:', error)
     } finally {
       setProcessingEvent(null)
     }
@@ -133,21 +137,31 @@ export default function WebhookDLQDashboard() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'destructive'
-      case 'high': return 'default'
-      case 'medium': return 'secondary'
-      case 'low': return 'outline'
-      default: return 'secondary'
+      case 'critical':
+        return 'destructive'
+      case 'high':
+        return 'default'
+      case 'medium':
+        return 'secondary'
+      case 'low':
+        return 'outline'
+      default:
+        return 'secondary'
     }
   }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending': return <Clock className="h-4 w-4" />
-      case 'processing': return <RefreshCw className="h-4 w-4 animate-spin" />
-      case 'recovered': return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'abandoned': return <XCircle className="h-4 w-4 text-red-500" />
-      default: return <AlertTriangle className="h-4 w-4" />
+      case 'pending':
+        return <Clock className="h-4 w-4" />
+      case 'processing':
+        return <RefreshCw className="h-4 w-4 animate-spin" />
+      case 'recovered':
+        return <CheckCircle className="h-4 w-4 text-green-500" />
+      case 'abandoned':
+        return <XCircle className="h-4 w-4 text-red-500" />
+      default:
+        return <AlertTriangle className="h-4 w-4" />
     }
   }
 
@@ -167,7 +181,7 @@ export default function WebhookDLQDashboard() {
   if (isLoading) {
     return (
       <div className="p-6">
-        <div className="flex items-center justify-center h-64">
+        <div className="flex h-64 items-center justify-center">
           <RefreshCw className="h-8 w-8 animate-spin" />
           <span className="ml-2">Loading webhook DLQ dashboard...</span>
         </div>
@@ -176,7 +190,7 @@ export default function WebhookDLQDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Webhook Dead Letter Queue</h1>
@@ -185,24 +199,22 @@ export default function WebhookDLQDashboard() {
           </p>
         </div>
         <Button onClick={loadDashboardData} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" />
+          <RefreshCw className="mr-2 h-4 w-4" />
           Refresh
         </Button>
       </div>
 
       {/* Metrics Overview */}
       {metrics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Events</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+              <AlertTriangle className="text-muted-foreground h-4 w-4" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metrics.totalEvents}</div>
-              <p className="text-xs text-muted-foreground">
-                All time webhook failures
-              </p>
+              <p className="text-muted-foreground text-xs">All time webhook failures</p>
             </CardContent>
           </Card>
 
@@ -213,9 +225,7 @@ export default function WebhookDLQDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metrics.pendingEvents}</div>
-              <p className="text-xs text-muted-foreground">
-                Awaiting retry
-              </p>
+              <p className="text-muted-foreground text-xs">Awaiting retry</p>
             </CardContent>
           </Card>
 
@@ -226,9 +236,7 @@ export default function WebhookDLQDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metrics.recoveredEvents}</div>
-              <p className="text-xs text-muted-foreground">
-                Successfully processed
-              </p>
+              <p className="text-muted-foreground text-xs">Successfully processed</p>
             </CardContent>
           </Card>
 
@@ -255,11 +263,11 @@ export default function WebhookDLQDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {Object.entries(metrics.failuresByProvider).map(([provider, count]) => (
                 <div key={provider} className="text-center">
                   <div className="text-2xl font-bold">{count}</div>
-                  <div className="text-sm text-muted-foreground capitalize">{provider}</div>
+                  <div className="text-muted-foreground text-sm capitalize">{provider}</div>
                 </div>
               ))}
             </div>
@@ -270,22 +278,16 @@ export default function WebhookDLQDashboard() {
       {/* Events Tabs */}
       <Tabs defaultValue="pending" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="pending">
-            Pending ({metrics?.pendingEvents || 0})
-          </TabsTrigger>
-          <TabsTrigger value="recovered">
-            Recovered ({metrics?.recoveredEvents || 0})
-          </TabsTrigger>
-          <TabsTrigger value="abandoned">
-            Abandoned ({metrics?.abandonedEvents || 0})
-          </TabsTrigger>
+          <TabsTrigger value="pending">Pending ({metrics?.pendingEvents || 0})</TabsTrigger>
+          <TabsTrigger value="recovered">Recovered ({metrics?.recoveredEvents || 0})</TabsTrigger>
+          <TabsTrigger value="abandoned">Abandoned ({metrics?.abandonedEvents || 0})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending" className="space-y-4">
           {pendingEvents.length === 0 ? (
             <Card>
-              <CardContent className="text-center py-8">
-                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+              <CardContent className="py-8 text-center">
+                <CheckCircle className="mx-auto mb-4 h-12 w-12 text-green-500" />
                 <h3 className="text-lg font-semibold">No Pending Events</h3>
                 <p className="text-muted-foreground">All webhooks are processing successfully!</p>
               </CardContent>
@@ -298,18 +300,12 @@ export default function WebhookDLQDashboard() {
                     <div className="flex items-center space-x-2">
                       {getStatusIcon(event.status)}
                       <CardTitle className="text-lg">{event.eventType}</CardTitle>
-                      <Badge variant={getPriorityColor(event.priority)}>
-                        {event.priority}
-                      </Badge>
+                      <Badge variant={getPriorityColor(event.priority)}>{event.priority}</Badge>
                       <Badge variant="outline">{event.sourceProvider}</Badge>
                     </div>
                     <div className="flex space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setSelectedEvent(event)}
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
+                      <Button size="sm" variant="outline" onClick={() => setSelectedEvent(event)}>
+                        <Eye className="mr-1 h-4 w-4" />
                         View
                       </Button>
                       <Button
@@ -318,9 +314,9 @@ export default function WebhookDLQDashboard() {
                         disabled={processingEvent === event.id}
                       >
                         {processingEvent === event.id ? (
-                          <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
+                          <RefreshCw className="mr-1 h-4 w-4 animate-spin" />
                         ) : (
-                          <Play className="h-4 w-4 mr-1" />
+                          <Play className="mr-1 h-4 w-4" />
                         )}
                         Retry
                       </Button>
@@ -330,20 +326,20 @@ export default function WebhookDLQDashboard() {
                         onClick={() => abandonEvent(event.id, 'Manual abandon from admin')}
                         disabled={processingEvent === event.id}
                       >
-                        <Trash2 className="h-4 w-4 mr-1" />
+                        <Trash2 className="mr-1 h-4 w-4" />
                         Abandon
                       </Button>
                     </div>
                   </div>
-                  <CardDescription>
-                    {event.businessImpact}
-                  </CardDescription>
+                  <CardDescription>{event.businessImpact}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
                     <div>
                       <span className="font-medium">Attempts:</span>
-                      <div>{event.attemptCount} / {event.maxRetries}</div>
+                      <div>
+                        {event.attemptCount} / {event.maxRetries}
+                      </div>
                     </div>
                     <div>
                       <span className="font-medium">Last Attempt:</span>
@@ -352,10 +348,9 @@ export default function WebhookDLQDashboard() {
                     <div>
                       <span className="font-medium">Next Retry:</span>
                       <div>
-                        {event.scheduledRetryAt 
+                        {event.scheduledRetryAt
                           ? formatTimeAgo(event.scheduledRetryAt)
-                          : 'Not scheduled'
-                        }
+                          : 'Not scheduled'}
                       </div>
                     </div>
                     <div>
@@ -367,9 +362,7 @@ export default function WebhookDLQDashboard() {
                   </div>
                   <div className="mt-4">
                     <span className="font-medium">Failure Reason:</span>
-                    <div className="mt-1 p-2 bg-muted rounded text-sm">
-                      {event.failureReason}
-                    </div>
+                    <div className="bg-muted mt-1 rounded p-2 text-sm">{event.failureReason}</div>
                   </div>
                 </CardContent>
               </Card>
@@ -387,18 +380,14 @@ export default function WebhookDLQDashboard() {
                     <CardTitle className="text-lg">{event.eventType}</CardTitle>
                     <Badge variant="outline">{event.sourceProvider}</Badge>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setSelectedEvent(event)}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
+                  <Button size="sm" variant="outline" onClick={() => setSelectedEvent(event)}>
+                    <Eye className="mr-1 h-4 w-4" />
                     View
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-3">
                   <div>
                     <span className="font-medium">Recovered:</span>
                     <div>{event.recoveredAt ? formatTimeAgo(event.recoveredAt) : 'Unknown'}</div>
@@ -428,18 +417,14 @@ export default function WebhookDLQDashboard() {
                     <Badge variant="destructive">Abandoned</Badge>
                     <Badge variant="outline">{event.sourceProvider}</Badge>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setSelectedEvent(event)}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
+                  <Button size="sm" variant="outline" onClick={() => setSelectedEvent(event)}>
+                    <Eye className="mr-1 h-4 w-4" />
                     View
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-3">
                   <div>
                     <span className="font-medium">Abandoned:</span>
                     <div>{event.abandonedAt ? formatTimeAgo(event.abandonedAt) : 'Unknown'}</div>
@@ -461,8 +446,8 @@ export default function WebhookDLQDashboard() {
 
       {/* Event Detail Modal */}
       {selectedEvent && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <Card className="max-w-4xl w-full max-h-[90vh] overflow-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <Card className="max-h-[90vh] w-full max-w-4xl overflow-auto">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Event Details: {selectedEvent.eventType}</CardTitle>
@@ -476,22 +461,46 @@ export default function WebhookDLQDashboard() {
                 <div>
                   <h4 className="font-medium">Event Information</h4>
                   <div className="mt-2 space-y-1 text-sm">
-                    <div><span className="font-medium">ID:</span> {selectedEvent.id}</div>
-                    <div><span className="font-medium">Type:</span> {selectedEvent.eventType}</div>
-                    <div><span className="font-medium">Provider:</span> {selectedEvent.sourceProvider}</div>
-                    <div><span className="font-medium">Priority:</span> {selectedEvent.priority}</div>
-                    <div><span className="font-medium">Impact:</span> {selectedEvent.impactLevel}</div>
-                    <div><span className="font-medium">Status:</span> {selectedEvent.status}</div>
+                    <div>
+                      <span className="font-medium">ID:</span> {selectedEvent.id}
+                    </div>
+                    <div>
+                      <span className="font-medium">Type:</span> {selectedEvent.eventType}
+                    </div>
+                    <div>
+                      <span className="font-medium">Provider:</span> {selectedEvent.sourceProvider}
+                    </div>
+                    <div>
+                      <span className="font-medium">Priority:</span> {selectedEvent.priority}
+                    </div>
+                    <div>
+                      <span className="font-medium">Impact:</span> {selectedEvent.impactLevel}
+                    </div>
+                    <div>
+                      <span className="font-medium">Status:</span> {selectedEvent.status}
+                    </div>
                   </div>
                 </div>
                 <div>
                   <h4 className="font-medium">Processing Details</h4>
                   <div className="mt-2 space-y-1 text-sm">
-                    <div><span className="font-medium">Created:</span> {new Date(selectedEvent.createdAt).toLocaleString()}</div>
-                    <div><span className="font-medium">Last Attempt:</span> {new Date(selectedEvent.lastAttemptAt).toLocaleString()}</div>
-                    <div><span className="font-medium">Attempts:</span> {selectedEvent.attemptCount} / {selectedEvent.maxRetries}</div>
+                    <div>
+                      <span className="font-medium">Created:</span>{' '}
+                      {new Date(selectedEvent.createdAt).toLocaleString()}
+                    </div>
+                    <div>
+                      <span className="font-medium">Last Attempt:</span>{' '}
+                      {new Date(selectedEvent.lastAttemptAt).toLocaleString()}
+                    </div>
+                    <div>
+                      <span className="font-medium">Attempts:</span> {selectedEvent.attemptCount} /{' '}
+                      {selectedEvent.maxRetries}
+                    </div>
                     {selectedEvent.scheduledRetryAt && (
-                      <div><span className="font-medium">Next Retry:</span> {new Date(selectedEvent.scheduledRetryAt).toLocaleString()}</div>
+                      <div>
+                        <span className="font-medium">Next Retry:</span>{' '}
+                        {new Date(selectedEvent.scheduledRetryAt).toLocaleString()}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -499,14 +508,14 @@ export default function WebhookDLQDashboard() {
 
               <div>
                 <h4 className="font-medium">Business Impact</h4>
-                <div className="mt-2 p-3 bg-muted rounded text-sm">
+                <div className="bg-muted mt-2 rounded p-3 text-sm">
                   {selectedEvent.businessImpact}
                 </div>
               </div>
 
               <div>
                 <h4 className="font-medium">Failure Reason</h4>
-                <div className="mt-2 p-3 bg-muted rounded text-sm">
+                <div className="bg-muted mt-2 rounded p-3 text-sm">
                   {selectedEvent.failureReason}
                 </div>
               </div>
@@ -514,7 +523,7 @@ export default function WebhookDLQDashboard() {
               {selectedEvent.stackTrace && (
                 <div>
                   <h4 className="font-medium">Stack Trace</h4>
-                  <pre className="mt-2 p-3 bg-muted rounded text-xs overflow-auto max-h-32">
+                  <pre className="bg-muted mt-2 max-h-32 overflow-auto rounded p-3 text-xs">
                     {selectedEvent.stackTrace}
                   </pre>
                 </div>
@@ -522,14 +531,14 @@ export default function WebhookDLQDashboard() {
 
               <div>
                 <h4 className="font-medium">Original Headers</h4>
-                <pre className="mt-2 p-3 bg-muted rounded text-xs overflow-auto max-h-32">
+                <pre className="bg-muted mt-2 max-h-32 overflow-auto rounded p-3 text-xs">
                   {JSON.stringify(selectedEvent.originalHeaders, null, 2)}
                 </pre>
               </div>
 
               <div>
                 <h4 className="font-medium">Payload</h4>
-                <pre className="mt-2 p-3 bg-muted rounded text-xs overflow-auto max-h-64">
+                <pre className="bg-muted mt-2 max-h-64 overflow-auto rounded p-3 text-xs">
                   {JSON.stringify(selectedEvent.payload, null, 2)}
                 </pre>
               </div>
@@ -537,7 +546,7 @@ export default function WebhookDLQDashboard() {
               {selectedEvent.technicalNotes && (
                 <div>
                   <h4 className="font-medium">Technical Notes</h4>
-                  <div className="mt-2 p-3 bg-muted rounded text-sm">
+                  <div className="bg-muted mt-2 rounded p-3 text-sm">
                     {selectedEvent.technicalNotes}
                   </div>
                 </div>

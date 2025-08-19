@@ -3,7 +3,14 @@
  * Multi-tier backup strategy with point-in-time recovery and disaster recovery
  */
 
-import { createReadStream, createWriteStream, existsSync, mkdirSync, readdirSync, statSync } from 'fs'
+import {
+  createReadStream,
+  createWriteStream,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  statSync,
+} from 'fs'
 import { join, dirname } from 'path'
 import { createGzip, createGunzip } from 'zlib'
 import { pipeline } from 'stream'
@@ -25,9 +32,9 @@ const pipelineAsync = promisify(pipeline)
 // Backup types and strategies
 export enum BackupType {
   FULL = 'full',
-  INCREMENTAL = 'incremental', 
+  INCREMENTAL = 'incremental',
   DIFFERENTIAL = 'differential',
-  POINT_IN_TIME = 'pit'
+  POINT_IN_TIME = 'pit',
 }
 
 export enum BackupStatus {
@@ -35,7 +42,7 @@ export enum BackupStatus {
   RUNNING = 'running',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CORRUPTED = 'corrupted'
+  CORRUPTED = 'corrupted',
 }
 
 export enum StorageLocation {
@@ -43,7 +50,7 @@ export enum StorageLocation {
   AWS_S3 = 'aws_s3',
   AZURE_BLOB = 'azure_blob',
   GCP_CLOUD = 'gcp_cloud',
-  FTP = 'ftp'
+  FTP = 'ftp',
 }
 
 export interface BackupJob {
@@ -70,7 +77,7 @@ export interface BackupTarget {
   source: string
   includes?: string[]
   excludes?: string[]
-  options?: Record<string, any>
+  options?: Record<string, unknown>
 }
 
 export interface StorageConfig {
@@ -156,24 +163,28 @@ export class BackupManager {
       nextRun: this.getNextScheduledTime('0 2 * * *'),
       retention: {
         days: 30,
-        maxBackups: 30
+        maxBackups: 30,
       },
-      targets: [{
-        type: 'database',
-        source: 'postgresql',
-        options: {
-          compress: true,
-          includeData: true,
-          includeSchema: true
-        }
-      }],
-      storage: [{
-        location: StorageLocation.LOCAL,
-        path: join(this.backupDirectory, 'database')
-      }],
+      targets: [
+        {
+          type: 'database',
+          source: 'postgresql',
+          options: {
+            compress: true,
+            includeData: true,
+            includeSchema: true,
+          },
+        },
+      ],
+      storage: [
+        {
+          location: StorageLocation.LOCAL,
+          path: join(this.backupDirectory, 'database'),
+        },
+      ],
       compression: true,
       encryption: true,
-      verification: true
+      verification: true,
     }
 
     // Application files backup job
@@ -186,21 +197,25 @@ export class BackupManager {
       nextRun: this.getNextScheduledTime('0 1 * * 0'),
       retention: {
         days: 90,
-        maxBackups: 12
+        maxBackups: 12,
       },
-      targets: [{
-        type: 'files',
-        source: process.cwd(),
-        includes: ['src/**', 'prisma/**', 'public/**', 'package.json', 'next.config.js'],
-        excludes: ['node_modules/**', '.next/**', 'logs/**', 'backups/**', '**/*.log']
-      }],
-      storage: [{
-        location: StorageLocation.LOCAL,
-        path: join(this.backupDirectory, 'files')
-      }],
+      targets: [
+        {
+          type: 'files',
+          source: process.cwd(),
+          includes: ['src/**', 'prisma/**', 'public/**', 'package.json', 'next.config.js'],
+          excludes: ['node_modules/**', '.next/**', 'logs/**', 'backups/**', '**/*.log'],
+        },
+      ],
+      storage: [
+        {
+          location: StorageLocation.LOCAL,
+          path: join(this.backupDirectory, 'files'),
+        },
+      ],
       compression: true,
       encryption: false,
-      verification: true
+      verification: true,
     }
 
     // Logs backup job
@@ -213,23 +228,27 @@ export class BackupManager {
       nextRun: this.getNextScheduledTime('0 23 * * *'),
       retention: {
         days: 365,
-        maxBackups: 365
+        maxBackups: 365,
       },
-      targets: [{
-        type: 'logs',
-        source: join(process.cwd(), 'logs'),
-        options: {
-          archiveOldLogs: true,
-          minAge: 24 // hours
-        }
-      }],
-      storage: [{
-        location: StorageLocation.LOCAL,
-        path: join(this.backupDirectory, 'logs')
-      }],
+      targets: [
+        {
+          type: 'logs',
+          source: join(process.cwd(), 'logs'),
+          options: {
+            archiveOldLogs: true,
+            minAge: 24, // hours
+          },
+        },
+      ],
+      storage: [
+        {
+          location: StorageLocation.LOCAL,
+          path: join(this.backupDirectory, 'logs'),
+        },
+      ],
       compression: true,
       encryption: false,
-      verification: false
+      verification: false,
     }
 
     this.jobs.set(databaseJob.id, databaseJob)
@@ -237,7 +256,7 @@ export class BackupManager {
     this.jobs.set(logsJob.id, logsJob)
   }
 
-  private getNextScheduledTime(cronExpression: string): Date {
+  private getNextScheduledTime(_cronExpression: string): Date {
     // Simplified cron parsing - in production use a proper cron library
     const now = new Date()
     const next = new Date(now)
@@ -260,10 +279,12 @@ export class BackupManager {
     for (const [jobId, job] of this.jobs.entries()) {
       if (job.enabled && job.nextRun <= now && !this.activeBackups.has(jobId)) {
         logger.info(LogCategory.SYSTEM, `Starting scheduled backup: ${job.name}`)
-        
+
         // Run backup asynchronously
-        this.runBackup(jobId).catch(error => {
-          logger.error(LogCategory.SYSTEM, `Scheduled backup failed: ${job.name}`, { error: error.message })
+        this.runBackup(jobId).catch((error) => {
+          logger.error(LogCategory.SYSTEM, `Scheduled backup failed: ${job.name}`, {
+            error: error.message,
+          })
         })
 
         // Update next run time
@@ -286,7 +307,7 @@ export class BackupManager {
     }
 
     this.activeBackups.add(jobId)
-    
+
     const record: BackupRecord = {
       id: `${jobId}-${Date.now()}`,
       jobId,
@@ -300,12 +321,15 @@ export class BackupManager {
         version: '2.0.0',
         hostname: process.env.HOSTNAME || 'localhost',
         environment: this.config.NODE_ENV,
-        targets: job.targets.map(t => `${t.type}:${t.source}`)
-      }
+        targets: job.targets.map((t) => `${t.type}:${t.source}`),
+      },
     }
 
     try {
-      logger.info(LogCategory.SYSTEM, `Starting backup: ${job.name}`, { jobId, recordId: record.id })
+      logger.info(LogCategory.SYSTEM, `Starting backup: ${job.name}`, {
+        jobId,
+        recordId: record.id,
+      })
 
       // Create backup directory for this job
       const jobBackupDir = join(this.backupDirectory, jobId, record.id)
@@ -358,37 +382,36 @@ export class BackupManager {
       logger.info(LogCategory.SYSTEM, `Backup completed: ${job.name}`, {
         duration: record.duration,
         size: record.size,
-        compressedSize: record.compressedSize
+        compressedSize: record.compressedSize,
       })
 
       // Record telemetry
       telemetry.recordCounter('backups_completed', 1, {
         job_id: jobId,
-        type: job.type
+        type: job.type,
       })
 
       telemetry.recordHistogram('backup_duration_ms', record.duration, {
-        job_id: jobId
+        job_id: jobId,
       })
 
       telemetry.recordGauge('backup_size_bytes', record.size, {
-        job_id: jobId
+        job_id: jobId,
       })
-
     } catch (error) {
       record.endTime = new Date()
       record.status = BackupStatus.FAILED
       record.error = error instanceof Error ? error.message : 'Unknown error'
 
-      logger.error(LogCategory.SYSTEM, `Backup failed: ${job.name}`, { 
+      logger.error(LogCategory.SYSTEM, `Backup failed: ${job.name}`, {
         error: record.error,
-        duration: record.endTime.getTime() - record.startTime.getTime()
+        duration: record.endTime.getTime() - record.startTime.getTime(),
       })
 
       // Record failure telemetry
       telemetry.recordCounter('backups_failed', 1, {
         job_id: jobId,
-        error_type: error instanceof Error ? error.constructor.name : 'unknown'
+        error_type: error instanceof Error ? error.constructor.name : 'unknown',
       })
 
       throw error
@@ -399,7 +422,11 @@ export class BackupManager {
     return record
   }
 
-  private async backupTarget(target: BackupTarget, outputDir: string, job: BackupJob): Promise<number> {
+  private async backupTarget(
+    target: BackupTarget,
+    outputDir: string,
+    job: BackupJob
+  ): Promise<number> {
     logger.debug(LogCategory.SYSTEM, `Backing up target: ${target.type}:${target.source}`)
 
     switch (target.type) {
@@ -416,9 +443,9 @@ export class BackupManager {
     }
   }
 
-  private async backupDatabase(outputDir: string, target: BackupTarget): Promise<number> {
+  private async backupDatabase(_outputDir: string, _target: BackupTarget): Promise<number> {
     const dumpFile = join(outputDir, 'database.sql')
-    
+
     try {
       // Use pg_dump for PostgreSQL backup
       // In production, use actual pg_dump with proper connection parameters
@@ -438,17 +465,23 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
 
 -- End of dump
 `
-      
+
       await this.writeToFile(dumpFile, mockDumpContent)
-      
+
       const stats = statSync(dumpFile)
       return stats.size
     } catch (error) {
-      throw new Error(`Database backup failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Database backup failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
-  private async backupFiles(sourcePath: string, outputDir: string, target: BackupTarget): Promise<number> {
+  private async backupFiles(
+    sourcePath: string,
+    outputDir: string,
+    target: BackupTarget
+  ): Promise<number> {
     const archiveFile = join(outputDir, 'files.tar')
     let totalSize = 0
 
@@ -466,14 +499,20 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
       }
 
       await this.writeToFile(archiveFile, archiveContent)
-      
+
       return totalSize
     } catch (error) {
-      throw new Error(`Files backup failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Files backup failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
-  private async backupLogs(sourcePath: string, outputDir: string, target: BackupTarget): Promise<number> {
+  private async backupLogs(
+    sourcePath: string,
+    outputDir: string,
+    target: BackupTarget
+  ): Promise<number> {
     if (!existsSync(sourcePath)) {
       return 0
     }
@@ -482,7 +521,7 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
     let totalSize = 0
 
     try {
-      const logFiles = readdirSync(sourcePath).filter(file => file.endsWith('.log'))
+      const logFiles = readdirSync(sourcePath).filter((file) => file.endsWith('.log'))
       let logsContent = ''
 
       for (const logFile of logFiles) {
@@ -493,16 +532,22 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
       }
 
       await this.writeToFile(logsArchive, logsContent)
-      
+
       return totalSize
     } catch (error) {
-      throw new Error(`Logs backup failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Logs backup failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
-  private async backupConfig(sourcePath: string, outputDir: string, target: BackupTarget): Promise<number> {
+  private async backupConfig(
+    sourcePath: string,
+    outputDir: string,
+    target: BackupTarget
+  ): Promise<number> {
     const configFile = join(outputDir, 'config.json')
-    
+
     try {
       const configData = {
         environment: this.config.NODE_ENV,
@@ -511,51 +556,55 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
         features: {
           ai: this.config.ENABLE_AI_FEATURES,
           analytics: this.config.ENABLE_ANALYTICS,
-          auditLogging: this.config.ENABLE_AUDIT_LOGGING
-        }
+          auditLogging: this.config.ENABLE_AUDIT_LOGGING,
+        },
       }
 
       const configContent = JSON.stringify(configData, null, 2)
       await this.writeToFile(configFile, configContent)
-      
+
       const stats = statSync(configFile)
       return stats.size
     } catch (error) {
-      throw new Error(`Config backup failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Config backup failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
-  private getFilesToBackup(sourcePath: string, target: BackupTarget): string[] {
+  private getFilesToBackup(_sourcePath: string, _target: BackupTarget): string[] {
     // Simplified file discovery - in production use proper glob patterns
     const files = [
       join(sourcePath, 'package.json'),
       join(sourcePath, 'next.config.js'),
-      join(sourcePath, 'prisma/schema.prisma')
+      join(sourcePath, 'prisma/schema.prisma'),
     ]
 
-    return files.filter(file => existsSync(file))
+    return files.filter((file) => existsSync(file))
   }
 
   private async compressBackup(sourcePath: string, backupId: string): Promise<string> {
     const compressedPath = `${sourcePath}.tar.gz`
-    
+
     try {
       // Mock compression - in production use proper tar/gzip
       const sourceContent = `Compressed backup: ${backupId}\nSource: ${sourcePath}\nTimestamp: ${new Date().toISOString()}`
       await this.writeToFile(compressedPath, sourceContent)
-      
+
       logger.debug(LogCategory.SYSTEM, `Backup compressed: ${compressedPath}`)
       return compressedPath
     } catch (error) {
-      throw new Error(`Backup compression failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Backup compression failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
   private async calculateChecksum(filePath: string): Promise<string> {
     try {
-      const crypto = require('crypto')
+      import crypto from 'crypto'
       const hash = crypto.createHash('sha256')
-      
+
       // For files
       if (existsSync(filePath) && statSync(filePath).isFile()) {
         const stream = createReadStream(filePath)
@@ -566,21 +615,24 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
         // For directories, hash the directory listing
         hash.update(JSON.stringify(readdirSync(filePath)))
       }
-      
+
       return hash.digest('hex')
     } catch (error) {
       return 'checksum-error'
     }
   }
 
-  private async verifyBackup(record: BackupRecord, job: BackupJob): Promise<{
+  private async verifyBackup(
+    record: BackupRecord,
+    job: BackupJob
+  ): Promise<{
     verified: boolean
     verifiedAt: Date
     integrity: boolean
     restoreTest: boolean
   }> {
     const verifiedAt = new Date()
-    
+
     try {
       // Verify file integrity
       const currentChecksum = await this.calculateChecksum(record.location)
@@ -594,28 +646,30 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
       logger.debug(LogCategory.SYSTEM, `Backup verification: ${verified ? 'PASSED' : 'FAILED'}`, {
         integrity,
         restoreTest,
-        checksum: record.checksum
+        checksum: record.checksum,
       })
 
       return {
         verified,
         verifiedAt,
         integrity,
-        restoreTest
+        restoreTest,
       }
     } catch (error) {
-      logger.error(LogCategory.SYSTEM, 'Backup verification failed', { error: error instanceof Error ? error.message : 'Unknown error' })
-      
+      logger.error(LogCategory.SYSTEM, 'Backup verification failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+
       return {
         verified: false,
         verifiedAt,
         integrity: false,
-        restoreTest: false
+        restoreTest: false,
       }
     }
   }
 
-  private async performRestoreTest(record: BackupRecord, job: BackupJob): Promise<boolean> {
+  private async performRestoreTest(_record: BackupRecord, _job: BackupJob): Promise<boolean> {
     // Simplified restore test - in production, perform actual restore to test environment
     try {
       const testDir = join(this.backupDirectory, 'restore-test', record.id)
@@ -625,17 +679,26 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
 
       // Mock restore test
       const testFile = join(testDir, 'restore-test.txt')
-      await this.writeToFile(testFile, `Restore test for backup: ${record.id}\nTimestamp: ${new Date().toISOString()}`)
+      await this.writeToFile(
+        testFile,
+        `Restore test for backup: ${record.id}\nTimestamp: ${new Date().toISOString()}`
+      )
 
       logger.debug(LogCategory.SYSTEM, `Restore test completed: ${record.id}`)
       return true
     } catch (error) {
-      logger.error(LogCategory.SYSTEM, `Restore test failed: ${record.id}`, { error: error instanceof Error ? error.message : 'Unknown error' })
+      logger.error(LogCategory.SYSTEM, `Restore test failed: ${record.id}`, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
       return false
     }
   }
 
-  private async uploadToStorage(filePath: string, storage: StorageConfig, backupId: string): Promise<void> {
+  private async uploadToStorage(
+    filePath: string,
+    storage: StorageConfig,
+    backupId: string
+  ): Promise<void> {
     logger.debug(LogCategory.SYSTEM, `Uploading backup to ${storage.location}: ${backupId}`)
 
     // Mock upload - in production implement actual cloud storage integration
@@ -654,17 +717,32 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
     }
   }
 
-  private async uploadToS3(filePath: string, storage: StorageConfig, backupId: string): Promise<void> {
+  private async uploadToS3(
+    filePath: string,
+    storage: StorageConfig,
+    backupId: string
+  ): Promise<void> {
     // Mock S3 upload
-    logger.info(LogCategory.SYSTEM, `Mock S3 upload: ${backupId} to bucket ${storage.credentials?.bucket}`)
+    logger.info(
+      LogCategory.SYSTEM,
+      `Mock S3 upload: ${backupId} to bucket ${storage.credentials?.bucket}`
+    )
   }
 
-  private async uploadToAzure(filePath: string, storage: StorageConfig, backupId: string): Promise<void> {
+  private async uploadToAzure(
+    filePath: string,
+    storage: StorageConfig,
+    backupId: string
+  ): Promise<void> {
     // Mock Azure upload
     logger.info(LogCategory.SYSTEM, `Mock Azure upload: ${backupId}`)
   }
 
-  private async uploadToGCP(filePath: string, storage: StorageConfig, backupId: string): Promise<void> {
+  private async uploadToGCP(
+    filePath: string,
+    storage: StorageConfig,
+    backupId: string
+  ): Promise<void> {
     // Mock GCP upload
     logger.info(LogCategory.SYSTEM, `Mock GCP upload: ${backupId}`)
   }
@@ -675,17 +753,17 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
 
     try {
       const backups = readdirSync(jobDir)
-        .map(dir => ({
+        .map((dir) => ({
           name: dir,
           path: join(jobDir, dir),
-          stats: statSync(join(jobDir, dir))
+          stats: statSync(join(jobDir, dir)),
         }))
-        .filter(item => item.stats.isDirectory())
+        .filter((item) => item.stats.isDirectory())
         .sort((a, b) => b.stats.mtime.getTime() - a.stats.mtime.getTime())
 
       // Keep only the specified number of backups
       const backupsToDelete = backups.slice(job.retention.maxBackups)
-      
+
       for (const backup of backupsToDelete) {
         // In production, properly delete directories
         logger.debug(LogCategory.SYSTEM, `Would delete old backup: ${backup.name || 'unknown'}`)
@@ -695,13 +773,14 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
       const retentionDate = new Date()
       retentionDate.setDate(retentionDate.getDate() - job.retention.days)
 
-      const expiredBackups = backups.filter(backup => backup.stats.mtime < retentionDate)
+      const expiredBackups = backups.filter((backup) => backup.stats.mtime < retentionDate)
       for (const backup of expiredBackups) {
         logger.debug(LogCategory.SYSTEM, `Would delete expired backup: ${backup.name || 'unknown'}`)
       }
-
     } catch (error) {
-      logger.error(LogCategory.SYSTEM, `Backup cleanup failed for job: ${job.id}`, { error: error instanceof Error ? error.message : 'Unknown error' })
+      logger.error(LogCategory.SYSTEM, `Backup cleanup failed for job: ${job.id}`, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
     }
   }
 
@@ -714,7 +793,7 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
     for (const item of items) {
       const itemPath = join(dirPath, item)
       const stats = statSync(itemPath)
-      
+
       if (stats.isDirectory()) {
         totalSize += this.getDirectorySize(itemPath)
       } else {
@@ -743,7 +822,7 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
   /**
    * Public API methods
    */
-  
+
   getBackupJobs(): BackupJob[] {
     return Array.from(this.jobs.values())
   }
@@ -756,12 +835,12 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
     const newJob: BackupJob = {
       ...job,
       id: `custom-${Date.now()}`,
-      nextRun: this.getNextScheduledTime(job.schedule)
+      nextRun: this.getNextScheduledTime(job.schedule),
     }
-    
+
     this.jobs.set(newJob.id, newJob)
     logger.info(LogCategory.SYSTEM, `Created backup job: ${newJob.name}`, { jobId: newJob.id })
-    
+
     return newJob
   }
 
@@ -776,10 +855,10 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
     lastBackups: { jobId: string; status: BackupStatus; lastRun?: Date }[]
     diskUsage: number
   } {
-    const lastBackups = Array.from(this.jobs.values()).map(job => ({
+    const lastBackups = Array.from(this.jobs.values()).map((job) => ({
       jobId: job.id,
       status: job.lastRun ? BackupStatus.COMPLETED : BackupStatus.SCHEDULED,
-      lastRun: job.lastRun
+      lastRun: job.lastRun,
     }))
 
     const diskUsage = this.getDirectorySize(this.backupDirectory)
@@ -788,7 +867,7 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
       totalJobs: this.jobs.size,
       activeBackups: this.activeBackups.size,
       lastBackups,
-      diskUsage
+      diskUsage,
     }
   }
 
@@ -816,23 +895,23 @@ INSERT INTO users (email) VALUES ('admin@coreflow360.com');
     }>
   } {
     const jobs = Array.from(this.jobs.values())
-    
+
     return {
       summary: {
         totalJobs: jobs.length,
         successfulBackups: 0, // Would track from records
-        failedBackups: 0,     // Would track from records
+        failedBackups: 0, // Would track from records
         totalSize: this.getDirectorySize(this.backupDirectory),
-        averageDuration: 0    // Would calculate from records
+        averageDuration: 0, // Would calculate from records
       },
-      jobs: jobs.map(job => ({
+      jobs: jobs.map((job) => ({
         id: job.id,
         name: job.name,
         lastStatus: job.lastRun ? BackupStatus.COMPLETED : BackupStatus.SCHEDULED,
         lastRun: job.lastRun,
         nextRun: job.nextRun,
-        averageSize: 0 // Would calculate from records
-      }))
+        averageSize: 0, // Would calculate from records
+      })),
     }
   }
 }

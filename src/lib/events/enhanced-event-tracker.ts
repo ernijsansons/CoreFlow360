@@ -13,13 +13,13 @@ export const BaseEventSchema = z.object({
   eventId: z.string(),
   eventType: z.enum([
     'user_journey',
-    'payment_flow', 
+    'payment_flow',
     'ai_interaction',
     'business_process',
     'enterprise_usage',
     'attribution',
     'error_recovery',
-    'conversion_funnel'
+    'conversion_funnel',
   ]),
   eventName: z.string(),
   userId: z.string().optional(),
@@ -27,15 +27,17 @@ export const BaseEventSchema = z.object({
   tenantId: z.string().optional(),
   timestamp: z.date().default(() => new Date()),
   properties: z.record(z.any()).default({}),
-  metadata: z.object({
-    userAgent: z.string().optional(),
-    ipAddress: z.string().optional(),
-    referrer: z.string().optional(),
-    source: z.string().optional(),
-    campaign: z.string().optional(),
-    device: z.enum(['mobile', 'desktop', 'tablet']).optional(),
-    platform: z.string().optional()
-  }).optional()
+  metadata: z
+    .object({
+      userAgent: z.string().optional(),
+      ipAddress: z.string().optional(),
+      referrer: z.string().optional(),
+      source: z.string().optional(),
+      campaign: z.string().optional(),
+      device: z.enum(['mobile', 'desktop', 'tablet']).optional(),
+      platform: z.string().optional(),
+    })
+    .optional(),
 })
 
 export const UserJourneyEventSchema = BaseEventSchema.extend({
@@ -48,8 +50,8 @@ export const UserJourneyEventSchema = BaseEventSchema.extend({
     nextStep: z.string().optional(),
     conversionValue: z.number().optional(),
     moduleId: z.string().optional(),
-    featureDiscovered: z.string().optional()
-  })
+    featureDiscovered: z.string().optional(),
+  }),
 })
 
 export const PaymentFlowEventSchema = BaseEventSchema.extend({
@@ -64,8 +66,8 @@ export const PaymentFlowEventSchema = BaseEventSchema.extend({
     retryAttempt: z.number().optional(),
     billingCycle: z.enum(['monthly', 'annual']).optional(),
     planType: z.string().optional(),
-    previousPlan: z.string().optional()
-  })
+    previousPlan: z.string().optional(),
+  }),
 })
 
 export const AIInteractionEventSchema = BaseEventSchema.extend({
@@ -81,14 +83,19 @@ export const AIInteractionEventSchema = BaseEventSchema.extend({
     accuracy: z.number().optional(),
     userSatisfaction: z.number().optional(),
     consciousnessLevel: z.number().optional(),
-    crossModuleConnections: z.array(z.string()).optional()
-  })
+    crossModuleConnections: z.array(z.string()).optional(),
+  }),
 })
 
 export const BusinessProcessEventSchema = BaseEventSchema.extend({
   eventType: z.literal('business_process'),
   properties: z.object({
-    processType: z.enum(['crm_workflow', 'hvac_service', 'territory_optimization', 'lead_conversion']),
+    processType: z.enum([
+      'crm_workflow',
+      'hvac_service',
+      'territory_optimization',
+      'lead_conversion',
+    ]),
     processId: z.string(),
     status: z.enum(['started', 'in_progress', 'completed', 'failed', 'abandoned']),
     duration: z.number().optional(),
@@ -96,8 +103,8 @@ export const BusinessProcessEventSchema = BaseEventSchema.extend({
     roiImpact: z.number().optional(),
     automationLevel: z.number().optional(),
     stepsCompleted: z.number().optional(),
-    totalSteps: z.number().optional()
-  })
+    totalSteps: z.number().optional(),
+  }),
 })
 
 export const EnterpriseEventSchema = BaseEventSchema.extend({
@@ -110,8 +117,8 @@ export const EnterpriseEventSchema = BaseEventSchema.extend({
     expansionSignal: z.boolean().optional(),
     seatUtilization: z.number().optional(),
     featureAdoption: z.number().optional(),
-    integrationUsage: z.string().optional()
-  })
+    integrationUsage: z.string().optional(),
+  }),
 })
 
 export type EnhancedEvent = z.infer<typeof BaseEventSchema>
@@ -157,7 +164,7 @@ export class EnhancedEventTracker {
     try {
       // Enrich event with metadata
       const enrichedEvent = await this.enrichEvent(event)
-      
+
       // Validate event schema
       const validatedEvent = BaseEventSchema.parse(enrichedEvent)
 
@@ -176,9 +183,7 @@ export class EnhancedEventTracker {
       if (this.isRevenueCritical(validatedEvent)) {
         await this.processRealtimeEvent(validatedEvent)
       }
-
     } catch (error) {
-      console.error('Event tracking failed:', error)
       // Fallback to localStorage for offline resilience
       this.storeOfflineEvent(event)
     }
@@ -195,9 +200,7 @@ export class EnhancedEventTracker {
         const enrichedEvent = await this.enrichEvent(event)
         const validatedEvent = BaseEventSchema.parse(enrichedEvent)
         validatedEvents.push(validatedEvent)
-      } catch (error) {
-        console.error('Event validation failed:', error)
-      }
+      } catch (error) {}
     }
 
     if (validatedEvents.length > 0) {
@@ -205,7 +208,7 @@ export class EnhancedEventTracker {
         events: validatedEvents,
         batchId: this.generateBatchId(),
         timestamp: new Date(),
-        totalEvents: validatedEvents.length
+        totalEvents: validatedEvents.length,
       })
     }
   }
@@ -219,7 +222,7 @@ export class EnhancedEventTracker {
       eventType: 'user_journey',
       eventId: this.generateEventId(),
       sessionId: event.sessionId || this.getSessionId(),
-      timestamp: new Date()
+      timestamp: new Date(),
     })
 
     await this.track(userJourneyEvent)
@@ -237,7 +240,7 @@ export class EnhancedEventTracker {
       eventType: 'payment_flow',
       eventId: this.generateEventId(),
       sessionId: event.sessionId || this.getSessionId(),
-      timestamp: new Date()
+      timestamp: new Date(),
     })
 
     await this.track(paymentEvent)
@@ -257,7 +260,7 @@ export class EnhancedEventTracker {
       eventType: 'ai_interaction',
       eventId: this.generateEventId(),
       sessionId: event.sessionId || this.getSessionId(),
-      timestamp: new Date()
+      timestamp: new Date(),
     })
 
     await this.track(aiEvent)
@@ -277,7 +280,7 @@ export class EnhancedEventTracker {
       eventType: 'business_process',
       eventId: this.generateEventId(),
       sessionId: event.sessionId || this.getSessionId(),
-      timestamp: new Date()
+      timestamp: new Date(),
     })
 
     await this.track(processEvent)
@@ -297,7 +300,7 @@ export class EnhancedEventTracker {
       eventType: 'enterprise_usage',
       eventId: this.generateEventId(),
       sessionId: event.sessionId || this.getSessionId(),
-      timestamp: new Date()
+      timestamp: new Date(),
     })
 
     await this.track(enterpriseEvent)
@@ -313,7 +316,7 @@ export class EnhancedEventTracker {
    */
   async getAnalytics(timeframe: 'hour' | 'day' | 'week' = 'day'): Promise<EventAnalytics> {
     const cacheKey = `analytics:events:${timeframe}`
-    
+
     // Try cache first
     const cached = await redis.get(cacheKey)
     if (cached) {
@@ -322,10 +325,10 @@ export class EnhancedEventTracker {
 
     // Calculate analytics
     const analytics = await this.calculateAnalytics(timeframe)
-    
+
     // Cache for 5 minutes
     await redis.set(cacheKey, JSON.stringify(analytics), { ex: 300 })
-    
+
     return analytics
   }
 
@@ -345,20 +348,24 @@ export class EnhancedEventTracker {
       metadata: {
         ...event.metadata,
         userAgent: typeof window !== 'undefined' ? navigator.userAgent : undefined,
-        platform: typeof window !== 'undefined' ? navigator.platform : 'server'
-      }
+        platform: typeof window !== 'undefined' ? navigator.platform : 'server',
+      },
     }
   }
 
   private isCriticalEvent(event: EnhancedEvent): boolean {
-    return event.eventType === 'payment_flow' || 
-           (event.eventType === 'user_journey' && event.properties.conversionValue)
+    return (
+      event.eventType === 'payment_flow' ||
+      (event.eventType === 'user_journey' && event.properties.conversionValue)
+    )
   }
 
   private isRevenueCritical(event: EnhancedEvent): boolean {
-    return event.eventType === 'payment_flow' ||
-           event.eventType === 'conversion_funnel' ||
-           (event.eventType === 'user_journey' && event.properties.conversionValue)
+    return (
+      event.eventType === 'payment_flow' ||
+      event.eventType === 'conversion_funnel' ||
+      (event.eventType === 'user_journey' && event.properties.conversionValue)
+    )
   }
 
   private async flushBatch(): Promise<void> {
@@ -373,10 +380,9 @@ export class EnhancedEventTracker {
         events,
         batchId: this.generateBatchId(),
         timestamp: new Date(),
-        totalEvents: events.length
+        totalEvents: events.length,
       })
     } catch (error) {
-      console.error('Batch processing failed:', error)
       // Re-queue events for retry
       this.batchQueue.unshift(...events)
     } finally {
@@ -387,13 +393,13 @@ export class EnhancedEventTracker {
   private async processBatch(batch: EventBatch): Promise<void> {
     // Store in database
     await this.storeEvents(batch.events)
-    
+
     // Send to analytics providers
     await this.sendToAnalytics(batch.events)
-    
+
     // Update real-time metrics
     await this.updateMetrics(batch.events)
-    
+
     // Trigger real-time alerts if needed
     await this.processAlerts(batch.events)
   }
@@ -401,16 +407,16 @@ export class EnhancedEventTracker {
   private async storeEvents(events: EnhancedEvent[]): Promise<void> {
     // Store in Redis for fast access
     const pipeline = redis.pipeline()
-    
+
     for (const event of events) {
       const key = `event:${event.eventId}`
       pipeline.setex(key, 86400, JSON.stringify(event)) // 24 hour retention
-      
+
       // Index by type and timestamp for analytics
       const typeKey = `events:${event.eventType}:${this.getDateKey(event.timestamp)}`
       pipeline.zadd(typeKey, event.timestamp.getTime(), event.eventId)
     }
-    
+
     await pipeline.exec()
   }
 
@@ -422,17 +428,17 @@ export class EnhancedEventTracker {
           ...event.properties,
           event_category: event.eventType,
           custom_parameter_1: event.userId,
-          custom_parameter_2: event.tenantId
+          custom_parameter_2: event.tenantId,
         })
       }
     }
 
     // Send to PostHog if available
-    if (typeof window !== 'undefined' && (window as any).posthog) {
-      events.forEach(event => {
-        (window as any).posthog.capture(event.eventName, {
+    if (typeof window !== 'undefined' && (window as unknown).posthog) {
+      events.forEach((event) => {
+        ;(window as unknown).posthog.capture(event.eventName, {
           ...event.properties,
-          $set: { eventType: event.eventType }
+          $set: { eventType: event.eventType },
         })
       })
     }
@@ -440,19 +446,19 @@ export class EnhancedEventTracker {
 
   private async updateMetrics(events: EnhancedEvent[]): Promise<void> {
     const pipeline = redis.pipeline()
-    
+
     for (const event of events) {
       // Update counters
       pipeline.incr(`metrics:events:total`)
       pipeline.incr(`metrics:events:${event.eventType}`)
       pipeline.incr(`metrics:events:${this.getDateKey(event.timestamp)}`)
-      
+
       // Update revenue metrics
       if (event.properties.conversionValue) {
         pipeline.incrbyfloat(`metrics:revenue:total`, event.properties.conversionValue)
       }
     }
-    
+
     await pipeline.exec()
   }
 
@@ -462,7 +468,7 @@ export class EnhancedEventTracker {
       if (event.eventType === 'payment_flow' && event.properties.action === 'failed') {
         await this.triggerPaymentFailureAlert(event as PaymentFlowEvent)
       }
-      
+
       // High-value conversion alert
       if (event.properties.conversionValue && event.properties.conversionValue > 50000) {
         await this.triggerHighValueAlert(event)
@@ -470,7 +476,7 @@ export class EnhancedEventTracker {
     }
   }
 
-  private async processRealtimeEvent(event: EnhancedEvent): Promise<void> {
+  private async processRealtimeEvent(_event: EnhancedEvent): Promise<void> {
     // WebSocket broadcast for real-time dashboards
     if (typeof window === 'undefined') {
       // Server-side: broadcast via WebSocket
@@ -482,7 +488,7 @@ export class EnhancedEventTracker {
     // Funnel analysis logic
     const funnelKey = `funnel:${event.properties.step}`
     await redis.incr(funnelKey)
-    
+
     if (event.properties.completed) {
       await redis.incr(`${funnelKey}:completed`)
     }
@@ -492,7 +498,7 @@ export class EnhancedEventTracker {
     // Payment failure analysis
     const failureKey = `payment_failures:${event.properties.failureReason}`
     await redis.incr(failureKey)
-    
+
     // Store for recovery analysis
     await redis.lpush('payment_recovery_queue', JSON.stringify(event))
   }
@@ -509,15 +515,18 @@ export class EnhancedEventTracker {
   }
 
   private async detectExpansionOpportunity(event: EnterpriseEvent): Promise<void> {
-    await redis.lpush('expansion_opportunities', JSON.stringify({
-      tenantId: event.tenantId,
-      signal: event.properties.action,
-      timestamp: event.timestamp,
-      teamSize: event.properties.teamSize
-    }))
+    await redis.lpush(
+      'expansion_opportunities',
+      JSON.stringify({
+        tenantId: event.tenantId,
+        signal: event.properties.action,
+        timestamp: event.timestamp,
+        teamSize: event.properties.teamSize,
+      })
+    )
   }
 
-  private async calculateAnalytics(timeframe: string): Promise<EventAnalytics> {
+  private async calculateAnalytics(_timeframe: string): Promise<EventAnalytics> {
     // Implementation would calculate real analytics from stored events
     return {
       totalEvents: 0,
@@ -527,18 +536,16 @@ export class EnhancedEventTracker {
       revenueImpact: 0,
       conversionRate: 0,
       averageSessionDuration: 0,
-      uniqueUsers: 0
+      uniqueUsers: 0,
     }
   }
 
-  private async triggerPaymentFailureAlert(event: PaymentFlowEvent): Promise<void> {
+  private async triggerPaymentFailureAlert(_event: PaymentFlowEvent): Promise<void> {
     // Payment failure alerting logic
-    console.log('Payment failure alert:', event.properties.failureReason)
   }
 
-  private async triggerHighValueAlert(event: EnhancedEvent): Promise<void> {
+  private async triggerHighValueAlert(_event: EnhancedEvent): Promise<void> {
     // High-value conversion alerting logic
-    console.log('High-value conversion:', event.properties.conversionValue)
   }
 
   private storeOfflineEvent(event: Partial<EnhancedEvent>): void {

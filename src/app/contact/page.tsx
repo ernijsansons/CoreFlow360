@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
+import {
   MessageSquare,
   Send,
   Bot,
@@ -20,7 +20,7 @@ import {
   Users,
   Building,
   Zap,
-  Shield
+  Shield,
 } from 'lucide-react'
 import { GlowingButton } from '@/components/ui/GlowingButton'
 import { NeuralNetworkBackground } from '@/components/ui/NeuralNetworkBackground'
@@ -48,7 +48,7 @@ interface OfficeLocation {
   country: string
   address: string
   timezone: string
-  coordinates: { lat: number, lng: number }
+  coordinates: { lat: number; lng: number }
   isHeadquarters?: boolean
 }
 
@@ -60,7 +60,7 @@ const contactMethods: ContactMethod[] = [
     value: 'Available 24/7',
     action: 'Start Chat',
     gradient: 'from-violet-500 to-purple-500',
-    available: true
+    available: true,
   },
   {
     icon: Calendar,
@@ -69,7 +69,7 @@ const contactMethods: ContactMethod[] = [
     value: '30-minute sessions',
     action: 'Book Now',
     gradient: 'from-emerald-500 to-green-500',
-    available: true
+    available: true,
   },
   {
     icon: Phone,
@@ -78,7 +78,7 @@ const contactMethods: ContactMethod[] = [
     value: '+1 (555) AI-FLOW',
     action: 'Call Now',
     gradient: 'from-blue-500 to-cyan-500',
-    available: true
+    available: true,
   },
   {
     icon: Mail,
@@ -87,8 +87,8 @@ const contactMethods: ContactMethod[] = [
     value: 'support@coreflow360.ai',
     action: 'Send Email',
     gradient: 'from-orange-500 to-red-500',
-    available: true
-  }
+    available: true,
+  },
 ]
 
 const offices: OfficeLocation[] = [
@@ -98,37 +98,37 @@ const offices: OfficeLocation[] = [
     address: '100 AI Innovation Drive, San Francisco, CA 94105',
     timezone: 'PST (UTC-8)',
     coordinates: { lat: 37.7749, lng: -122.4194 },
-    isHeadquarters: true
+    isHeadquarters: true,
   },
   {
     city: 'London',
     country: 'UK',
     address: '25 Tech City Road, London, EC1V 2NX',
     timezone: 'GMT (UTC+0)',
-    coordinates: { lat: 51.5074, lng: -0.1278 }
+    coordinates: { lat: 51.5074, lng: -0.1278 },
   },
   {
     city: 'Singapore',
     country: 'Singapore',
     address: '1 Marina Bay AI Hub, Singapore 018960',
     timezone: 'SGT (UTC+8)',
-    coordinates: { lat: 1.3521, lng: 103.8198 }
+    coordinates: { lat: 1.3521, lng: 103.8198 },
   },
   {
     city: 'Toronto',
     country: 'Canada',
     address: '200 Innovation Boulevard, Toronto, ON M5V 3C7',
     timezone: 'EST (UTC-5)',
-    coordinates: { lat: 43.6532, lng: -79.3832 }
-  }
+    coordinates: { lat: 43.6532, lng: -79.3832 },
+  },
 ]
 
 const aiResponses = [
-  "Hello! I&apos;m CoreFlow360&apos;s AI assistant. I can help you learn about our AI-powered ERP platform, schedule demos, or answer technical questions. What would you like to know?",
-  "I can provide information about our pricing tiers, AI capabilities, implementation process, or connect you with a human specialist. How can I assist you today?",
-  "Our AI platform serves over 50,000 businesses across HVAC, construction, healthcare, and legal industries. What industry are you in?",
-  "Would you like to see a personalized demo of how AI can transform your specific business processes? I can connect you with one of our industry specialists.",
-  "I can help you calculate potential ROI, explain our security measures, or schedule a consultation. What's most important for your business right now?"
+  'Hello! I&apos;m CoreFlow360&apos;s AI assistant. I can help you learn about our AI-powered ERP platform, schedule demos, or answer technical questions. What would you like to know?',
+  'I can provide information about our pricing tiers, AI capabilities, implementation process, or connect you with a human specialist. How can I assist you today?',
+  'Our AI platform serves over 50,000 businesses across HVAC, construction, healthcare, and legal industries. What industry are you in?',
+  'Would you like to see a personalized demo of how AI can transform your specific business processes? I can connect you with one of our industry specialists.',
+  "I can help you calculate potential ROI, explain our security measures, or schedule a consultation. What's most important for your business right now?",
 ]
 
 export default function ContactPage() {
@@ -136,9 +136,10 @@ export default function ContactPage() {
     {
       id: '1',
       type: 'ai',
-      message: "Hello! I&apos;m CoreFlow360&apos;s AI assistant. I&apos;m here to help you discover how artificial intelligence can transform your business operations. What would you like to know?",
-      timestamp: new Date()
-    }
+      message:
+        'Hello! I&apos;m CoreFlow360&apos;s AI assistant. I&apos;m here to help you discover how artificial intelligence can transform your business operations. What would you like to know?',
+      timestamp: new Date(),
+    },
   ])
   const [inputMessage, setInputMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -151,10 +152,10 @@ export default function ContactPage() {
       id: Date.now().toString(),
       type: 'user',
       message: inputMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
     }
 
-    setMessages(prev => [...prev, userMessage])
+    setMessages((prev) => [...prev, userMessage])
     setInputMessage('')
     setIsTyping(true)
 
@@ -164,9 +165,9 @@ export default function ContactPage() {
         id: (Date.now() + 1).toString(),
         type: 'ai',
         message: aiResponses[Math.floor(Math.random() * aiResponses.length)],
-        timestamp: new Date()
+        timestamp: new Date(),
       }
-      setMessages(prev => [...prev, aiMessage])
+      setMessages((prev) => [...prev, aiMessage])
       setIsTyping(false)
     }, 1500)
   }
@@ -181,30 +182,28 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center">
+      <section className="relative flex min-h-screen items-center">
         <NeuralNetworkBackground />
-        
+
         <div className="container-fluid relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center max-w-4xl mx-auto"
+            className="mx-auto max-w-4xl text-center"
           >
-            <h1 className="heading-hero gradient-text-ai mb-6">
-              Connect with Intelligence
-            </h1>
-            <p className="text-body-large text-gray-300 mb-12">
-              Whether you need instant AI assistance, want to schedule a personalized demo, 
-              or have complex questions about AI implementation - we&apos;re here to help you succeed.
+            <h1 className="heading-hero gradient-text-ai mb-6">Connect with Intelligence</h1>
+            <p className="text-body-large mb-12 text-gray-300">
+              Whether you need instant AI assistance, want to schedule a personalized demo, or have
+              complex questions about AI implementation - we&apos;re here to help you succeed.
             </p>
-            
+
             <div className="flex flex-wrap justify-center gap-6">
               <GlowingButton href="#ai-chat" size="xl">
                 Talk to AI Assistant
                 <Bot className="ml-2 h-5 w-5" />
               </GlowingButton>
-              
+
               <GlowingButton href="#contact-methods" size="xl" variant="outline">
                 View All Options
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -215,52 +214,52 @@ export default function ContactPage() {
       </section>
 
       {/* AI Chat Interface */}
-      <section id="ai-chat" className="py-24 bg-gray-950">
+      <section id="ai-chat" className="bg-gray-950 py-24">
         <div className="container-fluid">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="mb-16 text-center"
           >
-            <h2 className="heading-section text-white mb-6">
+            <h2 className="heading-section mb-6 text-white">
               AI-Powered <span className="gradient-text-ai">Support</span>
             </h2>
-            <p className="text-body-large text-gray-400 max-w-3xl mx-auto">
-              Get instant answers from our AI assistant trained on CoreFlow360&apos;s complete knowledge base. 
-              Ask about features, pricing, implementation, or anything else.
+            <p className="text-body-large mx-auto max-w-3xl text-gray-400">
+              Get instant answers from our AI assistant trained on CoreFlow360&apos;s complete
+              knowledge base. Ask about features, pricing, implementation, or anything else.
             </p>
           </motion.div>
 
-          <div className="max-w-4xl mx-auto">
+          <div className="mx-auto max-w-4xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="glass-card p-6 h-[600px] flex flex-col"
+              className="glass-card flex h-[600px] flex-col p-6"
             >
               {/* Chat Header */}
-              <div className="flex items-center gap-3 border-b border-gray-800 pb-4 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-white" />
+              <div className="mb-4 flex items-center gap-3 border-b border-gray-800 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-cyan-500">
+                  <Bot className="h-5 w-5 text-white" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-white">CoreFlow360 AI Assistant</h3>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                    <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
                     <span className="text-sm text-emerald-400">Online</span>
                   </div>
                 </div>
                 <div className="ml-auto flex items-center gap-2 text-sm text-gray-400">
-                  <Brain className="w-4 h-4" />
+                  <Brain className="h-4 w-4" />
                   <span>AI-Powered</span>
                 </div>
               </div>
 
               {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+              <div className="mb-4 flex-1 space-y-4 overflow-y-auto">
                 <AnimatePresence>
                   {messages.map((message) => (
                     <motion.div
@@ -269,30 +268,41 @@ export default function ContactPage() {
                       animate={{ opacity: 1, y: 0 }}
                       className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div className={`flex gap-3 max-w-xs lg:max-w-md ${
-                        message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
-                      }`}>
-                        <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${
-                          message.type === 'user' 
-                            ? 'bg-violet-600' 
-                            : 'bg-gradient-to-r from-violet-500 to-cyan-500'
-                        }`}>
+                      <div
+                        className={`flex max-w-xs gap-3 lg:max-w-md ${
+                          message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
+                        }`}
+                      >
+                        <div
+                          className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${
+                            message.type === 'user'
+                              ? 'bg-violet-600'
+                              : 'bg-gradient-to-r from-violet-500 to-cyan-500'
+                          }`}
+                        >
                           {message.type === 'user' ? (
-                            <User className="w-4 h-4 text-white" />
+                            <User className="h-4 w-4 text-white" />
                           ) : (
-                            <Bot className="w-4 h-4 text-white" />
+                            <Bot className="h-4 w-4 text-white" />
                           )}
                         </div>
-                        <div className={`px-4 py-3 rounded-2xl ${
-                          message.type === 'user' 
-                            ? 'bg-violet-600 text-white' 
-                            : 'bg-gray-800 text-gray-100'
-                        }`}>
+                        <div
+                          className={`rounded-2xl px-4 py-3 ${
+                            message.type === 'user'
+                              ? 'bg-violet-600 text-white'
+                              : 'bg-gray-800 text-gray-100'
+                          }`}
+                        >
                           {message.message}
-                          <div className={`text-xs mt-1 ${
-                            message.type === 'user' ? 'text-violet-200' : 'text-gray-500'
-                          }`}>
-                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          <div
+                            className={`mt-1 text-xs ${
+                              message.type === 'user' ? 'text-violet-200' : 'text-gray-500'
+                            }`}
+                          >
+                            {message.timestamp.toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
                           </div>
                         </div>
                       </div>
@@ -308,14 +318,23 @@ export default function ContactPage() {
                     className="flex justify-start"
                   >
                     <div className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 flex items-center justify-center">
-                        <Bot className="w-4 h-4 text-white" />
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-cyan-500">
+                        <Bot className="h-4 w-4 text-white" />
                       </div>
-                      <div className="bg-gray-800 px-4 py-3 rounded-2xl">
+                      <div className="rounded-2xl bg-gray-800 px-4 py-3">
                         <div className="flex gap-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                          <div
+                            className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                            style={{ animationDelay: '0ms' }}
+                          />
+                          <div
+                            className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                            style={{ animationDelay: '150ms' }}
+                          />
+                          <div
+                            className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                            style={{ animationDelay: '300ms' }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -331,28 +350,32 @@ export default function ContactPage() {
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask about AI features, pricing, implementation..."
-                    className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 resize-none focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                    className="flex-1 resize-none rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 focus:outline-none"
                     rows={1}
                     style={{ minHeight: '44px', maxHeight: '120px' }}
                   />
-                  <GlowingButton onClick={handleSendMessage} size="md" disabled={!inputMessage.trim()}>
-                    <Send className="w-4 h-4" />
+                  <GlowingButton
+                    onClick={handleSendMessage}
+                    size="md"
+                    disabled={!inputMessage.trim()}
+                  >
+                    <Send className="h-4 w-4" />
                   </GlowingButton>
                 </div>
-                
+
                 {/* Quick Actions */}
-                <div className="flex flex-wrap gap-2 mt-3">
+                <div className="mt-3 flex flex-wrap gap-2">
                   {[
                     'Schedule a demo',
                     'Pricing information',
                     'AI capabilities',
                     'Implementation process',
-                    'Security features'
+                    'Security features',
                   ].map((quickAction) => (
                     <button
                       key={quickAction}
                       onClick={() => setInputMessage(quickAction)}
-                      className="px-3 py-1 text-xs bg-gray-800 border border-gray-700 rounded-full text-gray-300 hover:text-white hover:border-violet-500 transition-all duration-200"
+                      className="rounded-full border border-gray-700 bg-gray-800 px-3 py-1 text-xs text-gray-300 transition-all duration-200 hover:border-violet-500 hover:text-white"
                     >
                       {quickAction}
                     </button>
@@ -365,21 +388,21 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Methods */}
-      <section id="contact-methods" className="py-24 bg-black">
+      <section id="contact-methods" className="bg-black py-24">
         <div className="container-fluid">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="mb-16 text-center"
           >
-            <h2 className="heading-section text-white mb-6">
+            <h2 className="heading-section mb-6 text-white">
               Multiple Ways to <span className="gradient-text-ai">Connect</span>
             </h2>
-            <p className="text-body-large text-gray-400 max-w-3xl mx-auto">
-              Choose the communication method that works best for you. Our team is available 
-              across all channels to provide the support you need.
+            <p className="text-body-large mx-auto max-w-3xl text-gray-400">
+              Choose the communication method that works best for you. Our team is available across
+              all channels to provide the support you need.
             </p>
           </motion.div>
 
@@ -392,27 +415,33 @@ export default function ContactPage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ y: -8, scale: 1.02 }}
-                className="glass-card p-6 text-center group cursor-pointer relative"
+                className="glass-card group relative cursor-pointer p-6 text-center"
               >
                 {/* Availability Indicator */}
                 <div className="absolute top-4 right-4">
-                  <div className={`w-3 h-3 rounded-full ${
-                    method.available ? 'bg-emerald-400' : 'bg-gray-500'
-                  } ${method.available ? 'animate-pulse' : ''}`} />
+                  <div
+                    className={`h-3 w-3 rounded-full ${
+                      method.available ? 'bg-emerald-400' : 'bg-gray-500'
+                    } ${method.available ? 'animate-pulse' : ''}`}
+                  />
                 </div>
 
                 {/* Glow Effect */}
-                <div className={`absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-20 rounded-2xl blur-xl transition-all duration-500 ${method.gradient}`} />
-                
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${method.gradient} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                  <method.icon className="w-8 h-8 text-white" />
+                <div
+                  className={`absolute inset-0 rounded-2xl bg-gradient-to-r opacity-0 blur-xl transition-all duration-500 group-hover:opacity-20 ${method.gradient}`}
+                />
+
+                <div
+                  className={`h-16 w-16 rounded-2xl bg-gradient-to-r ${method.gradient} mx-auto mb-4 flex items-center justify-center transition-transform duration-300 group-hover:scale-110`}
+                >
+                  <method.icon className="h-8 w-8 text-white" />
                 </div>
 
-                <h3 className="text-xl font-semibold text-white mb-3">{method.title}</h3>
-                <p className="text-gray-400 text-sm mb-4 leading-relaxed">{method.description}</p>
-                
-                <div className="font-medium text-white mb-6">{method.value}</div>
-                
+                <h3 className="mb-3 text-xl font-semibold text-white">{method.title}</h3>
+                <p className="mb-4 text-sm leading-relaxed text-gray-400">{method.description}</p>
+
+                <div className="mb-6 font-medium text-white">{method.value}</div>
+
                 <GlowingButton size="sm" className="w-full">
                   {method.action}
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -424,27 +453,27 @@ export default function ContactPage() {
       </section>
 
       {/* Global Offices */}
-      <section className="py-24 bg-gray-950">
+      <section className="bg-gray-950 py-24">
         <div className="container-fluid">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="mb-16 text-center"
           >
-            <h2 className="heading-section text-white mb-6">
+            <h2 className="heading-section mb-6 text-white">
               Global <span className="gradient-text-ai">Presence</span>
             </h2>
-            <p className="text-body-large text-gray-400 max-w-3xl mx-auto">
-              With offices around the world, we provide local support with global expertise. 
-              Our teams work around the clock to ensure your AI systems perform perfectly.
+            <p className="text-body-large mx-auto max-w-3xl text-gray-400">
+              With offices around the world, we provide local support with global expertise. Our
+              teams work around the clock to ensure your AI systems perform perfectly.
             </p>
           </motion.div>
 
-          <div className="max-w-6xl mx-auto">
+          <div className="mx-auto max-w-6xl">
             {/* Office Selector */}
-            <div className="flex flex-wrap justify-center gap-4 mb-12">
+            <div className="mb-12 flex flex-wrap justify-center gap-4">
               {offices.map((office, index) => (
                 <motion.button
                   key={`${office.city}-${office.country}`}
@@ -453,17 +482,19 @@ export default function ContactPage() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   onClick={() => setSelectedOffice(office)}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                  className={`rounded-xl px-6 py-3 font-medium transition-all duration-300 ${
                     selectedOffice.city === office.city
                       ? 'bg-violet-600 text-white'
                       : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <Globe className="w-4 h-4" />
-                    <span>{office.city}, {office.country}</span>
+                    <Globe className="h-4 w-4" />
+                    <span>
+                      {office.city}, {office.country}
+                    </span>
                     {office.isHeadquarters && (
-                      <div className="w-2 h-2 bg-emerald-400 rounded-full" />
+                      <div className="h-2 w-2 rounded-full bg-emerald-400" />
                     )}
                   </div>
                 </motion.button>
@@ -483,12 +514,12 @@ export default function ContactPage() {
                 <div className="grid gap-8 lg:grid-cols-2">
                   {/* Office Info */}
                   <div>
-                    <div className="flex items-center gap-3 mb-4">
+                    <div className="mb-4 flex items-center gap-3">
                       <h3 className="text-2xl font-semibold text-white">
                         {selectedOffice.city}, {selectedOffice.country}
                       </h3>
                       {selectedOffice.isHeadquarters && (
-                        <span className="px-3 py-1 bg-emerald-500/20 border border-emerald-500/50 rounded-full text-emerald-400 text-sm">
+                        <span className="rounded-full border border-emerald-500/50 bg-emerald-500/20 px-3 py-1 text-sm text-emerald-400">
                           Headquarters
                         </span>
                       )}
@@ -496,26 +527,28 @@ export default function ContactPage() {
 
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
-                        <MapPin className="w-5 h-5 text-violet-400 mt-0.5" />
+                        <MapPin className="mt-0.5 h-5 w-5 text-violet-400" />
                         <div>
-                          <div className="text-white font-medium">Address</div>
+                          <div className="font-medium text-white">Address</div>
                           <div className="text-gray-400">{selectedOffice.address}</div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <Clock className="w-5 h-5 text-cyan-400" />
+                        <Clock className="h-5 w-5 text-cyan-400" />
                         <div>
-                          <div className="text-white font-medium">Timezone</div>
+                          <div className="font-medium text-white">Timezone</div>
                           <div className="text-gray-400">{selectedOffice.timezone}</div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <Headphones className="w-5 h-5 text-emerald-400" />
+                        <Headphones className="h-5 w-5 text-emerald-400" />
                         <div>
-                          <div className="text-white font-medium">Support Hours</div>
-                          <div className="text-gray-400">24/7 AI Support, Business Hours for Human Support</div>
+                          <div className="font-medium text-white">Support Hours</div>
+                          <div className="text-gray-400">
+                            24/7 AI Support, Business Hours for Human Support
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -523,22 +556,31 @@ export default function ContactPage() {
 
                   {/* Office Services */}
                   <div>
-                    <h4 className="text-lg font-semibold text-white mb-4">Available Services</h4>
+                    <h4 className="mb-4 text-lg font-semibold text-white">Available Services</h4>
                     <div className="grid gap-3">
                       {[
                         { icon: Brain, label: 'AI Consultation', available: true },
                         { icon: Users, label: 'Technical Support', available: true },
                         { icon: Calendar, label: 'Demo Scheduling', available: true },
                         { icon: Building, label: 'Enterprise Sales', available: true },
-                        { icon: Shield, label: 'Security Consultation', available: selectedOffice.isHeadquarters },
-                        { icon: Zap, label: 'Implementation Services', available: true }
+                        {
+                          icon: Shield,
+                          label: 'Security Consultation',
+                          available: selectedOffice.isHeadquarters,
+                        },
+                        { icon: Zap, label: 'Implementation Services', available: true },
                       ].map((service, index) => (
-                        <div key={index} className={`flex items-center gap-3 p-3 rounded-lg ${
-                          service.available ? 'bg-gray-800/50' : 'bg-gray-900/50'
-                        }`}>
-                          <service.icon className={`w-5 h-5 ${
-                            service.available ? 'text-emerald-400' : 'text-gray-500'
-                          }`} />
+                        <div
+                          key={index}
+                          className={`flex items-center gap-3 rounded-lg p-3 ${
+                            service.available ? 'bg-gray-800/50' : 'bg-gray-900/50'
+                          }`}
+                        >
+                          <service.icon
+                            className={`h-5 w-5 ${
+                              service.available ? 'text-emerald-400' : 'text-gray-500'
+                            }`}
+                          />
                           <span className={service.available ? 'text-white' : 'text-gray-500'}>
                             {service.label}
                           </span>
@@ -557,82 +599,78 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Form */}
-      <section className="py-24 bg-black">
+      <section className="bg-black py-24">
         <div className="container-fluid">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="mb-16 text-center"
           >
-            <h2 className="heading-section text-white mb-6">
+            <h2 className="heading-section mb-6 text-white">
               Send Us a <span className="gradient-text-ai">Message</span>
             </h2>
-            <p className="text-body-large text-gray-400 max-w-2xl mx-auto">
-              Have specific questions or want to discuss a custom implementation? 
-              Send us a detailed message and we&apos;ll get back to you within 24 hours.
+            <p className="text-body-large mx-auto max-w-2xl text-gray-400">
+              Have specific questions or want to discuss a custom implementation? Send us a detailed
+              message and we&apos;ll get back to you within 24 hours.
             </p>
           </motion.div>
 
-          <div className="max-w-2xl mx-auto">
+          <div className="mx-auto max-w-2xl">
             <motion.form
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="glass-card p-8 space-y-6"
+              className="glass-card space-y-6 p-8"
             >
               <div className="grid gap-6 md:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    First Name
-                  </label>
+                  <label className="mb-2 block text-sm font-medium text-gray-300">First Name</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                    className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 focus:outline-none"
                     placeholder="John"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Last Name
-                  </label>
+                  <label className="mb-2 block text-sm font-medium text-gray-300">Last Name</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                    className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 focus:outline-none"
                     placeholder="Doe"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="mb-2 block text-sm font-medium text-gray-300">
                   Email Address
                 </label>
                 <input
                   type="email"
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                  className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 focus:outline-none"
                   placeholder="john.doe@company.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="mb-2 block text-sm font-medium text-gray-300">
                   Company & Industry
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                  className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 focus:outline-none"
                   placeholder="ACME Corp - HVAC Services"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="mb-2 block text-sm font-medium text-gray-300">
                   How can we help you?
                 </label>
-                <select className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500">
+                <select className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500 focus:outline-none">
                   <option>Schedule a demo</option>
                   <option>Get pricing information</option>
                   <option>Discuss implementation</option>
@@ -643,12 +681,10 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Message
-                </label>
+                <label className="mb-2 block text-sm font-medium text-gray-300">Message</label>
                 <textarea
                   rows={4}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 resize-none focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                  className="w-full resize-none rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 focus:outline-none"
                   placeholder="Tell us about your business needs, current challenges, or specific questions about our AI platform..."
                 />
               </div>
@@ -659,7 +695,8 @@ export default function ContactPage() {
               </GlowingButton>
 
               <p className="text-center text-sm text-gray-500">
-                We typically respond within 24 hours. For urgent matters, please use our AI chat or call us directly.
+                We typically respond within 24 hours. For urgent matters, please use our AI chat or
+                call us directly.
               </p>
             </motion.form>
           </div>
@@ -667,7 +704,7 @@ export default function ContactPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-violet-950/30 to-cyan-950/30">
+      <section className="bg-gradient-to-r from-violet-950/30 to-cyan-950/30 py-24">
         <div className="container-fluid text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -675,20 +712,20 @@ export default function ContactPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="heading-section text-white mb-6">
+            <h2 className="heading-section mb-6 text-white">
               Ready to <span className="gradient-text-ai">Connect</span>?
             </h2>
-            <p className="text-body-large text-gray-300 mb-12 max-w-2xl mx-auto">
-              Join thousands of businesses already using AI to transform their operations. 
-              Start with a free consultation today.
+            <p className="text-body-large mx-auto mb-12 max-w-2xl text-gray-300">
+              Join thousands of businesses already using AI to transform their operations. Start
+              with a free consultation today.
             </p>
-            
+
             <div className="flex flex-wrap justify-center gap-6">
               <GlowingButton href="/demo" size="xl">
                 Try AI Demo
                 <Sparkles className="ml-2 h-5 w-5" />
               </GlowingButton>
-              
+
               <GlowingButton href="/auth/signup" size="xl" variant="outline">
                 Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />

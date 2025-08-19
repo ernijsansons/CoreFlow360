@@ -12,7 +12,7 @@ const AlertActionSchema = z.object({
   alertId: z.string(),
   action: z.enum(['acknowledge', 'resolve']),
   resolution: z.string().optional(),
-  acknowledgedBy: z.string().optional()
+  acknowledgedBy: z.string().optional(),
 })
 
 // Global monitor instance (in production, this would be properly managed)
@@ -29,10 +29,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession()
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -47,20 +44,20 @@ export async function GET(request: NextRequest) {
     if (status) {
       switch (status) {
         case 'active':
-          alerts = alerts.filter(a => !a.acknowledged && !a.resolved)
+          alerts = alerts.filter((a) => !a.acknowledged && !a.resolved)
           break
         case 'acknowledged':
-          alerts = alerts.filter(a => a.acknowledged && !a.resolved)
+          alerts = alerts.filter((a) => a.acknowledged && !a.resolved)
           break
         case 'resolved':
-          alerts = alerts.filter(a => a.resolved)
+          alerts = alerts.filter((a) => a.resolved)
           break
       }
     }
 
     // Filter by severity
     if (severity) {
-      alerts = alerts.filter(a => a.severity === severity)
+      alerts = alerts.filter((a) => a.severity === severity)
     }
 
     // Limit results
@@ -69,26 +66,21 @@ export async function GET(request: NextRequest) {
     // Calculate summary statistics
     const summary = {
       total: alerts.length,
-      critical: alerts.filter(a => a.severity === 'critical').length,
-      high: alerts.filter(a => a.severity === 'high').length,
-      medium: alerts.filter(a => a.severity === 'medium').length,
-      low: alerts.filter(a => a.severity === 'low').length,
-      acknowledged: alerts.filter(a => a.acknowledged).length,
-      resolved: alerts.filter(a => a.resolved).length
+      critical: alerts.filter((a) => a.severity === 'critical').length,
+      high: alerts.filter((a) => a.severity === 'high').length,
+      medium: alerts.filter((a) => a.severity === 'medium').length,
+      low: alerts.filter((a) => a.severity === 'low').length,
+      acknowledged: alerts.filter((a) => a.acknowledged).length,
+      resolved: alerts.filter((a) => a.resolved).length,
     }
 
     return NextResponse.json({
       alerts,
       summary,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
-
   } catch (error) {
-    console.error('Get alerts API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -96,10 +88,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession()
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -111,7 +100,7 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'acknowledge':
         success = monitor.acknowledgeAlert(
-          alertId, 
+          alertId,
           acknowledgedBy || session.user.email || 'unknown'
         )
         break
@@ -127,22 +116,16 @@ export async function POST(request: NextRequest) {
     }
 
     if (!success) {
-      return NextResponse.json(
-        { error: 'Alert not found or action failed' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Alert not found or action failed' }, { status: 404 })
     }
 
     return NextResponse.json({
       success: true,
       action,
       alertId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
-
   } catch (error) {
-    console.error('Alert action API error:', error)
-    
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid request format', details: error.errors },
@@ -150,10 +133,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -162,43 +142,29 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession()
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
     const alertId = searchParams.get('id')
 
     if (!alertId) {
-      return NextResponse.json(
-        { error: 'Alert ID is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Alert ID is required' }, { status: 400 })
     }
 
     const monitor = getMonitor()
     const alerts = monitor.getActiveAlerts()
-    const alert = alerts.find(a => a.id === alertId)
+    const alert = alerts.find((a) => a.id === alertId)
 
     if (!alert) {
-      return NextResponse.json(
-        { error: 'Alert not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Alert not found' }, { status: 404 })
     }
 
     return NextResponse.json({
       alert,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
-
   } catch (error) {
-    console.error('Get alert details API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

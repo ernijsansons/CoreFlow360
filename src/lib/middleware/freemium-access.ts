@@ -34,8 +34,6 @@ export async function checkModuleAccess(
   tenantId?: string
 ): Promise<ModuleAccessResult> {
   try {
-    console.log(`🔐 Checking module access for user ${userId}, module: ${requiredModule}`)
-
     // First check if user is freemium
     const freemiumUser = await prisma.freemiumUser.findUnique({
       where: { userId },
@@ -45,11 +43,11 @@ export async function checkModuleAccess(
             tenantSubscriptions: {
               where: { status: { in: ['ACTIVE', 'TRIAL', 'FREE'] } },
               orderBy: { createdAt: 'desc' },
-              take: 1
-            }
-          }
-        }
-      }
+              take: 1,
+            },
+          },
+        },
+      },
     })
 
     // If not a freemium user, check their actual subscription
@@ -62,11 +60,11 @@ export async function checkModuleAccess(
               tenantSubscriptions: {
                 where: { status: { in: ['ACTIVE', 'TRIAL', 'BUSINESS', 'ENTERPRISE'] } },
                 orderBy: { createdAt: 'desc' },
-                take: 1
-              }
-            }
-          }
-        }
+                take: 1,
+              },
+            },
+          },
+        },
       })
 
       if (!user || !user.tenant.tenantSubscriptions.length) {
@@ -74,17 +72,17 @@ export async function checkModuleAccess(
           hasAccess: false,
           reason: 'No active subscription found',
           upgradeRequired: true,
-          userPlan: 'free'
+          userPlan: 'free',
         }
       }
 
       const subscription = user.tenant.tenantSubscriptions[0]
-      
+
       // Determine user plan and access
       if (subscription.status === 'ACTIVE' || subscription.status === 'TRIAL') {
         return {
           hasAccess: true,
-          userPlan: subscription.subscriptionTier?.toLowerCase() as any || 'starter'
+          userPlan: (subscription.subscriptionTier?.toLowerCase() as unknown) || 'starter',
         }
       }
     }
@@ -101,7 +99,7 @@ export async function checkModuleAccess(
             remainingUsage: 0,
             upgradeRequired: true,
             selectedAgent: freemiumUser.selectedAgent,
-            userPlan: 'free'
+            userPlan: 'free',
           }
         }
 
@@ -109,7 +107,7 @@ export async function checkModuleAccess(
           hasAccess: true,
           remainingUsage: freemiumUser.dailyLimit - freemiumUser.dailyUsageCount,
           selectedAgent: freemiumUser.selectedAgent,
-          userPlan: 'free'
+          userPlan: 'free',
         }
       } else {
         // Trying to access a different module
@@ -118,7 +116,7 @@ export async function checkModuleAccess(
           reason: `Free plan includes ${getModuleName(freemiumUser.selectedAgent)} only`,
           upgradeRequired: true,
           selectedAgent: freemiumUser.selectedAgent,
-          userPlan: 'free'
+          userPlan: 'free',
         }
       }
     }
@@ -128,16 +126,14 @@ export async function checkModuleAccess(
       hasAccess: false,
       reason: 'Unable to determine subscription status',
       upgradeRequired: true,
-      userPlan: 'free'
+      userPlan: 'free',
     }
-
   } catch (error) {
-    console.error('❌ Error checking module access:', error)
     return {
       hasAccess: false,
       reason: 'Access check failed',
       upgradeRequired: true,
-      userPlan: 'free'
+      userPlan: 'free',
     }
   }
 }
@@ -146,40 +142,46 @@ export async function checkModuleAccess(
  * Middleware factory for protecting API routes
  */
 export function createModuleAccessMiddleware(requiredModule: string) {
-  return async (request: NextRequest, response: NextResponse) => {
+  return async (_request: NextRequest, _response: NextResponse) => {
     try {
       // Extract user info from request (assuming it's been added by auth middleware)
       const userId = request.headers.get('x-user-id')
       const tenantId = request.headers.get('x-tenant-id')
 
       if (!userId) {
-        return NextResponse.json(
-          { error: 'Authentication required' },
-          { status: 401 }
-        )
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
       }
 
       const accessResult = await checkModuleAccess(userId, requiredModule, tenantId || undefined)
 
       if (!accessResult.hasAccess) {
         // Log access denial
-        await logAccessDenial(userId, requiredModule, accessResult.reason || 'Access denied', tenantId)
+        await logAccessDenial(
+          userId,
+          requiredModule,
+          accessResult.reason || 'Access denied',
+          tenantId
+        )
 
-        return NextResponse.json({
-          error: 'Module access restricted',
-          details: {
-            reason: accessResult.reason,
-            userPlan: accessResult.userPlan,
-            upgradeRequired: accessResult.upgradeRequired,
-            selectedAgent: accessResult.selectedAgent,
-            availableModules: accessResult.userPlan === 'free' ? [accessResult.selectedAgent] : []
+        return NextResponse.json(
+          {
+            error: 'Module access restricted',
+            details: {
+              reason: accessResult.reason,
+              userPlan: accessResult.userPlan,
+              upgradeRequired: accessResult.upgradeRequired,
+              selectedAgent: accessResult.selectedAgent,
+              availableModules:
+                accessResult.userPlan === 'free' ? [accessResult.selectedAgent] : [],
+            },
+            upgrade: {
+              message: getUpgradeMessage(accessResult.userPlan, requiredModule),
+              url: '/pricing',
+              benefits: getUpgradeBenefits(accessResult.userPlan),
+            },
           },
-          upgrade: {
-            message: getUpgradeMessage(accessResult.userPlan, requiredModule),
-            url: '/pricing',
-            benefits: getUpgradeBenefits(accessResult.userPlan)
-          }
-        }, { status: 403 })
+          { status: 403 }
+        )
       }
 
       // Add access info to request headers for use in route handlers
@@ -190,16 +192,11 @@ export function createModuleAccessMiddleware(requiredModule: string) {
 
       return NextResponse.next({
         request: {
-          headers: newHeaders
-        }
+          headers: newHeaders,
+        },
       })
-
     } catch (error) {
-      console.error('❌ Module access middleware error:', error)
-      return NextResponse.json(
-        { error: 'Access control system error' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Access control system error' }, { status: 500 })
     }
   }
 }
@@ -208,7 +205,7 @@ export function createModuleAccessMiddleware(requiredModule: string) {
  * Express-style middleware for API routes
  */
 export function requireModuleAccess(requiredModule: string) {
-  return async (req: any, res: any, next: any) => {
+  return async (req: unknown, res: unknown, next: unknown) => {
     try {
       const userId = req.user?.id || req.userId
       const tenantId = req.user?.tenantId || req.tenantId
@@ -220,7 +217,12 @@ export function requireModuleAccess(requiredModule: string) {
       const accessResult = await checkModuleAccess(userId, requiredModule, tenantId)
 
       if (!accessResult.hasAccess) {
-        await logAccessDenial(userId, requiredModule, accessResult.reason || 'Access denied', tenantId)
+        await logAccessDenial(
+          userId,
+          requiredModule,
+          accessResult.reason || 'Access denied',
+          tenantId
+        )
 
         return res.status(403).json({
           error: 'Module access restricted',
@@ -228,12 +230,12 @@ export function requireModuleAccess(requiredModule: string) {
             reason: accessResult.reason,
             userPlan: accessResult.userPlan,
             upgradeRequired: accessResult.upgradeRequired,
-            selectedAgent: accessResult.selectedAgent
+            selectedAgent: accessResult.selectedAgent,
           },
           upgrade: {
             message: getUpgradeMessage(accessResult.userPlan, requiredModule),
-            url: '/pricing'
-          }
+            url: '/pricing',
+          },
         })
       }
 
@@ -242,12 +244,11 @@ export function requireModuleAccess(requiredModule: string) {
         granted: true,
         userPlan: accessResult.userPlan,
         remainingUsage: accessResult.remainingUsage,
-        selectedAgent: accessResult.selectedAgent
+        selectedAgent: accessResult.selectedAgent,
       }
 
       next()
     } catch (error) {
-      console.error('❌ Module access error:', error)
       res.status(500).json({ error: 'Access control system error' })
     }
   }
@@ -258,13 +259,13 @@ export function requireModuleAccess(requiredModule: string) {
  */
 export async function trackModuleUsage(
   userId: string,
-  module: string,
-  action: string,
+  _module: string,
+  _action: string,
   tenantId?: string
 ): Promise<void> {
   try {
     const freemiumUser = await prisma.freemiumUser.findUnique({
-      where: { userId }
+      where: { userId },
     })
 
     if (!freemiumUser) {
@@ -284,19 +285,19 @@ export async function trackModuleUsage(
         lastResetDate: isNewDay ? new Date() : freemiumUser.lastResetDate,
         lastUsageAt: new Date(),
         lastActiveAt: new Date(),
-        daysActive: isNewDay ? freemiumUser.daysActive + 1 : freemiumUser.daysActive
-      }
+        daysActive: isNewDay ? freemiumUser.daysActive + 1 : freemiumUser.daysActive,
+      },
     })
-
-    console.log(`📊 Usage tracked for user ${userId}: ${action} in ${module}`)
-
-  } catch (error) {
-    console.error('❌ Failed to track module usage:', error)
-  }
+  } catch (error) {}
 }
 
 // Helper functions
-async function logAccessDenial(userId: string, module: string, reason: string, tenantId?: string): Promise<void> {
+async function logAccessDenial(
+  userId: string,
+  module: string,
+  reason: string,
+  tenantId?: string
+): Promise<void> {
   try {
     await prisma.conversionEvent.create({
       data: {
@@ -307,26 +308,24 @@ async function logAccessDenial(userId: string, module: string, reason: string, t
         triggerContext: JSON.stringify({
           module,
           reason,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }),
         userPlan: 'free',
         currentModule: module,
-        actionTaken: 'blocked'
-      }
+        actionTaken: 'blocked',
+      },
     })
-  } catch (error) {
-    console.error('❌ Failed to log access denial:', error)
-  }
+  } catch (error) {}
 }
 
 function getModuleName(moduleKey: string): string {
   const names: Record<string, string> = {
-    'sales': 'AI Sales Expert',
-    'finance': 'AI Money Detective',
-    'crm': 'AI Customer Expert',
-    'operations': 'AI Operations Expert',
-    'analytics': 'AI Crystal Ball',
-    'hr': 'AI People Person'
+    sales: 'AI Sales Expert',
+    finance: 'AI Money Detective',
+    crm: 'AI Customer Expert',
+    operations: 'AI Operations Expert',
+    analytics: 'AI Crystal Ball',
+    hr: 'AI People Person',
   }
   return names[moduleKey] || moduleKey.toUpperCase()
 }
@@ -345,19 +344,15 @@ function getUpgradeBenefits(userPlan: string): string[] {
       'Unlimited daily actions',
       'Cross-module intelligence',
       'Priority support',
-      '30-day money-back guarantee'
+      '30-day money-back guarantee',
     ]
   }
-  return [
-    'Advanced features',
-    'Priority support', 
-    'Additional modules'
-  ]
+  return ['Advanced features', 'Priority support', 'Additional modules']
 }
 
 export default {
   checkModuleAccess,
   createModuleAccessMiddleware,
   requireModuleAccess,
-  trackModuleUsage
+  trackModuleUsage,
 }

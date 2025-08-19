@@ -23,26 +23,23 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     // Require super admin permission
     const session = await requirePermission('system:manage')
-    
+
     const { id: keyId } = await params
-    
+
     if (!keyId) {
-      return NextResponse.json(
-        { error: 'API key ID is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'API key ID is required' }, { status: 400 })
     }
 
     const body = await request.json()
-    
+
     // Validate request body
     const validatedData = rotateAPIKeySchema.parse(body)
-    
+
     const rotateRequest: RotateAPIKeyRequest = {
       newKey: validatedData.newKey,
       reason: validatedData.reason,
       scheduleRotation: validatedData.scheduleRotation,
-      rotationDate: validatedData.rotationDate
+      rotationDate: validatedData.rotationDate,
     }
 
     const result = await credentialManager.rotateAPIKey(
@@ -56,51 +53,40 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     if (!result.success) {
       return NextResponse.json(
-        { 
-          error: result.message, 
+        {
+          error: result.message,
           details: result.errors,
-          warnings: result.warnings 
+          warnings: result.warnings,
         },
         { status: 400 }
       )
     }
 
     return NextResponse.json(result)
-  } catch (error: any) {
-    console.error('API Key rotation error:', error)
-    
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Validation failed',
-          details: error.errors.map(e => ({
+          details: error.errors.map((e) => ({
             field: e.path.join('.'),
             message: e.message,
-            code: e.code
-          }))
+            code: e.code,
+          })),
         },
         { status: 400 }
       )
     }
-    
+
     if (error.message === 'API key not found') {
-      return NextResponse.json(
-        { error: 'API key not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'API key not found' }, { status: 404 })
     }
-    
+
     if (error.message === 'Unauthorized' || error.message === 'Forbidden') {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
-    
-    return NextResponse.json(
-      { error: 'Failed to rotate API key' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to rotate API key' }, { status: 500 })
   }
 }
 
@@ -111,14 +97,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     // Require super admin permission
     const session = await requirePermission('system:manage')
-    
+
     const { id: keyId } = await params
-    
+
     if (!keyId) {
-      return NextResponse.json(
-        { error: 'API key ID is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'API key ID is required' }, { status: 400 })
     }
 
     // Get the API key details first
@@ -131,7 +114,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // Filter audit log for rotation events
     const rotationHistory = apiKeyResponse.auditLog.filter(
-      event => event.action === 'ROTATED' || event.action === 'CREATED'
+      (event) => event.action === 'ROTATED' || event.action === 'CREATED'
     )
 
     // Calculate rotation recommendations
@@ -139,32 +122,30 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const daysSinceLastRotation = Math.floor(
       (Date.now() - key.updatedAt.getTime()) / (1000 * 60 * 60 * 24)
     )
-    
+
     const rotationStatus = {
       isOverdue: daysSinceLastRotation > key.rotationDays,
       daysUntilRotation: key.rotationDays - daysSinceLastRotation,
       daysSinceLastRotation,
       recommendedRotationDays: key.rotationDays,
-      nextRotationDate: new Date(
-        key.updatedAt.getTime() + (key.rotationDays * 24 * 60 * 60 * 1000)
-      )
+      nextRotationDate: new Date(key.updatedAt.getTime() + key.rotationDays * 24 * 60 * 60 * 1000),
     }
 
     const recommendations = []
-    
+
     if (rotationStatus.isOverdue) {
       recommendations.push({
         type: 'URGENT',
         priority: 'HIGH',
         message: `Key is ${Math.abs(rotationStatus.daysUntilRotation)} days overdue for rotation`,
-        action: 'Rotate immediately'
+        action: 'Rotate immediately',
       })
     } else if (rotationStatus.daysUntilRotation <= 7) {
       recommendations.push({
         type: 'WARNING',
         priority: 'MEDIUM',
         message: `Key rotation due in ${rotationStatus.daysUntilRotation} days`,
-        action: 'Schedule rotation soon'
+        action: 'Schedule rotation soon',
       })
     }
 
@@ -174,7 +155,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         type: 'SECURITY',
         priority: 'HIGH',
         message: 'Low security score detected',
-        action: 'Consider immediate rotation and security review'
+        action: 'Consider immediate rotation and security review',
       })
     }
 
@@ -182,28 +163,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       rotationStatus,
       rotationHistory,
       recommendations,
-      securityScore: key.securityScore
+      securityScore: key.securityScore,
     })
-  } catch (error: any) {
-    console.error('API Key rotation info error:', error)
-    
+  } catch (error: unknown) {
     if (error.message === 'API key not found') {
-      return NextResponse.json(
-        { error: 'API key not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'API key not found' }, { status: 404 })
     }
-    
+
     if (error.message === 'Unauthorized' || error.message === 'Forbidden') {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
-    
-    return NextResponse.json(
-      { error: 'Failed to retrieve rotation information' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to retrieve rotation information' }, { status: 500 })
   }
 }

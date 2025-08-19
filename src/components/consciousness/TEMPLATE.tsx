@@ -20,27 +20,23 @@ const ComponentName: React.FC<ComponentNameProps> = (props) => {
   // 1. Fix any TypeScript errors
   // 2. Add proper types for all variables
   // 3. Import any missing dependencies
-  
-  return (
-    <div>
-      {/* V0.dev generated JSX */}
-    </div>
-  )
+
+  return <div>{/* V0.dev generated JSX */}</div>
 }
 
 // ============================================
 // WRAPPER WITH ERROR BOUNDARY AND LOADING
 // ============================================
 
-function ErrorFallback({ error }: { error: Error }) {
+function ErrorFallback({ error }: { _error: Error }) {
   return (
-    <div className="fixed inset-0 bg-black flex items-center justify-center">
-      <div className="text-center space-y-4">
-        <h2 className="text-2xl text-consciousness-neural">Consciousness Error</h2>
+    <div className="fixed inset-0 flex items-center justify-center bg-black">
+      <div className="space-y-4 text-center">
+        <h2 className="text-consciousness-neural text-2xl">Consciousness Error</h2>
         <p className="text-gray-400">The consciousness experience encountered an issue.</p>
         <button
           onClick={() => window.location.reload()}
-          className="px-6 py-2 bg-consciousness-synaptic text-white rounded-lg hover:bg-opacity-80 transition-colors"
+          className="bg-consciousness-synaptic hover:bg-opacity-80 rounded-lg px-6 py-2 text-white transition-colors"
         >
           Restart Experience
         </button>

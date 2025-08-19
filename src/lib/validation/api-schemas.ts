@@ -16,27 +16,27 @@ export const paginationSchema = z.object({
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(100).default(20),
   sortBy: z.string().optional(),
-  sortOrder: z.enum(['asc', 'desc']).default('desc')
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
 })
 
 // User role enum
 export const userRoleSchema = z.enum([
   'super_admin',
-  'org_admin', 
+  'org_admin',
   'department_manager',
   'team_lead',
-  'user'
+  'user',
 ])
 
 // Subscription status enum
 export const subscriptionStatusSchema = z.enum([
   'FREE',
   'TRIAL',
-  'STARTER', 
+  'STARTER',
   'BUSINESS',
   'ENTERPRISE',
   'CANCELLED',
-  'SUSPENDED'
+  'SUSPENDED',
 ])
 
 // Module names
@@ -50,14 +50,14 @@ export const moduleNameSchema = z.enum([
   'accounting',
   'projects',
   'inventory',
-  'custom'
+  'custom',
 ])
 
 // ===== Authentication Schemas =====
 export const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(8),
-  rememberMe: z.boolean().optional()
+  rememberMe: z.boolean().optional(),
 })
 
 export const registerSchema = z.object({
@@ -66,29 +66,29 @@ export const registerSchema = z.object({
   name: z.string().min(2).max(100),
   companyName: z.string().min(2).max(100).optional(),
   role: userRoleSchema.optional(),
-  acceptTerms: z.boolean().refine(val => val === true, {
-    message: 'You must accept the terms and conditions'
-  })
+  acceptTerms: z.boolean().refine((val) => val === true, {
+    message: 'You must accept the terms and conditions',
+  }),
 })
 
 // ===== Freemium Management Schemas =====
 export const selectAgentSchema = z.object({
   agentType: z.enum(['crm', 'sales', 'finance', 'operations', 'analytics', 'hr']),
   tenantId: tenantIdSchema.optional(),
-  userId: z.string().optional()
+  userId: z.string().optional(),
 })
 
 export const trackUsageSchema = z.object({
   feature: z.string().min(1),
   module: moduleNameSchema,
   tenantId: tenantIdSchema.optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.any()).optional(),
 })
 
 export const upgradeEligibilitySchema = z.object({
   currentPlan: subscriptionStatusSchema,
   targetPlan: subscriptionStatusSchema,
-  tenantId: tenantIdSchema.optional()
+  tenantId: tenantIdSchema.optional(),
 })
 
 // ===== Onboarding Schemas =====
@@ -99,7 +99,7 @@ export const roleSelectionSchema = z.object({
   companyName: z.string().optional(),
   timestamp: dateSchema.optional(),
   aiAgent: z.string().optional(),
-  focusAreas: z.array(z.string()).optional()
+  focusAreas: z.array(z.string()).optional(),
 })
 
 export const completeStepSchema = z.object({
@@ -110,7 +110,7 @@ export const completeStepSchema = z.object({
   totalSteps: z.number().min(1).optional(),
   estimatedTime: z.string().optional(),
   isCompleted: z.boolean(),
-  allStepsCompleted: z.array(z.string()).optional()
+  allStepsCompleted: z.array(z.string()).optional(),
 })
 
 // ===== Conversion Tracking Schemas =====
@@ -122,7 +122,7 @@ export const conversionEventSchema = z.object({
     'role_selected',
     'onboarding_started',
     'onboarding_completed',
-    'upgrade_completed'
+    'upgrade_completed',
   ]),
   triggerType: z.enum([
     'feature_limit',
@@ -131,13 +131,13 @@ export const conversionEventSchema = z.object({
     'time_based',
     'value_demonstration',
     'module_gate',
-    'role_selection'
+    'role_selection',
   ]),
   actionTaken: z.enum(['converted', 'dismissed', 'delayed', 'clicked', 'started']),
   currentModule: z.string().optional(),
   userPlan: z.string().optional(),
   conversionValue: z.number().optional(),
-  triggerContext: z.string().optional() // JSON string
+  triggerContext: z.string().optional(), // JSON string
 })
 
 // ===== Customer Management Schemas =====
@@ -149,7 +149,7 @@ export const createCustomerSchema = z.object({
   industry: z.string().optional(),
   status: z.enum(['active', 'inactive', 'lead', 'prospect']).default('lead'),
   tenantId: tenantIdSchema.optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.any()).optional(),
 })
 
 export const updateCustomerSchema = createCustomerSchema.partial()
@@ -159,13 +159,13 @@ export const activateModuleSchema = z.object({
   module: moduleNameSchema,
   modules: z.array(moduleNameSchema).optional(),
   tenantId: tenantIdSchema.optional(),
-  tier: z.string().optional()
+  tier: z.string().optional(),
 })
 
 export const deactivateModuleSchema = z.object({
   module: moduleNameSchema,
   tenantId: tenantIdSchema.optional(),
-  reason: z.string().optional()
+  reason: z.string().optional(),
 })
 
 export const updateSubscriptionSchema = z.object({
@@ -173,7 +173,7 @@ export const updateSubscriptionSchema = z.object({
   modules: z.array(moduleNameSchema).optional(),
   billingCycle: z.enum(['monthly', 'yearly']).optional(),
   seats: z.number().min(1).optional(),
-  tenantId: tenantIdSchema.optional()
+  tenantId: tenantIdSchema.optional(),
 })
 
 // ===== Performance Metrics Schemas =====
@@ -185,7 +185,7 @@ export const performanceMetricSchema = z.object({
   activeUsers: z.number().min(0),
   cpuUsage: z.number().min(0).max(100).optional(),
   memoryUsage: z.number().min(0).max(100).optional(),
-  tenantId: tenantIdSchema.optional()
+  tenantId: tenantIdSchema.optional(),
 })
 
 // ===== Dashboard Schemas =====
@@ -193,7 +193,7 @@ export const dashboardQuerySchema = z.object({
   tenantId: tenantIdSchema.optional(),
   timeframe: z.enum(['7d', '30d', '90d', '1y']).default('30d'),
   modules: z.array(moduleNameSchema).optional(),
-  metrics: z.array(z.string()).optional()
+  metrics: z.array(z.string()).optional(),
 })
 
 // ===== AI/ML Schemas =====
@@ -201,13 +201,15 @@ export const aiInsightRequestSchema = z.object({
   context: z.object({
     module: moduleNameSchema,
     dataType: z.string(),
-    timeRange: z.object({
-      start: dateSchema,
-      end: dateSchema
-    }).optional()
+    timeRange: z
+      .object({
+        start: dateSchema,
+        end: dateSchema,
+      })
+      .optional(),
   }),
   query: z.string().optional(),
-  tenantId: tenantIdSchema.optional()
+  tenantId: tenantIdSchema.optional(),
 })
 
 // ===== Error Response Schema =====
@@ -216,17 +218,21 @@ export const errorResponseSchema = z.object({
   message: z.string().optional(),
   code: z.string().optional(),
   statusCode: z.number().optional(),
-  details: z.array(z.object({
-    field: z.string(),
-    message: z.string()
-  })).optional()
+  details: z
+    .array(
+      z.object({
+        field: z.string(),
+        message: z.string(),
+      })
+    )
+    .optional(),
 })
 
 // ===== Success Response Schemas =====
 export const successResponseSchema = z.object({
   success: z.boolean(),
   message: z.string().optional(),
-  data: z.any().optional()
+  data: z.any().optional(),
 })
 
 export const paginatedResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
@@ -239,15 +245,15 @@ export const paginatedResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
       total: z.number(),
       totalPages: z.number(),
       hasNext: z.boolean(),
-      hasPrev: z.boolean()
-    })
+      hasPrev: z.boolean(),
+    }),
   })
 
 // ===== Request ID Schema =====
 export const requestIdSchema = z.object({
   'x-request-id': z.string().uuid().optional(),
   'x-tenant-id': tenantIdSchema.optional(),
-  'x-user-id': z.string().optional()
+  'x-user-id': z.string().optional(),
 })
 
 // Type exports

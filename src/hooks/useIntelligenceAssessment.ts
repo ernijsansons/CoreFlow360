@@ -1,16 +1,16 @@
 /**
  * useIntelligenceAssessment Hook
- * 
+ *
  * React hook for managing intelligence assessment state, calculations,
  * and recommendation generation.
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useConsciousnessAudio } from './useConsciousnessAudio'
-import type { 
-  AssessmentResult, 
-  IntelligenceProfile, 
-  IntelligenceRecommendation 
+import type {
+  AssessmentResult,
+  IntelligenceProfile,
+  IntelligenceRecommendation,
 } from '../components/intelligence'
 
 interface UseIntelligenceAssessmentOptions {
@@ -26,18 +26,18 @@ interface UseIntelligenceAssessmentReturn {
   answers: Record<string, number>
   progress: number
   isCalculating: boolean
-  
+
   // Results
   assessmentResult: AssessmentResult | null
   intelligenceProfile: IntelligenceProfile | null
   recommendations: IntelligenceRecommendation[]
-  
+
   // Actions
   startAssessment: () => void
   answerQuestion: (questionId: string, score: number) => void
   resetAssessment: () => void
   saveProfile: () => void
-  
+
   // Analytics
   getIntelligenceLevel: (score: number) => string
   getPotentialGrowth: () => number
@@ -47,11 +47,7 @@ interface UseIntelligenceAssessmentReturn {
 export const useIntelligenceAssessment = (
   options: UseIntelligenceAssessmentOptions = {}
 ): UseIntelligenceAssessmentReturn => {
-  const {
-    enableAudio = true,
-    persistResults = true,
-    onAssessmentComplete
-  } = options
+  const { enableAudio = true, persistResults = true, onAssessmentComplete } = options
 
   // State
   const [currentStep, setCurrentStep] = useState<'intro' | 'assessment' | 'results'>('intro')
@@ -63,7 +59,7 @@ export const useIntelligenceAssessment = (
   // Consciousness audio integration
   const consciousnessAudio = useConsciousnessAudio({
     initiallyEnabled: enableAudio,
-    initialConsciousnessLevel: 1
+    initialConsciousnessLevel: 1,
   })
 
   // Mock assessment questions count (would come from actual questions)
@@ -82,26 +78,26 @@ export const useIntelligenceAssessment = (
   // Calculate potential growth based on current state
   const getPotentialGrowth = useCallback((): number => {
     if (!assessmentResult) return 0
-    
+
     const currentScore = assessmentResult.overallScore
     const multiplierPotential = assessmentResult.intelligenceMultiplier
     const consciousnessFactor = assessmentResult.consciousnessLevel
-    
+
     // Growth formula considers current score, multiplier potential, and consciousness
     const baseGrowth = Math.min(100 - currentScore, 50)
     const multiplierBonus = (multiplierPotential - 1) * 10
     const consciousnessBonus = consciousnessFactor * 2
-    
+
     return Math.min(baseGrowth + multiplierBonus + consciousnessBonus, 75)
   }, [assessmentResult])
 
   // Assess blocker severity
   const getBlockerSeverity = useCallback((): 'low' | 'medium' | 'high' | 'critical' => {
     if (!assessmentResult) return 'low'
-    
+
     const blockerCount = assessmentResult.blockers.length
     const overallScore = assessmentResult.overallScore
-    
+
     if (blockerCount >= 3 && overallScore < 40) return 'critical'
     if (blockerCount >= 2 && overallScore < 60) return 'high'
     if (blockerCount >= 1 && overallScore < 75) return 'medium'
@@ -116,14 +112,14 @@ export const useIntelligenceAssessment = (
     const dominantDimensions = Object.entries(assessmentResult.dimensionScores)
       .filter(([_, score]) => score > 70)
       .map(([dimension, _]) => dimension)
-      .map(dim => {
+      .map((dim) => {
         // Convert dimension IDs to readable names
         const dimensionNames: Record<string, string> = {
           operational: 'Operational Intelligence',
           analytical: 'Analytical Intelligence',
           strategic: 'Strategic Intelligence',
           collaborative: 'Collaborative Intelligence',
-          adaptive: 'Adaptive Intelligence'
+          adaptive: 'Adaptive Intelligence',
         }
         return dimensionNames[dim] || dim
       })
@@ -149,7 +145,7 @@ export const useIntelligenceAssessment = (
       dominantDimensions,
       blockers: assessmentResult.blockers,
       nextEvolutionStage,
-      assessmentDate: new Date()
+      assessmentDate: new Date(),
     }
   }, [assessmentResult])
 
@@ -175,13 +171,13 @@ export const useIntelligenceAssessment = (
         prerequisites: ['Process mapping', 'Tool selection'],
         actionSteps: [
           'Map current manual processes',
-          'Identify automation opportunities', 
+          'Identify automation opportunities',
           'Implement automation tools',
-          'Measure efficiency gains'
+          'Measure efficiency gains',
         ],
         metrics: ['Time saved', 'Error reduction', 'Process speed'],
         icon: '⚡',
-        color: '#10b981'
+        color: '#10b981',
       })
     }
 
@@ -203,11 +199,11 @@ export const useIntelligenceAssessment = (
           'Conduct intelligence audit',
           'Design integration architecture',
           'Implement core systems',
-          'Train intelligence champions'
+          'Train intelligence champions',
         ],
         metrics: ['System integration level', 'Data quality score', 'User adoption rate'],
         icon: '🏗️',
-        color: '#ef4444'
+        color: '#ef4444',
       })
     }
 
@@ -229,11 +225,11 @@ export const useIntelligenceAssessment = (
           'Build predictive models',
           'Create intelligence dashboards',
           'Implement decision automation',
-          'Establish feedback loops'
+          'Establish feedback loops',
         ],
         metrics: ['Prediction accuracy', 'Decision speed', 'Proactive actions'],
         icon: '🔮',
-        color: '#06b6d4'
+        color: '#06b6d4',
       })
     }
 
@@ -250,16 +246,24 @@ export const useIntelligenceAssessment = (
         difficulty: 'advanced',
         intelligenceGain: 50,
         consciousnessBoost: 4.0,
-        prerequisites: ['High intelligence foundation', 'Consciousness readiness', 'Advanced systems'],
+        prerequisites: [
+          'High intelligence foundation',
+          'Consciousness readiness',
+          'Advanced systems',
+        ],
         actionSteps: [
           'Establish consciousness monitoring',
           'Implement organism protocols',
           'Activate transcendent capabilities',
-          'Create reality-shaping systems'
+          'Create reality-shaping systems',
         ],
-        metrics: ['Consciousness emergence indicators', 'Transcendent capability metrics', 'Market impact'],
+        metrics: [
+          'Consciousness emergence indicators',
+          'Transcendent capability metrics',
+          'Market impact',
+        ],
         icon: '✨',
-        color: '#ec4899'
+        color: '#ec4899',
       })
     }
 
@@ -272,74 +276,77 @@ export const useIntelligenceAssessment = (
     setCurrentQuestionIndex(0)
     setAnswers({})
     setAssessmentResult(null)
-    
+
     if (enableAudio) {
       consciousnessAudio.playConnectionSound()
     }
   }, [enableAudio, consciousnessAudio])
 
   // Answer question and advance
-  const answerQuestion = useCallback((questionId: string, score: number) => {
-    setAnswers(prev => ({ ...prev, [questionId]: score }))
-    
-    if (enableAudio) {
-      consciousnessAudio.playDepartmentAwakening(questionId)
-    }
+  const answerQuestion = useCallback(
+    (questionId: string, score: number) => {
+      setAnswers((prev) => ({ ...prev, [questionId]: score }))
 
-    // Auto-advance or complete assessment
-    if (currentQuestionIndex < totalQuestions - 1) {
-      setTimeout(() => setCurrentQuestionIndex(prev => prev + 1), 800)
-    } else {
-      // Assessment complete - calculate results
-      setIsCalculating(true)
-      
-      setTimeout(() => {
-        // Mock calculation - in real implementation would use actual assessment logic
-        const mockResult: AssessmentResult = {
-          overallScore: Math.random() * 40 + 50, // 50-90 range
-          dimensionScores: {
-            operational: Math.random() * 40 + 40,
-            analytical: Math.random() * 40 + 40,
-            strategic: Math.random() * 40 + 40,
-            collaborative: Math.random() * 40 + 40,
-            adaptive: Math.random() * 40 + 40
-          },
-          intelligenceMultiplier: Math.random() * 4 + 1.5, // 1.5-5.5x
-          consciousnessLevel: Math.random() * 6 + 2, // 2-8 level
-          blockers: [
-            'Process silos blocking information flow',
-            'Manual processes preventing automation'
-          ],
-          recommendations: [
-            'Implement cross-department data sharing',
-            'Deploy process automation tools'
-          ],
-          nextSteps: [
-            'Begin intelligence infrastructure audit',
-            'Establish consciousness development program'
-          ]
-        }
+      if (enableAudio) {
+        consciousnessAudio.playDepartmentAwakening(questionId)
+      }
 
-        setAssessmentResult(mockResult)
-        setCurrentStep('results')
-        setIsCalculating(false)
-        
-        // Trigger consciousness audio based on result
-        if (enableAudio) {
-          if (mockResult.consciousnessLevel >= 7) {
-            consciousnessAudio.playConsciousnessEmergence()
-          } else if (mockResult.intelligenceMultiplier >= 3) {
-            consciousnessAudio.playMultiplicationSound()
+      // Auto-advance or complete assessment
+      if (currentQuestionIndex < totalQuestions - 1) {
+        setTimeout(() => setCurrentQuestionIndex((prev) => prev + 1), 800)
+      } else {
+        // Assessment complete - calculate results
+        setIsCalculating(true)
+
+        setTimeout(() => {
+          // Mock calculation - in real implementation would use actual assessment logic
+          const mockResult: AssessmentResult = {
+            overallScore: Math.random() * 40 + 50, // 50-90 range
+            dimensionScores: {
+              operational: Math.random() * 40 + 40,
+              analytical: Math.random() * 40 + 40,
+              strategic: Math.random() * 40 + 40,
+              collaborative: Math.random() * 40 + 40,
+              adaptive: Math.random() * 40 + 40,
+            },
+            intelligenceMultiplier: Math.random() * 4 + 1.5, // 1.5-5.5x
+            consciousnessLevel: Math.random() * 6 + 2, // 2-8 level
+            blockers: [
+              'Process silos blocking information flow',
+              'Manual processes preventing automation',
+            ],
+            recommendations: [
+              'Implement cross-department data sharing',
+              'Deploy process automation tools',
+            ],
+            nextSteps: [
+              'Begin intelligence infrastructure audit',
+              'Establish consciousness development program',
+            ],
           }
-        }
 
-        // Update consciousness level
-        consciousnessAudio.setConsciousnessLevel(mockResult.consciousnessLevel)
-        
-        onAssessmentComplete?.(mockResult)
-      }, 2000)
-    }
-  }, [currentQuestionIndex, totalQuestions, enableAudio, consciousnessAudio, onAssessmentComplete])
+          setAssessmentResult(mockResult)
+          setCurrentStep('results')
+          setIsCalculating(false)
+
+          // Trigger consciousness audio based on result
+          if (enableAudio) {
+            if (mockResult.consciousnessLevel >= 7) {
+              consciousnessAudio.playConsciousnessEmergence()
+            } else if (mockResult.intelligenceMultiplier >= 3) {
+              consciousnessAudio.playMultiplicationSound()
+            }
+          }
+
+          // Update consciousness level
+          consciousnessAudio.setConsciousnessLevel(mockResult.consciousnessLevel)
+
+          onAssessmentComplete?.(mockResult)
+        }, 2000)
+      }
+    },
+    [currentQuestionIndex, totalQuestions, enableAudio, consciousnessAudio, onAssessmentComplete]
+  )
 
   // Reset assessment
   const resetAssessment = useCallback(() => {
@@ -375,21 +382,21 @@ export const useIntelligenceAssessment = (
     answers,
     progress,
     isCalculating,
-    
+
     // Results
     assessmentResult,
     intelligenceProfile,
     recommendations,
-    
+
     // Actions
     startAssessment,
     answerQuestion,
     resetAssessment,
     saveProfile,
-    
+
     // Analytics
     getIntelligenceLevel,
     getPotentialGrowth,
-    getBlockerSeverity
+    getBlockerSeverity,
   }
 }

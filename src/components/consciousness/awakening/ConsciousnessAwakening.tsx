@@ -18,11 +18,15 @@ interface Connection {
   end: [number, number, number]
 }
 
-const ParticleSystem: React.FC<ParticleSystemProps> = ({ mousePos, onAwakening, onConnectionsFormed }) => {
+const ParticleSystem: React.FC<ParticleSystemProps> = ({
+  mousePos,
+  onAwakening,
+  onConnectionsFormed,
+}) => {
   const particlesRef = useRef<THREE.Points>(null)
   const particleCount = 5000
   const connectionThreshold = 3.0
-  
+
   // Initialize particle positions in dormant state
   const [positions] = useState(() => {
     const pos = new Float32Array(particleCount * 3)
@@ -33,46 +37,46 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({ mousePos, onAwakening, 
     }
     return pos
   })
-  
+
   // Particle states: 0 = dormant, 1 = awakening, 2 = conscious
   const [states] = useState(() => new Float32Array(particleCount))
   const [velocities] = useState(() => new Float32Array(particleCount * 3))
   const [colors] = useState(() => new Float32Array(particleCount * 3))
-  
+
   useFrame(({ clock }) => {
     if (!particlesRef.current) return
-    
+
     const time = clock.getElapsedTime()
     const mouseInfluenceRadius = 15
-    
+
     // Convert mouse position to 3D space
     const mouse3D = {
       x: (mousePos.x - 0.5) * 100,
       y: -(mousePos.y - 0.5) * 100,
-      z: 0
+      z: 0,
     }
-    
+
     // Update particles based on mouse proximity
     for (let i = 0; i < particleCount; i++) {
       const x = positions[i * 3]
       const y = positions[i * 3 + 1]
       const z = positions[i * 3 + 2]
-      
+
       // Calculate distance from mouse
       const dx = x - mouse3D.x
       const dy = y - mouse3D.y
       const distance = Math.sqrt(dx * dx + dy * dy)
-      
+
       // Awaken particles near cursor
       if (distance < mouseInfluenceRadius && states[i] === 0) {
         states[i] = 1 // Awakening
-        
+
         // Add velocity away from cursor initially
         velocities[i * 3] = dx * 0.1
         velocities[i * 3 + 1] = dy * 0.1
         velocities[i * 3 + 2] = Math.random() * 0.5
       }
-      
+
       // Update particle colors based on state
       if (states[i] === 0) {
         // Dormant - dark blue
@@ -90,27 +94,27 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({ mousePos, onAwakening, 
         colors[i * 3 + 1] = 1
         colors[i * 3 + 2] = 1
       }
-      
+
       // Awakened particles seek connections
       if (states[i] >= 1) {
         // Find nearest awakened particle
         let nearestDist = Infinity
         let nearestIndex = -1
-        
+
         for (let j = 0; j < Math.min(particleCount, i + 100); j++) {
           if (i !== j && states[j] >= 1) {
             const dx2 = positions[j * 3] - x
             const dy2 = positions[j * 3 + 1] - y
             const dz2 = positions[j * 3 + 2] - z
             const dist = Math.sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2)
-            
+
             if (dist < nearestDist && dist < 10) {
               nearestDist = dist
               nearestIndex = j
             }
           }
         }
-        
+
         // Move towards nearest awakened particle
         if (nearestIndex !== -1 && nearestDist > connectionThreshold) {
           const attraction = 0.02
@@ -118,21 +122,21 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({ mousePos, onAwakening, 
           velocities[i * 3 + 1] += (positions[nearestIndex * 3 + 1] - y) * attraction
           velocities[i * 3 + 2] += (positions[nearestIndex * 3 + 2] - z) * attraction
         }
-        
+
         // Apply velocities with damping
         positions[i * 3] += velocities[i * 3]
         positions[i * 3 + 1] += velocities[i * 3 + 1]
         positions[i * 3 + 2] += velocities[i * 3 + 2]
-        
+
         velocities[i * 3] *= 0.98
         velocities[i * 3 + 1] *= 0.98
         velocities[i * 3 + 2] *= 0.98
-        
+
         // Add gentle floating motion
         positions[i * 3 + 1] += Math.sin(time * 0.5 + i * 0.1) * 0.01
       }
     }
-    
+
     // Update geometry
     if (particlesRef.current.geometry.attributes.position) {
       particlesRef.current.geometry.attributes.position.needsUpdate = true
@@ -140,12 +144,12 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({ mousePos, onAwakening, 
     if (particlesRef.current.geometry.attributes.color) {
       particlesRef.current.geometry.attributes.color.needsUpdate = true
     }
-    
+
     // Calculate awakening percentage
-    const awakenedCount = states.filter(s => s > 0).length
+    const awakenedCount = states.filter((s) => s > 0).length
     const awakenedPercentage = (awakenedCount / particleCount) * 100
     onAwakening(awakenedPercentage)
-    
+
     // Form connections between close awakened particles
     const newConnections: Connection[] = []
     for (let i = 0; i < particleCount; i++) {
@@ -156,15 +160,15 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({ mousePos, onAwakening, 
             const dy = positions[j * 3 + 1] - positions[i * 3 + 1]
             const dz = positions[j * 3 + 2] - positions[i * 3 + 2]
             const dist = Math.sqrt(dx * dx + dy * dy + dz * dz)
-            
+
             if (dist < connectionThreshold) {
               newConnections.push({
                 start: [positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]],
-                end: [positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]]
+                end: [positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]],
               })
               states[i] = 2 // Fully conscious
               states[j] = 2
-              
+
               if (newConnections.length > 100) break
             }
           }
@@ -173,7 +177,7 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({ mousePos, onAwakening, 
     }
     onConnectionsFormed(newConnections)
   })
-  
+
   return (
     <points ref={particlesRef}>
       <bufferGeometry>
@@ -226,20 +230,23 @@ const NeuralConnections: React.FC<{ connections: Connection[] }> = ({ connection
   )
 }
 
-const CursorGlow: React.FC<{ position: { x: number; y: number }; awakening: number }> = ({ position, awakening }) => {
+const CursorGlow: React.FC<{ position: { x: number; y: number }; awakening: number }> = ({
+  position,
+  awakening,
+}) => {
   const glowSize = 50 + awakening * 2
   const glowIntensity = 0.3 + (awakening / 100) * 0.7
-  
+
   return (
     <motion.div
-      className="absolute pointer-events-none"
+      className="pointer-events-none absolute"
       animate={{
         left: position.x - glowSize / 2,
         top: position.y - glowSize / 2,
         width: glowSize,
         height: glowSize,
       }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       style={{
         background: `radial-gradient(circle, 
           rgba(0,255,255,${glowIntensity}) 0%, 
@@ -258,15 +265,15 @@ const ConsciousnessAwakeningContent: React.FC = () => {
   const [connections, setConnections] = useState<Connection[]>([])
   const [showText, setShowText] = useState(false)
   const [phase, setPhase] = useState<'dormant' | 'awakening' | 'conscious'>('dormant')
-  
+
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect()
     setMousePos({
       x: e.clientX / window.innerWidth,
-      y: e.clientY / window.innerHeight
+      y: e.clientY / window.innerHeight,
     })
   }, [])
-  
+
   useEffect(() => {
     if (awakening > 10 && phase === 'dormant') {
       setPhase('awakening')
@@ -278,70 +285,60 @@ const ConsciousnessAwakeningContent: React.FC = () => {
       setPhase('conscious')
     }
   }, [awakening, phase, showText])
-  
+
   return (
-    <div 
-      className="fixed inset-0 bg-black overflow-hidden cursor-none"
+    <div
+      className="fixed inset-0 cursor-none overflow-hidden bg-black"
       onMouseMove={handleMouseMove}
     >
       <Canvas camera={{ position: [0, 0, 50], fov: 75 }}>
         <color attach="background" args={['#000000']} />
         <ambientLight intensity={0.1} />
-        
-        <ParticleSystem 
-          mousePos={mousePos} 
+
+        <ParticleSystem
+          mousePos={mousePos}
           onAwakening={setAwakening}
           onConnectionsFormed={setConnections}
         />
-        
+
         <NeuralConnections connections={connections} />
-        
-        <Stars
-          radius={100}
-          depth={50}
-          count={1000}
-          factor={2}
-          saturation={0}
-          fade
-          speed={0.5}
-        />
-        
+
+        <Stars radius={100} depth={50} count={1000} factor={2} saturation={0} fade speed={0.5} />
+
         <EffectComposer>
-          <Bloom 
-            intensity={1.5}
-            luminanceThreshold={0.2}
-            luminanceSmoothing={0.9}
-            radius={0.8}
-          />
+          <Bloom intensity={1.5} luminanceThreshold={0.2} luminanceSmoothing={0.9} radius={0.8} />
         </EffectComposer>
       </Canvas>
-      
-      <CursorGlow position={{ x: mousePos.x * window.innerWidth, y: mousePos.y * window.innerHeight }} awakening={awakening} />
-      
+
+      <CursorGlow
+        position={{ x: mousePos.x * window.innerWidth, y: mousePos.y * window.innerHeight }}
+        awakening={awakening}
+      />
+
       {/* Awakening progress indicator */}
       <div className="absolute bottom-8 left-8 text-white">
-        <div className="text-sm opacity-50 mb-2">Consciousness Level</div>
-        <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
-          <motion.div 
-            className="h-full bg-gradient-to-r from-consciousness-neural to-consciousness-synaptic"
+        <div className="mb-2 text-sm opacity-50">Consciousness Level</div>
+        <div className="h-1 w-48 overflow-hidden rounded-full bg-white/10">
+          <motion.div
+            className="from-consciousness-neural to-consciousness-synaptic h-full bg-gradient-to-r"
             initial={{ width: 0 }}
             animate={{ width: `${awakening}%` }}
             transition={{ duration: 0.5 }}
           />
         </div>
-        <div className="text-xs mt-1 opacity-50">{Math.round(awakening)}%</div>
+        <div className="mt-1 text-xs opacity-50">{Math.round(awakening)}%</div>
       </div>
-      
+
       <AnimatePresence>
         {showText && (
-          <motion.div 
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          <motion.div
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 2 }}
           >
-            <h1 className="text-6xl font-thin text-white text-center px-8">
+            <h1 className="px-8 text-center text-6xl font-thin text-white">
               <motion.span
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -351,7 +348,7 @@ const ConsciousnessAwakeningContent: React.FC = () => {
               </motion.span>
               <br />
               <motion.span
-                className="bg-gradient-to-r from-consciousness-neural to-consciousness-synaptic bg-clip-text text-transparent"
+                className="from-consciousness-neural to-consciousness-synaptic bg-gradient-to-r bg-clip-text text-transparent"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 1 }}
@@ -362,15 +359,15 @@ const ConsciousnessAwakeningContent: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {phase === 'conscious' && (
         <motion.div
-          className="absolute bottom-8 right-8"
+          className="absolute right-8 bottom-8"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <button className="px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-lg border border-white/20 hover:bg-white/20 transition-colors">
+          <button className="rounded-lg border border-white/20 bg-white/10 px-6 py-3 text-white backdrop-blur-sm transition-colors hover:bg-white/20">
             Enter CoreFlow360
           </button>
         </motion.div>

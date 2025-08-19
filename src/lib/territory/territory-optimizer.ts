@@ -1,13 +1,13 @@
 // CoreFlow360 - AI-Powered Territory Optimization Service
 
-import { 
-  Territory, 
-  Lead, 
-  TerritoryAssignmentRequest, 
-  TerritoryAssignmentResult, 
+import {
+  Territory,
+  Lead,
+  TerritoryAssignmentRequest,
+  TerritoryAssignmentResult,
   TerritoryOptimizationSuggestions,
   OptimizedRoute,
-  TerritoryBriefing 
+  TerritoryBriefing,
 } from '@/types/territory'
 
 export class TerritoryOptimizer {
@@ -18,35 +18,35 @@ export class TerritoryOptimizer {
   static async assignLeadToTerritory(
     request: TerritoryAssignmentRequest,
     territories: Territory[],
-    users: any[]
+    users: unknown[]
   ): Promise<TerritoryAssignmentResult> {
     // 1. Geographic assignment - find territories containing the lead location
     const candidateTerritories = this.findGeographicMatches(request, territories)
-    
+
     // 2. Workload balancing - consider current rep capacity
     const workloadScores = await this.calculateWorkloadScores(candidateTerritories, users)
-    
+
     // 3. Expertise matching - match industry/company size requirements
     const expertiseScores = this.calculateExpertiseScores(request, users)
-    
+
     // 4. Performance matching - assign to highest performing reps for high-value leads
     const performanceScores = await this.calculatePerformanceScores(users)
-    
+
     // 5. AI scoring algorithm - weighted combination of all factors
     const finalScores = this.calculateFinalAssignmentScores({
       geographic: candidateTerritories,
       workload: workloadScores,
       expertise: expertiseScores,
       performance: performanceScores,
-      urgency: request.urgency
+      urgency: request.urgency,
     })
-    
+
     // 6. Select best assignment
     const bestAssignment = finalScores[0]
-    
+
     // 7. Calculate estimated response time
     const estimatedResponseTime = this.calculateResponseTime(bestAssignment, request.urgency)
-    
+
     return {
       assignedUserId: bestAssignment.userId,
       assignedUser: bestAssignment.user,
@@ -54,11 +54,11 @@ export class TerritoryOptimizer {
       assignmentReason: bestAssignment.reasoning,
       confidence: bestAssignment.score,
       estimatedResponseTime,
-      alternativeAssignees: finalScores.slice(1, 4).map(alt => ({
+      alternativeAssignees: finalScores.slice(1, 4).map((alt) => ({
         userId: alt.userId,
         score: alt.score,
-        reasoning: alt.reasoning
-      }))
+        reasoning: alt.reasoning,
+      })),
     }
   }
 
@@ -68,7 +68,7 @@ export class TerritoryOptimizer {
    */
   static async optimizeVisitFrequency(
     territory: Territory,
-    historicalData: any[]
+    historicalData: unknown[]
   ): Promise<{
     currentFrequency: string
     recommendedFrequency: string
@@ -81,22 +81,22 @@ export class TerritoryOptimizer {
   }> {
     // Analyze historical performance by visit frequency
     const performanceByFrequency = this.analyzeFrequencyPerformance(historicalData)
-    
+
     // Calculate territory characteristics
     const territoryMetrics = {
       leadDensity: this.calculateLeadDensity(territory),
       avgDealValue: territory.avgDealValue,
       conversionRate: territory.leadConversionRate,
       competitiveActivity: territory.competitiveActivity,
-      marketPenetration: territory.marketPenetration
+      marketPenetration: territory.marketPenetration,
     }
-    
+
     // AI recommendation engine
     const recommendation = this.generateFrequencyRecommendation(
-      territoryMetrics, 
+      territoryMetrics,
       performanceByFrequency
     )
-    
+
     return recommendation
   }
 
@@ -113,44 +113,44 @@ export class TerritoryOptimizer {
     const territoryData = await this.fetchTerritoryData(territoryId)
     const recentActivity = await this.fetchRecentActivity(territoryId, userId)
     const marketIntel = await this.fetchMarketIntelligence(territoryId)
-    
+
     // AI-powered account prioritization
     const priorityAccounts = await this.prioritizeAccounts(territoryData.accounts, {
       visitDate,
       userId,
-      territoryContext: territoryData
+      territoryContext: territoryData,
     })
-    
+
     // Generate contextual talking points
     const talkingPoints = await this.generateTalkingPoints(
       priorityAccounts,
       marketIntel,
       territoryData.industry
     )
-    
+
     // Recommend activities based on territory state and objectives
     const recommendedActivities = await this.recommendTerritoryActivities(
       territoryData,
       priorityAccounts,
       visitDate
     )
-    
+
     return {
       territoryOverview: {
         totalAccounts: territoryData.accounts.length,
         activeOpportunities: territoryData.opportunities.length,
         pipelineValue: territoryData.pipelineValue,
         lastVisitDate: territoryData.lastVisitDate,
-        keyMetrics: territoryData.keyMetrics
+        keyMetrics: territoryData.keyMetrics,
       },
       priorityAccounts,
       marketIntelligence: {
         competitorActivity: marketIntel.competitors,
         industryTrends: marketIntel.trends,
-        newsAndEvents: marketIntel.news
+        newsAndEvents: marketIntel.news,
       },
       recommendedActivities,
-      talkingPoints
+      talkingPoints,
     }
   }
 
@@ -171,21 +171,21 @@ export class TerritoryOptimizer {
   ): Promise<OptimizedRoute> {
     // Fetch account locations and visit requirements
     const accountLocations = await this.fetchAccountLocations(targetAccounts)
-    
+
     // Apply AI routing algorithm considering:
     // - Geographic optimization (shortest path variants)
     // - Traffic patterns for visit date/time
     // - Customer availability windows
     // - Visit duration requirements
     // - Sales rep preferences and historical data
-    
+
     const optimizationResult = await this.runRouteOptimization({
       startLocation: constraints.startLocation,
       destinations: accountLocations,
       visitDate,
-      constraints
+      constraints,
     })
-    
+
     return optimizationResult
   }
 
@@ -193,9 +193,7 @@ export class TerritoryOptimizer {
    * Calculate territory effectiveness score
    * AI model that evaluates territory visit ROI and effectiveness
    */
-  static async calculateTerritoryEffectiveness(
-    territoryVisit: any
-  ): Promise<{
+  static async calculateTerritoryEffectiveness(territoryVisit: unknown): Promise<{
     effectivenessScore: number
     roiScore: number
     performanceFactors: {
@@ -209,34 +207,34 @@ export class TerritoryOptimizer {
   }> {
     // Analyze visit execution vs. plan
     const planExecutionScore = this.analyzePlanExecution(territoryVisit)
-    
+
     // Evaluate outcome metrics
     const outcomeScore = this.evaluateVisitOutcomes(territoryVisit)
-    
+
     // Calculate efficiency metrics
     const efficiencyScore = this.calculateVisitEfficiency(territoryVisit)
-    
+
     // AI-powered composite scoring
     const effectivenessScore = this.calculateCompositeEffectiveness({
       planExecution: planExecutionScore,
       outcomes: outcomeScore,
-      efficiency: efficiencyScore
+      efficiency: efficiencyScore,
     })
-    
+
     // Calculate ROI based on revenue generated vs. cost
     const roiScore = this.calculateVisitROI(territoryVisit)
-    
+
     // Generate improvement suggestions
     const improvementSuggestions = await this.generateImprovementSuggestions(
       territoryVisit,
       effectivenessScore
     )
-    
+
     return {
       effectivenessScore: effectivenessScore.overall,
       roiScore,
       performanceFactors: effectivenessScore.factors,
-      improvementSuggestions
+      improvementSuggestions,
     }
   }
 
@@ -246,9 +244,9 @@ export class TerritoryOptimizer {
     request: TerritoryAssignmentRequest,
     territories: Territory[]
   ): Territory[] {
-    return territories.filter(territory => {
+    return territories.filter((territory) => {
       if (!territory.isActive) return false
-      
+
       // Check if lead location falls within territory boundary
       const leadLocation = request.leadData.location
       if (leadLocation.latitude && leadLocation.longitude) {
@@ -257,7 +255,7 @@ export class TerritoryOptimizer {
           territory.boundaryData
         )
       }
-      
+
       // Fallback to zip/city/state matching
       return this.isLocationInTerritory(leadLocation, territory)
     })
@@ -265,74 +263,79 @@ export class TerritoryOptimizer {
 
   private static async calculateWorkloadScores(
     territories: Territory[],
-    users: any[]
+    users: unknown[]
   ): Promise<{ [userId: string]: number }> {
     const workloadScores: { [userId: string]: number } = {}
-    
+
     for (const user of users) {
       // Calculate current workload metrics
       const currentLeads = await this.getCurrentLeadCount(user.id)
       const activeDeals = await this.getActiveDealCount(user.id)
       const recentActivity = await this.getRecentActivityLevel(user.id)
-      
+
       // Normalize workload score (higher score = lower workload, better for assignment)
       const maxCapacity = this.getMaxCapacityForUser(user)
-      const currentUtilization = (currentLeads + (activeDeals * 2) + recentActivity) / maxCapacity
-      
+      const currentUtilization = (currentLeads + activeDeals * 2 + recentActivity) / maxCapacity
+
       workloadScores[user.id] = Math.max(0, 1 - currentUtilization)
     }
-    
+
     return workloadScores
   }
 
   private static calculateExpertiseScores(
     request: TerritoryAssignmentRequest,
-    users: any[]
+    users: unknown[]
   ): { [userId: string]: number } {
     const expertiseScores: { [userId: string]: number } = {}
-    
+
     for (const user of users) {
       let score = 0.5 // Base score
-      
+
       // Industry expertise matching
-      if (request.leadData.industry && user.expertise?.industries?.includes(request.leadData.industry)) {
+      if (
+        request.leadData.industry &&
+        user.expertise?.industries?.includes(request.leadData.industry)
+      ) {
         score += 0.3
       }
-      
+
       // Company size expertise
       const companySize = this.getCompanySizeCategory(request.leadData.revenue)
       if (user.expertise?.companySizes?.includes(companySize)) {
         score += 0.2
       }
-      
+
       // Historical performance in similar deals
       const historicalSuccess = this.getHistoricalSuccessRate(user.id, {
         industry: request.leadData.industry,
-        companySize
+        companySize,
       })
       score += historicalSuccess * 0.3
-      
+
       expertiseScores[user.id] = Math.min(1, score)
     }
-    
+
     return expertiseScores
   }
 
-  private static async calculatePerformanceScores(users: any[]): Promise<{ [userId: string]: number }> {
+  private static async calculatePerformanceScores(
+    users: unknown[]
+  ): Promise<{ [userId: string]: number }> {
     const performanceScores: { [userId: string]: number } = {}
-    
+
     for (const user of users) {
       // Get recent performance metrics
       const metrics = await this.getUserPerformanceMetrics(user.id)
-      
+
       // Normalize metrics to 0-1 scale
       const conversionRate = Math.min(1, metrics.conversionRate / 0.3) // 30% is excellent
-      const responseTime = Math.max(0, 1 - (metrics.avgResponseTimeHours / 24)) // < 24h is good
+      const responseTime = Math.max(0, 1 - metrics.avgResponseTimeHours / 24) // < 24h is good
       const customerSat = metrics.customerSatisfactionScore / 5 // 5-star scale
-      
+
       performanceScores[user.id] = (conversionRate + responseTime + customerSat) / 3
     }
-    
+
     return performanceScores
   }
 
@@ -344,161 +347,181 @@ export class TerritoryOptimizer {
     urgency: string
   }): Array<{
     userId: string
-    user: any
+    user: unknown
     territoryId?: string
     score: number
     reasoning: string
   }> {
     const scores: Array<{
       userId: string
-      user: any
+      user: unknown
       territoryId?: string
       score: number
       reasoning: string
     }> = []
-    
+
     // Weight factors based on lead urgency
     const weights = this.getAssignmentWeights(factors.urgency)
-    
+
     for (const territory of factors.geographic) {
       if (!territory.assignedUserId) continue
-      
+
       const userId = territory.assignedUserId
       const workloadScore = factors.workload[userId] || 0
       const expertiseScore = factors.expertise[userId] || 0.5
       const performanceScore = factors.performance[userId] || 0.5
-      
+
       // Calculate weighted score
-      const finalScore = (
+      const finalScore =
         workloadScore * weights.workload +
         expertiseScore * weights.expertise +
         performanceScore * weights.performance
-      )
-      
+
       // Generate reasoning
       const reasoning = this.generateAssignmentReasoning({
         workloadScore,
         expertiseScore,
         performanceScore,
-        territory: territory.name
+        territory: territory.name,
       })
-      
+
       scores.push({
         userId,
         user: { id: userId, name: `User ${userId}` }, // Would fetch real user data
         territoryId: territory.id,
         score: finalScore,
-        reasoning
+        reasoning,
       })
     }
-    
+
     return scores.sort((a, b) => b.score - a.score)
   }
 
   // Placeholder methods for actual implementation
-  private static isPointInTerritory(point: { lat: number; lng: number }, boundary: any): boolean {
+  private static isPointInTerritory(
+    _point: { lat: number; lng: number },
+    _boundary: unknown
+  ): boolean {
     // Implement point-in-polygon algorithm for GeoJSON
     return true // Simplified for demo
   }
 
-  private static isLocationInTerritory(location: any, territory: Territory): boolean {
+  private static isLocationInTerritory(_location: unknown, _territory: Territory): boolean {
     // Implement location matching logic
     return true // Simplified for demo
   }
 
-  private static async getCurrentLeadCount(userId: string): Promise<number> {
+  private static async getCurrentLeadCount(_userId: string): Promise<number> {
     return 10 // Mock data
   }
 
-  private static async getActiveDealCount(userId: string): Promise<number> {
+  private static async getActiveDealCount(_userId: string): Promise<number> {
     return 5 // Mock data
   }
 
-  private static async getRecentActivityLevel(userId: string): Promise<number> {
+  private static async getRecentActivityLevel(_userId: string): Promise<number> {
     return 3 // Mock data
   }
 
-  private static getMaxCapacityForUser(user: any): number {
+  private static getMaxCapacityForUser(_user: unknown): number {
     return 50 // Mock capacity
   }
 
-  private static calculateResponseTime(assignment: any, urgency: string): number {
+  private static calculateResponseTime(assignment: unknown, urgency: string): number {
     const baseTime = urgency === 'high' ? 30 : urgency === 'medium' ? 120 : 480
     return Math.round(baseTime * (1 - assignment.score * 0.5))
   }
 
-  private static analyzeFrequencyPerformance(data: any[]): any {
+  private static analyzeFrequencyPerformance(_data: unknown[]): unknown {
     return { weekly: 0.85, biweekly: 0.75, monthly: 0.65 }
   }
 
-  private static calculateLeadDensity(territory: Territory): number {
+  private static calculateLeadDensity(_territory: Territory): number {
     return 25 // Mock density
   }
 
-  private static generateFrequencyRecommendation(metrics: any, performance: any): any {
+  private static generateFrequencyRecommendation(
+    _metrics: unknown,
+    _performance: unknown
+  ): unknown {
     return {
       currentFrequency: 'monthly',
       recommendedFrequency: 'biweekly',
-      reasoning: 'High lead density and competitive activity suggest more frequent visits would improve conversion',
+      reasoning:
+        'High lead density and competitive activity suggest more frequent visits would improve conversion',
       expectedImpact: {
         revenueIncrease: 0.25,
         conversionImprovement: 0.15,
-        efficiencyGain: 0.1
-      }
+        efficiencyGain: 0.1,
+      },
     }
   }
 
   // Additional helper methods would be implemented here...
-  private static async fetchTerritoryData(territoryId: string): Promise<any> {
+  private static async fetchTerritoryData(_territoryId: string): Promise<unknown> {
     return { accounts: [], opportunities: [], pipelineValue: 0, keyMetrics: {} }
   }
 
-  private static async fetchRecentActivity(territoryId: string, userId: string): Promise<any> {
+  private static async fetchRecentActivity(
+    _territoryId: string,
+    _userId: string
+  ): Promise<unknown> {
     return []
   }
 
-  private static async fetchMarketIntelligence(territoryId: string): Promise<any> {
+  private static async fetchMarketIntelligence(_territoryId: string): Promise<unknown> {
     return { competitors: [], trends: [], news: [] }
   }
 
-  private static async prioritizeAccounts(accounts: any[], context: any): Promise<any[]> {
+  private static async prioritizeAccounts(
+    _accounts: unknown[],
+    _context: unknown
+  ): Promise<unknown[]> {
     return []
   }
 
-  private static async generateTalkingPoints(accounts: any[], intel: any, industry: string): Promise<any[]> {
+  private static async generateTalkingPoints(
+    _accounts: unknown[],
+    _intel: unknown,
+    industry: string
+  ): Promise<unknown[]> {
     return []
   }
 
-  private static async recommendTerritoryActivities(data: any, accounts: any[], date: string): Promise<any[]> {
+  private static async recommendTerritoryActivities(
+    _data: unknown,
+    _accounts: unknown[],
+    date: string
+  ): Promise<unknown[]> {
     return []
   }
 
-  private static async fetchAccountLocations(accountIds: string[]): Promise<any[]> {
+  private static async fetchAccountLocations(_accountIds: string[]): Promise<unknown[]> {
     return []
   }
 
-  private static async runRouteOptimization(params: any): Promise<OptimizedRoute> {
+  private static async runRouteOptimization(_params: unknown): Promise<OptimizedRoute> {
     return {
       waypoints: [],
       totalDistance: 0,
       totalTime: 0,
-      optimizationScore: 0
+      optimizationScore: 0,
     }
   }
 
-  private static analyzePlanExecution(visit: any): any {
+  private static analyzePlanExecution(_visit: unknown): unknown {
     return { score: 0.8 }
   }
 
-  private static evaluateVisitOutcomes(visit: any): any {
+  private static evaluateVisitOutcomes(_visit: unknown): unknown {
     return { score: 0.75 }
   }
 
-  private static calculateVisitEfficiency(visit: any): any {
+  private static calculateVisitEfficiency(_visit: unknown): unknown {
     return { score: 0.9 }
   }
 
-  private static calculateCompositeEffectiveness(scores: any): any {
+  private static calculateCompositeEffectiveness(_scores: unknown): unknown {
     return {
       overall: 0.82,
       factors: {
@@ -506,20 +529,23 @@ export class TerritoryOptimizer {
         accountCoverage: 0.8,
         objectiveAchievement: 0.9,
         revenueGeneration: 0.7,
-        relationshipBuilding: 0.8
-      }
+        relationshipBuilding: 0.8,
+      },
     }
   }
 
-  private static calculateVisitROI(visit: any): number {
+  private static calculateVisitROI(_visit: unknown): number {
     return 2.5 // Mock ROI
   }
 
-  private static async generateImprovementSuggestions(visit: any, effectiveness: any): Promise<string[]> {
+  private static async generateImprovementSuggestions(
+    _visit: unknown,
+    effectiveness: unknown
+  ): Promise<string[]> {
     return [
       'Consider spending more time on high-value prospects',
       'Improve preparation for customer meetings',
-      'Follow up more quickly on meeting outcomes'
+      'Follow up more quickly on meeting outcomes',
     ]
   }
 
@@ -530,19 +556,19 @@ export class TerritoryOptimizer {
     return '51-200'
   }
 
-  private static getHistoricalSuccessRate(userId: string, context: any): number {
+  private static getHistoricalSuccessRate(_userId: string, _context: unknown): number {
     return 0.7 // Mock success rate
   }
 
-  private static async getUserPerformanceMetrics(userId: string): Promise<any> {
+  private static async getUserPerformanceMetrics(_userId: string): Promise<unknown> {
     return {
       conversionRate: 0.25,
       avgResponseTimeHours: 2,
-      customerSatisfactionScore: 4.2
+      customerSatisfactionScore: 4.2,
     }
   }
 
-  private static getAssignmentWeights(urgency: string): any {
+  private static getAssignmentWeights(urgency: string): unknown {
     switch (urgency) {
       case 'high':
         return { workload: 0.2, expertise: 0.4, performance: 0.4 }
@@ -555,12 +581,12 @@ export class TerritoryOptimizer {
     }
   }
 
-  private static generateAssignmentReasoning(scores: any): string {
+  private static generateAssignmentReasoning(scores: unknown): string {
     const factors = []
     if (scores.expertiseScore > 0.7) factors.push('strong industry expertise')
     if (scores.performanceScore > 0.7) factors.push('excellent track record')
     if (scores.workloadScore > 0.7) factors.push('available capacity')
-    
+
     return `Assigned based on ${factors.join(', ')} in ${scores.territory} territory`
   }
 }

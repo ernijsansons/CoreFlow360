@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Zap, 
-  TrendingUp, 
-  Users, 
+import {
+  Zap,
+  TrendingUp,
+  Users,
   DollarSign,
   X,
   Clock,
@@ -14,7 +14,7 @@ import {
   ArrowRight,
   Sparkles,
   Target,
-  Shield
+  Shield,
 } from 'lucide-react'
 
 interface ConversionTrigger {
@@ -46,7 +46,7 @@ interface UpgradeOffer {
     savings?: string
   }
   gradient: string
-  icon: React.ComponentType<any>
+  icon: React.ComponentType<unknown>
 }
 
 interface UpgradeFunnelProps {
@@ -73,23 +73,23 @@ const getUpgradeOffer = (trigger: ConversionTrigger): UpgradeOffer => {
           'Get 3 AI employees instead of 1',
           'Unlock cross-module intelligence',
           '10x faster business insights',
-          '24/7 AI business optimization'
+          '24/7 AI business optimization',
         ],
         pricing: {
           currentPlan: 'Free Forever',
           upgradePlan: 'Get Started',
           currentPrice: 0,
           upgradePrice: 49,
-          savings: 'Save $300/month vs hiring human equivalents'
+          savings: 'Save $300/month vs hiring human equivalents',
         },
         gradient: 'from-violet-600 to-purple-600',
-        icon: Zap
+        icon: Zap,
       }
 
     case 'usage_limit':
       return {
         id: 'usage-expansion',
-        title: 'You\'re Getting Results!',
+        title: "You're Getting Results!",
         subtitle: 'Upgrade to keep the momentum going',
         ctaText: 'Remove All Limits',
         urgency: 'Limited time: First month 50% off',
@@ -98,16 +98,16 @@ const getUpgradeOffer = (trigger: ConversionTrigger): UpgradeOffer => {
           'Unlimited AI actions per day',
           'Priority AI response speed',
           'Advanced analytics & reporting',
-          'White-glove setup assistance'
+          'White-glove setup assistance',
         ],
         pricing: {
           currentPlan: context.currentPlan,
           upgradePlan: context.currentPlan === 'starter' ? 'Business' : 'Get Started',
           currentPrice: context.currentPlan === 'starter' ? 49 : 0,
-          upgradePrice: context.currentPlan === 'starter' ? 99 : 49
+          upgradePrice: context.currentPlan === 'starter' ? 99 : 49,
         },
         gradient: 'from-emerald-600 to-green-600',
-        icon: TrendingUp
+        icon: TrendingUp,
       }
 
     case 'success_story':
@@ -121,17 +121,17 @@ const getUpgradeOffer = (trigger: ConversionTrigger): UpgradeOffer => {
           'Full AI workforce (6 specialists)',
           'Cross-department intelligence',
           'Executive-level insights',
-          'Competitive advantage engine'
+          'Competitive advantage engine',
         ],
         pricing: {
           currentPlan: context.currentPlan,
           upgradePlan: 'Business',
           currentPrice: context.currentPlan === 'starter' ? 49 : 0,
           upgradePrice: 99,
-          savings: 'ROI typically 5x in first quarter'
+          savings: 'ROI typically 5x in first quarter',
         },
         gradient: 'from-blue-600 to-cyan-600',
-        icon: Star
+        icon: Star,
       }
 
     case 'value_demonstration':
@@ -140,23 +140,23 @@ const getUpgradeOffer = (trigger: ConversionTrigger): UpgradeOffer => {
         title: 'See The Full Picture',
         subtitle: 'Your AI agent has identified $47,000 in monthly opportunities',
         ctaText: 'Capture All Opportunities',
-        urgency: 'Don\'t leave money on the table',
+        urgency: "Don't leave money on the table",
         socialProof: 'Average customer captures $180k additional revenue',
         valueProps: [
           'Cross-module opportunity detection',
           'Advanced predictive analytics',
           'Automated revenue optimization',
-          'Competitive intelligence insights'
+          'Competitive intelligence insights',
         ],
         pricing: {
           currentPlan: context.currentPlan,
           upgradePlan: 'Business',
           currentPrice: context.currentPlan === 'starter' ? 49 : 0,
           upgradePrice: 99,
-          savings: 'Pays for itself 47x over'
+          savings: 'Pays for itself 47x over',
         },
         gradient: 'from-orange-600 to-red-600',
-        icon: Target
+        icon: Target,
       }
 
     default:
@@ -169,26 +169,26 @@ const getUpgradeOffer = (trigger: ConversionTrigger): UpgradeOffer => {
           'All AI employees included',
           'Advanced features unlocked',
           'Priority support',
-          'Exclusive insights'
+          'Exclusive insights',
         ],
         pricing: {
           currentPlan: context.currentPlan,
           upgradePlan: 'Business',
           currentPrice: 0,
-          upgradePrice: 99
+          upgradePrice: 99,
         },
         gradient: 'from-violet-600 to-purple-600',
-        icon: Sparkles
+        icon: Sparkles,
       }
   }
 }
 
-export default function UpgradeFunnels({ 
-  trigger, 
-  onUpgrade, 
-  onDismiss, 
+export default function UpgradeFunnels({
+  trigger,
+  onUpgrade,
+  onDismiss,
   onDelay,
-  className = ''
+  className = '',
 }: UpgradeFunnelProps) {
   const [isVisible, setIsVisible] = useState(true)
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
@@ -205,7 +205,7 @@ export default function UpgradeFunnels({
   useEffect(() => {
     if (timeLeft && timeLeft > 0) {
       const timer = setInterval(() => {
-        setTimeLeft(prev => prev ? prev - 1 : 0)
+        setTimeLeft((prev) => (prev ? prev - 1 : 0))
       }, 1000)
       return () => clearInterval(timer)
     }
@@ -229,16 +229,15 @@ export default function UpgradeFunnels({
           actionTaken,
           currentModule: trigger.context.currentModule,
           userPlan: trigger.context.currentPlan,
-          conversionValue: actionTaken === 'converted' ? offer.pricing.upgradePrice * 12 : undefined,
+          conversionValue:
+            actionTaken === 'converted' ? offer.pricing.upgradePrice * 12 : undefined,
           triggerContext: JSON.stringify({
             offerId: offer.id,
-            triggerContext: trigger.context
-          })
-        })
+            triggerContext: trigger.context,
+          }),
+        }),
       })
-    } catch (error) {
-      console.error('Failed to track conversion event:', error)
-    }
+    } catch (error) {}
   }
 
   const handleUpgrade = async () => {
@@ -263,48 +262,48 @@ export default function UpgradeFunnels({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className={`relative max-w-2xl w-full bg-gradient-to-br from-gray-900 to-black border border-gray-700 rounded-3xl overflow-hidden ${className}`}
+          className={`relative w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-700 bg-gradient-to-br from-gray-900 to-black ${className}`}
         >
           {/* Close button */}
           <button
             onClick={handleDismiss}
-            className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-white transition-colors"
+            className="absolute top-4 right-4 z-10 p-2 text-gray-400 transition-colors hover:text-white"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
 
           {/* Header with icon and title */}
-          <div className={`bg-gradient-to-r ${offer.gradient} p-8 text-white relative overflow-hidden`}>
+          <div
+            className={`bg-gradient-to-r ${offer.gradient} relative overflow-hidden p-8 text-white`}
+          >
             <div className="relative z-10">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-white/20 rounded-full p-3 mr-4">
-                  <IconComponent className="w-6 h-6" />
+              <div className="mb-4 flex items-center">
+                <div className="mr-4 h-12 w-12 rounded-full bg-white/20 p-3">
+                  <IconComponent className="h-6 w-6" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold">{offer.title}</h2>
                   <p className="text-white/90">{offer.subtitle}</p>
                 </div>
               </div>
-              
+
               {timeLeft && (
-                <div className="bg-white/20 rounded-lg px-4 py-2 inline-flex items-center">
-                  <Clock className="w-4 h-4 mr-2" />
-                  <span className="font-mono font-medium">
-                    {formatTime(timeLeft)} left
-                  </span>
+                <div className="inline-flex items-center rounded-lg bg-white/20 px-4 py-2">
+                  <Clock className="mr-2 h-4 w-4" />
+                  <span className="font-mono font-medium">{formatTime(timeLeft)} left</span>
                 </div>
               )}
             </div>
-            
+
             {/* Background decoration */}
             <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2">
-                <div className="w-64 h-64 rounded-full bg-white/20" />
+              <div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 transform">
+                <div className="h-64 w-64 rounded-full bg-white/20" />
               </div>
             </div>
           </div>
@@ -313,7 +312,7 @@ export default function UpgradeFunnels({
           <div className="p-8 text-white">
             {/* Value propositions */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-4">What you get:</h3>
+              <h3 className="mb-4 text-lg font-semibold">What you get:</h3>
               <div className="grid gap-3 md:grid-cols-2">
                 {offer.valueProps.map((prop, index) => (
                   <motion.div
@@ -323,7 +322,7 @@ export default function UpgradeFunnels({
                     transition={{ delay: index * 0.1 }}
                     className="flex items-start"
                   >
-                    <CheckCircle className="w-5 h-5 text-emerald-500 mr-3 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="mt-0.5 mr-3 h-5 w-5 flex-shrink-0 text-emerald-500" />
                     <span className="text-gray-300">{prop}</span>
                   </motion.div>
                 ))}
@@ -331,27 +330,31 @@ export default function UpgradeFunnels({
             </div>
 
             {/* Pricing */}
-            <div className="bg-gray-800/50 rounded-2xl p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="mb-6 rounded-2xl bg-gray-800/50 p-6">
+              <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <div className="text-gray-400 text-sm">Currently: {offer.pricing.currentPlan}</div>
+                  <div className="text-sm text-gray-400">
+                    Currently: {offer.pricing.currentPlan}
+                  </div>
                   <div className="text-2xl font-bold">
                     ${offer.pricing.currentPrice}
-                    <span className="text-gray-400 text-base font-normal">/user/month</span>
+                    <span className="text-base font-normal text-gray-400">/user/month</span>
                   </div>
                 </div>
-                <ArrowRight className="w-6 h-6 text-gray-500" />
+                <ArrowRight className="h-6 w-6 text-gray-500" />
                 <div className="text-right">
-                  <div className="text-gray-400 text-sm">Upgrade to: {offer.pricing.upgradePlan}</div>
+                  <div className="text-sm text-gray-400">
+                    Upgrade to: {offer.pricing.upgradePlan}
+                  </div>
                   <div className="text-2xl font-bold text-emerald-400">
                     ${offer.pricing.upgradePrice}
-                    <span className="text-gray-400 text-base font-normal">/user/month</span>
+                    <span className="text-base font-normal text-gray-400">/user/month</span>
                   </div>
                 </div>
               </div>
-              
+
               {offer.pricing.savings && (
-                <div className="text-center text-emerald-400 text-sm font-medium">
+                <div className="text-center text-sm font-medium text-emerald-400">
                   {offer.pricing.savings}
                 </div>
               )}
@@ -359,16 +362,14 @@ export default function UpgradeFunnels({
 
             {/* Social proof */}
             {offer.socialProof && (
-              <div className="text-center text-gray-400 text-sm mb-6">
-                ⭐ {offer.socialProof}
-              </div>
+              <div className="mb-6 text-center text-sm text-gray-400">⭐ {offer.socialProof}</div>
             )}
 
             {/* CTA Buttons */}
             <div className="flex space-x-4">
               <button
                 onClick={handleDelay}
-                className="flex-1 py-3 px-6 border border-gray-600 text-gray-300 rounded-xl hover:border-gray-500 hover:text-white transition-all"
+                className="flex-1 rounded-xl border border-gray-600 px-6 py-3 text-gray-300 transition-all hover:border-gray-500 hover:text-white"
               >
                 Maybe Later
               </button>
@@ -376,18 +377,16 @@ export default function UpgradeFunnels({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleUpgrade}
-                className={`flex-1 py-3 px-6 bg-gradient-to-r ${offer.gradient} text-white rounded-xl font-semibold hover:opacity-90 transition-all flex items-center justify-center`}
+                className={`flex-1 bg-gradient-to-r px-6 py-3 ${offer.gradient} flex items-center justify-center rounded-xl font-semibold text-white transition-all hover:opacity-90`}
               >
                 {offer.ctaText}
-                <ArrowRight className="w-4 h-4 ml-2" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </motion.button>
             </div>
 
             {/* Urgency message */}
             {offer.urgency && (
-              <div className="text-center text-yellow-400 text-xs mt-4">
-                {offer.urgency}
-              </div>
+              <div className="mt-4 text-center text-xs text-yellow-400">{offer.urgency}</div>
             )}
           </div>
         </motion.div>
@@ -414,20 +413,20 @@ export function useConversionTriggers() {
       try {
         // Get user context from freemium API
         const response = await fetch('/api/freemium/status')
-        
+
         if (!response.ok) {
           // Fallback to localStorage
           return checkTriggersFromLocalStorage()
         }
-        
+
         const freemiumStatus = await response.json()
-        
+
         const {
           subscriptionStatus,
           selectedAgent,
           dailyUsageCount,
           dailyLimit,
-          daysActive = 0
+          daysActive = 0,
         } = freemiumStatus
 
         // Feature limit trigger
@@ -439,8 +438,8 @@ export function useConversionTriggers() {
               currentPlan: 'free',
               currentModule: selectedAgent || 'crm',
               usageCount: dailyUsageCount,
-              usageLimit: dailyLimit
-            }
+              usageLimit: dailyLimit,
+            },
           })
           return
         }
@@ -453,8 +452,8 @@ export function useConversionTriggers() {
             context: {
               currentPlan: 'free',
               currentModule: selectedAgent || 'crm',
-              daysActive
-            }
+              daysActive,
+            },
           })
           return
         }
@@ -467,18 +466,16 @@ export function useConversionTriggers() {
             context: {
               currentPlan: subscriptionStatus.toLowerCase() as 'free' | 'starter',
               currentModule: selectedAgent || 'crm',
-              usageCount: dailyUsageCount
-            }
+              usageCount: dailyUsageCount,
+            },
           })
         }
-        
       } catch (error) {
-        console.error('Failed to check conversion triggers:', error)
         // Fallback to localStorage-based triggers
         checkTriggersFromLocalStorage()
       }
     }
-    
+
     const checkTriggersFromLocalStorage = () => {
       // Get user context from localStorage as fallback
       const userPlan = localStorage.getItem('userPlan') || 'free'
@@ -495,8 +492,8 @@ export function useConversionTriggers() {
             currentPlan: 'free',
             currentModule: selectedAgent || 'crm',
             usageCount,
-            usageLimit: 10
-          }
+            usageLimit: 10,
+          },
         })
         return
       }
@@ -509,8 +506,8 @@ export function useConversionTriggers() {
           context: {
             currentPlan: 'free',
             currentModule: selectedAgent || 'crm',
-            daysActive
-          }
+            daysActive,
+          },
         })
         return
       }
@@ -523,15 +520,15 @@ export function useConversionTriggers() {
           context: {
             currentPlan: userPlan as 'free' | 'starter',
             currentModule: selectedAgent || 'crm',
-            usageCount
-          }
+            usageCount,
+          },
         })
       }
     }
 
     // Check triggers every 30 seconds
     const interval = setInterval(checkTriggers, 30000)
-    
+
     // Initial check
     checkTriggers()
 
@@ -541,6 +538,6 @@ export function useConversionTriggers() {
   return {
     activeTrigger,
     triggerUpgrade,
-    dismissTrigger
+    dismissTrigger,
   }
 }

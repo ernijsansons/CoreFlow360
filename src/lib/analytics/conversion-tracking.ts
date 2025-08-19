@@ -4,7 +4,7 @@ import { useTrackEvent } from '@/components/analytics/AnalyticsProvider'
 
 export interface ConversionEvent {
   event: string
-  properties: Record<string, any>
+  properties: Record<string, unknown>
   timestamp: number
   userId?: string
   sessionId: string
@@ -21,7 +21,7 @@ class ConversionTracker {
   private events: ConversionEvent[] = []
   private sessionId: string
   private userId?: string
-  private eventListeners: Array<{ element: any, event: string, handler: any }> = []
+  private eventListeners: Array<{ element: unknown; event: string; handler: unknown }> = []
   private intervals: number[] = []
 
   constructor() {
@@ -36,16 +36,16 @@ class ConversionTracker {
   private initializeTracking() {
     // Track page views
     this.trackPageView()
-    
+
     // Track scroll depth
     this.trackScrollDepth()
-    
+
     // Track time on page
     this.trackTimeOnPage()
-    
+
     // Track click events
     this.trackClicks()
-    
+
     // Track form interactions
     this.trackFormInteractions()
   }
@@ -58,43 +58,43 @@ class ConversionTracker {
       userAgent: navigator.userAgent,
       viewport: {
         width: window.innerWidth,
-        height: window.innerHeight
-      }
+        height: window.innerHeight,
+      },
     })
   }
 
   trackScrollDepth() {
     let maxScroll = 0
-    let scrollMilestones = [25, 50, 75, 100]
-    let trackedMilestones: number[] = []
+    const scrollMilestones = [25, 50, 75, 100]
+    const trackedMilestones: number[] = []
 
     const handleScroll = () => {
       const scrollPercent = Math.round(
         (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100
       )
-      
+
       if (scrollPercent > maxScroll) {
         maxScroll = scrollPercent
       }
 
-      scrollMilestones.forEach(milestone => {
+      scrollMilestones.forEach((milestone) => {
         if (scrollPercent >= milestone && !trackedMilestones.includes(milestone)) {
           trackedMilestones.push(milestone)
           this.track('scroll_depth', {
             percentage: milestone,
-            pixelsFromTop: window.scrollY
+            pixelsFromTop: window.scrollY,
           })
         }
       })
     }
 
     window.addEventListener('scroll', handleScroll)
-    
+
     // Track final scroll on page unload
     window.addEventListener('beforeunload', () => {
       this.track('final_scroll_depth', {
         maxScrollPercentage: maxScroll,
-        finalPixels: window.scrollY
+        finalPixels: window.scrollY,
       })
     })
   }
@@ -102,13 +102,13 @@ class ConversionTracker {
   trackTimeOnPage() {
     const startTime = Date.now()
     let lastActiveTime = startTime
-    
+
     // Track active time (when user is actually engaging)
     const trackActivity = () => {
       lastActiveTime = Date.now()
     }
-    
-    ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+
+    ;['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach((event) => {
       document.addEventListener(event, trackActivity)
     })
 
@@ -116,16 +116,16 @@ class ConversionTracker {
     const sendTimeData = () => {
       const totalTime = Date.now() - startTime
       const activeTime = lastActiveTime - startTime
-      
+
       this.track('time_on_page', {
         totalTimeSeconds: Math.round(totalTime / 1000),
         activeTimeSeconds: Math.round(activeTime / 1000),
-        engagementRate: Math.round((activeTime / totalTime) * 100)
+        engagementRate: Math.round((activeTime / totalTime) * 100),
       })
     }
 
     window.addEventListener('beforeunload', sendTimeData)
-    
+
     // Send intermediate updates every 30 seconds
     setInterval(sendTimeData, 30000)
   }
@@ -140,7 +140,7 @@ class ConversionTracker {
         text: target.textContent?.slice(0, 100),
         href: target.getAttribute('href'),
         x: event.clientX,
-        y: event.clientY
+        y: event.clientY,
       }
 
       // Track CTA clicks specifically
@@ -150,16 +150,16 @@ class ConversionTracker {
           ...clickData,
           ctaText: ctaElement.textContent?.slice(0, 100),
           ctaType: ctaElement.tagName.toLowerCase(),
-          section: this.getPageSection(ctaElement)
+          section: this.getPageSection(ctaElement),
         })
       }
 
       // Track any click
       this.track('click', clickData)
     }
-    
+
     document.addEventListener('click', handleClick)
-    
+
     // Store for cleanup
     this.eventListeners = this.eventListeners || []
     this.eventListeners.push({ element: document, event: 'click', handler: handleClick })
@@ -167,17 +167,25 @@ class ConversionTracker {
 
   trackFormInteractions() {
     // Track form focuses
-    document.addEventListener('focus', (event) => {
-      const target = event.target as HTMLElement
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
-        this.track('form_field_focus', {
-          fieldType: target.tagName,
-          fieldName: target.getAttribute('name'),
-          fieldId: target.id,
-          formId: target.closest('form')?.id
-        })
-      }
-    }, true)
+    document.addEventListener(
+      'focus',
+      (event) => {
+        const target = event.target as HTMLElement
+        if (
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT'
+        ) {
+          this.track('form_field_focus', {
+            fieldType: target.tagName,
+            fieldName: target.getAttribute('name'),
+            fieldId: target.id,
+            formId: target.closest('form')?.id,
+          })
+        }
+      },
+      true
+    )
 
     // Track form submissions
     document.addEventListener('submit', (event) => {
@@ -186,27 +194,37 @@ class ConversionTracker {
         formId: form.id,
         formAction: form.action,
         formMethod: form.method,
-        fieldCount: form.elements.length
+        fieldCount: form.elements.length,
       })
     })
   }
 
   private getPageSection(element: HTMLElement): string {
     // Determine which section of the page the element is in
-    const sections = ['hero', 'social-proof', 'roi-calculator', 'features', 'pricing', 'testimonials', 'faq']
-    
+    const sections = [
+      'hero',
+      'social-proof',
+      'roi-calculator',
+      'features',
+      'pricing',
+      'testimonials',
+      'faq',
+    ]
+
     for (const section of sections) {
-      if (element.closest(`[data-section="${section}"]`) || 
-          element.closest(`.${section}`) ||
-          element.closest(`#${section}`)) {
+      if (
+        element.closest(`[data-section="${section}"]`) ||
+        element.closest(`.${section}`) ||
+        element.closest(`#${section}`)
+      ) {
         return section
       }
     }
-    
+
     return 'unknown'
   }
 
-  track(event: string, properties: Record<string, any> = {}) {
+  track(event: string, properties: Record<string, unknown> = {}) {
     const conversionEvent: ConversionEvent = {
       event,
       properties: {
@@ -214,18 +232,18 @@ class ConversionTracker {
         timestamp: Date.now(),
         url: window.location.href,
         sessionId: this.sessionId,
-        userId: this.userId
+        userId: this.userId,
       },
       timestamp: Date.now(),
       sessionId: this.sessionId,
-      userId: this.userId
+      userId: this.userId,
     }
 
     this.events.push(conversionEvent)
-    
+
     // Send to analytics service
     this.sendToAnalytics(conversionEvent)
-    
+
     // Store locally for offline capabilities
     this.storeLocally(conversionEvent)
   }
@@ -235,13 +253,11 @@ class ConversionTracker {
       await fetch('/api/analytics/events', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(event)
+        body: JSON.stringify(event),
       })
-    } catch (error) {
-      console.warn('Failed to send analytics event:', error)
-    }
+    } catch (error) {}
   }
 
   private storeLocally(event: ConversionEvent) {
@@ -249,36 +265,34 @@ class ConversionTracker {
       const stored = localStorage.getItem('conversion_events') || '[]'
       const events = JSON.parse(stored)
       events.push(event)
-      
+
       // Keep only last 100 events to avoid storage bloat
       if (events.length > 100) {
         events.splice(0, events.length - 100)
       }
-      
+
       localStorage.setItem('conversion_events', JSON.stringify(events))
-    } catch (error) {
-      console.warn('Failed to store event locally:', error)
-    }
+    } catch (error) {}
   }
 
   // ROI Calculator specific tracking
-  trackROICalculation(inputs: any, results: any) {
+  trackROICalculation(inputs: unknown, results: unknown) {
     this.track('roi_calculation', {
       employees: inputs.employees,
       currentCost: inputs.currentCost,
       hoursLost: inputs.hoursLost,
       calculatedROI: results.roi,
       annualSavings: results.netSavings,
-      calculationTime: Date.now()
+      calculationTime: Date.now(),
     })
   }
 
   // Urgency element tracking
-  trackUrgencyInteraction(type: 'countdown' | 'spots_remaining' | 'live_counter', value: any) {
+  trackUrgencyInteraction(type: 'countdown' | 'spots_remaining' | 'live_counter', value: unknown) {
     this.track('urgency_interaction', {
       urgencyType: type,
       value,
-      interactionTime: Date.now()
+      interactionTime: Date.now(),
     })
   }
 
@@ -287,16 +301,16 @@ class ConversionTracker {
     this.track('social_proof_view', {
       proofType: type,
       identifier,
-      viewTime: Date.now()
+      viewTime: Date.now(),
     })
   }
 
   // Conversion funnel tracking
-  trackFunnelStep(step: string, metadata: Record<string, any> = {}) {
+  trackFunnelStep(step: string, metadata: Record<string, unknown> = {}) {
     this.track('funnel_step', {
       step,
       ...metadata,
-      stepTime: Date.now()
+      stepTime: Date.now(),
     })
   }
 
@@ -309,24 +323,22 @@ class ConversionTracker {
       'cta_click',
       'form_start',
       'form_submit',
-      'trial_signup'
+      'trial_signup',
     ]
 
     return funnelSteps.map((step, index) => {
-      const stepEvents = this.events.filter(e => e.event === step)
-      const previousStepEvents = index > 0 ? 
-        this.events.filter(e => e.event === funnelSteps[index - 1]) : 
-        []
+      const stepEvents = this.events.filter((e) => e.event === step)
+      const previousStepEvents =
+        index > 0 ? this.events.filter((e) => e.event === funnelSteps[index - 1]) : []
 
-      const conversionRate = previousStepEvents.length > 0 ? 
-        (stepEvents.length / previousStepEvents.length) * 100 : 
-        100
+      const conversionRate =
+        previousStepEvents.length > 0 ? (stepEvents.length / previousStepEvents.length) * 100 : 100
 
       return {
         step,
         count: stepEvents.length,
         conversionRate: Math.round(conversionRate),
-        dropOffRate: Math.round(100 - conversionRate)
+        dropOffRate: Math.round(100 - conversionRate),
       }
     })
   }
@@ -336,18 +348,18 @@ class ConversionTracker {
     this.track('ab_test_variant', {
       testName,
       variant,
-      assignedAt: Date.now()
+      assignedAt: Date.now(),
     })
   }
 
   // Heat map data
   getHeatmapData() {
     return this.events
-      .filter(e => e.event === 'click')
-      .map(e => ({
+      .filter((e) => e.event === 'click')
+      .map((e) => ({
         x: e.properties.x,
         y: e.properties.y,
-        timestamp: e.timestamp
+        timestamp: e.timestamp,
       }))
   }
 
@@ -359,10 +371,9 @@ class ConversionTracker {
       events: this.events,
       summary: {
         totalEvents: this.events.length,
-        uniqueEvents: [...new Set(this.events.map(e => e.event))],
-        sessionDuration: this.events.length > 0 ? 
-          Date.now() - this.events[0].timestamp : 0
-      }
+        uniqueEvents: [...new Set(this.events.map((e) => e.event))],
+        sessionDuration: this.events.length > 0 ? Date.now() - this.events[0].timestamp : 0,
+      },
     }
   }
 
@@ -375,7 +386,7 @@ class ConversionTracker {
     this.eventListeners = []
 
     // Clear all intervals
-    this.intervals.forEach(intervalId => {
+    this.intervals.forEach((intervalId) => {
       clearInterval(intervalId)
     })
     this.intervals = []
@@ -394,6 +405,6 @@ export function useConversionTracking() {
     trackSocialProof: conversionTracker.trackSocialProofView.bind(conversionTracker),
     trackFunnelStep: conversionTracker.trackFunnelStep.bind(conversionTracker),
     getFunnel: conversionTracker.getConversionFunnel.bind(conversionTracker),
-    exportData: conversionTracker.exportEvents.bind(conversionTracker)
+    exportData: conversionTracker.exportEvents.bind(conversionTracker),
   }
 }

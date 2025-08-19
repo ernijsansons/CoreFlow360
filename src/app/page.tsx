@@ -18,10 +18,10 @@ import { LiveChat } from '@/components/chat/LiveChat'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
+    <div className="min-h-screen overflow-hidden bg-black text-white">
       {/* Navigation */}
       <Navbar />
-      
+
       {/* Hero Section - The Awakening */}
       <HeroSection />
 
@@ -59,7 +59,7 @@ export default function Home() {
       <FAQSection />
 
       {/* Beta CTA Section */}
-      <section className="py-24 bg-gray-950">
+      <section className="bg-gray-950 py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <BetaCTA showBenefits={true} />
         </div>
@@ -70,7 +70,7 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
-      
+
       {/* Live Chat Widget */}
       <LiveChat />
     </div>

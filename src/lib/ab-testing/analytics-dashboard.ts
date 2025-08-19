@@ -43,11 +43,12 @@ export class ABTestAnalytics {
   ): number {
     const p1 = controlConversions / controlParticipants
     const p2 = variantConversions / variantParticipants
-    const p = (controlConversions + variantConversions) / (controlParticipants + variantParticipants)
-    
+    const p =
+      (controlConversions + variantConversions) / (controlParticipants + variantParticipants)
+
     const se = Math.sqrt(p * (1 - p) * (1 / controlParticipants + 1 / variantParticipants))
     const z = (p2 - p1) / se
-    
+
     // Convert Z-score to confidence level
     const confidence = this.zScoreToConfidence(Math.abs(z))
     return confidence
@@ -73,7 +74,7 @@ export class ABTestAnalytics {
   static determineWinner(results: VariantResult[], minConfidence: number = 95): string | null {
     if (results.length < 2) return null
 
-    const control = results.find(r => r.variantId === 'control')
+    const control = results.find((r) => r.variantId === 'control')
     if (!control) return null
 
     let winner: VariantResult | null = null
@@ -110,35 +111,35 @@ export class ABTestAnalytics {
   ): number {
     const alpha = (100 - confidence) / 100
     const beta = (100 - power) / 100
-    
+
     // Z-scores for alpha and beta
     const zAlpha = 1.96 // 95% confidence
     const zBeta = 0.84 // 80% power
-    
+
     const p1 = baselineConversionRate / 100
     const p2 = p1 * (1 + minimumDetectableEffect / 100)
     const p = (p1 + p2) / 2
-    
-    const sampleSize = 2 * p * (1 - p) * Math.pow(zAlpha + zBeta, 2) / Math.pow(p2 - p1, 2)
-    
+
+    const sampleSize = (2 * p * (1 - p) * Math.pow(zAlpha + zBeta, 2)) / Math.pow(p2 - p1, 2)
+
     return Math.ceil(sampleSize)
   }
 
   // Analyze experiment results
-  static analyzeExperiment(
-    experimentId: string,
-    events: any[]
-  ): ExperimentResult {
-    const variantData = new Map<string, {
-      participants: Set<string>
-      conversions: Set<string>
-      revenue: number
-      timeOnPage: number[]
-      bounces: number
-    }>()
+  static analyzeExperiment(experimentId: string, events: unknown[]): ExperimentResult {
+    const variantData = new Map<
+      string,
+      {
+        participants: Set<string>
+        conversions: Set<string>
+        revenue: number
+        timeOnPage: number[]
+        bounces: number
+      }
+    >()
 
     // Process events
-    events.forEach(event => {
+    events.forEach((event) => {
       if (event.data.experimentId !== experimentId) return
 
       const variantId = event.data.variantId
@@ -148,7 +149,7 @@ export class ABTestAnalytics {
           conversions: new Set(),
           revenue: 0,
           timeOnPage: [],
-          bounces: 0
+          bounces: 0,
         })
       }
 
@@ -180,9 +181,10 @@ export class ABTestAnalytics {
       const conversions = data.conversions.size
       const conversionRate = this.calculateConversionRate(conversions, participants)
       const averageOrderValue = conversions > 0 ? data.revenue / conversions : 0
-      const avgTimeOnPage = data.timeOnPage.length > 0 
-        ? data.timeOnPage.reduce((a, b) => a + b, 0) / data.timeOnPage.length 
-        : 0
+      const avgTimeOnPage =
+        data.timeOnPage.length > 0
+          ? data.timeOnPage.reduce((a, b) => a + b, 0) / data.timeOnPage.length
+          : 0
       const bounceRate = participants > 0 ? (data.bounces / participants) * 100 : 0
 
       return {
@@ -194,18 +196,18 @@ export class ABTestAnalytics {
         revenue: data.revenue,
         averageOrderValue,
         bounceRate,
-        timeOnPage: avgTimeOnPage
+        timeOnPage: avgTimeOnPage,
       }
     })
 
     // Determine winner
     const winner = this.determineWinner(results)
-    const control = results.find(r => r.variantId === 'control')
-    const winnerResult = results.find(r => r.variantId === winner)
-    
+    const control = results.find((r) => r.variantId === 'control')
+    const winnerResult = results.find((r) => r.variantId === winner)
+
     let uplift = 0
     let confidence = 0
-    
+
     if (control && winnerResult) {
       uplift = this.calculateUplift(control.conversionRate, winnerResult.conversionRate)
       confidence = this.calculateSignificance(
@@ -223,7 +225,7 @@ export class ABTestAnalytics {
       variants: results,
       winner,
       confidence,
-      uplift
+      uplift,
     }
   }
 
@@ -232,33 +234,42 @@ export class ABTestAnalytics {
     const recommendations: string[] = []
 
     if (result.winner) {
-      recommendations.push(`Implement ${result.winner} as the new default (${result.uplift?.toFixed(2)}% uplift)`)
+      recommendations.push(
+        `Implement ${result.winner} as the new default (${result.uplift?.toFixed(2)}% uplift)`
+      )
     }
 
     if (result.confidence && result.confidence < 95) {
-      const control = result.variants.find(v => v.variantId === 'control')
+      const control = result.variants.find((v) => v.variantId === 'control')
       if (control) {
-        const additionalSample = this.calculateSampleSize(
-          control.conversionRate,
-          20, // 20% minimum detectable effect
-          95,
-          80
-        ) - control.participants
-        
+        const additionalSample =
+          this.calculateSampleSize(
+            control.conversionRate,
+            20, // 20% minimum detectable effect
+            95,
+            80
+          ) - control.participants
+
         if (additionalSample > 0) {
-          recommendations.push(`Continue testing for ${Math.ceil(additionalSample / 100)} more days to reach statistical significance`)
+          recommendations.push(
+            `Continue testing for ${Math.ceil(additionalSample / 100)} more days to reach statistical significance`
+          )
         }
       }
     }
 
     // Analyze secondary metrics
-    result.variants.forEach(variant => {
+    result.variants.forEach((variant) => {
       if (variant.bounceRate && variant.bounceRate > 70) {
-        recommendations.push(`High bounce rate (${variant.bounceRate.toFixed(1)}%) for ${variant.variantName} - consider improving page load time or content relevance`)
+        recommendations.push(
+          `High bounce rate (${variant.bounceRate.toFixed(1)}%) for ${variant.variantName} - consider improving page load time or content relevance`
+        )
       }
-      
+
       if (variant.timeOnPage && variant.timeOnPage < 30) {
-        recommendations.push(`Low engagement time (${variant.timeOnPage.toFixed(0)}s) for ${variant.variantName} - consider improving content quality`)
+        recommendations.push(
+          `Low engagement time (${variant.timeOnPage.toFixed(0)}s) for ${variant.variantName} - consider improving content quality`
+        )
       }
     })
 

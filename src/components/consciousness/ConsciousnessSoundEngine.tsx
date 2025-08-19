@@ -2,22 +2,22 @@
 
 /**
  * CoreFlow360 Consciousness Sound Engine
- * 
+ *
  * Advanced spatial audio system that creates immersive consciousness experiences
  * through binaural beats, spatial positioning, and adaptive soundscapes.
  */
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import { 
-  CONSCIOUSNESS_AUDIO_STATES, 
-  CONSCIOUSNESS_SOUND_EFFECTS, 
+import {
+  CONSCIOUSNESS_AUDIO_STATES,
+  CONSCIOUSNESS_SOUND_EFFECTS,
   BINAURAL_PATTERNS,
   CONSCIOUSNESS_SOUNDSCAPE,
   DEFAULT_AUDIO_CONFIG,
   type ConsciousnessAudioConfig,
   type SoundEffect,
   type ConsciousnessAudioEvent,
-  type AudioSystemConfig
+  type AudioSystemConfig,
 } from '../../lib/consciousness/soundDesign'
 
 interface ConsciousnessSoundEngineProps {
@@ -47,7 +47,7 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
   selectedDepartments = [],
   cursorPosition,
   onAudioStateChange,
-  config = {}
+  config = {},
 }) => {
   const audioConfig = { ...DEFAULT_AUDIO_CONFIG, ...config }
   const [audioState, setAudioState] = useState<AudioState>({
@@ -57,11 +57,12 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
     reverbConvolver: null,
     binauralOscillators: [],
     soundBuffers: new Map(),
-    isInitialized: false
+    isInitialized: false,
   })
-  const [currentConsciousnessState, setCurrentConsciousnessState] = useState<string>('single_department')
+  const [currentConsciousnessState, setCurrentConsciousnessState] =
+    useState<string>('single_department')
   const [isPlaying, setIsPlaying] = useState(false)
-  
+
   // Refs for persistent audio nodes
   const audioContextRef = useRef<AudioContext | null>(null)
   const masterGainRef = useRef<GainNode | null>(null)
@@ -74,10 +75,10 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
 
     try {
       onAudioStateChange?.('loading')
-      
+
       // Create audio context
-      const context = new (window.AudioContext || (window as any).webkitAudioContext)({
-        sampleRate: audioConfig.sampleRate
+      const context = new (window.AudioContext || (window as unknown).webkitAudioContext)({
+        sampleRate: audioConfig.sampleRate,
       })
       audioContextRef.current = context
 
@@ -110,9 +111,7 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
           // For now, create synthetic audio buffers
           const buffer = await createSyntheticSoundBuffer(context, effect)
           soundBuffers.set(effect.id, buffer)
-        } catch (err) {
-          console.warn(`Failed to load sound effect: ${effect.id}`, err)
-        }
+        } catch (err) {}
       }
 
       setAudioState({
@@ -122,45 +121,44 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
         reverbConvolver,
         binauralOscillators: [],
         soundBuffers,
-        isInitialized: true
+        isInitialized: true,
       })
 
       onAudioStateChange?.('ready')
     } catch (error) {
-      console.error('Failed to initialize audio context:', error)
       onAudioStateChange?.('error')
     }
   }, [isEnabled, masterVolume, audioConfig, onAudioStateChange])
 
   // Create synthetic sound buffer for demonstration
-  const createSyntheticSoundBuffer = useCallback(async (
-    context: AudioContext, 
-    effect: SoundEffect
-  ): Promise<AudioBuffer> => {
-    const duration = 2 // 2 seconds
-    const sampleRate = context.sampleRate
-    const buffer = context.createBuffer(2, duration * sampleRate, sampleRate)
-    
-    // Generate binaural beat based on effect's base frequency
-    const leftChannel = buffer.getChannelData(0)
-    const rightChannel = buffer.getChannelData(1)
-    
-    const baseFreq = effect.binauralBase
-    const beatFreq = 10 // 10Hz beat frequency
-    
-    for (let i = 0; i < buffer.length; i++) {
-      const t = i / sampleRate
-      const envelope = Math.exp(-t * 2) // Exponential decay
-      
-      // Left channel: base frequency
-      leftChannel[i] = Math.sin(2 * Math.PI * baseFreq * t) * envelope * 0.3
-      
-      // Right channel: base frequency + beat frequency
-      rightChannel[i] = Math.sin(2 * Math.PI * (baseFreq + beatFreq) * t) * envelope * 0.3
-    }
-    
-    return buffer
-  }, [])
+  const createSyntheticSoundBuffer = useCallback(
+    async (context: AudioContext, effect: SoundEffect): Promise<AudioBuffer> => {
+      const duration = 2 // 2 seconds
+      const sampleRate = context.sampleRate
+      const buffer = context.createBuffer(2, duration * sampleRate, sampleRate)
+
+      // Generate binaural beat based on effect's base frequency
+      const leftChannel = buffer.getChannelData(0)
+      const rightChannel = buffer.getChannelData(1)
+
+      const baseFreq = effect.binauralBase
+      const beatFreq = 10 // 10Hz beat frequency
+
+      for (let i = 0; i < buffer.length; i++) {
+        const t = i / sampleRate
+        const envelope = Math.exp(-t * 2) // Exponential decay
+
+        // Left channel: base frequency
+        leftChannel[i] = Math.sin(2 * Math.PI * baseFreq * t) * envelope * 0.3
+
+        // Right channel: base frequency + beat frequency
+        rightChannel[i] = Math.sin(2 * Math.PI * (baseFreq + beatFreq) * t) * envelope * 0.3
+      }
+
+      return buffer
+    },
+    []
+  )
 
   // Update consciousness state based on selected departments
   useEffect(() => {
@@ -183,104 +181,113 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
   }, [selectedDepartments])
 
   // Create and manage binaural beat oscillators
-  const createBinauralBeats = useCallback((audioConfig: ConsciousnessAudioConfig) => {
-    if (!audioContextRef.current || !masterGainRef.current) return
+  const createBinauralBeats = useCallback(
+    (audioConfig: ConsciousnessAudioConfig) => {
+      if (!audioContextRef.current || !masterGainRef.current) return
 
-    const context = audioContextRef.current
-    
-    // Stop existing oscillators
-    audioState.binauralOscillators.forEach(osc => {
-      try {
-        osc.stop()
-      } catch (e) {
-        // Oscillator might already be stopped
-      }
-    })
+      const context = audioContextRef.current
 
-    if (!audioConfig.binauralEnabled) return
+      // Stop existing oscillators
+      audioState.binauralOscillators.forEach((osc) => {
+        try {
+          osc.stop()
+        } catch (e) {
+          // Oscillator might already be stopped
+        }
+      })
 
-    // Create left channel oscillator
-    const leftOsc = context.createOscillator()
-    const leftGain = context.createGain()
-    leftOsc.frequency.setValueAtTime(audioConfig.binauralFrequency, context.currentTime)
-    leftOsc.type = 'sine'
-    leftGain.gain.setValueAtTime(0.1, context.currentTime)
-    
-    // Create right channel oscillator (with beat frequency offset)
-    const rightOsc = context.createOscillator()
-    const rightGain = context.createGain()
-    rightOsc.frequency.setValueAtTime(
-      audioConfig.binauralFrequency + audioConfig.beatFrequency, 
-      context.currentTime
-    )
-    rightOsc.type = 'sine'
-    rightGain.gain.setValueAtTime(0.1, context.currentTime)
-    
-    // Create stereo splitter and merger for binaural effect
-    const splitter = context.createChannelSplitter(2)
-    const merger = context.createChannelMerger(2)
-    
-    leftOsc.connect(leftGain)
-    rightOsc.connect(rightGain)
-    leftGain.connect(merger, 0, 0)
-    rightGain.connect(merger, 0, 1)
-    merger.connect(masterGainRef.current!)
-    
-    // Start oscillators
-    leftOsc.start()
-    rightOsc.start()
-    
-    setAudioState(prev => ({
-      ...prev,
-      binauralOscillators: [leftOsc, rightOsc]
-    }))
-  }, [audioState.binauralOscillators])
+      if (!audioConfig.binauralEnabled) return
+
+      // Create left channel oscillator
+      const leftOsc = context.createOscillator()
+      const leftGain = context.createGain()
+      leftOsc.frequency.setValueAtTime(audioConfig.binauralFrequency, context.currentTime)
+      leftOsc.type = 'sine'
+      leftGain.gain.setValueAtTime(0.1, context.currentTime)
+
+      // Create right channel oscillator (with beat frequency offset)
+      const rightOsc = context.createOscillator()
+      const rightGain = context.createGain()
+      rightOsc.frequency.setValueAtTime(
+        audioConfig.binauralFrequency + audioConfig.beatFrequency,
+        context.currentTime
+      )
+      rightOsc.type = 'sine'
+      rightGain.gain.setValueAtTime(0.1, context.currentTime)
+
+      // Create stereo splitter and merger for binaural effect
+      const splitter = context.createChannelSplitter(2)
+      const merger = context.createChannelMerger(2)
+
+      leftOsc.connect(leftGain)
+      rightOsc.connect(rightGain)
+      leftGain.connect(merger, 0, 0)
+      rightGain.connect(merger, 0, 1)
+      merger.connect(masterGainRef.current!)
+
+      // Start oscillators
+      leftOsc.start()
+      rightOsc.start()
+
+      setAudioState((prev) => ({
+        ...prev,
+        binauralOscillators: [leftOsc, rightOsc],
+      }))
+    },
+    [audioState.binauralOscillators]
+  )
 
   // Play sound effect
-  const playSoundEffect = useCallback((effectId: string, options: {
-    volume?: number
-    position?: [number, number, number]
-    delay?: number
-  } = {}) => {
-    if (!audioContextRef.current || !masterGainRef.current) return
+  const playSoundEffect = useCallback(
+    (
+      effectId: string,
+      options: {
+        volume?: number
+        position?: [number, number, number]
+        delay?: number
+      } = {}
+    ) => {
+      if (!audioContextRef.current || !masterGainRef.current) return
 
-    const context = audioContextRef.current
-    const buffer = audioState.soundBuffers.get(effectId)
-    if (!buffer) return
+      const context = audioContextRef.current
+      const buffer = audioState.soundBuffers.get(effectId)
+      if (!buffer) return
 
-    const source = context.createBufferSource()
-    const gain = context.createGain()
-    const panner = context.createPanner()
+      const source = context.createBufferSource()
+      const gain = context.createGain()
+      const panner = context.createPanner()
 
-    source.buffer = buffer
-    
-    // Configure gain
-    const volume = options.volume ?? 0.5
-    gain.gain.setValueAtTime(volume, context.currentTime)
-    
-    // Configure spatial positioning
-    if (options.position) {
-      panner.panningModel = 'HRTF'
-      panner.setPosition(...options.position)
-    }
-    
-    // Connect nodes
-    source.connect(gain)
-    gain.connect(panner)
-    panner.connect(masterGainRef.current)
-    
-    // Start playback
-    const delay = options.delay ?? 0
-    source.start(context.currentTime + delay)
-    
-    // Track active sound for cleanup
-    activeSoundsRef.current.set(effectId, source)
-    
-    // Auto-cleanup when sound ends
-    source.onended = () => {
-      activeSoundsRef.current.delete(effectId)
-    }
-  }, [audioState.soundBuffers])
+      source.buffer = buffer
+
+      // Configure gain
+      const volume = options.volume ?? 0.5
+      gain.gain.setValueAtTime(volume, context.currentTime)
+
+      // Configure spatial positioning
+      if (options.position) {
+        panner.panningModel = 'HRTF'
+        panner.setPosition(...options.position)
+      }
+
+      // Connect nodes
+      source.connect(gain)
+      gain.connect(panner)
+      panner.connect(masterGainRef.current)
+
+      // Start playback
+      const delay = options.delay ?? 0
+      source.start(context.currentTime + delay)
+
+      // Track active sound for cleanup
+      activeSoundsRef.current.set(effectId, source)
+
+      // Auto-cleanup when sound ends
+      source.onended = () => {
+        activeSoundsRef.current.delete(effectId)
+      }
+    },
+    [audioState.soundBuffers]
+  )
 
   // Handle consciousness state changes
   useEffect(() => {
@@ -290,15 +297,23 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
     if (consciousnessAudioConfig && audioConfig.binauralEnabled) {
       createBinauralBeats(consciousnessAudioConfig)
     }
-  }, [currentConsciousnessState, audioState.isInitialized, createBinauralBeats, audioConfig.binauralEnabled])
+  }, [
+    currentConsciousnessState,
+    audioState.isInitialized,
+    createBinauralBeats,
+    audioConfig.binauralEnabled,
+  ])
 
   // Handle department selection events
-  const handleDepartmentSelect = useCallback((departmentId: string) => {
-    playSoundEffect('department_select', {
-      volume: 0.3,
-      delay: 0
-    })
-  }, [playSoundEffect])
+  const handleDepartmentSelect = useCallback(
+    (_departmentId: string) => {
+      playSoundEffect('department_select', {
+        volume: 0.3,
+        delay: 0,
+      })
+    },
+    [playSoundEffect]
+  )
 
   // Handle department connections
   const handleDepartmentConnection = useCallback(() => {
@@ -306,7 +321,7 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
       playSoundEffect('synaptic_connection', {
         volume: 0.4,
         position: [0, 1, 0],
-        delay: 0.5
+        delay: 0.5,
       })
     }
   }, [selectedDepartments.length, playSoundEffect])
@@ -316,16 +331,16 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
     if (selectedDepartments.length >= 3) {
       playSoundEffect('intelligence_multiplication', {
         volume: 0.5,
-        delay: 0.2
+        delay: 0.2,
       })
-      
+
       // Chain to consciousness emergence if full consciousness
       if (selectedDepartments.length >= 5) {
         setTimeout(() => {
           playSoundEffect('consciousness_emergence', {
             volume: 0.6,
             position: [0, 5, 0],
-            delay: 1
+            delay: 1,
           })
         }, 2000)
       }
@@ -340,7 +355,7 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
     if (spatialPannerRef.current) {
       const normalizedX = (cursorPosition.x / window.innerWidth - 0.5) * 2
       const normalizedY = (cursorPosition.y / window.innerHeight - 0.5) * 2
-      
+
       spatialPannerRef.current.setPosition(
         normalizedX * 5, // X position
         -normalizedY * 5, // Y position (inverted)
@@ -349,10 +364,11 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
     }
 
     // Occasionally play cursor consciousness field
-    if (Math.random() < 0.01) { // 1% chance per cursor move
+    if (Math.random() < 0.01) {
+      // 1% chance per cursor move
       playSoundEffect('cursor_consciousness', {
         volume: 0.1,
-        position: [normalizedX * 2, -normalizedY * 2, 1]
+        position: [normalizedX * 2, -normalizedY * 2, 1],
       })
     }
   }, [cursorPosition, audioConfig.spatialEnabled, playSoundEffect])
@@ -366,10 +382,10 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
         document.removeEventListener('click', handleUserInteraction)
         document.removeEventListener('keydown', handleUserInteraction)
       }
-      
+
       document.addEventListener('click', handleUserInteraction)
       document.addEventListener('keydown', handleUserInteraction)
-      
+
       return () => {
         document.removeEventListener('click', handleUserInteraction)
         document.removeEventListener('keydown', handleUserInteraction)
@@ -379,12 +395,14 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
 
   // Expose sound engine API through custom events
   useEffect(() => {
-    const handleAudioEvent = (event: CustomEvent<{
-      type: ConsciousnessAudioEvent
-      data?: any
-    }>) => {
+    const handleAudioEvent = (
+      event: CustomEvent<{
+        type: ConsciousnessAudioEvent
+        data?: unknown
+      }>
+    ) => {
       const { type, data } = event.detail
-      
+
       switch (type) {
         case 'department_awaken':
           handleDepartmentSelect(data?.departmentId)
@@ -408,29 +426,34 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
     return () => {
       window.removeEventListener('consciousness-audio', handleAudioEvent as EventListener)
     }
-  }, [handleDepartmentSelect, handleDepartmentConnection, handleIntelligenceMultiplication, playSoundEffect])
+  }, [
+    handleDepartmentSelect,
+    handleDepartmentConnection,
+    handleIntelligenceMultiplication,
+    playSoundEffect,
+  ])
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       // Stop all active sounds
-      activeSoundsRef.current.forEach(source => {
+      activeSoundsRef.current.forEach((source) => {
         try {
           source.stop()
         } catch (e) {
           // Sound might already be stopped
         }
       })
-      
+
       // Stop oscillators
-      audioState.binauralOscillators.forEach(osc => {
+      audioState.binauralOscillators.forEach((osc) => {
         try {
           osc.stop()
         } catch (e) {
           // Oscillator might already be stopped
         }
       })
-      
+
       // Close audio context
       if (audioContextRef.current) {
         audioContextRef.current.close()
@@ -453,12 +476,9 @@ const ConsciousnessSoundEngine: React.FC<ConsciousnessSoundEngineProps> = ({
 }
 
 // Helper function to trigger consciousness audio events
-export const triggerConsciousnessAudioEvent = (
-  type: ConsciousnessAudioEvent, 
-  data?: any
-) => {
+export const triggerConsciousnessAudioEvent = (type: ConsciousnessAudioEvent, data?: unknown) => {
   const event = new CustomEvent('consciousness-audio', {
-    detail: { type, data }
+    detail: { type, data },
   })
   window.dispatchEvent(event)
 }

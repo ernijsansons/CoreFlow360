@@ -55,7 +55,7 @@ export interface BehavioralProfile {
     type: 'TIME' | 'LOCATION' | 'BEHAVIOR' | 'DEVICE' | 'VELOCITY'
     score: number
     timestamp: Date
-    metadata: Record<string, any>
+    metadata: Record<string, unknown>
   }>
   riskScore: number
   lastUpdated: Date
@@ -116,21 +116,17 @@ export class ZeroTrustOrchestrator extends EventEmitter {
     super()
     this.redis = redis
     this.securityOrchestrator = securityOrchestrator
-    
+
     this.initialize()
   }
 
   private async initialize(): Promise<void> {
-    console.log('🔐 Initializing Zero-Trust Security Orchestrator')
-    
     // Load existing fingerprints and profiles from Redis
     await this.loadDeviceFingerprints()
     await this.loadBehavioralProfiles()
-    
+
     // Start continuous monitoring
     this.startContinuousMonitoring()
-    
-    console.log('✅ Zero-Trust Orchestrator initialized')
   }
 
   /**
@@ -142,16 +138,16 @@ export class ZeroTrustOrchestrator extends EventEmitter {
     ipAddress: string
     userAgent: string
     deviceFingerprint?: Partial<DeviceFingerprint>
-    behavioralData?: any
+    behavioralData?: unknown
     sessionId: string
   }): Promise<TrustScore> {
     const scores = {
       device: 0,
       location: 0,
       behavior: 0,
-      temporal: 0
+      temporal: 0,
     }
-    
+
     const factors: Array<{ factor: string; impact: number; reason: string }> = []
 
     // 1. Device Trust Assessment
@@ -178,9 +174,9 @@ export class ZeroTrustOrchestrator extends EventEmitter {
     const weights = { device: 0.3, location: 0.25, behavior: 0.3, temporal: 0.15 }
     const overall = Math.round(
       scores.device * weights.device +
-      scores.location * weights.location +
-      scores.behavior * weights.behavior +
-      scores.temporal * weights.temporal
+        scores.location * weights.location +
+        scores.behavior * weights.behavior +
+        scores.temporal * weights.temporal
     )
 
     // Determine recommendation
@@ -204,8 +200,8 @@ export class ZeroTrustOrchestrator extends EventEmitter {
         locationScore: scores.location,
         behaviorScore: scores.behavior,
         temporalScore: scores.temporal,
-        factorCount: factors.length
-      }
+        factorCount: factors.length,
+      },
     })
 
     return {
@@ -215,7 +211,7 @@ export class ZeroTrustOrchestrator extends EventEmitter {
       behavior: scores.behavior,
       temporal: scores.temporal,
       factors,
-      recommendation
+      recommendation,
     }
   }
 
@@ -246,12 +242,10 @@ export class ZeroTrustOrchestrator extends EventEmitter {
       params.clientData.platform,
       params.clientData.cookiesEnabled.toString(),
       params.clientData.doNotTrack.toString(),
-      params.clientData.touchSupport.toString()
+      params.clientData.touchSupport.toString(),
     ].join('|')
 
-    const fingerprint = createHash('sha256')
-      .update(fingerprintData)
-      .digest('hex')
+    const fingerprint = createHash('sha256').update(fingerprintData).digest('hex')
 
     // Check if device exists
     let existingDevice = this.deviceFingerprints.get(fingerprint)
@@ -266,9 +260,9 @@ export class ZeroTrustOrchestrator extends EventEmitter {
         city: 'Unknown',
         ip: params.ipAddress,
         timestamp: now,
-        trusted: existingDevice.status === 'TRUSTED'
+        trusted: existingDevice.status === 'TRUSTED',
       })
-      
+
       // Increase trust score for known devices
       existingDevice.trustScore = Math.min(100, existingDevice.trustScore + 5)
     } else {
@@ -289,15 +283,17 @@ export class ZeroTrustOrchestrator extends EventEmitter {
         trustScore: 40, // Start with moderate trust
         firstSeen: now,
         lastSeen: now,
-        geolocations: [{
-          country: 'Unknown',
-          region: 'Unknown',
-          city: 'Unknown',
-          ip: params.ipAddress,
-          timestamp: now,
-          trusted: false
-        }],
-        status: 'SUSPICIOUS' // New devices start as suspicious
+        geolocations: [
+          {
+            country: 'Unknown',
+            region: 'Unknown',
+            city: 'Unknown',
+            ip: params.ipAddress,
+            timestamp: now,
+            trusted: false,
+          },
+        ],
+        status: 'SUSPICIOUS', // New devices start as suspicious
       }
     }
 
@@ -322,7 +318,7 @@ export class ZeroTrustOrchestrator extends EventEmitter {
       }>
       navigationPattern: string[]
       typingSpeed?: number
-      mouseData?: any
+      mouseData?: unknown
     }
   }): Promise<BehavioralProfile> {
     const userId = params.userId
@@ -340,20 +336,20 @@ export class ZeroTrustOrchestrator extends EventEmitter {
           actionFrequency: {},
           navigationPatterns: params.sessionData.navigationPattern,
           typingSpeed: params.sessionData.typingSpeed || 0,
-          mouseMovements: []
+          mouseMovements: [],
         },
         anomalies: [],
         riskScore: 50,
-        lastUpdated: now
+        lastUpdated: now,
       }
     } else {
       // Update existing profile
       profile.patterns.loginTimes.push(params.sessionData.loginTime.getHours())
       profile.patterns.navigationPatterns.push(...params.sessionData.navigationPattern)
-      
+
       // Update action frequency
       for (const action of params.sessionData.actions) {
-        profile.patterns.actionFrequency[action.action] = 
+        profile.patterns.actionFrequency[action.action] =
           (profile.patterns.actionFrequency[action.action] || 0) + 1
       }
 
@@ -363,9 +359,9 @@ export class ZeroTrustOrchestrator extends EventEmitter {
 
       // Update risk score based on anomalies
       const recentAnomalies = profile.anomalies.filter(
-        a => a.timestamp > new Date(Date.now() - 24 * 60 * 60 * 1000)
+        (a) => a.timestamp > new Date(Date.now() - 24 * 60 * 60 * 1000)
       )
-      profile.riskScore = Math.max(0, 50 - (recentAnomalies.length * 10))
+      profile.riskScore = Math.max(0, 50 - recentAnomalies.length * 10)
     }
 
     profile.lastUpdated = now
@@ -394,7 +390,7 @@ export class ZeroTrustOrchestrator extends EventEmitter {
       required: true,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
       completed: false,
-      riskFactors: params.riskFactors
+      riskFactors: params.riskFactors,
     }
 
     this.activeChallenges.set(challenge.id, challenge)
@@ -413,8 +409,8 @@ export class ZeroTrustOrchestrator extends EventEmitter {
         challengeId: challenge.id,
         challengeType: params.type,
         riskFactors: params.riskFactors,
-        expiresAt: challenge.expiresAt
-      }
+        expiresAt: challenge.expiresAt,
+      },
     })
 
     this.emit('challengeCreated', challenge)
@@ -424,7 +420,10 @@ export class ZeroTrustOrchestrator extends EventEmitter {
   /**
    * Validate continuous authentication challenge
    */
-  async validateChallenge(challengeId: string, response: string): Promise<{
+  async validateChallenge(
+    challengeId: string,
+    response: string
+  ): Promise<{
     valid: boolean
     challenge?: ContinuousAuthChallenge
     newTrustScore?: number
@@ -441,7 +440,7 @@ export class ZeroTrustOrchestrator extends EventEmitter {
     }
 
     const isValid = this.validateChallengeResponse(challenge, response)
-    
+
     if (isValid) {
       challenge.completed = true
       this.activeChallenges.delete(challengeId)
@@ -465,8 +464,8 @@ export class ZeroTrustOrchestrator extends EventEmitter {
         userId: challenge.userId,
         metadata: {
           challengeId,
-          challengeType: challenge.type
-        }
+          challengeType: challenge.type,
+        },
       })
     } else {
       // Log failed challenge
@@ -480,32 +479,35 @@ export class ZeroTrustOrchestrator extends EventEmitter {
         userId: challenge.userId,
         metadata: {
           challengeId,
-          challengeType: challenge.type
-        }
+          challengeType: challenge.type,
+        },
       })
     }
 
-    return { 
-      valid: isValid, 
+    return {
+      valid: isValid,
       challenge,
-      newTrustScore: userProfile?.riskScore 
+      newTrustScore: userProfile?.riskScore,
     }
   }
 
   /**
    * Monitor session for continuous authentication
    */
-  async monitorSession(sessionId: string, params: {
-    userId: string
-    tenantId: string
-    ipAddress: string
-    userAgent: string
-    activity: Array<{
-      action: string
-      timestamp: Date
-      metadata?: any
-    }>
-  }): Promise<{
+  async monitorSession(
+    sessionId: string,
+    params: {
+      userId: string
+      tenantId: string
+      ipAddress: string
+      userAgent: string
+      activity: Array<{
+        action: string
+        timestamp: Date
+        metadata?: unknown
+      }>
+    }
+  ): Promise<{
     challengeRequired: boolean
     challenge?: ContinuousAuthChallenge
     riskFactors: string[]
@@ -513,8 +515,8 @@ export class ZeroTrustOrchestrator extends EventEmitter {
     const riskFactors: string[] = []
 
     // Check for suspicious activity patterns
-    const suspiciousActions = params.activity.filter(a => 
-      ['DELETE', 'ADMIN_ACTION', 'BULK_OPERATION'].some(suspicious => 
+    const suspiciousActions = params.activity.filter((a) =>
+      ['DELETE', 'ADMIN_ACTION', 'BULK_OPERATION'].some((suspicious) =>
         a.action.includes(suspicious)
       )
     )
@@ -524,18 +526,19 @@ export class ZeroTrustOrchestrator extends EventEmitter {
     }
 
     // Check session duration
-    const sessionStart = Math.min(...params.activity.map(a => a.timestamp.getTime()))
+    const sessionStart = Math.min(...params.activity.map((a) => a.timestamp.getTime()))
     const sessionDuration = Date.now() - sessionStart
-    
-    if (sessionDuration > 8 * 60 * 60 * 1000) { // 8 hours
+
+    if (sessionDuration > 8 * 60 * 60 * 1000) {
+      // 8 hours
       riskFactors.push('LONG_SESSION')
     }
 
     // Check for rapid actions (potential automation)
-    const recentActions = params.activity.filter(a => 
-      a.timestamp > new Date(Date.now() - 60 * 1000)
+    const recentActions = params.activity.filter(
+      (a) => a.timestamp > new Date(Date.now() - 60 * 1000)
     )
-    
+
     if (recentActions.length > 20) {
       riskFactors.push('RAPID_ACTIONS')
     }
@@ -545,10 +548,8 @@ export class ZeroTrustOrchestrator extends EventEmitter {
     if (profile) {
       const currentHour = new Date().getHours()
       const typicalHours = profile.patterns.loginTimes
-      const isAtypicalTime = !typicalHours.some(hour => 
-        Math.abs(hour - currentHour) <= 2
-      )
-      
+      const isAtypicalTime = !typicalHours.some((hour) => Math.abs(hour - currentHour) <= 2)
+
       if (isAtypicalTime) {
         riskFactors.push('ATYPICAL_TIME')
       }
@@ -564,14 +565,14 @@ export class ZeroTrustOrchestrator extends EventEmitter {
         tenantId: params.tenantId,
         type: 'MFA', // Default to MFA for now
         riskFactors,
-        sessionId
+        sessionId,
       })
     }
 
     return {
       challengeRequired,
       challenge,
-      riskFactors
+      riskFactors,
     }
   }
 
@@ -602,44 +603,47 @@ export class ZeroTrustOrchestrator extends EventEmitter {
       active: number
     }
   } {
-    const devices = Array.from(this.deviceFingerprints.values())
-      .filter(d => !tenantId || d.tenantId === tenantId)
+    const devices = Array.from(this.deviceFingerprints.values()).filter(
+      (d) => !tenantId || d.tenantId === tenantId
+    )
 
-    const profiles = Array.from(this.behavioralProfiles.values())
-      .filter(p => !tenantId || p.tenantId === tenantId)
+    const profiles = Array.from(this.behavioralProfiles.values()).filter(
+      (p) => !tenantId || p.tenantId === tenantId
+    )
 
-    const challenges = Array.from(this.activeChallenges.values())
-      .filter(c => !tenantId || c.tenantId === tenantId)
+    const challenges = Array.from(this.activeChallenges.values()).filter(
+      (c) => !tenantId || c.tenantId === tenantId
+    )
 
     return {
       devices: {
         total: devices.length,
-        trusted: devices.filter(d => d.status === 'TRUSTED').length,
-        suspicious: devices.filter(d => d.status === 'SUSPICIOUS').length,
-        blocked: devices.filter(d => d.status === 'BLOCKED').length
+        trusted: devices.filter((d) => d.status === 'TRUSTED').length,
+        suspicious: devices.filter((d) => d.status === 'SUSPICIOUS').length,
+        blocked: devices.filter((d) => d.status === 'BLOCKED').length,
       },
       users: {
         total: profiles.length,
-        highRisk: profiles.filter(p => p.riskScore >= 80).length,
-        mediumRisk: profiles.filter(p => p.riskScore >= 40 && p.riskScore < 80).length,
-        lowRisk: profiles.filter(p => p.riskScore < 40).length
+        highRisk: profiles.filter((p) => p.riskScore >= 80).length,
+        mediumRisk: profiles.filter((p) => p.riskScore >= 40 && p.riskScore < 80).length,
+        lowRisk: profiles.filter((p) => p.riskScore < 40).length,
       },
       challenges: {
         active: challenges.length,
         todayTotal: 0, // Would be calculated from audit logs
-        successRate: 0 // Would be calculated from audit logs
+        successRate: 0, // Would be calculated from audit logs
       },
       threats: {
         blocked: 0, // Would be integrated with SecurityOrchestrator
         mitigated: 0,
-        active: 0
-      }
+        active: 0,
+      },
     }
   }
 
   // Private methods
 
-  private async assessDeviceTrust(params: any): Promise<{
+  private async assessDeviceTrust(params: unknown): Promise<{
     score: number
     factors: Array<{ factor: string; impact: number; reason: string }>
   }> {
@@ -656,13 +660,13 @@ export class ZeroTrustOrchestrator extends EventEmitter {
       factors.push({
         factor: 'KNOWN_DEVICE',
         impact: device.trustScore * 0.5,
-        reason: `Device seen ${device.geolocations.length} times`
+        reason: `Device seen ${device.geolocations.length} times`,
       })
     } else {
       factors.push({
         factor: 'NEW_DEVICE',
         impact: -20,
-        reason: 'Device not previously seen'
+        reason: 'Device not previously seen',
       })
       score -= 20
     }
@@ -670,7 +674,10 @@ export class ZeroTrustOrchestrator extends EventEmitter {
     return { score: Math.max(0, Math.min(100, score)), factors }
   }
 
-  private async assessLocationTrust(ipAddress: string, userId: string): Promise<{
+  private async assessLocationTrust(
+    ipAddress: string,
+    userId: string
+  ): Promise<{
     score: number
     factors: Array<{ factor: string; impact: number; reason: string }>
   }> {
@@ -679,7 +686,7 @@ export class ZeroTrustOrchestrator extends EventEmitter {
 
     // Check if location is cached
     let location = this.locationCache.get(ipAddress)
-    
+
     if (!location) {
       // In production, this would call a real IP geolocation service
       location = {
@@ -696,7 +703,7 @@ export class ZeroTrustOrchestrator extends EventEmitter {
         threatLevel: 'LOW',
         trusted: true,
         firstSeen: new Date(),
-        lastSeen: new Date()
+        lastSeen: new Date(),
       }
       this.locationCache.set(ipAddress, location)
     }
@@ -707,7 +714,7 @@ export class ZeroTrustOrchestrator extends EventEmitter {
       factors.push({
         factor: 'VPN_DETECTED',
         impact: -30,
-        reason: 'Connection through VPN service'
+        reason: 'Connection through VPN service',
       })
     }
 
@@ -716,7 +723,7 @@ export class ZeroTrustOrchestrator extends EventEmitter {
       factors.push({
         factor: 'TOR_DETECTED',
         impact: -50,
-        reason: 'Connection through Tor network'
+        reason: 'Connection through Tor network',
       })
     }
 
@@ -725,28 +732,30 @@ export class ZeroTrustOrchestrator extends EventEmitter {
       factors.push({
         factor: 'PROXY_DETECTED',
         impact: -20,
-        reason: 'Connection through proxy service'
+        reason: 'Connection through proxy service',
       })
     }
 
     return { score: Math.max(0, Math.min(100, score)), factors }
   }
 
-  private async assessBehavioralTrust(params: any): Promise<{
+  private async assessBehavioralTrust(params: unknown): Promise<{
     score: number
     factors: Array<{ factor: string; impact: number; reason: string }>
   }> {
     const factors: Array<{ factor: string; impact: number; reason: string }> = []
     const profile = this.behavioralProfiles.get(params.userId)
-    
+
     if (!profile) {
-      return { 
-        score: 50, 
-        factors: [{ 
-          factor: 'NO_BEHAVIORAL_DATA', 
-          impact: 0, 
-          reason: 'No behavioral profile available' 
-        }] 
+      return {
+        score: 50,
+        factors: [
+          {
+            factor: 'NO_BEHAVIORAL_DATA',
+            impact: 0,
+            reason: 'No behavioral profile available',
+          },
+        ],
       }
     }
 
@@ -754,13 +763,13 @@ export class ZeroTrustOrchestrator extends EventEmitter {
     factors.push({
       factor: 'BEHAVIORAL_PROFILE',
       impact: score - 50,
-      reason: `Based on ${profile.anomalies.length} anomalies detected`
+      reason: `Based on ${profile.anomalies.length} anomalies detected`,
     })
 
     return { score, factors }
   }
 
-  private assessTemporalTrust(userId: string): {
+  private assessTemporalTrust(_userId: string): {
     score: number
     factors: Array<{ factor: string; impact: number; reason: string }>
   } {
@@ -773,14 +782,14 @@ export class ZeroTrustOrchestrator extends EventEmitter {
       factors.push({
         factor: 'BUSINESS_HOURS',
         impact: 10,
-        reason: 'Login during typical business hours'
+        reason: 'Login during typical business hours',
       })
       score += 10
     } else if (currentHour >= 22 || currentHour <= 6) {
       factors.push({
         factor: 'UNUSUAL_HOURS',
         impact: -15,
-        reason: 'Login during unusual hours'
+        reason: 'Login during unusual hours',
       })
       score -= 15
     }
@@ -788,23 +797,26 @@ export class ZeroTrustOrchestrator extends EventEmitter {
     return { score: Math.max(0, Math.min(100, score)), factors }
   }
 
-  private detectBehavioralAnomalies(profile: BehavioralProfile, sessionData: any): Array<{
+  private detectBehavioralAnomalies(
+    profile: BehavioralProfile,
+    sessionData: unknown
+  ): Array<{
     type: 'TIME' | 'LOCATION' | 'BEHAVIOR' | 'DEVICE' | 'VELOCITY'
     score: number
     timestamp: Date
-    metadata: Record<string, any>
+    metadata: Record<string, unknown>
   }> {
     const anomalies: Array<{
       type: 'TIME' | 'LOCATION' | 'BEHAVIOR' | 'DEVICE' | 'VELOCITY'
       score: number
       timestamp: Date
-      metadata: Record<string, any>
+      metadata: Record<string, unknown>
     }> = []
 
     // Check for time-based anomalies
     const currentHour = sessionData.loginTime.getHours()
     const typicalHours = profile.patterns.loginTimes
-    const isAtypicalTime = !typicalHours.some(hour => Math.abs(hour - currentHour) <= 2)
+    const isAtypicalTime = !typicalHours.some((hour) => Math.abs(hour - currentHour) <= 2)
 
     if (isAtypicalTime && typicalHours.length > 5) {
       anomalies.push({
@@ -813,28 +825,29 @@ export class ZeroTrustOrchestrator extends EventEmitter {
         timestamp: new Date(),
         metadata: {
           currentHour,
-          typicalHours: typicalHours.slice(-10) // Last 10 login times
-        }
+          typicalHours: typicalHours.slice(-10), // Last 10 login times
+        },
       })
     }
 
     // Check for velocity anomalies (rapid succession of actions)
-    const actionTimestamps = sessionData.actions.map((a: any) => a.timestamp.getTime())
+    const actionTimestamps = sessionData.actions.map((a: unknown) => a.timestamp.getTime())
     const intervals = []
     for (let i = 1; i < actionTimestamps.length; i++) {
       intervals.push(actionTimestamps[i] - actionTimestamps[i - 1])
     }
-    
+
     const avgInterval = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length
-    if (avgInterval < 500) { // Actions less than 500ms apart
+    if (avgInterval < 500) {
+      // Actions less than 500ms apart
       anomalies.push({
         type: 'VELOCITY',
         score: 80,
         timestamp: new Date(),
         metadata: {
           averageInterval: avgInterval,
-          totalActions: sessionData.actions.length
-        }
+          totalActions: sessionData.actions.length,
+        },
       })
     }
 
@@ -872,12 +885,10 @@ export class ZeroTrustOrchestrator extends EventEmitter {
 
   private async loadDeviceFingerprints(): Promise<void> {
     // In production, load from Redis/database
-    console.log('📱 Loading device fingerprints...')
   }
 
   private async loadBehavioralProfiles(): Promise<void> {
     // In production, load from Redis/database
-    console.log('🧠 Loading behavioral profiles...')
   }
 
   private async persistDeviceFingerprint(device: DeviceFingerprint): Promise<void> {
@@ -901,8 +912,6 @@ export class ZeroTrustOrchestrator extends EventEmitter {
     setInterval(async () => {
       await this.performContinuousMonitoring()
     }, 60000)
-
-    console.log('🔄 Continuous monitoring started')
   }
 
   private async performContinuousMonitoring(): Promise<void> {
@@ -924,7 +933,6 @@ export class ZeroTrustOrchestrator extends EventEmitter {
    */
   async cleanup(): Promise<void> {
     this.removeAllListeners()
-    console.log('✅ Zero-Trust Orchestrator cleanup completed')
   }
 }
 

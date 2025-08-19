@@ -9,7 +9,7 @@ import { getPerformanceStats } from '@/middleware/performance-monitoring'
 import { api } from '@/lib/api-response'
 import { sanitizeInput } from '@/middleware/sanitization'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession()
@@ -27,10 +27,9 @@ export async function GET(request: NextRequest) {
     const sanitizedStats = sanitizeInput(stats, 'performance.metrics')
 
     return api.success(sanitizedStats, {
-      message: 'Performance metrics retrieved successfully'
+      message: 'Performance metrics retrieved successfully',
     })
   } catch (error) {
-    console.error('Failed to retrieve performance metrics:', error)
     return api.error('Failed to retrieve performance metrics')
   }
 }

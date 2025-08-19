@@ -109,10 +109,12 @@ export function initializeTelemetry(): NodeSDK {
           ignoreIncomingRequestHook: (req) => {
             // Ignore health checks and metrics endpoints
             const url = req.url || ''
-            return url.includes('/health') || 
-                   url.includes('/metrics') || 
-                   url.includes('/_next/') ||
-                   url.includes('/favicon.ico')
+            return (
+              url.includes('/health') ||
+              url.includes('/metrics') ||
+              url.includes('/_next/') ||
+              url.includes('/favicon.ico')
+            )
           },
         },
         '@opentelemetry/instrumentation-express': {
@@ -135,17 +137,14 @@ export function initializeTelemetry(): NodeSDK {
           ? { decision: 1 } // Record and sample
           : { decision: 0 } // Do not record
       },
-    } as any,
+    } as unknown,
   })
 
   // Start the SDK
   try {
     sdk.start()
     isInitialized = true
-    console.log('OpenTelemetry initialized successfully')
-  } catch (error) {
-    console.error('Failed to initialize OpenTelemetry:', error)
-  }
+  } catch (error) {}
 
   return sdk
 }
@@ -193,15 +192,22 @@ export class TelemetryService {
   /**
    * Create a new span for tracing
    */
-  createSpan(name: string, options: {
-    kind?: SpanKind
-    attributes?: Record<string, string | number | boolean>
-    parent?: any
-  } = {}) {
-    return this.tracer.startSpan(name, {
-      kind: options.kind || SpanKind.INTERNAL,
-      attributes: options.attributes,
-    }, options.parent || context.active())
+  createSpan(
+    name: string,
+    options: {
+      kind?: SpanKind
+      attributes?: Record<string, string | number | boolean>
+      parent?: unknown
+    } = {}
+  ) {
+    return this.tracer.startSpan(
+      name,
+      {
+        kind: options.kind || SpanKind.INTERNAL,
+        attributes: options.attributes,
+      },
+      options.parent || context.active()
+    )
   }
 
   /**
@@ -209,16 +215,16 @@ export class TelemetryService {
    */
   async traceAsync<T>(
     name: string,
-    operation: (span: any) => Promise<T>,
+    operation: (span: unknown) => Promise<T>,
     options: {
       kind?: SpanKind
       attributes?: Record<string, string | number | boolean>
     } = {}
   ): Promise<T> {
     const span = this.createSpan(name, options)
-    
+
     try {
-      const result = await context.with(trace.setSpan(context.active(), span), () => 
+      const result = await context.with(trace.setSpan(context.active(), span), () =>
         operation(span)
       )
       span.setStatus({ code: SpanStatusCode.OK })
@@ -238,12 +244,18 @@ export class TelemetryService {
   /**
    * Record HTTP request metrics
    */
-  recordHttpRequest(method: string, route: string, statusCode: number, duration: number, tenantId?: string) {
+  recordHttpRequest(
+    method: string,
+    route: string,
+    statusCode: number,
+    duration: number,
+    tenantId?: string
+  ) {
     const labels = {
       method,
       route,
       status_code: statusCode.toString(),
-      ...(tenantId && { tenant_id: tenantId })
+      ...(tenantId && { tenant_id: tenantId }),
     }
 
     this.httpRequestCounter.add(1, labels)
@@ -253,12 +265,18 @@ export class TelemetryService {
   /**
    * Record database query metrics
    */
-  recordDbQuery(operation: string, table: string, duration: number, success: boolean, tenantId?: string) {
+  recordDbQuery(
+    operation: string,
+    table: string,
+    duration: number,
+    success: boolean,
+    tenantId?: string
+  ) {
     const labels = {
       operation,
       table,
       status: success ? 'success' : 'error',
-      ...(tenantId && { tenant_id: tenantId })
+      ...(tenantId && { tenant_id: tenantId }),
     }
 
     this.dbQueryCounter.add(1, labels)
@@ -272,7 +290,7 @@ export class TelemetryService {
     this.cacheHitCounter.add(1, {
       cache_type: cacheType,
       key_pattern: keyPattern,
-      ...(tenantId && { tenant_id: tenantId })
+      ...(tenantId && { tenant_id: tenantId }),
     })
   }
 
@@ -280,7 +298,7 @@ export class TelemetryService {
     this.cacheMissCounter.add(1, {
       cache_type: cacheType,
       key_pattern: keyPattern,
-      ...(tenantId && { tenant_id: tenantId })
+      ...(tenantId && { tenant_id: tenantId }),
     })
   }
 
@@ -292,7 +310,7 @@ export class TelemetryService {
       error_type: errorType,
       severity,
       component,
-      ...(tenantId && { tenant_id: tenantId })
+      ...(tenantId && { tenant_id: tenantId }),
     })
   }
 
@@ -301,7 +319,7 @@ export class TelemetryService {
    */
   updateActiveUsers(count: number, tenantId?: string) {
     this.activeUsers.add(count, {
-      ...(tenantId && { tenant_id: tenantId })
+      ...(tenantId && { tenant_id: tenantId }),
     })
   }
 
@@ -347,10 +365,14 @@ export class TelemetryService {
   createChildSpan(name: string, attributes?: Record<string, string | number | boolean>) {
     const parentSpan = trace.getActiveSpan()
     if (parentSpan) {
-      return this.tracer.startSpan(name, {
-        attributes,
-        kind: SpanKind.INTERNAL,
-      }, trace.setSpan(context.active(), parentSpan))
+      return this.tracer.startSpan(
+        name,
+        {
+          attributes,
+          kind: SpanKind.INTERNAL,
+        },
+        trace.setSpan(context.active(), parentSpan)
+      )
     }
     return this.createSpan(name, { attributes })
   }
@@ -362,10 +384,7 @@ export class TelemetryService {
     if (sdk) {
       try {
         await sdk.shutdown()
-        console.log('OpenTelemetry shut down successfully')
-      } catch (error) {
-        console.error('Failed to shut down OpenTelemetry:', error)
-      }
+      } catch (error) {}
     }
   }
 }
@@ -376,7 +395,7 @@ export const telemetry = new TelemetryService()
 /**
  * Middleware wrapper for automatic tracing
  */
-export function withTelemetry<T extends any[], R>(
+export function withTelemetry<T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
   spanName: string,
   options: {
@@ -387,7 +406,7 @@ export function withTelemetry<T extends any[], R>(
   return async (...args: T): Promise<R> => {
     const attributes = {
       ...options.attributes,
-      ...(options.extractAttributes ? options.extractAttributes(...args) : {})
+      ...(options.extractAttributes ? options.extractAttributes(...args) : {}),
     }
 
     return telemetry.traceAsync(
@@ -409,10 +428,10 @@ export function withTelemetry<T extends any[], R>(
  * Database operation tracing decorator
  */
 export function traceDbOperation(operation: string, table: string) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       return telemetry.traceAsync(
         `db.${operation}`,
         async (span) => {
@@ -426,10 +445,10 @@ export function traceDbOperation(operation: string, table: string) {
           try {
             const result = await originalMethod.apply(this, args)
             const duration = Date.now() - startTime
-            
+
             telemetry.recordDbQuery(operation, table, duration, true)
             span.setAttribute('db.duration_ms', duration)
-            
+
             return result
           } catch (error) {
             const duration = Date.now() - startTime
@@ -441,8 +460,8 @@ export function traceDbOperation(operation: string, table: string) {
         {
           kind: SpanKind.CLIENT,
           attributes: {
-            'component': 'database'
-          }
+            component: 'database',
+          },
         }
       )
     }
@@ -455,13 +474,13 @@ export function traceDbOperation(operation: string, table: string) {
  * HTTP request tracing decorator
  */
 export function traceHttpRequest(route: string) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const request = args[0] // Assuming first arg is request
       const method = request?.method || 'UNKNOWN'
-      
+
       return telemetry.traceAsync(
         `http.${method} ${route}`,
         async (span) => {
@@ -469,7 +488,7 @@ export function traceHttpRequest(route: string) {
             'http.method': method,
             'http.route': route,
             'http.scheme': request?.url?.startsWith('https') ? 'https' : 'http',
-            'component': 'http'
+            component: 'http',
           })
 
           const startTime = Date.now()
@@ -477,14 +496,14 @@ export function traceHttpRequest(route: string) {
             const response = await originalMethod.apply(this, args)
             const duration = Date.now() - startTime
             const statusCode = response?.status || 200
-            
+
             span.setAttributes({
               'http.status_code': statusCode,
-              'http.response_time_ms': duration
+              'http.response_time_ms': duration,
             })
-            
+
             telemetry.recordHttpRequest(method, route, statusCode, duration)
-            
+
             return response
           } catch (error) {
             const duration = Date.now() - startTime
@@ -496,8 +515,8 @@ export function traceHttpRequest(route: string) {
         {
           kind: SpanKind.SERVER,
           attributes: {
-            'component': 'http'
-          }
+            component: 'http',
+          },
         }
       )
     }

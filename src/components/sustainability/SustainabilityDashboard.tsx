@@ -21,7 +21,7 @@ import {
   Calculator,
   BarChart3,
   PieChart,
-  Globe
+  Globe,
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -94,13 +94,12 @@ export default function SustainabilityDashboard() {
       const data = await response.json()
       setMetrics(data)
     } catch (error) {
-      console.error('Failed to fetch sustainability metrics:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const getEfficiencyColor = (score: number) => {
+  const getEfficiencyColor = (_score: number) => {
     if (score >= 90) return 'text-emerald-600 dark:text-emerald-400'
     if (score >= 80) return 'text-green-600 dark:text-green-400'
     if (score >= 70) return 'text-yellow-600 dark:text-yellow-400'
@@ -128,15 +127,15 @@ export default function SustainabilityDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-consciousness-neural"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="border-consciousness-neural h-8 w-8 animate-spin rounded-full border-b-2"></div>
       </div>
     )
   }
 
   if (!metrics) {
     return (
-      <div className="text-center py-8">
+      <div className="py-8 text-center">
         <p className="text-muted-foreground">Failed to load sustainability metrics</p>
         <Button onClick={fetchSustainabilityMetrics} className="mt-4">
           Retry
@@ -150,7 +149,7 @@ export default function SustainabilityDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-3xl font-bold">
             <Leaf className="text-emerald-600" />
             Sustainability Dashboard
           </h1>
@@ -161,18 +160,15 @@ export default function SustainabilityDashboard() {
         <div className="flex items-center gap-2">
           <select
             value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value as any)}
-            className="px-3 py-2 border rounded-md bg-background"
+            onChange={(e) => setSelectedPeriod(e.target.value as unknown)}
+            className="bg-background rounded-md border px-3 py-2"
           >
             <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
             <option value="monthly">Monthly</option>
           </select>
-          <Button
-            variant="outline"
-            onClick={() => setShowCalculator(!showCalculator)}
-          >
-            <Calculator className="w-4 h-4 mr-2" />
+          <Button variant="outline" onClick={() => setShowCalculator(!showCalculator)}>
+            <Calculator className="mr-2 h-4 w-4" />
             Calculator
           </Button>
         </div>
@@ -184,9 +180,7 @@ export default function SustainabilityDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Sustainability Score</CardTitle>
-              <CardDescription>
-                Overall environmental efficiency rating
-              </CardDescription>
+              <CardDescription>Overall environmental efficiency rating</CardDescription>
             </div>
             <Badge className={getGradeColor(metrics.efficiency.grade)}>
               Grade {metrics.efficiency.grade}
@@ -196,36 +190,34 @@ export default function SustainabilityDashboard() {
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-3xl font-bold text-consciousness-neural">
+              <span className="text-consciousness-neural text-3xl font-bold">
                 {metrics.efficiency.score}
               </span>
               <span className="text-muted-foreground">/100</span>
             </div>
             <Progress value={metrics.efficiency.score} className="h-2" />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="grid grid-cols-2 gap-4 text-center md:grid-cols-4">
               <div>
                 <p className="text-2xl font-bold text-emerald-600">
                   {metrics.carbonFootprint.total.toFixed(2)}
                 </p>
-                <p className="text-sm text-muted-foreground">kg CO₂e</p>
+                <p className="text-muted-foreground text-sm">kg CO₂e</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-blue-600">
                   {(metrics.performance.bundleSize / 1024).toFixed(1)}
                 </p>
-                <p className="text-sm text-muted-foreground">MB Bundle</p>
+                <p className="text-muted-foreground text-sm">MB Bundle</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-purple-600">
-                  {metrics.performance.loadTime}
-                </p>
-                <p className="text-sm text-muted-foreground">ms Load Time</p>
+                <p className="text-2xl font-bold text-purple-600">{metrics.performance.loadTime}</p>
+                <p className="text-muted-foreground text-sm">ms Load Time</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-orange-600">
                   {metrics.greenFeatures.cacheHitRate}%
                 </p>
-                <p className="text-sm text-muted-foreground">Cache Hit Rate</p>
+                <p className="text-muted-foreground text-sm">Cache Hit Rate</p>
               </div>
             </div>
           </div>
@@ -241,16 +233,18 @@ export default function SustainabilityDashboard() {
         </TabsList>
 
         <TabsContent value="metrics" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Carbon Footprint */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Carbon Footprint</CardTitle>
-                <CloudRain className="h-4 w-4 text-muted-foreground" />
+                <CloudRain className="text-muted-foreground h-4 w-4" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{metrics.carbonFootprint.total.toFixed(2)} kg CO₂e</div>
-                <div className="space-y-2 mt-4">
+                <div className="text-2xl font-bold">
+                  {metrics.carbonFootprint.total.toFixed(2)} kg CO₂e
+                </div>
+                <div className="mt-4 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Frontend</span>
                     <span>{metrics.carbonFootprint.frontend.toFixed(2)} kg</span>
@@ -275,30 +269,39 @@ export default function SustainabilityDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Performance</CardTitle>
-                <Zap className="h-4 w-4 text-muted-foreground" />
+                <Zap className="text-muted-foreground h-4 w-4" />
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="mb-1 flex justify-between text-sm">
                       <span>Bundle Size</span>
                       <span>{(metrics.performance.bundleSize / 1024).toFixed(1)} MB</span>
                     </div>
-                    <Progress value={Math.min(100, (metrics.performance.bundleSize / 10240) * 100)} className="h-2" />
+                    <Progress
+                      value={Math.min(100, (metrics.performance.bundleSize / 10240) * 100)}
+                      className="h-2"
+                    />
                   </div>
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="mb-1 flex justify-between text-sm">
                       <span>Load Time</span>
                       <span>{metrics.performance.loadTime} ms</span>
                     </div>
-                    <Progress value={Math.max(0, 100 - (metrics.performance.loadTime / 50))} className="h-2" />
+                    <Progress
+                      value={Math.max(0, 100 - metrics.performance.loadTime / 50)}
+                      className="h-2"
+                    />
                   </div>
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="mb-1 flex justify-between text-sm">
                       <span>Energy/View</span>
                       <span>{metrics.performance.energyPerPageView.toFixed(3)} mWh</span>
                     </div>
-                    <Progress value={Math.max(0, 100 - (metrics.performance.energyPerPageView * 10))} className="h-2" />
+                    <Progress
+                      value={Math.max(0, 100 - metrics.performance.energyPerPageView * 10)}
+                      className="h-2"
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -308,26 +311,26 @@ export default function SustainabilityDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Green Features</CardTitle>
-                <Battery className="h-4 w-4 text-muted-foreground" />
+                <Battery className="text-muted-foreground h-4 w-4" />
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="mb-1 flex justify-between text-sm">
                       <span>Dark Mode Usage</span>
                       <span>{metrics.greenFeatures.darkModeUsage}%</span>
                     </div>
                     <Progress value={metrics.greenFeatures.darkModeUsage} className="h-2" />
                   </div>
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="mb-1 flex justify-between text-sm">
                       <span>Reduced Motion</span>
                       <span>{metrics.greenFeatures.reducedMotionUsage}%</span>
                     </div>
                     <Progress value={metrics.greenFeatures.reducedMotionUsage} className="h-2" />
                   </div>
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="mb-1 flex justify-between text-sm">
                       <span>CDN Usage</span>
                       <span>{metrics.greenFeatures.cdnUsage}%</span>
                     </div>
@@ -342,32 +345,32 @@ export default function SustainabilityDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Target className="w-5 h-5" />
+                <Target className="h-5 w-5" />
                 Sustainability Targets
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                 <div>
-                  <h4 className="font-semibold mb-2">Carbon Reduction</h4>
+                  <h4 className="mb-2 font-semibold">Carbon Reduction</h4>
                   <div className="text-2xl font-bold text-emerald-600">
                     {metrics.targets.carbonReduction}%
                   </div>
-                  <p className="text-sm text-muted-foreground">Target by 2025</p>
+                  <p className="text-muted-foreground text-sm">Target by 2025</p>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Efficiency Improvement</h4>
+                  <h4 className="mb-2 font-semibold">Efficiency Improvement</h4>
                   <div className="text-2xl font-bold text-blue-600">
                     {metrics.targets.efficiencyImprovement}%
                   </div>
-                  <p className="text-sm text-muted-foreground">Performance boost</p>
+                  <p className="text-muted-foreground text-sm">Performance boost</p>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Green User Adoption</h4>
+                  <h4 className="mb-2 font-semibold">Green User Adoption</h4>
                   <div className="text-2xl font-bold text-purple-600">
                     {metrics.targets.greenUserAdoption}%
                   </div>
-                  <p className="text-sm text-muted-foreground">Users using green features</p>
+                  <p className="text-muted-foreground text-sm">Users using green features</p>
                 </div>
               </div>
             </CardContent>
@@ -375,7 +378,7 @@ export default function SustainabilityDashboard() {
         </TabsContent>
 
         <TabsContent value="breakdown" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Carbon Footprint Breakdown */}
             <Card>
               <CardHeader>
@@ -386,29 +389,57 @@ export default function SustainabilityDashboard() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                      <span>Frontend ({((metrics.carbonFootprint.frontend / metrics.carbonFootprint.total) * 100).toFixed(1)}%)</span>
+                      <div className="h-3 w-3 rounded-full bg-emerald-500"></div>
+                      <span>
+                        Frontend (
+                        {(
+                          (metrics.carbonFootprint.frontend / metrics.carbonFootprint.total) *
+                          100
+                        ).toFixed(1)}
+                        %)
+                      </span>
                     </div>
                     <span>{metrics.carbonFootprint.frontend.toFixed(2)} kg</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                      <span>Backend ({((metrics.carbonFootprint.backend / metrics.carbonFootprint.total) * 100).toFixed(1)}%)</span>
+                      <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                      <span>
+                        Backend (
+                        {(
+                          (metrics.carbonFootprint.backend / metrics.carbonFootprint.total) *
+                          100
+                        ).toFixed(1)}
+                        %)
+                      </span>
                     </div>
                     <span>{metrics.carbonFootprint.backend.toFixed(2)} kg</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                      <span>Infrastructure ({((metrics.carbonFootprint.infrastructure / metrics.carbonFootprint.total) * 100).toFixed(1)}%)</span>
+                      <div className="h-3 w-3 rounded-full bg-purple-500"></div>
+                      <span>
+                        Infrastructure (
+                        {(
+                          (metrics.carbonFootprint.infrastructure / metrics.carbonFootprint.total) *
+                          100
+                        ).toFixed(1)}
+                        %)
+                      </span>
                     </div>
                     <span>{metrics.carbonFootprint.infrastructure.toFixed(2)} kg</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                      <span>AI Processing ({((metrics.carbonFootprint.ai / metrics.carbonFootprint.total) * 100).toFixed(1)}%)</span>
+                      <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+                      <span>
+                        AI Processing (
+                        {(
+                          (metrics.carbonFootprint.ai / metrics.carbonFootprint.total) *
+                          100
+                        ).toFixed(1)}
+                        %)
+                      </span>
                     </div>
                     <span>{metrics.carbonFootprint.ai.toFixed(2)} kg</span>
                   </div>
@@ -425,18 +456,21 @@ export default function SustainabilityDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-semibold mb-2">Bundle Size Impact</h4>
-                    <p className="text-sm text-muted-foreground mb-2">
+                    <h4 className="mb-2 font-semibold">Bundle Size Impact</h4>
+                    <p className="text-muted-foreground mb-2 text-sm">
                       Every 1MB reduction saves ~0.5g CO₂ per page view
                     </p>
                     <div className="flex justify-between text-sm">
                       <span>Current: {(metrics.performance.bundleSize / 1024).toFixed(1)} MB</span>
-                      <span>Potential saving: {((metrics.performance.bundleSize / 1024) * 0.5).toFixed(2)}g CO₂</span>
+                      <span>
+                        Potential saving:{' '}
+                        {((metrics.performance.bundleSize / 1024) * 0.5).toFixed(2)}g CO₂
+                      </span>
                     </div>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">Load Time Impact</h4>
-                    <p className="text-sm text-muted-foreground mb-2">
+                    <h4 className="mb-2 font-semibold">Load Time Impact</h4>
+                    <p className="text-muted-foreground mb-2 text-sm">
                       Faster loading reduces device energy consumption
                     </p>
                     <div className="flex justify-between text-sm">
@@ -461,8 +495,8 @@ export default function SustainabilityDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {metrics.efficiency.improvements.map((improvement, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
-                    <div className="w-2 h-2 bg-consciousness-neural rounded-full mt-2"></div>
+                  <div key={index} className="flex items-start gap-3 rounded-lg border p-3">
+                    <div className="bg-consciousness-neural mt-2 h-2 w-2 rounded-full"></div>
                     <div className="flex-1">
                       <p className="text-sm">{improvement}</p>
                     </div>
@@ -481,7 +515,7 @@ export default function SustainabilityDashboard() {
               <CardTitle>Green Computing Best Practices</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-3">
                   <h4 className="font-semibold">Frontend Optimization</h4>
                   <ul className="space-y-2 text-sm">
@@ -506,17 +540,24 @@ export default function SustainabilityDashboard() {
         </TabsContent>
 
         <TabsContent value="achievements" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {metrics.achievements.map((achievement) => (
-              <Card key={achievement.id} className={achievement.achieved ? 'border-emerald-200 bg-emerald-50 dark:bg-emerald-950' : ''}>
+              <Card
+                key={achievement.id}
+                className={
+                  achievement.achieved ? 'border-emerald-200 bg-emerald-50 dark:bg-emerald-950' : ''
+                }
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
-                    <Award className={`w-5 h-5 ${achievement.achieved ? 'text-emerald-600' : 'text-gray-400'}`} />
+                    <Award
+                      className={`h-5 w-5 ${achievement.achieved ? 'text-emerald-600' : 'text-gray-400'}`}
+                    />
                     <CardTitle className="text-sm">{achievement.title}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground mb-3">{achievement.description}</p>
+                  <p className="text-muted-foreground mb-3 text-sm">{achievement.description}</p>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Progress</span>
@@ -525,9 +566,7 @@ export default function SustainabilityDashboard() {
                     <Progress value={achievement.progress} className="h-2" />
                   </div>
                   {achievement.achieved && (
-                    <Badge className="mt-2 bg-emerald-100 text-emerald-800">
-                      Achieved!
-                    </Badge>
+                    <Badge className="mt-2 bg-emerald-100 text-emerald-800">Achieved!</Badge>
                   )}
                 </CardContent>
               </Card>
@@ -543,29 +582,41 @@ export default function SustainabilityDashboard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
             onClick={() => setShowCalculator(false)}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-background border rounded-lg p-6 max-w-md w-full"
+              className="bg-background w-full max-w-md rounded-lg border p-6"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-lg font-semibold mb-4">Carbon Calculator</h3>
+              <h3 className="mb-4 text-lg font-semibold">Carbon Calculator</h3>
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium">Data Transfer (GB/month)</label>
-                  <input type="number" className="w-full mt-1 px-3 py-2 border rounded-md" placeholder="100" />
+                  <input
+                    type="number"
+                    className="mt-1 w-full rounded-md border px-3 py-2"
+                    placeholder="100"
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Page Views (thousands/month)</label>
-                  <input type="number" className="w-full mt-1 px-3 py-2 border rounded-md" placeholder="50" />
+                  <input
+                    type="number"
+                    className="mt-1 w-full rounded-md border px-3 py-2"
+                    placeholder="50"
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Server CPU Hours</label>
-                  <input type="number" className="w-full mt-1 px-3 py-2 border rounded-md" placeholder="720" />
+                  <input
+                    type="number"
+                    className="mt-1 w-full rounded-md border px-3 py-2"
+                    placeholder="720"
+                  />
                 </div>
                 <Button className="w-full">Calculate Impact</Button>
               </div>

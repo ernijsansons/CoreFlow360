@@ -6,19 +6,21 @@
 export {
   SecurityOperationsManager,
   SecurityViolationError,
-  securityManager
+  securityManager,
 } from './secure-operations'
 
 export type {
   SecurityContext,
   SecurityPolicy,
   AuditLogEntry,
-  SecurityViolation
+  SecurityViolation,
 } from './secure-operations'
 
 // Re-export the main executeSecureOperation function for convenience
 // Use lazy binding to avoid build-time initialization issues
-export const executeSecureOperation = (...args: Parameters<typeof securityManager.executeSecureOperation>) => {
+export const executeSecureOperation = (
+  ...args: Parameters<typeof securityManager.executeSecureOperation>
+) => {
   return securityManager.executeSecureOperation(...args)
 }
 

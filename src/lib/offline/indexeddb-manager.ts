@@ -6,7 +6,7 @@
 export interface OfflineRecord {
   id: string
   type: 'customer' | 'deal' | 'insight' | 'voice_note' | 'consciousness_event'
-  data: any
+  data: unknown
   timestamp: number
   lastModified: number
   syncStatus: 'pending' | 'synced' | 'conflict' | 'failed'
@@ -19,7 +19,7 @@ export interface OfflineAction {
   type: 'create' | 'update' | 'delete'
   entity: string
   entityId: string
-  data?: any
+  data?: unknown
   url: string
   method: string
   headers: Record<string, string>
@@ -34,8 +34,8 @@ export interface SyncConflict {
   id: string
   entityType: string
   entityId: string
-  localData: any
-  serverData: any
+  localData: unknown
+  serverData: unknown
   timestamp: number
   resolution?: 'local' | 'server' | 'merged'
 }
@@ -53,7 +53,7 @@ class IndexedDBManager {
     conflicts: 'sync_conflicts',
     insights: 'consciousness_insights',
     cache: 'api_cache',
-    metrics: 'performance_metrics'
+    metrics: 'performance_metrics',
   }
 
   async init(): Promise<void> {
@@ -75,7 +75,7 @@ class IndexedDBManager {
 
       request.onsuccess = () => {
         this.db = request.result
-        console.log('[IndexedDB] Database initialized successfully')
+
         resolve()
       }
 
@@ -148,10 +148,10 @@ class IndexedDBManager {
 
       const transaction = this.db.transaction([this.stores.records], 'readwrite')
       const store = transaction.objectStore(this.stores.records)
-      
+
       const request = store.put({
         ...record,
-        lastModified: Date.now()
+        lastModified: Date.now(),
       })
 
       request.onsuccess = () => resolve()
@@ -245,13 +245,13 @@ class IndexedDBManager {
       request.onsuccess = () => {
         // Sort by priority and timestamp
         const actions = request.result || []
-        const priorityOrder = { 'critical': 0, 'high': 1, 'medium': 2, 'low': 3 }
-        
+        const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 }
+
         actions.sort((a, b) => {
           const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority]
           return priorityDiff !== 0 ? priorityDiff : a.timestamp - b.timestamp
         })
-        
+
         resolve(actions)
       }
       request.onerror = () => reject(request.error)
@@ -320,7 +320,7 @@ class IndexedDBManager {
 
       const transaction = this.db.transaction([this.stores.conflicts], 'readwrite')
       const store = transaction.objectStore(this.stores.conflicts)
-      
+
       const getRequest = store.get(conflictId)
       getRequest.onsuccess = () => {
         const conflict = getRequest.result
@@ -338,7 +338,7 @@ class IndexedDBManager {
   }
 
   // Cache Management
-  async cacheApiResponse(key: string, data: any, ttlMinutes: number = 60): Promise<void> {
+  async cacheApiResponse(key: string, data: unknown, ttlMinutes: number = 60): Promise<void> {
     await this.init()
     return new Promise((resolve, reject) => {
       if (!this.db) {
@@ -346,13 +346,13 @@ class IndexedDBManager {
         return
       }
 
-      const expiry = Date.now() + (ttlMinutes * 60 * 1000)
+      const expiry = Date.now() + ttlMinutes * 60 * 1000
       const cacheEntry = {
         key,
         data,
         expiry,
         endpoint: key.split('?')[0], // Extract base endpoint
-        timestamp: Date.now()
+        timestamp: Date.now(),
       }
 
       const transaction = this.db.transaction([this.stores.cache], 'readwrite')
@@ -364,7 +364,7 @@ class IndexedDBManager {
     })
   }
 
-  async getCachedResponse(key: string): Promise<any | null> {
+  async getCachedResponse(key: string): Promise<unknown | null> {
     await this.init()
     return new Promise((resolve, reject) => {
       if (!this.db) {
@@ -428,7 +428,7 @@ class IndexedDBManager {
   }
 
   // Metrics and Analytics
-  async saveMetric(metric: { type: string; data: any }): Promise<void> {
+  async saveMetric(metric: { type: string; data: unknown }): Promise<void> {
     await this.init()
     return new Promise((resolve, reject) => {
       if (!this.db) {
@@ -440,7 +440,7 @@ class IndexedDBManager {
         id: `${metric.type}_${Date.now()}_${Math.random()}`,
         type: metric.type,
         data: metric.data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       }
 
       const transaction = this.db.transaction([this.stores.metrics], 'readwrite')
@@ -456,7 +456,7 @@ class IndexedDBManager {
   async saveConsciousnessInsight(insight: {
     category: string
     confidence: number
-    data: any
+    data: unknown
   }): Promise<void> {
     await this.init()
     return new Promise((resolve, reject) => {
@@ -470,7 +470,7 @@ class IndexedDBManager {
         category: insight.category,
         confidence: insight.confidence,
         data: insight.data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       }
 
       const transaction = this.db.transaction([this.stores.insights], 'readwrite')
@@ -482,7 +482,7 @@ class IndexedDBManager {
     })
   }
 
-  async getConsciousnessInsights(category?: string): Promise<any[]> {
+  async getConsciousnessInsights(category?: string): Promise<unknown[]> {
     await this.init()
     return new Promise((resolve, reject) => {
       if (!this.db) {
@@ -492,7 +492,7 @@ class IndexedDBManager {
 
       const transaction = this.db.transaction([this.stores.insights], 'readonly')
       const store = transaction.objectStore(this.stores.insights)
-      
+
       let request: IDBRequest
       if (category) {
         const index = store.index('category')
@@ -513,8 +513,8 @@ class IndexedDBManager {
 
     const storeNames = Object.values(this.stores)
     const transaction = this.db.transaction(storeNames, 'readwrite')
-    
-    const clearPromises = storeNames.map(storeName => {
+
+    const clearPromises = storeNames.map((storeName) => {
       return new Promise<void>((resolve, reject) => {
         const store = transaction.objectStore(storeName)
         const request = store.clear()
@@ -532,10 +532,10 @@ class IndexedDBManager {
       const used = estimate.usage || 0
       const quota = estimate.quota || 0
       const percentage = quota > 0 ? (used / quota) * 100 : 0
-      
+
       return { used, quota, percentage }
     }
-    
+
     return { used: 0, quota: 0, percentage: 0 }
   }
 }
@@ -573,7 +573,7 @@ export function createOfflineAction(
     timestamp: Date.now(),
     retryCount: 0,
     priority: options.priority || 'medium',
-    maxRetries: options.maxRetries || 3
+    maxRetries: options.maxRetries || 3,
   }
 }
 

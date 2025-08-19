@@ -80,7 +80,7 @@ class ProductionDeployer {
       
       console.log('✅ Production deployment completed successfully!');
       
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('❌ Deployment failed:', error);
       await this.rollbackIfNeeded();
       process.exit(1);
@@ -170,7 +170,7 @@ class ProductionDeployer {
 
       console.log('✓ All critical dependencies found');
       
-    } catch (error) {
+    } catch (error: unknown) {
       throw new Error(`Dependency validation failed: ${error.message}`);
     }
 
@@ -195,7 +195,7 @@ class ProductionDeployer {
       
       console.log('✅ Application build completed');
       
-    } catch (error) {
+    } catch (error: unknown) {
       throw new Error(`Build failed: ${error.message}`);
     }
   }
@@ -213,7 +213,7 @@ class ProductionDeployer {
       
       console.log('✅ Vercel deployment completed');
       
-    } catch (error) {
+    } catch (error: unknown) {
       throw new Error(`Vercel deployment failed: ${error.message}`);
     }
   }
@@ -228,7 +228,7 @@ class ProductionDeployer {
       
       console.log('✅ Database migrations completed');
       
-    } catch (error) {
+    } catch (error: unknown) {
       throw new Error(`Database migration failed: ${error.message}`);
     }
   }
@@ -246,7 +246,7 @@ class ProductionDeployer {
         console.log('ℹ️  No seed script found, skipping...');
       }
       
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn(`⚠️  Database seeding failed (non-critical): ${error.message}`);
     }
   }
@@ -283,7 +283,7 @@ class ProductionDeployer {
       
       console.log('✅ Health checks completed');
       
-    } catch (error) {
+    } catch (error: unknown) {
       throw new Error(`Health checks failed: ${error.message}`);
     }
   }
@@ -320,7 +320,7 @@ class ProductionDeployer {
       
       console.log('✅ Critical path validation completed');
       
-    } catch (error) {
+    } catch (error: unknown) {
       throw new Error(`Critical path validation failed: ${error.message}`);
     }
   }

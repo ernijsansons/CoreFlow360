@@ -6,27 +6,35 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { UserSession, UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions, canAccessRole } from '@/types/auth'
+import {
+  UserSession,
+  UserRole,
+  Permission,
+  hasPermission,
+  hasAnyPermission,
+  hasAllPermissions,
+  canAccessRole,
+} from '@/types/auth'
 
 interface AuthContextType {
   user: UserSession | null
   loading: boolean
   error: string | null
-  
+
   // Authentication methods
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   refreshSession: () => Promise<void>
-  
+
   // Permission checks
   hasPermission: (permission: Permission) => boolean
   hasAnyPermission: (permissions: Permission[]) => boolean
   hasAllPermissions: (permissions: Permission[]) => boolean
   canAccessRole: (targetRole: UserRole) => boolean
-  
+
   // User preferences
   updatePreferences: (preferences: Partial<UserSession['preferences']>) => Promise<void>
-  
+
   // Module access
   hasModule: (module: string) => boolean
   hasAllModules: (modules: string[]) => boolean
@@ -63,7 +71,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         //   setUser(session)
         // }
       } catch (err) {
-        console.error('Auth initialization error:', err)
         setError('Failed to initialize authentication')
       } finally {
         setLoading(false)
@@ -73,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth()
   }, [])
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (_email: string, _password: string) => {
     try {
       setLoading(true)
       setError(null)
@@ -83,10 +90,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: 'demo-user-1',
         email,
         name: email.split('@')[0],
-        role: email.includes('admin') ? UserRole.ORG_ADMIN : 
-              email.includes('super') ? UserRole.SUPER_ADMIN :
-              email.includes('manager') ? UserRole.DEPARTMENT_MANAGER :
-              UserRole.USER,
+        role: email.includes('admin')
+          ? UserRole.ORG_ADMIN
+          : email.includes('super')
+            ? UserRole.SUPER_ADMIN
+            : email.includes('manager')
+              ? UserRole.DEPARTMENT_MANAGER
+              : UserRole.USER,
         permissions: [], // Will be set based on role
         tenantId: 'demo-tenant',
         activeModules: ['crm', 'accounting', 'projects'],
@@ -100,24 +110,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             inApp: true,
             desktop: true,
             frequency: 'realtime',
-            categories: ['urgent', 'deals', 'tasks']
+            categories: ['urgent', 'deals', 'tasks'],
           },
           dashboard: {
             layout: 'grid',
             widgets: ['revenue', 'tasks', 'deals', 'team'],
             customWidgets: [],
-            refreshInterval: 300
+            refreshInterval: 300,
           },
           aiAssistant: {
             enabled: true,
             automationLevel: 'medium',
             suggestions: true,
             voiceCommands: false,
-            naturalLanguageSearch: true
-          }
+            naturalLanguageSearch: true,
+          },
         },
         mfaEnabled: false,
-        lastActivity: new Date()
+        lastActivity: new Date(),
       }
 
       // Set permissions based on role
@@ -137,7 +147,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // const session = await response.json()
       // setUser(session)
     } catch (err) {
-      console.error('Login error:', err)
       setError('Invalid credentials')
       throw err
     } finally {
@@ -150,11 +159,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true)
       localStorage.removeItem('userSession')
       setUser(null)
-      
+
       // In production:
       // await fetch('/api/auth/logout', { method: 'POST' })
     } catch (err) {
-      console.error('Logout error:', err)
     } finally {
       setLoading(false)
     }
@@ -168,79 +176,100 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // const response = await fetch('/api/auth/refresh')
       // const session = await response.json()
       // setUser(session)
-      
+
       // For demo, just update last activity
       const updatedUser = { ...user, lastActivity: new Date() }
       localStorage.setItem('userSession', JSON.stringify(updatedUser))
       setUser(updatedUser)
-    } catch (err) {
-      console.error('Session refresh error:', err)
-    }
+    } catch (err) {}
   }, [user])
 
-  const updatePreferences = useCallback(async (preferences: Partial<UserSession['preferences']>) => {
-    if (!user) return
+  const updatePreferences = useCallback(
+    async (preferences: Partial<UserSession['preferences']>) => {
+      if (!user) return
 
-    try {
-      const updatedUser = {
-        ...user,
-        preferences: {
-          ...user.preferences,
-          ...preferences
+      try {
+        const updatedUser = {
+          ...user,
+          preferences: {
+            ...user.preferences,
+            ...preferences,
+          },
         }
-      }
-      
-      localStorage.setItem('userSession', JSON.stringify(updatedUser))
-      setUser(updatedUser)
 
-      // In production:
-      // await fetch('/api/user/preferences', {
-      //   method: 'PATCH',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(preferences)
-      // })
-    } catch (err) {
-      console.error('Update preferences error:', err)
-      throw err
-    }
-  }, [user])
+        localStorage.setItem('userSession', JSON.stringify(updatedUser))
+        setUser(updatedUser)
+
+        // In production:
+        // await fetch('/api/user/preferences', {
+        //   method: 'PATCH',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(preferences)
+        // })
+      } catch (err) {
+        throw err
+      }
+    },
+    [user]
+  )
 
   // Permission check methods
-  const hasPermissionCheck = useCallback((permission: Permission): boolean => {
-    if (!user) return false
-    return hasPermission(user.permissions, permission)
-  }, [user])
+  const hasPermissionCheck = useCallback(
+    (permission: Permission): boolean => {
+      if (!user) return false
+      return hasPermission(user.permissions, permission)
+    },
+    [user]
+  )
 
-  const hasAnyPermissionCheck = useCallback((permissions: Permission[]): boolean => {
-    if (!user) return false
-    return hasAnyPermission(user.permissions, permissions)
-  }, [user])
+  const hasAnyPermissionCheck = useCallback(
+    (permissions: Permission[]): boolean => {
+      if (!user) return false
+      return hasAnyPermission(user.permissions, permissions)
+    },
+    [user]
+  )
 
-  const hasAllPermissionsCheck = useCallback((permissions: Permission[]): boolean => {
-    if (!user) return false
-    return hasAllPermissions(user.permissions, permissions)
-  }, [user])
+  const hasAllPermissionsCheck = useCallback(
+    (permissions: Permission[]): boolean => {
+      if (!user) return false
+      return hasAllPermissions(user.permissions, permissions)
+    },
+    [user]
+  )
 
-  const canAccessRoleCheck = useCallback((targetRole: UserRole): boolean => {
-    if (!user) return false
-    return canAccessRole(user.role, targetRole)
-  }, [user])
+  const canAccessRoleCheck = useCallback(
+    (targetRole: UserRole): boolean => {
+      if (!user) return false
+      return canAccessRole(user.role, targetRole)
+    },
+    [user]
+  )
 
   // Module access methods
-  const hasModule = useCallback((module: string): boolean => {
-    if (!user) return false
-    return user.activeModules.includes(module)
-  }, [user])
+  const hasModule = useCallback(
+    (module: string): boolean => {
+      if (!user) return false
+      return user.activeModules.includes(module)
+    },
+    [user]
+  )
 
-  const hasAllModules = useCallback((modules: string[]): boolean => {
-    if (!user) return false
-    return modules.every(module => user.activeModules.includes(module))
-  }, [user])
+  const hasAllModules = useCallback(
+    (modules: string[]): boolean => {
+      if (!user) return false
+      return modules.every((module) => user.activeModules.includes(module))
+    },
+    [user]
+  )
 
-  const hasAnyModule = useCallback((modules: string[]): boolean => {
-    if (!user) return false
-    return modules.some(module => user.activeModules.includes(module))
-  }, [user])
+  const hasAnyModule = useCallback(
+    (modules: string[]): boolean => {
+      if (!user) return false
+      return modules.some((module) => user.activeModules.includes(module))
+    },
+    [user]
+  )
 
   const value: AuthContextType = {
     user,
@@ -256,14 +285,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updatePreferences,
     hasModule,
     hasAllModules,
-    hasAnyModule
+    hasAnyModule,
   }
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 // Custom hook for using auth context

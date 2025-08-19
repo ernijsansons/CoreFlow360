@@ -5,9 +5,12 @@
 
 import { NextResponse } from 'next/server'
 import { ZodError } from 'zod'
-import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library'
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientValidationError,
+} from '@prisma/client/runtime/library'
 import { prisma } from './db'
-import { 
+import {
   AppError,
   ValidationError,
   AuthenticationError,
@@ -18,7 +21,7 @@ import {
   DatabaseError,
   ExternalServiceError,
   BusinessLogicError,
-  TenantError
+  TenantError,
 } from './errors/base-error'
 
 // Error types for different scenarios
@@ -31,7 +34,7 @@ export enum ErrorType {
   DATABASE = 'DATABASE_ERROR',
   EXTERNAL_SERVICE = 'EXTERNAL_SERVICE_ERROR',
   INTERNAL = 'INTERNAL_ERROR',
-  CONFIGURATION = 'CONFIGURATION_ERROR'
+  CONFIGURATION = 'CONFIGURATION_ERROR',
 }
 
 // Error severity levels
@@ -39,7 +42,7 @@ export enum ErrorSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 // Error context interface
@@ -72,7 +75,7 @@ const ERROR_CONFIG = {
   includeStackTraces: process.env.NODE_ENV === 'development',
   logErrors: true,
   monitorErrors: process.env.NODE_ENV === 'production',
-  sanitizeMessages: process.env.NODE_ENV === 'production'
+  sanitizeMessages: process.env.NODE_ENV === 'production',
 } as const
 
 /**
@@ -100,57 +103,45 @@ export class ErrorHandler {
   ): NextResponse {
     const errorInfo = this.extractErrorInfo(error, type)
     const response = this.formatErrorResponse(errorInfo, context)
-    
+
     // Log the error
     if (ERROR_CONFIG.logErrors) {
       this.logError(errorInfo, context)
     }
-    
+
     // Monitor in production
     if (ERROR_CONFIG.monitorErrors) {
       this.monitorError(errorInfo, context)
     }
-    
+
     return NextResponse.json(response, { status: errorInfo.statusCode })
   }
 
   /**
    * Handle validation errors
    */
-  handleValidationError(
-    errors: unknown,
-    context: ErrorContext = {}
-  ): NextResponse {
+  handleValidationError(errors: unknown, context: ErrorContext = {}): NextResponse {
     return this.handleError(errors, context, ErrorType.VALIDATION)
   }
 
   /**
    * Handle authentication errors
    */
-  handleAuthError(
-    error: unknown,
-    context: ErrorContext = {}
-  ): NextResponse {
+  handleAuthError(error: unknown, context: ErrorContext = {}): NextResponse {
     return this.handleError(error, context, ErrorType.AUTHENTICATION)
   }
 
   /**
    * Handle authorization errors
    */
-  handleAuthzError(
-    error: unknown,
-    context: ErrorContext = {}
-  ): NextResponse {
+  handleAuthzError(error: unknown, context: ErrorContext = {}): NextResponse {
     return this.handleError(error, context, ErrorType.AUTHORIZATION)
   }
 
   /**
    * Handle not found errors
    */
-  handleNotFoundError(
-    resource: string,
-    context: ErrorContext = {}
-  ): NextResponse {
+  handleNotFoundError(resource: string, context: ErrorContext = {}): NextResponse {
     const error = new NotFoundError(resource)
     return this.handleError(error, context, ErrorType.NOT_FOUND)
   }
@@ -158,20 +149,17 @@ export class ErrorHandler {
   /**
    * Handle rate limit errors
    */
-  handleRateLimitError(
-    retryAfter: number,
-    context: ErrorContext = {}
-  ): NextResponse {
+  handleRateLimitError(retryAfter: number, context: ErrorContext = {}): NextResponse {
     const error = new RateLimitError('Rate limit exceeded', retryAfter)
     const errorInfo = this.extractErrorInfo(error, ErrorType.RATE_LIMIT)
     errorInfo.retryAfter = retryAfter
-    
+
     const response = this.formatErrorResponse(errorInfo, context)
-    return NextResponse.json(response, { 
+    return NextResponse.json(response, {
       status: 429,
       headers: {
-        'Retry-After': String(Math.ceil(retryAfter / 1000))
-      }
+        'Retry-After': String(Math.ceil(retryAfter / 1000)),
+      },
     })
   }
 
@@ -180,13 +168,13 @@ export class ErrorHandler {
    */
   handleZodError(error: ZodError, context: ErrorContext = {}): NextResponse {
     const details = {
-      issues: error.issues.map(issue => ({
+      issues: error.issues.map((issue) => ({
         path: issue.path.join('.'),
         message: issue.message,
-        code: issue.code
-      }))
+        code: issue.code,
+      })),
     }
-    
+
     const errorInfo = {
       type: ErrorType.VALIDATION,
       message: 'Validation failed',
@@ -194,18 +182,21 @@ export class ErrorHandler {
       statusCode: 400,
       severity: ErrorSeverity.LOW,
       retryAfter: undefined,
-      originalError: error
+      originalError: error,
     }
-    
+
     return this.processErrorResponse(errorInfo, context)
   }
 
   /**
    * Handle Prisma database errors specifically
    */
-  handlePrismaError(error: PrismaClientKnownRequestError | PrismaClientValidationError, context: ErrorContext = {}): NextResponse {
-    let errorInfo: any
-    
+  handlePrismaError(
+    error: PrismaClientKnownRequestError | PrismaClientValidationError,
+    context: ErrorContext = {}
+  ): NextResponse {
+    let errorInfo: unknown
+
     if (error instanceof PrismaClientKnownRequestError) {
       switch (error.code) {
         case 'P2002':
@@ -214,7 +205,7 @@ export class ErrorHandler {
             message: 'Duplicate entry detected',
             details: { field: error.meta?.target, code: error.code },
             statusCode: 409,
-            severity: ErrorSeverity.LOW
+            severity: ErrorSeverity.LOW,
           }
           break
         case 'P2025':
@@ -223,7 +214,7 @@ export class ErrorHandler {
             message: 'Record not found',
             details: { code: error.code },
             statusCode: 404,
-            severity: ErrorSeverity.LOW
+            severity: ErrorSeverity.LOW,
           }
           break
         default:
@@ -232,7 +223,7 @@ export class ErrorHandler {
             message: 'Database operation failed',
             details: { code: error.code, meta: error.meta },
             statusCode: 500,
-            severity: ErrorSeverity.HIGH
+            severity: ErrorSeverity.HIGH,
           }
       }
     } else {
@@ -241,32 +232,32 @@ export class ErrorHandler {
         message: 'Database validation failed',
         details: { validation: true },
         statusCode: 400,
-        severity: ErrorSeverity.MEDIUM
+        severity: ErrorSeverity.MEDIUM,
       }
     }
-    
+
     errorInfo.retryAfter = undefined
     errorInfo.originalError = error
-    
+
     return this.processErrorResponse(errorInfo, context)
   }
 
   /**
    * Process error response with enhanced logic
    */
-  private processErrorResponse(errorInfo: any, context: ErrorContext): NextResponse {
+  private processErrorResponse(errorInfo: unknown, context: ErrorContext): NextResponse {
     const response = this.formatErrorResponse(errorInfo, context)
-    
+
     // Log the error
     if (ERROR_CONFIG.logErrors) {
       this.logError(errorInfo, context)
     }
-    
+
     // Monitor in production
     if (ERROR_CONFIG.monitorErrors) {
       this.monitorError(errorInfo, context)
     }
-    
+
     return NextResponse.json(response, { status: errorInfo.statusCode })
   }
 
@@ -283,7 +274,7 @@ export class ErrorHandler {
         statusCode: error.statusCode,
         severity: this.getErrorSeverity(error),
         retryAfter: error instanceof RateLimitError ? error.details?.retryAfter : undefined,
-        originalError: error
+        originalError: error,
       }
     }
 
@@ -291,48 +282,48 @@ export class ErrorHandler {
       [ErrorType.VALIDATION]: {
         statusCode: 400,
         defaultMessage: 'Invalid request data',
-        severity: ErrorSeverity.LOW
+        severity: ErrorSeverity.LOW,
       },
       [ErrorType.AUTHENTICATION]: {
         statusCode: 401,
         defaultMessage: 'Authentication required',
-        severity: ErrorSeverity.MEDIUM
+        severity: ErrorSeverity.MEDIUM,
       },
       [ErrorType.AUTHORIZATION]: {
         statusCode: 403,
         defaultMessage: 'Access denied',
-        severity: ErrorSeverity.MEDIUM
+        severity: ErrorSeverity.MEDIUM,
       },
       [ErrorType.NOT_FOUND]: {
         statusCode: 404,
         defaultMessage: 'Resource not found',
-        severity: ErrorSeverity.LOW
+        severity: ErrorSeverity.LOW,
       },
       [ErrorType.RATE_LIMIT]: {
         statusCode: 429,
         defaultMessage: 'Too many requests',
-        severity: ErrorSeverity.MEDIUM
+        severity: ErrorSeverity.MEDIUM,
       },
       [ErrorType.DATABASE]: {
         statusCode: 500,
         defaultMessage: 'Database operation failed',
-        severity: ErrorSeverity.HIGH
+        severity: ErrorSeverity.HIGH,
       },
       [ErrorType.EXTERNAL_SERVICE]: {
         statusCode: 502,
         defaultMessage: 'External service unavailable',
-        severity: ErrorSeverity.HIGH
+        severity: ErrorSeverity.HIGH,
       },
       [ErrorType.INTERNAL]: {
         statusCode: 500,
         defaultMessage: 'Internal server error',
-        severity: ErrorSeverity.CRITICAL
+        severity: ErrorSeverity.CRITICAL,
       },
       [ErrorType.CONFIGURATION]: {
         statusCode: 500,
         defaultMessage: 'Configuration error',
-        severity: ErrorSeverity.CRITICAL
-      }
+        severity: ErrorSeverity.CRITICAL,
+      },
     }
 
     const config = errorMap[type]
@@ -346,7 +337,7 @@ export class ErrorHandler {
       statusCode: config.statusCode,
       severity: config.severity,
       retryAfter: undefined as number | undefined,
-      originalError: error
+      originalError: error,
     }
   }
 
@@ -355,17 +346,15 @@ export class ErrorHandler {
    */
   private extractMessage(error: unknown, defaultMessage: string): string {
     if (error instanceof Error) {
-      return ERROR_CONFIG.sanitizeMessages 
+      return ERROR_CONFIG.sanitizeMessages
         ? this.sanitizeErrorMessage(error.message)
         : error.message
     }
-    
+
     if (typeof error === 'string') {
-      return ERROR_CONFIG.sanitizeMessages 
-        ? this.sanitizeErrorMessage(error)
-        : error
+      return ERROR_CONFIG.sanitizeMessages ? this.sanitizeErrorMessage(error) : error
     }
-    
+
     return defaultMessage
   }
 
@@ -376,18 +365,16 @@ export class ErrorHandler {
     if (error instanceof Error && ERROR_CONFIG.includeStackTraces) {
       return {
         stack: error.stack,
-        name: error.name
+        name: error.name,
       }
     }
-    
+
     if (typeof error === 'object' && error !== null) {
       return error as Record<string, unknown>
     }
-    
+
     return undefined
   }
-
-
 
   /**
    * Format error response
@@ -402,9 +389,9 @@ export class ErrorHandler {
         type: errorInfo.type,
         message: errorInfo.message,
         code: `${errorInfo.type}_${errorInfo.statusCode}`,
-        requestId: context.requestId
+        requestId: context.requestId,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     }
 
     // Add details if available and in development
@@ -436,13 +423,13 @@ export class ErrorHandler {
       ip: context.ip,
       metadata: context.metadata,
       stack: errorInfo.details?.stack,
-      timestamp: new Date()
+      timestamp: new Date(),
     }
 
     // Console logging
     console.error('ERROR:', {
       ...logData,
-      originalError: errorInfo.originalError
+      originalError: errorInfo.originalError,
     })
 
     // Database logging (async, don't block response)
@@ -458,15 +445,13 @@ export class ErrorHandler {
             errorType: errorInfo.type,
             severity: errorInfo.severity,
             endpoint: context.endpoint,
-            method: context.method
+            method: context.method,
           }),
           tenantId: context.tenantId || 'system',
-          userId: context.userId
-        }
+          userId: context.userId,
+        },
       })
-    } catch (dbError) {
-      console.error('Failed to log error to database:', dbError)
-    }
+    } catch (dbError) {}
   }
 
   /**
@@ -482,7 +467,7 @@ export class ErrorHandler {
       [ErrorType.DATABASE]: 500,
       [ErrorType.EXTERNAL_SERVICE]: 502,
       [ErrorType.INTERNAL]: 500,
-      [ErrorType.CONFIGURATION]: 500
+      [ErrorType.CONFIGURATION]: 500,
     }
     return statusMap[type] || 500
   }
@@ -500,12 +485,15 @@ export class ErrorHandler {
   /**
    * Get error details
    */
-  private getErrorDetails(error: unknown, context: ErrorContext): Record<string, unknown> | undefined {
+  private getErrorDetails(
+    error: unknown,
+    context: ErrorContext
+  ): Record<string, unknown> | undefined {
     if (error instanceof Error && ERROR_CONFIG.includeStackTraces) {
       return {
         stack: error.stack,
         name: error.name,
-        ...context.metadata
+        ...context.metadata,
       }
     }
     return context.metadata
@@ -516,17 +504,13 @@ export class ErrorHandler {
    */
   private sanitizeErrorMessage(error: unknown): string {
     if (error instanceof Error) {
-      return ERROR_CONFIG.sanitizeMessages 
-        ? this.sanitizeMessage(error.message)
-        : error.message
+      return ERROR_CONFIG.sanitizeMessages ? this.sanitizeMessage(error.message) : error.message
     }
-    
+
     if (typeof error === 'string') {
-      return ERROR_CONFIG.sanitizeMessages 
-        ? this.sanitizeMessage(error)
-        : error
+      return ERROR_CONFIG.sanitizeMessages ? this.sanitizeMessage(error) : error
     }
-    
+
     return 'An unexpected error occurred'
   }
 
@@ -549,7 +533,11 @@ export class ErrorHandler {
     if (error instanceof ValidationError || error instanceof NotFoundError) {
       return ErrorSeverity.LOW
     }
-    if (error instanceof AuthenticationError || error instanceof AuthorizationError || error instanceof RateLimitError) {
+    if (
+      error instanceof AuthenticationError ||
+      error instanceof AuthorizationError ||
+      error instanceof RateLimitError
+    ) {
       return ErrorSeverity.MEDIUM
     }
     if (error instanceof DatabaseError || error instanceof ExternalServiceError) {
@@ -570,7 +558,7 @@ export class ErrorHandler {
   ): void {
     // In production, this would integrate with monitoring services
     // like Sentry, DataDog, or New Relic
-    
+
     if (errorInfo.severity === ErrorSeverity.CRITICAL) {
       // Send immediate alert for critical errors
       console.error('CRITICAL ERROR ALERT:', {
@@ -578,7 +566,7 @@ export class ErrorHandler {
         message: errorInfo.message,
         endpoint: context.endpoint,
         tenantId: context.tenantId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })
     }
   }
@@ -618,19 +606,27 @@ export const handleAuthorizationError = handleAuthzError
 export const handleNotFoundError = (resource: string, context?: ErrorContext) =>
   errorHandler.handleNotFoundError(resource, context)
 
-
-
 export const handleRateLimitError = (retryAfter: number, context?: ErrorContext) =>
   errorHandler.handleRateLimitError(retryAfter, context)
 
-export const handleDatabaseError = (message: string, originalError?: unknown, context?: ErrorContext) =>
-  errorHandler.handleError(new DatabaseError(message, originalError), context)
+export const handleDatabaseError = (
+  message: string,
+  originalError?: unknown,
+  context?: ErrorContext
+) => errorHandler.handleError(new DatabaseError(message, originalError), context)
 
-export const handleExternalServiceError = (service: string, message: string, originalError?: unknown, context?: ErrorContext) =>
-  errorHandler.handleError(new ExternalServiceError(service, message, originalError), context)
+export const handleExternalServiceError = (
+  service: string,
+  message: string,
+  originalError?: unknown,
+  context?: ErrorContext
+) => errorHandler.handleError(new ExternalServiceError(service, message, originalError), context)
 
-export const handleBusinessLogicError = (message: string, details?: any, context?: ErrorContext) =>
-  errorHandler.handleError(new BusinessLogicError(message, details), context)
+export const handleBusinessLogicError = (
+  message: string,
+  details?: unknown,
+  context?: ErrorContext
+) => errorHandler.handleError(new BusinessLogicError(message, details), context)
 
 export const handleTenantError = (message?: string, context?: ErrorContext) =>
   errorHandler.handleError(new TenantError(message), context)
@@ -639,8 +635,8 @@ export const handleError = (error: unknown, context?: ErrorContext, type?: Error
   errorHandler.handleError(error, context, type)
 
 // Additional exports for backward compatibility
-export const createValidationError = (message: string, details?: any) => 
+export const createValidationError = (message: string, details?: unknown) =>
   new ValidationError(message, details)
 
-export const createAuthzError = (message: string, details?: any) => 
+export const createAuthzError = (message: string, details?: unknown) =>
   new AuthorizationError(message, details)

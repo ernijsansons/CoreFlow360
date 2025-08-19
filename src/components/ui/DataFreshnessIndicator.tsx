@@ -30,7 +30,7 @@ export function DataFreshnessIndicator({
   onRefresh,
   className,
   showDetails = true,
-  variant = 'detailed'
+  variant = 'detailed',
 }: DataFreshnessProps) {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [isOnline, setIsOnline] = useState(true)
@@ -40,7 +40,7 @@ export function DataFreshnessIndicator({
     const interval = setInterval(() => {
       setCurrentTime(new Date())
     }, 30000)
-    
+
     return () => clearInterval(interval)
   }, [])
 
@@ -48,10 +48,10 @@ export function DataFreshnessIndicator({
   useEffect(() => {
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
-    
+
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
-    
+
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
@@ -80,7 +80,7 @@ export function DataFreshnessIndicator({
       bgColor: 'bg-green-50',
       borderColor: 'border-green-200',
       label: 'Fresh',
-      description: 'Data is up to date'
+      description: 'Data is up to date',
     },
     expiring: {
       icon: Clock,
@@ -88,7 +88,7 @@ export function DataFreshnessIndicator({
       bgColor: 'bg-yellow-50',
       borderColor: 'border-yellow-200',
       label: 'Expiring soon',
-      description: 'Data will be refreshed shortly'
+      description: 'Data will be refreshed shortly',
     },
     stale: {
       icon: RefreshCw,
@@ -96,7 +96,7 @@ export function DataFreshnessIndicator({
       bgColor: 'bg-orange-50',
       borderColor: 'border-orange-200',
       label: 'Refreshing',
-      description: 'Showing cached data while updating'
+      description: 'Showing cached data while updating',
     },
     very_stale: {
       icon: AlertTriangle,
@@ -104,7 +104,7 @@ export function DataFreshnessIndicator({
       bgColor: 'bg-red-50',
       borderColor: 'border-red-200',
       label: 'Stale',
-      description: 'Data may be outdated'
+      description: 'Data may be outdated',
     },
     refreshing: {
       icon: RefreshCw,
@@ -112,7 +112,7 @@ export function DataFreshnessIndicator({
       bgColor: 'bg-blue-50',
       borderColor: 'border-blue-200',
       label: 'Updating',
-      description: 'Fetching latest data'
+      description: 'Fetching latest data',
     },
     offline: {
       icon: WifiOff,
@@ -120,8 +120,8 @@ export function DataFreshnessIndicator({
       bgColor: 'bg-gray-50',
       borderColor: 'border-gray-200',
       label: 'Offline',
-      description: 'Showing cached data'
-    }
+      description: 'Showing cached data',
+    },
   }
 
   const config = statusConfig[status]
@@ -129,40 +129,34 @@ export function DataFreshnessIndicator({
 
   if (variant === 'minimal') {
     return (
-      <div className={cn("flex items-center space-x-1 text-xs", className)}>
-        <Icon 
-          className={cn("w-3 h-3", config.color, isRefreshing && "animate-spin")} 
-        />
-        <span className={config.color}>
-          {timeAgo}
-        </span>
+      <div className={cn('flex items-center space-x-1 text-xs', className)}>
+        <Icon className={cn('h-3 w-3', config.color, isRefreshing && 'animate-spin')} />
+        <span className={config.color}>{timeAgo}</span>
       </div>
     )
   }
 
   if (variant === 'badge') {
     return (
-      <div 
+      <div
         className={cn(
-          "inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border",
+          'inline-flex items-center space-x-1 rounded-full border px-2 py-1 text-xs font-medium',
           config.bgColor,
           config.borderColor,
           config.color,
           className
         )}
       >
-        <Icon 
-          className={cn("w-3 h-3", isRefreshing && "animate-spin")} 
-        />
+        <Icon className={cn('h-3 w-3', isRefreshing && 'animate-spin')} />
         <span>{config.label}</span>
       </div>
     )
   }
 
   return (
-    <motion.div 
+    <motion.div
       className={cn(
-        "flex items-center justify-between p-3 rounded-lg border",
+        'flex items-center justify-between rounded-lg border p-3',
         config.bgColor,
         config.borderColor,
         className
@@ -172,17 +166,9 @@ export function DataFreshnessIndicator({
       transition={{ duration: 0.2 }}
     >
       <div className="flex items-center space-x-2">
-        <Icon 
-          className={cn(
-            "w-4 h-4", 
-            config.color,
-            isRefreshing && "animate-spin"
-          )} 
-        />
+        <Icon className={cn('h-4 w-4', config.color, isRefreshing && 'animate-spin')} />
         <div className="flex flex-col">
-          <span className={cn("text-sm font-medium", config.color)}>
-            {config.label}
-          </span>
+          <span className={cn('text-sm font-medium', config.color)}>{config.label}</span>
           {showDetails && (
             <span className="text-xs text-gray-600">
               {config.description} • Updated {timeAgo}
@@ -196,20 +182,20 @@ export function DataFreshnessIndicator({
           onClick={onRefresh}
           disabled={isRefreshing}
           className={cn(
-            "flex items-center space-x-1 px-2 py-1 text-xs font-medium rounded transition-colors",
-            "hover:bg-white/50 focus:outline-none focus:ring-2 focus:ring-offset-1",
+            'flex items-center space-x-1 rounded px-2 py-1 text-xs font-medium transition-colors',
+            'hover:bg-white/50 focus:ring-2 focus:ring-offset-1 focus:outline-none',
             config.color,
-            isRefreshing && "opacity-50 cursor-not-allowed"
+            isRefreshing && 'cursor-not-allowed opacity-50'
           )}
         >
-          <RefreshCw className={cn("w-3 h-3", isRefreshing && "animate-spin")} />
+          <RefreshCw className={cn('h-3 w-3', isRefreshing && 'animate-spin')} />
           <span>Refresh</span>
         </button>
       )}
 
       {!isOnline && (
         <div className="flex items-center space-x-1 text-xs text-gray-500">
-          <WifiOff className="w-3 h-3" />
+          <WifiOff className="h-3 w-3" />
           <span>Offline</span>
         </div>
       )}
@@ -218,17 +204,19 @@ export function DataFreshnessIndicator({
 }
 
 // Higher-order component for automatic data freshness
-export function withDataFreshness<T extends Record<string, any>>(
+export function withDataFreshness<T extends Record<string, unknown>>(
   Component: React.ComponentType<T>
 ) {
-  return function DataFreshnessWrapper(props: T & { 
-    cachedData?: { 
-      cachedAt: Date
-      expiresAt: Date 
-      isStale: boolean 
+  return function DataFreshnessWrapper(
+    props: T & {
+      cachedData?: {
+        cachedAt: Date
+        expiresAt: Date
+        isStale: boolean
+      }
+      onRefresh?: () => void
     }
-    onRefresh?: () => void
-  }) {
+  ) {
     const { cachedData, onRefresh, ...componentProps } = props
 
     if (!cachedData) {
@@ -252,11 +240,7 @@ export function withDataFreshness<T extends Record<string, any>>(
 }
 
 // Hook for data freshness state
-export function useDataFreshness(
-  cachedAt: Date,
-  expiresAt: Date,
-  refreshInterval?: number
-) {
+export function useDataFreshness(cachedAt: Date, expiresAt: Date, refreshInterval?: number) {
   const [isStale, setIsStale] = useState(false)
   const [isExpiringSoon, setIsExpiringSoon] = useState(false)
   const [timeUntilStale, setTimeUntilStale] = useState<number>(0)
@@ -278,7 +262,7 @@ export function useDataFreshness(
 
     // Set up interval to check freshness
     const interval = setInterval(checkFreshness, refreshInterval || 30000)
-    
+
     return () => clearInterval(interval)
   }, [cachedAt, expiresAt, refreshInterval])
 
@@ -286,7 +270,7 @@ export function useDataFreshness(
     isStale,
     isExpiringSoon,
     timeUntilStale,
-    timeAgo: formatDistanceToNow(cachedAt, { addSuffix: true })
+    timeAgo: formatDistanceToNow(cachedAt, { addSuffix: true }),
   }
 }
 

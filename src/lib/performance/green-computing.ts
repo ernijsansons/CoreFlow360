@@ -52,7 +52,7 @@ class GreenComputingOptimizer {
       reducedMotion: false,
       prefetchStrategy: 'adaptive',
       cacheStrategy: 'balanced',
-      ...config
+      ...config,
     }
 
     this.initializeOptimizations()
@@ -71,8 +71,11 @@ class GreenComputingOptimizer {
   private async detectDeviceCapabilities(): Promise<void> {
     try {
       // Detect connection type
-      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
-      
+      const connection =
+        (navigator as unknown).connection ||
+        (navigator as unknown).mozConnection ||
+        (navigator as unknown).webkitConnection
+
       if (connection) {
         const effectiveType = connection.effectiveType
         const downlink = connection.downlink // Mbps
@@ -81,7 +84,7 @@ class GreenComputingOptimizer {
         // Adjust energy profile based on connection
         if (effectiveType === 'slow-2g' || effectiveType === '2g' || downlink < 1) {
           this.energyProfile = 'low'
-          this.config.prefetchStrategy = 'minimal' as any
+          this.config.prefetchStrategy = 'minimal' as unknown
           this.config.cacheStrategy = 'aggressive'
         } else if (effectiveType === '3g' || downlink < 5) {
           this.energyProfile = 'medium'
@@ -91,17 +94,22 @@ class GreenComputingOptimizer {
           this.config.prefetchStrategy = 'adaptive'
         }
 
-        console.log('[Green Computing] Connection type detected:', effectiveType, 'Energy profile:', this.energyProfile)
+        console.log(
+          '[Green Computing] Connection type detected:',
+          effectiveType,
+          'Energy profile:',
+          this.energyProfile
+        )
       }
 
       // Detect battery status
       if ('getBattery' in navigator) {
-        const battery = await (navigator as any).getBattery()
+        const battery = await (navigator as unknown).getBattery()
         this.batteryInfo = {
           isCharging: battery.charging,
           chargingLevel: battery.level,
           dischargingTime: battery.dischargingTime / 60, // Convert to minutes
-          chargingTime: battery.chargingTime / 60
+          chargingTime: battery.chargingTime / 60,
         }
 
         // Enable battery saving if low battery
@@ -128,14 +136,11 @@ class GreenComputingOptimizer {
       }
 
       // Detect data saver preference
-      const saveData = (navigator as any).connection?.saveData
+      const saveData = (navigator as unknown).connection?.saveData
       if (saveData) {
         this.enableDataSaverMode()
       }
-
-    } catch (error) {
-      console.warn('[Green Computing] Device capability detection failed:', error)
-    }
+    } catch (error) {}
   }
 
   // Performance Monitoring
@@ -151,14 +156,13 @@ class GreenComputingOptimizer {
       try {
         vitalsObserver.observe({ entryTypes: ['measure', 'navigation', 'resource', 'paint'] })
         this.observers.push(vitalsObserver)
-      } catch (error) {
-        console.warn('[Green Computing] Performance observer setup failed:', error)
-      }
+      } catch (error) {}
 
       // Monitor long tasks
       const longTaskObserver = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          if (entry.duration > 50) { // Tasks longer than 50ms
+          if (entry.duration > 50) {
+            // Tasks longer than 50ms
             this.optimizeLongTask(entry)
           }
         }
@@ -167,9 +171,7 @@ class GreenComputingOptimizer {
       try {
         longTaskObserver.observe({ entryTypes: ['longtask'] })
         this.observers.push(longTaskObserver)
-      } catch (error) {
-        console.warn('[Green Computing] Long task observer setup failed:', error)
-      }
+      } catch (error) {}
     }
 
     // Custom performance metrics
@@ -182,13 +184,12 @@ class GreenComputingOptimizer {
         const navEntry = entry as PerformanceNavigationTiming
         this.updateMetrics({
           loadTime: navEntry.loadEventEnd - navEntry.loadEventStart,
-          renderTime: navEntry.domContentLoadedEventEnd - navEntry.domContentLoadedEventStart
+          renderTime: navEntry.domContentLoadedEventEnd - navEntry.domContentLoadedEventStart,
         })
         break
 
       case 'paint':
         if (entry.name === 'first-contentful-paint') {
-          console.log('[Green Computing] FCP:', entry.startTime + 'ms')
         }
         break
 
@@ -202,8 +203,6 @@ class GreenComputingOptimizer {
   }
 
   private optimizeLongTask(entry: PerformanceEntry): void {
-    console.warn('[Green Computing] Long task detected:', entry.duration + 'ms')
-    
     // Suggest optimizations
     if (entry.duration > 100) {
       this.suggestTaskOptimization(entry)
@@ -216,7 +215,8 @@ class GreenComputingOptimizer {
       type: 'long-task',
       duration: entry.duration,
       timestamp: entry.startTime,
-      recommendation: 'Consider breaking this task into smaller chunks using setTimeout or requestIdleCallback'
+      recommendation:
+        'Consider breaking this task into smaller chunks using setTimeout or requestIdleCallback',
     }
 
     // Dispatch custom event for the dashboard
@@ -231,11 +231,9 @@ class GreenComputingOptimizer {
   }
 
   private enableBatterySavingMode(): void {
-    console.log('[Green Computing] Enabling battery saving mode')
-    
     this.config.batterySavingMode = true
     this.config.reducedMotion = true
-    this.config.prefetchStrategy = 'minimal' as any
+    this.config.prefetchStrategy = 'minimal' as unknown
 
     // Reduce CPU-intensive operations
     this.reduceAnimations()
@@ -258,32 +256,35 @@ class GreenComputingOptimizer {
 
     // Optimize image formats
     this.optimizeImageFormats()
-    
+
     // Responsive images
     this.setupResponsiveImages()
   }
 
   private setupLazyLoading(): void {
     const images = document.querySelectorAll('img[data-src]')
-    
-    if ('IntersectionObserver' in window) {
-      const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const img = entry.target as HTMLImageElement
-            img.src = img.dataset.src || ''
-            img.classList.remove('lazy')
-            imageObserver.unobserve(img)
-          }
-        })
-      }, {
-        rootMargin: '50px'
-      })
 
-      images.forEach(img => imageObserver.observe(img))
+    if ('IntersectionObserver' in window) {
+      const imageObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const img = entry.target as HTMLImageElement
+              img.src = img.dataset.src || ''
+              img.classList.remove('lazy')
+              imageObserver.unobserve(img)
+            }
+          })
+        },
+        {
+          rootMargin: '50px',
+        }
+      )
+
+      images.forEach((img) => imageObserver.observe(img))
     } else {
       // Fallback for browsers without IntersectionObserver
-      images.forEach(img => {
+      images.forEach((img) => {
         const image = img as HTMLImageElement
         image.src = image.dataset.src || ''
       })
@@ -316,7 +317,7 @@ class GreenComputingOptimizer {
 
   private replaceImageFormats(format: 'webp' | 'avif'): void {
     const images = document.querySelectorAll('img')
-    images.forEach(img => {
+    images.forEach((img) => {
       const src = img.src
       if (src && !src.includes(`.${format}`)) {
         // This would typically be handled by the server/CDN
@@ -328,26 +329,26 @@ class GreenComputingOptimizer {
 
   private setupResponsiveImages(): void {
     const images = document.querySelectorAll('img[data-responsive]')
-    
-    images.forEach(img => {
+
+    images.forEach((img) => {
       const image = img as HTMLImageElement
       const devicePixelRatio = window.devicePixelRatio || 1
       const width = image.offsetWidth * devicePixelRatio
-      
+
       // Generate responsive URLs (typically handled by CDN)
       const baseSrc = image.dataset.responsive || image.src
       const responsiveSrc = `${baseSrc}?w=${Math.round(width)}&q=85&f=auto`
-      
+
       image.src = responsiveSrc
     })
   }
 
   // Green Mode Features
   private enableGreenModeIfNeeded(): void {
-    const shouldEnableGreenMode = 
-      this.energyProfile === 'low' || 
+    const shouldEnableGreenMode =
+      this.energyProfile === 'low' ||
       this.config.enableGreenMode ||
-      this.batteryInfo?.chargingLevel && this.batteryInfo.chargingLevel < 0.2
+      (this.batteryInfo?.chargingLevel && this.batteryInfo.chargingLevel < 0.2)
 
     if (shouldEnableGreenMode) {
       this.enableGreenMode()
@@ -355,10 +356,8 @@ class GreenComputingOptimizer {
   }
 
   private enableGreenMode(): void {
-    console.log('[Green Computing] Enabling green mode')
-    
     this.config.enableGreenMode = true
-    
+
     // Apply green optimizations
     this.enableDarkMode()
     this.reduceAnimations()
@@ -377,7 +376,7 @@ class GreenComputingOptimizer {
   private reduceAnimations(): void {
     document.documentElement.style.setProperty('--animation-duration', '0.1s')
     document.documentElement.style.setProperty('--transition-duration', '0.1s')
-    
+
     // Disable complex animations
     const style = document.createElement('style')
     style.textContent = `
@@ -395,12 +394,16 @@ class GreenComputingOptimizer {
   private optimizeRenderingFrequency(): void {
     // Throttle scroll events
     let scrollTimeout: NodeJS.Timeout
-    window.addEventListener('scroll', () => {
-      clearTimeout(scrollTimeout)
-      scrollTimeout = setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('throttled-scroll'))
-      }, 16) // 60fps max
-    }, { passive: true })
+    window.addEventListener(
+      'scroll',
+      () => {
+        clearTimeout(scrollTimeout)
+        scrollTimeout = setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('throttled-scroll'))
+        }, 16) // 60fps max
+      },
+      { passive: true }
+    )
 
     // Optimize resize events
     let resizeTimeout: NodeJS.Timeout
@@ -415,8 +418,8 @@ class GreenComputingOptimizer {
   private disableNonEssentialFeatures(): void {
     // Disable auto-playing videos
     const videos = document.querySelectorAll('video[autoplay]')
-    videos.forEach(video => {
-      (video as HTMLVideoElement).autoplay = false
+    videos.forEach((video) => {
+      ;(video as HTMLVideoElement).autoplay = false
     })
 
     // Reduce polling frequency
@@ -435,12 +438,12 @@ class GreenComputingOptimizer {
 
   private enableAggressiveCaching(): void {
     this.config.cacheStrategy = 'aggressive'
-    
+
     // Register aggressive caching strategy with service worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(registration => {
+      navigator.serviceWorker.ready.then((registration) => {
         registration.active?.postMessage({
-          type: 'ENABLE_AGGRESSIVE_CACHING'
+          type: 'ENABLE_AGGRESSIVE_CACHING',
         })
       })
     }
@@ -449,51 +452,50 @@ class GreenComputingOptimizer {
   private setupIntersectionObserver(): void {
     // Lazy load non-critical sections
     const lazyElements = document.querySelectorAll('[data-lazy-section]')
-    
-    if ('IntersectionObserver' in window && lazyElements.length > 0) {
-      const sectionObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const element = entry.target as HTMLElement
-            element.classList.add('lazy-loaded')
-            
-            // Trigger lazy loading
-            const event = new CustomEvent('lazy-section-loaded', { detail: element })
-            element.dispatchEvent(event)
-            
-            sectionObserver.unobserve(element)
-          }
-        })
-      }, {
-        rootMargin: '100px'
-      })
 
-      lazyElements.forEach(element => sectionObserver.observe(element))
+    if ('IntersectionObserver' in window && lazyElements.length > 0) {
+      const sectionObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const element = entry.target as HTMLElement
+              element.classList.add('lazy-loaded')
+
+              // Trigger lazy loading
+              const event = new CustomEvent('lazy-section-loaded', { detail: element })
+              element.dispatchEvent(event)
+
+              sectionObserver.unobserve(element)
+            }
+          })
+        },
+        {
+          rootMargin: '100px',
+        }
+      )
+
+      lazyElements.forEach((element) => sectionObserver.observe(element))
     }
   }
 
   private enableDataSaverMode(): void {
-    console.log('[Green Computing] Data saver mode detected')
-    
     // Reduce image quality
     this.optimizeImagesForDataSaver()
-    
+
     // Disable autoplay
     this.disableAutoplay()
-    
+
     // Reduce prefetching
-    this.config.prefetchStrategy = 'minimal' as any
+    this.config.prefetchStrategy = 'minimal' as unknown
   }
 
   private optimizeImagesForDataSaver(): void {
     const images = document.querySelectorAll('img')
-    images.forEach(img => {
+    images.forEach((img) => {
       const src = img.src
       if (src && !src.includes('q=')) {
         // Reduce quality for data saving
-        const dataSaverSrc = src.includes('?') 
-          ? src + '&q=60&f=auto' 
-          : src + '?q=60&f=auto'
+        const dataSaverSrc = src.includes('?') ? src + '&q=60&f=auto' : src + '?q=60&f=auto'
         img.src = dataSaverSrc
       }
     })
@@ -501,7 +503,7 @@ class GreenComputingOptimizer {
 
   private disableAutoplay(): void {
     const mediaElements = document.querySelectorAll('video, audio')
-    mediaElements.forEach(element => {
+    mediaElements.forEach((element) => {
       const media = element as HTMLMediaElement
       media.autoplay = false
       media.preload = 'none'
@@ -512,10 +514,10 @@ class GreenComputingOptimizer {
   private startMetricsCollection(): void {
     // Collect bundle size information
     this.calculateBundleSize()
-    
+
     // Monitor cache performance
     this.monitorCachePerformance()
-    
+
     // Calculate energy score
     this.calculateEnergyScore()
   }
@@ -523,9 +525,9 @@ class GreenComputingOptimizer {
   private calculateBundleSize(): void {
     if ('performance' in window && 'getEntriesByType' in performance) {
       const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
-      const jsResources = resources.filter(r => r.name.includes('.js'))
-      const cssResources = resources.filter(r => r.name.includes('.css'))
-      
+      const jsResources = resources.filter((r) => r.name.includes('.js'))
+      const cssResources = resources.filter((r) => r.name.includes('.css'))
+
       const totalSize = [...jsResources, ...cssResources].reduce((sum, resource) => {
         return sum + (resource.transferSize || 0)
       }, 0)
@@ -537,9 +539,9 @@ class GreenComputingOptimizer {
   private monitorCachePerformance(): void {
     if ('performance' in window) {
       const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
-      const cachedResources = resources.filter(r => r.transferSize === 0)
+      const cachedResources = resources.filter((r) => r.transferSize === 0)
       const totalResources = resources.length
-      
+
       const cacheHitRate = totalResources > 0 ? (cachedResources.length / totalResources) * 100 : 0
       this.updateMetrics({ cacheHitRate })
     }
@@ -575,12 +577,15 @@ class GreenComputingOptimizer {
   }
 
   private trackResourceEfficiency(resource: PerformanceResourceTiming): void {
-    const compressionRatio = resource.encodedBodySize > 0 
-      ? resource.decodedBodySize / resource.encodedBodySize 
-      : 1
+    const compressionRatio =
+      resource.encodedBodySize > 0 ? resource.decodedBodySize / resource.encodedBodySize : 1
 
     if (compressionRatio > 1.5) {
-      console.log('[Green Computing] Good compression detected:', resource.name, compressionRatio.toFixed(2))
+      console.log(
+        '[Green Computing] Good compression detected:',
+        resource.name,
+        compressionRatio.toFixed(2)
+      )
     }
 
     this.updateMetrics({ compressionRatio })
@@ -589,16 +594,18 @@ class GreenComputingOptimizer {
   // Public API
   public updateMetrics(newMetrics: Partial<PerformanceMetrics>): void {
     this.metrics = { ...this.metrics, ...newMetrics } as PerformanceMetrics
-    
+
     // Calculate carbon footprint
     if (this.metrics) {
       this.metrics.carbonFootprint = this.calculateCarbonFootprint(this.metrics)
     }
 
     // Dispatch update event
-    window.dispatchEvent(new CustomEvent('green-metrics-updated', { 
-      detail: this.metrics 
-    }))
+    window.dispatchEvent(
+      new CustomEvent('green-metrics-updated', {
+        detail: this.metrics,
+      })
+    )
   }
 
   private calculateCarbonFootprint(metrics: PerformanceMetrics): number {
@@ -606,14 +613,14 @@ class GreenComputingOptimizer {
     const baseCarbon = 0.5 // Base carbon per page view
     const sizeMultiplier = (metrics.bundleSize / 1024 / 1024) * 0.1 // 0.1g per MB
     const timeMultiplier = (metrics.loadTime / 1000) * 0.05 // 0.05g per second
-    
+
     let totalCarbon = baseCarbon + sizeMultiplier + timeMultiplier
-    
+
     // Apply green optimizations discount
     if (this.config.enableGreenMode) totalCarbon *= 0.7
     if (this.config.batterySavingMode) totalCarbon *= 0.8
     if (metrics.cacheHitRate > 80) totalCarbon *= 0.9
-    
+
     return Math.max(0.1, totalCarbon) // Minimum 0.1g
   }
 
@@ -627,7 +634,7 @@ class GreenComputingOptimizer {
 
   public updateConfig(newConfig: Partial<GreenOptimizationConfig>): void {
     this.config = { ...this.config, ...newConfig }
-    
+
     // Apply configuration changes
     if (newConfig.enableGreenMode !== undefined) {
       if (newConfig.enableGreenMode) {
@@ -678,13 +685,13 @@ class GreenComputingOptimizer {
       score: this.metrics?.energyScore || 0,
       metrics: this.metrics,
       optimizations,
-      carbonSavings: carbonSavings * 100 // Convert to percentage
+      carbonSavings: carbonSavings * 100, // Convert to percentage
     }
   }
 
   public cleanup(): void {
     // Clean up observers
-    this.observers.forEach(observer => observer.disconnect())
+    this.observers.forEach((observer) => observer.disconnect())
     this.observers = []
   }
 }
@@ -705,7 +712,7 @@ export function useGreenComputing() {
     const handleGreenModeEnabled = () => setIsGreenModeEnabled(true)
     const handleGreenModeDisabled = () => setIsGreenModeEnabled(false)
 
-    window.addEventListener('green-metrics-updated', handleMetricsUpdate as any)
+    window.addEventListener('green-metrics-updated', handleMetricsUpdate as unknown)
     window.addEventListener('green-mode-enabled', handleGreenModeEnabled)
     window.addEventListener('green-mode-disabled', handleGreenModeDisabled)
 
@@ -714,7 +721,7 @@ export function useGreenComputing() {
     setIsGreenModeEnabled(greenComputingOptimizer.getConfig().enableGreenMode)
 
     return () => {
-      window.removeEventListener('green-metrics-updated', handleMetricsUpdate as any)
+      window.removeEventListener('green-metrics-updated', handleMetricsUpdate as unknown)
       window.removeEventListener('green-mode-enabled', handleGreenModeEnabled)
       window.removeEventListener('green-mode-disabled', handleGreenModeDisabled)
     }
@@ -726,8 +733,9 @@ export function useGreenComputing() {
     enableGreenMode: () => greenComputingOptimizer.updateConfig({ enableGreenMode: true }),
     disableGreenMode: () => greenComputingOptimizer.updateConfig({ enableGreenMode: false }),
     getConfig: () => greenComputingOptimizer.getConfig(),
-    updateConfig: (config: Partial<GreenOptimizationConfig>) => greenComputingOptimizer.updateConfig(config),
-    generateReport: () => greenComputingOptimizer.generateSustainabilityReport()
+    updateConfig: (config: Partial<GreenOptimizationConfig>) =>
+      greenComputingOptimizer.updateConfig(config),
+    generateReport: () => greenComputingOptimizer.generateSustainabilityReport(),
   }
 }
 

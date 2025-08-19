@@ -10,44 +10,52 @@ import { prisma } from './db'
 const OdooPricingRequestSchema = z.object({
   // Core pricing parameters
   modules: z.array(z.string()).min(1, 'At least one module required'),
-  userCount: z.number().int().min(1, 'User count must be at least 1').max(10000, 'User count too high'),
+  userCount: z
+    .number()
+    .int()
+    .min(1, 'User count must be at least 1')
+    .max(10000, 'User count too high'),
   billingCycle: z.enum(['monthly', 'quarterly', 'annual']).default('monthly'),
-  
+
   // Odoo-style pricing options
   pricingModel: z.enum(['standard', 'enterprise', 'custom']).default('standard'),
   contractType: z.enum(['subscription', 'perpetual', 'usage-based']).default('subscription'),
   deploymentType: z.enum(['cloud', 'on-premise', 'hybrid']).default('cloud'),
-  
+
   // Business context
   tenantId: z.string().optional(),
   industry: z.string().optional(),
   companySize: z.enum(['startup', 'sme', 'enterprise']).optional(),
   // region defined below in Currency and regional pricing
-  
+
   // Advanced pricing options
-  customDiscounts: z.array(z.object({
-    type: z.string(),
-    value: z.number(),
-    reason: z.string()
-  })).optional(),
-  
+  customDiscounts: z
+    .array(
+      z.object({
+        type: z.string(),
+        value: z.number(),
+        reason: z.string(),
+      })
+    )
+    .optional(),
+
   // Odoo-style add-ons
   addons: z.array(z.string()).optional(),
   implementationServices: z.boolean().default(false),
   supportLevel: z.enum(['basic', 'standard', 'premium', 'enterprise']).default('standard'),
-  
+
   // Volume and commitment discounts
   volumeTier: z.enum(['small', 'medium', 'large', 'enterprise']).optional(),
   commitmentPeriod: z.number().int().min(1).max(60).optional(), // months
-  
+
   // Currency and regional pricing
   currency: z.string().default('USD'),
   region: z.string().optional(),
-  
+
   // Special pricing
   partnerDiscount: z.number().min(0).max(1).optional(),
   earlyAdopterDiscount: z.boolean().default(false),
-  loyaltyDiscount: z.number().min(0).max(1).optional()
+  loyaltyDiscount: z.number().min(0).max(1).optional(),
 })
 
 // Odoo-style pricing result
@@ -57,26 +65,26 @@ export interface OdooPricingResult {
   modulePricing: ModulePricing[]
   addonPricing: AddonPricing[]
   servicePricing: ServicePricing[]
-  
+
   // Discounts and adjustments
   discounts: OdooDiscount[]
   totalDiscount: number
   netPrice: number
-  
+
   // Billing details
   billingBreakdown: BillingBreakdown
   paymentSchedule: PaymentSchedule[]
-  
+
   // Odoo-style features
   features: FeatureBreakdown
   limitations: Limitation[]
   recommendations: Recommendation[]
-  
+
   // Enterprise features
   roi: ROICalculation
   tco: TCOCalculation
   competitiveAnalysis: CompetitiveAnalysis
-  
+
   // Metadata
   pricingModel: string
   contractType: string
@@ -225,56 +233,61 @@ export class OdooStylePricingEngine {
   /**
    * Calculate Odoo-style pricing
    */
-  async calculateOdooPricing(request: z.infer<typeof OdooPricingRequestSchema>): Promise<OdooPricingResult> {
+  async calculateOdooPricing(
+    request: z.infer<typeof OdooPricingRequestSchema>
+  ): Promise<OdooPricingResult> {
     const validatedRequest = OdooPricingRequestSchema.parse(request)
-    
+
     // Get module definitions
     const moduleDefinitions = await this.getModuleDefinitions(validatedRequest.modules)
-    
+
     // Calculate base module pricing
     const modulePricing = this.calculateModulePricing(moduleDefinitions, validatedRequest)
-    
+
     // Calculate addon pricing
-    const addonPricing = await this.calculateAddonPricing(validatedRequest.addons || [], validatedRequest)
-    
+    const addonPricing = await this.calculateAddonPricing(
+      validatedRequest.addons || [],
+      validatedRequest
+    )
+
     // Calculate service pricing
     const servicePricing = this.calculateServicePricing(validatedRequest)
-    
+
     // Calculate base price
     const basePrice = this.calculateBasePrice(modulePricing, addonPricing, servicePricing)
-    
+
     // Apply Odoo-style discounts
     const discounts = this.calculateOdooDiscounts(validatedRequest, basePrice)
     const totalDiscount = discounts.reduce((sum, discount) => sum + discount.amount, 0)
-    
+
     // Calculate net price
     const netPrice = Math.max(0, basePrice - totalDiscount)
-    
+
     // Generate billing breakdown
     const billingBreakdown = this.generateBillingBreakdown(validatedRequest, netPrice)
-    
+
     // Generate payment schedule
     const paymentSchedule = this.generatePaymentSchedule(validatedRequest, billingBreakdown)
-    
+
     // Generate feature breakdown
     const features = this.generateFeatureBreakdown(validatedRequest, modulePricing)
-    
+
     // Generate limitations
     const limitations = this.generateLimitations(validatedRequest, modulePricing)
-    
+
     // Generate recommendations
     const recommendations = this.generateRecommendations(validatedRequest, modulePricing)
-    
+
     // Calculate ROI and TCO
     const roi = this.calculateROI(validatedRequest, billingBreakdown)
     const tco = this.calculateTCO(validatedRequest, billingBreakdown)
-    
+
     // Generate competitive analysis
     const competitiveAnalysis = this.generateCompetitiveAnalysis(validatedRequest, billingBreakdown)
-    
+
     // Generate pricing terms
     const terms = this.generatePricingTerms(validatedRequest)
-    
+
     return {
       basePrice,
       modulePricing,
@@ -295,21 +308,24 @@ export class OdooStylePricingEngine {
       contractType: validatedRequest.contractType,
       deploymentType: validatedRequest.deploymentType,
       validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-      terms
+      terms,
     }
   }
 
   /**
    * Calculate module pricing with Odoo-style flexibility
    */
-  private calculateModulePricing(modules: any[], request: z.infer<typeof OdooPricingRequestSchema>): ModulePricing[] {
-    return modules.map(module => {
+  private calculateModulePricing(
+    modules: unknown[],
+    request: z.infer<typeof OdooPricingRequestSchema>
+  ): ModulePricing[] {
+    return modules.map((module) => {
       const basePrice = parseFloat(module.basePrice)
       const perUserPrice = parseFloat(module.perUserPrice)
-      
+
       // Odoo-style pricing: tiered pricing with volume discounts
       let userPrice = perUserPrice * request.userCount
-      
+
       // Apply volume-based pricing tiers
       if (request.userCount > 100) {
         userPrice *= 0.8 // 20% discount for 100+ users
@@ -318,10 +334,10 @@ export class OdooStylePricingEngine {
       } else if (request.userCount > 20) {
         userPrice *= 0.9 // 10% discount for 20+ users
       }
-      
+
       // Use Odoo-style pricing formula: max(basePrice, userPrice)
       const subtotal = Math.max(basePrice, userPrice)
-      
+
       return {
         moduleKey: module.moduleKey,
         moduleName: module.name,
@@ -330,8 +346,12 @@ export class OdooStylePricingEngine {
         perUserPrice,
         userCount: request.userCount,
         subtotal,
-        features: Array.isArray(module.features) ? module.features : JSON.parse(module.features || '[]'),
-        limitations: Array.isArray(module.limitations) ? module.limitations : JSON.parse(module.limitations || '[]')
+        features: Array.isArray(module.features)
+          ? module.features
+          : JSON.parse(module.features || '[]'),
+        limitations: Array.isArray(module.limitations)
+          ? module.limitations
+          : JSON.parse(module.limitations || '[]'),
       }
     })
   }
@@ -339,7 +359,10 @@ export class OdooStylePricingEngine {
   /**
    * Calculate addon pricing
    */
-  private async calculateAddonPricing(addons: string[], request: z.infer<typeof OdooPricingRequestSchema>): Promise<AddonPricing[]> {
+  private async calculateAddonPricing(
+    addons: string[],
+    request: z.infer<typeof OdooPricingRequestSchema>
+  ): Promise<AddonPricing[]> {
     // For tests, use mock data instead of database
     if (process.env.NODE_ENV === 'test') {
       const mockAddons = [
@@ -349,7 +372,14 @@ export class OdooStylePricingEngine {
           description: 'Enhanced analytics with machine learning and predictive insights',
           price: 50.0,
           billingFrequency: 'monthly',
-          features: ['Machine learning models', 'Predictive analytics', 'Custom data sources', 'Advanced visualizations', 'Automated insights', 'API access']
+          features: [
+            'Machine learning models',
+            'Predictive analytics',
+            'Custom data sources',
+            'Advanced visualizations',
+            'Automated insights',
+            'API access',
+          ],
         },
         {
           addonKey: 'custom_integrations',
@@ -357,7 +387,14 @@ export class OdooStylePricingEngine {
           description: 'Custom API integrations and third-party connectors',
           price: 100.0,
           billingFrequency: 'monthly',
-          features: ['Custom API development', 'Third-party connectors', 'Data synchronization', 'Webhook support', 'Integration monitoring', 'Technical support']
+          features: [
+            'Custom API development',
+            'Third-party connectors',
+            'Data synchronization',
+            'Webhook support',
+            'Integration monitoring',
+            'Technical support',
+          ],
         },
         {
           addonKey: 'white_label',
@@ -365,7 +402,14 @@ export class OdooStylePricingEngine {
           description: 'Complete white-label customization for your brand',
           price: 500.0,
           billingFrequency: 'monthly',
-          features: ['Custom branding', 'Domain customization', 'Branded emails', 'Custom login pages', 'Logo and colors', 'Marketing materials']
+          features: [
+            'Custom branding',
+            'Domain customization',
+            'Branded emails',
+            'Custom login pages',
+            'Logo and colors',
+            'Marketing materials',
+          ],
         },
         {
           addonKey: 'dedicated_support',
@@ -373,37 +417,48 @@ export class OdooStylePricingEngine {
           description: 'Personal account manager and priority support',
           price: 1000.0,
           billingFrequency: 'monthly',
-          features: ['Personal account manager', 'Priority support queue', 'Phone support', 'Custom training', 'Implementation assistance', 'Regular check-ins']
-        }
+          features: [
+            'Personal account manager',
+            'Priority support queue',
+            'Phone support',
+            'Custom training',
+            'Implementation assistance',
+            'Regular check-ins',
+          ],
+        },
       ]
-      
-      return mockAddons.filter(addon => addons.includes(addon.addonKey)).map(addon => ({
-        addonKey: addon.addonKey,
-        addonName: addon.name,
-        price: addon.price,
-        billingFrequency: addon.billingFrequency,
-        features: addon.features
-      }))
+
+      return mockAddons
+        .filter((addon) => addons.includes(addon.addonKey))
+        .map((addon) => ({
+          addonKey: addon.addonKey,
+          addonName: addon.name,
+          price: addon.price,
+          billingFrequency: addon.billingFrequency,
+          features: addon.features,
+        }))
     }
-    
+
     // For production, use real database
     const addonDefinitions = await prisma.addonDefinition.findMany({
-      where: { addonKey: { in: addons }, isActive: true }
+      where: { addonKey: { in: addons }, isActive: true },
     })
 
-    return addonDefinitions.map(addon => ({
+    return addonDefinitions.map((addon) => ({
       addonKey: addon.addonKey,
       addonName: addon.name,
       price: parseFloat(addon.price),
       billingFrequency: addon.billingFrequency,
-      features: JSON.parse(addon.features || '[]')
+      features: JSON.parse(addon.features || '[]'),
     }))
   }
 
   /**
    * Calculate service pricing
    */
-  private calculateServicePricing(request: z.infer<typeof OdooPricingRequestSchema>): ServicePricing[] {
+  private calculateServicePricing(
+    request: z.infer<typeof OdooPricingRequestSchema>
+  ): ServicePricing[] {
     const services: ServicePricing[] = []
 
     // Implementation services
@@ -414,12 +469,7 @@ export class OdooStylePricingEngine {
         serviceName: 'Professional Implementation',
         price: implementationFee,
         duration: '4-8 weeks',
-        features: [
-          'Data migration',
-          'User training',
-          'Custom configuration',
-          'Go-live support'
-        ]
+        features: ['Data migration', 'User training', 'Custom configuration', 'Go-live support'],
       })
     }
 
@@ -430,7 +480,7 @@ export class OdooStylePricingEngine {
       serviceName: `${request.supportLevel} Support`,
       price: supportFee,
       duration: 'per month',
-      features: this.getSupportFeatures(request.supportLevel)
+      features: this.getSupportFeatures(request.supportLevel),
     })
 
     return services
@@ -439,7 +489,10 @@ export class OdooStylePricingEngine {
   /**
    * Calculate Odoo-style discounts
    */
-  private calculateOdooDiscounts(request: z.infer<typeof OdooPricingRequestSchema>, basePrice: number): OdooDiscount[] {
+  private calculateOdooDiscounts(
+    request: z.infer<typeof OdooPricingRequestSchema>,
+    basePrice: number
+  ): OdooDiscount[] {
     const discounts: OdooDiscount[] = []
 
     // Volume discounts
@@ -450,7 +503,10 @@ export class OdooStylePricingEngine {
 
     // Commitment discounts
     if (request.commitmentPeriod && request.commitmentPeriod >= 12) {
-      const commitmentDiscount = this.calculateCommitmentDiscount(request.commitmentPeriod, basePrice)
+      const commitmentDiscount = this.calculateCommitmentDiscount(
+        request.commitmentPeriod,
+        basePrice
+      )
       discounts.push(commitmentDiscount)
     }
 
@@ -469,7 +525,7 @@ export class OdooStylePricingEngine {
         percentage: request.partnerDiscount,
         amount: basePrice * request.partnerDiscount,
         reason: 'Partner program',
-        conditions: ['Valid partner agreement']
+        conditions: ['Valid partner agreement'],
       })
     }
 
@@ -482,7 +538,7 @@ export class OdooStylePricingEngine {
         percentage: 0.15,
         amount: basePrice * 0.15,
         reason: 'Early adopter program',
-        conditions: ['First 6 months of subscription']
+        conditions: ['First 6 months of subscription'],
       })
     }
 
@@ -495,13 +551,13 @@ export class OdooStylePricingEngine {
         percentage: request.loyaltyDiscount,
         amount: basePrice * request.loyaltyDiscount,
         reason: 'Customer loyalty',
-        conditions: ['Existing customer']
+        conditions: ['Existing customer'],
       })
     }
 
     // Custom discounts
     if (request.customDiscounts) {
-      request.customDiscounts.forEach(custom => {
+      request.customDiscounts.forEach((custom) => {
         discounts.push({
           type: 'custom',
           name: 'Custom Discount',
@@ -509,7 +565,7 @@ export class OdooStylePricingEngine {
           percentage: custom.value,
           amount: basePrice * custom.value,
           reason: custom.reason,
-          conditions: [custom.type]
+          conditions: [custom.type],
         })
       })
     }
@@ -520,15 +576,20 @@ export class OdooStylePricingEngine {
   /**
    * Generate billing breakdown
    */
-  private generateBillingBreakdown(request: z.infer<typeof OdooPricingRequestSchema>, netPrice: number): BillingBreakdown {
+  private generateBillingBreakdown(
+    request: z.infer<typeof OdooPricingRequestSchema>,
+    netPrice: number
+  ): BillingBreakdown {
     const subtotal = netPrice
     const taxes = this.calculateTaxes(subtotal, request.region)
     const setupFees = request.implementationServices ? this.calculateImplementationFee(request) : 0
-    const implementationFees = request.implementationServices ? this.calculateImplementationFee(request) : 0
+    const implementationFees = request.implementationServices
+      ? this.calculateImplementationFee(request)
+      : 0
     const supportFees = this.calculateSupportFee(request)
-    
+
     const total = subtotal + taxes + setupFees + implementationFees + supportFees
-    
+
     return {
       subtotal,
       taxes,
@@ -537,22 +598,25 @@ export class OdooStylePricingEngine {
       supportFees,
       total,
       monthlyEquivalent: request.billingCycle === 'monthly' ? total : total / 12,
-      annualEquivalent: request.billingCycle === 'annual' ? total : total * 12
+      annualEquivalent: request.billingCycle === 'annual' ? total : total * 12,
     }
   }
 
   /**
    * Generate payment schedule
    */
-  private generatePaymentSchedule(request: z.infer<typeof OdooPricingRequestSchema>, billing: BillingBreakdown): PaymentSchedule[] {
+  private generatePaymentSchedule(
+    request: z.infer<typeof OdooPricingRequestSchema>,
+    billing: BillingBreakdown
+  ): PaymentSchedule[] {
     const schedule: PaymentSchedule[] = []
-    
+
     if (request.billingCycle === 'monthly') {
       schedule.push({
         period: 'Monthly',
         amount: billing.total,
         dueDate: new Date(),
-        description: 'Monthly subscription'
+        description: 'Monthly subscription',
       })
     } else if (request.billingCycle === 'quarterly') {
       for (let i = 0; i < 4; i++) {
@@ -560,7 +624,7 @@ export class OdooStylePricingEngine {
           period: `Q${i + 1}`,
           amount: billing.total / 4,
           dueDate: new Date(Date.now() + i * 3 * 30 * 24 * 60 * 60 * 1000),
-          description: `Quarter ${i + 1} payment`
+          description: `Quarter ${i + 1} payment`,
         })
       }
     } else if (request.billingCycle === 'annual') {
@@ -568,23 +632,26 @@ export class OdooStylePricingEngine {
         period: 'Annual',
         amount: billing.total,
         dueDate: new Date(),
-        description: 'Annual subscription'
+        description: 'Annual subscription',
       })
     }
-    
+
     return schedule
   }
 
   /**
    * Generate feature breakdown
    */
-  private generateFeatureBreakdown(request: z.infer<typeof OdooPricingRequestSchema>, modulePricing: ModulePricing[]): FeatureBreakdown {
+  private generateFeatureBreakdown(
+    request: z.infer<typeof OdooPricingRequestSchema>,
+    modulePricing: ModulePricing[]
+  ): FeatureBreakdown {
     const included: string[] = []
     const available: string[] = []
     const enterprise: string[] = []
     const custom: string[] = []
 
-    modulePricing.forEach(module => {
+    modulePricing.forEach((module) => {
       included.push(...module.features)
     })
 
@@ -605,7 +672,10 @@ export class OdooStylePricingEngine {
   /**
    * Generate limitations
    */
-  private generateLimitations(request: z.infer<typeof OdooPricingRequestSchema>, modulePricing: ModulePricing[]): Limitation[] {
+  private generateLimitations(
+    request: z.infer<typeof OdooPricingRequestSchema>,
+    modulePricing: ModulePricing[]
+  ): Limitation[] {
     const limitations: Limitation[] = []
 
     // User count limitations
@@ -615,19 +685,19 @@ export class OdooStylePricingEngine {
         description: 'User count limit for standard pricing',
         current: request.userCount,
         limit: 100,
-        upgradePath: 'Upgrade to Enterprise pricing model'
+        upgradePath: 'Upgrade to Enterprise pricing model',
       })
     }
 
     // Module limitations
-    modulePricing.forEach(module => {
-      module.limitations.forEach(limitation => {
+    modulePricing.forEach((module) => {
+      module.limitations.forEach((limitation) => {
         limitations.push({
           type: 'module',
           description: limitation,
           current: 0,
           limit: 0,
-          upgradePath: `Upgrade ${module.moduleName}`
+          upgradePath: `Upgrade ${module.moduleName}`,
         })
       })
     })
@@ -638,7 +708,10 @@ export class OdooStylePricingEngine {
   /**
    * Generate recommendations
    */
-  private generateRecommendations(request: z.infer<typeof OdooPricingRequestSchema>, modulePricing: ModulePricing[]): Recommendation[] {
+  private generateRecommendations(
+    request: z.infer<typeof OdooPricingRequestSchema>,
+    modulePricing: ModulePricing[]
+  ): Recommendation[] {
     const recommendations: Recommendation[] = []
 
     // Upsell recommendations
@@ -649,7 +722,7 @@ export class OdooStylePricingEngine {
         description: 'Get better pricing and features for your team size',
         impact: 'Save 20% on pricing, unlock enterprise features',
         effort: 'Low',
-        priority: 'high'
+        priority: 'high',
       })
     }
 
@@ -661,7 +734,7 @@ export class OdooStylePricingEngine {
         description: 'Save 15% with annual billing',
         impact: 'Save 15% on total cost',
         effort: 'Low',
-        priority: 'medium'
+        priority: 'medium',
       })
     }
 
@@ -671,32 +744,44 @@ export class OdooStylePricingEngine {
   /**
    * Calculate ROI
    */
-  private calculateROI(request: z.infer<typeof OdooPricingRequestSchema>, billing: BillingBreakdown): ROICalculation {
+  private calculateROI(
+    request: z.infer<typeof OdooPricingRequestSchema>,
+    billing: BillingBreakdown
+  ): ROICalculation {
     const implementationCost = billing.setupFees + billing.implementationFees
     const annualSoftwareCost = billing.annualEquivalent
-    
+
     // Estimate annual savings (typical ERP ROI is 200-300%)
     const annualSavings = annualSoftwareCost * 2.5 // 250% ROI
     const paybackPeriod = implementationCost / (annualSavings - annualSoftwareCost)
-    
+
     return {
       implementationCost,
       annualSavings,
       paybackPeriod: Math.max(0, paybackPeriod),
-      threeYearROI: ((annualSavings * 3 - implementationCost - annualSoftwareCost * 3) / (implementationCost + annualSoftwareCost * 3)) * 100,
-      fiveYearROI: ((annualSavings * 5 - implementationCost - annualSoftwareCost * 5) / (implementationCost + annualSoftwareCost * 5)) * 100
+      threeYearROI:
+        ((annualSavings * 3 - implementationCost - annualSoftwareCost * 3) /
+          (implementationCost + annualSoftwareCost * 3)) *
+        100,
+      fiveYearROI:
+        ((annualSavings * 5 - implementationCost - annualSoftwareCost * 5) /
+          (implementationCost + annualSoftwareCost * 5)) *
+        100,
     }
   }
 
   /**
    * Calculate TCO
    */
-  private calculateTCO(request: z.infer<typeof OdooPricingRequestSchema>, billing: BillingBreakdown): TCOCalculation {
+  private calculateTCO(
+    request: z.infer<typeof OdooPricingRequestSchema>,
+    billing: BillingBreakdown
+  ): TCOCalculation {
     const softwareCosts = billing.annualEquivalent * 3 // 3 years
     // Ensure implementation costs are not zero by estimating a baseline when services not explicitly selected
     const baselineImplementation = this.calculateImplementationFee({
       modules: ['crm'],
-      userCount: Math.max(1, (request.userCount || 1)),
+      userCount: Math.max(1, request.userCount || 1),
       billingCycle: request.billingCycle,
       pricingModel: request.pricingModel,
       contractType: request.contractType,
@@ -706,12 +791,13 @@ export class OdooStylePricingEngine {
       addons: [],
       implementationServices: request.implementationServices ?? false,
       currency: request.currency,
-    } as any)
+    } as unknown)
 
-    const implementationCosts = (billing.setupFees + billing.implementationFees) || baselineImplementation
+    const implementationCosts =
+      billing.setupFees + billing.implementationFees || baselineImplementation
     const maintenanceCosts = billing.supportFees * 36 // 3 years
     const totalTCO = softwareCosts + implementationCosts + maintenanceCosts
-    
+
     return {
       softwareCosts,
       implementationCosts,
@@ -722,42 +808,45 @@ export class OdooStylePricingEngine {
         competitor: 'Odoo Enterprise',
         competitorTCO: totalTCO * 1.3, // 30% more expensive
         savings: totalTCO * 0.3,
-        savingsPercentage: 30
-      }
+        savingsPercentage: 30,
+      },
     }
   }
 
   /**
    * Generate competitive analysis
    */
-  private generateCompetitiveAnalysis(request: z.infer<typeof OdooPricingRequestSchema>, billing: BillingBreakdown): CompetitiveAnalysis {
+  private generateCompetitiveAnalysis(
+    request: z.infer<typeof OdooPricingRequestSchema>,
+    billing: BillingBreakdown
+  ): CompetitiveAnalysis {
     return {
       competitors: [
         {
           name: 'Odoo Enterprise',
           pricing: billing.annualEquivalent * 1.3,
           features: ['Basic ERP', 'CRM', 'Accounting'],
-          limitations: ['Limited AI', 'Basic analytics', 'Standard support']
+          limitations: ['Limited AI', 'Basic analytics', 'Standard support'],
         },
         {
           name: 'NetSuite',
           pricing: billing.annualEquivalent * 2.5,
           features: ['Full ERP', 'Advanced analytics', 'Enterprise features'],
-          limitations: ['High cost', 'Complex implementation', 'Long contracts']
-        }
+          limitations: ['High cost', 'Complex implementation', 'Long contracts'],
+        },
       ],
       advantages: [
         'AI-powered insights',
         'Modular pricing',
         'Flexible deployment',
-        'Modern interface'
+        'Modern interface',
       ],
       differentiators: [
         'Subscription-aware AI orchestration',
         'Real-time business intelligence',
         'Predictive analytics',
-        'Self-healing business logic'
-      ]
+        'Self-healing business logic',
+      ],
     }
   }
 
@@ -770,7 +859,7 @@ export class OdooStylePricingEngine {
       cancellationPolicy: '30-day notice required',
       upgradePolicy: 'Pro-rated upgrades available',
       supportIncluded: this.getSupportFeatures(request.supportLevel),
-      customizations: ['API access', 'Custom integrations', 'White-label options']
+      customizations: ['API access', 'Custom integrations', 'White-label options'],
     }
   }
 
@@ -788,7 +877,7 @@ export class OdooStylePricingEngine {
           perUserPrice: 25.0,
           features: ['contact_management', 'deal_tracking', 'email_integration'],
           limitations: ['Standard CRM features only', 'Basic reporting', 'Email support only'],
-          isActive: true
+          isActive: true,
         },
         {
           moduleKey: 'accounting',
@@ -797,9 +886,18 @@ export class OdooStylePricingEngine {
           category: 'accounting',
           basePrice: 149.0,
           perUserPrice: 35.0,
-          features: ['general_ledger', 'accounts_payable', 'accounts_receivable', 'financial_reporting'],
-          limitations: ['Basic financial reports', 'Standard chart of accounts', 'Limited customization'],
-          isActive: true
+          features: [
+            'general_ledger',
+            'accounts_payable',
+            'accounts_receivable',
+            'financial_reporting',
+          ],
+          limitations: [
+            'Basic financial reports',
+            'Standard chart of accounts',
+            'Limited customization',
+          ],
+          isActive: true,
         },
         {
           moduleKey: 'projects',
@@ -808,9 +906,14 @@ export class OdooStylePricingEngine {
           category: 'projects',
           basePrice: 79.0,
           perUserPrice: 20.0,
-          features: ['task_management', 'time_tracking', 'resource_allocation', 'project_reporting'],
+          features: [
+            'task_management',
+            'time_tracking',
+            'resource_allocation',
+            'project_reporting',
+          ],
           limitations: ['Basic project templates', 'Standard reporting', 'Limited customization'],
-          isActive: true
+          isActive: true,
         },
         {
           moduleKey: 'erp',
@@ -821,7 +924,7 @@ export class OdooStylePricingEngine {
           perUserPrice: 50.0,
           features: ['crm', 'accounting', 'projects', 'inventory', 'hr', 'manufacturing'],
           limitations: ['Enterprise features', 'Advanced reporting', 'Full customization'],
-          isActive: true
+          isActive: true,
         },
         {
           moduleKey: 'hr',
@@ -830,9 +933,20 @@ export class OdooStylePricingEngine {
           category: 'hr',
           basePrice: 129.0,
           perUserPrice: 20.0,
-          features: ['employee_database', 'payroll_management', 'time_tracking', 'performance_reviews', 'benefits_administration', 'compliance_tracking'],
-          limitations: ['Basic payroll features', 'Standard performance metrics', 'Limited integration options'],
-          isActive: true
+          features: [
+            'employee_database',
+            'payroll_management',
+            'time_tracking',
+            'performance_reviews',
+            'benefits_administration',
+            'compliance_tracking',
+          ],
+          limitations: [
+            'Basic payroll features',
+            'Standard performance metrics',
+            'Limited integration options',
+          ],
+          isActive: true,
         },
         {
           moduleKey: 'inventory',
@@ -841,25 +955,36 @@ export class OdooStylePricingEngine {
           category: 'inventory',
           basePrice: 179.0,
           perUserPrice: 30.0,
-          features: ['stock_tracking', 'purchase_orders', 'warehouse_management', 'barcode_scanning', 'reorder_alerts', 'inventory_reports'],
-          limitations: ['Single warehouse support', 'Basic reporting', 'Standard integrations only'],
-          isActive: true
-        }
+          features: [
+            'stock_tracking',
+            'purchase_orders',
+            'warehouse_management',
+            'barcode_scanning',
+            'reorder_alerts',
+            'inventory_reports',
+          ],
+          limitations: [
+            'Single warehouse support',
+            'Basic reporting',
+            'Standard integrations only',
+          ],
+          isActive: true,
+        },
       ]
-      
-      return mockModules.filter(module => moduleKeys.includes(module.moduleKey))
+
+      return mockModules.filter((module) => moduleKeys.includes(module.moduleKey))
     }
-    
+
     // For production, use real database
     const bundles = await prisma.bundle.findMany({
-      where: { 
-        category: { in: moduleKeys }, 
-        tier: { not: null } 
-      }
+      where: {
+        category: { in: moduleKeys },
+        tier: { not: null },
+      },
     })
-    
+
     // Convert bundles to module-like format for compatibility
-    return bundles.map(bundle => ({
+    return bundles.map((bundle) => ({
       moduleKey: bundle.category,
       name: bundle.name,
       description: bundle.description,
@@ -868,26 +993,30 @@ export class OdooStylePricingEngine {
       perUserPrice: bundle.perUserPrice,
       features: JSON.parse(bundle.features || '[]'),
       limitations: JSON.parse(bundle.limits || '[]'),
-      isActive: true
+      isActive: true,
     }))
   }
 
-  private calculateBasePrice(modulePricing: ModulePricing[], addonPricing: AddonPricing[], servicePricing: ServicePricing[]): number {
+  private calculateBasePrice(
+    modulePricing: ModulePricing[],
+    addonPricing: AddonPricing[],
+    servicePricing: ServicePricing[]
+  ): number {
     const moduleTotal = modulePricing.reduce((sum, module) => sum + module.subtotal, 0)
     const addonTotal = addonPricing.reduce((sum, addon) => sum + addon.price, 0)
     const serviceTotal = servicePricing.reduce((sum, service) => sum + service.price, 0)
-    
+
     return moduleTotal + addonTotal + serviceTotal
   }
 
   private calculateVolumeDiscount(userCount: number, basePrice: number): OdooDiscount | null {
     let discount = 0
-    
+
     if (userCount >= 250) discount = 0.25
-    else if (userCount >= 100) discount = 0.20
+    else if (userCount >= 100) discount = 0.2
     else if (userCount >= 50) discount = 0.15
-    else if (userCount >= 20) discount = 0.10
-    
+    else if (userCount >= 20) discount = 0.1
+
     if (discount > 0) {
       return {
         type: 'volume',
@@ -896,20 +1025,20 @@ export class OdooStylePricingEngine {
         percentage: discount,
         amount: basePrice * discount,
         reason: 'Volume pricing',
-        conditions: [`${userCount}+ users`]
+        conditions: [`${userCount}+ users`],
       }
     }
-    
+
     return null
   }
 
   private calculateCommitmentDiscount(months: number, basePrice: number): OdooDiscount {
     let discount = 0
-    
+
     if (months >= 36) discount = 0.25
-    else if (months >= 24) discount = 0.20
+    else if (months >= 24) discount = 0.2
     else if (months >= 12) discount = 0.15
-    
+
     return {
       type: 'commitment',
       name: 'Commitment Discount',
@@ -917,16 +1046,16 @@ export class OdooStylePricingEngine {
       percentage: discount,
       amount: basePrice * discount,
       reason: 'Long-term commitment',
-      conditions: [`${months}+ month commitment`]
+      conditions: [`${months}+ month commitment`],
     }
   }
 
   private calculateBillingDiscount(billingCycle: string, basePrice: number): OdooDiscount | null {
     let discount = 0
-    
+
     if (billingCycle === 'annual') discount = 0.15
     else if (billingCycle === 'quarterly') discount = 0.05
-    
+
     if (discount > 0) {
       return {
         type: 'volume',
@@ -935,22 +1064,22 @@ export class OdooStylePricingEngine {
         percentage: discount,
         amount: basePrice * discount,
         reason: `${billingCycle} billing`,
-        conditions: [`${billingCycle} billing cycle`]
+        conditions: [`${billingCycle} billing cycle`],
       }
     }
-    
+
     return null
   }
 
   private calculateTaxes(subtotal: number, region?: string): number {
     // Simplified tax calculation
     const taxRates: Record<string, number> = {
-      'US': 0.08,
-      'EU': 0.20,
-      'CA': 0.13
+      US: 0.08,
+      EU: 0.2,
+      CA: 0.13,
     }
-    
-    const taxRate = region ? taxRates[region] || 0.10 : 0.10
+
+    const taxRate = region ? taxRates[region] || 0.1 : 0.1
     return subtotal * taxRate
   }
 
@@ -963,25 +1092,30 @@ export class OdooStylePricingEngine {
 
   private calculateSupportFee(request: z.infer<typeof OdooPricingRequestSchema>): number {
     const baseFee = request.userCount * 10
-    
+
     const supportMultipliers: Record<string, number> = {
-      'basic': 1,
-      'standard': 1.5,
-      'premium': 2,
-      'enterprise': 3
+      basic: 1,
+      standard: 1.5,
+      premium: 2,
+      enterprise: 3,
     }
-    
+
     return baseFee * (supportMultipliers[request.supportLevel] || 1)
   }
 
   private getSupportFeatures(level: string): string[] {
     const features: Record<string, string[]> = {
-      'basic': ['Email support', 'Documentation', 'Community forum'],
-      'standard': ['Email support', 'Phone support', 'Documentation', 'Training videos'],
-      'premium': ['Priority support', 'Phone support', 'Video calls', 'Custom training'],
-      'enterprise': ['Dedicated support', '24/7 phone support', 'On-site training', 'Custom development']
+      basic: ['Email support', 'Documentation', 'Community forum'],
+      standard: ['Email support', 'Phone support', 'Documentation', 'Training videos'],
+      premium: ['Priority support', 'Phone support', 'Video calls', 'Custom training'],
+      enterprise: [
+        'Dedicated support',
+        '24/7 phone support',
+        'On-site training',
+        'Custom development',
+      ],
     }
-    
+
     return features[level] || features['standard']
   }
 }

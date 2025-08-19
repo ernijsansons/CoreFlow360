@@ -56,7 +56,7 @@ interface ModuleSelectionDashboardProps {
   currentModules?: string[]
   userCount?: number
   onModuleChange?: (modules: string[]) => void
-  onCheckout?: (selection: any) => void
+  onCheckout?: (selection: unknown) => void
 }
 
 const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
@@ -64,13 +64,13 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
   currentModules = [],
   userCount = 1,
   onModuleChange,
-  onCheckout
+  onCheckout,
 }) => {
   const [selectedModules, setSelectedModules] = useState<string[]>(currentModules)
   const [availableModules, setAvailableModules] = useState<Module[]>([])
   const [availableBundles, setAvailableBundles] = useState<Bundle[]>([])
   const [selectedBundle, setSelectedBundle] = useState<string | null>(null)
-  const [pricingCalculation, setPricingCalculation] = useState<any>(null)
+  const [pricingCalculation, setPricingCalculation] = useState<unknown>(null)
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'modules' | 'bundles'>('bundles')
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
@@ -80,7 +80,7 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
     const fetchData = async () => {
       try {
         setLoading(true)
-        
+
         // Fetch modules
         const modulesResponse = await fetch('/api/pricing/modules')
         const modulesData = await modulesResponse.json()
@@ -90,9 +90,7 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
         const bundlesResponse = await fetch(`/api/pricing/bundles?userCount=${userCount}`)
         const bundlesData = await bundlesResponse.json()
         setAvailableBundles(bundlesData.bundles || [])
-
       } catch (error) {
-        console.error('Error fetching pricing data:', error)
       } finally {
         setLoading(false)
       }
@@ -117,15 +115,13 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
             modules: selectedModules,
             userCount,
             billingCycle,
-            applyBundleDiscounts: true
-          })
+            applyBundleDiscounts: true,
+          }),
         })
 
         const calculation = await response.json()
         setPricingCalculation(calculation)
-      } catch (error) {
-        console.error('Error calculating pricing:', error)
-      }
+      } catch (error) {}
     }
 
     if (selectedModules.length > 0) {
@@ -135,18 +131,18 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
 
   const handleModuleToggle = (moduleKey: string) => {
     const newSelection = selectedModules.includes(moduleKey)
-      ? selectedModules.filter(m => m !== moduleKey)
+      ? selectedModules.filter((m) => m !== moduleKey)
       : [...selectedModules, moduleKey]
-    
+
     setSelectedModules(newSelection)
     setSelectedBundle(null) // Clear bundle selection when manually selecting modules
     onModuleChange?.(newSelection)
   }
 
   const handleBundleSelect = (bundleKey: string) => {
-    const bundle = availableBundles.find(b => b.bundleKey === bundleKey)
+    const bundle = availableBundles.find((b) => b.bundleKey === bundleKey)
     if (bundle) {
-      const bundleModules = bundle.modules.included.map(m => m.moduleKey)
+      const bundleModules = bundle.modules.included.map((m) => m.moduleKey)
       setSelectedModules(bundleModules)
       setSelectedBundle(bundleKey)
       onModuleChange?.(bundleModules)
@@ -160,9 +156,9 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
       userCount,
       billingCycle,
       pricing: pricingCalculation,
-      tenantId
+      tenantId,
     }
-    
+
     onCheckout?.(selection)
   }
 
@@ -186,8 +182,8 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
           customerName: 'Demo User',
           companyName: 'Demo Company',
           successUrl: `${window.location.origin}/subscription/success`,
-          cancelUrl: `${window.location.origin}/subscription/cancelled`
-        })
+          cancelUrl: `${window.location.origin}/subscription/cancelled`,
+        }),
       })
 
       const data = await response.json()
@@ -198,17 +194,16 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
         throw new Error(data.error || 'Failed to create checkout session')
       }
     } catch (error) {
-      console.error('Checkout error:', error)
       alert(`Checkout failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
   const getCategoryIcon = (category: string) => {
     const icons: Record<string, string> = {
-      'core': '⚡',
-      'advanced': '🚀',
-      'industry': '🏭',
-      'integration': '🔗'
+      core: '⚡',
+      advanced: '🚀',
+      industry: '🏭',
+      integration: '🔗',
     }
     return icons[category] || '📦'
   }
@@ -217,36 +212,37 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(price)
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      <div className="flex h-96 items-center justify-center">
+        <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-blue-500"></div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className="mx-auto max-w-7xl space-y-8 p-6">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      <div className="space-y-4 text-center">
+        <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-4xl font-bold text-transparent">
           Choose Your ERP Modules
         </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Build your perfect ERP solution with our modular pricing. Pay only for what you need, upgrade as you grow.
+        <p className="mx-auto max-w-3xl text-xl text-gray-600">
+          Build your perfect ERP solution with our modular pricing. Pay only for what you need,
+          upgrade as you grow.
         </p>
       </div>
 
       {/* View Toggle */}
       <div className="flex justify-center">
-        <div className="bg-gray-100 p-1 rounded-lg flex">
+        <div className="flex rounded-lg bg-gray-100 p-1">
           <button
             onClick={() => setView('bundles')}
-            className={`px-6 py-2 rounded-md font-medium transition-all ${
+            className={`rounded-md px-6 py-2 font-medium transition-all ${
               view === 'bundles'
                 ? 'bg-white text-blue-600 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
@@ -256,7 +252,7 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
           </button>
           <button
             onClick={() => setView('modules')}
-            className={`px-6 py-2 rounded-md font-medium transition-all ${
+            className={`rounded-md px-6 py-2 font-medium transition-all ${
               view === 'modules'
                 ? 'bg-white text-blue-600 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
@@ -269,10 +265,10 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
 
       {/* Billing Cycle Toggle */}
       <div className="flex justify-center">
-        <div className="bg-gray-100 p-1 rounded-lg flex">
+        <div className="flex rounded-lg bg-gray-100 p-1">
           <button
             onClick={() => setBillingCycle('monthly')}
-            className={`px-4 py-2 rounded-md font-medium transition-all ${
+            className={`rounded-md px-4 py-2 font-medium transition-all ${
               billingCycle === 'monthly'
                 ? 'bg-white text-gray-900 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
@@ -282,13 +278,13 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
           </button>
           <button
             onClick={() => setBillingCycle('annual')}
-            className={`px-4 py-2 rounded-md font-medium transition-all ${
+            className={`rounded-md px-4 py-2 font-medium transition-all ${
               billingCycle === 'annual'
                 ? 'bg-white text-gray-900 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            Annual <span className="text-green-600 text-sm">(Save 10%)</span>
+            Annual <span className="text-sm text-green-600">(Save 10%)</span>
           </button>
         </div>
       </div>
@@ -300,31 +296,31 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
           >
             {availableBundles.map((bundle) => (
               <motion.div
                 key={bundle.bundleKey}
                 whileHover={{ scale: 1.02 }}
-                className={`relative bg-white rounded-xl shadow-lg border-2 cursor-pointer transition-all ${
+                className={`relative cursor-pointer rounded-xl border-2 bg-white shadow-lg transition-all ${
                   selectedBundle === bundle.bundleKey
                     ? 'border-blue-500 shadow-blue-200'
                     : 'border-gray-200 hover:border-blue-300'
-                } ${bundle.isPopular ? 'ring-2 ring-purple-500 ring-opacity-20' : ''}`}
+                } ${bundle.isPopular ? 'ring-opacity-20 ring-2 ring-purple-500' : ''}`}
                 onClick={() => handleBundleSelect(bundle.bundleKey)}
               >
                 {bundle.isPopular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 transform">
+                    <span className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-1 text-sm font-medium text-white">
                       🔥 Most Popular
                     </span>
                   </div>
                 )}
-                
-                <div className="p-6 space-y-4">
+
+                <div className="space-y-4 p-6">
                   <div className="text-center">
                     <h3 className="text-xl font-bold text-gray-900">{bundle.name}</h3>
-                    <p className="text-gray-600 text-sm mt-1">{bundle.description}</p>
+                    <p className="mt-1 text-sm text-gray-600">{bundle.description}</p>
                   </div>
 
                   <div className="text-center">
@@ -333,8 +329,9 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
                     </div>
                     <div className="text-sm text-gray-500">per user per month</div>
                     {bundle.pricing.savings && (
-                      <div className="text-green-600 font-medium">
-                        Save {formatPrice(bundle.pricing.savings)} ({bundle.pricing.savingsPercentage}%)
+                      <div className="font-medium text-green-600">
+                        Save {formatPrice(bundle.pricing.savings)} (
+                        {bundle.pricing.savingsPercentage}%)
                       </div>
                     )}
                   </div>
@@ -342,8 +339,11 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
                   <div className="space-y-2">
                     <div className="text-sm font-medium text-gray-700">Included Modules:</div>
                     {bundle.modules.included.map((module) => (
-                      <div key={module.moduleKey} className="flex items-center text-sm text-gray-600">
-                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                      <div
+                        key={module.moduleKey}
+                        className="flex items-center text-sm text-gray-600"
+                      >
+                        <span className="mr-2 h-2 w-2 rounded-full bg-green-500"></span>
                         {module.name}
                       </div>
                     ))}
@@ -358,20 +358,20 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
           >
             {availableModules.map((module) => (
               <motion.div
                 key={module.moduleKey}
                 whileHover={{ scale: 1.02 }}
-                className={`bg-white rounded-xl shadow-lg border-2 cursor-pointer transition-all ${
+                className={`cursor-pointer rounded-xl border-2 bg-white shadow-lg transition-all ${
                   selectedModules.includes(module.moduleKey)
                     ? 'border-blue-500 shadow-blue-200'
                     : 'border-gray-200 hover:border-blue-300'
                 }`}
                 onClick={() => handleModuleToggle(module.moduleKey)}
               >
-                <div className="p-6 space-y-4">
+                <div className="space-y-4 p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <span className="text-2xl">{getCategoryIcon(module.category)}</span>
@@ -380,14 +380,20 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
                         <span className="text-xs text-gray-500 capitalize">{module.category}</span>
                       </div>
                     </div>
-                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                      selectedModules.includes(module.moduleKey)
-                        ? 'bg-blue-500 border-blue-500'
-                        : 'border-gray-300'
-                    }`}>
+                    <div
+                      className={`flex h-5 w-5 items-center justify-center rounded border-2 ${
+                        selectedModules.includes(module.moduleKey)
+                          ? 'border-blue-500 bg-blue-500'
+                          : 'border-gray-300'
+                      }`}
+                    >
                       {selectedModules.includes(module.moduleKey) && (
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                       )}
                     </div>
@@ -408,7 +414,7 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
                   </div>
 
                   {module.constraints.enterpriseOnly && (
-                    <div className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs text-center">
+                    <div className="rounded-full bg-purple-100 px-3 py-1 text-center text-xs text-purple-800">
                       Enterprise Only
                     </div>
                   )}
@@ -424,18 +430,19 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200"
+          className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6"
         >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-gray-900">Pricing Summary</h3>
               <div className="text-sm text-gray-600">
-                {selectedModules.length} module{selectedModules.length !== 1 ? 's' : ''} • {userCount} user{userCount !== 1 ? 's' : ''} • {billingCycle} billing
+                {selectedModules.length} module{selectedModules.length !== 1 ? 's' : ''} •{' '}
+                {userCount} user{userCount !== 1 ? 's' : ''} • {billingCycle} billing
               </div>
-              
+
               {pricingCalculation.discounts?.length > 0 && (
                 <div className="space-y-1">
-                  {pricingCalculation.discounts.map((discount: any, index: number) => (
+                  {pricingCalculation.discounts.map((discount: unknown, index: number) => (
                     <div key={index} className="text-sm text-green-600">
                       ✓ {discount.description}: -{formatPrice(discount.amount)}
                     </div>
@@ -444,9 +451,13 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
               )}
             </div>
 
-            <div className="text-right space-y-2">
+            <div className="space-y-2 text-right">
               <div className="text-3xl font-bold text-gray-900">
-                {formatPrice(billingCycle === 'annual' ? pricingCalculation.totalAnnualPrice : pricingCalculation.totalMonthlyPrice)}
+                {formatPrice(
+                  billingCycle === 'annual'
+                    ? pricingCalculation.totalAnnualPrice
+                    : pricingCalculation.totalMonthlyPrice
+                )}
               </div>
               <div className="text-sm text-gray-500">
                 {billingCycle === 'annual' ? 'per year' : 'per month'}
@@ -464,17 +475,17 @@ const ModuleSelectionDashboard: React.FC<ModuleSelectionDashboardProps> = ({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleCheckout}
-                  className="flex-1 border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-blue-50 transition-all"
+                  className="flex-1 rounded-lg border-2 border-blue-600 px-8 py-3 font-medium text-blue-600 transition-all hover:bg-blue-50"
                 >
                   Custom Checkout
                 </motion.button>
               )}
-              
+
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleDirectStripeCheckout}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg"
+                className="flex-1 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 font-medium text-white shadow-lg transition-all hover:from-blue-700 hover:to-purple-700"
               >
                 Subscribe Now 🚀
               </motion.button>

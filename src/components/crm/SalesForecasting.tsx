@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
+import {
   ChartBarIcon,
   ArrowTrendingUpIcon as TrendingUpIcon,
   ArrowTrendingDownIcon as TrendingDownIcon,
@@ -19,7 +19,7 @@ import {
   ArrowPathIcon,
   FunnelIcon,
   ClockIcon,
-  BoltIcon
+  BoltIcon,
 } from '@heroicons/react/24/outline'
 import { MetricCard } from '@/components/ui/MetricCard'
 
@@ -72,7 +72,9 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
   const [forecasts, setForecasts] = useState<SalesForecast[]>([])
   const [metrics, setMetrics] = useState<ForecastMetrics | null>(null)
   const [loading, setLoading] = useState(true)
-  const [selectedPeriod, setSelectedPeriod] = useState<'weekly' | 'monthly' | 'quarterly'>('monthly')
+  const [selectedPeriod, setSelectedPeriod] = useState<'weekly' | 'monthly' | 'quarterly'>(
+    'monthly'
+  )
   const [selectedForecast, setSelectedForecast] = useState<string | null>(null)
   const [showAIInsights, setShowAIInsights] = useState(true)
 
@@ -83,14 +85,19 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
   const loadForecastData = async () => {
     try {
       setLoading(true)
-      
+
       // Mock data for demonstration
       const mockForecasts: SalesForecast[] = [
         {
           id: 'revenue-forecast',
           name: 'Revenue Forecast',
           period: selectedPeriod,
-          timeframe: selectedPeriod === 'weekly' ? 'Next 12 Weeks' : selectedPeriod === 'monthly' ? 'Next 12 Months' : 'Next 4 Quarters',
+          timeframe:
+            selectedPeriod === 'weekly'
+              ? 'Next 12 Weeks'
+              : selectedPeriod === 'monthly'
+                ? 'Next 12 Months'
+                : 'Next 4 Quarters',
           data: generateForecastData(selectedPeriod),
           totalPredicted: 2450000,
           totalActual: 1850000,
@@ -100,31 +107,36 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
             {
               direction: 'up',
               percentage: 15.2,
-              reason: 'Strong Q4 pipeline and seasonal uptick'
+              reason: 'Strong Q4 pipeline and seasonal uptick',
             },
             {
               direction: 'up',
               percentage: 8.7,
-              reason: 'New enterprise deals in negotiation'
-            }
+              reason: 'New enterprise deals in negotiation',
+            },
           ],
           riskFactors: [
             'Economic uncertainty may delay enterprise decisions',
             '2 large deals at risk due to budget freezes',
-            'Team capacity constraints in Q1'
+            'Team capacity constraints in Q1',
           ],
           opportunities: [
             'Upsell opportunities with existing customers',
             'New market expansion showing early traction',
-            'Product feature launches expected to drive demand'
+            'Product feature launches expected to drive demand',
           ],
-          lastUpdated: '2024-08-09T12:00:00Z'
+          lastUpdated: '2024-08-09T12:00:00Z',
         },
         {
           id: 'deals-forecast',
           name: 'Deal Closure Forecast',
           period: selectedPeriod,
-          timeframe: selectedPeriod === 'weekly' ? 'Next 12 Weeks' : selectedPeriod === 'monthly' ? 'Next 12 Months' : 'Next 4 Quarters',
+          timeframe:
+            selectedPeriod === 'weekly'
+              ? 'Next 12 Weeks'
+              : selectedPeriod === 'monthly'
+                ? 'Next 12 Months'
+                : 'Next 4 Quarters',
           data: generateDealForecastData(selectedPeriod),
           totalPredicted: 156,
           totalActual: 98,
@@ -134,19 +146,19 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
             {
               direction: 'stable',
               percentage: 2.1,
-              reason: 'Consistent deal velocity maintained'
-            }
+              reason: 'Consistent deal velocity maintained',
+            },
           ],
           riskFactors: [
             'Longer sales cycles in enterprise segment',
-            'Competitor activity in key accounts'
+            'Competitor activity in key accounts',
           ],
           opportunities: [
             'Improved qualification process',
-            'New sales tools increasing efficiency'
+            'New sales tools increasing efficiency',
           ],
-          lastUpdated: '2024-08-09T12:00:00Z'
-        }
+          lastUpdated: '2024-08-09T12:00:00Z',
+        },
       ]
 
       const mockMetrics: ForecastMetrics = {
@@ -157,7 +169,7 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
         timeToClose: 45,
         conversionRate: 68.5,
         growthRate: 15.2,
-        riskLevel: 'medium'
+        riskLevel: 'medium',
       }
 
       setForecasts(mockForecasts)
@@ -166,7 +178,6 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
         setSelectedForecast(mockForecasts[0].id)
       }
     } catch (error) {
-      console.error('Failed to load forecast data:', error)
     } finally {
       setLoading(false)
     }
@@ -176,32 +187,33 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
     const data: ForecastData[] = []
     const periods = period === 'weekly' ? 12 : period === 'monthly' ? 12 : 4
     const baseValue = 200000
-    
+
     for (let i = 0; i < periods; i++) {
       const trend = Math.sin(i * 0.5) * 0.3 + 0.1 // Seasonal trend
       const noise = (Math.random() - 0.5) * 0.2
       const growth = i * 0.05
-      
+
       const predicted = Math.round(baseValue * (1 + trend + noise + growth))
       const confidence = Math.round(85 + Math.random() * 10)
       const variance = predicted * 0.15
-      
+
       let actual: number | undefined
       if (i < periods / 2) {
         // Historical data
         actual = Math.round(predicted * (0.85 + Math.random() * 0.3))
       }
-      
+
       data.push({
-        period: period === 'weekly' ? `W${i + 1}` : period === 'monthly' ? getMonthName(i) : `Q${i + 1}`,
+        period:
+          period === 'weekly' ? `W${i + 1}` : period === 'monthly' ? getMonthName(i) : `Q${i + 1}`,
         actual,
         predicted,
         confidence,
         upperBound: Math.round(predicted + variance),
-        lowerBound: Math.round(predicted - variance)
+        lowerBound: Math.round(predicted - variance),
       })
     }
-    
+
     return data
   }
 
@@ -209,35 +221,48 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
     const data: ForecastData[] = []
     const periods = period === 'weekly' ? 12 : period === 'monthly' ? 12 : 4
     const baseValue = 15
-    
+
     for (let i = 0; i < periods; i++) {
       const trend = Math.sin(i * 0.4) * 0.2 + 0.05
       const noise = (Math.random() - 0.5) * 0.1
-      
+
       const predicted = Math.round(baseValue * (1 + trend + noise))
       const confidence = Math.round(80 + Math.random() * 15)
-      
+
       let actual: number | undefined
       if (i < periods / 2) {
         actual = Math.round(predicted * (0.8 + Math.random() * 0.4))
       }
-      
+
       data.push({
-        period: period === 'weekly' ? `W${i + 1}` : period === 'monthly' ? getMonthName(i) : `Q${i + 1}`,
+        period:
+          period === 'weekly' ? `W${i + 1}` : period === 'monthly' ? getMonthName(i) : `Q${i + 1}`,
         actual,
         predicted,
         confidence,
         upperBound: predicted + 3,
-        lowerBound: Math.max(0, predicted - 3)
+        lowerBound: Math.max(0, predicted - 3),
       })
     }
-    
+
     return data
   }
 
   const getMonthName = (index: number) => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ]
     const currentMonth = new Date().getMonth()
     return months[(currentMonth + index) % 12]
   }
@@ -251,7 +276,7 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
     }).format(amount)
   }
 
-  const getRiskColor = (level: string) => {
+  const getRiskColor = (_level: string) => {
     switch (level) {
       case 'low':
         return 'text-green-600'
@@ -264,12 +289,12 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
     }
   }
 
-  const selectedForecastData = forecasts.find(f => f.id === selectedForecast)
+  const selectedForecastData = forecasts.find((f) => f.id === selectedForecast)
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -277,16 +302,18 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Sales Forecasting</h1>
-          <p className="text-gray-600 mt-1">AI-powered predictive analytics and sales trends</p>
+          <p className="mt-1 text-gray-600">AI-powered predictive analytics and sales trends</p>
         </div>
         <div className="flex items-center space-x-3">
           <select
             value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value as 'weekly' | 'monthly' | 'quarterly')}
-            className="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
+            onChange={(e) =>
+              setSelectedPeriod(e.target.value as 'weekly' | 'monthly' | 'quarterly')
+            }
+            className="block rounded-md border-gray-300 py-2 pr-10 pl-3 text-base focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
           >
             <option value="weekly">Weekly</option>
             <option value="monthly">Monthly</option>
@@ -294,18 +321,18 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
           </select>
           <button
             onClick={() => setShowAIInsights(!showAIInsights)}
-            className={`inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium ${
+            className={`inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium ${
               showAIInsights
                 ? 'border-purple-300 bg-purple-50 text-purple-700'
                 : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <SparklesIcon className="h-4 w-4 mr-2" />
+            <SparklesIcon className="mr-2 h-4 w-4" />
             AI Insights
           </button>
           <button
             onClick={() => selectedForecastData && onExportData?.(selectedForecastData)}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
           >
             Export Data
           </button>
@@ -347,13 +374,13 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
       )}
 
       {/* Forecast Selection */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+      <div className="rounded-lg bg-white p-4 shadow">
+        <div className="flex space-x-1 rounded-lg bg-gray-100 p-1">
           {forecasts.map((forecast) => (
             <button
               key={forecast.id}
               onClick={() => setSelectedForecast(forecast.id)}
-              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+              className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                 selectedForecast === forecast.id
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
@@ -367,24 +394,24 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
 
       {/* Forecast Details */}
       {selectedForecastData && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Chart Area */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center justify-between mb-6">
+          <div className="rounded-lg bg-white p-6 shadow lg:col-span-2">
+            <div className="mb-6 flex items-center justify-between">
               <h3 className="text-lg font-medium text-gray-900">
                 {selectedForecastData.name} - {selectedForecastData.timeframe}
               </h3>
               <div className="flex items-center space-x-4 text-sm">
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <div className="h-3 w-3 rounded-full bg-blue-500"></div>
                   <span>Predicted</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <div className="h-3 w-3 rounded-full bg-green-500"></div>
                   <span>Actual</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
+                  <div className="h-3 w-3 rounded-full bg-gray-300"></div>
                   <span>Confidence Range</span>
                 </div>
               </div>
@@ -394,76 +421,76 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
             <div className="space-y-4">
               {selectedForecastData.data.map((dataPoint, index) => (
                 <div key={dataPoint.period} className="flex items-center space-x-4">
-                  <div className="w-12 text-sm font-medium text-gray-900">
-                    {dataPoint.period}
-                  </div>
-                  <div className="flex-1 relative">
-                    <div className="h-8 bg-gray-100 rounded-lg relative overflow-hidden">
+                  <div className="w-12 text-sm font-medium text-gray-900">{dataPoint.period}</div>
+                  <div className="relative flex-1">
+                    <div className="relative h-8 overflow-hidden rounded-lg bg-gray-100">
                       {/* Confidence range */}
                       <div
-                        className="absolute h-full bg-gray-200 rounded"
+                        className="absolute h-full rounded bg-gray-200"
                         style={{
                           left: '0%',
-                          width: `${(dataPoint.upperBound / Math.max(...selectedForecastData.data.map(d => d.upperBound))) * 100}%`
+                          width: `${(dataPoint.upperBound / Math.max(...selectedForecastData.data.map((d) => d.upperBound))) * 100}%`,
                         }}
                       />
                       {/* Predicted value */}
                       <div
-                        className="absolute h-full bg-blue-500 rounded"
+                        className="absolute h-full rounded bg-blue-500"
                         style={{
                           left: '0%',
-                          width: `${(dataPoint.predicted / Math.max(...selectedForecastData.data.map(d => d.upperBound))) * 100}%`
+                          width: `${(dataPoint.predicted / Math.max(...selectedForecastData.data.map((d) => d.upperBound))) * 100}%`,
                         }}
                       />
                       {/* Actual value */}
                       {dataPoint.actual && (
                         <div
-                          className="absolute h-full bg-green-500 rounded"
+                          className="absolute h-full rounded bg-green-500"
                           style={{
                             left: '0%',
-                            width: `${(dataPoint.actual / Math.max(...selectedForecastData.data.map(d => d.upperBound))) * 100}%`
+                            width: `${(dataPoint.actual / Math.max(...selectedForecastData.data.map((d) => d.upperBound))) * 100}%`,
                           }}
                         />
                       )}
                     </div>
                   </div>
                   <div className="flex space-x-4 text-sm">
-                    <span className="text-blue-600 font-medium">
-                      {selectedForecastData.id.includes('revenue') 
-                        ? formatCurrency(dataPoint.predicted) 
+                    <span className="font-medium text-blue-600">
+                      {selectedForecastData.id.includes('revenue')
+                        ? formatCurrency(dataPoint.predicted)
                         : dataPoint.predicted.toString()}
                     </span>
                     {dataPoint.actual && (
-                      <span className="text-green-600 font-medium">
-                        {selectedForecastData.id.includes('revenue') 
-                          ? formatCurrency(dataPoint.actual) 
+                      <span className="font-medium text-green-600">
+                        {selectedForecastData.id.includes('revenue')
+                          ? formatCurrency(dataPoint.actual)
                           : dataPoint.actual.toString()}
                       </span>
                     )}
-                    <span className="text-gray-500">
-                      {dataPoint.confidence}%
-                    </span>
+                    <span className="text-gray-500">{dataPoint.confidence}%</span>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Summary Stats */}
-            <div className="mt-6 grid grid-cols-3 gap-4 pt-6 border-t border-gray-200">
+            <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-200 pt-6">
               <div className="text-center">
                 <p className="text-2xl font-semibold text-gray-900">
-                  {selectedForecastData.id.includes('revenue') 
-                    ? formatCurrency(selectedForecastData.totalPredicted) 
+                  {selectedForecastData.id.includes('revenue')
+                    ? formatCurrency(selectedForecastData.totalPredicted)
                     : selectedForecastData.totalPredicted.toString()}
                 </p>
                 <p className="text-sm text-gray-500">Total Predicted</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-semibold text-gray-900">{selectedForecastData.accuracy}%</p>
+                <p className="text-2xl font-semibold text-gray-900">
+                  {selectedForecastData.accuracy}%
+                </p>
                 <p className="text-sm text-gray-500">Accuracy</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-semibold text-gray-900">{selectedForecastData.confidence}%</p>
+                <p className="text-2xl font-semibold text-gray-900">
+                  {selectedForecastData.confidence}%
+                </p>
                 <p className="text-sm text-gray-500">Confidence</p>
               </div>
             </div>
@@ -472,22 +499,34 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
           {/* Insights Panel */}
           <div className="space-y-6">
             {/* Trends */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Trends</h4>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h4 className="mb-4 text-lg font-medium text-gray-900">Trends</h4>
               <div className="space-y-3">
                 {selectedForecastData.trends.map((trend, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 mt-1">
-                      {trend.direction === 'up' && <TrendingUpIcon className="h-4 w-4 text-green-500" />}
-                      {trend.direction === 'down' && <TrendingDownIcon className="h-4 w-4 text-red-500" />}
-                      {trend.direction === 'stable' && <ArrowPathIcon className="h-4 w-4 text-gray-500" />}
+                    <div className="mt-1 flex-shrink-0">
+                      {trend.direction === 'up' && (
+                        <TrendingUpIcon className="h-4 w-4 text-green-500" />
+                      )}
+                      {trend.direction === 'down' && (
+                        <TrendingDownIcon className="h-4 w-4 text-red-500" />
+                      )}
+                      {trend.direction === 'stable' && (
+                        <ArrowPathIcon className="h-4 w-4 text-gray-500" />
+                      )}
                     </div>
                     <div>
-                      <p className={`font-medium ${
-                        trend.direction === 'up' ? 'text-green-700' : 
-                        trend.direction === 'down' ? 'text-red-700' : 'text-gray-700'
-                      }`}>
-                        {trend.percentage > 0 ? '+' : ''}{trend.percentage}%
+                      <p
+                        className={`font-medium ${
+                          trend.direction === 'up'
+                            ? 'text-green-700'
+                            : trend.direction === 'down'
+                              ? 'text-red-700'
+                              : 'text-gray-700'
+                        }`}
+                      >
+                        {trend.percentage > 0 ? '+' : ''}
+                        {trend.percentage}%
                       </p>
                       <p className="text-sm text-gray-600">{trend.reason}</p>
                     </div>
@@ -498,15 +537,15 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
 
             {/* Risk Factors */}
             {showAIInsights && selectedForecastData.riskFactors.length > 0 && (
-              <div className="bg-red-50 p-6 rounded-lg">
-                <div className="flex items-center space-x-2 mb-4">
+              <div className="rounded-lg bg-red-50 p-6">
+                <div className="mb-4 flex items-center space-x-2">
                   <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
                   <h4 className="text-lg font-medium text-red-900">Risk Factors</h4>
                 </div>
                 <ul className="space-y-2">
                   {selectedForecastData.riskFactors.map((risk, index) => (
-                    <li key={index} className="text-sm text-red-800 flex items-start space-x-2">
-                      <div className="w-1 h-1 bg-red-600 rounded-full mt-2 flex-shrink-0"></div>
+                    <li key={index} className="flex items-start space-x-2 text-sm text-red-800">
+                      <div className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-red-600"></div>
                       <span>{risk}</span>
                     </li>
                   ))}
@@ -516,15 +555,15 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
 
             {/* Opportunities */}
             {showAIInsights && selectedForecastData.opportunities.length > 0 && (
-              <div className="bg-green-50 p-6 rounded-lg">
-                <div className="flex items-center space-x-2 mb-4">
+              <div className="rounded-lg bg-green-50 p-6">
+                <div className="mb-4 flex items-center space-x-2">
                   <CheckCircleIcon className="h-5 w-5 text-green-600" />
                   <h4 className="text-lg font-medium text-green-900">Opportunities</h4>
                 </div>
                 <ul className="space-y-2">
                   {selectedForecastData.opportunities.map((opportunity, index) => (
-                    <li key={index} className="text-sm text-green-800 flex items-start space-x-2">
-                      <div className="w-1 h-1 bg-green-600 rounded-full mt-2 flex-shrink-0"></div>
+                    <li key={index} className="flex items-start space-x-2 text-sm text-green-800">
+                      <div className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-green-600"></div>
                       <span>{opportunity}</span>
                     </li>
                   ))}
@@ -537,28 +576,31 @@ export default function SalesForecasting({ onDrillDown, onExportData }: SalesFor
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-purple-50 p-6 rounded-lg"
+                className="rounded-lg bg-purple-50 p-6"
               >
-                <div className="flex items-center space-x-2 mb-4">
+                <div className="mb-4 flex items-center space-x-2">
                   <SparklesIcon className="h-5 w-5 text-purple-600" />
                   <h4 className="text-lg font-medium text-purple-900">AI Recommendations</h4>
                 </div>
                 <div className="space-y-3">
                   <div className="text-sm text-purple-800">
-                    <strong>Focus Areas:</strong> Based on current trends, prioritize enterprise deals and upsell opportunities with existing customers.
+                    <strong>Focus Areas:</strong> Based on current trends, prioritize enterprise
+                    deals and upsell opportunities with existing customers.
                   </div>
                   <div className="text-sm text-purple-800">
-                    <strong>Risk Mitigation:</strong> Increase touchpoints with deals over $50k to prevent slippage.
+                    <strong>Risk Mitigation:</strong> Increase touchpoints with deals over $50k to
+                    prevent slippage.
                   </div>
                   <div className="text-sm text-purple-800">
-                    <strong>Optimization:</strong> Deploy additional resources to Q4 pipeline to capture seasonal uptick.
+                    <strong>Optimization:</strong> Deploy additional resources to Q4 pipeline to
+                    capture seasonal uptick.
                   </div>
                 </div>
               </motion.div>
             )}
 
             {/* Last Updated */}
-            <div className="text-xs text-gray-500 text-center">
+            <div className="text-center text-xs text-gray-500">
               Last updated: {new Date(selectedForecastData.lastUpdated).toLocaleString()}
             </div>
           </div>

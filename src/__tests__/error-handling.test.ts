@@ -17,18 +17,18 @@ vi.mock('next/server', () => ({
     json: vi.fn((data, init) => ({
       status: init?.status || 200,
       data,
-      headers: { set: vi.fn() }
-    }))
-  }
+      headers: { set: vi.fn() },
+    })),
+  },
 }))
 
 // Mock Prisma
 vi.mock('@/lib/db', () => ({
   prisma: {
     auditLog: {
-      create: vi.fn().mockResolvedValue({ id: 'test-audit-log' })
-    }
-  }
+      create: vi.fn().mockResolvedValue({ id: 'test-audit-log' }),
+    },
+  },
 }))
 
 describe('Error Handling System', () => {
@@ -47,7 +47,7 @@ describe('Error Handling System', () => {
     it('should handle validation errors correctly', () => {
       const schema = z.object({
         email: z.string().email(),
-        age: z.number().min(18)
+        age: z.number().min(18),
       })
 
       try {
@@ -55,7 +55,7 @@ describe('Error Handling System', () => {
       } catch (error) {
         const response = errorHandler.handleValidationError(error, {
           requestId: 'test-request',
-          endpoint: '/api/test'
+          endpoint: '/api/test',
         })
 
         expect(response.status).toBe(400)
@@ -68,7 +68,7 @@ describe('Error Handling System', () => {
       const error = new Error('Authentication failed')
       const response = errorHandler.handleAuthError(error, {
         requestId: 'test-request',
-        endpoint: '/api/protected'
+        endpoint: '/api/protected',
       })
 
       expect(response.status).toBe(401)
@@ -80,7 +80,7 @@ describe('Error Handling System', () => {
       const error = new Error('Access denied')
       const response = errorHandler.handleAuthzError(error, {
         requestId: 'test-request',
-        userId: 'user-123'
+        userId: 'user-123',
       })
 
       expect(response.status).toBe(403)
@@ -91,7 +91,7 @@ describe('Error Handling System', () => {
     it('should handle not found errors', () => {
       const response = errorHandler.handleNotFoundError('User', {
         requestId: 'test-request',
-        tenantId: 'tenant-123'
+        tenantId: 'tenant-123',
       })
 
       expect(response.status).toBe(404)
@@ -103,7 +103,7 @@ describe('Error Handling System', () => {
       const retryAfter = 60000 // 1 minute
       const response = errorHandler.handleRateLimitError(retryAfter, {
         requestId: 'test-request',
-        ip: '192.168.1.1'
+        ip: '192.168.1.1',
       })
 
       expect(response.status).toBe(429)
@@ -112,18 +112,19 @@ describe('Error Handling System', () => {
     })
 
     it('should handle Prisma errors correctly', () => {
-      const prismaError = new PrismaClientKnownRequestError(
-        'Unique constraint failed',
-        {
-          code: 'P2002',
-          clientVersion: '4.0.0',
-          meta: { target: ['email'] }
-        }
-      )
+      const prismaError = new PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: '4.0.0',
+        meta: { target: ['email'] },
+      })
 
-      const response = errorHandler.handleError(prismaError, {
-        requestId: 'test-request'
-      }, ErrorType.DATABASE)
+      const response = errorHandler.handleError(
+        prismaError,
+        {
+          requestId: 'test-request',
+        },
+        ErrorType.DATABASE
+      )
 
       expect(response.status).toBe(500)
       expect(response.data.success).toBe(false)
@@ -136,7 +137,7 @@ describe('Error Handling System', () => {
 
       const error = new Error('Database password=secret123 failed')
       const response = errorHandler.handleError(error, {
-        requestId: 'test-request'
+        requestId: 'test-request',
       })
 
       expect(response.data.error.message).not.toContain('secret123')
@@ -147,16 +148,16 @@ describe('Error Handling System', () => {
 
     it('should log errors to database', async () => {
       const { prisma } = await import('@/lib/db')
-      
+
       const error = new Error('Test error')
       errorHandler.handleError(error, {
         requestId: 'test-request',
         userId: 'user-123',
-        tenantId: 'tenant-123'
+        tenantId: 'tenant-123',
       })
 
       // Wait a bit for async logging
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       expect(prisma.auditLog.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -164,8 +165,8 @@ describe('Error Handling System', () => {
             action: 'ERROR',
             entityType: 'SYSTEM',
             tenantId: 'tenant-123',
-            userId: 'user-123'
-          })
+            userId: 'user-123',
+          }),
         })
       )
     })
@@ -181,7 +182,7 @@ describe('Error Handling System', () => {
     it('should handle API errors correctly', () => {
       const mockResponse = {
         ok: false,
-        status: 400
+        status: 400,
       } as Response
 
       const errorData = {
@@ -190,8 +191,8 @@ describe('Error Handling System', () => {
           type: 'VALIDATION_ERROR',
           code: 'VALIDATION_FAILED',
           message: 'Invalid input data',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
 
       const result = clientErrorHandler.handleApiError(mockResponse, errorData)
@@ -216,7 +217,7 @@ describe('Error Handling System', () => {
 
       const validationErrors = {
         email: ['Invalid email format'],
-        password: ['Password too short', 'Password must contain numbers']
+        password: ['Password too short', 'Password must contain numbers'],
       }
 
       clientErrorHandler.handleValidationError(validationErrors)
@@ -225,7 +226,7 @@ describe('Error Handling System', () => {
         expect.objectContaining({
           type: 'error',
           title: 'Form Validation Failed',
-          message: 'Please fix 2 errors and try again.'
+          message: 'Please fix 2 errors and try again.',
         })
       )
     })
@@ -234,7 +235,7 @@ describe('Error Handling System', () => {
       // Mock successful response
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({ data: 'test' })
+        json: () => Promise.resolve({ data: 'test' }),
       })
       global.fetch = mockFetch
 
@@ -270,8 +271,8 @@ describe('Error Handling System', () => {
           type: 'INTERNAL_ERROR',
           code: 'SERVER_ERROR',
           message: 'Internal server error',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       })
 
       expect(errorCallback).toHaveBeenCalled()
@@ -292,8 +293,8 @@ describe('Error Handling System', () => {
           type: 'INTERNAL_ERROR',
           code: 'SERVER_ERROR',
           message: 'Internal server error',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       })
 
       // Callbacks should not be called
@@ -309,7 +310,7 @@ describe('Error Handling System', () => {
         { error: new Error('Unauthorized access'), expectedType: ErrorType.AUTHENTICATION },
         { error: new Error('Access denied'), expectedType: ErrorType.AUTHORIZATION },
         { error: new Error('User not found'), expectedType: ErrorType.NOT_FOUND },
-        { error: new Error('Database connection failed'), expectedType: ErrorType.DATABASE }
+        { error: new Error('Database connection failed'), expectedType: ErrorType.DATABASE },
       ]
 
       testCases.forEach(({ error, expectedType }) => {
@@ -325,7 +326,7 @@ describe('Error Handling System', () => {
         userId: 'user-456',
         tenantId: 'tenant-789',
         endpoint: '/api/test',
-        method: 'POST'
+        method: 'POST',
       }
 
       const response = errorHandler.handleError(error, context)
@@ -336,12 +337,12 @@ describe('Error Handling System', () => {
 
     it('should handle stack traces correctly based on environment', () => {
       const originalEnv = process.env.NODE_ENV
-      
+
       // Test development environment
       process.env.NODE_ENV = 'development'
       const devError = new Error('Development error')
       const devResponse = errorHandler.handleError(devError, { requestId: 'dev-test' })
-      
+
       // Test production environment
       process.env.NODE_ENV = 'production'
       const prodError = new Error('Production error')

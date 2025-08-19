@@ -13,24 +13,23 @@ interface DealsWidgetProps {
 }
 
 export function DealsWidget({ onRemove, layout }: DealsWidgetProps) {
-  const containerClass = layout === 'list' 
-    ? 'bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6'
-    : 'bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 h-full'
+  const containerClass =
+    layout === 'list'
+      ? 'bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6'
+      : 'bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 h-full'
 
   return (
     <div className={containerClass}>
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <TrendingUp className="w-5 h-5 text-purple-600" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Active Deals
-          </h3>
+          <TrendingUp className="h-5 w-5 text-purple-600" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Active Deals</h3>
         </div>
         <button
           onClick={onRemove}
           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
         >
-          <X className="w-4 h-4" />
+          <X className="h-4 w-4" />
         </button>
       </div>
 

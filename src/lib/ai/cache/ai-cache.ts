@@ -8,16 +8,13 @@ import { AIResult } from '../contexts/ai-flow-context'
 
 export class AICache {
   private cache: LRUCache<string, AIResult>
-  
-  constructor(options?: {
-    max?: number
-    ttl?: number
-  }) {
+
+  constructor(options?: { max?: number; ttl?: number }) {
     this.cache = new LRUCache<string, AIResult>({
       max: options?.max || 1000, // Maximum number of items
       ttl: options?.ttl || 1000 * 60 * 60, // Default 1 hour TTL
       updateAgeOnGet: true,
-      updateAgeOnHas: true
+      updateAgeOnHas: true,
     })
   }
 
@@ -27,7 +24,7 @@ export class AICache {
       // Update cache hit statistics
       return {
         ...cached,
-        cacheHit: true
+        cacheHit: true,
       }
     }
     return null
@@ -58,17 +55,17 @@ export class AICache {
   } {
     const calculatedValues = this.cache.calculatedSize || 0
     const size = this.cache.size
-    
+
     // These would be tracked in a real implementation
     const hits = 0
     const misses = 0
     const hitRate = hits / (hits + misses) || 0
-    
+
     return {
       size,
       hits,
       misses,
-      hitRate
+      hitRate,
     }
   }
 

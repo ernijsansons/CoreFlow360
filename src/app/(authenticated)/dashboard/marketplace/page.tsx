@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
+import {
   Search,
   Filter,
   Package,
@@ -27,7 +27,7 @@ import {
   Users,
   BarChart3,
   Cog,
-  Bot
+  Bot,
 } from 'lucide-react'
 
 interface Module {
@@ -63,7 +63,7 @@ const CATEGORIES = [
   { id: 'crm', name: 'CRM & Sales', icon: Users },
   { id: 'operations', name: 'Operations', icon: Cog },
   { id: 'ai', name: 'AI & Analytics', icon: Bot },
-  { id: 'erp', name: 'Enterprise ERP', icon: BarChart3 }
+  { id: 'erp', name: 'Enterprise ERP', icon: BarChart3 },
 ]
 
 export default function MarketplacePage() {
@@ -88,25 +88,24 @@ export default function MarketplacePage() {
       // Fetch module data
       const [modulesResponse, accessResponse] = await Promise.all([
         fetch('/api/marketplace/modules'),
-        fetch('/api/modules', { method: 'POST' })
+        fetch('/api/modules', { method: 'POST' }),
       ])
 
       const modulesData = await modulesResponse.json()
       const accessData = await accessResponse.json()
 
       if (modulesData.success && accessData.success) {
-        const accessibleModules = accessData.data.accessibleModules.map((m: any) => m.id)
-        
+        const accessibleModules = accessData.data.accessibleModules.map((m: unknown) => m.id)
+
         // Combine data
-        const combinedModules = modulesData.data.map((module: any) => ({
+        const combinedModules = modulesData.data.map((module: unknown) => ({
           ...module,
-          accessible: accessibleModules.includes(module.id)
+          accessible: accessibleModules.includes(module.id),
         }))
 
         setModules(combinedModules)
       }
     } catch (error) {
-      console.error('Failed to fetch modules:', error)
     } finally {
       setLoading(false)
     }
@@ -117,18 +116,19 @@ export default function MarketplacePage() {
 
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter(module =>
-        module.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        module.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        module.features.some(feature => 
-          feature.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+      filtered = filtered.filter(
+        (module) =>
+          module.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          module.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          module.features.some((feature) =>
+            feature.toLowerCase().includes(searchQuery.toLowerCase())
+          )
       )
     }
 
     // Filter by category
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(module => module.category === selectedCategory)
+      filtered = filtered.filter((module) => module.category === selectedCategory)
     }
 
     // Sort modules
@@ -151,49 +151,46 @@ export default function MarketplacePage() {
   const handleInstallModule = async (moduleId: string) => {
     try {
       const response = await fetch(`/api/modules/${moduleId}/install`, {
-        method: 'POST'
+        method: 'POST',
       })
 
       const data = await response.json()
-      
+
       if (data.success) {
         // Refresh modules list
         fetchModules()
       } else {
-        console.error('Failed to install module:', data.error)
       }
-    } catch (error) {
-      console.error('Installation error:', error)
-    }
+    } catch (error) {}
   }
 
   const getCategoryIcon = (categoryId: string) => {
-    const category = CATEGORIES.find(cat => cat.id === categoryId)
+    const category = CATEGORIES.find((cat) => cat.id === categoryId)
     const Icon = category?.icon || Package
     return <Icon className="h-5 w-5" />
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="border-primary h-12 w-12 animate-spin rounded-full border-b-2"></div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Module Marketplace</h1>
+        <h1 className="mb-2 text-3xl font-bold">Module Marketplace</h1>
         <p className="text-muted-foreground">
           Discover and activate business modules to expand your capabilities
         </p>
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
+      <div className="mb-6 flex flex-col gap-4 md:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
           <Input
             placeholder="Search modules, features, or capabilities..."
             className="pl-10"
@@ -203,8 +200,8 @@ export default function MarketplacePage() {
         </div>
         <select
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as any)}
-          className="px-3 py-2 border rounded-md"
+          onChange={(e) => setSortBy(e.target.value as unknown)}
+          className="rounded-md border px-3 py-2"
         >
           <option value="popularity">Most Popular</option>
           <option value="rating">Highest Rated</option>
@@ -212,7 +209,7 @@ export default function MarketplacePage() {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
         {/* Categories Sidebar */}
         <div className="lg:col-span-1">
           <Card>
@@ -224,7 +221,7 @@ export default function MarketplacePage() {
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-accent ${
+                  className={`hover:bg-accent flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left ${
                     selectedCategory === category.id ? 'bg-primary text-primary-foreground' : ''
                   }`}
                 >
@@ -238,7 +235,7 @@ export default function MarketplacePage() {
 
         {/* Modules Grid */}
         <div className="lg:col-span-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {filteredModules.map((module) => (
               <Card key={module.id} className="relative overflow-hidden">
                 {/* Access Status Badge */}
@@ -258,31 +255,29 @@ export default function MarketplacePage() {
 
                 <CardHeader className="pb-4">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
+                    <div className="bg-primary/10 rounded-lg p-2">
                       {getCategoryIcon(module.category)}
                     </div>
                     <div className="flex-1">
                       <CardTitle className="text-lg">{module.name}</CardTitle>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="mt-1 flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
                           {module.category}
                         </Badge>
                         {module.vendor.verified && (
-                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                          <Badge variant="outline" className="bg-blue-50 text-xs text-blue-700">
                             Verified
                           </Badge>
                         )}
                       </div>
                     </div>
                   </div>
-                  <CardDescription className="mt-3">
-                    {module.description}
-                  </CardDescription>
+                  <CardDescription className="mt-3">{module.description}</CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
                   {/* Rating and Stats */}
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="text-muted-foreground flex items-center justify-between text-sm">
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                       <span>{module.rating}</span>
@@ -296,7 +291,7 @@ export default function MarketplacePage() {
 
                   {/* Key Features */}
                   <div>
-                    <h4 className="text-sm font-medium mb-2">Key Features</h4>
+                    <h4 className="mb-2 text-sm font-medium">Key Features</h4>
                     <div className="flex flex-wrap gap-1">
                       {module.features.slice(0, 3).map((feature, index) => (
                         <Badge key={index} variant="outline" className="text-xs">
@@ -312,7 +307,7 @@ export default function MarketplacePage() {
                   </div>
 
                   {/* Integration Info */}
-                  <div className="flex justify-between text-xs text-muted-foreground">
+                  <div className="text-muted-foreground flex justify-between text-xs">
                     <span>Setup: {module.integration.setupDifficulty}</span>
                     <span>{module.integration.deploymentType}</span>
                   </div>
@@ -320,8 +315,8 @@ export default function MarketplacePage() {
                   {/* Actions */}
                   <div className="flex gap-2 pt-2">
                     {module.accessible ? (
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className="flex-1"
                         onClick={() => handleInstallModule(module.id)}
                       >
@@ -329,11 +324,11 @@ export default function MarketplacePage() {
                         Configure
                       </Button>
                     ) : (
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
+                      <Button
+                        size="sm"
+                        variant="outline"
                         className="flex-1"
-                        onClick={() => window.location.href = '/dashboard/subscription'}
+                        onClick={() => (window.location.href = '/dashboard/subscription')}
                       >
                         <Zap className="mr-2 h-4 w-4" />
                         Upgrade to Access
@@ -349,16 +344,18 @@ export default function MarketplacePage() {
           </div>
 
           {filteredModules.length === 0 && (
-            <div className="text-center py-12">
-              <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No modules found</h3>
+            <div className="py-12 text-center">
+              <Package className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+              <h3 className="mb-2 text-lg font-medium">No modules found</h3>
               <p className="text-muted-foreground mb-4">
                 Try adjusting your search criteria or browse different categories
               </p>
-              <Button onClick={() => {
-                setSearchQuery('')
-                setSelectedCategory('all')
-              }}>
+              <Button
+                onClick={() => {
+                  setSearchQuery('')
+                  setSelectedCategory('all')
+                }}
+              >
                 Clear Filters
               </Button>
             </div>
@@ -368,13 +365,11 @@ export default function MarketplacePage() {
 
       {/* Featured Section */}
       <div className="mt-12">
-        <Card className="bg-gradient-to-r from-primary/10 to-primary/5">
+        <Card className="from-primary/10 to-primary/5 bg-gradient-to-r">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-semibold mb-2">
-                  Need a Custom Integration?
-                </h3>
+                <h3 className="mb-2 text-xl font-semibold">Need a Custom Integration?</h3>
                 <p className="text-muted-foreground">
                   Our team can help you connect any business system to CoreFlow360
                 </p>

@@ -180,18 +180,20 @@ export class LinkedInAPI {
       'r_emailaddress',
       'w_member_social',
       'r_organization_social',
-      'rw_organization_admin'
+      'rw_organization_admin',
     ]
-    
+
     const allScopes = [...defaultScopes, ...scopes]
     const redirectUri = `${process.env.NEXTAUTH_URL}/api/integrations/linkedin/callback`
-    
-    return `https://www.linkedin.com/oauth/v2/authorization?` +
+
+    return (
+      `https://www.linkedin.com/oauth/v2/authorization?` +
       `response_type=code&` +
       `client_id=${this.clientId}&` +
       `redirect_uri=${encodeURIComponent(redirectUri)}&` +
       `state=${state}&` +
       `scope=${encodeURIComponent(allScopes.join(' '))}`
+    )
   }
 
   /**
@@ -205,15 +207,15 @@ export class LinkedInAPI {
     const response = await fetch('https://www.linkedin.com/oauth/v2/accessToken', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code,
         client_id: this.clientId,
         client_secret: this.clientSecret,
-        redirect_uri: `${process.env.NEXTAUTH_URL}/api/integrations/linkedin/callback`
-      })
+        redirect_uri: `${process.env.NEXTAUTH_URL}/api/integrations/linkedin/callback`,
+      }),
     })
 
     if (!response.ok) {
@@ -235,7 +237,7 @@ export class LinkedInAPI {
    */
   async getMyProfile(): Promise<LinkedInProfile> {
     const response = await this.makeRequest('/people/~')
-    
+
     return {
       id: response.id,
       firstName: response.localizedFirstName || response.firstName?.localized?.en_US,
@@ -246,12 +248,13 @@ export class LinkedInAPI {
       location: response.locationName,
       industry: response.industryName,
       connections: 0, // Would need separate API call
-      profilePictureUrl: response.profilePicture?.['displayImage~']?.elements?.[0]?.identifiers?.[0]?.identifier,
+      profilePictureUrl:
+        response.profilePicture?.['displayImage~']?.elements?.[0]?.identifiers?.[0]?.identifier,
       experience: [],
       education: [],
       skills: [],
       companyName: response.positions?.values?.[0]?.company?.name,
-      salesNavigatorUrl: `https://www.linkedin.com/sales/people/${response.id}`
+      salesNavigatorUrl: `https://www.linkedin.com/sales/people/${response.id}`,
     }
   }
 
@@ -286,20 +289,20 @@ export class LinkedInAPI {
             title: 'VP of Sales',
             companyName: 'TechCorp',
             current: true,
-            startDate: '2022-01-01'
-          }
+            startDate: '2022-01-01',
+          },
         ],
         education: [],
         skills: ['Sales', 'B2B', 'SaaS', 'Leadership'],
         companyName: 'TechCorp',
-        salesNavigatorUrl: 'https://www.linkedin.com/sales/people/linkedin-123'
-      }
+        salesNavigatorUrl: 'https://www.linkedin.com/sales/people/linkedin-123',
+      },
     ]
 
     return {
       profiles: mockProfiles,
       total: 1,
-      hasMore: false
+      hasMore: false,
     }
   }
 
@@ -311,7 +314,7 @@ export class LinkedInAPI {
       const [profile, experience, education] = await Promise.all([
         this.makeRequest(`/people/${profileId}`),
         this.makeRequest(`/people/${profileId}/positions`),
-        this.makeRequest(`/people/${profileId}/educations`)
+        this.makeRequest(`/people/${profileId}/educations`),
       ])
 
       return {
@@ -325,30 +328,31 @@ export class LinkedInAPI {
         industry: profile.industryName,
         connections: 0,
         summary: profile.summary?.localized?.en_US,
-        experience: experience.values?.map((exp: any) => ({
-          id: exp.id,
-          title: exp.title?.localized?.en_US,
-          companyName: exp.company?.name,
-          companyId: exp.company?.id,
-          location: exp.locationName,
-          startDate: `${exp.startDate?.year}-${exp.startDate?.month}-01`,
-          endDate: exp.endDate ? `${exp.endDate?.year}-${exp.endDate?.month}-01` : undefined,
-          description: exp.description?.localized?.en_US,
-          current: !exp.endDate
-        })) || [],
-        education: education.values?.map((edu: any) => ({
-          id: edu.id,
-          school: edu.schoolName,
-          degree: edu.degreeName,
-          fieldOfStudy: edu.fieldOfStudy,
-          startYear: edu.startDate?.year,
-          endYear: edu.endDate?.year
-        })) || [],
+        experience:
+          experience.values?.map((exp: unknown) => ({
+            id: exp.id,
+            title: exp.title?.localized?.en_US,
+            companyName: exp.company?.name,
+            companyId: exp.company?.id,
+            location: exp.locationName,
+            startDate: `${exp.startDate?.year}-${exp.startDate?.month}-01`,
+            endDate: exp.endDate ? `${exp.endDate?.year}-${exp.endDate?.month}-01` : undefined,
+            description: exp.description?.localized?.en_US,
+            current: !exp.endDate,
+          })) || [],
+        education:
+          education.values?.map((edu: unknown) => ({
+            id: edu.id,
+            school: edu.schoolName,
+            degree: edu.degreeName,
+            fieldOfStudy: edu.fieldOfStudy,
+            startYear: edu.startDate?.year,
+            endYear: edu.endDate?.year,
+          })) || [],
         skills: [],
-        salesNavigatorUrl: `https://www.linkedin.com/sales/people/${profileId}`
+        salesNavigatorUrl: `https://www.linkedin.com/sales/people/${profileId}`,
       }
     } catch (error) {
-      console.error('Error fetching LinkedIn profile:', error)
       throw new Error('Failed to fetch LinkedIn profile details')
     }
   }
@@ -358,7 +362,7 @@ export class LinkedInAPI {
    */
   async getCompany(companyId: string): Promise<LinkedInCompany> {
     const response = await this.makeRequest(`/companies/${companyId}`)
-    
+
     return {
       id: response.id,
       name: response.localizedName,
@@ -374,13 +378,14 @@ export class LinkedInAPI {
       logoUrl: response.logo?.original,
       followerCount: response.followersCount || 0,
       employeeCount: response.staffCount || 0,
-      locations: response.locations?.map((loc: any) => ({
-        country: loc.address?.country,
-        city: loc.address?.city,
-        address: loc.address?.line1,
-        postalCode: loc.address?.postalCode
-      })) || [],
-      recentUpdates: []
+      locations:
+        response.locations?.map((loc: unknown) => ({
+          country: loc.address?.country,
+          city: loc.address?.city,
+          address: loc.address?.line1,
+          postalCode: loc.address?.postalCode,
+        })) || [],
+      recentUpdates: [],
     }
   }
 
@@ -388,27 +393,28 @@ export class LinkedInAPI {
    * Send connection request with personalized message
    */
   async sendConnectionRequest(
-    profileId: string, 
+    profileId: string,
     message: string,
     trackingId?: string
   ): Promise<{ success: boolean; messageId?: string }> {
     try {
       const response = await this.makeRequest('/people/~/mailbox', 'POST', {
         recipients: {
-          values: [{
-            person: `urn:li:person:${profileId}`
-          }]
+          values: [
+            {
+              person: `urn:li:person:${profileId}`,
+            },
+          ],
         },
         subject: 'Connection Request',
-        body: message
+        body: message,
       })
 
       return {
         success: true,
-        messageId: response.value
+        messageId: response.value,
       }
     } catch (error) {
-      console.error('Error sending connection request:', error)
       return { success: false }
     }
   }
@@ -426,15 +432,14 @@ export class LinkedInAPI {
       const response = await this.makeRequest('/messaging/conversations', 'POST', {
         recipients: [`urn:li:person:${profileId}`],
         subject,
-        body: message
+        body: message,
       })
 
       return {
         success: true,
-        messageId: response.value
+        messageId: response.value,
       }
     } catch (error) {
-      console.error('Error sending LinkedIn message:', error)
       return { success: false }
     }
   }
@@ -456,22 +461,22 @@ export class LinkedInAPI {
           type: 'POST',
           content: 'Excited to announce our new product launch!',
           publishedAt: new Date().toISOString(),
-          engagement: { likes: 45, comments: 12, shares: 8 }
-        }
+          engagement: { likes: 45, comments: 12, shares: 8 },
+        },
       ],
       jobChangeAlert: {
         previousCompany: 'OldCorp',
         newCompany: 'TechCorp',
         changeDate: new Date().toISOString(),
-        changeType: 'NEW_ROLE'
+        changeType: 'NEW_ROLE',
       },
       buyingSignals: [
         {
           signal: 'Posted about scaling challenges',
           strength: 'HIGH',
           source: 'LinkedIn Post',
-          detectedAt: new Date().toISOString()
-        }
+          detectedAt: new Date().toISOString(),
+        },
       ],
       socialSellingIndex: {
         score: 78,
@@ -479,20 +484,17 @@ export class LinkedInAPI {
         industryAverage: 65,
         recommendations: [
           'Share more industry insights',
-          'Engage with prospects\' content',
-          'Expand your network in target accounts'
-        ]
-      }
+          "Engage with prospects' content",
+          'Expand your network in target accounts',
+        ],
+      },
     }
   }
 
   /**
    * Track profile activities and updates
    */
-  async getProfileActivity(
-    profileId: string, 
-    days = 30
-  ): Promise<LinkedInActivity[]> {
+  async getProfileActivity(_profileId: string, days = 30): Promise<LinkedInActivity[]> {
     // This would track real LinkedIn activity
     // For demo, return mock activities
     return [
@@ -501,14 +503,14 @@ export class LinkedInAPI {
         type: 'POST',
         content: 'Great insights on B2B sales trends in 2024',
         publishedAt: new Date().toISOString(),
-        engagement: { likes: 23, comments: 5, shares: 3 }
+        engagement: { likes: 23, comments: 5, shares: 3 },
       },
       {
         id: 'act-2',
         type: 'JOB_CHANGE',
         content: 'Started new position as VP of Sales at TechCorp',
-        publishedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      }
+        publishedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      },
     ]
   }
 
@@ -532,21 +534,21 @@ export class LinkedInAPI {
           category: 'BRAND',
           title: 'Optimize your LinkedIn headline',
           description: 'Your headline could better showcase your value proposition',
-          impact: 'HIGH'
+          impact: 'HIGH',
         },
         {
           category: 'INSIGHTS',
           title: 'Share industry insights weekly',
           description: 'Regular content sharing increases visibility by 400%',
-          impact: 'HIGH'
+          impact: 'HIGH',
         },
         {
           category: 'NETWORK',
           title: 'Connect with decision makers',
           description: '15 target prospects in your ICP are 2nd degree connections',
-          impact: 'MEDIUM'
-        }
-      ]
+          impact: 'MEDIUM',
+        },
+      ],
     }
   }
 
@@ -576,19 +578,19 @@ export class LinkedInAPI {
    * Private helper to make authenticated requests
    */
   private async makeRequest(
-    endpoint: string, 
+    endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-    data?: any
-  ): Promise<any> {
+    data?: unknown
+  ): Promise<unknown> {
     const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`
-    
+
     const options: RequestInit = {
       method,
       headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
+        Authorization: `Bearer ${this.accessToken}`,
         'Content-Type': 'application/json',
-        'LinkedIn-Version': '202401'
-      }
+        'LinkedIn-Version': '202401',
+      },
     }
 
     if (data && (method === 'POST' || method === 'PUT')) {
@@ -611,15 +613,15 @@ export class LinkedInAPI {
   private async makeRequestWithRetry(
     endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-    data?: any,
+    data?: unknown,
     retries = 3
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       return await this.makeRequest(endpoint, method, data)
     } catch (error) {
       if (retries > 0 && error instanceof Error && error.message.includes('429')) {
         // Rate limited, wait and retry
-        await new Promise(resolve => setTimeout(resolve, 60000)) // Wait 1 minute
+        await new Promise((resolve) => setTimeout(resolve, 60000)) // Wait 1 minute
         return this.makeRequestWithRetry(endpoint, method, data, retries - 1)
       }
       throw error

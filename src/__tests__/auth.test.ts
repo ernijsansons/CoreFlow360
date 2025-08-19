@@ -9,9 +9,9 @@ describe('Authentication Validation', () => {
         lastName: 'Doe',
         email: 'john@example.com',
         phone: '123-456-7890',
-        address: '123 Main St'
+        address: '123 Main St',
       }
-      
+
       const result = customerCreateSchema.safeParse(validData)
       expect(result.success).toBe(true)
     })
@@ -19,16 +19,16 @@ describe('Authentication Validation', () => {
     it('should reject missing required fields', () => {
       const invalidData = {
         firstName: '',
-        lastName: 'Doe'
+        lastName: 'Doe',
       }
-      
+
       const result = customerCreateSchema.safeParse(invalidData)
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.error.issues).toContainEqual(
           expect.objectContaining({
             path: ['firstName'],
-            message: 'First name is required'
+            message: 'First name is required',
           })
         )
       }
@@ -38,16 +38,16 @@ describe('Authentication Validation', () => {
       const invalidData = {
         firstName: 'John',
         lastName: 'Doe',
-        email: 'invalid-email'
+        email: 'invalid-email',
       }
-      
+
       const result = customerCreateSchema.safeParse(invalidData)
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.error.issues).toContainEqual(
           expect.objectContaining({
             path: ['email'],
-            message: 'Invalid email'
+            message: 'Invalid email',
           })
         )
       }
@@ -60,18 +60,18 @@ describe('Authentication Validation', () => {
         equipment_type: 'Central Air',
         equipment_brand: 'Carrier',
         seer_rating: 16,
-        refrigerant_type: 'R-410A'
+        refrigerant_type: 'R-410A',
       }
-      
+
       const result = hvacDataSchema.safeParse(validHVACData)
       expect(result.success).toBe(true)
     })
 
     it('should reject invalid SEER rating', () => {
       const invalidData = {
-        seer_rating: 0
+        seer_rating: 0,
       }
-      
+
       const result = hvacDataSchema.safeParse(invalidData)
       expect(result.success).toBe(false)
     })

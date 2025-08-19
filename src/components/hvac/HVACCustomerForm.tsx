@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { getIndustryCustomFields } from "@/lib/industry-config"
+import { useState } from 'react'
+import { getIndustryCustomFields } from '@/lib/industry-config'
 
 interface HVACCustomerData {
   name: string
@@ -26,7 +26,17 @@ interface HVACCustomerData {
 interface FieldConfig {
   name: string
   label: string
-  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'number' | 'date' | 'boolean' | 'file' | 'multiselect'
+  type:
+    | 'text'
+    | 'email'
+    | 'tel'
+    | 'textarea'
+    | 'select'
+    | 'number'
+    | 'date'
+    | 'boolean'
+    | 'file'
+    | 'multiselect'
   required?: boolean
   group?: string
   options?: string[]
@@ -66,7 +76,7 @@ export function HVACCustomerForm({ customer, onSubmit, onCancel }: HVACCustomerF
   }
 
   const handleChange = (field: string, value: string | number | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   const renderField = (field: FieldConfig) => {
@@ -76,7 +86,7 @@ export function HVACCustomerForm({ customer, onSubmit, onCancel }: HVACCustomerF
       case 'select':
         return (
           <select
-            value={value as string || ''}
+            value={(value as string) || ''}
             onChange={(e) => handleChange(field.name, e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             required={field.required}
@@ -93,7 +103,7 @@ export function HVACCustomerForm({ customer, onSubmit, onCancel }: HVACCustomerF
         return (
           <input
             type="number"
-            value={value as number || ''}
+            value={(value as number) || ''}
             onChange={(e) => handleChange(field.name, parseFloat(e.target.value) || 0)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             required={field.required}
@@ -103,7 +113,7 @@ export function HVACCustomerForm({ customer, onSubmit, onCancel }: HVACCustomerF
         return (
           <input
             type="date"
-            value={value as string || ''}
+            value={(value as string) || ''}
             onChange={(e) => handleChange(field.name, e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             required={field.required}
@@ -115,14 +125,14 @@ export function HVACCustomerForm({ customer, onSubmit, onCancel }: HVACCustomerF
             type="checkbox"
             checked={Boolean(value) || false}
             onChange={(e) => handleChange(field.name, e.target.checked)}
-            className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
         )
       default:
         return (
           <input
             type="text"
-            value={value as string || ''}
+            value={(value as string) || ''}
             onChange={(e) => handleChange(field.name, e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             required={field.required}
@@ -132,12 +142,15 @@ export function HVACCustomerForm({ customer, onSubmit, onCancel }: HVACCustomerF
   }
 
   // Group fields by category
-  const groupedFields = hvacFields.reduce((groups, field) => {
-    const group = field.group || 'General'
-    if (!groups[group]) groups[group] = []
-    groups[group].push(field)
-    return groups
-  }, {} as Record<string, FieldConfig[]>)
+  const groupedFields = hvacFields.reduce(
+    (groups, field) => {
+      const group = field.group || 'General'
+      if (!groups[group]) groups[group] = []
+      groups[group].push(field)
+      return groups
+    },
+    {} as Record<string, FieldConfig[]>
+  )
 
   // Add basic fields to General group
   const basicFields: FieldConfig[] = [
@@ -152,25 +165,23 @@ export function HVACCustomerForm({ customer, onSubmit, onCancel }: HVACCustomerF
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4">
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={onCancel} />
-        <div className="relative bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <div className="bg-opacity-75 fixed inset-0 bg-gray-600" onClick={onCancel} />
+        <div className="relative max-h-screen w-full max-w-4xl overflow-y-auto rounded-lg bg-white">
           <form onSubmit={handleSubmit} className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-6">
+            <h2 className="mb-6 text-lg font-medium text-gray-900">
               {customer ? 'Edit Customer' : 'Add New HVAC Customer'}
             </h2>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
               {Object.entries(groupedFields).map(([groupName, fields]) => (
                 <div key={groupName} className="space-y-4">
-                  <h3 className="text-sm font-medium text-gray-900 border-b pb-2">
-                    {groupName}
-                  </h3>
+                  <h3 className="border-b pb-2 text-sm font-medium text-gray-900">{groupName}</h3>
                   {fields.map((field) => (
                     <div key={field.name}>
                       <label className="block text-sm font-medium text-gray-700">
                         {field.label}
-                        {field.required && <span className="text-red-500 ml-1">*</span>}
+                        {field.required && <span className="ml-1 text-red-500">*</span>}
                       </label>
                       {field.name === 'address' ? (
                         <textarea
@@ -188,17 +199,17 @@ export function HVACCustomerForm({ customer, onSubmit, onCancel }: HVACCustomerF
               ))}
             </div>
 
-            <div className="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+            <div className="mt-8 flex justify-end space-x-3 border-t border-gray-200 pt-6">
               <button
                 type="button"
                 onClick={onCancel}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
               >
                 {customer ? 'Update Customer' : 'Add Customer'}
               </button>

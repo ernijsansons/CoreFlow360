@@ -1,92 +1,92 @@
-import { logger } from '@/lib/logging/logger';
+import { logger } from '@/lib/logging/logger'
 
 export interface CloudResource {
-  resourceId: string;
-  resourceType: string;
-  provider: CloudProvider;
-  region: string;
-  tags: Record<string, string>;
-  status: 'running' | 'stopped' | 'terminated' | 'pending';
-  createdAt: Date;
-  cost: ResourceCost;
-  utilization: ResourceUtilization;
-  metadata: Record<string, any>;
+  resourceId: string
+  resourceType: string
+  provider: CloudProvider
+  region: string
+  tags: Record<string, string>
+  status: 'running' | 'stopped' | 'terminated' | 'pending'
+  createdAt: Date
+  cost: ResourceCost
+  utilization: ResourceUtilization
+  metadata: Record<string, unknown>
 }
 
 export interface ResourceCost {
-  hourlyRate: number;
-  dailyCost: number;
-  monthlyCost: number;
-  currency: string;
-  billingType: 'on_demand' | 'reserved' | 'spot' | 'savings_plan';
-  discount?: number;
-  effectiveRate?: number;
+  hourlyRate: number
+  dailyCost: number
+  monthlyCost: number
+  currency: string
+  billingType: 'on_demand' | 'reserved' | 'spot' | 'savings_plan'
+  discount?: number
+  effectiveRate?: number
 }
 
 export interface ResourceUtilization {
-  cpu?: number; // 0-100%
-  memory?: number; // 0-100%
-  disk?: number; // 0-100%
-  network?: number; // MB/s
-  iops?: number;
-  requests?: number;
-  dataTransfer?: number; // GB
-  lastUpdated: Date;
+  cpu?: number // 0-100%
+  memory?: number // 0-100%
+  disk?: number // 0-100%
+  network?: number // MB/s
+  iops?: number
+  requests?: number
+  dataTransfer?: number // GB
+  lastUpdated: Date
 }
 
 export interface CloudProviderConfig {
-  provider: CloudProvider;
-  credentials: CloudCredentials;
-  regions: string[];
-  services: string[];
-  pollingInterval?: number; // minutes
-  costExplorerEnabled: boolean;
-  tagFilters?: Record<string, string>;
+  provider: CloudProvider
+  credentials: CloudCredentials
+  regions: string[]
+  services: string[]
+  pollingInterval?: number // minutes
+  costExplorerEnabled: boolean
+  tagFilters?: Record<string, string>
 }
 
 export interface CloudCredentials {
   aws?: {
-    accessKeyId: string;
-    secretAccessKey: string;
-    sessionToken?: string;
-    roleArn?: string;
-  };
+    accessKeyId: string
+    secretAccessKey: string
+    sessionToken?: string
+    roleArn?: string
+  }
   azure?: {
-    tenantId: string;
-    clientId: string;
-    clientSecret: string;
-    subscriptionId: string;
-  };
+    tenantId: string
+    clientId: string
+    clientSecret: string
+    subscriptionId: string
+  }
   gcp?: {
-    projectId: string;
-    keyFile: string;
-    serviceAccount: string;
-  };
+    projectId: string
+    keyFile: string
+    serviceAccount: string
+  }
 }
 
-export type CloudProvider = 'aws' | 'azure' | 'gcp';
+export type CloudProvider = 'aws' | 'azure' | 'gcp'
 
 abstract class BaseCloudProvider {
-  protected config: CloudProviderConfig;
-  protected authenticated: boolean = false;
+  protected config: CloudProviderConfig
+  protected authenticated: boolean = false
 
   constructor(config: CloudProviderConfig) {
-    this.config = config;
+    this.config = config
   }
 
-  abstract authenticate(): Promise<boolean>;
-  abstract getResources(filters?: any): Promise<CloudResource[]>;
-  abstract getCosts(startDate: Date, endDate: Date): Promise<any>;
-  abstract getUtilization(resourceIds: string[]): Promise<Map<string, ResourceUtilization>>;
-  abstract getRecommendations(): Promise<any[]>;
-  abstract getTags(resourceIds: string[]): Promise<Map<string, Record<string, string>>>;
+  abstract authenticate(): Promise<boolean>
+  abstract getResources(filters?: unknown): Promise<CloudResource[]>
+  abstract getCosts(startDate: Date, endDate: Date): Promise<unknown>
+  abstract getUtilization(resourceIds: string[]): Promise<Map<string, ResourceUtilization>>
+  abstract getRecommendations(): Promise<unknown[]>
+  abstract getTags(resourceIds: string[]): Promise<Map<string, Record<string, string>>>
 }
 
 class AWSProvider extends BaseCloudProvider {
-  private ec2Client: any;
-  private cloudWatchClient: any;
-  private costExplorerClient: any;
-  private computeOptimizerClient: any;
+  private ec2Client: unknown
+  private cloudWatchClient: unknown
+  private costExplorerClient: unknown
+  private computeOptimizerClient: unknown
 
   async authenticate(): Promise<boolean> {
     try {
@@ -94,100 +94,100 @@ class AWSProvider extends BaseCloudProvider {
       // const { EC2Client } = require('@aws-sdk/client-ec2');
       // const { CloudWatchClient } = require('@aws-sdk/client-cloudwatch');
       // const { CostExplorerClient } = require('@aws-sdk/client-cost-explorer');
-      
-      logger.info('AWS authentication successful', { 
+
+      logger.info('AWS authentication successful', {
         provider: 'aws',
-        regions: this.config.regions 
-      });
-      
-      this.authenticated = true;
-      return true;
+        regions: this.config.regions,
+      })
+
+      this.authenticated = true
+      return true
     } catch (error) {
-      logger.error('AWS authentication failed', { error });
-      return false;
+      logger.error('AWS authentication failed', { error })
+      return false
     }
   }
 
-  async getResources(filters?: any): Promise<CloudResource[]> {
-    if (!this.authenticated) await this.authenticate();
+  async getResources(filters?: unknown): Promise<CloudResource[]> {
+    if (!this.authenticated) await this.authenticate()
 
-    const resources: CloudResource[] = [];
+    const resources: CloudResource[] = []
 
     try {
       // Fetch EC2 instances
-      const ec2Resources = await this.getEC2Resources();
-      resources.push(...ec2Resources);
+      const ec2Resources = await this.getEC2Resources()
+      resources.push(...ec2Resources)
 
       // Fetch RDS instances
-      const rdsResources = await this.getRDSResources();
-      resources.push(...rdsResources);
+      const rdsResources = await this.getRDSResources()
+      resources.push(...rdsResources)
 
       // Fetch S3 buckets
-      const s3Resources = await this.getS3Resources();
-      resources.push(...s3Resources);
+      const s3Resources = await this.getS3Resources()
+      resources.push(...s3Resources)
 
       // Fetch Lambda functions
-      const lambdaResources = await this.getLambdaResources();
-      resources.push(...lambdaResources);
+      const lambdaResources = await this.getLambdaResources()
+      resources.push(...lambdaResources)
 
       // Apply tag filters if specified
       if (this.config.tagFilters) {
-        return resources.filter(resource => 
+        return resources.filter((resource) =>
           this.matchesTags(resource.tags, this.config.tagFilters!)
-        );
+        )
       }
 
-      return resources;
+      return resources
     } catch (error) {
-      logger.error('Failed to fetch AWS resources', { error });
-      throw error;
+      logger.error('Failed to fetch AWS resources', { error })
+      throw error
     }
   }
 
-  async getCosts(startDate: Date, endDate: Date): Promise<any> {
-    if (!this.authenticated) await this.authenticate();
+  async getCosts(startDate: Date, endDate: Date): Promise<unknown> {
+    if (!this.authenticated) await this.authenticate()
 
     try {
       // Mock implementation - in production, use AWS Cost Explorer API
       const costData = {
         totalCost: 15000,
         byService: {
-          'EC2': 8000,
-          'RDS': 3000,
-          'S3': 2000,
-          'Lambda': 500,
-          'CloudFront': 1500
+          EC2: 8000,
+          RDS: 3000,
+          S3: 2000,
+          Lambda: 500,
+          CloudFront: 1500,
         },
         byRegion: {
           'us-east-1': 10000,
-          'us-west-2': 5000
+          'us-west-2': 5000,
         },
         trend: {
-          daily: this.generateCostTrend(startDate, endDate)
+          daily: this.generateCostTrend(startDate, endDate),
         },
         forecast: {
           nextMonth: 16500,
-          confidence: 0.85
-        }
-      };
+          confidence: 0.85,
+        },
+      }
 
       logger.info('AWS cost data retrieved', {
         startDate,
         endDate,
-        totalCost: costData.totalCost
-      });
+        totalCost: costData.totalCost,
+      })
 
-      return costData;
+      return costData
     } catch (error) {
-      logger.error('Failed to fetch AWS costs', { error });
-      throw error;
+      logger.error('Failed to fetch AWS costs', { error })
+      throw error
     }
   }
 
   async getUtilization(resourceIds: string[]): Promise<Map<string, ResourceUtilization>> {
-    if (!this.authenticated) await this.authenticate();
+    if (!this.authenticated) await this.authenticate()
 
-    const utilizationMap = new Map<string, ResourceUtilization>();
+    const utilizationMap = new Map<string, ResourceUtilization>()
 
     try {
       // Mock implementation - in production, use CloudWatch API
@@ -197,19 +197,19 @@ class AWSProvider extends BaseCloudProvider {
           memory: Math.random() * 100,
           disk: Math.random() * 100,
           network: Math.random() * 1000,
-          lastUpdated: new Date()
-        });
+          lastUpdated: new Date(),
+        })
       }
 
-      return utilizationMap;
+      return utilizationMap
     } catch (error) {
-      logger.error('Failed to fetch AWS utilization metrics', { error });
-      throw error;
+      logger.error('Failed to fetch AWS utilization metrics', { error })
+      throw error
     }
   }
 
-  async getRecommendations(): Promise<any[]> {
-    if (!this.authenticated) await this.authenticate();
+  async getRecommendations(): Promise<unknown[]> {
+    if (!this.authenticated) await this.authenticate()
 
     try {
       // Mock implementation - in production, use AWS Compute Optimizer API
@@ -221,7 +221,7 @@ class AWSProvider extends BaseCloudProvider {
           currentInstance: 'm5.xlarge',
           recommendedInstance: 'm5.large',
           monthlySavings: 150,
-          performanceRisk: 'low'
+          performanceRisk: 'low',
         },
         {
           resourceId: 'db-prod-001',
@@ -230,42 +230,42 @@ class AWSProvider extends BaseCloudProvider {
           currentCost: 500,
           recommendedCost: 350,
           monthlySavings: 150,
-          performanceRisk: 'none'
-        }
-      ];
+          performanceRisk: 'none',
+        },
+      ]
 
       logger.info('AWS recommendations retrieved', {
         count: recommendations.length,
-        totalSavings: recommendations.reduce((sum, r) => sum + r.monthlySavings, 0)
-      });
+        totalSavings: recommendations.reduce((sum, r) => sum + r.monthlySavings, 0),
+      })
 
-      return recommendations;
+      return recommendations
     } catch (error) {
-      logger.error('Failed to fetch AWS recommendations', { error });
-      throw error;
+      logger.error('Failed to fetch AWS recommendations', { error })
+      throw error
     }
   }
 
   async getTags(resourceIds: string[]): Promise<Map<string, Record<string, string>>> {
-    if (!this.authenticated) await this.authenticate();
+    if (!this.authenticated) await this.authenticate()
 
-    const tagsMap = new Map<string, Record<string, string>>();
+    const tagsMap = new Map<string, Record<string, string>>()
 
     try {
       // Mock implementation
       for (const resourceId of resourceIds) {
         tagsMap.set(resourceId, {
-          'Environment': 'production',
-          'Team': 'engineering',
-          'CostCenter': 'IT-001',
-          'Project': 'coreflow360'
-        });
+          Environment: 'production',
+          Team: 'engineering',
+          CostCenter: 'IT-001',
+          Project: 'coreflow360',
+        })
       }
 
-      return tagsMap;
+      return tagsMap
     } catch (error) {
-      logger.error('Failed to fetch AWS tags', { error });
-      throw error;
+      logger.error('Failed to fetch AWS tags', { error })
+      throw error
     }
   }
 
@@ -285,18 +285,18 @@ class AWSProvider extends BaseCloudProvider {
           dailyCost: 4.992,
           monthlyCost: 149.76,
           currency: 'USD',
-          billingType: 'on_demand'
+          billingType: 'on_demand',
         },
         utilization: {
           cpu: 25,
           memory: 60,
           disk: 40,
           network: 100,
-          lastUpdated: new Date()
+          lastUpdated: new Date(),
         },
-        metadata: { instanceType: 'm5.xlarge', availabilityZone: 'us-east-1a' }
-      }
-    ];
+        metadata: { instanceType: 'm5.xlarge', availabilityZone: 'us-east-1a' },
+      },
+    ]
   }
 
   private async getRDSResources(): Promise<CloudResource[]> {
@@ -313,20 +313,20 @@ class AWSProvider extends BaseCloudProvider {
         cost: {
           hourlyRate: 0.695,
           dailyCost: 16.68,
-          monthlyCost: 500.40,
+          monthlyCost: 500.4,
           currency: 'USD',
-          billingType: 'on_demand'
+          billingType: 'on_demand',
         },
         utilization: {
           cpu: 15,
           memory: 30,
           disk: 20,
           iops: 1000,
-          lastUpdated: new Date()
+          lastUpdated: new Date(),
         },
-        metadata: { engine: 'postgres', instanceClass: 'db.r5.large' }
-      }
-    ];
+        metadata: { engine: 'postgres', instanceClass: 'db.r5.large' },
+      },
+    ]
   }
 
   private async getS3Resources(): Promise<CloudResource[]> {
@@ -345,17 +345,17 @@ class AWSProvider extends BaseCloudProvider {
           dailyCost: 0.552,
           monthlyCost: 16.56,
           currency: 'USD',
-          billingType: 'on_demand'
+          billingType: 'on_demand',
         },
         utilization: {
           disk: 500, // GB
           dataTransfer: 100, // GB
           requests: 1000000,
-          lastUpdated: new Date()
+          lastUpdated: new Date(),
         },
-        metadata: { storageClass: 'STANDARD', bucketSize: '500GB' }
-      }
-    ];
+        metadata: { storageClass: 'STANDARD', bucketSize: '500GB' },
+      },
+    ]
   }
 
   private async getLambdaResources(): Promise<CloudResource[]> {
@@ -374,38 +374,39 @@ class AWSProvider extends BaseCloudProvider {
           dailyCost: 0.048,
           monthlyCost: 1.44,
           currency: 'USD',
-          billingType: 'on_demand'
+          billingType: 'on_demand',
         },
         utilization: {
           requests: 10000,
-          lastUpdated: new Date()
+          lastUpdated: new Date(),
         },
-        metadata: { runtime: 'nodejs18.x', memorySize: 512 }
-      }
-    ];
+        metadata: { runtime: 'nodejs18.x', memorySize: 512 },
+      },
+    ]
   }
 
-  private matchesTags(resourceTags: Record<string, string>, filterTags: Record<string, string>): boolean {
-    return Object.entries(filterTags).every(([key, value]) => 
-      resourceTags[key] === value
-    );
+  private matchesTags(
+    resourceTags: Record<string, string>,
+    filterTags: Record<string, string>
+  ): boolean {
+    return Object.entries(filterTags).every(([key, value]) => resourceTags[key] === value)
   }
 
-  private generateCostTrend(startDate: Date, endDate: Date): any[] {
-    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-    const trend = [];
-    
+  private generateCostTrend(startDate: Date, endDate: Date): unknown[] {
+    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+    const trend = []
+
     for (let i = 0; i < days; i++) {
-      const date = new Date(startDate);
-      date.setDate(date.getDate() + i);
-      
+      const date = new Date(startDate)
+      date.setDate(date.getDate() + i)
+
       trend.push({
         date: date.toISOString().split('T')[0],
-        cost: 450 + Math.sin(i / 7) * 50 + Math.random() * 20
-      });
+        cost: 450 + Math.sin(i / 7) * 50 + Math.random() * 20,
+      })
     }
-    
-    return trend;
+
+    return trend
   }
 }
 
@@ -415,19 +416,19 @@ class AzureProvider extends BaseCloudProvider {
       // In production, use Azure SDK
       logger.info('Azure authentication successful', {
         provider: 'azure',
-        subscriptionId: this.config.credentials.azure?.subscriptionId
-      });
-      
-      this.authenticated = true;
-      return true;
+        subscriptionId: this.config.credentials.azure?.subscriptionId,
+      })
+
+      this.authenticated = true
+      return true
     } catch (error) {
-      logger.error('Azure authentication failed', { error });
-      return false;
+      logger.error('Azure authentication failed', { error })
+      return false
     }
   }
 
-  async getResources(filters?: any): Promise<CloudResource[]> {
-    if (!this.authenticated) await this.authenticate();
+  async getResources(filters?: unknown): Promise<CloudResource[]> {
+    if (!this.authenticated) await this.authenticate()
 
     // Mock Azure resources
     return [
@@ -444,55 +445,55 @@ class AzureProvider extends BaseCloudProvider {
           dailyCost: 4.584,
           monthlyCost: 137.52,
           currency: 'USD',
-          billingType: 'on_demand'
+          billingType: 'on_demand',
         },
         utilization: {
           cpu: 30,
           memory: 55,
           disk: 35,
           network: 150,
-          lastUpdated: new Date()
+          lastUpdated: new Date(),
         },
-        metadata: { vmSize: 'Standard_D4s_v3', osType: 'Linux' }
-      }
-    ];
+        metadata: { vmSize: 'Standard_D4s_v3', osType: 'Linux' },
+      },
+    ]
   }
 
-  async getCosts(startDate: Date, endDate: Date): Promise<any> {
-    if (!this.authenticated) await this.authenticate();
+  async getCosts(_startDate: Date, _endDate: Date): Promise<unknown> {
+    if (!this.authenticated) await this.authenticate()
 
     return {
       totalCost: 12000,
       byService: {
         'Virtual Machines': 6000,
         'SQL Database': 3000,
-        'Storage': 1500,
-        'App Service': 1500
+        Storage: 1500,
+        'App Service': 1500,
       },
       byResourceGroup: {
-        'production': 8000,
-        'staging': 4000
-      }
-    };
+        production: 8000,
+        staging: 4000,
+      },
+    }
   }
 
   async getUtilization(resourceIds: string[]): Promise<Map<string, ResourceUtilization>> {
-    const utilizationMap = new Map<string, ResourceUtilization>();
-    
+    const utilizationMap = new Map<string, ResourceUtilization>()
+
     for (const resourceId of resourceIds) {
       utilizationMap.set(resourceId, {
         cpu: Math.random() * 100,
         memory: Math.random() * 100,
         disk: Math.random() * 100,
         network: Math.random() * 1000,
-        lastUpdated: new Date()
-      });
+        lastUpdated: new Date(),
+      })
     }
-    
-    return utilizationMap;
+
+    return utilizationMap
   }
 
-  async getRecommendations(): Promise<any[]> {
+  async getRecommendations(): Promise<unknown[]> {
     return [
       {
         resourceId: 'vm-prod-001',
@@ -501,23 +502,23 @@ class AzureProvider extends BaseCloudProvider {
         currentSize: 'Standard_D4s_v3',
         recommendedSize: 'Standard_D2s_v3',
         monthlySavings: 68.76,
-        performanceRisk: 'medium'
-      }
-    ];
+        performanceRisk: 'medium',
+      },
+    ]
   }
 
   async getTags(resourceIds: string[]): Promise<Map<string, Record<string, string>>> {
-    const tagsMap = new Map<string, Record<string, string>>();
-    
+    const tagsMap = new Map<string, Record<string, string>>()
+
     for (const resourceId of resourceIds) {
       tagsMap.set(resourceId, {
-        'Environment': 'production',
-        'Department': 'IT',
-        'Owner': 'ops-team'
-      });
+        Environment: 'production',
+        Department: 'IT',
+        Owner: 'ops-team',
+      })
     }
-    
-    return tagsMap;
+
+    return tagsMap
   }
 }
 
@@ -527,19 +528,19 @@ class GCPProvider extends BaseCloudProvider {
       // In production, use Google Cloud SDK
       logger.info('GCP authentication successful', {
         provider: 'gcp',
-        projectId: this.config.credentials.gcp?.projectId
-      });
-      
-      this.authenticated = true;
-      return true;
+        projectId: this.config.credentials.gcp?.projectId,
+      })
+
+      this.authenticated = true
+      return true
     } catch (error) {
-      logger.error('GCP authentication failed', { error });
-      return false;
+      logger.error('GCP authentication failed', { error })
+      return false
     }
   }
 
-  async getResources(filters?: any): Promise<CloudResource[]> {
-    if (!this.authenticated) await this.authenticate();
+  async getResources(filters?: unknown): Promise<CloudResource[]> {
+    if (!this.authenticated) await this.authenticate()
 
     // Mock GCP resources
     return [
@@ -556,22 +557,22 @@ class GCPProvider extends BaseCloudProvider {
           dailyCost: 4.368,
           monthlyCost: 131.04,
           currency: 'USD',
-          billingType: 'on_demand'
+          billingType: 'on_demand',
         },
         utilization: {
           cpu: 20,
           memory: 45,
           disk: 30,
           network: 200,
-          lastUpdated: new Date()
+          lastUpdated: new Date(),
         },
-        metadata: { machineType: 'n2-standard-4', zone: 'us-central1-a' }
-      }
-    ];
+        metadata: { machineType: 'n2-standard-4', zone: 'us-central1-a' },
+      },
+    ]
   }
 
-  async getCosts(startDate: Date, endDate: Date): Promise<any> {
-    if (!this.authenticated) await this.authenticate();
+  async getCosts(_startDate: Date, _endDate: Date): Promise<unknown> {
+    if (!this.authenticated) await this.authenticate()
 
     return {
       totalCost: 10000,
@@ -579,32 +580,32 @@ class GCPProvider extends BaseCloudProvider {
         'Compute Engine': 5000,
         'Cloud SQL': 2500,
         'Cloud Storage': 1500,
-        'App Engine': 1000
+        'App Engine': 1000,
       },
       byProject: {
         'coreflow360-prod': 7000,
-        'coreflow360-dev': 3000
-      }
-    };
+        'coreflow360-dev': 3000,
+      },
+    }
   }
 
   async getUtilization(resourceIds: string[]): Promise<Map<string, ResourceUtilization>> {
-    const utilizationMap = new Map<string, ResourceUtilization>();
-    
+    const utilizationMap = new Map<string, ResourceUtilization>()
+
     for (const resourceId of resourceIds) {
       utilizationMap.set(resourceId, {
         cpu: Math.random() * 100,
         memory: Math.random() * 100,
         disk: Math.random() * 100,
         network: Math.random() * 1000,
-        lastUpdated: new Date()
-      });
+        lastUpdated: new Date(),
+      })
     }
-    
-    return utilizationMap;
+
+    return utilizationMap
   }
 
-  async getRecommendations(): Promise<any[]> {
+  async getRecommendations(): Promise<unknown[]> {
     return [
       {
         resourceId: 'instance-prod-001',
@@ -613,168 +614,170 @@ class GCPProvider extends BaseCloudProvider {
         currentCost: 131.04,
         recommendedCost: 91.73,
         monthlySavings: 39.31,
-        performanceRisk: 'none'
-      }
-    ];
+        performanceRisk: 'none',
+      },
+    ]
   }
 
   async getTags(resourceIds: string[]): Promise<Map<string, Record<string, string>>> {
-    const tagsMap = new Map<string, Record<string, string>>();
-    
+    const tagsMap = new Map<string, Record<string, string>>()
+
     for (const resourceId of resourceIds) {
       tagsMap.set(resourceId, {
-        'environment': 'production',
+        environment: 'production',
         'cost-center': 'engineering',
-        'managed-by': 'terraform'
-      });
+        'managed-by': 'terraform',
+      })
     }
-    
-    return tagsMap;
+
+    return tagsMap
   }
 }
 
 class CloudProviderManager {
-  private providers: Map<CloudProvider, BaseCloudProvider> = new Map();
+  private providers: Map<CloudProvider, BaseCloudProvider> = new Map()
 
   registerProvider(config: CloudProviderConfig): void {
-    let provider: BaseCloudProvider;
+    let provider: BaseCloudProvider
 
     switch (config.provider) {
       case 'aws':
-        provider = new AWSProvider(config);
-        break;
+        provider = new AWSProvider(config)
+        break
       case 'azure':
-        provider = new AzureProvider(config);
-        break;
+        provider = new AzureProvider(config)
+        break
       case 'gcp':
-        provider = new GCPProvider(config);
-        break;
+        provider = new GCPProvider(config)
+        break
       default:
-        throw new Error(`Unsupported cloud provider: ${config.provider}`);
+        throw new Error(`Unsupported cloud provider: ${config.provider}`)
     }
 
-    this.providers.set(config.provider, provider);
-    logger.info('Cloud provider registered', { provider: config.provider });
+    this.providers.set(config.provider, provider)
+    logger.info('Cloud provider registered', { provider: config.provider })
   }
 
   async getAllResources(): Promise<CloudResource[]> {
-    const allResources: CloudResource[] = [];
+    const allResources: CloudResource[] = []
 
     for (const [providerName, provider] of this.providers.entries()) {
       try {
-        const resources = await provider.getResources();
-        allResources.push(...resources);
-        
+        const resources = await provider.getResources()
+        allResources.push(...resources)
+
         logger.info('Resources fetched from provider', {
           provider: providerName,
-          count: resources.length
-        });
+          count: resources.length,
+        })
       } catch (error) {
         logger.error('Failed to fetch resources from provider', {
           provider: providerName,
-          error
-        });
+          error,
+        })
       }
     }
 
-    return allResources;
+    return allResources
   }
 
-  async getAggregatedCosts(startDate: Date, endDate: Date): Promise<any> {
-    const costs: any = {
+  async getAggregatedCosts(startDate: Date, endDate: Date): Promise<unknown> {
+    const costs: unknown = {
       totalCost: 0,
       byProvider: {},
       byService: {},
-      trend: []
-    };
+      trend: [],
+    }
 
     for (const [providerName, provider] of this.providers.entries()) {
       try {
-        const providerCosts = await provider.getCosts(startDate, endDate);
-        costs.totalCost += providerCosts.totalCost;
-        costs.byProvider[providerName] = providerCosts.totalCost;
-        
+        const providerCosts = await provider.getCosts(startDate, endDate)
+        costs.totalCost += providerCosts.totalCost
+        costs.byProvider[providerName] = providerCosts.totalCost
+
         // Merge service costs
         Object.entries(providerCosts.byService).forEach(([service, cost]) => {
-          const key = `${providerName}:${service}`;
-          costs.byService[key] = cost as number;
-        });
-        
+          const key = `${providerName}:${service}`
+          costs.byService[key] = cost as number
+        })
+
         logger.info('Costs fetched from provider', {
           provider: providerName,
-          totalCost: providerCosts.totalCost
-        });
+          totalCost: providerCosts.totalCost,
+        })
       } catch (error) {
         logger.error('Failed to fetch costs from provider', {
           provider: providerName,
-          error
-        });
+          error,
+        })
       }
     }
 
-    return costs;
+    return costs
   }
 
-  async getAllRecommendations(): Promise<any[]> {
-    const allRecommendations: any[] = [];
+  async getAllRecommendations(): Promise<unknown[]> {
+    const allRecommendations: unknown[] = []
 
     for (const [providerName, provider] of this.providers.entries()) {
       try {
-        const recommendations = await provider.getRecommendations();
-        const taggedRecommendations = recommendations.map(r => ({
+        const recommendations = await provider.getRecommendations()
+        const taggedRecommendations = recommendations.map((r) => ({
           ...r,
-          provider: providerName
-        }));
-        
-        allRecommendations.push(...taggedRecommendations);
-        
+          provider: providerName,
+        }))
+
+        allRecommendations.push(...taggedRecommendations)
+
         logger.info('Recommendations fetched from provider', {
           provider: providerName,
-          count: recommendations.length
-        });
+          count: recommendations.length,
+        })
       } catch (error) {
         logger.error('Failed to fetch recommendations from provider', {
           provider: providerName,
-          error
-        });
+          error,
+        })
       }
     }
 
-    return allRecommendations;
+    return allRecommendations
   }
 
-  async getResourceUtilization(resources: CloudResource[]): Promise<Map<string, ResourceUtilization>> {
-    const utilizationMap = new Map<string, ResourceUtilization>();
+  async getResourceUtilization(
+    resources: CloudResource[]
+  ): Promise<Map<string, ResourceUtilization>> {
+    const utilizationMap = new Map<string, ResourceUtilization>()
 
     // Group resources by provider
-    const resourcesByProvider = new Map<CloudProvider, string[]>();
-    
-    resources.forEach(resource => {
-      const ids = resourcesByProvider.get(resource.provider) || [];
-      ids.push(resource.resourceId);
-      resourcesByProvider.set(resource.provider, ids);
-    });
+    const resourcesByProvider = new Map<CloudProvider, string[]>()
+
+    resources.forEach((resource) => {
+      const ids = resourcesByProvider.get(resource.provider) || []
+      ids.push(resource.resourceId)
+      resourcesByProvider.set(resource.provider, ids)
+    })
 
     // Fetch utilization from each provider
     for (const [providerName, resourceIds] of resourcesByProvider.entries()) {
-      const provider = this.providers.get(providerName);
-      if (!provider) continue;
+      const provider = this.providers.get(providerName)
+      if (!provider) continue
 
       try {
-        const providerUtilization = await provider.getUtilization(resourceIds);
+        const providerUtilization = await provider.getUtilization(resourceIds)
         providerUtilization.forEach((utilization, resourceId) => {
-          utilizationMap.set(resourceId, utilization);
-        });
+          utilizationMap.set(resourceId, utilization)
+        })
       } catch (error) {
         logger.error('Failed to fetch utilization from provider', {
           provider: providerName,
-          error
-        });
+          error,
+        })
       }
     }
 
-    return utilizationMap;
+    return utilizationMap
   }
 }
 
-export const cloudProviderManager = new CloudProviderManager();
+export const cloudProviderManager = new CloudProviderManager()

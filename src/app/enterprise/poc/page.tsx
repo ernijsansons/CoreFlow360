@@ -21,7 +21,7 @@ import {
   Download,
   Play,
   Star,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react'
 
 interface POCRequest {
@@ -86,12 +86,12 @@ export default function EnterprisePOC() {
         'Lead qualification speed increase by 60%',
         'Sales cycle reduction by 45%',
         'Conversion rate improvement by 40%',
-        'Pipeline accuracy improvement by 70%'
+        'Pipeline accuracy improvement by 70%',
       ],
       includedModules: ['AI Sales Expert', 'AI Customer Expert', 'AI Crystal Ball'],
       estimatedROI: '340%',
       difficulty: 'easy',
-      icon: Target
+      icon: Target,
     },
     {
       id: 'financial-optimization',
@@ -103,12 +103,12 @@ export default function EnterprisePOC() {
         'Cash flow prediction accuracy >90%',
         'Cost reduction identification >15%',
         'Budget variance reduction by 50%',
-        'Financial reporting automation 80%'
+        'Financial reporting automation 80%',
       ],
       includedModules: ['AI Money Detective', 'AI Crystal Ball', 'AI Operations Expert'],
       estimatedROI: '275%',
       difficulty: 'medium',
-      icon: DollarSign
+      icon: DollarSign,
     },
     {
       id: 'operations-transformation',
@@ -120,12 +120,12 @@ export default function EnterprisePOC() {
         'Process efficiency improvement 35%',
         'Manual task reduction by 70%',
         'Error rate reduction by 85%',
-        'Employee productivity increase 45%'
+        'Employee productivity increase 45%',
       ],
       includedModules: ['AI Operations Expert', 'AI People Person', 'AI Crystal Ball'],
       estimatedROI: '420%',
       difficulty: 'complex',
-      icon: Zap
+      icon: Zap,
     },
     {
       id: 'complete-transformation',
@@ -137,13 +137,13 @@ export default function EnterprisePOC() {
         'Overall efficiency improvement 50%',
         'Revenue increase 25%',
         'Cost reduction 30%',
-        'Customer satisfaction +40 NPS'
+        'Customer satisfaction +40 NPS',
       ],
       includedModules: ['All AI Agents', 'Custom Integrations', 'Executive Dashboard'],
       estimatedROI: '650%',
       difficulty: 'complex',
-      icon: Building
-    }
+      icon: Building,
+    },
   ]
 
   const handleTemplateSelect = (template: POCTemplate) => {
@@ -151,7 +151,7 @@ export default function EnterprisePOC() {
     setPocRequest({
       ...pocRequest,
       expectedROI: template.estimatedROI,
-      timeline: template.duration
+      timeline: template.duration,
     })
     setStep('form')
   }
@@ -175,7 +175,7 @@ export default function EnterprisePOC() {
       implementation,
       netROI,
       paybackPeriod,
-      yearOneValue
+      yearOneValue,
     }
 
     setROICalculation(calculation)
@@ -184,7 +184,7 @@ export default function EnterprisePOC() {
 
   const submitPOCRequest = async () => {
     setLoading(true)
-    
+
     try {
       // Track POC request
       const pocData = {
@@ -196,17 +196,17 @@ export default function EnterprisePOC() {
         currentSolution: pocRequest.currentSolution,
         challenges: pocRequest.primaryChallenges,
         roi: roiCalculation,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
 
       // Send to analytics
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', 'enterprise_poc_request', {
+      if (typeof window !== 'undefined' && (window as unknown).gtag) {
+        ;(window as unknown).gtag('event', 'enterprise_poc_request', {
           template_id: selectedTemplate?.id,
           company_size: pocRequest.companySize,
           industry: pocRequest.industry,
           estimated_roi: roiCalculation?.netROI,
-          projected_value: roiCalculation?.yearOneValue
+          projected_value: roiCalculation?.yearOneValue,
         })
       }
 
@@ -214,7 +214,7 @@ export default function EnterprisePOC() {
       const response = await fetch('/api/enterprise/poc-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(pocData)
+        body: JSON.stringify(pocData),
       })
 
       if (response.ok) {
@@ -223,7 +223,6 @@ export default function EnterprisePOC() {
         throw new Error('Failed to submit POC request')
       }
     } catch (error) {
-      console.error('POC submission error:', error)
       alert('There was an error submitting your request. Please try again.')
     } finally {
       setLoading(false)
@@ -235,7 +234,7 @@ export default function EnterprisePOC() {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount)
   }
 
@@ -248,43 +247,45 @@ export default function EnterprisePOC() {
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl font-bold mb-4"
+              className="mb-4 text-4xl font-bold"
             >
               Enterprise <span className="gradient-text-ai">Proof of Concept</span>
             </motion.h1>
-            <p className="text-xl text-gray-300 mb-6">
+            <p className="mb-6 text-xl text-gray-300">
               90-day trial with guaranteed ROI tracking and dedicated success management
             </p>
-            
+
             {/* Progress Indicator */}
-            <div className="flex items-center justify-center space-x-4 mb-6">
+            <div className="mb-6 flex items-center justify-center space-x-4">
               {[
                 { id: 'template', label: 'Template', icon: FileText },
                 { id: 'form', label: 'Details', icon: Building },
                 { id: 'roi', label: 'ROI', icon: TrendingUp },
-                { id: 'submit', label: 'Complete', icon: CheckCircle }
+                { id: 'submit', label: 'Complete', icon: CheckCircle },
               ].map((stepItem, index) => {
                 const Icon = stepItem.icon
                 const isActive = step === stepItem.id
-                const isCompleted = ['template', 'form', 'roi'].indexOf(step) > ['template', 'form', 'roi'].indexOf(stepItem.id)
-                
+                const isCompleted =
+                  ['template', 'form', 'roi'].indexOf(step) >
+                  ['template', 'form', 'roi'].indexOf(stepItem.id)
+
                 return (
                   <div key={stepItem.id} className="flex items-center">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      isActive 
-                        ? 'bg-violet-600 text-white'
-                        : isCompleted
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gray-700 text-gray-400'
-                    }`}>
-                      <Icon className="w-5 h-5" />
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                        isActive
+                          ? 'bg-violet-600 text-white'
+                          : isCompleted
+                            ? 'bg-green-600 text-white'
+                            : 'bg-gray-700 text-gray-400'
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
                     </div>
                     <span className={`ml-2 text-sm ${isActive ? 'text-white' : 'text-gray-400'}`}>
                       {stepItem.label}
                     </span>
-                    {index < 3 && (
-                      <ArrowRight className="w-4 h-4 text-gray-600 mx-4" />
-                    )}
+                    {index < 3 && <ArrowRight className="mx-4 h-4 w-4 text-gray-600" />}
                   </div>
                 )
               })}
@@ -302,14 +303,14 @@ export default function EnterprisePOC() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-white mb-4">Choose Your POC Template</h2>
+              <div className="mb-12 text-center">
+                <h2 className="mb-4 text-3xl font-bold text-white">Choose Your POC Template</h2>
                 <p className="text-xl text-gray-300">
                   Select the business area where you want to see immediate ROI
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-2">
                 {pocTemplates.map((template, index) => {
                   const Icon = template.icon
                   return (
@@ -319,37 +320,37 @@ export default function EnterprisePOC() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                       onClick={() => handleTemplateSelect(template)}
-                      className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 cursor-pointer hover:border-violet-500/50 transition-all group"
+                      className="group cursor-pointer rounded-2xl border border-gray-700/50 bg-gray-800/40 p-8 backdrop-blur-sm transition-all hover:border-violet-500/50"
                     >
-                      <div className="flex items-center mb-6">
-                        <div className="w-16 h-16 bg-gradient-to-r from-violet-500 to-cyan-500 rounded-2xl flex items-center justify-center mr-4">
-                          <Icon className="w-8 h-8 text-white" />
+                      <div className="mb-6 flex items-center">
+                        <div className="mr-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-500">
+                          <Icon className="h-8 w-8 text-white" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-semibold text-white group-hover:text-violet-300 transition-colors">
+                          <h3 className="text-xl font-semibold text-white transition-colors group-hover:text-violet-300">
                             {template.name}
                           </h3>
-                          <div className="flex items-center mt-2 space-x-4 text-sm text-gray-400">
+                          <div className="mt-2 flex items-center space-x-4 text-sm text-gray-400">
                             <div className="flex items-center">
-                              <Clock className="w-4 h-4 mr-1" />
+                              <Clock className="mr-1 h-4 w-4" />
                               {template.duration}
                             </div>
                             <div className="flex items-center">
-                              <TrendingUp className="w-4 h-4 mr-1" />
+                              <TrendingUp className="mr-1 h-4 w-4" />
                               {template.estimatedROI} ROI
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      <p className="text-gray-300 mb-6">{template.description}</p>
+                      <p className="mb-6 text-gray-300">{template.description}</p>
 
                       <div className="mb-6">
-                        <h4 className="text-sm font-semibold text-white mb-3">Success Metrics:</h4>
+                        <h4 className="mb-3 text-sm font-semibold text-white">Success Metrics:</h4>
                         <div className="space-y-2">
                           {template.successMetrics.slice(0, 2).map((metric, idx) => (
                             <div key={idx} className="flex items-center text-sm text-gray-300">
-                              <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                              <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                               {metric}
                             </div>
                           ))}
@@ -364,24 +365,29 @@ export default function EnterprisePOC() {
                       <div className="flex items-center justify-between">
                         <div className="flex space-x-2">
                           {template.industry.slice(0, 2).map((industry) => (
-                            <span key={industry} className="px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded">
+                            <span
+                              key={industry}
+                              className="rounded bg-gray-700/50 px-2 py-1 text-xs text-gray-300"
+                            >
                               {industry}
                             </span>
                           ))}
                           {template.industry.length > 2 && (
-                            <span className="px-2 py-1 bg-gray-700/50 text-gray-400 text-xs rounded">
+                            <span className="rounded bg-gray-700/50 px-2 py-1 text-xs text-gray-400">
                               +{template.industry.length - 2}
                             </span>
                           )}
                         </div>
-                        
-                        <div className={`px-2 py-1 rounded text-xs ${
-                          template.difficulty === 'easy' 
-                            ? 'bg-green-600/20 text-green-400'
-                            : template.difficulty === 'medium'
-                            ? 'bg-yellow-600/20 text-yellow-400'
-                            : 'bg-red-600/20 text-red-400'
-                        }`}>
+
+                        <div
+                          className={`rounded px-2 py-1 text-xs ${
+                            template.difficulty === 'easy'
+                              ? 'bg-green-600/20 text-green-400'
+                              : template.difficulty === 'medium'
+                                ? 'bg-yellow-600/20 text-yellow-400'
+                                : 'bg-red-600/20 text-red-400'
+                          }`}
+                        >
                           {template.difficulty}
                         </div>
                       </div>
@@ -398,55 +404,59 @@ export default function EnterprisePOC() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="max-w-4xl mx-auto"
+              className="mx-auto max-w-4xl"
             >
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-white mb-4">
+              <div className="mb-8 text-center">
+                <h2 className="mb-4 text-3xl font-bold text-white">
                   {selectedTemplate.name} - Company Details
                 </h2>
                 <p className="text-gray-300">Help us customize your POC for maximum impact</p>
               </div>
 
-              <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8">
-                <div className="grid md:grid-cols-2 gap-8">
+              <div className="rounded-2xl border border-gray-700/50 bg-gray-800/40 p-8 backdrop-blur-sm">
+                <div className="grid gap-8 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">
+                    <label className="mb-2 block text-sm font-medium text-white">
                       Company Name
                     </label>
                     <input
                       type="text"
                       value={pocRequest.companyName || ''}
-                      onChange={(e) => setPocRequest({...pocRequest, companyName: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:border-violet-500 focus:outline-none"
+                      onChange={(e) =>
+                        setPocRequest({ ...pocRequest, companyName: e.target.value })
+                      }
+                      className="w-full rounded-xl border border-gray-600 bg-gray-900/50 px-4 py-3 text-white focus:border-violet-500 focus:outline-none"
                       placeholder="Acme Corporation"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">
-                      Industry
-                    </label>
+                    <label className="mb-2 block text-sm font-medium text-white">Industry</label>
                     <select
                       value={pocRequest.industry || ''}
-                      onChange={(e) => setPocRequest({...pocRequest, industry: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:border-violet-500 focus:outline-none"
+                      onChange={(e) => setPocRequest({ ...pocRequest, industry: e.target.value })}
+                      className="w-full rounded-xl border border-gray-600 bg-gray-900/50 px-4 py-3 text-white focus:border-violet-500 focus:outline-none"
                     >
                       <option value="">Select Industry</option>
-                      {selectedTemplate.industry.map(industry => (
-                        <option key={industry} value={industry}>{industry}</option>
+                      {selectedTemplate.industry.map((industry) => (
+                        <option key={industry} value={industry}>
+                          {industry}
+                        </option>
                       ))}
                       <option value="Other">Other</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">
+                    <label className="mb-2 block text-sm font-medium text-white">
                       Company Size
                     </label>
                     <select
                       value={pocRequest.companySize || ''}
-                      onChange={(e) => setPocRequest({...pocRequest, companySize: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:border-violet-500 focus:outline-none"
+                      onChange={(e) =>
+                        setPocRequest({ ...pocRequest, companySize: e.target.value })
+                      }
+                      className="w-full rounded-xl border border-gray-600 bg-gray-900/50 px-4 py-3 text-white focus:border-violet-500 focus:outline-none"
                     >
                       <option value="">Select Size</option>
                       <option value="100-500">100-500 employees</option>
@@ -457,13 +467,15 @@ export default function EnterprisePOC() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">
+                    <label className="mb-2 block text-sm font-medium text-white">
                       Current Solution
                     </label>
                     <select
                       value={pocRequest.currentSolution || ''}
-                      onChange={(e) => setPocRequest({...pocRequest, currentSolution: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:border-violet-500 focus:outline-none"
+                      onChange={(e) =>
+                        setPocRequest({ ...pocRequest, currentSolution: e.target.value })
+                      }
+                      className="w-full rounded-xl border border-gray-600 bg-gray-900/50 px-4 py-3 text-white focus:border-violet-500 focus:outline-none"
                     >
                       <option value="">Select Current Solution</option>
                       <option value="SAP">SAP</option>
@@ -478,10 +490,10 @@ export default function EnterprisePOC() {
                 </div>
 
                 <div className="mt-8">
-                  <label className="block text-sm font-medium text-white mb-4">
+                  <label className="mb-4 block text-sm font-medium text-white">
                     Primary Business Challenges (Select all that apply)
                   </label>
-                  <div className="grid md:grid-cols-2 gap-3">
+                  <div className="grid gap-3 md:grid-cols-2">
                     {[
                       'Slow decision making',
                       'Data silos',
@@ -490,7 +502,7 @@ export default function EnterprisePOC() {
                       'High operational costs',
                       'Compliance issues',
                       'Customer satisfaction',
-                      'Employee productivity'
+                      'Employee productivity',
                     ].map((challenge) => (
                       <label key={challenge} className="flex items-center">
                         <input
@@ -499,12 +511,18 @@ export default function EnterprisePOC() {
                           onChange={(e) => {
                             const challenges = pocRequest.primaryChallenges || []
                             if (e.target.checked) {
-                              setPocRequest({...pocRequest, primaryChallenges: [...challenges, challenge]})
+                              setPocRequest({
+                                ...pocRequest,
+                                primaryChallenges: [...challenges, challenge],
+                              })
                             } else {
-                              setPocRequest({...pocRequest, primaryChallenges: challenges.filter(c => c !== challenge)})
+                              setPocRequest({
+                                ...pocRequest,
+                                primaryChallenges: challenges.filter((c) => c !== challenge),
+                              })
                             }
                           }}
-                          className="mr-3 w-4 h-4 text-violet-600 border-gray-600 rounded focus:ring-violet-500"
+                          className="mr-3 h-4 w-4 rounded border-gray-600 text-violet-600 focus:ring-violet-500"
                         />
                         <span className="text-gray-300">{challenge}</span>
                       </label>
@@ -512,17 +530,19 @@ export default function EnterprisePOC() {
                   </div>
                 </div>
 
-                <div className="flex justify-between mt-8">
+                <div className="mt-8 flex justify-between">
                   <button
                     onClick={() => setStep('template')}
-                    className="px-6 py-3 border border-gray-600 text-gray-300 rounded-xl hover:border-gray-500 transition-all"
+                    className="rounded-xl border border-gray-600 px-6 py-3 text-gray-300 transition-all hover:border-gray-500"
                   >
                     ← Back
                   </button>
                   <button
                     onClick={() => calculateROI(pocRequest)}
-                    disabled={!pocRequest.companyName || !pocRequest.industry || !pocRequest.companySize}
-                    className="px-8 py-3 bg-gradient-to-r from-violet-600 to-cyan-600 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={
+                      !pocRequest.companyName || !pocRequest.industry || !pocRequest.companySize
+                    }
+                    className="rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 px-8 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Calculate ROI →
                   </button>
@@ -537,74 +557,86 @@ export default function EnterprisePOC() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="max-w-4xl mx-auto"
+              className="mx-auto max-w-4xl"
             >
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-white mb-4">Your Projected ROI</h2>
-                <p className="text-gray-300">Based on your company profile and industry benchmarks</p>
+              <div className="mb-8 text-center">
+                <h2 className="mb-4 text-3xl font-bold text-white">Your Projected ROI</h2>
+                <p className="text-gray-300">
+                  Based on your company profile and industry benchmarks
+                </p>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-2xl p-6 text-center">
-                  <div className="text-4xl font-bold text-green-400 mb-2">
+              <div className="mb-8 grid gap-6 md:grid-cols-3">
+                <div className="rounded-2xl border border-green-500/30 bg-gradient-to-br from-green-600/20 to-emerald-600/20 p-6 text-center">
+                  <div className="mb-2 text-4xl font-bold text-green-400">
                     {roiCalculation.netROI.toFixed(0)}%
                   </div>
                   <div className="text-gray-300">First Year ROI</div>
                 </div>
 
-                <div className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border border-blue-500/30 rounded-2xl p-6 text-center">
-                  <div className="text-4xl font-bold text-blue-400 mb-2">
+                <div className="rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-600/20 to-cyan-600/20 p-6 text-center">
+                  <div className="mb-2 text-4xl font-bold text-blue-400">
                     {roiCalculation.paybackPeriod.toFixed(1)}
                   </div>
                   <div className="text-gray-300">Months to Payback</div>
                 </div>
 
-                <div className="bg-gradient-to-br from-violet-600/20 to-purple-600/20 border border-violet-500/30 rounded-2xl p-6 text-center">
-                  <div className="text-4xl font-bold text-violet-400 mb-2">
+                <div className="rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-600/20 to-purple-600/20 p-6 text-center">
+                  <div className="mb-2 text-4xl font-bold text-violet-400">
                     {formatCurrency(roiCalculation.yearOneValue)}
                   </div>
                   <div className="text-gray-300">Year One Value</div>
                 </div>
               </div>
 
-              <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 mb-8">
-                <h3 className="text-xl font-semibold text-white mb-6">ROI Breakdown</h3>
-                
+              <div className="mb-8 rounded-2xl border border-gray-700/50 bg-gray-800/40 p-8 backdrop-blur-sm">
+                <h3 className="mb-6 text-xl font-semibold text-white">ROI Breakdown</h3>
+
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between py-3 border-b border-gray-700/50">
+                  <div className="flex items-center justify-between border-b border-gray-700/50 py-3">
                     <span className="text-gray-300">Current Annual Inefficiency Costs</span>
-                    <span className="text-red-400 font-semibold">{formatCurrency(roiCalculation.currentCosts)}</span>
+                    <span className="font-semibold text-red-400">
+                      {formatCurrency(roiCalculation.currentCosts)}
+                    </span>
                   </div>
-                  
-                  <div className="flex items-center justify-between py-3 border-b border-gray-700/50">
+
+                  <div className="flex items-center justify-between border-b border-gray-700/50 py-3">
                     <span className="text-gray-300">Projected Annual Savings (35%)</span>
-                    <span className="text-green-400 font-semibold">+{formatCurrency(roiCalculation.projectedSavings)}</span>
+                    <span className="font-semibold text-green-400">
+                      +{formatCurrency(roiCalculation.projectedSavings)}
+                    </span>
                   </div>
-                  
-                  <div className="flex items-center justify-between py-3 border-b border-gray-700/50">
+
+                  <div className="flex items-center justify-between border-b border-gray-700/50 py-3">
                     <span className="text-gray-300">Additional Revenue (25%)</span>
-                    <span className="text-green-400 font-semibold">+{formatCurrency(roiCalculation.additionalRevenue)}</span>
+                    <span className="font-semibold text-green-400">
+                      +{formatCurrency(roiCalculation.additionalRevenue)}
+                    </span>
                   </div>
-                  
-                  <div className="flex items-center justify-between py-3 border-b border-gray-700/50">
+
+                  <div className="flex items-center justify-between border-b border-gray-700/50 py-3">
                     <span className="text-gray-300">Implementation Investment</span>
-                    <span className="text-gray-400 font-semibold">-{formatCurrency(roiCalculation.implementation)}</span>
+                    <span className="font-semibold text-gray-400">
+                      -{formatCurrency(roiCalculation.implementation)}
+                    </span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between py-3 text-lg font-bold">
                     <span className="text-white">Net Year One Value</span>
-                    <span className="text-emerald-400">{formatCurrency(roiCalculation.yearOneValue)}</span>
+                    <span className="text-emerald-400">
+                      {formatCurrency(roiCalculation.yearOneValue)}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-violet-600/20 border border-violet-500/30 rounded-2xl p-6 mb-8">
-                <div className="flex items-center mb-4">
-                  <Shield className="w-6 h-6 text-violet-400 mr-3" />
+              <div className="mb-8 rounded-2xl border border-violet-500/30 bg-violet-600/20 p-6">
+                <div className="mb-4 flex items-center">
+                  <Shield className="mr-3 h-6 w-6 text-violet-400" />
                   <h4 className="text-lg font-semibold text-white">90-Day Guarantee</h4>
                 </div>
                 <p className="text-gray-300">
-                  If you don't see measurable improvement in your success metrics within 90 days, 
+                  If you don't see measurable improvement in your success metrics within 90 days,
                   we'll refund 100% of your implementation cost. No questions asked.
                 </p>
               </div>
@@ -612,17 +644,17 @@ export default function EnterprisePOC() {
               <div className="flex justify-between">
                 <button
                   onClick={() => setStep('form')}
-                  className="px-6 py-3 border border-gray-600 text-gray-300 rounded-xl hover:border-gray-500 transition-all"
+                  className="rounded-xl border border-gray-600 px-6 py-3 text-gray-300 transition-all hover:border-gray-500"
                 >
                   ← Back
                 </button>
                 <button
                   onClick={submitPOCRequest}
                   disabled={loading}
-                  className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold flex items-center disabled:opacity-50"
+                  className="flex items-center rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-3 font-semibold text-white disabled:opacity-50"
                 >
                   {loading ? 'Submitting...' : 'Start 90-Day POC'}
-                  {!loading && <ArrowRight className="w-5 h-5 ml-2" />}
+                  {!loading && <ArrowRight className="ml-2 h-5 w-5" />}
                 </button>
               </div>
             </motion.div>
@@ -633,49 +665,57 @@ export default function EnterprisePOC() {
               key="submit"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center max-w-2xl mx-auto"
+              className="mx-auto max-w-2xl text-center"
             >
-              <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-10 h-10 text-white" />
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-600">
+                <CheckCircle className="h-10 w-10 text-white" />
               </div>
-              
-              <h2 className="text-3xl font-bold text-white mb-4">POC Request Submitted!</h2>
-              <p className="text-xl text-gray-300 mb-8">
+
+              <h2 className="mb-4 text-3xl font-bold text-white">POC Request Submitted!</h2>
+              <p className="mb-8 text-xl text-gray-300">
                 Your dedicated success manager will contact you within 4 hours to begin setup.
               </p>
 
-              <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 mb-8">
-                <h3 className="text-lg font-semibold text-white mb-4">What happens next:</h3>
+              <div className="mb-8 rounded-2xl border border-gray-700/50 bg-gray-800/40 p-6 backdrop-blur-sm">
+                <h3 className="mb-4 text-lg font-semibold text-white">What happens next:</h3>
                 <div className="space-y-3 text-left">
                   <div className="flex items-center">
-                    <div className="w-8 h-8 bg-violet-600 rounded-full flex items-center justify-center mr-3 text-sm font-bold">1</div>
+                    <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-sm font-bold">
+                      1
+                    </div>
                     <span className="text-gray-300">Success manager call within 4 hours</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-8 h-8 bg-violet-600 rounded-full flex items-center justify-center mr-3 text-sm font-bold">2</div>
+                    <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-sm font-bold">
+                      2
+                    </div>
                     <span className="text-gray-300">Custom environment setup (24-48 hours)</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-8 h-8 bg-violet-600 rounded-full flex items-center justify-center mr-3 text-sm font-bold">3</div>
+                    <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-sm font-bold">
+                      3
+                    </div>
                     <span className="text-gray-300">Team training and onboarding</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-8 h-8 bg-violet-600 rounded-full flex items-center justify-center mr-3 text-sm font-bold">4</div>
+                    <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-sm font-bold">
+                      4
+                    </div>
                     <span className="text-gray-300">90-day success tracking begins</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col justify-center gap-4 sm:flex-row">
                 <button
-                  onClick={() => window.location.href = '/'}
-                  className="px-6 py-3 border border-gray-600 text-gray-300 rounded-xl hover:border-gray-500 transition-all"
+                  onClick={() => (window.location.href = '/')}
+                  className="rounded-xl border border-gray-600 px-6 py-3 text-gray-300 transition-all hover:border-gray-500"
                 >
                   Return to Home
                 </button>
                 <button
-                  onClick={() => window.location.href = '/marketplace'}
-                  className="px-6 py-3 bg-gradient-to-r from-violet-600 to-cyan-600 text-white rounded-xl font-semibold"
+                  onClick={() => (window.location.href = '/marketplace')}
+                  className="rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 px-6 py-3 font-semibold text-white"
                 >
                   Explore Marketplace
                 </button>

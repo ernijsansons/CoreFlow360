@@ -13,7 +13,7 @@ export const BayesianConfigSchema = z.object({
   minimumDetectableEffect: z.number().default(0.05),
   stopEarly: z.boolean().default(true),
   maxSampleSize: z.number().optional(),
-  powerThreshold: z.number().default(0.8)
+  powerThreshold: z.number().default(0.8),
 })
 
 export const TestResultSchema = z.object({
@@ -22,7 +22,7 @@ export const TestResultSchema = z.object({
   conversions: z.number(),
   conversionRate: z.number(),
   alpha: z.number(), // Posterior alpha
-  beta: z.number()   // Posterior beta
+  beta: z.number(), // Posterior beta
 })
 
 export const BayesianResultSchema = z.object({
@@ -31,17 +31,19 @@ export const BayesianResultSchema = z.object({
   analysis: z.object({
     probabilityToBeatControl: z.record(z.number()),
     expectedLoss: z.record(z.number()),
-    credibleIntervals: z.record(z.object({
-      lower: z.number(),
-      upper: z.number(),
-      mean: z.number()
-    })),
+    credibleIntervals: z.record(
+      z.object({
+        lower: z.number(),
+        upper: z.number(),
+        mean: z.number(),
+      })
+    ),
     recommendedAction: z.enum(['continue', 'stop_winner', 'stop_inconclusive']),
     confidence: z.number(),
     significanceReached: z.boolean(),
-    minimumSampleSizeReached: z.boolean()
+    minimumSampleSizeReached: z.boolean(),
   }),
-  timestamp: z.date()
+  timestamp: z.date(),
 })
 
 export type BayesianConfig = z.infer<typeof BayesianConfigSchema>
@@ -60,11 +62,11 @@ export class BayesianAnalyzer {
    */
   analyze(testId: string, results: Omit<TestResult, 'alpha' | 'beta'>[]): BayesianResult {
     // Calculate posterior parameters for each variant
-    const posteriorResults = results.map(result => ({
+    const posteriorResults = results.map((result) => ({
       ...result,
       conversionRate: result.visitors > 0 ? result.conversions / result.visitors : 0,
       alpha: this.config.priorAlpha + result.conversions,
-      beta: this.config.priorBeta + result.visitors - result.conversions
+      beta: this.config.priorBeta + result.visitors - result.conversions,
     }))
 
     // Find control (first variant) and variations
@@ -81,17 +83,21 @@ export class BayesianAnalyzer {
 
     for (const variation of variations) {
       probabilityToBeatControl[variation.variant] = this.calculateProbabilityToBeatControl(
-        control.alpha, control.beta,
-        variation.alpha, variation.beta
+        control.alpha,
+        control.beta,
+        variation.alpha,
+        variation.beta
       )
 
       expectedLoss[variation.variant] = this.calculateExpectedLoss(
-        control.alpha, control.beta,
-        variation.alpha, variation.beta
+        control.alpha,
+        control.beta,
+        variation.alpha,
+        variation.beta
       )
 
       credibleIntervals[variation.variant] = this.calculateCredibleInterval(
-        variation.alpha, 
+        variation.alpha,
         variation.beta
       )
     }
@@ -110,9 +116,9 @@ export class BayesianAnalyzer {
         probabilityToBeatControl,
         expectedLoss,
         credibleIntervals,
-        ...analysis
+        ...analysis,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     }
   }
 
@@ -131,7 +137,7 @@ export class BayesianAnalyzer {
     for (let i = 0; i < iterations; i++) {
       const controlSample = this.betaRandom(controlAlpha, controlBeta)
       const variationSample = this.betaRandom(variationAlpha, variationBeta)
-      
+
       if (variationSample > controlSample) {
         wins++
       }
@@ -155,7 +161,7 @@ export class BayesianAnalyzer {
     for (let i = 0; i < iterations; i++) {
       const controlSample = this.betaRandom(controlAlpha, controlBeta)
       const variationSample = this.betaRandom(variationAlpha, variationBeta)
-      
+
       if (controlSample > variationSample) {
         totalLoss += controlSample - variationSample
       }
@@ -172,11 +178,11 @@ export class BayesianAnalyzer {
     beta: number
   ): { lower: number; upper: number; mean: number } {
     const mean = alpha / (alpha + beta)
-    
+
     // Calculate percentiles for credible interval
     const lowerPercentile = (1 - this.config.credibleInterval) / 2
     const upperPercentile = 1 - lowerPercentile
-    
+
     const lower = this.betaQuantile(alpha, beta, lowerPercentile)
     const upper = this.betaQuantile(alpha, beta, upperPercentile)
 
@@ -197,13 +203,14 @@ export class BayesianAnalyzer {
     minimumSampleSizeReached: boolean
   } {
     const totalSampleSize = results.reduce((sum, r) => sum + r.visitors, 0)
-    const minimumSampleSizeReached = !this.config.maxSampleSize || 
-      totalSampleSize >= this.config.maxSampleSize
+    const minimumSampleSizeReached =
+      !this.config.maxSampleSize || totalSampleSize >= this.config.maxSampleSize
 
     // Find best performing variation
-    const bestVariation = Object.entries(probabilityToBeatControl)
-      .reduce((best, [variant, prob]) => prob > best.prob ? { variant, prob } : best, 
-        { variant: '', prob: 0 })
+    const bestVariation = Object.entries(probabilityToBeatControl).reduce(
+      (best, [variant, prob]) => (prob > best.prob ? { variant, prob } : best),
+      { variant: '', prob: 0 }
+    )
 
     const maxProbability = bestVariation.prob
     const maxExpectedLoss = Math.max(...Object.values(expectedLoss))
@@ -211,9 +218,9 @@ export class BayesianAnalyzer {
     // Determine if significance is reached
     const significanceThreshold = 0.95 // 95% confidence
     const lossThreshold = 0.01 // 1% acceptable loss
-    
-    const significanceReached = maxProbability >= significanceThreshold && 
-      maxExpectedLoss <= lossThreshold
+
+    const significanceReached =
+      maxProbability >= significanceThreshold && maxExpectedLoss <= lossThreshold
 
     let recommendedAction: 'continue' | 'stop_winner' | 'stop_inconclusive' = 'continue'
     let confidence = maxProbability
@@ -222,7 +229,7 @@ export class BayesianAnalyzer {
       recommendedAction = 'stop_winner'
       confidence = maxProbability
     } else if (minimumSampleSizeReached) {
-      if (maxProbability >= 0.90) {
+      if (maxProbability >= 0.9) {
         recommendedAction = 'stop_winner'
         confidence = maxProbability
       } else {
@@ -235,7 +242,7 @@ export class BayesianAnalyzer {
       recommendedAction,
       confidence,
       significanceReached,
-      minimumSampleSizeReached
+      minimumSampleSizeReached,
     }
   }
 
@@ -287,7 +294,8 @@ export class BayesianAnalyzer {
    * Generate random sample from normal distribution using Box-Muller transform
    */
   private normalRandom(): number {
-    let u = 0, v = 0
+    let u = 0,
+      v = 0
     while (u === 0) u = Math.random() // Converting [0,1) to (0,1)
     while (v === 0) v = Math.random()
     return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2 * Math.PI * v)
@@ -306,15 +314,15 @@ export class BayesianAnalyzer {
     while (iterations < maxIterations) {
       const cdf = this.betaCDF(x, alpha, beta)
       const pdf = this.betaPDF(x, alpha, beta)
-      
+
       if (Math.abs(cdf - p) < tolerance) {
         break
       }
-      
+
       // Newton-Raphson iteration
       x = x - (cdf - p) / pdf
       x = Math.max(0.001, Math.min(0.999, x)) // Keep in bounds
-      
+
       iterations++
     }
 
@@ -327,7 +335,7 @@ export class BayesianAnalyzer {
   private betaCDF(x: number, alpha: number, beta: number): number {
     if (x <= 0) return 0
     if (x >= 1) return 1
-    
+
     return this.incompleteBeta(x, alpha, beta)
   }
 
@@ -336,7 +344,7 @@ export class BayesianAnalyzer {
    */
   private betaPDF(x: number, alpha: number, beta: number): number {
     if (x <= 0 || x >= 1) return 0
-    
+
     return (Math.pow(x, alpha - 1) * Math.pow(1 - x, beta - 1)) / this.betaFunction(alpha, beta)
   }
 
@@ -344,7 +352,7 @@ export class BayesianAnalyzer {
    * Beta function B(a,b) = Γ(a)Γ(b)/Γ(a+b)
    */
   private betaFunction(a: number, b: number): number {
-    return this.gammaFunction(a) * this.gammaFunction(b) / this.gammaFunction(a + b)
+    return (this.gammaFunction(a) * this.gammaFunction(b)) / this.gammaFunction(a + b)
   }
 
   /**
@@ -354,9 +362,9 @@ export class BayesianAnalyzer {
     if (z < 0.5) {
       return Math.PI / (Math.sin(Math.PI * z) * this.gammaFunction(1 - z))
     }
-    
+
     // Stirling's approximation
-    return Math.sqrt(2 * Math.PI / z) * Math.pow(z / Math.E, z)
+    return Math.sqrt((2 * Math.PI) / z) * Math.pow(z / Math.E, z)
   }
 
   /**
@@ -366,18 +374,18 @@ export class BayesianAnalyzer {
     // Continued fraction approximation
     if (x === 0) return 0
     if (x === 1) return 1
-    
+
     // Use series expansion for better accuracy
     let result = 0
-    let term = Math.pow(x, a) * Math.pow(1 - x, b) / (a * this.betaFunction(a, b))
-    
+    let term = (Math.pow(x, a) * Math.pow(1 - x, b)) / (a * this.betaFunction(a, b))
+
     for (let n = 0; n < 100; n++) {
       result += term
-      term *= (a + n) * x / (a + b + n)
-      
+      term *= ((a + n) * x) / (a + b + n)
+
       if (Math.abs(term) < 1e-15) break
     }
-    
+
     return Math.min(1, Math.max(0, result))
   }
 
@@ -393,19 +401,22 @@ export class BayesianAnalyzer {
     // Simplified sample size calculation for conversion rate tests
     const p1 = baselineRate
     const p2 = baselineRate * (1 + minimumDetectableEffect)
-    
+
     // Z-scores for alpha and power
     const zAlpha = this.normalInverse(1 - alpha / 2)
     const zBeta = this.normalInverse(power)
-    
+
     // Pooled probability
     const pPooled = (p1 + p2) / 2
-    
+
     // Sample size per group
-    const n = Math.pow(zAlpha * Math.sqrt(2 * pPooled * (1 - pPooled)) + 
-                      zBeta * Math.sqrt(p1 * (1 - p1) + p2 * (1 - p2)), 2) /
-              Math.pow(p2 - p1, 2)
-    
+    const n =
+      Math.pow(
+        zAlpha * Math.sqrt(2 * pPooled * (1 - pPooled)) +
+          zBeta * Math.sqrt(p1 * (1 - p1) + p2 * (1 - p2)),
+        2
+      ) / Math.pow(p2 - p1, 2)
+
     return Math.ceil(n)
   }
 
@@ -414,24 +425,28 @@ export class BayesianAnalyzer {
    */
   private normalInverse(p: number): number {
     // Beasley-Springer-Moro algorithm approximation
-    const a = [0, -3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 
-               1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00]
-    
-    const b = [0, -5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 
-               6.680131188771972e+01, -1.328068155288572e+01]
-    
+    const a = [
+      0, -3.969683028665376e1, 2.209460984245205e2, -2.759285104469687e2, 1.38357751867269e2,
+      -3.066479806614716e1, 2.506628277459239,
+    ]
+
+    const b = [
+      0, -5.447609879822406e1, 1.615858368580409e2, -1.556989798598866e2, 6.680131188771972e1,
+      -1.328068155288572e1,
+    ]
+
     if (p <= 0 || p >= 1) {
       throw new Error('Probability must be between 0 and 1')
     }
-    
+
     if (p === 0.5) return 0
-    
+
     const q = p < 0.5 ? p : 1 - p
     const t = Math.sqrt(-2 * Math.log(q))
-    
+
     let result = (((((a[6] * t + a[5]) * t + a[4]) * t + a[3]) * t + a[2]) * t + a[1]) * t + a[0]
     result /= ((((b[5] * t + b[4]) * t + b[3]) * t + b[2]) * t + b[1]) * t + 1
-    
+
     return p < 0.5 ? -result : result
   }
 }
@@ -445,13 +460,15 @@ export function calculatePosterior(
 ): { alpha: number; beta: number } {
   return {
     alpha: priorAlpha + conversions,
-    beta: priorBeta + visitors - conversions
+    beta: priorBeta + visitors - conversions,
   }
 }
 
 export function calculateProbabilityOfSuperior(
-  alphaA: number, betaA: number,
-  alphaB: number, betaB: number
+  alphaA: number,
+  betaA: number,
+  alphaB: number,
+  betaB: number
 ): number {
   const analyzer = new BayesianAnalyzer()
   return analyzer['calculateProbabilityToBeatControl'](alphaA, betaA, alphaB, betaB)

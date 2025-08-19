@@ -1,6 +1,7 @@
 // CoreFlow360 - Production Schema
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -238,6 +239,9 @@ model Tenant {
   // Cost Management Relations
   costAudits CostAudit[]
 
+  // AI Provider Relations
+  aiProviders       AIProvider[]
+  aiProviderUsage   AIProviderUsage[]
 
   @@map("tenants")
 }
@@ -2620,5 +2624,103 @@ model WebhookFailure {
   @@index([scheduledRetryAt])
   @@index([status, priority, scheduledRetryAt])
   @@map("webhook_failures")
+}
+
+// ===========================================
+// AI PROVIDER MANAGEMENT
+// ===========================================
+
+model AIProvider {
+  id               String    @id @default(cuid())
+  tenantId         String
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Provider identification
+  providerId       String    // openai, anthropic, google, cohere, mistral
+  name             String    // Display name
+  description      String?   // Provider description
+  
+  // Configuration
+  apiKey           String?   // Encrypted API key
+  apiKeyHash       String?   // Hash for verification
+  isEnabled        Boolean   @default(false)
+  isConfigured     Boolean   @default(false)
+  
+  // Settings
+  defaultModel     String?   // Default model for this provider
+  temperature      Float?    @default(0.7)
+  maxTokens        Int?      @default(4096)
+  costPerToken     Float?    @default(0.0)
+  
+  // Status tracking
+  lastTested       DateTime?
+  testResult       Boolean?
+  lastTestError    String?
+  healthStatus     HealthStatus @default(INACTIVE)
+  
+  // Usage tracking
+  totalRequests    Int       @default(0)
+  totalTokens      BigInt    @default(0)
+  totalCost        Decimal   @default(0) @db.Decimal(12,4)
+  lastUsed         DateTime?
+  
+  // Performance metrics
+  avgResponseTime  Int?      // Average response time in milliseconds
+  errorRate        Float?    @default(0.0) // Error rate 0-100
+  uptime           Float?    @default(100.0) // Uptime percentage
+  
+  // Configuration metadata
+  supportedModels  String[]  // Available models for this provider
+  supportedFeatures String[] // Capabilities: text, code, vision, embeddings
+  metadata         Json?     // Provider-specific settings
+  
+  // Audit trail
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  createdBy        String?   // User who configured provider
+  lastModifiedBy   String?   // User who last modified
+  
+  // Relations
+  usageLogs        AIProviderUsage[]
+  
+  @@unique([tenantId, providerId])
+  @@index([tenantId, isEnabled])
+  @@index([providerId, isEnabled])
+  @@index([healthStatus, lastTested])
+  @@index([totalCost, lastUsed])
+  @@map("ai_providers")
+}
+
+model AIProviderUsage {
+  id           String     @id @default(cuid())
+  tenantId     String
+  tenant       Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  providerId   String
+  provider     AIProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  // Usage details
+  model        String     // Model used
+  tokensUsed   Int        // Tokens consumed
+  cost         Decimal    @db.Decimal(12,6) // Cost for this request
+  responseTime Int        // Response time in milliseconds
+  
+  // Request context
+  taskType     String?    // reasoning, code-generation, vision, etc.
+  department   String?    // crm, sales, finance, etc.
+  userId       String?    // User who initiated request
+  
+  // Status
+  success      Boolean    @default(true)
+  errorMessage String?    // Error if failed
+  
+  // Audit
+  timestamp    DateTime   @default(now())
+  
+  @@index([tenantId, timestamp])
+  @@index([providerId, timestamp])
+  @@index([taskType, timestamp])
+  @@index([success, timestamp])
+  @@map("ai_provider_usage")
 }
 

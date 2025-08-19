@@ -26,7 +26,7 @@ export const stripe = new Proxy({} as Stripe, {
   get(_target, prop) {
     const client = getStripeClient()
     return client[prop as keyof Stripe]
-  }
+  },
 })
 
 // Stripe webhook endpoint secret
@@ -153,9 +153,7 @@ export async function createCustomerPortalSession(
 /**
  * Get subscription details
  */
-export async function getSubscription(
-  subscriptionId: string
-): Promise<Stripe.Subscription> {
+export async function getSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
   return stripe.subscriptions.retrieve(subscriptionId, {
     expand: ['default_payment_method', 'customer', 'items.data.price'],
   })

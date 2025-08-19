@@ -1,16 +1,19 @@
 /**
  * CoreFlow360 - AI Agent Orchestrator
  * MATHEMATICALLY PERFECT, ALGORITHMICALLY OPTIMAL, PROVABLY CORRECT
- * 
+ *
  * Central nervous system for AI-powered business operations
  * Coordinates multiple AI agents across different business domains
  */
 
 import { LangChainManager } from './langchain-manager'
-import { AIServiceManager } from '@/services/ai/ai-service-manager'
-import { executeSecureOperation, SecureOperationContext } from '@/services/security/secure-operations'
-import { withPerformanceTracking } from '@/utils/performance/performance-tracking'
-import { AuditLogger } from '@/services/security/audit-logging'
+import { AIServiceManager } from '@/lib/services/ai/ai-service-manager'
+import {
+  executeSecureOperation,
+  SecureOperationContext,
+} from '@/lib/services/security/secure-operations'
+import { withPerformanceTracking } from '@/lib/utils/performance/performance-tracking'
+import { AuditLogger } from '@/lib/services/security/audit-logging'
 import { PrismaClient, AIModelType, ModuleType, IndustryType } from '@prisma/client'
 import { Redis } from 'ioredis'
 import { EventEmitter } from 'events'
@@ -38,7 +41,7 @@ export enum AgentType {
   OPERATIONS_AGENT = 'OPERATIONS_AGENT',
   LEGAL_AGENT = 'LEGAL_AGENT',
   ANALYTICS_AGENT = 'ANALYTICS_AGENT',
-  ORCHESTRATOR = 'ORCHESTRATOR'
+  ORCHESTRATOR = 'ORCHESTRATOR',
 }
 
 export enum AgentCapability {
@@ -49,7 +52,7 @@ export enum AgentCapability {
   DECISION_MAKING = 'DECISION_MAKING',
   CROSS_DEPARTMENT = 'CROSS_DEPARTMENT',
   REAL_TIME = 'REAL_TIME',
-  LEARNING = 'LEARNING'
+  LEARNING = 'LEARNING',
 }
 
 export interface AgentPerformanceTargets {
@@ -69,24 +72,24 @@ export interface AITask {
   tenantId: string
   department?: string
   module: ModuleType
-  
+
   // Task Data
   input: Record<string, unknown>
   context: AITaskContext
   requirements: TaskRequirements
-  
+
   // Scheduling
   scheduledAt?: Date
   deadline?: Date
-  
+
   // Status
   status: TaskStatus
   assignedAgents: string[]
-  
+
   // Results
   result?: AITaskResult
   error?: string
-  
+
   createdAt: Date
   updatedAt: Date
 }
@@ -101,14 +104,14 @@ export enum TaskType {
   AUTOMATE_WORKFLOW = 'AUTOMATE_WORKFLOW',
   CROSS_MODULE_SYNC = 'CROSS_MODULE_SYNC',
   COMPLIANCE_CHECK = 'COMPLIANCE_CHECK',
-  PERFORMANCE_ANALYSIS = 'PERFORMANCE_ANALYSIS'
+  PERFORMANCE_ANALYSIS = 'PERFORMANCE_ANALYSIS',
 }
 
 export enum TaskPriority {
   CRITICAL = 1,
   HIGH = 2,
   MEDIUM = 3,
-  LOW = 4
+  LOW = 4,
 }
 
 export enum TaskStatus {
@@ -117,7 +120,7 @@ export enum TaskStatus {
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
 }
 
 export interface AITaskContext {
@@ -206,14 +209,14 @@ export class AIAgentOrchestrator extends EventEmitter {
   private auditLogger: AuditLogger
   private prisma: PrismaClient
   private redis: Redis
-  
+
   private agents: Map<string, AIAgentConfig> = new Map()
   private activeTasks: Map<string, AITask> = new Map()
   private taskQueue: AITask[] = []
-  
+
   private isRunning = false
   private processingInterval?: NodeJS.Timeout
-  
+
   constructor(
     langChainManager: LangChainManager,
     aiServiceManager: AIServiceManager,
@@ -222,13 +225,13 @@ export class AIAgentOrchestrator extends EventEmitter {
     redis: Redis
   ) {
     super()
-    
+
     this.langChainManager = langChainManager
     this.aiServiceManager = aiServiceManager
     this.auditLogger = auditLogger
     this.prisma = prisma
     this.redis = redis
-    
+
     this.initializeAgents()
   }
 
@@ -246,7 +249,7 @@ export class AIAgentOrchestrator extends EventEmitter {
         capabilities: [
           AgentCapability.ANALYSIS,
           AgentCapability.PREDICTION,
-          AgentCapability.RECOMMENDATION
+          AgentCapability.RECOMMENDATION,
         ],
         priority: 1,
         maxConcurrentTasks: 10,
@@ -256,10 +259,10 @@ export class AIAgentOrchestrator extends EventEmitter {
           accuracy: 0.94,
           costPerOperation: 0.05,
           throughputPerHour: 1000,
-          errorRate: 0.01
-        }
+          errorRate: 0.01,
+        },
       },
-      
+
       // Sales Optimization Agent
       {
         id: 'sales-agent',
@@ -269,7 +272,7 @@ export class AIAgentOrchestrator extends EventEmitter {
         capabilities: [
           AgentCapability.PREDICTION,
           AgentCapability.RECOMMENDATION,
-          AgentCapability.AUTOMATION
+          AgentCapability.AUTOMATION,
         ],
         priority: 1,
         maxConcurrentTasks: 8,
@@ -279,10 +282,10 @@ export class AIAgentOrchestrator extends EventEmitter {
           accuracy: 0.92,
           costPerOperation: 0.08,
           throughputPerHour: 800,
-          errorRate: 0.02
-        }
+          errorRate: 0.02,
+        },
       },
-      
+
       // Financial Intelligence Agent
       {
         id: 'finance-agent',
@@ -292,7 +295,7 @@ export class AIAgentOrchestrator extends EventEmitter {
         capabilities: [
           AgentCapability.ANALYSIS,
           AgentCapability.PREDICTION,
-          AgentCapability.DECISION_MAKING
+          AgentCapability.DECISION_MAKING,
         ],
         priority: 1,
         maxConcurrentTasks: 12,
@@ -300,12 +303,12 @@ export class AIAgentOrchestrator extends EventEmitter {
         performanceTargets: {
           responseTimeMs: 3000,
           accuracy: 0.96,
-          costPerOperation: 0.10,
+          costPerOperation: 0.1,
           throughputPerHour: 600,
-          errorRate: 0.005
-        }
+          errorRate: 0.005,
+        },
       },
-      
+
       // HR Analytics Agent
       {
         id: 'hr-agent',
@@ -315,20 +318,20 @@ export class AIAgentOrchestrator extends EventEmitter {
         capabilities: [
           AgentCapability.ANALYSIS,
           AgentCapability.PREDICTION,
-          AgentCapability.RECOMMENDATION
+          AgentCapability.RECOMMENDATION,
         ],
         priority: 2,
         maxConcurrentTasks: 6,
         costBudget: 80,
         performanceTargets: {
           responseTimeMs: 2500,
-          accuracy: 0.90,
+          accuracy: 0.9,
           costPerOperation: 0.06,
           throughputPerHour: 400,
-          errorRate: 0.02
-        }
+          errorRate: 0.02,
+        },
       },
-      
+
       // Operations Optimization Agent
       {
         id: 'operations-agent',
@@ -338,7 +341,7 @@ export class AIAgentOrchestrator extends EventEmitter {
         capabilities: [
           AgentCapability.ANALYSIS,
           AgentCapability.AUTOMATION,
-          AgentCapability.REAL_TIME
+          AgentCapability.REAL_TIME,
         ],
         priority: 2,
         maxConcurrentTasks: 15,
@@ -348,10 +351,10 @@ export class AIAgentOrchestrator extends EventEmitter {
           accuracy: 0.88,
           costPerOperation: 0.04,
           throughputPerHour: 1200,
-          errorRate: 0.03
-        }
+          errorRate: 0.03,
+        },
       },
-      
+
       // Central Orchestrator
       {
         id: 'orchestrator',
@@ -361,7 +364,7 @@ export class AIAgentOrchestrator extends EventEmitter {
         capabilities: [
           AgentCapability.DECISION_MAKING,
           AgentCapability.CROSS_DEPARTMENT,
-          AgentCapability.LEARNING
+          AgentCapability.LEARNING,
         ],
         priority: 0, // Highest priority
         maxConcurrentTasks: 5,
@@ -369,19 +372,19 @@ export class AIAgentOrchestrator extends EventEmitter {
         performanceTargets: {
           responseTimeMs: 5000,
           accuracy: 0.95,
-          costPerOperation: 0.20,
+          costPerOperation: 0.2,
           throughputPerHour: 200,
-          errorRate: 0.01
-        }
-      }
+          errorRate: 0.01,
+        },
+      },
     ]
 
     // Register agents
     for (const agentConfig of defaultAgents) {
       this.agents.set(agentConfig.id, agentConfig)
     }
-    
-    console.log(`🤖 Initialized ${this.agents.size} AI agents`)
+
+    // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // console.log(`🤖 Initialized ${this.agents.size} AI agents`)
   }
 
   /**
@@ -389,20 +392,20 @@ export class AIAgentOrchestrator extends EventEmitter {
    */
   async start(): Promise<void> {
     if (this.isRunning) return
-    
+
     this.isRunning = true
-    console.log('🚀 Starting AI Agent Orchestrator...')
-    
+    // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // console.log('🚀 Starting AI Agent Orchestrator...')
+
     // Start task processing
     this.processingInterval = setInterval(
       () => this.processTaskQueue(),
       1000 // Process every second
     )
-    
+
     // Load pending tasks from database
     await this.loadPendingTasks()
-    
-    console.log('✅ AI Agent Orchestrator started')
+
+    // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // console.log('✅ AI Agent Orchestrator started')
     this.emit('started')
   }
 
@@ -411,18 +414,18 @@ export class AIAgentOrchestrator extends EventEmitter {
    */
   async stop(): Promise<void> {
     if (!this.isRunning) return
-    
+
     this.isRunning = false
-    console.log('⏹️ Stopping AI Agent Orchestrator...')
-    
+    // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // console.log('⏹️ Stopping AI Agent Orchestrator...')
+
     if (this.processingInterval) {
       clearInterval(this.processingInterval)
     }
-    
+
     // Wait for active tasks to complete
     await this.waitForActiveTasks()
-    
-    console.log('✅ AI Agent Orchestrator stopped')
+
+    // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // console.log('✅ AI Agent Orchestrator stopped')
     this.emit('stopped')
   }
 
@@ -444,7 +447,7 @@ export class AIAgentOrchestrator extends EventEmitter {
         operation: 'SUBMIT_TASK',
         taskType,
         tenantId,
-        userId
+        userId,
       },
       async () => {
         const task: AITask = {
@@ -460,16 +463,16 @@ export class AIAgentOrchestrator extends EventEmitter {
           status: TaskStatus.PENDING,
           assignedAgents: [],
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         }
 
         // Store task in database
         await this.persistTask(task)
-        
+
         // Add to queue
         this.taskQueue.push(task)
         this.sortTaskQueue()
-        
+
         // Log activity
         await this.auditLogger.logActivity({
           action: 'AI_TASK_SUBMITTED',
@@ -480,13 +483,13 @@ export class AIAgentOrchestrator extends EventEmitter {
           metadata: {
             taskType,
             priority,
-            module: task.module
-          }
+            module: task.module,
+          },
         })
-        
-        console.log(`📥 Task submitted: ${task.id} (${taskType})`)
+
+        // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // console.log(`📥 Task submitted: ${task.id} (${taskType})`)
         this.emit('taskSubmitted', task)
-        
+
         return task.id
       }
     )
@@ -500,7 +503,7 @@ export class AIAgentOrchestrator extends EventEmitter {
     if (this.activeTasks.has(taskId)) {
       return this.activeTasks.get(taskId)!
     }
-    
+
     // Check database
     return await this.loadTaskFromDatabase(taskId)
   }
@@ -510,18 +513,18 @@ export class AIAgentOrchestrator extends EventEmitter {
    */
   private async processTaskQueue(): Promise<void> {
     if (this.taskQueue.length === 0) return
-    
+
     await withPerformanceTracking('task_queue_processing', async () => {
       // Find available agents and tasks they can handle
       const availableCapacity = this.getAvailableCapacity()
-      
+
       for (const [agentId, capacity] of availableCapacity.entries()) {
         if (capacity <= 0) continue
-        
+
         // Find suitable tasks for this agent
         const suitableTasks = this.findSuitableTasksForAgent(agentId)
         const tasksToAssign = suitableTasks.slice(0, capacity)
-        
+
         for (const task of tasksToAssign) {
           await this.assignTaskToAgent(task, agentId)
         }
@@ -535,27 +538,26 @@ export class AIAgentOrchestrator extends EventEmitter {
   private async assignTaskToAgent(task: AITask, agentId: string): Promise<void> {
     const agent = this.agents.get(agentId)
     if (!agent) throw new Error(`Agent not found: ${agentId}`)
-    
+
     // Move from queue to active tasks
-    const queueIndex = this.taskQueue.findIndex(t => t.id === task.id)
+    const queueIndex = this.taskQueue.findIndex((t) => t.id === task.id)
     if (queueIndex > -1) {
       this.taskQueue.splice(queueIndex, 1)
     }
-    
+
     // Update task status
     task.status = TaskStatus.IN_PROGRESS
     task.assignedAgents = [agentId]
     task.updatedAt = new Date()
-    
+
     this.activeTasks.set(task.id, task)
-    
+
     // Execute task asynchronously
-    this.executeTask(task, agent).catch(error => {
-      console.error(`Task execution failed: ${task.id}`, error)
+    this.executeTask(task, agent).catch((error) => {
       this.handleTaskError(task, error)
     })
-    
-    console.log(`🎯 Task ${task.id} assigned to ${agentId}`)
+
+    // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // console.log(`🎯 Task ${task.id} assigned to ${agentId}`)
   }
 
   /**
@@ -563,25 +565,25 @@ export class AIAgentOrchestrator extends EventEmitter {
    */
   private async executeTask(task: AITask, agent: AIAgentConfig): Promise<void> {
     const startTime = Date.now()
-    
+
     try {
       // Create execution context
       const executionContext = await this.createExecutionContext(task, agent)
-      
+
       // Execute based on task type
       const result = await this.executeTaskByType(task, agent, executionContext)
-      
+
       // Update task with results
       task.result = result
       task.status = TaskStatus.COMPLETED
       task.updatedAt = new Date()
-      
+
       // Remove from active tasks
       this.activeTasks.delete(task.id)
-      
+
       // Persist results
       await this.persistTaskResult(task)
-      
+
       // Log success
       await this.auditLogger.logActivity({
         action: 'AI_TASK_COMPLETED',
@@ -592,13 +594,12 @@ export class AIAgentOrchestrator extends EventEmitter {
           agent: agent.id,
           duration: Date.now() - startTime,
           cost: result.metadata.cost,
-          confidence: result.confidence
-        }
+          confidence: result.confidence,
+        },
       })
-      
-      console.log(`✅ Task completed: ${task.id} (${task.type})`)
+
+      // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // console.log(`✅ Task completed: ${task.id} (${task.type})`)
       this.emit('taskCompleted', task)
-      
     } catch (error) {
       await this.handleTaskError(task, error)
     }
@@ -615,34 +616,34 @@ export class AIAgentOrchestrator extends EventEmitter {
     switch (task.type) {
       case TaskType.ANALYZE_CUSTOMER:
         return await this.executeCustomerAnalysis(task, agent, context)
-      
+
       case TaskType.PREDICT_CHURN:
         return await this.executeChurnPrediction(task, agent, context)
-      
+
       case TaskType.RECOMMEND_ACTION:
         return await this.executeActionRecommendation(task, agent, context)
-      
+
       case TaskType.OPTIMIZE_PRICING:
         return await this.executePriceOptimization(task, agent, context)
-      
+
       case TaskType.FORECAST_DEMAND:
         return await this.executeDemandForecast(task, agent, context)
-      
+
       case TaskType.DETECT_ANOMALY:
         return await this.executeAnomalyDetection(task, agent, context)
-      
+
       case TaskType.AUTOMATE_WORKFLOW:
         return await this.executeWorkflowAutomation(task, agent, context)
-      
+
       case TaskType.CROSS_MODULE_SYNC:
         return await this.executeCrossModuleSync(task, agent, context)
-      
+
       case TaskType.COMPLIANCE_CHECK:
         return await this.executeComplianceCheck(task, agent, context)
-      
+
       case TaskType.PERFORMANCE_ANALYSIS:
         return await this.executePerformanceAnalysis(task, agent, context)
-      
+
       default:
         throw new Error(`Unknown task type: ${task.type}`)
     }
@@ -654,49 +655,52 @@ export class AIAgentOrchestrator extends EventEmitter {
   private async executeCustomerAnalysis(
     task: AITask,
     agent: AIAgentConfig,
-    context: Record<string, unknown>
+    _context: Record<string, unknown>
   ): Promise<AITaskResult> {
     const startTime = Date.now()
-    
+
     // Use LangChain for complex analysis
     const analysisChain = await this.langChainManager.createAnalysisChain(
       agent.model,
       'customer_intelligence'
     )
-    
+
     const result = await analysisChain.call({
       customerData: task.input,
       historicalData: task.context.historicalData,
       industryBenchmarks: task.context.industryContext,
-      analysisType: 'comprehensive'
+      analysisType: 'comprehensive',
     })
-    
+
     // Extract insights, predictions, and recommendations
-    const insights: Insight[] = result.insights?.map((insight: any) => ({
-      type: insight.type,
-      category: 'customer',
-      description: insight.description,
-      data: insight.data,
-      confidence: insight.confidence
-    })) || []
-    
-    const predictions: Prediction[] = result.predictions?.map((pred: any) => ({
-      type: pred.type,
-      targetDate: new Date(pred.targetDate),
-      value: pred.value,
-      confidence: pred.confidence,
-      factors: pred.factors
-    })) || []
-    
-    const recommendations: Recommendation[] = result.recommendations?.map((rec: any) => ({
-      type: rec.type,
-      priority: rec.priority,
-      action: rec.action,
-      rationale: rec.rationale,
-      expectedImpact: rec.expectedImpact,
-      confidence: rec.confidence
-    })) || []
-    
+    const insights: Insight[] =
+      result.insights?.map((insight: unknown) => ({
+        type: insight.type,
+        category: 'customer',
+        description: insight.description,
+        data: insight.data,
+        confidence: insight.confidence,
+      })) || []
+
+    const predictions: Prediction[] =
+      result.predictions?.map((pred: unknown) => ({
+        type: pred.type,
+        targetDate: new Date(pred.targetDate),
+        value: pred.value,
+        confidence: pred.confidence,
+        factors: pred.factors,
+      })) || []
+
+    const recommendations: Recommendation[] =
+      result.recommendations?.map((rec: unknown) => ({
+        type: rec.type,
+        priority: rec.priority,
+        action: rec.action,
+        rationale: rec.rationale,
+        expectedImpact: rec.expectedImpact,
+        confidence: rec.confidence,
+      })) || []
+
     return {
       success: true,
       data: result.analysis,
@@ -709,8 +713,8 @@ export class AIAgentOrchestrator extends EventEmitter {
         cost: this.calculateTaskCost(task, agent),
         model: agent.model,
         agentsUsed: [agent.id],
-        confidence: result.confidence || 0.85
-      }
+        confidence: result.confidence || 0.85,
+      },
     }
   }
 
@@ -720,54 +724,56 @@ export class AIAgentOrchestrator extends EventEmitter {
   private async executeChurnPrediction(
     task: AITask,
     agent: AIAgentConfig,
-    context: Record<string, unknown>
+    _context: Record<string, unknown>
   ): Promise<AITaskResult> {
     const startTime = Date.now()
-    
+
     // Use specialized churn prediction model
     const predictionResult = await this.aiServiceManager.predict(
       agent.model,
       {
         type: 'churn_prediction',
         features: task.input,
-        historicalData: task.context.historicalData
+        historicalData: task.context.historicalData,
       },
       { tenantId: task.tenantId, userId: task.requesterUserId }
     )
-    
+
     const churnProbability = predictionResult.prediction
     const riskFactors = predictionResult.features
-    
+
     // Generate retention recommendations
     const recommendations = await this.generateRetentionRecommendations(
       churnProbability,
       riskFactors,
       task.context
     )
-    
+
     return {
       success: true,
       data: {
         churnProbability,
         riskLevel: this.categorizeRisk(churnProbability),
-        keyFactors: riskFactors
+        keyFactors: riskFactors,
       },
       confidence: predictionResult.confidence,
-      predictions: [{
-        type: 'churn_risk',
-        targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-        value: churnProbability,
-        confidence: predictionResult.confidence,
-        factors: riskFactors
-      }],
+      predictions: [
+        {
+          type: 'churn_risk',
+          targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+          value: churnProbability,
+          confidence: predictionResult.confidence,
+          factors: riskFactors,
+        },
+      ],
       recommendations,
       metadata: {
         executionTime: Date.now() - startTime,
         cost: this.calculateTaskCost(task, agent),
         model: agent.model,
         agentsUsed: [agent.id],
-        confidence: predictionResult.confidence
-      }
+        confidence: predictionResult.confidence,
+      },
     }
   }
 
@@ -789,9 +795,9 @@ export class AIAgentOrchestrator extends EventEmitter {
       [TaskType.AUTOMATE_WORKFLOW]: ModuleType.WORKFLOW,
       [TaskType.CROSS_MODULE_SYNC]: ModuleType.INTEGRATION,
       [TaskType.COMPLIANCE_CHECK]: ModuleType.COMPLIANCE,
-      [TaskType.PERFORMANCE_ANALYSIS]: ModuleType.ANALYTICS
+      [TaskType.PERFORMANCE_ANALYSIS]: ModuleType.ANALYTICS,
     }
-    
+
     return moduleMap[taskType] || ModuleType.AI_ENGINE
   }
 
@@ -801,7 +807,7 @@ export class AIAgentOrchestrator extends EventEmitter {
       if (a.priority !== b.priority) {
         return a.priority - b.priority
       }
-      
+
       // Then by creation time (older first)
       return a.createdAt.getTime() - b.createdAt.getTime()
     })
@@ -809,23 +815,24 @@ export class AIAgentOrchestrator extends EventEmitter {
 
   private getAvailableCapacity(): Map<string, number> {
     const capacity = new Map<string, number>()
-    
+
     for (const [agentId, agent] of this.agents.entries()) {
-      const activeTasks = Array.from(this.activeTasks.values())
-        .filter(task => task.assignedAgents.includes(agentId))
-      
+      const activeTasks = Array.from(this.activeTasks.values()).filter((task) =>
+        task.assignedAgents.includes(agentId)
+      )
+
       const available = agent.maxConcurrentTasks - activeTasks.length
       capacity.set(agentId, Math.max(0, available))
     }
-    
+
     return capacity
   }
 
   private findSuitableTasksForAgent(agentId: string): AITask[] {
     const agent = this.agents.get(agentId)
     if (!agent) return []
-    
-    return this.taskQueue.filter(task => this.isTaskSuitableForAgent(task, agent))
+
+    return this.taskQueue.filter((task) => this.isTaskSuitableForAgent(task, agent))
   }
 
   private isTaskSuitableForAgent(task: AITask, agent: AIAgentConfig): boolean {
@@ -840,9 +847,9 @@ export class AIAgentOrchestrator extends EventEmitter {
       [TaskType.AUTOMATE_WORKFLOW]: [AgentType.OPERATIONS_AGENT, AgentType.ORCHESTRATOR],
       [TaskType.CROSS_MODULE_SYNC]: [AgentType.ORCHESTRATOR],
       [TaskType.COMPLIANCE_CHECK]: [AgentType.LEGAL_AGENT, AgentType.FINANCE_AGENT],
-      [TaskType.PERFORMANCE_ANALYSIS]: [AgentType.HR_AGENT, AgentType.ANALYTICS_AGENT]
+      [TaskType.PERFORMANCE_ANALYSIS]: [AgentType.HR_AGENT, AgentType.ANALYTICS_AGENT],
     }
-    
+
     const suitableTypes = taskAgentTypeMap[task.type] || []
     return suitableTypes.includes(agent.type)
   }
@@ -857,15 +864,15 @@ export class AIAgentOrchestrator extends EventEmitter {
       task.context.entityId,
       task.tenantId
     )
-    
+
     const crossModuleData = await this.loadCrossModuleData(task)
-    
+
     return {
       ...task.context,
       entityData,
       crossModuleData,
       agentCapabilities: agent.capabilities,
-      industryContext: await this.loadIndustryContext(task.tenantId)
+      industryContext: await this.loadIndustryContext(task.tenantId),
     }
   }
 
@@ -888,7 +895,7 @@ export class AIAgentOrchestrator extends EventEmitter {
     context: AITaskContext
   ): Promise<Recommendation[]> {
     const recommendations: Recommendation[] = []
-    
+
     if (churnProbability > 0.7) {
       recommendations.push({
         type: 'immediate_intervention',
@@ -896,10 +903,10 @@ export class AIAgentOrchestrator extends EventEmitter {
         action: 'Schedule immediate customer success call',
         rationale: 'High churn risk detected based on engagement patterns',
         expectedImpact: 0.4,
-        confidence: 0.85
+        confidence: 0.85,
       })
     }
-    
+
     if (riskFactors.engagement_score < 0.3) {
       recommendations.push({
         type: 'engagement_campaign',
@@ -907,22 +914,22 @@ export class AIAgentOrchestrator extends EventEmitter {
         action: 'Launch targeted re-engagement campaign',
         rationale: 'Low engagement score indicates need for proactive outreach',
         expectedImpact: 0.3,
-        confidence: 0.75
+        confidence: 0.75,
       })
     }
-    
+
     return recommendations
   }
 
-  private async handleTaskError(task: AITask, error: any): Promise<void> {
+  private async handleTaskError(task: AITask, error: unknown): Promise<void> {
     task.status = TaskStatus.FAILED
     task.error = error.message || String(error)
     task.updatedAt = new Date()
-    
+
     this.activeTasks.delete(task.id)
-    
+
     await this.persistTaskResult(task)
-    
+
     await this.auditLogger.logActivity({
       action: 'AI_TASK_FAILED',
       entityType: 'AITask',
@@ -930,24 +937,23 @@ export class AIAgentOrchestrator extends EventEmitter {
       tenantId: task.tenantId,
       metadata: {
         error: task.error,
-        taskType: task.type
-      }
+        taskType: task.type,
+      },
     })
-    
-    console.error(`❌ Task failed: ${task.id} - ${task.error}`)
+
     this.emit('taskFailed', task)
   }
 
   // Database operations (to be implemented)
-  private async persistTask(task: AITask): Promise<void> {
+  private async persistTask(_task: AITask): Promise<void> {
     // TODO: Implement task persistence
   }
 
-  private async persistTaskResult(task: AITask): Promise<void> {
+  private async persistTaskResult(_task: AITask): Promise<void> {
     // TODO: Implement result persistence
   }
 
-  private async loadTaskFromDatabase(taskId: string): Promise<AITask | null> {
+  private async loadTaskFromDatabase(_taskId: string): Promise<AITask | null> {
     // TODO: Implement task loading
     return null
   }
@@ -961,61 +967,93 @@ export class AIAgentOrchestrator extends EventEmitter {
   }
 
   private async loadEntityData(
-    entityType: string,
-    entityId: string,
+    _entityType: string,
+    _entityId: string,
     tenantId: string
   ): Promise<Record<string, unknown> | null> {
     // TODO: Load entity data from appropriate table
     return null
   }
 
-  private async loadCrossModuleData(task: AITask): Promise<Record<string, unknown>> {
+  private async loadCrossModuleData(_task: AITask): Promise<Record<string, unknown>> {
     // TODO: Load related data from other modules
     return {}
   }
 
-  private async loadIndustryContext(tenantId: string): Promise<Record<string, unknown>> {
+  private async loadIndustryContext(_tenantId: string): Promise<Record<string, unknown>> {
     // TODO: Load industry-specific context
     return {}
   }
 
   // Additional method implementations for other task types...
-  private async executeActionRecommendation(task: AITask, agent: AIAgentConfig, context: Record<string, unknown>): Promise<AITaskResult> {
+  private async executeActionRecommendation(
+    _task: AITask,
+    _agent: AIAgentConfig,
+    _context: Record<string, unknown>
+  ): Promise<AITaskResult> {
     // TODO: Implement action recommendation
     throw new Error('Not implemented')
   }
 
-  private async executePriceOptimization(task: AITask, agent: AIAgentConfig, context: Record<string, unknown>): Promise<AITaskResult> {
+  private async executePriceOptimization(
+    _task: AITask,
+    _agent: AIAgentConfig,
+    _context: Record<string, unknown>
+  ): Promise<AITaskResult> {
     // TODO: Implement price optimization
     throw new Error('Not implemented')
   }
 
-  private async executeDemandForecast(task: AITask, agent: AIAgentConfig, context: Record<string, unknown>): Promise<AITaskResult> {
+  private async executeDemandForecast(
+    _task: AITask,
+    _agent: AIAgentConfig,
+    _context: Record<string, unknown>
+  ): Promise<AITaskResult> {
     // TODO: Implement demand forecasting
     throw new Error('Not implemented')
   }
 
-  private async executeAnomalyDetection(task: AITask, agent: AIAgentConfig, context: Record<string, unknown>): Promise<AITaskResult> {
+  private async executeAnomalyDetection(
+    _task: AITask,
+    _agent: AIAgentConfig,
+    _context: Record<string, unknown>
+  ): Promise<AITaskResult> {
     // TODO: Implement anomaly detection
     throw new Error('Not implemented')
   }
 
-  private async executeWorkflowAutomation(task: AITask, agent: AIAgentConfig, context: Record<string, unknown>): Promise<AITaskResult> {
+  private async executeWorkflowAutomation(
+    _task: AITask,
+    _agent: AIAgentConfig,
+    _context: Record<string, unknown>
+  ): Promise<AITaskResult> {
     // TODO: Implement workflow automation
     throw new Error('Not implemented')
   }
 
-  private async executeCrossModuleSync(task: AITask, agent: AIAgentConfig, context: Record<string, unknown>): Promise<AITaskResult> {
+  private async executeCrossModuleSync(
+    _task: AITask,
+    _agent: AIAgentConfig,
+    _context: Record<string, unknown>
+  ): Promise<AITaskResult> {
     // TODO: Implement cross-module synchronization
     throw new Error('Not implemented')
   }
 
-  private async executeComplianceCheck(task: AITask, agent: AIAgentConfig, context: Record<string, unknown>): Promise<AITaskResult> {
+  private async executeComplianceCheck(
+    _task: AITask,
+    _agent: AIAgentConfig,
+    _context: Record<string, unknown>
+  ): Promise<AITaskResult> {
     // TODO: Implement compliance checking
     throw new Error('Not implemented')
   }
 
-  private async executePerformanceAnalysis(task: AITask, agent: AIAgentConfig, context: Record<string, unknown>): Promise<AITaskResult> {
+  private async executePerformanceAnalysis(
+    _task: AITask,
+    _agent: AIAgentConfig,
+    _context: Record<string, unknown>
+  ): Promise<AITaskResult> {
     // TODO: Implement performance analysis
     throw new Error('Not implemented')
   }

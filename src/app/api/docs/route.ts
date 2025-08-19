@@ -74,11 +74,7 @@ const getSwaggerHTML = (specUrl: string) => `
 `
 
 // API routes that should be excluded from documentation in production
-const EXCLUDED_ROUTES_PRODUCTION = [
-  '/api/super-admin',
-  '/api/test',
-  '/api/debug'
-]
+const EXCLUDED_ROUTES_PRODUCTION = ['/api/super-admin', '/api/test', '/api/debug']
 
 /**
  * GET /api/docs
@@ -87,56 +83,54 @@ const EXCLUDED_ROUTES_PRODUCTION = [
 export async function GET(request: NextRequest) {
   // Check if docs are enabled
   const docsEnabled = process.env.ENABLE_API_DOCS !== 'false'
-  
+
   if (!docsEnabled && process.env.NODE_ENV === 'production') {
-    return NextResponse.json(
-      { error: 'API documentation is disabled' },
-      { status: 404 }
-    )
+    return NextResponse.json({ error: 'API documentation is disabled' }, { status: 404 })
   }
-  
+
   // Get the host URL
   const host = request.headers.get('host') || 'localhost:3000'
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
   const baseUrl = `${protocol}://${host}`
-  
+
   // Check for JSON format request
   const acceptHeader = request.headers.get('accept') || ''
-  const isJsonRequest = acceptHeader.includes('application/json') || 
-                       request.nextUrl.searchParams.get('format') === 'json'
-  
+  const isJsonRequest =
+    acceptHeader.includes('application/json') ||
+    request.nextUrl.searchParams.get('format') === 'json'
+
   if (isJsonRequest) {
     // Return the OpenAPI spec as JSON
     const spec = { ...openAPISpec }
-    
+
     // Filter out excluded routes in production
     if (process.env.NODE_ENV === 'production') {
       spec.paths = Object.fromEntries(
-        Object.entries(spec.paths).filter(([path]) => 
-          !EXCLUDED_ROUTES_PRODUCTION.some(excluded => path.startsWith(excluded))
+        Object.entries(spec.paths).filter(
+          ([path]) => !EXCLUDED_ROUTES_PRODUCTION.some((excluded) => path.startsWith(excluded))
         )
       )
     }
-    
+
     // Update server URL
     spec.servers[0].url = `${baseUrl}`
-    
+
     return NextResponse.json(spec, {
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
+        'Access-Control-Allow-Origin': '*',
+      },
     })
   }
-  
+
   // Return Swagger UI HTML
   const html = getSwaggerHTML(`${baseUrl}/api/docs?format=json`)
-  
+
   return new NextResponse(html, {
     headers: {
       'Content-Type': 'text/html',
-      'Cache-Control': 'public, max-age=3600'
-    }
+      'Cache-Control': 'public, max-age=3600',
+    },
   })
 }
 
@@ -150,7 +144,7 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Accept'
-    }
+      'Access-Control-Allow-Headers': 'Content-Type, Accept',
+    },
   })
 }

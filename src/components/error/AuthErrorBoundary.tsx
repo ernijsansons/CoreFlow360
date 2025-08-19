@@ -31,7 +31,7 @@ export class AuthErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
       errorInfo: null,
-      retryCount: 0
+      retryCount: 0,
     }
   }
 
@@ -42,19 +42,18 @@ export class AuthErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error to error reporting service
-    console.error('Auth Error Boundary caught error:', error, errorInfo)
-    
+
     // Send to monitoring service (e.g., Sentry)
     if (typeof window !== 'undefined' && window.Sentry) {
       window.Sentry.captureException(error, {
         contexts: {
           react: {
-            componentStack: errorInfo.componentStack
-          }
+            componentStack: errorInfo.componentStack,
+          },
         },
         tags: {
-          component: 'AuthErrorBoundary'
-        }
+          component: 'AuthErrorBoundary',
+        },
       })
     }
 
@@ -63,18 +62,18 @@ export class AuthErrorBoundary extends Component<Props, State> {
 
   handleRetry = async () => {
     const { retryCount } = this.state
-    
+
     if (retryCount < this.maxRetries) {
       // Exponential backoff
       const delay = this.retryDelay * Math.pow(2, retryCount)
-      
-      this.setState({ 
-        hasError: false, 
-        error: null, 
+
+      this.setState({
+        hasError: false,
+        error: null,
         errorInfo: null,
-        retryCount: retryCount + 1 
+        retryCount: retryCount + 1,
       })
-      
+
       // Force re-render after delay
       setTimeout(() => {
         window.location.reload()
@@ -84,9 +83,9 @@ export class AuthErrorBoundary extends Component<Props, State> {
 
   handleSignOut = async () => {
     try {
-      await signOut({ 
+      await signOut({
         callbackUrl: '/login?error=session_expired',
-        redirect: true 
+        redirect: true,
       })
     } catch (error) {
       // If sign out fails, force redirect
@@ -96,18 +95,18 @@ export class AuthErrorBoundary extends Component<Props, State> {
 
   isAuthError = (error: Error | null): boolean => {
     if (!error) return false
-    
+
     const authErrorMessages = [
       'unauthorized',
       'authentication',
       'session expired',
       'invalid token',
       'forbidden',
-      'tenant is not active'
+      'tenant is not active',
     ]
-    
+
     const errorMessage = error.message.toLowerCase()
-    return authErrorMessages.some(msg => errorMessage.includes(msg))
+    return authErrorMessages.some((msg) => errorMessage.includes(msg))
   }
 
   render() {
@@ -123,28 +122,26 @@ export class AuthErrorBoundary extends Component<Props, State> {
 
       // Default error UI
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
-              <AlertCircle className="w-6 h-6 text-red-600" />
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+              <AlertCircle className="h-6 w-6 text-red-600" />
             </div>
-            
+
             <h2 className="mt-4 text-center text-2xl font-bold text-gray-900">
               {isAuthError ? 'Authentication Error' : 'Something went wrong'}
             </h2>
-            
+
             <p className="mt-2 text-center text-sm text-gray-600">
-              {isAuthError 
+              {isAuthError
                 ? 'Your session may have expired or you may not have access to this resource.'
                 : 'An unexpected error occurred. Please try again.'}
             </p>
 
             {process.env.NODE_ENV === 'development' && (
-              <details className="mt-4 p-3 bg-gray-100 rounded text-xs">
-                <summary className="cursor-pointer font-semibold">
-                  Error Details
-                </summary>
-                <pre className="mt-2 whitespace-pre-wrap break-words">
+              <details className="mt-4 rounded bg-gray-100 p-3 text-xs">
+                <summary className="cursor-pointer font-semibold">Error Details</summary>
+                <pre className="mt-2 break-words whitespace-pre-wrap">
                   {error.message}
                   {this.state.errorInfo?.componentStack}
                 </pre>
@@ -155,32 +152,32 @@ export class AuthErrorBoundary extends Component<Props, State> {
               {isAuthError ? (
                 <button
                   onClick={this.handleSignOut}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="flex w-full items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="mr-2 h-4 w-4" />
                   Sign In Again
                 </button>
               ) : canRetry ? (
                 <button
                   onClick={this.handleRetry}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="flex w-full items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCw className="mr-2 h-4 w-4" />
                   Retry ({this.maxRetries - retryCount} attempts left)
                 </button>
               ) : (
                 <button
-                  onClick={() => window.location.href = '/'}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  onClick={() => (window.location.href = '/')}
+                  className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                 >
                   Go to Homepage
                 </button>
               )}
-              
+
               {!isAuthError && (
                 <button
-                  onClick={() => window.location.href = '/support'}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  onClick={() => (window.location.href = '/support')}
+                  className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                 >
                   Contact Support
                 </button>

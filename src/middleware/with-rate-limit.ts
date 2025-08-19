@@ -15,7 +15,7 @@ interface RateLimitOptions {
   perMinute?: number
   perHour?: number
   perDay?: number
-  
+
   // Options
   keyPrefix?: string
   authenticated?: boolean // Require authentication
@@ -33,7 +33,7 @@ async function getRateLimitKey(
   options: RateLimitOptions
 ): Promise<string | null> {
   const prefix = options.keyPrefix || 'api'
-  
+
   if (options.byUser) {
     // Rate limit by user ID
     const session = await getServerSession(authOptions)
@@ -43,10 +43,11 @@ async function getRateLimitKey(
     return `${prefix}:user:${session.user.id}`
   } else {
     // Rate limit by IP address
-    const ip = request.headers.get('x-forwarded-for') || 
-                request.headers.get('x-real-ip') || 
-                request.ip || 
-                'unknown'
+    const ip =
+      request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      request.ip ||
+      'unknown'
     return `${prefix}:ip:${ip}`
   }
 }
@@ -66,19 +67,19 @@ export function withRateLimit(
         if (!session?.user) {
           return api.unauthorized('Authentication required')
         }
-        
+
         // Skip rate limiting for admin users if configured
         if (options.skipForAdmin && session.user.role === 'admin') {
           return handler(request)
         }
       }
-      
+
       // Get rate limit key
       const key = await getRateLimitKey(request, options)
       if (!key) {
         return api.error('Unable to apply rate limiting')
       }
-      
+
       // Check rate limit
       const result = await rateLimiter.checkLimit(key, {
         perSecond: options.perSecond,
@@ -86,9 +87,9 @@ export function withRateLimit(
         perHour: options.perHour,
         perDay: options.perDay,
         burst: options.burst,
-        penalty: options.penalty
+        penalty: options.penalty,
       })
-      
+
       // Add rate limit headers to response
       const addRateLimitHeaders = (response: NextResponse) => {
         response.headers.set('X-RateLimit-Limit', result.limit.toString())
@@ -96,7 +97,7 @@ export function withRateLimit(
         response.headers.set('X-RateLimit-Reset', result.resetAt.toISOString())
         return response
       }
-      
+
       if (!result.allowed) {
         // Rate limit exceeded
         const response = NextResponse.json(
@@ -107,24 +108,22 @@ export function withRateLimit(
               message: 'Too many requests. Please try again later.',
               details: {
                 limit: result.limit,
-                resetAt: result.resetAt.toISOString()
-              }
-            }
+                resetAt: result.resetAt.toISOString(),
+              },
+            },
           },
           { status: 429 }
         )
-        
+
         return addRateLimitHeaders(response)
       }
-      
+
       // Execute the handler
       const response = await handler(request)
-      
+
       // Add rate limit headers to successful response
       return addRateLimitHeaders(response)
-      
     } catch (error) {
-      console.error('Rate limiting middleware error:', error)
       // Don't block the request on rate limiting errors
       return handler(request)
     }
@@ -140,45 +139,45 @@ export const rateLimitPresets = {
     perMinute: 5,
     perHour: 20,
     perDay: 50,
-    penalty: 300 // 5 minute penalty
+    penalty: 300, // 5 minute penalty
   },
-  
+
   // Standard API usage
   standard: {
     perSecond: 10,
     perMinute: 100,
     perHour: 1000,
-    perDay: 10000
+    perDay: 10000,
   },
-  
+
   // Relaxed - for less sensitive endpoints
   relaxed: {
     perMinute: 200,
     perHour: 2000,
-    perDay: 20000
+    perDay: 20000,
   },
-  
+
   // Search endpoints
   search: {
     perSecond: 5,
     perMinute: 50,
     perHour: 500,
-    burst: 10
+    burst: 10,
   },
-  
+
   // File uploads
   upload: {
     perMinute: 10,
     perHour: 50,
     perDay: 200,
-    penalty: 600 // 10 minute penalty
+    penalty: 600, // 10 minute penalty
   },
-  
+
   // Authentication endpoints
   auth: {
     perMinute: 5,
     perHour: 20,
     perDay: 100,
-    penalty: 900 // 15 minute penalty
-  }
+    penalty: 900, // 15 minute penalty
+  },
 }

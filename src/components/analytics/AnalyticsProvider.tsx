@@ -11,15 +11,15 @@ import { analytics, trackWebVitals } from '@/lib/analytics'
 import { getSessionTracker, getPerformanceTracker } from '@/lib/monitoring'
 
 interface AnalyticsContextType {
-  track: (eventName: string, properties?: Record<string, any>) => void
-  identify: (userId: string, traits?: Record<string, any>) => void
+  track: (eventName: string, properties?: Record<string, unknown>) => void
+  identify: (userId: string, traits?: Record<string, unknown>) => void
   pageView: (url: string) => void
 }
 
 const AnalyticsContext = createContext<AnalyticsContextType>({
   track: () => {},
   identify: () => {},
-  pageView: () => {}
+  pageView: () => {},
 })
 
 export function useAnalytics() {
@@ -59,14 +59,10 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
   const contextValue: AnalyticsContextType = {
     track: analytics.track,
     identify: analytics.identify,
-    pageView: analytics.pageView
+    pageView: analytics.pageView,
   }
 
-  return (
-    <AnalyticsContext.Provider value={contextValue}>
-      {children}
-    </AnalyticsContext.Provider>
-  )
+  return <AnalyticsContext.Provider value={contextValue}>{children}</AnalyticsContext.Provider>
 }
 
 // Higher-order component for tracking page visits
@@ -76,7 +72,7 @@ export function withPageTracking<P extends object>(
 ) {
   return function TrackedComponent(props: P) {
     const { track } = useAnalytics()
-    
+
     useEffect(() => {
       track('page_visited', { page_name: pageName })
     }, [track])
@@ -88,30 +84,30 @@ export function withPageTracking<P extends object>(
 // Hook for tracking user interactions
 export function useTrackEvent() {
   const { track } = useAnalytics()
-  
+
   return {
     // Subscription events
     trackModuleSelection: (moduleName: string, price: number) => {
-      track('module_selected', { 
-        module_name: moduleName, 
+      track('module_selected', {
+        module_name: moduleName,
         price: price,
-        category: 'subscription' 
+        category: 'subscription',
       })
     },
-    
+
     trackPricingCalculation: (totalPrice: number, modules: string[]) => {
       track('pricing_calculated', {
         total_price: totalPrice,
         modules: modules.join(','),
         module_count: modules.length,
-        category: 'subscription'
+        category: 'subscription',
       })
     },
 
     trackTrialStart: (plan: string) => {
-      track('trial_started', { 
+      track('trial_started', {
         plan: plan,
-        category: 'conversion'
+        category: 'conversion',
       })
     },
 
@@ -121,14 +117,14 @@ export function useTrackEvent() {
         task_type: taskType,
         modules: modules.join(','),
         module_count: modules.length,
-        category: 'ai_interaction'
+        category: 'ai_interaction',
       })
     },
 
     trackDemoCompletion: (demoType: string) => {
       track('demo_completed', {
         demo_type: demoType,
-        category: 'engagement'
+        category: 'engagement',
       })
     },
 
@@ -137,7 +133,7 @@ export function useTrackEvent() {
       track('feature_used', {
         feature: feature,
         module: module || 'core',
-        category: 'user_engagement'
+        category: 'user_engagement',
       })
     },
 
@@ -145,29 +141,29 @@ export function useTrackEvent() {
     trackSupportRequest: (type: string) => {
       track('support_requested', {
         support_type: type,
-        category: 'support'
+        category: 'support',
       })
     },
 
     // Generic event tracking
-    trackEvent: (eventName: string, properties?: Record<string, any>) => {
+    trackEvent: (eventName: string, properties?: Record<string, unknown>) => {
       track(eventName, properties)
-    }
+    },
   }
 }
 
 // Component for tracking button clicks
-export function TrackingButton({ 
-  children, 
-  eventName, 
+export function TrackingButton({
+  children,
+  eventName,
   eventProperties,
   className,
   onClick,
-  ...props 
+  ...props
 }: {
   children: React.ReactNode
   eventName: string
-  eventProperties?: Record<string, any>
+  eventProperties?: Record<string, unknown>
   className?: string
   onClick?: () => void
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
@@ -179,47 +175,38 @@ export function TrackingButton({
   }
 
   return (
-    <button 
-      className={className} 
-      onClick={handleClick}
-      {...props}
-    >
+    <button className={className} onClick={handleClick} {...props}>
       {children}
     </button>
   )
 }
 
 // Component for tracking link clicks
-export function TrackingLink({ 
-  children, 
+export function TrackingLink({
+  children,
   href,
-  eventName, 
+  eventName,
   eventProperties,
   className,
-  ...props 
+  ...props
 }: {
   children: React.ReactNode
   href: string
   eventName: string
-  eventProperties?: Record<string, any>
+  eventProperties?: Record<string, unknown>
   className?: string
 } & React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   const { track } = useAnalytics()
 
   const handleClick = () => {
-    track(eventName, { 
-      link_url: href, 
-      ...eventProperties 
+    track(eventName, {
+      link_url: href,
+      ...eventProperties,
     })
   }
 
   return (
-    <a 
-      href={href}
-      className={className} 
-      onClick={handleClick}
-      {...props}
-    >
+    <a href={href} className={className} onClick={handleClick} {...props}>
       {children}
     </a>
   )

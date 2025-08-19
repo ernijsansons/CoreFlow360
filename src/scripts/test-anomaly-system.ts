@@ -10,17 +10,15 @@ interface TestResult {
   testName: string
   passed: boolean
   details: string
-  metrics?: any
+  metrics?: unknown
 }
 
 class AnomalyTestSuite {
   private results: TestResult[] = []
 
-  log(message: string) {
-    console.log(`[ANOMALY TEST] ${message}`)
-  }
+  log(_message: string) {}
 
-  addResult(testName: string, passed: boolean, details: string, metrics?: any) {
+  addResult(testName: string, passed: boolean, details: string, metrics?: unknown) {
     this.results.push({ testName, passed, details, metrics })
     const status = passed ? '✅ PASS' : '❌ FAIL'
     this.log(`${status}: ${testName} - ${details}`)
@@ -28,7 +26,7 @@ class AnomalyTestSuite {
 
   async runAllTests() {
     this.log('Starting Anomaly Detection System Test Suite...')
-    
+
     await this.testBasicAnomalyDetection()
     await this.testStatisticalMethods()
     await this.testSeasonalPatterns()
@@ -36,35 +34,37 @@ class AnomalyTestSuite {
     await this.testAlertSystem()
     await this.testPatternDetection()
     await this.testAPICompatibility()
-    
+
     this.generateReport()
   }
 
   async testBasicAnomalyDetection() {
     this.log('Testing basic anomaly detection...')
-    
+
     try {
       const detector = new AdvancedAnomalyDetector({
         sensitivity: 0.95,
-        algorithms: ['statistical']
+        algorithms: ['statistical'],
       })
 
       // Create normal data with one obvious outlier
       const normalData: DataPoint[] = []
       const now = new Date()
-      
+
       for (let i = 0; i < 30; i++) {
         normalData.push({
           timestamp: new Date(now.getTime() - i * 24 * 60 * 60 * 1000),
-          value: 100 + Math.random() * 10 // Normal range: 100-110
+          value: 100 + Math.random() * 10, // Normal range: 100-110
         })
       }
 
       // Add obvious anomaly
-      const anomalyData: DataPoint[] = [{
-        timestamp: new Date(),
-        value: 500 // Obvious outlier
-      }]
+      const anomalyData: DataPoint[] = [
+        {
+          timestamp: new Date(),
+          value: 500, // Obvious outlier
+        },
+      ]
 
       detector.addHistoricalData('test_metric', normalData)
       const results = detector.detectAnomalies('test_metric', anomalyData)
@@ -78,7 +78,6 @@ class AnomalyTestSuite {
         `Anomaly detected: ${anomalyDetected}, Score: ${anomalyScore.toFixed(3)}`,
         { anomalyScore, severity: results[0].severity }
       )
-
     } catch (error) {
       this.addResult(
         'Basic Anomaly Detection',
@@ -90,30 +89,30 @@ class AnomalyTestSuite {
 
   async testStatisticalMethods() {
     this.log('Testing statistical detection methods...')
-    
+
     try {
       const detector = new AdvancedAnomalyDetector({
-        algorithms: ['statistical', 'isolation_forest']
+        algorithms: ['statistical', 'isolation_forest'],
       })
 
       // Generate data with known statistical properties
       const data: DataPoint[] = []
       const mean = 100
       const stdDev = 10
-      
+
       // Generate normal data
       for (let i = 0; i < 50; i++) {
         const value = mean + (Math.random() - 0.5) * 2 * stdDev * 0.5 // Within 1 std dev
         data.push({
           timestamp: new Date(Date.now() - i * 60000),
-          value
+          value,
         })
       }
 
       // Add statistical outlier (beyond 3 standard deviations)
       const outlier: DataPoint = {
         timestamp: new Date(),
-        value: mean + 4 * stdDev // 4 std devs from mean
+        value: mean + 4 * stdDev, // 4 std devs from mean
       }
 
       detector.addHistoricalData('statistical_test', data)
@@ -128,7 +127,6 @@ class AnomalyTestSuite {
         `Statistical outlier detected: ${detected}, Confidence: ${confidence.toFixed(3)}`,
         { confidence, algorithm: results[0].algorithm }
       )
-
     } catch (error) {
       this.addResult(
         'Statistical Methods',
@@ -140,40 +138,41 @@ class AnomalyTestSuite {
 
   async testSeasonalPatterns() {
     this.log('Testing seasonal pattern detection...')
-    
+
     try {
       const detector = new AdvancedAnomalyDetector({
         algorithms: ['ensemble'],
         businessContext: {
-          seasonality: ['weekly']
-        }
+          seasonality: ['weekly'],
+        },
       })
 
       // Generate weekly seasonal data
       const seasonalData: DataPoint[] = []
       const baseValue = 1000
-      
-      for (let i = 0; i < 21; i++) { // 3 weeks of data
+
+      for (let i = 0; i < 21; i++) {
+        // 3 weeks of data
         const dayOfWeek = i % 7
         const weekendMultiplier = dayOfWeek === 0 || dayOfWeek === 6 ? 0.7 : 1.0
         const seasonalValue = baseValue * weekendMultiplier
-        
+
         seasonalData.push({
           timestamp: new Date(Date.now() - i * 24 * 60 * 60 * 1000),
-          value: seasonalValue + Math.random() * 50
+          value: seasonalValue + Math.random() * 50,
         })
       }
 
       // Test normal seasonal variation (should not be flagged)
       const normalWeekendValue: DataPoint = {
         timestamp: new Date(),
-        value: baseValue * 0.7 + 25 // Normal weekend value
+        value: baseValue * 0.7 + 25, // Normal weekend value
       }
 
       // Test seasonal anomaly
       const seasonalAnomaly: DataPoint = {
         timestamp: new Date(),
-        value: baseValue * 1.5 // Much higher than expected
+        value: baseValue * 1.5, // Much higher than expected
       }
 
       detector.addHistoricalData('seasonal_test', seasonalData)
@@ -187,12 +186,11 @@ class AnomalyTestSuite {
         'Seasonal Pattern Detection',
         normalNotFlagged && anomalyFlagged,
         `Normal seasonal: ${!normalNotFlagged}, Seasonal anomaly: ${anomalyFlagged}`,
-        { 
+        {
           normalScore: normalResult[0].anomalyScore,
-          anomalyScore: anomalyResult[0].anomalyScore
+          anomalyScore: anomalyResult[0].anomalyScore,
         }
       )
-
     } catch (error) {
       this.addResult(
         'Seasonal Pattern Detection',
@@ -204,7 +202,7 @@ class AnomalyTestSuite {
 
   async testBusinessMonitoring() {
     this.log('Testing business anomaly monitoring...')
-    
+
     try {
       const monitor = new BusinessAnomalyMonitor()
       const metrics = monitor.getMetrics()
@@ -212,22 +210,24 @@ class AnomalyTestSuite {
       // Test that all core business metrics are initialized
       const expectedMetrics = [
         'daily_revenue',
-        'new_subscriptions', 
+        'new_subscriptions',
         'churn_rate',
         'active_users',
         'api_response_time',
-        'error_rate'
+        'error_rate',
       ]
 
-      const allMetricsPresent = expectedMetrics.every(
-        metricName => metrics.some(m => m.name === metricName)
+      const allMetricsPresent = expectedMetrics.every((metricName) =>
+        metrics.some((m) => m.name === metricName)
       )
 
       // Test monitoring a metric
-      const testData: DataPoint[] = [{
-        timestamp: new Date(),
-        value: 50000 // High revenue (potential anomaly)
-      }]
+      const testData: DataPoint[] = [
+        {
+          timestamp: new Date(),
+          value: 50000, // High revenue (potential anomaly)
+        },
+      ]
 
       const anomalies = await monitor.monitorMetric('daily_revenue', testData)
       const monitoringWorks = anomalies.length > 0
@@ -236,12 +236,11 @@ class AnomalyTestSuite {
         'Business Monitoring',
         allMetricsPresent && monitoringWorks,
         `Metrics initialized: ${allMetricsPresent}, Monitoring works: ${monitoringWorks}`,
-        { 
+        {
           metricsCount: metrics.length,
-          anomaliesDetected: anomalies.filter(a => a.isAnomaly).length
+          anomaliesDetected: anomalies.filter((a) => a.isAnomaly).length,
         }
       )
-
     } catch (error) {
       this.addResult(
         'Business Monitoring',
@@ -253,7 +252,7 @@ class AnomalyTestSuite {
 
   async testAlertSystem() {
     this.log('Testing alert system...')
-    
+
     try {
       const monitor = new BusinessAnomalyMonitor()
 
@@ -262,13 +261,15 @@ class AnomalyTestSuite {
       const initialCount = initialAlerts.length
 
       // Generate data that should trigger an alert
-      const criticalData: DataPoint[] = [{
-        timestamp: new Date(),
-        value: 15 // High churn rate (should trigger alert)
-      }]
+      const criticalData: DataPoint[] = [
+        {
+          timestamp: new Date(),
+          value: 15, // High churn rate (should trigger alert)
+        },
+      ]
 
       await monitor.monitorMetric('churn_rate', criticalData)
-      
+
       // Check if alert was generated
       const finalAlerts = monitor.getActiveAlerts()
       const alertGenerated = finalAlerts.length > initialCount
@@ -284,13 +285,12 @@ class AnomalyTestSuite {
         'Alert System',
         alertGenerated && acknowledgmentWorks,
         `Alert generated: ${alertGenerated}, Acknowledgment works: ${acknowledgmentWorks}`,
-        { 
+        {
           initialAlerts: initialCount,
           finalAlerts: finalAlerts.length,
-          alertGenerated
+          alertGenerated,
         }
       )
-
     } catch (error) {
       this.addResult(
         'Alert System',
@@ -302,39 +302,38 @@ class AnomalyTestSuite {
 
   async testPatternDetection() {
     this.log('Testing pattern detection...')
-    
+
     try {
       const detector = new AdvancedAnomalyDetector()
 
       // Create data with spike pattern
       const spikeData: DataPoint[] = []
       const baseValue = 100
-      
+
       for (let i = 0; i < 20; i++) {
         // Add several spikes
-        const value = (i % 5 === 0) ? baseValue * 3 : baseValue + Math.random() * 10
+        const value = i % 5 === 0 ? baseValue * 3 : baseValue + Math.random() * 10
         spikeData.push({
           timestamp: new Date(Date.now() - i * 60000),
-          value
+          value,
         })
       }
 
       const anomalies = detector.detectAnomalies('pattern_test', spikeData)
       const patterns = detector.detectPatterns(anomalies)
 
-      const spikePatternDetected = patterns.some(p => p.type === 'spike')
+      const spikePatternDetected = patterns.some((p) => p.type === 'spike')
       const patternsFound = patterns.length > 0
 
       this.addResult(
         'Pattern Detection',
         spikePatternDetected && patternsFound,
         `Spike pattern detected: ${spikePatternDetected}, Total patterns: ${patterns.length}`,
-        { 
-          patterns: patterns.map(p => p.type),
-          anomaliesAnalyzed: anomalies.length
+        {
+          patterns: patterns.map((p) => p.type),
+          anomaliesAnalyzed: anomalies.length,
         }
       )
-
     } catch (error) {
       this.addResult(
         'Pattern Detection',
@@ -346,24 +345,27 @@ class AnomalyTestSuite {
 
   async testAPICompatibility() {
     this.log('Testing API compatibility...')
-    
+
     try {
       // Test that our classes can be serialized/deserialized (important for API responses)
       const detector = new AdvancedAnomalyDetector()
-      
-      const testData: DataPoint[] = [{
-        timestamp: new Date(),
-        value: 100
-      }]
+
+      const testData: DataPoint[] = [
+        {
+          timestamp: new Date(),
+          value: 100,
+        },
+      ]
 
       const results = detector.detectAnomalies('api_test', testData)
-      
+
       // Test JSON serialization
       const serialized = JSON.stringify(results)
       const deserialized = JSON.parse(serialized)
-      
+
       const serializationWorks = deserialized.length === results.length
-      const hasRequiredFields = deserialized[0] && 
+      const hasRequiredFields =
+        deserialized[0] &&
         typeof deserialized[0].isAnomaly === 'boolean' &&
         typeof deserialized[0].anomalyScore === 'number'
 
@@ -371,12 +373,11 @@ class AnomalyTestSuite {
         'API Compatibility',
         serializationWorks && hasRequiredFields,
         `Serialization works: ${serializationWorks}, Required fields present: ${hasRequiredFields}`,
-        { 
+        {
           originalLength: results.length,
-          deserializedLength: deserialized.length
+          deserializedLength: deserialized.length,
         }
       )
-
     } catch (error) {
       this.addResult(
         'API Compatibility',
@@ -390,20 +391,20 @@ class AnomalyTestSuite {
     this.log('\n' + '='.repeat(60))
     this.log('ANOMALY DETECTION SYSTEM TEST REPORT')
     this.log('='.repeat(60))
-    
+
     const totalTests = this.results.length
-    const passedTests = this.results.filter(r => r.passed).length
+    const passedTests = this.results.filter((r) => r.passed).length
     const failedTests = totalTests - passedTests
-    const successRate = (passedTests / totalTests * 100).toFixed(1)
-    
+    const successRate = ((passedTests / totalTests) * 100).toFixed(1)
+
     this.log(`Total Tests: ${totalTests}`)
     this.log(`Passed: ${passedTests}`)
     this.log(`Failed: ${failedTests}`)
     this.log(`Success Rate: ${successRate}%`)
-    
+
     this.log('\nDETAILED RESULTS:')
     this.log('-'.repeat(40))
-    
+
     this.results.forEach((result, index) => {
       const status = result.passed ? '✅' : '❌'
       this.log(`${index + 1}. ${status} ${result.testName}`)
@@ -413,13 +414,13 @@ class AnomalyTestSuite {
       }
       this.log('')
     })
-    
+
     if (failedTests > 0) {
       this.log('⚠️  SOME TESTS FAILED - Please review the anomaly detection implementation')
     } else {
       this.log('🎉 ALL TESTS PASSED - Anomaly detection system is working correctly!')
     }
-    
+
     this.log('='.repeat(60))
   }
 }

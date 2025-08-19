@@ -114,7 +114,7 @@ class SOXComplianceFramework {
       itGeneral: itGeneralResults,
       application: applicationResults,
       disclosure: disclosureResults,
-      aiRisks: aiFinancialRisks
+      aiRisks: aiFinancialRisks,
     })
 
     // Generate remediation plan
@@ -137,8 +137,15 @@ class SOXComplianceFramework {
         frequency: 'Annual',
         owner: 'Chief Executive Officer',
         description: 'Establishment and communication of ethical standards',
-        evidenceRequired: ['Written code of conduct', 'Employee acknowledgments', 'Training records'],
-        deficiencies: ['Code not updated for AI decision-making', 'Insufficient AI ethics training']
+        evidenceRequired: [
+          'Written code of conduct',
+          'Employee acknowledgments',
+          'Training records',
+        ],
+        deficiencies: [
+          'Code not updated for AI decision-making',
+          'Insufficient AI ethics training',
+        ],
       },
       {
         controlId: 'ELC-002',
@@ -148,8 +155,12 @@ class SOXComplianceFramework {
         frequency: 'Quarterly',
         owner: 'Chief Financial Officer',
         description: 'Controls to prevent management override of internal controls',
-        evidenceRequired: ['Journal entry testing', 'Segregation of duties matrix', 'Approval hierarchies'],
-        deficiencies: ['AI systems can bypass traditional approval workflows']
+        evidenceRequired: [
+          'Journal entry testing',
+          'Segregation of duties matrix',
+          'Approval hierarchies',
+        ],
+        deficiencies: ['AI systems can bypass traditional approval workflows'],
       },
 
       // Process Level Controls
@@ -162,7 +173,10 @@ class SOXComplianceFramework {
         owner: 'Revenue Operations Manager',
         description: 'Automated controls for accurate revenue recognition',
         evidenceRequired: ['System configuration', 'Exception reports', 'Reconciliations'],
-        deficiencies: ['AI subscription pricing models not fully tested', 'Complex revenue sharing arrangements']
+        deficiencies: [
+          'AI subscription pricing models not fully tested',
+          'Complex revenue sharing arrangements',
+        ],
       },
       {
         controlId: 'PLC-002',
@@ -173,7 +187,7 @@ class SOXComplianceFramework {
         owner: 'Accounts Payable Manager',
         description: 'Authorization controls for expense recognition',
         evidenceRequired: ['Approval matrices', 'System reports', 'Budget comparisons'],
-        deficiencies: ['AI can approve expenses automatically', 'Machine learning cost allocation']
+        deficiencies: ['AI can approve expenses automatically', 'Machine learning cost allocation'],
       },
 
       // IT General Controls
@@ -186,7 +200,10 @@ class SOXComplianceFramework {
         owner: 'Chief Information Security Officer',
         description: 'Controls over system access and user privileges',
         evidenceRequired: ['Access reviews', 'Privilege escalation logs', 'Authentication logs'],
-        deficiencies: ['AI systems have elevated privileges', 'Service accounts not properly managed']
+        deficiencies: [
+          'AI systems have elevated privileges',
+          'Service accounts not properly managed',
+        ],
       },
       {
         controlId: 'ITGC-002',
@@ -197,7 +214,10 @@ class SOXComplianceFramework {
         owner: 'Development Manager',
         description: 'Controls over system and application changes',
         evidenceRequired: ['Change tickets', 'Approval records', 'Testing documentation'],
-        deficiencies: ['AI model updates bypass change control', 'Automated deployments not documented']
+        deficiencies: [
+          'AI model updates bypass change control',
+          'Automated deployments not documented',
+        ],
       },
 
       // Application Controls
@@ -210,7 +230,7 @@ class SOXComplianceFramework {
         owner: 'Application Owner',
         description: 'Controls to ensure data accuracy and completeness',
         evidenceRequired: ['Validation rules', 'Error logs', 'Exception reports'],
-        deficiencies: ['AI training data quality not validated', 'Automated data enrichment risks']
+        deficiencies: ['AI training data quality not validated', 'Automated data enrichment risks'],
       },
       {
         controlId: 'AC-002',
@@ -221,7 +241,7 @@ class SOXComplianceFramework {
         owner: 'Financial Systems Manager',
         description: 'Controls over financial calculations and processing',
         evidenceRequired: ['Calculation verification', 'Reconciliation reports', 'Balance checks'],
-        deficiencies: ['AI algorithms not auditable', 'Black-box ML financial calculations']
+        deficiencies: ['AI algorithms not auditable', 'Black-box ML financial calculations'],
       },
 
       // Disclosure Controls
@@ -233,8 +253,15 @@ class SOXComplianceFramework {
         frequency: 'Monthly',
         owner: 'Controller',
         description: 'Controls over financial statement compilation',
-        evidenceRequired: ['Account reconciliations', 'Supporting schedules', 'Review documentation'],
-        deficiencies: ['AI-generated financial insights not reviewed', 'Automated report generation']
+        evidenceRequired: [
+          'Account reconciliations',
+          'Supporting schedules',
+          'Review documentation',
+        ],
+        deficiencies: [
+          'AI-generated financial insights not reviewed',
+          'Automated report generation',
+        ],
       },
       {
         controlId: 'DC-002',
@@ -245,8 +272,11 @@ class SOXComplianceFramework {
         owner: 'Chief Financial Officer',
         description: 'Review and approval of SEC filings and disclosures',
         evidenceRequired: ['Review checklists', 'Approval signatures', 'Supporting documentation'],
-        deficiencies: ['AI risk disclosures insufficient', 'Technology risk not properly disclosed']
-      }
+        deficiencies: [
+          'AI risk disclosures insufficient',
+          'Technology risk not properly disclosed',
+        ],
+      },
     ]
   }
 
@@ -256,26 +286,26 @@ class SOXComplianceFramework {
         area: 'Ethics',
         control: 'Code of Conduct includes AI ethics and autonomous decision-making standards',
         implementationStatus: 'In Progress',
-        effectiveness: 'Needs Improvement'
+        effectiveness: 'Needs Improvement',
       },
       {
         area: 'Management Override',
         control: 'AI systems cannot override established financial controls without human approval',
         implementationStatus: 'Not Implemented',
-        effectiveness: 'Ineffective'
+        effectiveness: 'Ineffective',
       },
       {
         area: 'Board Oversight',
         control: 'Board receives regular reports on AI financial decision-making',
         implementationStatus: 'Not Implemented',
-        effectiveness: 'Ineffective'
+        effectiveness: 'Ineffective',
       },
       {
         area: 'Risk Assessment',
         control: 'Annual risk assessment includes AI and technology risks',
         implementationStatus: 'In Progress',
-        effectiveness: 'Needs Improvement'
-      }
+        effectiveness: 'Needs Improvement',
+      },
     ]
   }
 
@@ -286,22 +316,22 @@ class SOXComplianceFramework {
         control: 'Automated revenue recognition with AI subscription billing',
         automationLevel: 'Fully Automated',
         aiInvolvement: true,
-        riskOfError: 'High'
+        riskOfError: 'High',
       },
       {
         process: 'Expenses',
         control: 'AI-driven expense categorization and approval workflows',
         automationLevel: 'Semi-Automated',
         aiInvolvement: true,
-        riskOfError: 'Medium'
+        riskOfError: 'Medium',
       },
       {
         process: 'Financial Close',
         control: 'Automated journal entries and account reconciliations',
         automationLevel: 'Fully Automated',
         aiInvolvement: true,
-        riskOfError: 'High'
-      }
+        riskOfError: 'High',
+      },
     ]
   }
 
@@ -312,22 +342,22 @@ class SOXComplianceFramework {
         control: 'Role-based access controls for financial systems',
         systemsInScope: ['CoreFlow360', 'Stripe', 'PostgreSQL', 'AI Services'],
         cloudProviderControls: true,
-        effectiveness: 'Effective'
+        effectiveness: 'Effective',
       },
       {
         domain: 'Change Management',
         control: 'Controlled deployment process for AI model updates',
         systemsInScope: ['AI Models', 'Application Code', 'Database Schema'],
         cloudProviderControls: false,
-        effectiveness: 'Needs Improvement'
+        effectiveness: 'Needs Improvement',
       },
       {
         domain: 'Data Integrity',
         control: 'Backup and recovery procedures for financial data',
         systemsInScope: ['Financial Database', 'AI Training Data', 'Transaction Logs'],
         cloudProviderControls: true,
-        effectiveness: 'Effective'
-      }
+        effectiveness: 'Effective',
+      },
     ]
   }
 
@@ -339,7 +369,7 @@ class SOXComplianceFramework {
         description: 'AI-driven subscription billing and revenue recognition',
         automatedControl: true,
         aiDecisionMaking: true,
-        completenessAccuracy: 'Incomplete'
+        completenessAccuracy: 'Incomplete',
       },
       {
         application: 'Financial Reporting System',
@@ -347,7 +377,7 @@ class SOXComplianceFramework {
         description: 'Automated generation of financial reports',
         automatedControl: true,
         aiDecisionMaking: true,
-        completenessAccuracy: 'Complete'
+        completenessAccuracy: 'Complete',
       },
       {
         application: 'Expense Management',
@@ -355,8 +385,8 @@ class SOXComplianceFramework {
         description: 'AI categorization and approval of expenses',
         automatedControl: true,
         aiDecisionMaking: true,
-        completenessAccuracy: 'Incomplete'
-      }
+        completenessAccuracy: 'Incomplete',
+      },
     ]
   }
 
@@ -367,22 +397,22 @@ class SOXComplianceFramework {
         control: 'Review of AI-generated financial statement components',
         reviewLevel: 'Management',
         aiGeneratedContent: true,
-        effectiveness: 'Needs Improvement'
+        effectiveness: 'Needs Improvement',
       },
       {
         category: 'SEC Filings',
         control: 'Disclosure of AI risks and technology dependencies',
         reviewLevel: 'Board',
         aiGeneratedContent: false,
-        effectiveness: 'Ineffective'
+        effectiveness: 'Ineffective',
       },
       {
         category: 'MD&A',
         control: 'Management discussion of AI impact on business operations',
         reviewLevel: 'Management',
         aiGeneratedContent: true,
-        effectiveness: 'Needs Improvement'
-      }
+        effectiveness: 'Needs Improvement',
+      },
     ]
   }
 
@@ -398,17 +428,17 @@ class SOXComplianceFramework {
       expenseClassificationRisk: 'Medium', // AI categorization needs oversight
       fraudDetectionRisk: 'High', // AI may miss sophisticated fraud
       auditabilityRisk: 'High', // Black-box AI not auditable
-      systemReliabilityRisk: 'Medium' // Cloud infrastructure dependencies
+      systemReliabilityRisk: 'Medium', // Cloud infrastructure dependencies
     }
   }
 
-  private calculateSOXRating(evaluationResults: any): SOXAuditResult {
+  private calculateSOXRating(_evaluationResults: unknown): SOXAuditResult {
     const materialWeaknesses = [
       'AI systems can override financial controls without human approval',
       'AI algorithm decisions are not auditable or explainable',
       'Insufficient disclosure of AI risks in SEC filings',
       'AI training data quality not validated for financial accuracy',
-      'Automated AI model updates bypass change control procedures'
+      'Automated AI model updates bypass change control procedures',
     ]
 
     const significantDeficiencies = [
@@ -416,20 +446,20 @@ class SOXComplianceFramework {
       'Board oversight of AI financial decisions insufficient',
       'AI-generated financial reports lack adequate review',
       'Complex AI subscription revenue models not fully tested',
-      'AI expense categorization requires manual validation'
+      'AI expense categorization requires manual validation',
     ]
 
     const totalControls = this.controls.length
-    const effectiveControls = this.controls.filter(c => 
-      c.testResult === 'Effective' || 
-      (c.deficiencies.length === 0 && !c.testResult)
+    const effectiveControls = this.controls.filter(
+      (c) => c.testResult === 'Effective' || (c.deficiencies.length === 0 && !c.testResult)
     ).length
 
-    const overallRating = materialWeaknesses.length > 0 
-      ? 'Material Weakness' 
-      : significantDeficiencies.length > 3 
-        ? 'Significant Deficiency' 
-        : 'Effective'
+    const overallRating =
+      materialWeaknesses.length > 0
+        ? 'Material Weakness'
+        : significantDeficiencies.length > 3
+          ? 'Significant Deficiency'
+          : 'Effective'
 
     return {
       overallRating,
@@ -440,8 +470,9 @@ class SOXComplianceFramework {
       significantDeficiencies,
       managementRecommendations: this.generateManagementRecommendations(),
       certificationReadiness: materialWeaknesses.length === 0,
-      estimatedRemediationTime: materialWeaknesses.length * 90 + significantDeficiencies.length * 30, // days
-      complianceCosts: this.estimateComplianceCosts(materialWeaknesses, significantDeficiencies)
+      estimatedRemediationTime:
+        materialWeaknesses.length * 90 + significantDeficiencies.length * 30, // days
+      complianceCosts: this.estimateComplianceCosts(materialWeaknesses, significantDeficiencies),
     }
   }
 
@@ -456,12 +487,12 @@ class SOXComplianceFramework {
       'MEDIUM PRIORITY: Develop AI training data validation procedures',
       'MEDIUM PRIORITY: Create specialized AI financial control testing procedures',
       'ONGOING: Regular SOX compliance training for AI-enabled processes',
-      'ONGOING: Quarterly AI financial risk assessments'
+      'ONGOING: Quarterly AI financial risk assessments',
     ]
   }
 
   private estimateComplianceCosts(
-    materialWeaknesses: string[], 
+    materialWeaknesses: string[],
     significantDeficiencies: string[]
   ): number {
     // Base costs for SOX compliance
@@ -470,7 +501,7 @@ class SOXComplianceFramework {
       internalControls: 100000, // Internal control documentation and testing
       systemImplementation: 200000, // IT systems and process improvements
       training: 25000, // Staff training and education
-      ongoing: 75000 // Ongoing compliance monitoring
+      ongoing: 75000, // Ongoing compliance monitoring
     }
 
     // Additional costs for AI-specific controls
@@ -479,19 +510,21 @@ class SOXComplianceFramework {
       humanOversight: 100000, // Additional oversight processes
       specializedTesting: 75000, // AI control testing procedures
       regulatoryConsulting: 50000, // AI compliance expertise
-      systemEnhancements: 125000 // Enhanced monitoring and controls
+      systemEnhancements: 125000, // Enhanced monitoring and controls
     }
 
-    const remediationCosts = 
+    const remediationCosts =
       materialWeaknesses.length * 50000 + // $50k per material weakness
       significantDeficiencies.length * 25000 // $25k per significant deficiency
 
-    return Object.values(baseCosts).reduce((a, b) => a + b, 0) +
-           Object.values(aiSpecificCosts).reduce((a, b) => a + b, 0) +
-           remediationCosts
+    return (
+      Object.values(baseCosts).reduce((a, b) => a + b, 0) +
+      Object.values(aiSpecificCosts).reduce((a, b) => a + b, 0) +
+      remediationCosts
+    )
   }
 
-  private generateRemediationPlan(auditResult: SOXAuditResult): any {
+  private generateRemediationPlan(_auditResult: SOXAuditResult): unknown {
     return {
       phase1: {
         timeline: '0-90 days',
@@ -500,8 +533,8 @@ class SOXComplianceFramework {
           'Implement human approval gates for AI financial decisions over $10,000',
           'Develop AI decision audit log with explanations',
           'Update Code of Conduct and employee training materials',
-          'Establish AI Financial Control Committee'
-        ]
+          'Establish AI Financial Control Committee',
+        ],
       },
       phase2: {
         timeline: '90-180 days',
@@ -510,8 +543,8 @@ class SOXComplianceFramework {
           'Implement explainable AI features for financial calculations',
           'Develop AI model change control procedures',
           'Create Board reporting on AI financial risks',
-          'Enhance disclosure controls for AI technology'
-        ]
+          'Enhance disclosure controls for AI technology',
+        ],
       },
       phase3: {
         timeline: '180-365 days',
@@ -520,15 +553,15 @@ class SOXComplianceFramework {
           'Complete external SOX readiness assessment',
           'Implement continuous AI control monitoring',
           'Develop AI-specific internal audit procedures',
-          'Obtain SOX compliance certification'
-        ]
-      }
+          'Obtain SOX compliance certification',
+        ],
+      },
     }
   }
 
   private async saveSOXAuditResults(
-    auditResult: SOXAuditResult, 
-    remediationPlan: any
+    auditResult: SOXAuditResult,
+    remediationPlan: unknown
   ): Promise<void> {
     try {
       await AuditLogger.log({
@@ -544,24 +577,24 @@ class SOXComplianceFramework {
           materialWeaknesses: auditResult.materialWeaknesses.length,
           significantDeficiencies: auditResult.significantDeficiencies.length,
           certificationReadiness: auditResult.certificationReadiness,
-          estimatedCosts: auditResult.complianceCosts
+          estimatedCosts: auditResult.complianceCosts,
         },
         metadata: {
           auditDate: new Date().toISOString(),
           remediationPlan,
-          controlDetails: this.controls
-        }
+          controlDetails: this.controls,
+        },
       })
 
       logger.info('SOX compliance audit results saved', {
         tenantId: this.tenantId,
         rating: auditResult.overallRating,
-        materialWeaknesses: auditResult.materialWeaknesses.length
+        materialWeaknesses: auditResult.materialWeaknesses.length,
       })
     } catch (error) {
       logger.error('Failed to save SOX audit results', {
         tenantId: this.tenantId,
-        error
+        error,
       })
     }
   }
@@ -572,7 +605,7 @@ class SOXComplianceFramework {
     evidence: string[]
     deficiencies: string[]
   }> {
-    const control = this.controls.find(c => c.controlId === controlId)
+    const control = this.controls.find((c) => c.controlId === controlId)
     if (!control) {
       throw new Error(`Control ${controlId} not found`)
     }
@@ -581,13 +614,13 @@ class SOXComplianceFramework {
     return {
       result: control.deficiencies.length === 0 ? 'Effective' : 'Ineffective',
       evidence: control.evidenceRequired,
-      deficiencies: control.deficiencies
+      deficiencies: control.deficiencies,
     }
   }
 
   async generateCertificationReport(): Promise<string> {
     const assessment = await this.performSOXReadinessAssessment()
-    
+
     return `
 # SOX Compliance Certification Report
 
@@ -601,13 +634,13 @@ Certification Ready: ${assessment.certificationReadiness ? 'Yes' : 'No'}
 - Deficient Controls: ${assessment.deficientControls}
 
 ## Material Weaknesses
-${assessment.materialWeaknesses.map(w => `- ${w}`).join('\n')}
+${assessment.materialWeaknesses.map((w) => `- ${w}`).join('\n')}
 
 ## Significant Deficiencies  
-${assessment.significantDeficiencies.map(d => `- ${d}`).join('\n')}
+${assessment.significantDeficiencies.map((d) => `- ${d}`).join('\n')}
 
 ## Management Recommendations
-${assessment.managementRecommendations.map(r => `- ${r}`).join('\n')}
+${assessment.managementRecommendations.map((r) => `- ${r}`).join('\n')}
 
 ## Estimated Compliance Investment
 Total Cost: $${assessment.complianceCosts.toLocaleString()}

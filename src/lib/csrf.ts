@@ -29,7 +29,7 @@ export function generateCSRFToken(): string {
       array[i] = Math.floor(Math.random() * 256)
     }
   }
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
+  return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('')
 }
 
 /**
@@ -40,7 +40,7 @@ async function createHMAC(secret: string, data: string): Promise<string> {
   const encoder = new TextEncoder()
   const keyData = encoder.encode(secret)
   const dataArray = encoder.encode(data)
-  
+
   // Import the key
   const key = await globalThis.crypto.subtle.importKey(
     'raw',
@@ -49,17 +49,13 @@ async function createHMAC(secret: string, data: string): Promise<string> {
     false,
     ['sign']
   )
-  
+
   // Create HMAC
-  const signature = await globalThis.crypto.subtle.sign(
-    'HMAC',
-    key,
-    dataArray
-  )
-  
+  const signature = await globalThis.crypto.subtle.sign('HMAC', key, dataArray)
+
   // Convert to hex string
   return Array.from(new Uint8Array(signature))
-    .map(b => b.toString(16).padStart(2, '0'))
+    .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
 }
 
@@ -69,7 +65,7 @@ async function createHMAC(secret: string, data: string): Promise<string> {
 export async function createCSRFTokenPair(secret: string): Promise<CSRFTokenPair> {
   const token = generateCSRFToken()
   const cookieValue = await createHMAC(secret, token)
-  
+
   return { token, cookieValue }
 }
 
@@ -78,7 +74,7 @@ export async function createCSRFTokenPair(secret: string): Promise<CSRFTokenPair
  */
 function timingSafeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false
-  
+
   let result = 0
   for (let i = 0; i < a.length; i++) {
     result |= a.charCodeAt(i) ^ b.charCodeAt(i)
@@ -95,9 +91,9 @@ export async function validateCSRFToken(
   secret: string
 ): Promise<boolean> {
   if (!token || !cookieValue) return false
-  
+
   const expectedCookieValue = await createHMAC(secret, token)
-  
+
   // Constant-time comparison to prevent timing attacks
   return timingSafeEqual(cookieValue, expectedCookieValue)
 }
@@ -107,7 +103,7 @@ export async function validateCSRFToken(
  */
 export async function setCSRFCookie(cookieValue: string) {
   const cookieStore = await cookies()
-  
+
   cookieStore.set(CSRF_COOKIE_NAME, cookieValue, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -117,7 +113,7 @@ export async function setCSRFCookie(cookieValue: string) {
     // Use __Host- prefix for additional security in production
     ...(process.env.NODE_ENV === 'production' && {
       domain: undefined, // Required for __Host- prefix
-    })
+    }),
   })
 }
 
@@ -139,56 +135,31 @@ export function getCSRFTokenFromHeaders(headers: Headers): string | null {
 /**
  * Middleware to validate CSRF tokens for state-changing operations
  */
-export async function validateCSRFMiddleware(
-  request: Request,
-  secret?: string
-): Promise<boolean> {
+export async function validateCSRFMiddleware(request: Request, secret?: string): Promise<boolean> {
   // Skip CSRF validation for safe methods
   if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
     return true
   }
-  
+
   const token = getCSRFTokenFromHeaders(request.headers)
   const cookieValue = await getCSRFCookie()
-  
+
   // Use provided secret or fallback to default
-  const csrfSecret = secret || (typeof process !== 'undefined' && process.env?.API_KEY_SECRET) || 'default-secret'
-  
+  const csrfSecret =
+    secret || (typeof process !== 'undefined' && process.env?.API_KEY_SECRET) || 'default-secret'
+
   return await validateCSRFToken(token, cookieValue, csrfSecret)
 }
 
 /**
  * Generate and set a new CSRF token for a session
  */
-export async function initializeCSRFProtection(
-  secret?: string
-): Promise<string> {
+export async function initializeCSRFProtection(secret?: string): Promise<string> {
   // Use provided secret or fallback to default
-  const csrfSecret = secret || (typeof process !== 'undefined' && process.env?.API_KEY_SECRET) || 'default-secret'
-  
+  const csrfSecret =
+    secret || (typeof process !== 'undefined' && process.env?.API_KEY_SECRET) || 'default-secret'
+
   const { token, cookieValue } = await createCSRFTokenPair(csrfSecret)
   await setCSRFCookie(cookieValue)
   return token
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

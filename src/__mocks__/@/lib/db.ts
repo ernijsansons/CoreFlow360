@@ -13,7 +13,7 @@ export const mockDb = {
     delete: vi.fn(),
     upsert: vi.fn(),
   },
-  
+
   user: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
@@ -21,7 +21,7 @@ export const mockDb = {
     update: vi.fn(),
     delete: vi.fn(),
   },
-  
+
   tenant: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
@@ -29,7 +29,7 @@ export const mockDb = {
     update: vi.fn(),
     delete: vi.fn(),
   },
-  
+
   moduleDefinition: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
@@ -37,7 +37,7 @@ export const mockDb = {
     update: vi.fn(),
     delete: vi.fn(),
   },
-  
+
   subscription: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
@@ -45,7 +45,7 @@ export const mockDb = {
     update: vi.fn(),
     delete: vi.fn(),
   },
-  
+
   subscriptionEvent: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
@@ -53,7 +53,7 @@ export const mockDb = {
     update: vi.fn(),
     delete: vi.fn(),
   },
-  
+
   aiActivity: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
@@ -61,18 +61,18 @@ export const mockDb = {
     update: vi.fn(),
     delete: vi.fn(),
   },
-  
+
   // Transaction support
   $transaction: vi.fn(),
-  
+
   // Connection management
   $connect: vi.fn(),
   $disconnect: vi.fn(),
-  
+
   // Query raw
   $queryRaw: vi.fn(),
   $executeRaw: vi.fn(),
-  
+
   // Metrics
   $metrics: {
     histogram: vi.fn(),
@@ -85,9 +85,9 @@ export const prisma = mockDb
 
 // Helper function to reset all mocks
 export const resetMocks = () => {
-  Object.values(mockDb).forEach(model => {
+  Object.values(mockDb).forEach((model) => {
     if (typeof model === 'object' && model !== null) {
-      Object.values(model).forEach(method => {
+      Object.values(model).forEach((method) => {
         if (typeof method === 'function' && method.mockReset) {
           method.mockReset()
         }

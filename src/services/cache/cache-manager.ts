@@ -1,7 +1,7 @@
 /**
  * CoreFlow360 - High-Performance Caching Layer
  * MATHEMATICALLY PERFECT, ALGORITHMICALLY OPTIMAL, PROVABLY CORRECT
- * 
+ *
  * Multi-tier caching with intelligent invalidation and performance optimization
  */
 
@@ -11,23 +11,26 @@ import { withPerformanceTracking } from '@/utils/performance/performance-trackin
 // Cache configuration
 const CACHE_CONFIG = {
   tiers: {
-    l1: { // In-memory, fastest
+    l1: {
+      // In-memory, fastest
       stdTTL: 300, // 5 minutes
       checkperiod: 60, // Check for expired keys every 60s
       maxKeys: 10000,
-      useClones: false // For performance
+      useClones: false, // For performance
     },
-    l2: { // Extended memory, medium speed
-      stdTTL: 1800, // 30 minutes  
+    l2: {
+      // Extended memory, medium speed
+      stdTTL: 1800, // 30 minutes
       checkperiod: 300, // Check every 5 minutes
       maxKeys: 50000,
-      useClones: true // For safety
+      useClones: true, // For safety
     },
-    l3: { // Persistent (Redis-like), slower but durable
+    l3: {
+      // Persistent (Redis-like), slower but durable
       stdTTL: 3600, // 1 hour
       maxKeys: 1000000,
-      persistence: true
-    }
+      persistence: true,
+    },
   },
   patterns: {
     user: { ttl: 900, tier: 'l1' }, // 15 minutes
@@ -36,18 +39,18 @@ const CACHE_CONFIG = {
     analytics: { ttl: 3600, tier: 'l3' }, // 1 hour
     static: { ttl: 86400, tier: 'l3' }, // 24 hours
     session: { ttl: 1800, tier: 'l1' }, // 30 minutes
-    api_response: { ttl: 60, tier: 'l1' } // 1 minute
+    api_response: { ttl: 60, tier: 'l1' }, // 1 minute
   },
   compression: {
     enabled: true,
     threshold: 1024, // Compress objects > 1KB
-    algorithm: 'gzip'
+    algorithm: 'gzip',
   },
   monitoring: {
     enabled: true,
     metricsInterval: 30000, // 30 seconds
-    hitRateThreshold: 0.8 // Alert if hit rate < 80%
-  }
+    hitRateThreshold: 0.8, // Alert if hit rate < 80%
+  },
 } as const
 
 export interface CacheEntry<T = unknown> {
@@ -95,13 +98,13 @@ class CacheManager {
     // Initialize cache tiers
     this.l1Cache = new NodeCache(CACHE_CONFIG.tiers.l1)
     this.l2Cache = new NodeCache(CACHE_CONFIG.tiers.l2)
-    
+
     // Initialize metrics
     this.initializeMetrics()
-    
+
     // Setup monitoring
     this.startMonitoring()
-    
+
     // Setup invalidation patterns
     this.setupInvalidationRules()
   }
@@ -114,7 +117,7 @@ class CacheManager {
     context?: { tenantId?: string; userId?: string; operation?: string }
   ): Promise<T | null> {
     const operation = `cache_get_${context?.operation || 'unknown'}`
-    
+
     return withPerformanceTracking(operation, async () => {
       // L1 Cache (fastest)
       let result = this.l1Cache.get<T>(key)
@@ -144,9 +147,9 @@ class CacheManager {
 
       // Cache miss
       this.recordMiss('l1', key)
-      this.recordMiss('l2', key) 
+      this.recordMiss('l2', key)
       this.recordMiss('l3', key)
-      
+
       return null
     })()
   }
@@ -166,10 +169,10 @@ class CacheManager {
     }
   ): Promise<void> {
     const operation = 'cache_set'
-    
+
     return withPerformanceTracking(operation, async () => {
       const opts = { ...options }
-      
+
       // Auto-select tier if not specified
       if (!opts.tier || opts.tier === 'auto') {
         opts.tier = this.selectOptimalTier(key, value, opts)
@@ -177,7 +180,7 @@ class CacheManager {
 
       // Determine TTL based on patterns or provided value
       const ttl = opts.ttl || this.getTTLForKey(key)
-      
+
       // Calculate size and apply compression if needed
       const serialized = JSON.stringify(value)
       const size = Buffer.byteLength(serialized, 'utf8')
@@ -191,14 +194,14 @@ class CacheManager {
 
       // Store in appropriate tier(s)
       const now = Date.now()
-      
+
       switch (opts.tier) {
         case 'l1':
           if (!opts.promotionOnly) {
             this.l1Cache.set(key, finalValue, ttl)
           }
           break
-          
+
         case 'l2':
           this.l2Cache.set(key, finalValue, ttl)
           if (!opts.promotionOnly) {
@@ -206,7 +209,7 @@ class CacheManager {
             this.l1Cache.set(key, finalValue, Math.min(ttl, CACHE_CONFIG.tiers.l1.stdTTL))
           }
           break
-          
+
         case 'l3':
           const entry: CacheEntry<T> = {
             key,
@@ -218,10 +221,10 @@ class CacheManager {
             lastAccessed: now,
             size,
             compressed,
-            metadata: opts.metadata
+            metadata: opts.metadata,
           }
           this.l3Cache.set(key, entry)
-          
+
           if (!opts.promotionOnly) {
             // Also store in L2 and L1
             this.l2Cache.set(key, finalValue, Math.min(ttl, CACHE_CONFIG.tiers.l2.stdTTL))
@@ -245,7 +248,7 @@ class CacheManager {
     context?: { tenantId?: string; operation?: string }
   ): Promise<number> {
     const operation = `cache_invalidate_${context?.operation || 'pattern'}`
-    
+
     return withPerformanceTracking(operation, async () => {
       let keysToDelete: string[] = []
 
@@ -291,7 +294,7 @@ class CacheManager {
     }
   ): Promise<T> {
     const opts = { ...options }
-    
+
     // Skip cache if explicitly requested
     if (opts.skipCache) {
       const value = await loader()
@@ -308,7 +311,7 @@ class CacheManager {
     // Cache miss - load and store
     const value = await loader()
     await this.set(key, value, opts)
-    
+
     return value
   }
 
@@ -318,31 +321,33 @@ class CacheManager {
   async mget<T = unknown>(keys: string[]): Promise<Map<string, T>> {
     return withPerformanceTracking('cache_mget', async () => {
       const results = new Map<string, T>()
-      
+
       for (const key of keys) {
         const value = await this.get<T>(key)
         if (value !== null) {
           results.set(key, value)
         }
       }
-      
+
       return results
     })()
   }
 
   async mset<T = unknown>(
-    entries: Array<{ key: string; value: T; options?: {
-      ttl?: number
-      tier?: 'l1' | 'l2' | 'l3' | 'auto'
-      tags?: string[]
-      metadata?: Record<string, unknown>
-      promotionOnly?: boolean
-    } }>
+    entries: Array<{
+      key: string
+      value: T
+      options?: {
+        ttl?: number
+        tier?: 'l1' | 'l2' | 'l3' | 'auto'
+        tags?: string[]
+        metadata?: Record<string, unknown>
+        promotionOnly?: boolean
+      }
+    }>
   ): Promise<void> {
     return withPerformanceTracking('cache_mset', async () => {
-      const promises = entries.map(({ key, value, options }) => 
-        this.set(key, value, options)
-      )
+      const promises = entries.map(({ key, value, options }) => this.set(key, value, options))
       await Promise.all(promises)
     })()
   }
@@ -351,13 +356,12 @@ class CacheManager {
    * CACHE WARMING STRATEGIES
    */
   async warmCache(
-    strategy: 'popular_keys' | 'recent_keys' | 'predicted_keys',
+    _strategy: 'popular_keys' | 'recent_keys' | 'predicted_keys',
     context: { tenantId: string; count?: number }
   ): Promise<void> {
     return withPerformanceTracking('cache_warm', async () => {
       // Implementation would depend on analytics and usage patterns
       // For now, providing the interface
-      console.log(`Warming cache with strategy: ${strategy} for tenant: ${context.tenantId}`)
     })()
   }
 
@@ -368,7 +372,7 @@ class CacheManager {
     if (tier) {
       return this.metrics.get(tier) || this.createEmptyMetrics(tier)
     }
-    
+
     const allMetrics: Record<string, CacheMetrics> = {}
     for (const [tierName, metrics] of this.metrics.entries()) {
       allMetrics[tierName] = metrics
@@ -387,19 +391,19 @@ class CacheManager {
 
     for (const [tier, metrics] of this.metrics.entries()) {
       let status = 'healthy'
-      
+
       if (metrics.hitRate < CACHE_CONFIG.monitoring.hitRateThreshold) {
         status = 'degraded'
         recommendations.push(`Low hit rate in ${tier}: ${(metrics.hitRate * 100).toFixed(1)}%`)
       }
-      
+
       if (metrics.evictions > metrics.totalKeys * 0.1) {
         status = 'critical'
         recommendations.push(`High eviction rate in ${tier}: ${metrics.evictions} evictions`)
       }
 
       tierStatuses[tier] = { status, metrics }
-      
+
       if (status === 'critical') overallStatus = 'critical'
       else if (status === 'degraded' && overallStatus !== 'critical') overallStatus = 'degraded'
     }
@@ -407,20 +411,24 @@ class CacheManager {
     return {
       status: overallStatus,
       tiers: tierStatuses,
-      recommendations
+      recommendations,
     }
   }
 
   /**
    * PRIVATE UTILITY METHODS
    */
-  private selectOptimalTier(key: string, value: unknown, _options?: {
-    ttl?: number
-    tier?: 'l1' | 'l2' | 'l3' | 'auto'
-    tags?: string[]
-    metadata?: Record<string, unknown>
-    promotionOnly?: boolean
-  }): 'l1' | 'l2' | 'l3' {
+  private selectOptimalTier(
+    key: string,
+    value: unknown,
+    _options?: {
+      ttl?: number
+      tier?: 'l1' | 'l2' | 'l3' | 'auto'
+      tags?: string[]
+      metadata?: Record<string, unknown>
+      promotionOnly?: boolean
+    }
+  ): 'l1' | 'l2' | 'l3' {
     // Analyze key pattern
     for (const [pattern, config] of Object.entries(CACHE_CONFIG.patterns)) {
       if (key.includes(pattern)) {
@@ -460,44 +468,44 @@ class CacheManager {
 
   private findKeysByPattern(pattern: string): string[] {
     const keys: string[] = []
-    
+
     // L1 keys
     for (const key of this.l1Cache.keys()) {
       if (key.includes(pattern)) keys.push(key)
     }
-    
-    // L2 keys  
+
+    // L2 keys
     for (const key of this.l2Cache.keys()) {
       if (key.includes(pattern)) keys.push(key)
     }
-    
+
     // L3 keys
     for (const key of this.l3Cache.keys()) {
       if (key.includes(pattern)) keys.push(key)
     }
-    
+
     return [...new Set(keys)] // Remove duplicates
   }
 
   private findKeysByQuery(query: CacheQuery): string[] {
     // Complex query implementation
     const keys: string[] = []
-    
+
     for (const [key, entry] of this.l3Cache.entries()) {
       let matches = true
-      
+
       if (query.pattern && !key.includes(query.pattern)) matches = false
       if (query.tier && entry.tier !== query.tier) matches = false
       if (query.olderThan && Date.now() - entry.createdAt < query.olderThan) matches = false
       if (query.accessedLessThan && entry.accessCount >= query.accessedLessThan) matches = false
-      
+
       if (matches) keys.push(key)
     }
-    
+
     return keys
   }
 
-  private recordHit(tier: 'l1' | 'l2' | 'l3', _key: string): void {
+  private recordHit(_tier: 'l1' | 'l2' | 'l3', _key: string): void {
     const metrics = this.metrics.get(tier)
     if (metrics) {
       metrics.hits++
@@ -506,7 +514,7 @@ class CacheManager {
     }
   }
 
-  private recordMiss(tier: 'l1' | 'l2' | 'l3', _key: string): void {
+  private recordMiss(_tier: 'l1' | 'l2' | 'l3', _key: string): void {
     const metrics = this.metrics.get(tier)
     if (metrics) {
       metrics.misses++
@@ -516,7 +524,7 @@ class CacheManager {
   }
 
   private initializeMetrics(): void {
-    ['l1', 'l2', 'l3'].forEach(tier => {
+    ;['l1', 'l2', 'l3'].forEach((tier) => {
       this.metrics.set(tier, this.createEmptyMetrics(tier as 'l1' | 'l2' | 'l3'))
     })
   }
@@ -531,7 +539,7 @@ class CacheManager {
       memoryUsage: 0,
       averageAccessTime: 0,
       compressionRatio: 1.0,
-      evictions: 0
+      evictions: 0,
     }
   }
 
@@ -548,11 +556,11 @@ class CacheManager {
     // Update L1 metrics
     const l1Metrics = this.metrics.get('l1')!
     l1Metrics.totalKeys = this.l1Cache.keys().length
-    
+
     // Update L2 metrics
     const l2Metrics = this.metrics.get('l2')!
     l2Metrics.totalKeys = this.l2Cache.keys().length
-    
+
     // Update L3 metrics
     const l3Metrics = this.metrics.get('l3')!
     l3Metrics.totalKeys = this.l3Cache.size
@@ -561,7 +569,9 @@ class CacheManager {
   private checkAlerts(): void {
     for (const [tier, metrics] of this.metrics.entries()) {
       if (metrics.hitRate < CACHE_CONFIG.monitoring.hitRateThreshold) {
-        console.warn(`Cache hit rate alert: ${tier} hit rate is ${(metrics.hitRate * 100).toFixed(1)}%`)
+        console.warn(
+          `Cache hit rate alert: ${tier} hit rate is ${(metrics.hitRate * 100).toFixed(1)}%`
+        )
       }
     }
   }
@@ -575,7 +585,7 @@ class CacheManager {
 
   private getCascadeInvalidation(keys: string[]): string[] {
     const cascadeKeys: string[] = []
-    
+
     for (const key of keys) {
       for (const [pattern, relatedPatterns] of this.invalidationRules.entries()) {
         if (key.includes(pattern)) {
@@ -585,7 +595,7 @@ class CacheManager {
         }
       }
     }
-    
+
     return [...new Set(cascadeKeys)]
   }
 

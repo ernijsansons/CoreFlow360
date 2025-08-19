@@ -18,9 +18,7 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <SessionProvider>
       <ReactQueryProvider>
-        <AuthErrorBoundary>
-          {children}
-        </AuthErrorBoundary>
+        <AuthErrorBoundary>{children}</AuthErrorBoundary>
       </ReactQueryProvider>
     </SessionProvider>
   )

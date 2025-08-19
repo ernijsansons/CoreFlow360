@@ -1,6 +1,6 @@
 /**
  * CoreFlow360 - Tenant Isolation Security Module
- * 
+ *
  * Comprehensive tenant isolation enforcement for all database operations
  * to prevent cross-tenant data access and manipulation vulnerabilities
  */
@@ -16,7 +16,7 @@ export interface TenantSecurityContext {
   entityId?: string
 }
 
-export interface SecureDatabaseResult<T = any> {
+export interface SecureDatabaseResult<T = unknown> {
   success: boolean
   data?: T
   error?: string
@@ -30,23 +30,23 @@ export class TenantSecureDatabase {
   /**
    * Secure FIND operation with mandatory tenant constraint
    */
-  static async findUnique<T extends Record<string, any>>(
-    model: any,
+  static async findUnique<T extends Record<string, unknown>>(
+    model: unknown,
     params: {
-      where: any
-      select?: any
-      include?: any
+      where: unknown
+      select?: unknown
+      include?: unknown
     },
     context: TenantSecurityContext
   ): Promise<SecureDatabaseResult<T>> {
     try {
       // Enforce tenant constraint in where clause
       const secureWhere = this.enforceTenantConstraint(params.where, context.tenantId)
-      
+
       const result = await model.findUnique({
         where: secureWhere,
         select: params.select,
-        include: params.include
+        include: params.include,
       })
 
       return { success: true, data: result }
@@ -54,7 +54,7 @@ export class TenantSecureDatabase {
       return {
         success: false,
         error: `Secure find operation failed: ${error.message}`,
-        securityViolation: this.isSecurityViolation(error)
+        securityViolation: this.isSecurityViolation(error),
       }
     }
   }
@@ -62,13 +62,13 @@ export class TenantSecureDatabase {
   /**
    * Secure FIND MANY operation with mandatory tenant constraint
    */
-  static async findMany<T extends Record<string, any>>(
-    model: any,
+  static async findMany<T extends Record<string, unknown>>(
+    model: unknown,
     params: {
-      where?: any
-      select?: any
-      include?: any
-      orderBy?: any
+      where?: unknown
+      select?: unknown
+      include?: unknown
+      orderBy?: unknown
       take?: number
       skip?: number
     },
@@ -77,14 +77,14 @@ export class TenantSecureDatabase {
     try {
       // Enforce tenant constraint in where clause
       const secureWhere = this.enforceTenantConstraint(params.where || {}, context.tenantId)
-      
+
       const result = await model.findMany({
         where: secureWhere,
         select: params.select,
         include: params.include,
         orderBy: params.orderBy,
         take: params.take,
-        skip: params.skip
+        skip: params.skip,
       })
 
       return { success: true, data: result }
@@ -92,7 +92,7 @@ export class TenantSecureDatabase {
       return {
         success: false,
         error: `Secure find many operation failed: ${error.message}`,
-        securityViolation: this.isSecurityViolation(error)
+        securityViolation: this.isSecurityViolation(error),
       }
     }
   }
@@ -100,12 +100,12 @@ export class TenantSecureDatabase {
   /**
    * Secure CREATE operation with automatic tenant assignment
    */
-  static async create<T extends Record<string, any>>(
-    model: any,
+  static async create<T extends Record<string, unknown>>(
+    model: unknown,
     params: {
-      data: any
-      select?: any
-      include?: any
+      data: unknown
+      select?: unknown
+      include?: unknown
     },
     context: TenantSecurityContext
   ): Promise<SecureDatabaseResult<T>> {
@@ -113,13 +113,13 @@ export class TenantSecureDatabase {
       // Automatically inject tenant ID into create data
       const secureData = {
         ...params.data,
-        tenantId: context.tenantId
+        tenantId: context.tenantId,
       }
-      
+
       const result = await model.create({
         data: secureData,
         select: params.select,
-        include: params.include
+        include: params.include,
       })
 
       // Log creation for audit
@@ -130,7 +130,7 @@ export class TenantSecureDatabase {
       return {
         success: false,
         error: `Secure create operation failed: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}`,
-        securityViolation: this.isSecurityViolation(error)
+        securityViolation: this.isSecurityViolation(error),
       }
     }
   }
@@ -138,13 +138,13 @@ export class TenantSecureDatabase {
   /**
    * Secure UPDATE operation with tenant verification
    */
-  static async update<T extends Record<string, any>>(
-    model: any,
+  static async update<T extends Record<string, unknown>>(
+    model: unknown,
     params: {
-      where: any
-      data: any
-      select?: any
-      include?: any
+      where: unknown
+      data: unknown
+      select?: unknown
+      include?: unknown
     },
     context: TenantSecurityContext
   ): Promise<SecureDatabaseResult<T>> {
@@ -152,14 +152,14 @@ export class TenantSecureDatabase {
       // First verify the record exists and belongs to tenant
       const existingRecord = await model.findFirst({
         where: this.enforceTenantConstraint(params.where, context.tenantId),
-        select: { id: true, tenantId: true }
+        select: { id: true, tenantId: true },
       })
 
       if (!existingRecord) {
         return {
           success: false,
           error: 'Record not found or access denied',
-          securityViolation: true
+          securityViolation: true,
         }
       }
 
@@ -167,24 +167,24 @@ export class TenantSecureDatabase {
       if (existingRecord.tenantId !== context.tenantId) {
         await this.logSecurityViolation(context, 'UPDATE_TENANT_BYPASS_ATTEMPT', {
           recordTenantId: existingRecord.tenantId,
-          attemptedTenantId: context.tenantId
+          attemptedTenantId: context.tenantId,
         })
-        
+
         return {
           success: false,
           error: 'Access denied: Cross-tenant operation attempted',
-          securityViolation: true
+          securityViolation: true,
         }
       }
 
       // Enforce tenant constraint in where clause
       const secureWhere = this.enforceTenantConstraint(params.where, context.tenantId)
-      
+
       const result = await model.update({
         where: secureWhere,
         data: params.data,
         select: params.select,
-        include: params.include
+        include: params.include,
       })
 
       // Log update for audit
@@ -195,7 +195,7 @@ export class TenantSecureDatabase {
       return {
         success: false,
         error: `Secure update operation failed: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}`,
-        securityViolation: this.isSecurityViolation(error)
+        securityViolation: this.isSecurityViolation(error),
       }
     }
   }
@@ -203,24 +203,24 @@ export class TenantSecureDatabase {
   /**
    * Secure DELETE operation with mandatory tenant verification
    */
-  static async delete<T extends Record<string, any>>(
-    model: any,
+  static async delete<T extends Record<string, unknown>>(
+    model: unknown,
     params: {
-      where: any
+      where: unknown
     },
     context: TenantSecurityContext
   ): Promise<SecureDatabaseResult<T>> {
     try {
       // First verify the record exists and belongs to tenant
       const existingRecord = await model.findFirst({
-        where: this.enforceTenantConstraint(params.where, context.tenantId)
+        where: this.enforceTenantConstraint(params.where, context.tenantId),
       })
 
       if (!existingRecord) {
         return {
           success: false,
           error: 'Record not found or access denied',
-          securityViolation: true
+          securityViolation: true,
         }
       }
 
@@ -228,21 +228,21 @@ export class TenantSecureDatabase {
       if (existingRecord.tenantId !== context.tenantId) {
         await this.logSecurityViolation(context, 'DELETE_TENANT_BYPASS_ATTEMPT', {
           recordTenantId: existingRecord.tenantId,
-          attemptedTenantId: context.tenantId
+          attemptedTenantId: context.tenantId,
         })
-        
+
         return {
           success: false,
           error: 'Access denied: Cross-tenant delete attempted',
-          securityViolation: true
+          securityViolation: true,
         }
       }
 
       // CRITICAL: Use compound where clause with BOTH id AND tenantId
       const secureWhere = this.enforceTenantConstraint(params.where, context.tenantId)
-      
+
       const result = await model.delete({
-        where: secureWhere
+        where: secureWhere,
       })
 
       // Log deletion for audit
@@ -253,7 +253,7 @@ export class TenantSecureDatabase {
       return {
         success: false,
         error: `Secure delete operation failed: ${error.message?.replace(/[<>'"]/g, '') || 'Unknown error'}`,
-        securityViolation: this.isSecurityViolation(error)
+        securityViolation: this.isSecurityViolation(error),
       }
     }
   }
@@ -261,42 +261,46 @@ export class TenantSecureDatabase {
   /**
    * Secure soft delete operation
    */
-  static async softDelete<T extends Record<string, any>>(
-    model: any,
+  static async softDelete<T extends Record<string, unknown>>(
+    model: unknown,
     params: {
-      where: any
-      data?: any
+      where: unknown
+      data?: unknown
     },
     context: TenantSecurityContext
   ): Promise<SecureDatabaseResult<T>> {
     const softDeleteData = {
       isActive: false,
       deletedAt: new Date(),
-      ...params.data
+      ...params.data,
     }
 
-    return this.update(model, {
-      where: params.where,
-      data: softDeleteData
-    }, context)
+    return this.update(
+      model,
+      {
+        where: params.where,
+        data: softDeleteData,
+      },
+      context
+    )
   }
 
   /**
    * Transaction with tenant isolation
    */
   static async transaction<T>(
-    operations: ((tx: any) => Promise<T>)[],
+    operations: ((tx: unknown) => Promise<T>)[],
     context: TenantSecurityContext
   ): Promise<SecureDatabaseResult<T[]>> {
     try {
       const results = await prisma.$transaction(async (tx) => {
         const operationResults = []
-        
+
         for (const operation of operations) {
           const result = await operation(tx)
           operationResults.push(result)
         }
-        
+
         return operationResults
       })
 
@@ -308,7 +312,7 @@ export class TenantSecureDatabase {
       return {
         success: false,
         error: `Secure transaction failed: ${error.message}`,
-        securityViolation: this.isSecurityViolation(error)
+        securityViolation: this.isSecurityViolation(error),
       }
     }
   }
@@ -316,32 +320,31 @@ export class TenantSecureDatabase {
   /**
    * Enforce tenant constraint in where clauses
    */
-  private static enforceTenantConstraint(where: any, tenantId: string): any {
+  private static enforceTenantConstraint(where: unknown, tenantId: string): unknown {
     // Always add tenantId constraint
     return {
       ...where,
-      tenantId
+      tenantId,
     }
   }
 
   /**
    * Check if error indicates a security violation
    */
-  private static isSecurityViolation(error: any): boolean {
+  private static isSecurityViolation(error: unknown): boolean {
     const securityIndicators = [
       'P2025', // Record not found (Prisma)
       'P2002', // Unique constraint violation
       'access denied',
       'permission denied',
-      'unauthorized'
+      'unauthorized',
     ]
 
     const errorMessage = error.message?.toLowerCase() || ''
     const errorCode = error.code || ''
 
-    return securityIndicators.some(indicator => 
-      errorMessage.includes(indicator.toLowerCase()) || 
-      errorCode === indicator
+    return securityIndicators.some(
+      (indicator) => errorMessage.includes(indicator.toLowerCase()) || errorCode === indicator
     )
   }
 
@@ -351,12 +354,12 @@ export class TenantSecureDatabase {
   private static async logSecureOperation(
     context: TenantSecurityContext,
     operation: string,
-    data: any
+    data: unknown
   ): Promise<void> {
     try {
       await prisma.auditLog.create({
         data: {
-          action: operation as any,
+          action: operation as unknown,
           entityType: context.entityType,
           entityId: context.entityId || data?.id,
           tenantId: context.tenantId,
@@ -365,12 +368,11 @@ export class TenantSecureDatabase {
           metadata: JSON.stringify({
             secureOperation: true,
             operationType: operation,
-            timestamp: new Date().toISOString()
-          })
-        }
+            timestamp: new Date().toISOString(),
+          }),
+        },
       })
     } catch (error) {
-      console.error('Failed to log secure operation:', error)
       // Don't throw - logging failure shouldn't break the operation
     }
   }
@@ -381,12 +383,12 @@ export class TenantSecureDatabase {
   private static async logSecurityViolation(
     context: TenantSecurityContext,
     violationType: string,
-    details: any
+    details: unknown
   ): Promise<void> {
     try {
       await prisma.auditLog.create({
         data: {
-          action: 'SECURITY_EVENT' as any,
+          action: 'SECURITY_EVENT' as unknown,
           entityType: 'SECURITY_VIOLATION',
           entityId: context.entityId || 'unknown',
           tenantId: context.tenantId,
@@ -395,9 +397,9 @@ export class TenantSecureDatabase {
             violationType,
             details,
             timestamp: new Date().toISOString(),
-            severity: 'CRITICAL'
-          })
-        }
+            severity: 'CRITICAL',
+          }),
+        },
       })
 
       // Also log to console for immediate attention
@@ -406,11 +408,9 @@ export class TenantSecureDatabase {
         tenantId: context.tenantId,
         userId: context.userId,
         entityType: context.entityType,
-        details
+        details,
       })
-    } catch (error) {
-      console.error('Failed to log security violation:', error)
-    }
+    } catch (error) {}
   }
 }
 
@@ -427,19 +427,18 @@ export const TenantSecurity = {
     tableName: string
   ): Promise<boolean> {
     try {
-      const model = (prisma as any)[tableName]
+      const model = (prisma as unknown)[tableName]
       if (!model) {
         throw new Error(`Invalid table name: ${tableName}`)
       }
 
       const record = await model.findUnique({
         where: { id: recordId },
-        select: { tenantId: true }
+        select: { tenantId: true },
       })
 
       return record?.tenantId === tenantId
     } catch (error) {
-      console.error('Tenant access validation failed:', error)
       return false
     }
   },
@@ -447,10 +446,10 @@ export const TenantSecurity = {
   /**
    * Create a tenant-safe where clause
    */
-  createTenantWhereClause(where: any, tenantId: string): any {
+  createTenantWhereClause(where: unknown, tenantId: string): unknown {
     return {
       ...where,
-      tenantId
+      tenantId,
     }
   },
 
@@ -463,55 +462,54 @@ export const TenantSecurity = {
     tableName: string
   ): Promise<{ valid: boolean; invalidIds: string[] }> {
     try {
-      const model = (prisma as any)[tableName]
+      const model = (prisma as unknown)[tableName]
       if (!model) {
         throw new Error(`Invalid table name: ${tableName}`)
       }
 
       const records = await model.findMany({
         where: {
-          id: { in: recordIds }
+          id: { in: recordIds },
         },
-        select: { id: true, tenantId: true }
+        select: { id: true, tenantId: true },
       })
 
       const invalidIds = records
-        .filter(record => record.tenantId !== tenantId)
-        .map(record => record.id)
+        .filter((record) => record.tenantId !== tenantId)
+        .map((record) => record.id)
 
       return {
         valid: invalidIds.length === 0,
-        invalidIds
+        invalidIds,
       }
     } catch (error) {
-      console.error('Bulk tenant access validation failed:', error)
       return { valid: false, invalidIds: recordIds }
     }
-  }
+  },
 }
 
 /**
  * Middleware for automatic tenant isolation
  */
-export function withTenantIsolation<T extends (...args: any[]) => any>(
+export function withTenantIsolation<T extends (...args: unknown[]) => unknown>(
   handler: T,
   options: {
     enforceStrict?: boolean
     logViolations?: boolean
   } = {}
 ): T {
-  return (async (...args: any[]) => {
+  return (async (...args: unknown[]) => {
     const [request, context] = args
-    
+
     // Extract tenant context from request/session
     const tenantId = context?.user?.tenantId || context?.tenantId
-    
+
     if (!tenantId && options.enforceStrict !== false) {
       throw new Error('Tenant context required for this operation')
     }
 
     // Add tenant security context to all database operations
-    const originalArgs = args.map(arg => {
+    const originalArgs = args.map((arg) => {
       if (arg && typeof arg === 'object' && 'tenantId' in arg) {
         return { ...arg, tenantId }
       }
@@ -525,7 +523,7 @@ export function withTenantIsolation<T extends (...args: any[]) => any>(
         console.warn('Potential tenant isolation violation:', {
           tenantId,
           error: error.message,
-          handler: handler.name
+          handler: handler.name,
         })
       }
       throw error

@@ -12,29 +12,19 @@ export async function GET() {
     // Check if user is authenticated
     const session = await getServerSession()
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Generate CSRF token
     const secret = process.env.API_KEY_SECRET || process.env.NEXTAUTH_SECRET
     if (!secret) {
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
     }
 
     const csrfToken = await initializeCSRFProtection(secret)
 
     return NextResponse.json({ csrfToken })
   } catch (error) {
-    console.error('CSRF token generation error:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate CSRF token' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to generate CSRF token' }, { status: 500 })
   }
 }

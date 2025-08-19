@@ -9,18 +9,18 @@ import { z } from 'zod'
 const buildEnvironmentSchema = z.object({
   // Node.js Environment
   NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('production'),
-  
+
   // Required for build but can have defaults
-  DATABASE_URL: z.string().default('postgresql://user:pass@localhost:5432/db'),
-  NEXTAUTH_SECRET: z.string().default('build-time-placeholder-secret-will-be-replaced'),
-  NEXTAUTH_URL: z.string().default('https://localhost:3000'),
-  
+  DATABASE_URL: z.string().default('postgresql://placeholder:placeholder@localhost:5432/placeholder'),
+  NEXTAUTH_SECRET: z.string().default('build-time-placeholder-secret-32-chars-minimum-for-nextauth'),
+  NEXTAUTH_URL: z.string().default('http://localhost:3000'),
+
   // Optional during build
   APP_NAME: z.string().default('CoreFlow360'),
   APP_VERSION: z.string().default('2.0.0'),
   APP_URL: z.string().optional(),
   PORT: z.coerce.number().default(3000),
-  
+
   // All other vars are optional during build
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
@@ -44,7 +44,7 @@ let cachedEnv: BuildEnvironment | null = null
 
 export function getBuildEnvironment(): BuildEnvironment {
   if (cachedEnv) return cachedEnv
-  
+
   try {
     // Parse environment with defaults
     const env = buildEnvironmentSchema.parse(process.env)
@@ -52,18 +52,18 @@ export function getBuildEnvironment(): BuildEnvironment {
     return env
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.warn('Build environment validation warnings:')
+      
       error.errors.forEach((err) => {
-        console.warn(`  ${err.path.join('.')}: ${err.message}`)
+        }: ${err.message}`)
       })
     }
-    
+
     // Return safe defaults for build
     return {
       NODE_ENV: 'production',
-      DATABASE_URL: 'postgresql://user:pass@localhost:5432/db',
-      NEXTAUTH_SECRET: 'build-time-placeholder-secret-will-be-replaced',
-      NEXTAUTH_URL: 'https://localhost:3000',
+      DATABASE_URL: 'postgresql://placeholder:placeholder@localhost:5432/placeholder',
+      NEXTAUTH_SECRET: 'build-time-placeholder-secret-32-chars-minimum-for-nextauth',
+      NEXTAUTH_URL: 'http://localhost:3000',
       APP_NAME: 'CoreFlow360',
       APP_VERSION: '2.0.0',
       PORT: 3000,

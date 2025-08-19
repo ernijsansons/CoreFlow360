@@ -34,7 +34,7 @@ export interface FinancialDataPoint {
   timestamp: string
   value: number
   category: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface ForecastResult {
@@ -64,7 +64,7 @@ export interface StrategicAnalysisRequest {
     revenue: FinancialDataPoint[]
     expenses: FinancialDataPoint[]
     cashFlow: FinancialDataPoint[]
-    marketData?: Record<string, any>
+    marketData?: Record<string, unknown>
   }
   analysisType: 'growth' | 'efficiency' | 'risk' | 'valuation' | 'comprehensive'
   timeHorizon: number // months
@@ -133,24 +133,24 @@ export interface RiskAssessmentResult {
 export interface FinRobotService {
   // Forecasting capabilities
   executeForecast(request: FinancialForecastRequest): Promise<ForecastResult>
-  
+
   // Strategic analysis
   executeAnalysis(request: StrategicAnalysisRequest): Promise<StrategicAnalysisResult>
-  
+
   // Risk assessment
   assessRisk(request: RiskAssessmentRequest): Promise<RiskAssessmentResult>
-  
+
   // Agent management
   getAvailableAgents(): Promise<FinRobotAgent[]>
   getAgentById(id: string): Promise<FinRobotAgent>
-  
+
   // Multi-agent coordination
   executeMultiAgentAnalysis(
     agents: string[],
-    data: Record<string, any>
+    data: Record<string, unknown>
   ): Promise<{
-    results: Record<string, any>
-    consensus: any
+    results: Record<string, unknown>
+    consensus: unknown
     conflicts: string[]
   }>
 }
@@ -160,7 +160,7 @@ const FinancialDataPointSchema = z.object({
   timestamp: z.string(),
   value: z.number(),
   category: z.string(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.any()).optional(),
 })
 
 const ForecastRequestSchema = z.object({
@@ -168,7 +168,7 @@ const ForecastRequestSchema = z.object({
   forecastPeriods: z.number().min(1).max(24),
   confidenceLevel: z.number().min(0.5).max(0.99).optional(),
   includeFactors: z.array(z.string()).optional(),
-  modelType: z.enum(['lstm', 'arima', 'prophet', 'ensemble']).optional()
+  modelType: z.enum(['lstm', 'arima', 'prophet', 'ensemble']).optional(),
 })
 
 const StrategicAnalysisRequestSchema = z.object({
@@ -176,11 +176,11 @@ const StrategicAnalysisRequestSchema = z.object({
     revenue: z.array(FinancialDataPointSchema),
     expenses: z.array(FinancialDataPointSchema),
     cashFlow: z.array(FinancialDataPointSchema),
-    marketData: z.record(z.any()).optional()
+    marketData: z.record(z.any()).optional(),
   }),
   analysisType: z.enum(['growth', 'efficiency', 'risk', 'valuation', 'comprehensive']),
   timeHorizon: z.number().min(3).max(60),
-  benchmarks: z.array(z.string()).optional()
+  benchmarks: z.array(z.string()).optional(),
 })
 
 // Mock Implementation
@@ -192,56 +192,56 @@ export class MockFinRobotService implements FinRobotService {
       type: 'forecasting',
       capabilities: ['time-series', 'seasonal-adjustment', 'trend-analysis'],
       confidenceThreshold: 0.85,
-      maxExecutionTime: 30000
+      maxExecutionTime: 30000,
     },
     {
       id: 'strategy-agent-v2',
       name: 'Strategic Planning Agent',
       type: 'strategy',
       capabilities: ['swot-analysis', 'scenario-planning', 'kpi-optimization'],
-      confidenceThreshold: 0.80,
-      maxExecutionTime: 45000
+      confidenceThreshold: 0.8,
+      maxExecutionTime: 45000,
     },
     {
       id: 'risk-agent-v2',
       name: 'Risk Assessment Agent',
       type: 'risk_assessment',
       capabilities: ['var-calculation', 'stress-testing', 'scenario-analysis'],
-      confidenceThreshold: 0.90,
-      maxExecutionTime: 20000
-    }
+      confidenceThreshold: 0.9,
+      maxExecutionTime: 20000,
+    },
   ]
 
   async executeForecast(request: FinancialForecastRequest): Promise<ForecastResult> {
     // Validate input
     ForecastRequestSchema.parse(request)
-    
+
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000))
-    
+    await new Promise((resolve) => setTimeout(resolve, Math.random() * 2000 + 1000))
+
     // Generate realistic mock forecast
     const baseValue = request.data[request.data.length - 1]?.value || 100000
     const trend = this.calculateTrend(request.data)
     const volatility = this.calculateVolatility(request.data)
-    
+
     const predictions = Array.from({ length: request.forecastPeriods }, (_, i) => {
       const period = i + 1
       const trendAdjustment = trend * period
       const seasonalFactor = Math.sin((period * Math.PI) / 6) * 0.1 + 1
       const randomFactor = (Math.random() - 0.5) * volatility
-      
+
       const predictedValue = baseValue * seasonalFactor + trendAdjustment + randomFactor
-      const confidence = Math.max(0.6, 0.95 - (period * 0.03)) // Decreasing confidence over time
-      
+      const confidence = Math.max(0.6, 0.95 - period * 0.03) // Decreasing confidence over time
+
       return {
         period: `2024-${String(period).padStart(2, '0')}`,
         value: Math.round(predictedValue),
         confidence: Number(confidence.toFixed(3)),
         upperBound: Math.round(predictedValue * (1 + volatility * 0.5)),
-        lowerBound: Math.round(predictedValue * (1 - volatility * 0.5))
+        lowerBound: Math.round(predictedValue * (1 - volatility * 0.5)),
       }
     })
-    
+
     return {
       predictions,
       modelAccuracy: 0.87 + Math.random() * 0.1,
@@ -249,68 +249,65 @@ export class MockFinRobotService implements FinRobotService {
         {
           name: 'Market Trend',
           impact: trend > 0 ? 0.7 : -0.3,
-          description: trend > 0 ? 'Positive market momentum detected' : 'Market showing signs of correction'
+          description:
+            trend > 0 ? 'Positive market momentum detected' : 'Market showing signs of correction',
         },
         {
           name: 'Seasonal Patterns',
           impact: 0.4,
-          description: 'Historical seasonal patterns indicate cyclical behavior'
+          description: 'Historical seasonal patterns indicate cyclical behavior',
         },
         {
           name: 'Economic Indicators',
           impact: Math.random() * 0.6 - 0.3,
-          description: 'Mixed signals from leading economic indicators'
-        }
+          description: 'Mixed signals from leading economic indicators',
+        },
       ],
       recommendations: [
         'Monitor key performance indicators closely',
         'Prepare contingency plans for scenario variations',
-        'Consider diversification strategies to reduce volatility'
+        'Consider diversification strategies to reduce volatility',
       ],
       metadata: {
         modelUsed: request.modelType || 'ensemble',
         trainingSize: request.data.length,
-        executionTime: Math.random() * 5000 + 2000
-      }
+        executionTime: Math.random() * 5000 + 2000,
+      },
     }
   }
 
   async executeAnalysis(request: StrategicAnalysisRequest): Promise<StrategicAnalysisResult> {
     // Validate input
     StrategicAnalysisRequestSchema.parse(request)
-    
+
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 2000))
-    
+    await new Promise((resolve) => setTimeout(resolve, Math.random() * 3000 + 2000))
+
     const revenueGrowth = this.calculateGrowthRate(request.companyData.revenue)
     const profitMargin = this.calculateProfitMargin(
       request.companyData.revenue,
       request.companyData.expenses
     )
-    
+
     return {
       overallScore: Math.round(65 + Math.random() * 25), // 65-90 range
       analysis: {
         strengths: [
           'Strong revenue growth trajectory',
           'Diverse customer base',
-          'Operational efficiency improvements'
+          'Operational efficiency improvements',
         ],
         weaknesses: [
           'High dependency on key markets',
           'Limited cash reserves',
-          'Technology infrastructure gaps'
+          'Technology infrastructure gaps',
         ],
         opportunities: [
           'Market expansion potential',
           'Digital transformation initiatives',
-          'Strategic partnerships'
+          'Strategic partnerships',
         ],
-        threats: [
-          'Increased competition',
-          'Regulatory changes',
-          'Economic uncertainty'
-        ]
+        threats: ['Increased competition', 'Regulatory changes', 'Economic uncertainty'],
       },
       kpis: [
         {
@@ -318,15 +315,15 @@ export class MockFinRobotService implements FinRobotService {
           current: revenueGrowth,
           target: revenueGrowth * 1.2,
           trend: revenueGrowth > 0.1 ? 'improving' : 'stable',
-          recommendation: 'Focus on customer acquisition and retention'
+          recommendation: 'Focus on customer acquisition and retention',
         },
         {
           name: 'Profit Margin',
           current: profitMargin,
           target: profitMargin * 1.15,
           trend: profitMargin > 0.15 ? 'improving' : 'declining',
-          recommendation: 'Optimize operational costs and pricing strategy'
-        }
+          recommendation: 'Optimize operational costs and pricing strategy',
+        },
       ],
       actionPlan: [
         {
@@ -334,84 +331,84 @@ export class MockFinRobotService implements FinRobotService {
           action: 'Develop digital transformation roadmap',
           expectedImpact: '15-20% efficiency improvement',
           timeline: '6-12 months',
-          resources: ['Technology team', 'External consultants']
+          resources: ['Technology team', 'External consultants'],
         },
         {
           priority: 'medium',
           action: 'Expand into adjacent markets',
           expectedImpact: '10-15% revenue increase',
           timeline: '12-18 months',
-          resources: ['Sales team', 'Market research']
-        }
+          resources: ['Sales team', 'Market research'],
+        },
       ],
       riskFactors: [
         {
           factor: 'Market volatility',
           probability: 0.6,
           impact: 0.7,
-          mitigation: 'Diversify revenue streams and maintain cash reserves'
+          mitigation: 'Diversify revenue streams and maintain cash reserves',
         },
         {
           factor: 'Key customer dependency',
           probability: 0.3,
           impact: 0.9,
-          mitigation: 'Develop broader customer base and strengthen relationships'
-        }
-      ]
+          mitigation: 'Develop broader customer base and strengthen relationships',
+        },
+      ],
     }
   }
 
   async assessRisk(request: RiskAssessmentRequest): Promise<RiskAssessmentResult> {
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 1500 + 1000))
-    
+    await new Promise((resolve) => setTimeout(resolve, Math.random() * 1500 + 1000))
+
     const baseRisk = 20 + Math.random() * 40 // 20-60 base risk
-    
+
     return {
       overallRisk: Math.round(baseRisk),
-      riskBreakdown: request.riskTypes.map(type => ({
+      riskBreakdown: request.riskTypes.map((type) => ({
         type,
         score: Math.round(baseRisk + (Math.random() - 0.5) * 20),
         trend: Math.random() > 0.5 ? 'increasing' : 'stable',
-        factors: this.getRiskFactors(type)
+        factors: this.getRiskFactors(type),
       })),
       scenarios: [
         {
           name: 'Market Correction',
           probability: 0.3,
           impact: 0.6,
-          description: 'Broad market downturn affecting portfolio values'
+          description: 'Broad market downturn affecting portfolio values',
         },
         {
           name: 'Sector Rotation',
           probability: 0.5,
           impact: 0.4,
-          description: 'Shift in investor preference across sectors'
+          description: 'Shift in investor preference across sectors',
         },
         {
           name: 'Regulatory Changes',
           probability: 0.2,
           impact: 0.8,
-          description: 'New regulations impacting business operations'
-        }
+          description: 'New regulations impacting business operations',
+        },
       ],
       recommendations: [
         {
           action: 'Implement dynamic hedging strategies',
           urgency: 'short-term',
-          expectedReduction: 15
+          expectedReduction: 15,
         },
         {
           action: 'Diversify across asset classes',
           urgency: 'long-term',
-          expectedReduction: 25
+          expectedReduction: 25,
         },
         {
           action: 'Enhance monitoring systems',
           urgency: 'immediate',
-          expectedReduction: 10
-        }
-      ]
+          expectedReduction: 10,
+        },
+      ],
     }
   }
 
@@ -420,7 +417,7 @@ export class MockFinRobotService implements FinRobotService {
   }
 
   async getAgentById(id: string): Promise<FinRobotAgent> {
-    const agent = this.agents.find(a => a.id === id)
+    const agent = this.agents.find((a) => a.id === id)
     if (!agent) {
       throw new Error(`Agent ${id} not found`)
     }
@@ -429,57 +426,57 @@ export class MockFinRobotService implements FinRobotService {
 
   async executeMultiAgentAnalysis(
     agents: string[],
-    data: Record<string, any>
+    _data: Record<string, unknown>
   ): Promise<{
-    results: Record<string, any>
-    consensus: any
+    results: Record<string, unknown>
+    consensus: unknown
     conflicts: string[]
   }> {
     // Simulate multi-agent processing
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 4000 + 3000))
-    
-    const results: Record<string, any> = {}
+    await new Promise((resolve) => setTimeout(resolve, Math.random() * 4000 + 3000))
+
+    const results: Record<string, unknown> = {}
     const conflicts: string[] = []
-    
+
     for (const agentId of agents) {
       const agent = await this.getAgentById(agentId)
-      
+
       // Simulate agent-specific analysis
       switch (agent.type) {
         case 'forecasting':
           results[agentId] = {
             forecast: 'Positive growth expected',
-            confidence: 0.85
+            confidence: 0.85,
           }
           break
         case 'analysis':
           results[agentId] = {
             recommendation: 'Moderate risk, balanced approach',
-            confidence: 0.78
+            confidence: 0.78,
           }
           break
         case 'risk_assessment':
           results[agentId] = {
             riskLevel: 'Medium',
-            confidence: 0.92
+            confidence: 0.92,
           }
           break
       }
     }
-    
+
     // Detect conflicts (simplified)
     if (agents.length > 1) {
       conflicts.push('Minor disagreement on growth rate projections')
     }
-    
+
     return {
       results,
       consensus: {
         overallOutlook: 'Cautiously optimistic',
         confidence: 0.82,
-        keyFactors: ['Market stability', 'Operational efficiency', 'Risk management']
+        keyFactors: ['Market stability', 'Operational efficiency', 'Risk management'],
       },
-      conflicts
+      conflicts,
     }
   }
 
@@ -493,7 +490,7 @@ export class MockFinRobotService implements FinRobotService {
 
   private calculateVolatility(data: FinancialDataPoint[]): number {
     if (data.length < 2) return 0.1
-    const values = data.map(d => d.value)
+    const values = data.map((d) => d.value)
     const mean = values.reduce((a, b) => a + b, 0) / values.length
     const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / values.length
     return Math.sqrt(variance) / mean
@@ -501,13 +498,18 @@ export class MockFinRobotService implements FinRobotService {
 
   private calculateGrowthRate(data: FinancialDataPoint[]): number {
     if (data.length < 2) return 0
-    const sortedData = data.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+    const sortedData = data.sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    )
     const first = sortedData[0].value
     const last = sortedData[sortedData.length - 1].value
     return (last - first) / first
   }
 
-  private calculateProfitMargin(revenue: FinancialDataPoint[], expenses: FinancialDataPoint[]): number {
+  private calculateProfitMargin(
+    revenue: FinancialDataPoint[],
+    expenses: FinancialDataPoint[]
+  ): number {
     const totalRevenue = revenue.reduce((sum, item) => sum + item.value, 0)
     const totalExpenses = expenses.reduce((sum, item) => sum + item.value, 0)
     return totalRevenue > 0 ? (totalRevenue - totalExpenses) / totalRevenue : 0
@@ -519,7 +521,7 @@ export class MockFinRobotService implements FinRobotService {
       credit: ['Default risk', 'Concentration', 'Rating changes'],
       operational: ['Process failures', 'Human error', 'Technology risk'],
       liquidity: ['Funding risk', 'Market liquidity', 'Cash flow'],
-      regulatory: ['Compliance', 'Policy changes', 'Legal risk']
+      regulatory: ['Compliance', 'Policy changes', 'Legal risk'],
     }
     return factorMap[riskType] || ['General risk factors']
   }

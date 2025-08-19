@@ -4,15 +4,15 @@
  */
 
 import { z } from 'zod'
-import { 
-  CreateAPIKeyRequest, 
-  UpdateAPIKeyRequest, 
+import {
+  CreateAPIKeyRequest,
+  UpdateAPIKeyRequest,
   RotateAPIKeyRequest,
   APIKeyValidationResult,
   ValidationError,
   ValidationWarning,
   APIKeyStatus,
-  VendorCategory 
+  VendorCategory,
 } from '@/types/api-keys'
 
 // Common validation schemas
@@ -23,7 +23,7 @@ const apiKeyPatterns = {
   aws: /^[A-Z0-9]{20}$/,
   stripe: /^sk_(test_|live_)[A-Za-z0-9]{24}$/,
   github: /^ghp_[A-Za-z0-9]{36}$/,
-  generic: /^[A-Za-z0-9_-]{8,128}$/
+  generic: /^[A-Za-z0-9_-]{8,128}$/,
 }
 
 // Service-specific validation rules
@@ -34,7 +34,7 @@ const serviceValidation = {
     category: 'AI_ML' as VendorCategory,
     requiredPermissions: ['ai:use'],
     maxRotationDays: 90,
-    recommendedRotationDays: 30
+    recommendedRotationDays: 30,
   },
   anthropic: {
     name: 'Anthropic Claude',
@@ -42,7 +42,7 @@ const serviceValidation = {
     category: 'AI_ML' as VendorCategory,
     requiredPermissions: ['ai:use'],
     maxRotationDays: 90,
-    recommendedRotationDays: 30
+    recommendedRotationDays: 30,
   },
   google_ai: {
     name: 'Google AI',
@@ -50,7 +50,7 @@ const serviceValidation = {
     category: 'AI_ML' as VendorCategory,
     requiredPermissions: ['ai:use'],
     maxRotationDays: 180,
-    recommendedRotationDays: 60
+    recommendedRotationDays: 60,
   },
   stripe: {
     name: 'Stripe',
@@ -58,7 +58,7 @@ const serviceValidation = {
     category: 'PAYMENT' as VendorCategory,
     requiredPermissions: ['payment:process'],
     maxRotationDays: 365,
-    recommendedRotationDays: 90
+    recommendedRotationDays: 90,
   },
   aws: {
     name: 'Amazon Web Services',
@@ -66,7 +66,7 @@ const serviceValidation = {
     category: 'STORAGE' as VendorCategory,
     requiredPermissions: ['storage:access'],
     maxRotationDays: 90,
-    recommendedRotationDays: 30
+    recommendedRotationDays: 30,
   },
   github: {
     name: 'GitHub',
@@ -74,74 +74,68 @@ const serviceValidation = {
     category: 'INTEGRATION' as VendorCategory,
     requiredPermissions: ['integration:github'],
     maxRotationDays: 365,
-    recommendedRotationDays: 180
-  }
+    recommendedRotationDays: 180,
+  },
 }
 
 // Validation schemas
 export const createAPIKeySchema = z.object({
-  service: z.string()
+  service: z
+    .string()
     .min(1, 'Service is required')
     .max(50, 'Service name too long')
     .regex(/^[a-z_]+$/, 'Service must be lowercase with underscores only'),
-  name: z.string()
+  name: z
+    .string()
     .min(1, 'Name is required')
     .max(100, 'Name too long')
     .regex(/^[a-zA-Z0-9\s_-]+$/, 'Name contains invalid characters'),
-  description: z.string()
-    .max(500, 'Description too long')
-    .optional(),
-  key: z.string()
-    .min(8, 'API key too short')
-    .max(200, 'API key too long'),
-  rotationDays: z.number()
+  description: z.string().max(500, 'Description too long').optional(),
+  key: z.string().min(8, 'API key too short').max(200, 'API key too long'),
+  rotationDays: z
+    .number()
     .int('Rotation days must be an integer')
     .min(1, 'Rotation days must be at least 1')
     .max(365, 'Rotation days cannot exceed 365')
     .optional()
     .default(90),
-  expiresAt: z.date()
-    .optional(),
-  vendorId: z.string()
-    .min(1, 'Vendor ID is required')
+  expiresAt: z.date().optional(),
+  vendorId: z.string().min(1, 'Vendor ID is required'),
 })
 
 export const updateAPIKeySchema = z.object({
-  name: z.string()
+  name: z
+    .string()
     .min(1, 'Name is required')
     .max(100, 'Name too long')
     .regex(/^[a-zA-Z0-9\s_-]+$/, 'Name contains invalid characters')
     .optional(),
-  description: z.string()
-    .max(500, 'Description too long')
-    .optional(),
-  key: z.string()
-    .min(8, 'API key too short')
-    .max(200, 'API key too long')
-    .optional(),
-  rotationDays: z.number()
+  description: z.string().max(500, 'Description too long').optional(),
+  key: z.string().min(8, 'API key too short').max(200, 'API key too long').optional(),
+  rotationDays: z
+    .number()
     .int('Rotation days must be an integer')
     .min(1, 'Rotation days must be at least 1')
     .max(365, 'Rotation days cannot exceed 365')
     .optional(),
-  expiresAt: z.date()
+  expiresAt: z.date().optional(),
+  status: z
+    .enum([
+      'ACTIVE',
+      'INACTIVE',
+      'EXPIRED',
+      'ROTATION_REQUIRED',
+      'COMPROMISED',
+      'PENDING_VALIDATION',
+    ])
     .optional(),
-  status: z.enum(['ACTIVE', 'INACTIVE', 'EXPIRED', 'ROTATION_REQUIRED', 'COMPROMISED', 'PENDING_VALIDATION'])
-    .optional()
 })
 
 export const rotateAPIKeySchema = z.object({
-  newKey: z.string()
-    .min(8, 'API key too short')
-    .max(200, 'API key too long'),
-  reason: z.string()
-    .max(200, 'Reason too long')
-    .optional(),
-  scheduleRotation: z.boolean()
-    .optional()
-    .default(false),
-  rotationDate: z.date()
-    .optional()
+  newKey: z.string().min(8, 'API key too short').max(200, 'API key too long'),
+  reason: z.string().max(200, 'Reason too long').optional(),
+  scheduleRotation: z.boolean().optional().default(false),
+  rotationDate: z.date().optional(),
 })
 
 /**
@@ -154,7 +148,7 @@ export function validateAPIKeyFormat(service: string, key: string): APIKeyValida
 
   // Get service validation rules
   const serviceRule = serviceValidation[service as keyof typeof serviceValidation]
-  
+
   if (!serviceRule) {
     // For unknown services, use generic validation
     if (!apiKeyPatterns.generic.test(key)) {
@@ -162,7 +156,7 @@ export function validateAPIKeyFormat(service: string, key: string): APIKeyValida
         field: 'key',
         code: 'INVALID_FORMAT',
         message: 'API key format is invalid',
-        severity: 'ERROR'
+        severity: 'ERROR',
       })
     }
   } else {
@@ -172,9 +166,11 @@ export function validateAPIKeyFormat(service: string, key: string): APIKeyValida
         field: 'key',
         code: 'INVALID_SERVICE_FORMAT',
         message: `API key does not match ${serviceRule.name} format`,
-        severity: 'ERROR'
+        severity: 'ERROR',
       })
-      suggestions.push(`${serviceRule.name} keys should match pattern: ${serviceRule.keyPattern.toString()}`)
+      suggestions.push(
+        `${serviceRule.name} keys should match pattern: ${serviceRule.keyPattern.toString()}`
+      )
     }
   }
 
@@ -184,7 +180,7 @@ export function validateAPIKeyFormat(service: string, key: string): APIKeyValida
       field: 'key',
       code: 'CONTAINS_SPACES',
       message: 'API key should not contain spaces',
-      severity: 'ERROR'
+      severity: 'ERROR',
     })
   }
 
@@ -193,7 +189,7 @@ export function validateAPIKeyFormat(service: string, key: string): APIKeyValida
       field: 'key',
       code: 'SHORT_KEY',
       message: 'API key is shorter than recommended minimum (16 characters)',
-      recommendation: 'Use a longer API key for better security'
+      recommendation: 'Use a longer API key for better security',
     })
   }
 
@@ -203,7 +199,7 @@ export function validateAPIKeyFormat(service: string, key: string): APIKeyValida
       field: 'key',
       code: 'TEST_KEY_DETECTED',
       message: 'This appears to be a test/sandbox API key',
-      recommendation: 'Ensure you are using production keys in production environment'
+      recommendation: 'Ensure you are using production keys in production environment',
     })
   }
 
@@ -211,7 +207,7 @@ export function validateAPIKeyFormat(service: string, key: string): APIKeyValida
     isValid: errors.length === 0,
     errors,
     warnings,
-    suggestions
+    suggestions,
   }
 }
 
@@ -236,7 +232,7 @@ export function calculateSecurityScore(keyData: {
   factors.push({
     factor: 'Age',
     impact: -ageFactor,
-    reason: `Key is ${keyData.daysSinceCreated} days old`
+    reason: `Key is ${keyData.daysSinceCreated} days old`,
   })
 
   // Rotation factor (0-25 points)
@@ -245,7 +241,7 @@ export function calculateSecurityScore(keyData: {
   factors.push({
     factor: 'Rotation',
     impact: -rotationFactor,
-    reason: `${keyData.daysSinceLastRotation} days since last rotation`
+    reason: `${keyData.daysSinceLastRotation} days since last rotation`,
   })
 
   // Error rate factor (0-20 points)
@@ -254,19 +250,21 @@ export function calculateSecurityScore(keyData: {
   factors.push({
     factor: 'Error Rate',
     impact: -errorFactor,
-    reason: `${(keyData.errorRate * 100).toFixed(1)}% error rate`
+    reason: `${(keyData.errorRate * 100).toFixed(1)}% error rate`,
   })
 
   // Usage factor (0-10 points)
   if (keyData.lastUsed) {
-    const daysSinceUsed = Math.floor((Date.now() - keyData.lastUsed.getTime()) / (1000 * 60 * 60 * 24))
+    const daysSinceUsed = Math.floor(
+      (Date.now() - keyData.lastUsed.getTime()) / (1000 * 60 * 60 * 24)
+    )
     if (daysSinceUsed > 30) {
       const usageFactor = Math.min((daysSinceUsed - 30) / 60, 1) * 10
       score -= usageFactor
       factors.push({
         factor: 'Usage',
         impact: -usageFactor,
-        reason: `${daysSinceUsed} days since last use`
+        reason: `${daysSinceUsed} days since last use`,
       })
     }
   }
@@ -278,14 +276,14 @@ export function calculateSecurityScore(keyData: {
     factors.push({
       factor: 'Format',
       impact: -15,
-      reason: 'Invalid key format detected'
+      reason: 'Invalid key format detected',
     })
   } else if (formatValidation.warnings.length > 0) {
     score -= 5
     factors.push({
       factor: 'Format',
       impact: -5,
-      reason: 'Key format warnings detected'
+      reason: 'Key format warnings detected',
     })
   }
 
@@ -295,7 +293,7 @@ export function calculateSecurityScore(keyData: {
     factors.push({
       factor: 'Proactive Rotation',
       impact: 5,
-      reason: 'Key rotated proactively'
+      reason: 'Key rotated proactively',
     })
   }
 
@@ -304,7 +302,7 @@ export function calculateSecurityScore(keyData: {
     factors.push({
       factor: 'Low Error Rate',
       impact: 5,
-      reason: 'Excellent error rate performance'
+      reason: 'Excellent error rate performance',
     })
   }
 
@@ -329,14 +327,20 @@ export function generateSecurityRecommendations(keyData: {
 
   // Rotation recommendations
   if (keyData.daysSinceLastRotation > keyData.rotationDays) {
-    recommendations.push(`🔄 Rotate this key immediately - it's ${keyData.daysSinceLastRotation - keyData.rotationDays} days overdue`)
+    recommendations.push(
+      `🔄 Rotate this key immediately - it's ${keyData.daysSinceLastRotation - keyData.rotationDays} days overdue`
+    )
   } else if (keyData.daysSinceLastRotation > keyData.rotationDays * 0.8) {
-    recommendations.push(`⏰ Schedule key rotation soon - due in ${keyData.rotationDays - keyData.daysSinceLastRotation} days`)
+    recommendations.push(
+      `⏰ Schedule key rotation soon - due in ${keyData.rotationDays - keyData.daysSinceLastRotation} days`
+    )
   }
 
   // Usage recommendations
   if (keyData.lastUsed) {
-    const daysSinceUsed = Math.floor((Date.now() - keyData.lastUsed.getTime()) / (1000 * 60 * 60 * 24))
+    const daysSinceUsed = Math.floor(
+      (Date.now() - keyData.lastUsed.getTime()) / (1000 * 60 * 60 * 24)
+    )
     if (daysSinceUsed > 60) {
       recommendations.push(`🧹 Consider deactivating - unused for ${daysSinceUsed} days`)
     } else if (daysSinceUsed > 30) {
@@ -346,22 +350,28 @@ export function generateSecurityRecommendations(keyData: {
 
   // Error rate recommendations
   if (keyData.errorRate > 0.1) {
-    recommendations.push(`🚨 High error rate (${(keyData.errorRate * 100).toFixed(1)}%) - investigate API issues`)
+    recommendations.push(
+      `🚨 High error rate (${(keyData.errorRate * 100).toFixed(1)}%) - investigate API issues`
+    )
   } else if (keyData.errorRate > 0.05) {
-    recommendations.push(`⚠️ Monitor error rate (${(keyData.errorRate * 100).toFixed(1)}%) - above normal levels`)
+    recommendations.push(
+      `⚠️ Monitor error rate (${(keyData.errorRate * 100).toFixed(1)}%) - above normal levels`
+    )
   }
 
   // Service-specific recommendations
   if (serviceRule) {
     if (keyData.rotationDays > serviceRule.recommendedRotationDays) {
-      recommendations.push(`🔧 Consider shorter rotation period (recommended: ${serviceRule.recommendedRotationDays} days for ${serviceRule.name})`)
+      recommendations.push(
+        `🔧 Consider shorter rotation period (recommended: ${serviceRule.recommendedRotationDays} days for ${serviceRule.name})`
+      )
     }
   }
 
   // Format recommendations
   const formatValidation = validateAPIKeyFormat(keyData.service, keyData.key)
   if (formatValidation.warnings.length > 0) {
-    formatValidation.warnings.forEach(warning => {
+    formatValidation.warnings.forEach((warning) => {
       recommendations.push(`💡 ${warning.recommendation}`)
     })
   }
@@ -388,23 +398,30 @@ export function detectUsageAnomalies(usageData: {
   avgRequestsPerDay: number
   peakRequestsPerHour: number
 }): Array<{ type: string; severity: 'LOW' | 'MEDIUM' | 'HIGH'; description: string }> {
-  const anomalies: Array<{ type: string; severity: 'LOW' | 'MEDIUM' | 'HIGH'; description: string }> = []
+  const anomalies: Array<{
+    type: string
+    severity: 'LOW' | 'MEDIUM' | 'HIGH'
+    description: string
+  }> = []
 
   // Sudden spike in requests
   if (usageData.requestsLast24h > usageData.avgRequestsPerDay * 3) {
     anomalies.push({
       type: 'REQUEST_SPIKE',
       severity: 'MEDIUM',
-      description: `Unusual spike: ${usageData.requestsLast24h} requests vs ${usageData.avgRequestsPerDay} average`
+      description: `Unusual spike: ${usageData.requestsLast24h} requests vs ${usageData.avgRequestsPerDay} average`,
     })
   }
 
   // Sudden drop in requests
-  if (usageData.avgRequestsPerDay > 100 && usageData.requestsLast24h < usageData.avgRequestsPerDay * 0.1) {
+  if (
+    usageData.avgRequestsPerDay > 100 &&
+    usageData.requestsLast24h < usageData.avgRequestsPerDay * 0.1
+  ) {
     anomalies.push({
       type: 'REQUEST_DROP',
       severity: 'MEDIUM',
-      description: `Unusual drop: ${usageData.requestsLast24h} requests vs ${usageData.avgRequestsPerDay} average`
+      description: `Unusual drop: ${usageData.requestsLast24h} requests vs ${usageData.avgRequestsPerDay} average`,
     })
   }
 
@@ -413,16 +430,19 @@ export function detectUsageAnomalies(usageData: {
     anomalies.push({
       type: 'HIGH_ERROR_RATE',
       severity: 'HIGH',
-      description: `High error rate: ${(usageData.errorRateLast24h * 100).toFixed(1)}% in last 24h`
+      description: `High error rate: ${(usageData.errorRateLast24h * 100).toFixed(1)}% in last 24h`,
     })
   }
 
   // Error rate spike
-  if (usageData.errorRateLast24h > usageData.errorRateLast7d * 3 && usageData.errorRateLast24h > 0.05) {
+  if (
+    usageData.errorRateLast24h > usageData.errorRateLast7d * 3 &&
+    usageData.errorRateLast24h > 0.05
+  ) {
     anomalies.push({
       type: 'ERROR_SPIKE',
       severity: 'MEDIUM',
-      description: `Error rate spike: ${(usageData.errorRateLast24h * 100).toFixed(1)}% vs ${(usageData.errorRateLast7d * 100).toFixed(1)}% average`
+      description: `Error rate spike: ${(usageData.errorRateLast24h * 100).toFixed(1)}% vs ${(usageData.errorRateLast7d * 100).toFixed(1)}% average`,
     })
   }
 
@@ -431,7 +451,7 @@ export function detectUsageAnomalies(usageData: {
     anomalies.push({
       type: 'PEAK_TRAFFIC',
       severity: 'LOW',
-      description: `High peak traffic: ${usageData.peakRequestsPerHour} requests/hour`
+      description: `High peak traffic: ${usageData.peakRequestsPerHour} requests/hour`,
     })
   }
 
@@ -454,9 +474,9 @@ export function validateAPIKeyPermissions(
 
   // Regular admins cannot manage API keys
   if (userRole !== 'SUPER_ADMIN') {
-    return { 
-      allowed: false, 
-      reason: 'API key management requires SUPER_ADMIN role' 
+    return {
+      allowed: false,
+      reason: 'API key management requires SUPER_ADMIN role',
     }
   }
 
@@ -464,13 +484,13 @@ export function validateAPIKeyPermissions(
   if (service) {
     const serviceRule = serviceValidation[service as keyof typeof serviceValidation]
     if (serviceRule?.requiredPermissions) {
-      const hasRequiredPermissions = serviceRule.requiredPermissions.every(
-        permission => userPermissions.includes(permission)
+      const hasRequiredPermissions = serviceRule.requiredPermissions.every((permission) =>
+        userPermissions.includes(permission)
       )
       if (!hasRequiredPermissions) {
         return {
           allowed: false,
-          reason: `Missing required permissions for ${serviceRule.name}: ${serviceRule.requiredPermissions.join(', ')}`
+          reason: `Missing required permissions for ${serviceRule.name}: ${serviceRule.requiredPermissions.join(', ')}`,
         }
       }
     }

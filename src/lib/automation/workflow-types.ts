@@ -22,7 +22,7 @@ export enum WorkflowNodeType {
   TRIGGER_CRM_EVENT = 'TRIGGER_CRM_EVENT',
   TRIGGER_TIME_BASED = 'TRIGGER_TIME_BASED',
   TRIGGER_FILE_UPLOAD = 'TRIGGER_FILE_UPLOAD',
-  
+
   // Actions
   ACTION_SEND_EMAIL = 'ACTION_SEND_EMAIL',
   ACTION_CREATE_TASK = 'ACTION_CREATE_TASK',
@@ -34,7 +34,7 @@ export enum WorkflowNodeType {
   ACTION_UPDATE_DATABASE = 'ACTION_UPDATE_DATABASE',
   ACTION_GENERATE_DOCUMENT = 'ACTION_GENERATE_DOCUMENT',
   ACTION_SCHEDULE_MEETING = 'ACTION_SCHEDULE_MEETING',
-  
+
   // Logic
   LOGIC_CONDITION = 'LOGIC_CONDITION',
   LOGIC_DELAY = 'LOGIC_DELAY',
@@ -42,31 +42,31 @@ export enum WorkflowNodeType {
   LOGIC_SPLIT = 'LOGIC_SPLIT',
   LOGIC_MERGE = 'LOGIC_MERGE',
   LOGIC_FILTER = 'LOGIC_FILTER',
-  
+
   // Integrations
   INTEGRATION_SLACK = 'INTEGRATION_SLACK',
   INTEGRATION_TEAMS = 'INTEGRATION_TEAMS',
   INTEGRATION_ZAPIER = 'INTEGRATION_ZAPIER',
   INTEGRATION_GOOGLE_SHEETS = 'INTEGRATION_GOOGLE_SHEETS',
-  INTEGRATION_DROPBOX = 'INTEGRATION_DROPBOX'
+  INTEGRATION_DROPBOX = 'INTEGRATION_DROPBOX',
 }
 
 export interface WorkflowNodeData {
   // Common fields
   title: string
-  configuration: Record<string, any>
-  
+  configuration: Record<string, unknown>
+
   // Trigger specific
   triggerConditions?: TriggerCondition[]
-  
+
   // Action specific
   actionParameters?: ActionParameter[]
-  
+
   // Logic specific
   conditions?: LogicCondition[]
   delayAmount?: number
   delayUnit?: 'minutes' | 'hours' | 'days'
-  
+
   // Integration specific
   integrationConfig?: IntegrationConfig
 }
@@ -82,13 +82,13 @@ export interface NodeConnection {
 export interface TriggerCondition {
   field: string
   operator: 'equals' | 'contains' | 'greater_than' | 'less_than' | 'not_empty'
-  value: any
+  value: unknown
   description?: string
 }
 
 export interface ActionParameter {
   name: string
-  value: any
+  value: unknown
   type: 'static' | 'dynamic' | 'template'
   source?: string // For dynamic values
 }
@@ -96,13 +96,21 @@ export interface ActionParameter {
 export interface LogicCondition {
   field: string
   operator: ComparisonOperator
-  value: any
+  value: unknown
   logicalOperator?: 'AND' | 'OR'
 }
 
-export type ComparisonOperator = 'equals' | 'not_equals' | 'contains' | 'not_contains' | 
-                               'greater_than' | 'less_than' | 'is_empty' | 'is_not_empty' |
-                               'starts_with' | 'ends_with'
+export type ComparisonOperator =
+  | 'equals'
+  | 'not_equals'
+  | 'contains'
+  | 'not_contains'
+  | 'greater_than'
+  | 'less_than'
+  | 'is_empty'
+  | 'is_not_empty'
+  | 'starts_with'
+  | 'ends_with'
 
 export interface IntegrationConfig {
   service: string
@@ -110,7 +118,7 @@ export interface IntegrationConfig {
   endpoint?: string
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   headers?: Record<string, string>
-  parameters?: Record<string, any>
+  parameters?: Record<string, unknown>
 }
 
 export interface Workflow {
@@ -118,25 +126,25 @@ export interface Workflow {
   name: string
   description: string
   isActive: boolean
-  
+
   // Metadata
   tenantId: string
   createdBy: string
   createdAt: Date
   updatedAt: Date
-  
+
   // Workflow definition
   nodes: WorkflowNode[]
   connections: WorkflowConnection[]
-  
+
   // Configuration
   settings: WorkflowSettings
-  
+
   // Natural language context
   originalDescription: string
   generatedByAI: boolean
   aiConfidence?: number
-  
+
   // Execution stats
   executionCount: number
   lastExecuted?: Date
@@ -157,7 +165,7 @@ export interface WorkflowConnection {
 export interface ConnectionCondition {
   field: string
   operator: ComparisonOperator
-  value: any
+  value: unknown
 }
 
 export interface WorkflowSettings {
@@ -192,7 +200,7 @@ export enum WorkflowIntentType {
   SCHEDULE_ACTION = 'SCHEDULE_ACTION',
   MULTI_STEP_WORKFLOW = 'MULTI_STEP_WORKFLOW',
   DATA_SYNC = 'DATA_SYNC',
-  APPROVAL_PROCESS = 'APPROVAL_PROCESS'
+  APPROVAL_PROCESS = 'APPROVAL_PROCESS',
 }
 
 export interface WorkflowEntity {
@@ -213,7 +221,7 @@ export enum WorkflowEntityType {
   FIELD_NAME = 'FIELD_NAME',
   VALUE = 'VALUE',
   INTEGRATION = 'INTEGRATION',
-  TEMPLATE = 'TEMPLATE'
+  TEMPLATE = 'TEMPLATE',
 }
 
 // AI Processing Types
@@ -273,14 +281,14 @@ export interface WorkflowTemplate {
   category: WorkflowTemplateCategory
   industry?: string
   tags: string[]
-  
+
   // Template definition
   templateWorkflow: Omit<Workflow, 'id' | 'tenantId' | 'createdBy' | 'createdAt' | 'updatedAt'>
-  
+
   // Customization
   customizationOptions: TemplateCustomization[]
   requiredIntegrations: string[]
-  
+
   // Metadata
   popularity: number
   rating: number
@@ -297,7 +305,7 @@ export enum WorkflowTemplateCategory {
   MARKETING_AUTOMATION = 'MARKETING_AUTOMATION',
   SALES_PIPELINE = 'SALES_PIPELINE',
   COMPLIANCE = 'COMPLIANCE',
-  REPORTING = 'REPORTING'
+  REPORTING = 'REPORTING',
 }
 
 export interface TemplateCustomization {
@@ -307,7 +315,7 @@ export interface TemplateCustomization {
   type: 'text' | 'select' | 'integration' | 'template'
   options?: string[]
   required: boolean
-  defaultValue?: any
+  defaultValue?: unknown
 }
 
 // Execution Types
@@ -318,21 +326,21 @@ export interface WorkflowExecution {
   startTime: Date
   endTime?: Date
   status: WorkflowExecutionStatus
-  
+
   // Execution data
-  inputData: Record<string, any>
-  outputData?: Record<string, any>
-  
+  inputData: Record<string, unknown>
+  outputData?: Record<string, unknown>
+
   // Node executions
   nodeExecutions: NodeExecution[]
-  
+
   // Error handling
   errors?: WorkflowExecutionError[]
-  
+
   // Performance
   totalDuration: number
   nodeCount: number
-  
+
   // Context
   tenantId: string
 }
@@ -342,7 +350,7 @@ export enum WorkflowExecutionStatus {
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
   CANCELLED = 'CANCELLED',
-  TIMEOUT = 'TIMEOUT'
+  TIMEOUT = 'TIMEOUT',
 }
 
 export interface NodeExecution {
@@ -350,8 +358,8 @@ export interface NodeExecution {
   startTime: Date
   endTime?: Date
   status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped'
-  inputData: Record<string, any>
-  outputData?: Record<string, any>
+  inputData: Record<string, unknown>
+  outputData?: Record<string, unknown>
   error?: string
   duration: number
 }
@@ -360,7 +368,7 @@ export interface WorkflowExecutionError {
   nodeId: string
   errorType: 'validation' | 'execution' | 'timeout' | 'integration'
   message: string
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   timestamp: Date
   retryAttempt?: number
 }
@@ -372,18 +380,18 @@ export interface WorkflowAnalytics {
     start: Date
     end: Date
   }
-  
+
   // Execution metrics
   totalExecutions: number
   successfulExecutions: number
   failedExecutions: number
   avgExecutionTime: number
-  
+
   // Performance metrics
   executionTrends: ExecutionTrend[]
   errorAnalysis: ErrorAnalysis[]
   nodePerformance: NodePerformanceMetric[]
-  
+
   // Usage patterns
   triggerPatterns: TriggerPattern[]
   peakUsageTimes: UsagePattern[]

@@ -19,10 +19,7 @@ export default function GoogleAnalytics() {
         strategy="afterInteractive"
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
       />
-      <Script
-        id="google-analytics"
-        strategy="afterInteractive"
-      >
+      <Script id="google-analytics" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
@@ -58,7 +55,12 @@ export default function GoogleAnalytics() {
 
 // Hook for tracking page views in App Router
 export function usePageTracking() {
-  if (typeof window !== 'undefined' && window.gtag && GA_TRACKING_ID && /^G-[A-Z0-9]+$/.test(GA_TRACKING_ID)) {
+  if (
+    typeof window !== 'undefined' &&
+    window.gtag &&
+    GA_TRACKING_ID &&
+    /^G-[A-Z0-9]+$/.test(GA_TRACKING_ID)
+  ) {
     // Track route changes
     const handleRouteChange = (url: string) => {
       // Validate URL to prevent injection
@@ -71,6 +73,6 @@ export function usePageTracking() {
 
     return handleRouteChange
   }
-  
+
   return () => {}
 }

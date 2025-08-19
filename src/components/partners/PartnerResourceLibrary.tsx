@@ -2,7 +2,7 @@
 
 /**
  * Partner Resource Library
- * 
+ *
  * Comprehensive library of consciousness transformation resources,
  * tools, and materials for certified consultants.
  */
@@ -56,7 +56,7 @@ const RESOURCE_CATEGORIES: ResourceCategory[] = [
     icon: '🔍',
     description: 'Intelligence gap analysis and consciousness measurement',
     resourceCount: 24,
-    color: '#06B6D4'
+    color: '#06B6D4',
   },
   {
     id: 'transformation-guides',
@@ -64,7 +64,7 @@ const RESOURCE_CATEGORIES: ResourceCategory[] = [
     icon: '📖',
     description: 'Step-by-step consciousness transformation playbooks',
     resourceCount: 18,
-    color: '#8B5CF6'
+    color: '#8B5CF6',
   },
   {
     id: 'client-materials',
@@ -72,7 +72,7 @@ const RESOURCE_CATEGORIES: ResourceCategory[] = [
     icon: '👥',
     description: 'Presentation decks and consciousness education content',
     resourceCount: 42,
-    color: '#10B981'
+    color: '#10B981',
   },
   {
     id: 'implementation-templates',
@@ -80,7 +80,7 @@ const RESOURCE_CATEGORIES: ResourceCategory[] = [
     icon: '🛠️',
     description: 'Project plans and transformation roadmaps',
     resourceCount: 31,
-    color: '#F59E0B'
+    color: '#F59E0B',
   },
   {
     id: 'case-studies',
@@ -88,7 +88,7 @@ const RESOURCE_CATEGORIES: ResourceCategory[] = [
     icon: '📊',
     description: 'Success stories and transformation examples',
     resourceCount: 15,
-    color: '#EC4899'
+    color: '#EC4899',
   },
   {
     id: 'advanced-frameworks',
@@ -96,8 +96,8 @@ const RESOURCE_CATEGORIES: ResourceCategory[] = [
     icon: '🧠',
     description: 'Consciousness emergence and multiplication strategies',
     resourceCount: 12,
-    color: '#3B82F6'
-  }
+    color: '#3B82F6',
+  },
 ]
 
 // Sample Resources
@@ -107,7 +107,8 @@ const SAMPLE_RESOURCES: Resource[] = [
     title: 'Complete Consciousness Assessment Toolkit',
     type: 'tool',
     category: 'assessment-tools',
-    description: 'Comprehensive toolkit for measuring business consciousness levels across all departments',
+    description:
+      'Comprehensive toolkit for measuring business consciousness levels across all departments',
     consciousnessLevel: 1,
     certificationRequired: 'foundation',
     fileSize: '45 MB',
@@ -115,7 +116,7 @@ const SAMPLE_RESOURCES: Resource[] = [
     downloads: 1247,
     rating: 4.8,
     tags: ['assessment', 'consciousness', 'measurement', 'foundation'],
-    featured: true
+    featured: true,
   },
   {
     id: 'intelligence-multiplication-playbook',
@@ -130,7 +131,7 @@ const SAMPLE_RESOURCES: Resource[] = [
     downloads: 892,
     rating: 4.9,
     tags: ['multiplication', 'intelligence', 'advanced', 'strategy'],
-    featured: true
+    featured: true,
   },
   {
     id: 'executive-consciousness-deck',
@@ -145,7 +146,7 @@ const SAMPLE_RESOURCES: Resource[] = [
     lastUpdated: new Date('2024-01-10'),
     downloads: 2103,
     rating: 4.7,
-    tags: ['executive', 'presentation', 'consciousness', 'c-suite']
+    tags: ['executive', 'presentation', 'consciousness', 'c-suite'],
   },
   {
     id: 'transformation-roadmap-template',
@@ -159,7 +160,7 @@ const SAMPLE_RESOURCES: Resource[] = [
     lastUpdated: new Date('2024-01-05'),
     downloads: 1567,
     rating: 4.6,
-    tags: ['roadmap', 'planning', 'transformation', 'template']
+    tags: ['roadmap', 'planning', 'transformation', 'template'],
   },
   {
     id: 'manufacturing-consciousness-case',
@@ -173,7 +174,7 @@ const SAMPLE_RESOURCES: Resource[] = [
     lastUpdated: new Date('2023-12-20'),
     downloads: 634,
     rating: 4.9,
-    tags: ['case-study', 'manufacturing', 'success', 'multiplication']
+    tags: ['case-study', 'manufacturing', 'success', 'multiplication'],
   },
   {
     id: 'consciousness-emergence-framework',
@@ -188,19 +189,19 @@ const SAMPLE_RESOURCES: Resource[] = [
     downloads: 287,
     rating: 5.0,
     tags: ['emergence', 'consciousness', 'master', 'architecture'],
-    featured: true
-  }
+    featured: true,
+  },
 ]
 
 // 3D Resource Visualization
-const ResourceVisualization: React.FC<{ 
-  category: string 
-  resourceCount: number 
-  color: string 
+const ResourceVisualization: React.FC<{
+  category: string
+  resourceCount: number
+  color: string
 }> = ({ category, resourceCount, color }) => {
   // TODO: Re-enable when Three.js is available
   // const meshRef = React.useRef<THREE.Mesh>(null)
-  
+
   // useFrame((state) => {
   //   if (meshRef.current) {
   //     meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1
@@ -210,14 +211,14 @@ const ResourceVisualization: React.FC<{
 
   return (
     // TODO: Re-enable 3D visualization when Three.js is available
-    <div className="w-24 h-24 mx-auto relative">
+    <div className="relative mx-auto h-24 w-24">
       <div
-        className="w-full h-full rounded-lg flex items-center justify-center text-white font-bold text-xl"
+        className="flex h-full w-full items-center justify-center rounded-lg text-xl font-bold text-white"
         style={{ backgroundColor: color }}
       >
         {resourceCount}
       </div>
-      <div className="absolute -bottom-6 left-0 right-0 text-center text-sm text-gray-600">
+      <div className="absolute right-0 -bottom-6 left-0 text-center text-sm text-gray-600">
         {category}
       </div>
     </div>
@@ -228,7 +229,7 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
   partnerId = 'demo-partner',
   certificationLevel = 'advanced',
   onResourceOpen,
-  className = ''
+  className = '',
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -238,7 +239,7 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
   const [loading, setLoading] = useState(false)
 
   // Filter resources based on certification level
-  const accessibleResources = resources.filter(resource => {
+  const accessibleResources = resources.filter((resource) => {
     const levels = ['foundation', 'advanced', 'master', 'transcendent']
     const userLevelIndex = levels.indexOf(certificationLevel)
     const requiredLevelIndex = levels.indexOf(resource.certificationRequired)
@@ -246,11 +247,12 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
   })
 
   // Apply category and search filters
-  const filteredResources = accessibleResources.filter(resource => {
+  const filteredResources = accessibleResources.filter((resource) => {
     const matchesCategory = selectedCategory === 'all' || resource.category === selectedCategory
-    const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         resource.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    const matchesSearch =
+      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
     return matchesCategory && matchesSearch
   })
 
@@ -270,41 +272,52 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
 
   const getCertificationColor = (level: string) => {
     switch (level) {
-      case 'foundation': return '#10B981'
-      case 'advanced': return '#3B82F6'
-      case 'master': return '#8B5CF6'
-      case 'transcendent': return '#EC4899'
-      default: return '#6B7280'
+      case 'foundation':
+        return '#10B981'
+      case 'advanced':
+        return '#3B82F6'
+      case 'master':
+        return '#8B5CF6'
+      case 'transcendent':
+        return '#EC4899'
+      default:
+        return '#6B7280'
     }
   }
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'guide': return '📖'
-      case 'template': return '📋'
-      case 'tool': return '🛠️'
-      case 'presentation': return '🎯'
-      case 'case-study': return '📊'
-      case 'framework': return '🧠'
-      default: return '📄'
+      case 'guide':
+        return '📖'
+      case 'template':
+        return '📋'
+      case 'tool':
+        return '🛠️'
+      case 'presentation':
+        return '🎯'
+      case 'case-study':
+        return '📊'
+      case 'framework':
+        return '🧠'
+      default:
+        return '📄'
     }
   }
 
   return (
     <div className={`space-y-8 ${className}`}>
       {/* Header */}
-      <div className="text-center space-y-4">
-        <h2 className="text-4xl font-thin text-white">
-          📚 Partner Resource Library
-        </h2>
-        <p className="text-xl text-gray-300 max-w-4xl mx-auto">
-          Everything you need to guide businesses from unconscious automation to transcendent intelligence
+      <div className="space-y-4 text-center">
+        <h2 className="text-4xl font-thin text-white">📚 Partner Resource Library</h2>
+        <p className="mx-auto max-w-4xl text-xl text-gray-300">
+          Everything you need to guide businesses from unconscious automation to transcendent
+          intelligence
         </p>
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-gradient-to-r from-gray-900 to-black border border-gray-700 rounded-2xl p-6">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="rounded-2xl border border-gray-700 bg-gradient-to-r from-gray-900 to-black p-6">
+        <div className="flex flex-col gap-4 md:flex-row">
           {/* Search */}
           <div className="flex-1">
             <input
@@ -312,15 +325,15 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
               placeholder="Search resources, tools, guides..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
+              className="w-full rounded-lg border border-gray-600 bg-black/50 px-4 py-3 text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
             />
           </div>
 
           {/* Sort */}
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:border-cyan-400 focus:outline-none"
+            onChange={(e) => setSortBy(e.target.value as unknown)}
+            className="rounded-lg border border-gray-600 bg-black/50 px-4 py-3 text-white focus:border-cyan-400 focus:outline-none"
           >
             <option value="latest">Latest Updated</option>
             <option value="popular">Most Downloaded</option>
@@ -330,7 +343,7 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
           {/* Filter Toggle */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="px-6 py-3 bg-gray-700 rounded-lg text-white hover:bg-gray-600 transition-all"
+            className="rounded-lg bg-gray-700 px-6 py-3 text-white transition-all hover:bg-gray-600"
           >
             Filters {showFilters ? '▲' : '▼'}
           </button>
@@ -346,10 +359,10 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
               transition={{ duration: 0.3 }}
               className="mt-6"
             >
-              <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
                 <button
                   onClick={() => setSelectedCategory('all')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                     selectedCategory === 'all'
                       ? 'bg-cyan-500 text-white'
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -361,13 +374,14 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
                   <button
                     key={category.id}
                     onClick={() => setSelectedCategory(category.id)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                       selectedCategory === category.id
                         ? 'text-white'
                         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                     }`}
                     style={{
-                      backgroundColor: selectedCategory === category.id ? category.color : undefined
+                      backgroundColor:
+                        selectedCategory === category.id ? category.color : undefined,
                     }}
                   >
                     {category.icon} {category.name}
@@ -381,15 +395,15 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
 
       {/* Category Overview */}
       {selectedCategory === 'all' && (
-        <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
           {RESOURCE_CATEGORIES.map((category) => (
             <motion.div
               key={category.id}
-              className="bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer hover:border-gray-600 transition-all"
+              className="cursor-pointer rounded-xl border border-gray-700 bg-gray-900 p-4 transition-all hover:border-gray-600"
               onClick={() => setSelectedCategory(category.id)}
               whileHover={{ scale: 1.02 }}
             >
-              <div className="h-32 mb-4">
+              <div className="mb-4 h-32">
                 <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
                   <ambientLight intensity={0.5} />
                   <pointLight position={[10, 10, 10]} />
@@ -401,9 +415,9 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
                 </Canvas>
               </div>
               <div className="text-center">
-                <div className="text-2xl mb-2">{category.icon}</div>
-                <h3 className="font-semibold text-white text-sm">{category.name}</h3>
-                <p className="text-xs text-gray-400 mt-1">{category.resourceCount} resources</p>
+                <div className="mb-2 text-2xl">{category.icon}</div>
+                <h3 className="text-sm font-semibold text-white">{category.name}</h3>
+                <p className="mt-1 text-xs text-gray-400">{category.resourceCount} resources</p>
               </div>
             </motion.div>
           ))}
@@ -418,7 +432,11 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
             Showing {sortedResources.length} of {resources.length} resources
           </div>
           <div className="text-sm text-gray-500">
-            Your access level: <span className="font-semibold" style={{ color: getCertificationColor(certificationLevel) }}>
+            Your access level:{' '}
+            <span
+              className="font-semibold"
+              style={{ color: getCertificationColor(certificationLevel) }}
+            >
               {certificationLevel.charAt(0).toUpperCase() + certificationLevel.slice(1)}
             </span>
           </div>
@@ -427,76 +445,86 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
         {/* Featured Resources */}
         {selectedCategory === 'all' && (
           <div className="mb-8">
-            <h3 className="text-xl font-bold text-white mb-4">⭐ Featured Resources</h3>
-            <div className="grid md:grid-cols-3 gap-6">
-              {sortedResources.filter(r => r.featured).slice(0, 3).map((resource) => (
-                <motion.div
-                  key={resource.id}
-                  className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border border-purple-700 rounded-xl p-6 cursor-pointer hover:border-purple-600 transition-all"
-                  onClick={() => onResourceOpen?.(resource)}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="text-3xl">{getTypeIcon(resource.type)}</div>
-                    <div className="flex items-center space-x-1">
-                      <span className="text-yellow-400">★</span>
-                      <span className="text-white font-semibold">{resource.rating}</span>
+            <h3 className="mb-4 text-xl font-bold text-white">⭐ Featured Resources</h3>
+            <div className="grid gap-6 md:grid-cols-3">
+              {sortedResources
+                .filter((r) => r.featured)
+                .slice(0, 3)
+                .map((resource) => (
+                  <motion.div
+                    key={resource.id}
+                    className="cursor-pointer rounded-xl border border-purple-700 bg-gradient-to-br from-purple-900/30 to-indigo-900/30 p-6 transition-all hover:border-purple-600"
+                    onClick={() => onResourceOpen?.(resource)}
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <div className="mb-4 flex items-start justify-between">
+                      <div className="text-3xl">{getTypeIcon(resource.type)}</div>
+                      <div className="flex items-center space-x-1">
+                        <span className="text-yellow-400">★</span>
+                        <span className="font-semibold text-white">{resource.rating}</span>
+                      </div>
                     </div>
-                  </div>
-                  <h4 className="text-lg font-semibold text-white mb-2">{resource.title}</h4>
-                  <p className="text-sm text-gray-300 mb-4 line-clamp-2">{resource.description}</p>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-purple-400">{resource.downloads.toLocaleString()} downloads</span>
-                    <span 
-                      className="px-2 py-1 rounded-full font-medium"
-                      style={{ 
-                        backgroundColor: getCertificationColor(resource.certificationRequired) + '33',
-                        color: getCertificationColor(resource.certificationRequired)
-                      }}
-                    >
-                      {resource.certificationRequired}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
+                    <h4 className="mb-2 text-lg font-semibold text-white">{resource.title}</h4>
+                    <p className="mb-4 line-clamp-2 text-sm text-gray-300">
+                      {resource.description}
+                    </p>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-purple-400">
+                        {resource.downloads.toLocaleString()} downloads
+                      </span>
+                      <span
+                        className="rounded-full px-2 py-1 font-medium"
+                        style={{
+                          backgroundColor:
+                            getCertificationColor(resource.certificationRequired) + '33',
+                          color: getCertificationColor(resource.certificationRequired),
+                        }}
+                      >
+                        {resource.certificationRequired}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
             </div>
           </div>
         )}
 
         {/* Resource List */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {sortedResources.map((resource) => (
             <motion.div
               key={resource.id}
-              className="bg-gray-900 border border-gray-700 rounded-xl p-6 cursor-pointer hover:border-gray-600 transition-all"
+              className="cursor-pointer rounded-xl border border-gray-700 bg-gray-900 p-6 transition-all hover:border-gray-600"
               onClick={() => onResourceOpen?.(resource)}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               whileHover={{ scale: 1.01 }}
             >
-              <div className="flex items-start justify-between mb-4">
+              <div className="mb-4 flex items-start justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="text-2xl">{getTypeIcon(resource.type)}</div>
                   <div>
                     <div className="text-xs text-gray-400 uppercase">{resource.type}</div>
-                    <div className="text-xs text-gray-500">{resource.fileSize || resource.duration}</div>
+                    <div className="text-xs text-gray-500">
+                      {resource.fileSize || resource.duration}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <span className="text-yellow-400 text-sm">★</span>
-                  <span className="text-white font-semibold text-sm">{resource.rating}</span>
+                  <span className="text-sm text-yellow-400">★</span>
+                  <span className="text-sm font-semibold text-white">{resource.rating}</span>
                 </div>
               </div>
 
-              <h4 className="text-lg font-semibold text-white mb-2">{resource.title}</h4>
-              <p className="text-sm text-gray-300 mb-4 line-clamp-2">{resource.description}</p>
+              <h4 className="mb-2 text-lg font-semibold text-white">{resource.title}</h4>
+              <p className="mb-4 line-clamp-2 text-sm text-gray-300">{resource.description}</p>
 
               {/* Tags */}
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="mb-4 flex flex-wrap gap-2">
                 {resource.tags.slice(0, 3).map((tag) => (
                   <span
                     key={tag}
-                    className="px-2 py-1 bg-gray-800 rounded-full text-xs text-gray-400"
+                    className="rounded-full bg-gray-800 px-2 py-1 text-xs text-gray-400"
                   >
                     {tag}
                   </span>
@@ -517,11 +545,11 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
                     Updated {resource.lastUpdated.toLocaleDateString()}
                   </span>
                 </div>
-                <span 
-                  className="px-2 py-1 rounded-full font-medium"
-                  style={{ 
+                <span
+                  className="rounded-full px-2 py-1 font-medium"
+                  style={{
                     backgroundColor: getCertificationColor(resource.certificationRequired) + '33',
-                    color: getCertificationColor(resource.certificationRequired)
+                    color: getCertificationColor(resource.certificationRequired),
                   }}
                 >
                   {resource.certificationRequired}
@@ -529,14 +557,14 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
               </div>
 
               {/* Consciousness Level Indicator */}
-              <div className="mt-4 pt-4 border-t border-gray-700">
+              <div className="mt-4 border-t border-gray-700 pt-4">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-gray-400">Consciousness Level</span>
-                  <span className="text-cyan-400 font-semibold">{resource.consciousnessLevel}</span>
+                  <span className="font-semibold text-cyan-400">{resource.consciousnessLevel}</span>
                 </div>
-                <div className="mt-1 w-full bg-gray-700 rounded-full h-1">
+                <div className="mt-1 h-1 w-full rounded-full bg-gray-700">
                   <div
-                    className="bg-gradient-to-r from-cyan-500 to-purple-500 h-1 rounded-full"
+                    className="h-1 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500"
                     style={{ width: `${(resource.consciousnessLevel / 10) * 100}%` }}
                   />
                 </div>
@@ -547,33 +575,33 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
 
         {/* Empty State */}
         {sortedResources.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-white mb-2">No resources found</h3>
+          <div className="py-12 text-center">
+            <div className="mb-4 text-6xl">🔍</div>
+            <h3 className="mb-2 text-xl font-semibold text-white">No resources found</h3>
             <p className="text-gray-400">Try adjusting your filters or search query</p>
           </div>
         )}
       </div>
 
       {/* Quick Access Tools */}
-      <div className="bg-gradient-to-r from-cyan-900/30 to-purple-900/30 border border-cyan-700 rounded-2xl p-6">
-        <h3 className="text-xl font-bold text-white mb-4">🚀 Quick Access Tools</h3>
-        <div className="grid md:grid-cols-4 gap-4">
+      <div className="rounded-2xl border border-cyan-700 bg-gradient-to-r from-cyan-900/30 to-purple-900/30 p-6">
+        <h3 className="mb-4 text-xl font-bold text-white">🚀 Quick Access Tools</h3>
+        <div className="grid gap-4 md:grid-cols-4">
           {[
             { name: 'Consciousness Calculator', icon: '🧮', time: '2 min' },
             { name: 'Intelligence Gap Analyzer', icon: '📊', time: '5 min' },
             { name: 'ROI Projection Tool', icon: '💰', time: '3 min' },
-            { name: 'Transformation Readiness', icon: '✅', time: '4 min' }
+            { name: 'Transformation Readiness', icon: '✅', time: '4 min' },
           ].map((tool, index) => (
             <motion.button
               key={index}
-              className="bg-black/30 rounded-lg p-4 text-left hover:bg-black/50 transition-all"
+              className="rounded-lg bg-black/30 p-4 text-left transition-all hover:bg-black/50"
               whileHover={{ scale: 1.02 }}
-              onClick={() => console.log(`Opening ${tool.name}`)}
+              onClick={() => }
             >
-              <div className="text-2xl mb-2">{tool.icon}</div>
-              <div className="text-white font-medium text-sm">{tool.name}</div>
-              <div className="text-xs text-gray-400 mt-1">{tool.time} to complete</div>
+              <div className="mb-2 text-2xl">{tool.icon}</div>
+              <div className="text-sm font-medium text-white">{tool.name}</div>
+              <div className="mt-1 text-xs text-gray-400">{tool.time} to complete</div>
             </motion.button>
           ))}
         </div>

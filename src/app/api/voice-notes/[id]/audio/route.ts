@@ -16,10 +16,7 @@ import { pipeline } from 'stream/promises'
  * GET /api/voice-notes/[id]/audio
  * Stream encrypted audio file with decryption
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession()
     if (!session?.user) {
@@ -31,15 +28,15 @@ export async function GET(
       where: {
         id: params.id,
         userId: session.user.id,
-        deletedAt: null
+        deletedAt: null,
       },
       select: {
         audioUrl: true,
         audioEncrypted: true,
         audioEncryptionMetadata: true,
         audioFormat: true,
-        tenantId: true
-      }
+        tenantId: true,
+      },
     })
 
     if (!voiceNote || !voiceNote.audioUrl) {
@@ -49,7 +46,7 @@ export async function GET(
     // Get user tenant ID
     const user = await db.user.findUnique({
       where: { id: session.user.id },
-      select: { tenantId: true }
+      select: { tenantId: true },
     })
 
     // Verify tenant access
@@ -65,7 +62,7 @@ export async function GET(
     if (voiceNote.audioEncrypted && voiceNote.audioEncryptionMetadata) {
       // Stream with decryption
       const encryptedData = await readFile(filePath)
-      
+
       // Decrypt audio
       const decrypted = await audioEncryption.decryptAudio(
         encryptedData,
@@ -81,29 +78,24 @@ export async function GET(
           'Cache-Control': 'private, max-age=3600',
           'X-Content-Type-Options': 'nosniff',
           'X-Audio-Encrypted': 'true',
-          'X-Audio-Verified': decrypted.verified.toString()
-        }
+          'X-Audio-Verified': decrypted.verified.toString(),
+        },
       })
     } else {
       // Stream unencrypted audio
       const audioData = await readFile(filePath)
-      
+
       return new NextResponse(audioData, {
         headers: {
           'Content-Type': voiceNote.audioFormat || 'audio/webm',
           'Content-Length': audioData.length.toString(),
           'Cache-Control': 'private, max-age=3600',
-          'X-Content-Type-Options': 'nosniff'
-        }
+          'X-Content-Type-Options': 'nosniff',
+        },
       })
     }
-
   } catch (error) {
-    console.error('Error streaming audio:', error)
-    return NextResponse.json(
-      { error: 'Failed to stream audio' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to stream audio' }, { status: 500 })
   }
 }
 
@@ -111,10 +103,7 @@ export async function GET(
  * POST /api/voice-notes/[id]/audio/encrypt
  * Encrypt existing unencrypted audio
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession()
     if (!session?.user) {
@@ -126,8 +115,8 @@ export async function POST(
       where: {
         id: params.id,
         userId: session.user.id,
-        deletedAt: null
-      }
+        deletedAt: null,
+      },
     })
 
     if (!voiceNote || !voiceNote.audioUrl) {
@@ -151,8 +140,8 @@ export async function POST(
       data: {
         audioEncrypted: true,
         audioEncryptionMetadata: encryptionMetadata,
-        audioUrl: voiceNote.audioUrl.replace(/\.[^.]+$/, '.enc')
-      }
+        audioUrl: voiceNote.audioUrl.replace(/\.[^.]+$/, '.enc'),
+      },
     })
 
     // Log encryption event
@@ -165,23 +154,18 @@ export async function POST(
         userId: session.user.id,
         metadata: {
           originalFile: filename,
-          encryptionVersion: encryptionMetadata.version
+          encryptionVersion: encryptionMetadata.version,
         },
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     })
 
     return NextResponse.json({
       success: true,
       encrypted: true,
-      encryptionMetadata
+      encryptionMetadata,
     })
-
   } catch (error) {
-    console.error('Error encrypting audio:', error)
-    return NextResponse.json(
-      { error: 'Failed to encrypt audio' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to encrypt audio' }, { status: 500 })
   }
 }

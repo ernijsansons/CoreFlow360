@@ -17,78 +17,78 @@ export const CACHE_KEYS = {
   CUSTOMER_BY_ID: {
     pattern: 'customer:{{id}}',
     ttl: 300, // 5 minutes
-    tags: ['customer']
+    tags: ['customer'],
   },
   CUSTOMER_LIST: {
     pattern: 'customers:{{tenantId}}:{{page}}:{{limit}}:{{search}}:{{status}}',
     ttl: 180, // 3 minutes
-    tags: ['customer', 'list']
+    tags: ['customer', 'list'],
   },
   CUSTOMER_METRICS: {
     pattern: 'metrics:customers:{{tenantId}}',
     ttl: 600, // 10 minutes
-    tags: ['metrics', 'customer']
+    tags: ['metrics', 'customer'],
   },
 
   // Dashboard stats caching
   DASHBOARD_STATS: {
     pattern: 'dashboard:stats:{{tenantId}}:{{timeframe}}',
     ttl: 300, // 5 minutes
-    tags: ['dashboard', 'stats']
+    tags: ['dashboard', 'stats'],
   },
   DASHBOARD_CHARTS: {
     pattern: 'dashboard:charts:{{tenantId}}:{{chartType}}:{{timeframe}}',
     ttl: 900, // 15 minutes
-    tags: ['dashboard', 'charts']
+    tags: ['dashboard', 'charts'],
   },
 
   // Analytics caching
   CRM_ANALYTICS: {
     pattern: 'analytics:crm:{{tenantId}}:{{timeframe}}',
     ttl: 1800, // 30 minutes
-    tags: ['analytics', 'crm']
+    tags: ['analytics', 'crm'],
   },
   PERFORMANCE_METRICS: {
     pattern: 'metrics:performance:{{tenantId}}:{{metricType}}',
     ttl: 600, // 10 minutes
-    tags: ['metrics', 'performance']
+    tags: ['metrics', 'performance'],
   },
 
   // User session caching
   USER_SESSION: {
     pattern: 'session:{{userId}}',
     ttl: 3600, // 1 hour
-    tags: ['session', 'user']
+    tags: ['session', 'user'],
   },
   USER_PERMISSIONS: {
     pattern: 'permissions:{{userId}}:{{tenantId}}',
     ttl: 1800, // 30 minutes
-    tags: ['permissions', 'user']
+    tags: ['permissions', 'user'],
   },
 
   // Subscription and module caching
   SUBSCRIPTION_DATA: {
     pattern: 'subscription:{{tenantId}}',
     ttl: 1800, // 30 minutes
-    tags: ['subscription']
+    tags: ['subscription'],
   },
   MODULE_ACCESS: {
     pattern: 'modules:access:{{tenantId}}:{{userId}}',
     ttl: 900, // 15 minutes
-    tags: ['modules', 'access']
+    tags: ['modules', 'access'],
   },
 
   // AI and processing results
   AI_INSIGHTS: {
     pattern: 'ai:insights:{{tenantId}}:{{type}}',
     ttl: 3600, // 1 hour
-    tags: ['ai', 'insights']
+    tags: ['ai', 'insights'],
   },
   PROCESSED_DATA: {
     pattern: 'processed:{{type}}:{{hash}}',
     ttl: 7200, // 2 hours
-    tags: ['processed']
-  }
+    tags: ['processed'],
+  },
 } as const
 
 /**
@@ -111,14 +111,18 @@ export class ApplicationCache {
   /**
    * Cache customer data with automatic invalidation
    */
-  async cacheCustomer<T>(customerId: string, tenantId: string, factory: () => Promise<T>): Promise<T> {
+  async cacheCustomer<T>(
+    customerId: string,
+    tenantId: string,
+    factory: () => Promise<T>
+  ): Promise<T> {
     const key = buildCacheKey(CACHE_KEYS.CUSTOMER_BY_ID.pattern, { id: customerId })
-    
+
     return unifiedCache.cache(key, factory, {
       ttl: CACHE_KEYS.CUSTOMER_BY_ID.ttl,
       tenantId,
       namespace: 'app',
-      tags: CACHE_KEYS.CUSTOMER_BY_ID.tags
+      tags: CACHE_KEYS.CUSTOMER_BY_ID.tags,
     })
   }
 
@@ -138,14 +142,14 @@ export class ApplicationCache {
       page,
       limit,
       search: search || 'none',
-      status: status || 'all'
+      status: status || 'all',
     })
 
     return unifiedCache.cache(key, factory, {
       ttl: CACHE_KEYS.CUSTOMER_LIST.ttl,
       tenantId,
       namespace: 'app',
-      tags: CACHE_KEYS.CUSTOMER_LIST.tags
+      tags: CACHE_KEYS.CUSTOMER_LIST.tags,
     })
   }
 
@@ -163,7 +167,7 @@ export class ApplicationCache {
       ttl: CACHE_KEYS.DASHBOARD_STATS.ttl,
       tenantId,
       namespace: 'app',
-      tags: CACHE_KEYS.DASHBOARD_STATS.tags
+      tags: CACHE_KEYS.DASHBOARD_STATS.tags,
     })
   }
 
@@ -181,7 +185,7 @@ export class ApplicationCache {
       ttl: CACHE_KEYS.CRM_ANALYTICS.ttl,
       tenantId,
       namespace: 'app',
-      tags: CACHE_KEYS.CRM_ANALYTICS.tags
+      tags: CACHE_KEYS.CRM_ANALYTICS.tags,
     })
   }
 
@@ -194,7 +198,7 @@ export class ApplicationCache {
     return unifiedCache.cache(key, factory, {
       ttl: CACHE_KEYS.USER_SESSION.ttl,
       namespace: 'session',
-      tags: CACHE_KEYS.USER_SESSION.tags
+      tags: CACHE_KEYS.USER_SESSION.tags,
     })
   }
 
@@ -212,7 +216,7 @@ export class ApplicationCache {
       ttl: CACHE_KEYS.USER_PERMISSIONS.ttl,
       tenantId,
       namespace: 'auth',
-      tags: CACHE_KEYS.USER_PERMISSIONS.tags
+      tags: CACHE_KEYS.USER_PERMISSIONS.tags,
     })
   }
 
@@ -226,7 +230,7 @@ export class ApplicationCache {
       ttl: CACHE_KEYS.SUBSCRIPTION_DATA.ttl,
       tenantId,
       namespace: 'subscription',
-      tags: CACHE_KEYS.SUBSCRIPTION_DATA.tags
+      tags: CACHE_KEYS.SUBSCRIPTION_DATA.tags,
     })
   }
 
@@ -243,7 +247,7 @@ export class ApplicationCache {
     return unifiedCache.cache(key, factory, {
       ttl: CACHE_KEYS.PROCESSED_DATA.ttl,
       namespace: 'ai',
-      tags: CACHE_KEYS.PROCESSED_DATA.tags
+      tags: CACHE_KEYS.PROCESSED_DATA.tags,
     })
   }
 
@@ -254,7 +258,7 @@ export class ApplicationCache {
     await Promise.all([
       unifiedCache.invalidatePattern('customer:*', { tenantId, namespace: 'app' }),
       unifiedCache.invalidatePattern('customers:*', { tenantId, namespace: 'app' }),
-      unifiedCache.invalidatePattern('metrics:customers:*', { tenantId, namespace: 'app' })
+      unifiedCache.invalidatePattern('metrics:customers:*', { tenantId, namespace: 'app' }),
     ])
   }
 
@@ -264,7 +268,7 @@ export class ApplicationCache {
   async invalidateDashboardCache(tenantId: string): Promise<void> {
     await Promise.all([
       unifiedCache.invalidatePattern('dashboard:*', { tenantId, namespace: 'app' }),
-      unifiedCache.invalidatePattern('analytics:*', { tenantId, namespace: 'app' })
+      unifiedCache.invalidatePattern('analytics:*', { tenantId, namespace: 'app' }),
     ])
   }
 
@@ -274,7 +278,9 @@ export class ApplicationCache {
   async invalidateUserCache(userId: string, tenantId?: string): Promise<void> {
     await Promise.all([
       unifiedCache.invalidatePattern('session:*', { namespace: 'session' }),
-      tenantId ? unifiedCache.invalidatePattern('permissions:*', { tenantId, namespace: 'auth' }) : Promise.resolve()
+      tenantId
+        ? unifiedCache.invalidatePattern('permissions:*', { tenantId, namespace: 'auth' })
+        : Promise.resolve(),
     ])
   }
 
@@ -284,17 +290,15 @@ export class ApplicationCache {
   async invalidateSubscriptionCache(tenantId: string): Promise<void> {
     await Promise.all([
       unifiedCache.invalidatePattern('subscription:*', { tenantId, namespace: 'subscription' }),
-      unifiedCache.invalidatePattern('modules:*', { tenantId, namespace: 'app' })
+      unifiedCache.invalidatePattern('modules:*', { tenantId, namespace: 'app' }),
     ])
   }
 
   /**
    * Warm up critical cache entries
    */
-  async warmupCache(tenantId: string, userId: string): Promise<void> {
+  async warmupCache(_tenantId: string, _userId: string): Promise<void> {
     // This would be called during login or app initialization
-    console.log(`Warming up cache for tenant ${tenantId}, user ${userId}`)
-    
     // Pre-load critical data that's commonly accessed
     // Implementation would depend on specific application needs
   }
@@ -309,22 +313,22 @@ export class ApplicationCache {
   /**
    * Perform cache health check
    */
-  async healthCheck(): Promise<{ status: 'healthy' | 'degraded' | 'unhealthy'; details: any }> {
+  async healthCheck(): Promise<{ status: 'healthy' | 'degraded' | 'unhealthy'; details: unknown }> {
     try {
       const testKey = 'health:check'
       const testValue = { timestamp: Date.now() }
-      
+
       // Test write
       await unifiedCache.set(testKey, testValue, { ttl: 10 })
-      
+
       // Test read
       const retrieved = await unifiedCache.get(testKey)
-      
+
       // Test delete
       await unifiedCache.del(testKey)
-      
+
       const stats = unifiedCache.getStats()
-      
+
       if (retrieved && retrieved.timestamp === testValue.timestamp) {
         return {
           status: stats.hitRate > 50 ? 'healthy' : 'degraded',
@@ -332,19 +336,19 @@ export class ApplicationCache {
             hitRate: stats.hitRate,
             totalKeys: stats.totalKeys,
             errors: stats.errors,
-            redisAvailable: unifiedCache.isAvailable()
-          }
+            redisAvailable: unifiedCache.isAvailable(),
+          },
         }
       } else {
         return {
           status: 'unhealthy',
-          details: { error: 'Cache read/write test failed' }
+          details: { error: 'Cache read/write test failed' },
         }
       }
     } catch (error) {
       return {
         status: 'unhealthy',
-        details: { error: error instanceof Error ? error.message : 'Unknown error' }
+        details: { error: error instanceof Error ? error.message : 'Unknown error' },
       }
     }
   }

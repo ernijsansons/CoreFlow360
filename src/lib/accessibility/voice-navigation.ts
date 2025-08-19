@@ -7,7 +7,7 @@ export interface VoiceCommand {
   phrase: string
   aliases: string[]
   action: string
-  parameters?: Record<string, any>
+  parameters?: Record<string, unknown>
   confirmationRequired?: boolean
   accessibilityLevel: 'basic' | 'enhanced' | 'expert'
   description: string
@@ -63,7 +63,7 @@ class VoiceNavigationEngine {
       lastCommand: null,
       errorMessage: null,
       language: 'en-US',
-      voiceSettings: this.getDefaultVoiceSettings()
+      voiceSettings: this.getDefaultVoiceSettings(),
     }
 
     this.initializeVoiceRecognition()
@@ -82,13 +82,12 @@ class VoiceNavigationEngine {
       confirmationTimeout: 5000,
       noiseThreshold: 0.3,
       preferredVoice: 'default',
-      accessibilityMode: 'standard'
+      accessibilityMode: 'standard',
     }
   }
 
   private initializeVoiceRecognition(): void {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      console.warn('[Voice Navigation] Speech recognition not supported')
       return
     }
 
@@ -121,10 +120,10 @@ class VoiceNavigationEngine {
     }
 
     this.recognition.onerror = (event) => {
-      this.updateState({ 
-        isListening: false, 
+      this.updateState({
+        isListening: false,
         isProcessing: false,
-        errorMessage: `Voice recognition error: ${event.error}` 
+        errorMessage: `Voice recognition error: ${event.error}`,
       })
     }
   }
@@ -133,7 +132,6 @@ class VoiceNavigationEngine {
     if ('speechSynthesis' in window) {
       this.synthesis = window.speechSynthesis
     } else {
-      console.warn('[Voice Navigation] Speech synthesis not supported')
     }
   }
 
@@ -146,7 +144,7 @@ class VoiceNavigationEngine {
         action: 'navigate',
         parameters: { path: '/dashboard' },
         accessibilityLevel: 'basic',
-        description: 'Navigate to the main dashboard'
+        description: 'Navigate to the main dashboard',
       },
       {
         phrase: 'go to customers',
@@ -154,7 +152,7 @@ class VoiceNavigationEngine {
         action: 'navigate',
         parameters: { path: '/dashboard/customers' },
         accessibilityLevel: 'basic',
-        description: 'Navigate to customer management'
+        description: 'Navigate to customer management',
       },
       {
         phrase: 'go to consciousness center',
@@ -162,7 +160,7 @@ class VoiceNavigationEngine {
         action: 'navigate',
         parameters: { path: '/consciousness' },
         accessibilityLevel: 'enhanced',
-        description: 'Navigate to consciousness interface'
+        description: 'Navigate to consciousness interface',
       },
       {
         phrase: 'go to sustainability',
@@ -170,7 +168,7 @@ class VoiceNavigationEngine {
         action: 'navigate',
         parameters: { path: '/sustainability' },
         accessibilityLevel: 'enhanced',
-        description: 'Navigate to sustainability dashboard'
+        description: 'Navigate to sustainability dashboard',
       },
 
       // Action Commands
@@ -181,21 +179,21 @@ class VoiceNavigationEngine {
         parameters: { entity: 'customer' },
         confirmationRequired: true,
         accessibilityLevel: 'basic',
-        description: 'Open new customer creation form'
+        description: 'Open new customer creation form',
       },
       {
         phrase: 'save current form',
         aliases: ['save form', 'submit form', 'save changes'],
         action: 'save',
         accessibilityLevel: 'basic',
-        description: 'Save the current form'
+        description: 'Save the current form',
       },
       {
         phrase: 'cancel current action',
         aliases: ['cancel', 'go back', 'abort'],
         action: 'cancel',
         accessibilityLevel: 'basic',
-        description: 'Cancel current action and go back'
+        description: 'Cancel current action and go back',
       },
 
       // Search Commands
@@ -204,14 +202,14 @@ class VoiceNavigationEngine {
         aliases: ['find', 'look for', 'search'],
         action: 'search',
         accessibilityLevel: 'basic',
-        description: 'Search for specific content'
+        description: 'Search for specific content',
       },
       {
         phrase: 'filter by',
         aliases: ['filter', 'show only', 'filter results'],
         action: 'filter',
         accessibilityLevel: 'enhanced',
-        description: 'Apply filters to current view'
+        description: 'Apply filters to current view',
       },
 
       // Accessibility Commands
@@ -221,7 +219,7 @@ class VoiceNavigationEngine {
         action: 'accessibility',
         parameters: { type: 'fontSize', direction: 'increase' },
         accessibilityLevel: 'basic',
-        description: 'Increase font size for better readability'
+        description: 'Increase font size for better readability',
       },
       {
         phrase: 'decrease text size',
@@ -229,7 +227,7 @@ class VoiceNavigationEngine {
         action: 'accessibility',
         parameters: { type: 'fontSize', direction: 'decrease' },
         accessibilityLevel: 'basic',
-        description: 'Decrease font size'
+        description: 'Decrease font size',
       },
       {
         phrase: 'enable high contrast',
@@ -237,7 +235,7 @@ class VoiceNavigationEngine {
         action: 'accessibility',
         parameters: { type: 'contrast', value: 'high' },
         accessibilityLevel: 'basic',
-        description: 'Enable high contrast mode for better visibility'
+        description: 'Enable high contrast mode for better visibility',
       },
       {
         phrase: 'reduce motion',
@@ -245,7 +243,7 @@ class VoiceNavigationEngine {
         action: 'accessibility',
         parameters: { type: 'motion', value: 'reduced' },
         accessibilityLevel: 'basic',
-        description: 'Reduce or disable animations'
+        description: 'Reduce or disable animations',
       },
 
       // Consciousness Commands (Advanced)
@@ -255,7 +253,7 @@ class VoiceNavigationEngine {
         action: 'consciousness',
         parameters: { level: 'neural' },
         accessibilityLevel: 'enhanced',
-        description: 'Activate neural-level consciousness features'
+        description: 'Activate neural-level consciousness features',
       },
       {
         phrase: 'activate synaptic mode',
@@ -263,14 +261,14 @@ class VoiceNavigationEngine {
         action: 'consciousness',
         parameters: { level: 'synaptic' },
         accessibilityLevel: 'enhanced',
-        description: 'Activate synaptic-level consciousness features'
+        description: 'Activate synaptic-level consciousness features',
       },
       {
         phrase: 'show ai insights',
         aliases: ['ai insights', 'consciousness insights', 'intelligent recommendations'],
         action: 'showInsights',
         accessibilityLevel: 'enhanced',
-        description: 'Display AI-powered business insights'
+        description: 'Display AI-powered business insights',
       },
 
       // Voice Control Commands
@@ -280,15 +278,15 @@ class VoiceNavigationEngine {
         action: 'voiceControl',
         parameters: { action: 'stop' },
         accessibilityLevel: 'basic',
-        description: 'Stop voice recognition'
+        description: 'Stop voice recognition',
       },
       {
         phrase: 'help with voice commands',
         aliases: ['voice help', 'what can I say', 'voice commands'],
         action: 'showHelp',
         accessibilityLevel: 'basic',
-        description: 'Show available voice commands'
-      }
+        description: 'Show available voice commands',
+      },
     ]
   }
 
@@ -301,7 +299,6 @@ class VoiceNavigationEngine {
       this.recognition.start()
       this.announceToScreenReader('Listening for voice commands')
     } catch (error) {
-      console.error('[Voice Navigation] Failed to start listening:', error)
       this.updateState({ errorMessage: 'Failed to start voice recognition' })
     }
   }
@@ -315,15 +312,15 @@ class VoiceNavigationEngine {
   }
 
   public async processVoiceCommand(command: string, confidence: number): Promise<void> {
-    this.updateState({ 
-      isProcessing: true, 
+    this.updateState({
+      isProcessing: true,
       currentCommand: command,
-      confidence: confidence 
+      confidence: confidence,
     })
 
     try {
       const matchedCommand = this.findMatchingCommand(command)
-      
+
       if (!matchedCommand) {
         this.handleUnknownCommand(command)
         return
@@ -343,9 +340,7 @@ class VoiceNavigationEngine {
       }
 
       this.updateState({ lastCommand: matchedCommand })
-      
     } catch (error) {
-      console.error('[Voice Navigation] Command processing error:', error)
       this.updateState({ errorMessage: 'Failed to process voice command' })
       this.announceToScreenReader('Command processing failed')
     } finally {
@@ -355,23 +350,21 @@ class VoiceNavigationEngine {
 
   private findMatchingCommand(input: string): VoiceCommand | null {
     const normalizedInput = input.toLowerCase().trim()
-    
+
     // Direct phrase match
-    let match = this.commands.find(cmd => 
-      cmd.phrase.toLowerCase() === normalizedInput
-    )
-    
+    let match = this.commands.find((cmd) => cmd.phrase.toLowerCase() === normalizedInput)
+
     if (match) return match
 
     // Alias match
-    match = this.commands.find(cmd => 
-      cmd.aliases.some(alias => alias.toLowerCase() === normalizedInput)
+    match = this.commands.find((cmd) =>
+      cmd.aliases.some((alias) => alias.toLowerCase() === normalizedInput)
     )
-    
+
     if (match) return match
 
     // Partial match for complex commands
-    match = this.commands.find(cmd => {
+    match = this.commands.find((cmd) => {
       const phrase = cmd.phrase.toLowerCase()
       return normalizedInput.includes(phrase) || phrase.includes(normalizedInput)
     })
@@ -383,16 +376,16 @@ class VoiceNavigationEngine {
     if (!this.context) return true
 
     const tierLevels = {
-      'neural': 1,
-      'synaptic': 2,
-      'autonomous': 3,
-      'transcendent': 4
+      neural: 1,
+      synaptic: 2,
+      autonomous: 3,
+      transcendent: 4,
     }
 
     const accessibilityLevels = {
-      'basic': 1,
-      'enhanced': 2,
-      'expert': 3
+      basic: 1,
+      enhanced: 2,
+      expert: 3,
     }
 
     const userTierLevel = tierLevels[this.context.subscriptionTier]
@@ -412,9 +405,9 @@ class VoiceNavigationEngine {
         resolve()
       }, this.state.voiceSettings.confirmationTimeout)
 
-      const handleConfirmation = (event: any) => {
+      const handleConfirmation = (event: unknown) => {
         const response = event.results[event.results.length - 1][0].transcript.toLowerCase().trim()
-        
+
         if (response.includes('yes') || response.includes('confirm')) {
           clearTimeout(timeout)
           this.executeCommand(command)
@@ -511,19 +504,19 @@ class VoiceNavigationEngine {
     }
   }
 
-  private async handleFilter(parameters: any): Promise<void> {
+  private async handleFilter(parameters: unknown): Promise<void> {
     const event = new CustomEvent('voice-filter', { detail: parameters })
     document.dispatchEvent(event)
     this.announceToScreenReader('Applying filters')
   }
 
-  private async handleAccessibilityChange(parameters: any): Promise<void> {
+  private async handleAccessibilityChange(parameters: unknown): Promise<void> {
     const event = new CustomEvent('voice-accessibility', { detail: parameters })
     document.dispatchEvent(event)
-    
+
     const { type, direction, value } = parameters
     let message = ''
-    
+
     if (type === 'fontSize') {
       message = `${direction === 'increase' ? 'Increasing' : 'Decreasing'} text size`
     } else if (type === 'contrast') {
@@ -531,11 +524,11 @@ class VoiceNavigationEngine {
     } else if (type === 'motion') {
       message = `Setting motion to ${value}`
     }
-    
+
     this.announceToScreenReader(message)
   }
 
-  private async handleConsciousnessChange(parameters: any): Promise<void> {
+  private async handleConsciousnessChange(parameters: unknown): Promise<void> {
     const event = new CustomEvent('voice-consciousness', { detail: parameters })
     document.dispatchEvent(event)
     this.announceToScreenReader(`Activating ${parameters.level} consciousness mode`)
@@ -547,7 +540,7 @@ class VoiceNavigationEngine {
     this.announceToScreenReader('Displaying AI insights')
   }
 
-  private async handleVoiceControl(parameters: any): Promise<void> {
+  private async handleVoiceControl(parameters: unknown): Promise<void> {
     if (parameters.action === 'stop') {
       this.stopListening()
       this.updateSettings({ enabled: false })
@@ -556,16 +549,20 @@ class VoiceNavigationEngine {
 
   private async handleShowHelp(): Promise<void> {
     const availableCommands = this.commands
-      .filter(cmd => this.isCommandAccessible(cmd))
-      .map(cmd => cmd.phrase)
+      .filter((cmd) => this.isCommandAccessible(cmd))
+      .map((cmd) => cmd.phrase)
       .slice(0, 5) // Show first 5 commands
       .join(', ')
-    
-    this.announceToScreenReader(`Available voice commands include: ${availableCommands}. Say "voice help" for more options.`)
+
+    this.announceToScreenReader(
+      `Available voice commands include: ${availableCommands}. Say "voice help" for more options.`
+    )
   }
 
   private handleUnknownCommand(command: string): void {
-    this.announceToScreenReader(`Sorry, I didn't understand "${command}". Say "help with voice commands" to see available options.`)
+    this.announceToScreenReader(
+      `Sorry, I didn't understand "${command}". Say "help with voice commands" to see available options.`
+    )
   }
 
   private announceToScreenReader(message: string): void {
@@ -575,9 +572,9 @@ class VoiceNavigationEngine {
     announcement.setAttribute('aria-atomic', 'true')
     announcement.className = 'sr-only'
     announcement.textContent = message
-    
+
     document.body.appendChild(announcement)
-    
+
     setTimeout(() => {
       document.body.removeChild(announcement)
     }, 1000)
@@ -599,8 +596,8 @@ class VoiceNavigationEngine {
 
     // Set preferred voice if available
     const voices = this.synthesis.getVoices()
-    const preferredVoice = voices.find(voice => 
-      voice.name === this.state.voiceSettings.preferredVoice
+    const preferredVoice = voices.find(
+      (voice) => voice.name === this.state.voiceSettings.preferredVoice
     )
     if (preferredVoice) {
       utterance.voice = preferredVoice
@@ -612,7 +609,7 @@ class VoiceNavigationEngine {
   // Public API methods
   public updateSettings(settings: Partial<VoiceSettings>): void {
     this.state.voiceSettings = { ...this.state.voiceSettings, ...settings }
-    
+
     if (this.recognition) {
       this.recognition.lang = this.state.voiceSettings.language
       this.recognition.continuous = this.state.voiceSettings.continuousListening
@@ -641,7 +638,7 @@ class VoiceNavigationEngine {
   }
 
   public getAvailableCommands(): VoiceCommand[] {
-    return this.commands.filter(cmd => this.isCommandAccessible(cmd))
+    return this.commands.filter((cmd) => this.isCommandAccessible(cmd))
   }
 
   public getAvailableVoices(): SpeechSynthesisVoice[] {
@@ -650,7 +647,7 @@ class VoiceNavigationEngine {
 
   private updateState(updates: Partial<VoiceNavigationState>): void {
     this.state = { ...this.state, ...updates }
-    this.listeners.forEach(listener => listener(this.state))
+    this.listeners.forEach((listener) => listener(this.state))
   }
 }
 
@@ -663,16 +660,14 @@ export function useVoiceNavigation() {
 
   React.useEffect(() => {
     const unsubscribe = voiceNavigationEngine.subscribe(setState)
-    
+
     // Load saved settings
     const savedSettings = localStorage.getItem('coreflow360-voice-settings')
     if (savedSettings) {
       try {
         const settings = JSON.parse(savedSettings)
         voiceNavigationEngine.updateSettings(settings)
-      } catch (error) {
-        console.error('Failed to load voice settings:', error)
-      }
+      } catch (error) {}
     }
 
     return unsubscribe
@@ -682,18 +677,19 @@ export function useVoiceNavigation() {
     state,
     startListening: () => voiceNavigationEngine.startListening(),
     stopListening: () => voiceNavigationEngine.stopListening(),
-    updateSettings: (settings: Partial<VoiceSettings>) => voiceNavigationEngine.updateSettings(settings),
+    updateSettings: (settings: Partial<VoiceSettings>) =>
+      voiceNavigationEngine.updateSettings(settings),
     updateContext: (context: NavigationContext) => voiceNavigationEngine.updateContext(context),
     getAvailableCommands: () => voiceNavigationEngine.getAvailableCommands(),
-    getAvailableVoices: () => voiceNavigationEngine.getAvailableVoices()
+    getAvailableVoices: () => voiceNavigationEngine.getAvailableVoices(),
   }
 }
 
 // Declare global types for speech recognition
 declare global {
   interface Window {
-    SpeechRecognition: any
-    webkitSpeechRecognition: any
+    SpeechRecognition: unknown
+    webkitSpeechRecognition: unknown
   }
 }
 

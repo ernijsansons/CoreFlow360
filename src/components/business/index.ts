@@ -1,8 +1,8 @@
-export { default as SmartBusinessPreview } from './SmartBusinessPreview';
-export { default as SmartDepartmentDashboard } from './SmartDepartmentDashboard';
-export { default as SoftwareComparisonChart } from './SoftwareComparisonChart';
-export { default as ROICalculatorDashboard } from './ROICalculatorDashboard';
-export { default as IndustrySpecificSolutions } from './IndustrySpecificSolutions';
-export { default as CustomerSuccessStories } from './CustomerSuccessStories';
-export { default as PricingComparisonTable } from './PricingComparisonTable';
-export { default as BusinessFAQSection } from './BusinessFAQSection';
+export { default as SmartBusinessPreview } from './SmartBusinessPreview'
+export { default as SmartDepartmentDashboard } from './SmartDepartmentDashboard'
+export { default as SoftwareComparisonChart } from './SoftwareComparisonChart'
+export { default as ROICalculatorDashboard } from './ROICalculatorDashboard'
+export { default as IndustrySpecificSolutions } from './IndustrySpecificSolutions'
+export { default as CustomerSuccessStories } from './CustomerSuccessStories'
+export { default as PricingComparisonTable } from './PricingComparisonTable'
+export { default as BusinessFAQSection } from './BusinessFAQSection'

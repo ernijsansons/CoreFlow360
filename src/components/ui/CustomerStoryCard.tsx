@@ -29,7 +29,7 @@ export function CustomerStoryCard({
   afterText,
   metric,
   delay = 0,
-  gradient = 'violet'
+  gradient = 'violet',
 }: CustomerStoryCardProps) {
   const gradientClasses = {
     violet: 'from-violet-500/20 to-purple-500/20 border-violet-500/30',
@@ -37,20 +37,20 @@ export function CustomerStoryCard({
     blue: 'from-blue-500/20 to-cyan-500/20 border-blue-500/30',
     orange: 'from-orange-500/20 to-red-500/20 border-orange-500/30',
     red: 'from-red-500/20 to-pink-500/20 border-red-500/30',
-    cyan: 'from-cyan-500/20 to-blue-500/20 border-cyan-500/30'
+    cyan: 'from-cyan-500/20 to-blue-500/20 border-cyan-500/30',
   }
 
   const getMetricIcon = () => {
     switch (metric.type) {
       case 'money':
-        return <DollarSign className="w-4 h-4" />
+        return <DollarSign className="h-4 w-4" />
       case 'percentage':
       case 'generic':
-        return <TrendingUp className="w-4 h-4" />
+        return <TrendingUp className="h-4 w-4" />
       case 'time':
-        return <Clock className="w-4 h-4" />
+        return <Clock className="h-4 w-4" />
       default:
-        return <Star className="w-4 h-4" />
+        return <Star className="h-4 w-4" />
     }
   }
 
@@ -61,7 +61,7 @@ export function CustomerStoryCard({
       blue: 'text-blue-400',
       orange: 'text-orange-400',
       red: 'text-red-400',
-      cyan: 'text-cyan-400'
+      cyan: 'text-cyan-400',
     }
     return colors[gradient]
   }
@@ -73,60 +73,65 @@ export function CustomerStoryCard({
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay }}
       whileHover={{ y: -8, scale: 1.02 }}
-      className="relative group cursor-pointer"
+      className="group relative cursor-pointer"
     >
-      <div className={`absolute inset-0 bg-gradient-to-r ${gradientClasses[gradient]} opacity-0 group-hover:opacity-100 rounded-2xl blur-xl transition-all duration-500`} />
-      
-      <div className={`relative bg-gray-900/60 backdrop-blur-sm border rounded-2xl p-6 group-hover:border-opacity-70 transition-all duration-300 ${gradientClasses[gradient].split(' ')[1]}`}>
+      <div
+        className={`absolute inset-0 bg-gradient-to-r ${gradientClasses[gradient]} rounded-2xl opacity-0 blur-xl transition-all duration-500 group-hover:opacity-100`}
+      />
+
+      <div
+        className={`group-hover:border-opacity-70 relative rounded-2xl border bg-gray-900/60 p-6 backdrop-blur-sm transition-all duration-300 ${gradientClasses[gradient].split(' ')[1]}`}
+      >
         {/* Customer Info */}
-        <div className="flex items-center mb-4">
+        <div className="mb-4 flex items-center">
           {avatar ? (
-            <img 
-              src={avatar} 
-              alt={name}
-              className="w-12 h-12 rounded-full mr-4 object-cover"
-            />
+            <img src={avatar} alt={name} className="mr-4 h-12 w-12 rounded-full object-cover" />
           ) : (
-            <div className={`w-12 h-12 rounded-full mr-4 flex items-center justify-center text-white font-bold text-lg bg-gradient-to-r ${gradientClasses[gradient].replace('/20', '/60').replace('border-', 'from-').split(' ')[0]} ${gradientClasses[gradient].replace('/20', '/40').replace('border-', 'to-').split(' ')[1]}`}>
-              {name.split(' ').map(n => n[0]).join('')}
+            <div
+              className={`mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r text-lg font-bold text-white ${gradientClasses[gradient].replace('/20', '/60').replace('border-', 'from-').split(' ')[0]} ${gradientClasses[gradient].replace('/20', '/40').replace('border-', 'to-').split(' ')[1]}`}
+            >
+              {name
+                .split(' ')
+                .map((n) => n[0])
+                .join('')}
             </div>
           )}
           <div>
-            <div className="text-white font-semibold text-lg">{name}</div>
-            {title && <div className="text-gray-400 text-sm">{title}</div>}
-            {company && <div className="text-gray-500 text-xs">{company}</div>}
+            <div className="text-lg font-semibold text-white">{name}</div>
+            {title && <div className="text-sm text-gray-400">{title}</div>}
+            {company && <div className="text-xs text-gray-500">{company}</div>}
           </div>
         </div>
 
         {/* Before/After */}
-        <div className="space-y-4 mb-6">
+        <div className="mb-6 space-y-4">
           <div>
-            <div className="text-gray-400 text-sm font-medium mb-1">Before CoreFlow360:</div>
-            <div className="text-gray-300 text-sm italic">"{beforeText}"</div>
+            <div className="mb-1 text-sm font-medium text-gray-400">Before CoreFlow360:</div>
+            <div className="text-sm text-gray-300 italic">"{beforeText}"</div>
           </div>
-          
+
           <div>
-            <div className="text-gray-400 text-sm font-medium mb-1">After 30 days:</div>
-            <div className="text-white text-sm font-medium">"{afterText}"</div>
+            <div className="mb-1 text-sm font-medium text-gray-400">After 30 days:</div>
+            <div className="text-sm font-medium text-white">"{afterText}"</div>
           </div>
         </div>
 
         {/* Metric */}
         <div className="border-t border-gray-700/50 pt-4">
           <div className="flex items-center justify-between">
-            <div className="text-gray-400 text-sm">{metric.label}</div>
-            <div className={`flex items-center gap-1 ${getMetricColor()} font-bold text-lg`}>
+            <div className="text-sm text-gray-400">{metric.label}</div>
+            <div className={`flex items-center gap-1 ${getMetricColor()} text-lg font-bold`}>
               {getMetricIcon()}
               <span>{metric.value}</span>
-              {metric.trend === 'up' && <TrendingUp className="w-4 h-4 ml-1" />}
+              {metric.trend === 'up' && <TrendingUp className="ml-1 h-4 w-4" />}
             </div>
           </div>
         </div>
 
         {/* Rating Stars */}
-        <div className="flex items-center mt-3">
+        <div className="mt-3 flex items-center">
           {[...Array(5)].map((_, i) => (
-            <Star key={i} className={`w-4 h-4 fill-current ${getMetricColor()}`} />
+            <Star key={i} className={`h-4 w-4 fill-current ${getMetricColor()}`} />
           ))}
         </div>
       </div>

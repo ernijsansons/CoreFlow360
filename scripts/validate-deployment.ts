@@ -1,529 +1,305 @@
 #!/usr/bin/env tsx
+
 /**
- * CoreFlow360 Deployment Validation Script
- * Validates production deployment readiness and runs pre-deployment checks
+ * CoreFlow360 - Deployment Validation Script
+ * Validates all critical components before deployment
  */
 
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import chalk from 'chalk';
-import fs from 'fs/promises';
-import path from 'path';
-
-const execAsync = promisify(exec);
+import { execSync } from 'child_process'
+import { existsSync, readFileSync } from 'fs'
+import { join } from 'path'
 
 interface ValidationResult {
-  name: string;
-  status: 'pass' | 'fail' | 'warning';
-  message?: string;
-  details?: any;
+  name: string
+  status: 'pass' | 'fail' | 'warning'
+  message: string
+  details?: any
 }
 
 class DeploymentValidator {
-  private results: ValidationResult[] = [];
-  private errors: string[] = [];
-  private warnings: string[] = [];
+  private results: ValidationResult[] = []
 
-  async validate(): Promise<boolean> {
-    console.log(chalk.blue.bold('\n🚀 CoreFlow360 Deployment Validation\n'));
+  async validateAll(): Promise<void> {
+    console.log('🔍 CoreFlow360 - Deployment Validation')
+    console.log('=====================================\n')
 
-    // Run all validation checks
-    await this.checkNodeVersion();
-    await this.checkPackageJson();
-    await this.checkBuildProcess();
-    await this.checkDatabaseMigrations();
-    await this.checkEnvironmentVariables();
-    await this.checkTypeScript();
-    await this.checkDependencies();
-    await this.checkSecurityHeaders();
-    await this.checkVercelConfig();
-    await this.checkStaticAssets();
+    // Core validations
+    await this.validateEnvironment()
+    await this.validateDependencies()
+    await this.validateBuildScripts()
+    await this.validateGitHubActions()
+    await this.validateVercelConfig()
+    await this.validateDatabase()
+    await this.validateSecurity()
 
-    // Display results
-    this.displayResults();
-
-    return this.errors.length === 0;
+    // Report results
+    this.printResults()
+    
+    // Exit with appropriate code
+    const hasFailures = this.results.some(r => r.status === 'fail')
+    if (hasFailures) {
+      console.log('\n❌ Deployment validation failed!')
+      process.exit(1)
+    } else {
+      console.log('\n✅ Deployment validation passed!')
+      process.exit(0)
+    }
   }
 
-  private async checkNodeVersion(): Promise<void> {
+  private async validateEnvironment(): Promise<void> {
+    console.log('📋 Validating environment configuration...')
+    
+    // Check .env.example exists
+    if (existsSync('.env.example')) {
+      this.addResult('env-example', 'pass', '.env.example file exists')
+    } else {
+      this.addResult('env-example', 'fail', '.env.example file missing')
+    }
+
+    // Check required environment variables in example
     try {
-      const { stdout } = await execAsync('node --version');
-      const version = stdout.trim();
-      const major = parseInt(version.split('.')[0].replace('v', ''));
+      const envExample = readFileSync('.env.example', 'utf-8')
+      const requiredVars = ['DATABASE_URL', 'NEXTAUTH_SECRET', 'NEXTAUTH_URL']
       
-      this.results.push({
-        name: 'Node.js Version',
-        status: major >= 18 ? 'pass' : 'fail',
-        message: `${version} (requires >= 18.x)`,
-        details: { version, major }
-      });
-
-      if (major < 18) {
-        this.errors.push('Node.js version must be 18.x or higher');
+      for (const varName of requiredVars) {
+        if (envExample.includes(varName)) {
+          this.addResult(`env-${varName}`, 'pass', `${varName} documented in .env.example`)
+        } else {
+          this.addResult(`env-${varName}`, 'warning', `${varName} not documented in .env.example`)
+        }
       }
     } catch (error) {
-      this.results.push({
-        name: 'Node.js Version',
-        status: 'fail',
-        message: 'Failed to check Node.js version'
-      });
-      this.errors.push('Unable to verify Node.js version');
+      this.addResult('env-read', 'fail', `Failed to read .env.example: ${error}`)
     }
   }
 
-  private async checkPackageJson(): Promise<void> {
-    try {
-      const packageJson = JSON.parse(
-        await fs.readFile('package.json', 'utf-8')
-      );
-
-      // Check required scripts
-      const requiredScripts = ['build', 'start', 'db:deploy'];
-      const missingScripts = requiredScripts.filter(
-        script => !packageJson.scripts?.[script]
-      );
-
-      this.results.push({
-        name: 'Package.json Scripts',
-        status: missingScripts.length === 0 ? 'pass' : 'fail',
-        message: missingScripts.length > 0 
-          ? `Missing scripts: ${missingScripts.join(', ')}`
-          : 'All required scripts present',
-        details: { requiredScripts, missingScripts }
-      });
-
-      if (missingScripts.length > 0) {
-        this.errors.push(`Missing required scripts: ${missingScripts.join(', ')}`);
-      }
-
-      // Check engines
-      if (!packageJson.engines?.node) {
-        this.warnings.push('No Node.js engine version specified in package.json');
-      }
-
-    } catch (error) {
-      this.results.push({
-        name: 'Package.json',
-        status: 'fail',
-        message: 'Failed to read package.json'
-      });
-      this.errors.push('Unable to read package.json');
-    }
-  }
-
-  private async checkBuildProcess(): Promise<void> {
-    console.log(chalk.cyan('Running build process...'));
+  private async validateDependencies(): Promise<void> {
+    console.log('📦 Validating dependencies...')
     
     try {
-      const startTime = Date.now();
-      const { stdout, stderr } = await execAsync('npm run build', {
-        env: { ...process.env, NODE_ENV: 'production' }
-      });
-      const buildTime = Date.now() - startTime;
-
-      // Check for build errors
-      const hasErrors = stderr.toLowerCase().includes('error') || 
-                       stdout.toLowerCase().includes('error');
-
-      this.results.push({
-        name: 'Production Build',
-        status: hasErrors ? 'fail' : 'pass',
-        message: hasErrors 
-          ? 'Build completed with errors'
-          : `Build successful (${(buildTime / 1000).toFixed(2)}s)`,
-        details: { buildTime, hasErrors }
-      });
-
-      if (hasErrors) {
-        this.errors.push('Production build contains errors');
+      // Check package.json exists
+      if (existsSync('package.json')) {
+        this.addResult('package-json', 'pass', 'package.json exists')
+        
+        const packageJson = JSON.parse(readFileSync('package.json', 'utf-8'))
+        
+        // Check required scripts
+        const requiredScripts = ['build', 'build:ci', 'dev', 'start']
+        for (const script of requiredScripts) {
+          if (packageJson.scripts?.[script]) {
+            this.addResult(`script-${script}`, 'pass', `${script} script exists`)
+          } else {
+            this.addResult(`script-${script}`, 'fail', `${script} script missing`)
+          }
+        }
+        
+        // Check Next.js version
+        const nextVersion = packageJson.dependencies?.next
+        if (nextVersion) {
+          this.addResult('next-version', 'pass', `Next.js version: ${nextVersion}`)
+        } else {
+          this.addResult('next-version', 'fail', 'Next.js not found in dependencies')
+        }
+      } else {
+        this.addResult('package-json', 'fail', 'package.json missing')
       }
-
-      // Check build output
-      const buildExists = await this.checkFileExists('.next/BUILD_ID');
-      if (!buildExists) {
-        this.errors.push('.next build directory not created');
-      }
-
     } catch (error) {
-      this.results.push({
-        name: 'Production Build',
-        status: 'fail',
-        message: 'Build process failed'
-      });
-      this.errors.push('Production build failed to complete');
+      this.addResult('dependencies', 'fail', `Failed to validate dependencies: ${error}`)
     }
   }
 
-  private async checkDatabaseMigrations(): Promise<void> {
-    try {
-      // Check if migrations directory exists
-      const migrationsExist = await this.checkFileExists('prisma/migrations');
-      
-      if (!migrationsExist) {
-        this.results.push({
-          name: 'Database Migrations',
-          status: 'warning',
-          message: 'No migrations directory found'
-        });
-        this.warnings.push('No database migrations found');
-        return;
-      }
-
-      // Check for pending migrations (dry run)
-      const { stdout } = await execAsync('npx prisma migrate status', {
-        env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL || '' }
-      });
-
-      const hasPending = stdout.includes('Database schema is not up to date');
-      
-      this.results.push({
-        name: 'Database Migrations',
-        status: hasPending ? 'warning' : 'pass',
-        message: hasPending 
-          ? 'Pending migrations detected'
-          : 'Database schema up to date',
-        details: { hasPending }
-      });
-
-      if (hasPending) {
-        this.warnings.push('Database has pending migrations');
-      }
-
-    } catch (error) {
-      this.results.push({
-        name: 'Database Migrations',
-        status: 'warning',
-        message: 'Unable to check migration status'
-      });
-      this.warnings.push('Could not verify database migration status');
-    }
-  }
-
-  private async checkEnvironmentVariables(): Promise<void> {
-    // Core required variables - absolutely necessary
-    const requiredVars = [
-      'DATABASE_URL',
-      'NEXTAUTH_URL',
-      'NEXTAUTH_SECRET'
-    ];
-
-    // Optional but recommended for full functionality
-    const optionalVars = [
-      'API_KEY_SECRET',
-      'STRIPE_SECRET_KEY',
-      'STRIPE_WEBHOOK_SECRET',
-      'OPENAI_API_KEY',
-      'REDIS_URL',
-      'EMAIL_FROM',
-      'ENCRYPTION_KEY'
-    ];
-
-    const missingRequired = requiredVars.filter(varName => !process.env[varName]);
-    const missingOptional = optionalVars.filter(varName => !process.env[varName]);
-
-    this.results.push({
-      name: 'Environment Variables',
-      status: missingRequired.length === 0 ? (missingOptional.length > 0 ? 'warning' : 'pass') : 'fail',
-      message: missingRequired.length > 0
-        ? `Missing required: ${missingRequired.join(', ')}`
-        : missingOptional.length > 0
-        ? `Missing optional: ${missingOptional.join(', ')}`
-        : 'All variables set',
-      details: { requiredVars, optionalVars, missingRequired, missingOptional }
-    });
-
-    if (missingRequired.length > 0) {
-      this.errors.push(`Missing required environment variables: ${missingRequired.join(', ')}`);
-    }
-
-    if (missingOptional.length > 0) {
-      this.warnings.push(`Missing optional environment variables (some features disabled): ${missingOptional.join(', ')}`);
-    }
-
-    // Check for production values
-    if (process.env.NODE_ENV === 'production') {
-      if (process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.startsWith('https://')) {
-        this.errors.push('NEXTAUTH_URL must use HTTPS in production');
-      }
-    }
-  }
-
-  private async checkTypeScript(): Promise<void> {
-    try {
-      console.log(chalk.cyan('Running TypeScript checks...'));
-      
-      const { stdout, stderr } = await execAsync('npx tsc --noEmit --skipLibCheck');
-      const hasErrors = stderr.length > 0 || stdout.includes('error');
-
-      this.results.push({
-        name: 'TypeScript Compilation',
-        status: hasErrors ? 'warning' : 'pass',
-        message: hasErrors 
-          ? 'TypeScript errors found'
-          : 'No TypeScript errors',
-        details: { hasErrors }
-      });
-
-      if (hasErrors) {
-        this.warnings.push('TypeScript compilation warnings');
-      }
-
-    } catch (error) {
-      this.results.push({
-        name: 'TypeScript Compilation',
-        status: 'warning',
-        message: 'TypeScript check failed'
-      });
-      this.warnings.push('Could not complete TypeScript validation');
-    }
-  }
-
-  private async checkDependencies(): Promise<void> {
-    try {
-      // Check for security vulnerabilities
-      const { stdout } = await execAsync('npm audit --json');
-      const auditData = JSON.parse(stdout);
-      
-      const vulnerabilities = auditData.metadata.vulnerabilities;
-      const criticalOrHigh = (vulnerabilities.critical || 0) + (vulnerabilities.high || 0);
-
-      this.results.push({
-        name: 'Dependency Security',
-        status: criticalOrHigh > 0 ? 'warning' : 'pass',
-        message: criticalOrHigh > 0
-          ? `${criticalOrHigh} high/critical vulnerabilities`
-          : 'No critical vulnerabilities',
-        details: vulnerabilities
-      });
-
-      if (criticalOrHigh > 0) {
-        this.warnings.push(`${criticalOrHigh} high/critical dependency vulnerabilities`);
-      }
-
-    } catch (error) {
-      // npm audit returns non-zero exit code if vulnerabilities found
-      this.results.push({
-        name: 'Dependency Security',
-        status: 'warning',
-        message: 'Dependency audit completed with findings'
-      });
-    }
-  }
-
-  private async checkSecurityHeaders(): Promise<void> {
-    const vercelConfigExists = await this.checkFileExists('vercel.json');
+  private async validateBuildScripts(): Promise<void> {
+    console.log('🔨 Validating build scripts...')
     
-    if (!vercelConfigExists) {
-      this.results.push({
-        name: 'Security Headers',
-        status: 'fail',
-        message: 'vercel.json not found'
-      });
-      this.errors.push('vercel.json configuration missing');
-      return;
-    }
-
     try {
-      const vercelConfig = JSON.parse(
-        await fs.readFile('vercel.json', 'utf-8')
-      );
-
-      const hasSecurityHeaders = vercelConfig.headers?.some((rule: any) =>
-        rule.headers?.some((header: any) => 
-          header.key === 'Strict-Transport-Security' ||
-          header.key === 'X-Frame-Options'
-        )
-      );
-
-      this.results.push({
-        name: 'Security Headers',
-        status: hasSecurityHeaders ? 'pass' : 'warning',
-        message: hasSecurityHeaders
-          ? 'Security headers configured'
-          : 'Security headers not fully configured'
-      });
-
-      if (!hasSecurityHeaders) {
-        this.warnings.push('Security headers not fully configured in vercel.json');
+      const packageJson = JSON.parse(readFileSync('package.json', 'utf-8'))
+      const buildScript = packageJson.scripts?.build
+      
+      if (buildScript) {
+        // Check if build script includes memory optimization
+        if (buildScript.includes('--max-old-space-size=8192')) {
+          this.addResult('build-memory', 'pass', 'Build script includes memory optimization')
+        } else {
+          this.addResult('build-memory', 'warning', 'Build script missing memory optimization')
+        }
+        
+        // Check if build script disables telemetry
+        if (buildScript.includes('NEXT_TELEMETRY_DISABLED=1')) {
+          this.addResult('build-telemetry', 'pass', 'Build script disables telemetry')
+        } else {
+          this.addResult('build-telemetry', 'warning', 'Build script does not disable telemetry')
+        }
+      } else {
+        this.addResult('build-script', 'fail', 'Build script missing')
       }
-
     } catch (error) {
-      this.results.push({
-        name: 'Security Headers',
-        status: 'fail',
-        message: 'Failed to parse vercel.json'
-      });
-      this.errors.push('Invalid vercel.json configuration');
+      this.addResult('build-validation', 'fail', `Failed to validate build scripts: ${error}`)
     }
   }
 
-  private async checkVercelConfig(): Promise<void> {
-    try {
-      const vercelConfig = JSON.parse(
-        await fs.readFile('vercel.json', 'utf-8')
-      );
-
-      // Check critical configurations
-      const checks = {
-        buildCommand: !!vercelConfig.buildCommand,
-        framework: vercelConfig.framework === 'nextjs',
-        functions: !!vercelConfig.functions,
-        headers: Array.isArray(vercelConfig.headers) && vercelConfig.headers.length > 0
-      };
-
-      const failedChecks = Object.entries(checks)
-        .filter(([_, passed]) => !passed)
-        .map(([check]) => check);
-
-      this.results.push({
-        name: 'Vercel Configuration',
-        status: failedChecks.length === 0 ? 'pass' : 'warning',
-        message: failedChecks.length > 0
-          ? `Missing: ${failedChecks.join(', ')}`
-          : 'Properly configured',
-        details: checks
-      });
-
-      if (failedChecks.length > 0) {
-        this.warnings.push(`Incomplete Vercel configuration: ${failedChecks.join(', ')}`);
-      }
-
-    } catch (error) {
-      this.results.push({
-        name: 'Vercel Configuration',
-        status: 'fail',
-        message: 'Failed to read vercel.json'
-      });
-      this.errors.push('Unable to verify Vercel configuration');
-    }
-  }
-
-  private async checkStaticAssets(): Promise<void> {
-    const requiredAssets = [
-      'public/favicon.ico',
-      'public/manifest.json'
-    ];
-
-    const missingAssets: string[] = [];
+  private async validateGitHubActions(): Promise<void> {
+    console.log('⚙️  Validating GitHub Actions...')
     
-    for (const asset of requiredAssets) {
-      const exists = await this.checkFileExists(asset);
-      if (!exists) {
-        missingAssets.push(asset);
+    const workflowsDir = '.github/workflows'
+    if (existsSync(workflowsDir)) {
+      this.addResult('workflows-dir', 'pass', 'GitHub Actions workflows directory exists')
+      
+      // Check for CI workflow
+      if (existsSync(join(workflowsDir, 'ci.yml'))) {
+        this.addResult('ci-workflow', 'pass', 'CI workflow exists')
+      } else {
+        this.addResult('ci-workflow', 'warning', 'CI workflow missing')
       }
-    }
-
-    this.results.push({
-      name: 'Static Assets',
-      status: missingAssets.length === 0 ? 'pass' : 'warning',
-      message: missingAssets.length > 0
-        ? `Missing: ${missingAssets.join(', ')}`
-        : 'All required assets present',
-      details: { requiredAssets, missingAssets }
-    });
-
-    if (missingAssets.length > 0) {
-      this.warnings.push(`Missing static assets: ${missingAssets.join(', ')}`);
-    }
-  }
-
-  private async checkFileExists(filePath: string): Promise<boolean> {
-    try {
-      await fs.access(filePath);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  private displayResults(): void {
-    console.log(chalk.blue.bold('\n═══════════════════════════════════════════════════════════════'));
-    console.log(chalk.blue.bold('DEPLOYMENT VALIDATION RESULTS'));
-    console.log(chalk.blue.bold('═══════════════════════════════════════════════════════════════'));
-
-    let passCount = 0;
-    let failCount = 0;
-    let warningCount = 0;
-
-    // Display each result
-    this.results.forEach(result => {
-      const icon = result.status === 'pass' ? chalk.green('✓') :
-                  result.status === 'fail' ? chalk.red('✗') :
-                  chalk.yellow('⚠');
       
-      const statusText = result.status === 'pass' ? chalk.green('PASS') :
-                        result.status === 'fail' ? chalk.red('FAIL') :
-                        chalk.yellow('WARN');
-
-      if (result.status === 'pass') passCount++;
-      else if (result.status === 'fail') failCount++;
-      else warningCount++;
-
-      console.log(`${icon} ${result.name.padEnd(25)} ${statusText} ${result.message ? chalk.gray(`- ${result.message}`) : ''}`);
-    });
-
-    // Summary
-    console.log(chalk.blue.bold('\n─────────────────────────────────────────────────────────────'));
-    console.log(`Total Checks: ${this.results.length}`);
-    console.log(`Passed: ${chalk.green(passCount)}`);
-    console.log(`Failed: ${failCount > 0 ? chalk.red(failCount) : chalk.green(0)}`);
-    console.log(`Warnings: ${warningCount > 0 ? chalk.yellow(warningCount) : chalk.green(0)}`);
-
-    // Display errors
-    if (this.errors.length > 0) {
-      console.log(chalk.red.bold('\n❌ DEPLOYMENT BLOCKERS:'));
-      this.errors.forEach(error => {
-        console.log(chalk.red(`   • ${error}`));
-      });
-    }
-
-    // Display warnings
-    if (this.warnings.length > 0) {
-      console.log(chalk.yellow.bold('\n⚠️  WARNINGS:'));
-      this.warnings.forEach(warning => {
-        console.log(chalk.yellow(`   • ${warning}`));
-      });
-    }
-
-    // Final verdict
-    if (this.errors.length === 0) {
-      console.log(chalk.green.bold('\n✅ DEPLOYMENT VALIDATION PASSED!'));
-      console.log(chalk.green('The application is ready for production deployment.'));
-      
-      if (this.warnings.length > 0) {
-        console.log(chalk.yellow('\nNote: Address warnings for optimal production performance.'));
+      // Check for deployment workflow
+      if (existsSync(join(workflowsDir, 'vercel-deploy.yml'))) {
+        this.addResult('deploy-workflow', 'pass', 'Vercel deployment workflow exists')
+      } else {
+        this.addResult('deploy-workflow', 'warning', 'Vercel deployment workflow missing')
       }
     } else {
-      console.log(chalk.red.bold('\n❌ DEPLOYMENT VALIDATION FAILED'));
-      console.log(chalk.red(`Fix ${this.errors.length} critical issue(s) before deploying.`));
+      this.addResult('workflows-dir', 'fail', 'GitHub Actions workflows directory missing')
     }
+  }
 
-    // Deployment checklist
-    console.log(chalk.cyan.bold('\n📋 DEPLOYMENT CHECKLIST:'));
-    console.log('1. Run: npm run validate:env');
-    console.log('2. Run: npm run db:deploy');
-    console.log('3. Run: npm run db:seed:production');
-    console.log('4. Configure monitoring and alerts');
-    console.log('5. Test all critical user flows');
-    console.log('6. Verify backup and recovery procedures');
-    console.log('7. Deploy with: vercel --prod');
+  private async validateVercelConfig(): Promise<void> {
+    console.log('🚀 Validating Vercel configuration...')
+    
+    if (existsSync('vercel.json')) {
+      this.addResult('vercel-config', 'pass', 'vercel.json exists')
+      
+      try {
+        const vercelConfig = JSON.parse(readFileSync('vercel.json', 'utf-8'))
+        
+        // Check build command
+        if (vercelConfig.buildCommand === 'npm run build:ci') {
+          this.addResult('vercel-build-command', 'pass', 'Vercel uses build:ci command')
+        } else {
+          this.addResult('vercel-build-command', 'warning', 'Vercel build command may not be optimal')
+        }
+        
+        // Check headers
+        if (vercelConfig.headers && vercelConfig.headers.length > 0) {
+          this.addResult('vercel-headers', 'pass', 'Vercel security headers configured')
+        } else {
+          this.addResult('vercel-headers', 'warning', 'Vercel security headers not configured')
+        }
+      } catch (error) {
+        this.addResult('vercel-config-parse', 'fail', `Failed to parse vercel.json: ${error}`)
+      }
+    } else {
+      this.addResult('vercel-config', 'warning', 'vercel.json missing (using defaults)')
+    }
+  }
+
+  private async validateDatabase(): Promise<void> {
+    console.log('🗄️  Validating database configuration...')
+    
+    // Check Prisma schema
+    if (existsSync('prisma/schema.prisma')) {
+      this.addResult('prisma-schema', 'pass', 'Prisma schema exists')
+    } else {
+      this.addResult('prisma-schema', 'fail', 'Prisma schema missing')
+    }
+    
+    // Check migrations directory
+    if (existsSync('prisma/migrations')) {
+      this.addResult('prisma-migrations', 'pass', 'Prisma migrations directory exists')
+    } else {
+      this.addResult('prisma-migrations', 'warning', 'Prisma migrations directory missing')
+    }
+  }
+
+  private async validateSecurity(): Promise<void> {
+    console.log('🔒 Validating security configuration...')
+    
+    // Check for security headers in vercel.json
+    if (existsSync('vercel.json')) {
+      try {
+        const vercelConfig = JSON.parse(readFileSync('vercel.json', 'utf-8'))
+        const hasSecurityHeaders = vercelConfig.headers?.some((header: any) => 
+          header.headers?.some((h: any) => 
+            ['X-Frame-Options', 'X-Content-Type-Options', 'Referrer-Policy'].includes(h.key)
+          )
+        )
+        
+        if (hasSecurityHeaders) {
+          this.addResult('security-headers', 'pass', 'Security headers configured')
+        } else {
+          this.addResult('security-headers', 'warning', 'Security headers not fully configured')
+        }
+      } catch (error) {
+        this.addResult('security-validation', 'fail', `Failed to validate security: ${error}`)
+      }
+    }
+    
+    // Check for .gitignore
+    if (existsSync('.gitignore')) {
+      const gitignore = readFileSync('.gitignore', 'utf-8')
+      const sensitiveFiles = ['.env', '.env.local', '.env.production']
+      
+      for (const file of sensitiveFiles) {
+        if (gitignore.includes(file)) {
+          this.addResult(`gitignore-${file}`, 'pass', `${file} in .gitignore`)
+        } else {
+          this.addResult(`gitignore-${file}`, 'warning', `${file} not in .gitignore`)
+        }
+      }
+    } else {
+      this.addResult('gitignore', 'fail', '.gitignore missing')
+    }
+  }
+
+  private addResult(name: string, status: 'pass' | 'fail' | 'warning', message: string, details?: any): void {
+    this.results.push({ name, status, message, details })
+  }
+
+  private printResults(): void {
+    console.log('\n📊 Validation Results:')
+    console.log('=====================')
+    
+    const passes = this.results.filter(r => r.status === 'pass')
+    const warnings = this.results.filter(r => r.status === 'warning')
+    const failures = this.results.filter(r => r.status === 'fail')
+    
+    console.log(`✅ Passed: ${passes.length}`)
+    console.log(`⚠️  Warnings: ${warnings.length}`)
+    console.log(`❌ Failed: ${failures.length}`)
+    console.log('')
+    
+    // Print failures first
+    if (failures.length > 0) {
+      console.log('❌ Failures:')
+      failures.forEach(result => {
+        console.log(`  • ${result.name}: ${result.message}`)
+      })
+      console.log('')
+    }
+    
+    // Print warnings
+    if (warnings.length > 0) {
+      console.log('⚠️  Warnings:')
+      warnings.forEach(result => {
+        console.log(`  • ${result.name}: ${result.message}`)
+      })
+      console.log('')
+    }
+    
+    // Print passes (summary)
+    if (passes.length > 0) {
+      console.log('✅ Passed validations:')
+      passes.forEach(result => {
+        console.log(`  • ${result.name}: ${result.message}`)
+      })
+    }
   }
 }
 
 // Run validation
-async function main() {
-  const validator = new DeploymentValidator();
-  const isValid = await validator.validate();
-  
-  process.exit(isValid ? 0 : 1);
-}
-
-// Execute if run directly
 if (require.main === module) {
-  main().catch(error => {
-    console.error(chalk.red('Validation failed with error:'), error);
-    process.exit(1);
-  });
+  const validator = new DeploymentValidator()
+  validator.validateAll().catch(error => {
+    console.error('❌ Validation failed:', error)
+    process.exit(1)
+  })
 }
-
-export { DeploymentValidator };

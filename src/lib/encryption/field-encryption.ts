@@ -4,7 +4,7 @@
  */
 
 import crypto from 'crypto'
-import { config } from '@/lib/config/environment'
+import { env } from '@/lib/config/environment'
 
 /*
 ✅ Pre-flight validation: AES-256-GCM encryption with key rotation support
@@ -30,11 +30,14 @@ interface EncryptedData {
 export class FieldEncryption {
   private masterKey: string
   private keyCache = new Map<string, Buffer>()
-  
+
   constructor() {
     // During build time, use a placeholder key
-    const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
-    
+    const isBuildTime =
+      process.env.VERCEL_ENV ||
+      process.env.CI ||
+      process.env.NEXT_PHASE === 'phase-production-build'
+
     if (isBuildTime) {
       // Use a valid placeholder key during build
       this.masterKey = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
@@ -45,24 +48,24 @@ export class FieldEncryption {
       }
     }
   }
-  
+
   /**
    * Generate a cryptographically secure key
    */
   private generateSecureKey(): string {
     return crypto.randomBytes(32).toString('hex')
   }
-  
+
   /**
    * Derive encryption key from master key and salt
    */
   private deriveKey(salt: Buffer): Buffer {
     const saltString = salt.toString('hex')
-    
+
     if (this.keyCache.has(saltString)) {
       return this.keyCache.get(saltString)!
     }
-    
+
     const key = crypto.pbkdf2Sync(
       Buffer.from(this.masterKey, 'hex'),
       salt,
@@ -70,15 +73,15 @@ export class FieldEncryption {
       32,
       'sha256'
     )
-    
+
     // Cache key for performance (limited cache size)
     if (this.keyCache.size < 1000) {
       this.keyCache.set(saltString, key)
     }
-    
+
     return key
   }
-  
+
   /**
    * Encrypt sensitive field data
    */
@@ -87,41 +90,40 @@ export class FieldEncryption {
       if (!plaintext || plaintext.length === 0) {
         return plaintext
       }
-      
+
       // Generate random salt and IV
       const salt = crypto.randomBytes(SALT_LENGTH)
       const iv = crypto.randomBytes(IV_LENGTH)
-      
+
       // Derive key from master key and salt
       const key = this.deriveKey(salt)
-      
+
       // Create cipher with IV
       const cipher = crypto.createCipheriv(ALGORITHM, key, iv)
-      
+
       // Encrypt data
       let encrypted = cipher.update(plaintext, 'utf8', 'base64')
       encrypted += cipher.final('base64')
-      
+
       // Get authentication tag
       const tag = cipher.getAuthTag()
-      
+
       // Create encrypted data object
       const encryptedData: EncryptedData = {
         encrypted,
         iv: iv.toString('base64'),
         salt: salt.toString('base64'),
         tag: tag.toString('base64'),
-        version: 1
+        version: 1,
       }
-      
+
       // Return base64 encoded JSON
       return Buffer.from(JSON.stringify(encryptedData)).toString('base64')
     } catch (error) {
-      console.error('Encryption failed:', error)
       throw new Error('Failed to encrypt data')
     }
   }
-  
+
   /**
    * Decrypt sensitive field data
    */
@@ -130,7 +132,7 @@ export class FieldEncryption {
       if (!encryptedText || encryptedText.length === 0) {
         return encryptedText
       }
-      
+
       // Parse encrypted data
       let encryptedData: EncryptedData
       try {
@@ -140,39 +142,38 @@ export class FieldEncryption {
         // Assume it's plain text if parsing fails
         return encryptedText
       }
-      
+
       // Validate encrypted data structure
       if (!this.isValidEncryptedData(encryptedData)) {
         throw new Error('Invalid encrypted data format')
       }
-      
+
       // Extract components
       const iv = Buffer.from(encryptedData.iv, 'base64')
       const salt = Buffer.from(encryptedData.salt, 'base64')
       const tag = Buffer.from(encryptedData.tag, 'base64')
-      
+
       // Derive key from master key and salt
       const key = this.deriveKey(salt)
-      
+
       // Create decipher with IV
       const decipher = crypto.createDecipheriv(ALGORITHM, key, iv)
       decipher.setAuthTag(tag)
-      
+
       // Decrypt data
       let decrypted = decipher.update(encryptedData.encrypted, 'base64', 'utf8')
       decrypted += decipher.final('utf8')
-      
+
       return decrypted
     } catch (error) {
-      console.error('Decryption failed:', error)
       throw new Error('Failed to decrypt data')
     }
   }
-  
+
   /**
    * Validate encrypted data structure
    */
-  private isValidEncryptedData(data: any): data is EncryptedData {
+  private isValidEncryptedData(data: unknown): data is EncryptedData {
     return (
       typeof data === 'object' &&
       typeof data.encrypted === 'string' &&
@@ -183,14 +184,14 @@ export class FieldEncryption {
       data.version === 1
     )
   }
-  
+
   /**
    * Check if a field value is encrypted
    */
   isEncrypted(value: string): boolean {
     try {
       if (!value || value.length === 0) return false
-      
+
       const jsonString = Buffer.from(value, 'base64').toString('utf8')
       const data = JSON.parse(jsonString)
       return this.isValidEncryptedData(data)
@@ -198,7 +199,7 @@ export class FieldEncryption {
       return false
     }
   }
-  
+
   /**
    * Rotate encryption keys (for key rotation scenarios)
    */
@@ -206,43 +207,43 @@ export class FieldEncryption {
     if (newKey.length !== 64 || !/^[a-f0-9]{64}$/i.test(newKey)) {
       throw new Error('Invalid new encryption key format')
     }
-    
+
     // Clear key cache
     this.keyCache.clear()
-    
+
     // Update master key
     this.masterKey = newKey
-    
+
     console.info('Encryption key rotated successfully')
   }
-  
+
   /**
    * Batch encrypt multiple fields
    */
-  encryptFields(data: Record<string, any>, fields: string[]): Record<string, any> {
+  encryptFields(data: Record<string, unknown>, fields: string[]): Record<string, unknown> {
     const result = { ...data }
-    
+
     for (const field of fields) {
       if (result[field] && typeof result[field] === 'string') {
         result[field] = this.encrypt(result[field])
       }
     }
-    
+
     return result
   }
-  
+
   /**
    * Batch decrypt multiple fields
    */
-  decryptFields(data: Record<string, any>, fields: string[]): Record<string, any> {
+  decryptFields(data: Record<string, unknown>, fields: string[]): Record<string, unknown> {
     const result = { ...data }
-    
+
     for (const field of fields) {
       if (result[field] && typeof result[field] === 'string') {
         result[field] = this.decrypt(result[field])
       }
     }
-    
+
     return result
   }
 }
@@ -252,8 +253,9 @@ let _fieldEncryption: FieldEncryption | null = null
 
 export const fieldEncryption = (() => {
   // During build time, create a mock instance
-  const isBuildTime = process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
-  
+  const isBuildTime =
+    process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build'
+
   if (isBuildTime) {
     // Return a proxy that will create the real instance when first used
     return new Proxy({} as FieldEncryption, {
@@ -261,11 +263,11 @@ export const fieldEncryption = (() => {
         if (!_fieldEncryption) {
           _fieldEncryption = new FieldEncryption()
         }
-        return (_fieldEncryption as any)[prop]
-      }
+        return (_fieldEncryption as unknown)[prop]
+      },
     })
   }
-  
+
   // For runtime, create immediately
   if (!_fieldEncryption) {
     _fieldEncryption = new FieldEncryption()
@@ -284,26 +286,31 @@ export const decryptSensitiveData = (encryptedData: string): string => {
 
 // Prisma middleware for automatic encryption/decryption
 export const createEncryptionMiddleware = (encryptedFields: string[]) => {
-  return async (params: any, next: any) => {
+  return async (params: unknown, next: unknown) => {
     // Encrypt on create/update
     if (params.action === 'create' || params.action === 'update') {
       if (params.args.data) {
         params.args.data = fieldEncryption.encryptFields(params.args.data, encryptedFields)
       }
     }
-    
+
     // Execute query
     const result = await next(params)
-    
+
     // Decrypt on read
-    if (result && (params.action === 'findUnique' || params.action === 'findFirst' || params.action === 'findMany')) {
+    if (
+      result &&
+      (params.action === 'findUnique' ||
+        params.action === 'findFirst' ||
+        params.action === 'findMany')
+    ) {
       if (Array.isArray(result)) {
-        return result.map(item => fieldEncryption.decryptFields(item, encryptedFields))
+        return result.map((item) => fieldEncryption.decryptFields(item, encryptedFields))
       } else {
         return fieldEncryption.decryptFields(result, encryptedFields)
       }
     }
-    
+
     return result
   }
 }

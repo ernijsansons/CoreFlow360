@@ -5,7 +5,10 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { ZodError } from 'zod'
-import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library'
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientValidationError,
+} from '@prisma/client/runtime/library'
 import { getServerSession, ExtendedSession } from '@/lib/auth'
 import { errorHandler, ErrorType } from '@/lib/error-handler'
 import { validateCSRFMiddleware } from '@/lib/csrf'
@@ -36,17 +39,20 @@ class ApiWrapper {
   private static rateLimitStore = new Map<string, { requests: number[]; windowStart: number }>()
   private static config = {
     rateLimitWindow: 60000, // 1 minute
-    rateLimitMaxRequests: 100
+    rateLimitMaxRequests: 100,
   }
-  
+
   /**
    * Wrap an API route handler with comprehensive error handling
    */
-  static wrap(handler: ApiHandler, options: ApiWrapperOptions = {}): (req: NextRequest) => Promise<NextResponse> {
+  static wrap(
+    handler: ApiHandler,
+    options: ApiWrapperOptions = {}
+  ): (req: NextRequest) => Promise<NextResponse> {
     return async (request: NextRequest) => {
       const requestId = crypto.randomUUID()
       const startTime = Date.now()
-      
+
       let session: ExtendedSession | null = null
       let user: ExtendedSession['user'] | null = null
       let tenantId: string | null = null
@@ -64,13 +70,13 @@ class ApiWrapper {
           endpoint: url,
           method,
           userAgent,
-          ip
+          ip,
         }
 
         // Authentication check
         if (options.requireAuth || options.validateSession) {
           session = await getServerSession()
-          
+
           if (!session && options.requireAuth) {
             return errorHandler.handleError(
               new Error('Authentication required'),
@@ -82,11 +88,11 @@ class ApiWrapper {
           if (session) {
             user = session.user
             tenantId = user?.tenantId || null
-            
+
             // Add user context to error context
             Object.assign(baseErrorContext, {
               userId: user?.id,
-              tenantId
+              tenantId,
             })
           }
         }
@@ -94,7 +100,7 @@ class ApiWrapper {
         // CSRF Protection for state-changing operations
         if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
           const isValidCSRF = await validateCSRFMiddleware(request, process.env.API_KEY_SECRET!)
-          
+
           if (!isValidCSRF) {
             return errorHandler.handleError(
               new Error('CSRF token validation failed'),
@@ -125,10 +131,7 @@ class ApiWrapper {
           )
 
           if (!rateLimitResult.allowed) {
-            return errorHandler.handleRateLimitError(
-              rateLimitResult.retryAfter,
-              baseErrorContext
-            )
+            return errorHandler.handleRateLimitError(rateLimitResult.retryAfter, baseErrorContext)
           }
         }
 
@@ -138,7 +141,7 @@ class ApiWrapper {
           requestId,
           session,
           user,
-          tenantId
+          tenantId,
         }
 
         // Execute the handler
@@ -153,17 +156,16 @@ class ApiWrapper {
           duration: Date.now() - startTime,
           userId: user?.id,
           tenantId,
-          success: true
+          success: true,
         })
 
         // Add request ID to response headers
         result.headers.set('x-request-id', requestId)
-        
-        return result
 
+        return result
       } catch (error) {
         const duration = Date.now() - startTime
-        
+
         // Enhanced error context with request details
         const errorContext = {
           requestId,
@@ -177,8 +179,8 @@ class ApiWrapper {
             duration,
             authenticated: !!session,
             hasUser: !!user,
-            hasTenant: !!tenantId
-          }
+            hasTenant: !!tenantId,
+          },
         }
 
         // Log failed request
@@ -191,7 +193,7 @@ class ApiWrapper {
           userId: user?.id,
           tenantId,
           success: false,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         })
 
         // Handle specific error types
@@ -199,16 +201,19 @@ class ApiWrapper {
           return errorHandler.handleZodError(error, errorContext)
         }
 
-        if (error instanceof PrismaClientKnownRequestError || error instanceof PrismaClientValidationError) {
+        if (
+          error instanceof PrismaClientKnownRequestError ||
+          error instanceof PrismaClientValidationError
+        ) {
           return errorHandler.handlePrismaError(error, errorContext)
         }
 
         // Determine error type based on error message/properties
         let errorType = ErrorType.INTERNAL
-        
+
         if (error instanceof Error) {
           const message = error.message.toLowerCase()
-          
+
           if (message.includes('unauthorized') || message.includes('authentication')) {
             errorType = ErrorType.AUTHENTICATION
           } else if (message.includes('forbidden') || message.includes('access denied')) {
@@ -237,11 +242,11 @@ class ApiWrapper {
     const forwarded = request.headers.get('x-forwarded-for')
     const realIP = request.headers.get('x-real-ip')
     const cfConnectingIP = request.headers.get('cf-connecting-ip')
-    
+
     if (cfConnectingIP) return cfConnectingIP
     if (realIP) return realIP
     if (forwarded) return forwarded.split(',')[0].trim()
-    
+
     return 'unknown'
   }
 
@@ -260,36 +265,36 @@ class ApiWrapper {
     // Simple in-memory rate limiter with LRU cache
     const now = Date.now()
     const identifier = `${key}:${tenantId || 'anonymous'}:${userId || this.getClientIP(request)}`
-    
+
     // Get or create bucket for this identifier
     let bucket = this.rateLimitStore.get(identifier)
     if (!bucket) {
       bucket = { requests: [], windowStart: now }
       this.rateLimitStore.set(identifier, bucket)
     }
-    
+
     // Clean old requests outside the window
     const windowStart = now - this.config.rateLimitWindow
-    bucket.requests = bucket.requests.filter(timestamp => timestamp > windowStart)
-    
+    bucket.requests = bucket.requests.filter((timestamp) => timestamp > windowStart)
+
     // Check if we're within limits
     if (bucket.requests.length >= this.config.rateLimitMaxRequests) {
       const oldestRequest = Math.min(...bucket.requests)
       const retryAfter = Math.ceil((oldestRequest + this.config.rateLimitWindow - now) / 1000)
-      
+
       return {
         allowed: false,
-        retryAfter: Math.max(retryAfter, 1)
+        retryAfter: Math.max(retryAfter, 1),
       }
     }
-    
+
     // Add current request
     bucket.requests.push(now)
     bucket.windowStart = windowStart
-    
+
     return {
       allowed: true,
-      retryAfter: 0
+      retryAfter: 0,
     }
   }
 
@@ -299,14 +304,14 @@ class ApiWrapper {
   private static getErrorStatus(error: unknown): number {
     if (error instanceof Error) {
       const message = error.message.toLowerCase()
-      
+
       if (message.includes('unauthorized')) return 401
       if (message.includes('forbidden')) return 403
       if (message.includes('not found')) return 404
       if (message.includes('validation')) return 400
       if (message.includes('conflict')) return 409
     }
-    
+
     return 500
   }
 
@@ -326,14 +331,14 @@ class ApiWrapper {
   }) {
     const logLevel = details.success ? 'info' : 'error'
     const message = `${details.method} ${details.url} - ${details.status} (${details.duration}ms)`
-    
+
     console[logLevel](message, {
       requestId: details.requestId,
       status: details.status,
       duration: details.duration,
       userId: details.userId,
       tenantId: details.tenantId,
-      error: details.error
+      error: details.error,
     })
   }
 }
@@ -344,13 +349,21 @@ export function withApiWrapper(handler: ApiHandler, options?: ApiWrapperOptions)
 }
 
 // Pre-configured wrappers for common scenarios
-export const withAuth = (handler: ApiHandler, options: Omit<ApiWrapperOptions, 'requireAuth'> = {}) =>
-  withApiWrapper(handler, { ...options, requireAuth: true })
+export const withAuth = (
+  handler: ApiHandler,
+  options: Omit<ApiWrapperOptions, 'requireAuth'> = {}
+) => withApiWrapper(handler, { ...options, requireAuth: true })
 
-export const withTenant = (handler: ApiHandler, options: Omit<ApiWrapperOptions, 'requireAuth' | 'requireTenant'> = {}) =>
-  withApiWrapper(handler, { ...options, requireAuth: true, requireTenant: true })
+export const withTenant = (
+  handler: ApiHandler,
+  options: Omit<ApiWrapperOptions, 'requireAuth' | 'requireTenant'> = {}
+) => withApiWrapper(handler, { ...options, requireAuth: true, requireTenant: true })
 
-export const withRateLimit = (handler: ApiHandler, max: number = 100, window: number = 60000, key: string = 'api') =>
-  withApiWrapper(handler, { rateLimitKey: key, rateLimitMax: max, rateLimitWindow: window })
+export const withRateLimit = (
+  handler: ApiHandler,
+  max: number = 100,
+  window: number = 60000,
+  key: string = 'api'
+) => withApiWrapper(handler, { rateLimitKey: key, rateLimitMax: max, rateLimitWindow: window })
 
 export default ApiWrapper

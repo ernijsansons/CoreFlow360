@@ -10,15 +10,21 @@ import { SecurityContext } from '@/types/bundles'
 // ============================================================================
 
 export interface FinGPTService {
-  sentimentAnalysis(text: string, context: SecurityContext): Promise<{
+  sentimentAnalysis(
+    text: string,
+    context: SecurityContext
+  ): Promise<{
     sentiment: 'positive' | 'negative' | 'neutral'
     score: number
     confidence: number
     keywords: string[]
     reasoning: string
   }>
-  
-  anomalyDetection(data: any[], context: SecurityContext): Promise<{
+
+  anomalyDetection(
+    data: unknown[],
+    context: SecurityContext
+  ): Promise<{
     anomalies: Array<{
       index: number
       severity: 'low' | 'medium' | 'high'
@@ -29,8 +35,11 @@ export interface FinGPTService {
     overallRisk: number
     patterns: string[]
   }>
-  
-  predictiveForecasting(historicalData: any[], horizon: number): Promise<{
+
+  predictiveForecasting(
+    historicalData: unknown[],
+    horizon: number
+  ): Promise<{
     predictions: Array<{
       timestamp: Date
       value: number
@@ -48,22 +57,31 @@ export interface FinGPTService {
 // ============================================================================
 
 export interface FinRobotService {
-  portfolioOptimization(assets: any[], constraints: any): Promise<{
+  portfolioOptimization(
+    assets: unknown[],
+    constraints: unknown
+  ): Promise<{
     optimalWeights: Record<string, number>
     expectedReturn: number
     risk: number
     sharpeRatio: number
     diversificationScore: number
   }>
-  
-  marketAnalysis(ticker: string, timeframe: string): Promise<{
+
+  marketAnalysis(
+    ticker: string,
+    timeframe: string
+  ): Promise<{
     technicalIndicators: Record<string, number>
     signals: Array<{ type: string; strength: number; reason: string }>
     recommendation: 'buy' | 'sell' | 'hold'
     confidence: number
   }>
-  
-  tradingStrategy(portfolio: any, marketData: any): Promise<{
+
+  tradingStrategy(
+    portfolio: unknown,
+    marketData: unknown
+  ): Promise<{
     actions: Array<{
       type: 'buy' | 'sell' | 'hold'
       ticker: string
@@ -90,16 +108,19 @@ export interface IDURARService {
     recommendations: string[]
     nextBestActions: Array<{ action: string; priority: number; expectedValue: number }>
   }>
-  
-  inventoryPrediction(productId: string, horizon: number): Promise<{
+
+  inventoryPrediction(
+    productId: string,
+    horizon: number
+  ): Promise<{
     demandForecast: Array<{ date: Date; quantity: number; confidence: number }>
     optimalStockLevel: number
     reorderPoint: number
     safetyStock: number
   }>
-  
-  supplyChainOptimization(network: any): Promise<{
-    optimizedRoutes: any[]
+
+  supplyChainOptimization(network: unknown): Promise<{
+    optimizedRoutes: unknown[]
     costSavings: number
     timeReduction: number
     bottlenecks: Array<{ location: string; severity: number; solution: string }>
@@ -111,21 +132,27 @@ export interface IDURARService {
 // ============================================================================
 
 export interface ERPNextService {
-  processAutomation(workflow: string, data: any): Promise<{
+  processAutomation(
+    workflow: string,
+    data: unknown
+  ): Promise<{
     automatedSteps: string[]
     manualInterventions: string[]
     estimatedTimeSaved: number
     confidence: number
   }>
-  
-  documentAnalysis(document: any): Promise<{
-    extractedData: Record<string, any>
+
+  documentAnalysis(document: unknown): Promise<{
+    extractedData: Record<string, unknown>
     documentType: string
     confidence: number
     validationIssues: string[]
   }>
-  
-  complianceCheck(entity: string, regulations: string[]): Promise<{
+
+  complianceCheck(
+    entity: string,
+    regulations: string[]
+  ): Promise<{
     complianceStatus: 'compliant' | 'non_compliant' | 'partial'
     violations: Array<{ regulation: string; issue: string; severity: number }>
     recommendations: string[]
@@ -138,21 +165,24 @@ export interface ERPNextService {
 // ============================================================================
 
 export interface DolibarrService {
-  contractAnalysis(contract: any): Promise<{
-    keyTerms: Record<string, any>
+  contractAnalysis(contract: unknown): Promise<{
+    keyTerms: Record<string, unknown>
     risks: Array<{ type: string; severity: number; mitigation: string }>
     opportunities: string[]
     renewalProbability: number
   }>
-  
-  priceOptimization(product: any, market: any): Promise<{
+
+  priceOptimization(
+    product: unknown,
+    market: unknown
+  ): Promise<{
     optimalPrice: number
     elasticity: number
     competitorComparison: Record<string, number>
     expectedRevenue: number
   }>
-  
-  leadScoring(lead: any): Promise<{
+
+  leadScoring(lead: unknown): Promise<{
     score: number
     conversionProbability: number
     recommendedActions: string[]

@@ -9,7 +9,7 @@ import { bugBot } from '@/lib/bug-bot/bug-bot'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     // Report a test bug
     const bug = await bugBot.reportBug({
       title: body.title || 'Test Bug',
@@ -19,27 +19,26 @@ export async function POST(request: NextRequest) {
       tags: body.tags || ['test', 'demo'],
       technicalDetails: {
         errorMessage: body.errorMessage || 'Test error message',
-        componentName: body.componentName || 'TestComponent'
+        componentName: body.componentName || 'TestComponent',
       },
       businessImpact: {
         affectedUsers: body.affectedUsers || 1,
         revenueImpact: body.revenueImpact || 'LOW',
-        customerImpact: body.customerImpact || 'Minimal impact for testing'
-      }
+        customerImpact: body.customerImpact || 'Minimal impact for testing',
+      },
     })
 
     return NextResponse.json({
       success: true,
       message: 'Test bug reported successfully',
-      bug
+      bug,
     })
-
   } catch (error) {
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Failed to report test bug',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )
@@ -56,15 +55,14 @@ export async function GET() {
       success: true,
       statistics,
       activeBugs: activeBugs.slice(0, 5), // Return first 5 bugs
-      totalActiveBugs: activeBugs.length
+      totalActiveBugs: activeBugs.length,
     })
-
   } catch (error) {
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Failed to get bug statistics',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )

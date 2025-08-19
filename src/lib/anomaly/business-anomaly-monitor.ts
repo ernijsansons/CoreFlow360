@@ -3,7 +3,11 @@
  * High-level business metric monitoring with automated alerting
  */
 
-import { AdvancedAnomalyDetector, type DataPoint, type AnomalyResult } from './advanced-anomaly-detector'
+import {
+  AdvancedAnomalyDetector,
+  type DataPoint,
+  type AnomalyResult,
+} from './advanced-anomaly-detector'
 import { eventTracker } from '@/lib/events/enhanced-event-tracker'
 import { paymentAnalytics } from '@/lib/billing/payment-analytics'
 
@@ -71,8 +75,8 @@ export class BusinessAnomalyMonitor {
       businessContext: {
         industry: 'saas',
         businessModel: 'subscription',
-        seasonality: ['weekly', 'monthly']
-      }
+        seasonality: ['weekly', 'monthly'],
+      },
     })
 
     this.initializeBusinessMetrics()
@@ -95,8 +99,8 @@ export class BusinessAnomalyMonitor {
           department: 'Finance',
           owner: 'CFO',
           kpi: true,
-          revenueImpact: 'high'
-        }
+          revenueImpact: 'high',
+        },
       },
       {
         name: 'new_subscriptions',
@@ -108,8 +112,8 @@ export class BusinessAnomalyMonitor {
           department: 'Sales',
           owner: 'VP Sales',
           kpi: true,
-          revenueImpact: 'high'
-        }
+          revenueImpact: 'high',
+        },
       },
       {
         name: 'churn_rate',
@@ -122,8 +126,8 @@ export class BusinessAnomalyMonitor {
           department: 'Customer Success',
           owner: 'VP Customer Success',
           kpi: true,
-          revenueImpact: 'high'
-        }
+          revenueImpact: 'high',
+        },
       },
       {
         name: 'active_users',
@@ -135,8 +139,8 @@ export class BusinessAnomalyMonitor {
           department: 'Product',
           owner: 'VP Product',
           kpi: true,
-          revenueImpact: 'medium'
-        }
+          revenueImpact: 'medium',
+        },
       },
       {
         name: 'api_response_time',
@@ -149,8 +153,8 @@ export class BusinessAnomalyMonitor {
           department: 'Engineering',
           owner: 'CTO',
           kpi: false,
-          revenueImpact: 'medium'
-        }
+          revenueImpact: 'medium',
+        },
       },
       {
         name: 'error_rate',
@@ -163,12 +167,12 @@ export class BusinessAnomalyMonitor {
           department: 'Engineering',
           owner: 'CTO',
           kpi: false,
-          revenueImpact: 'high'
-        }
-      }
+          revenueImpact: 'high',
+        },
+      },
     ]
 
-    coreMetrics.forEach(metric => {
+    coreMetrics.forEach((metric) => {
       this.metrics.set(metric.name, metric)
     })
   }
@@ -184,14 +188,14 @@ export class BusinessAnomalyMonitor {
         severity: ['critical'],
         conditions: {
           consecutiveAnomalies: 1,
-          anomalyScore: 0.8
+          anomalyScore: 0.8,
         },
         cooldownPeriod: 60,
         escalation: {
           immediate: ['cfo@company.com', 'exec-team@company.com'],
           after30min: ['board@company.com'],
-          after2hours: []
-        }
+          after2hours: [],
+        },
       },
       {
         id: 'churn_high',
@@ -199,14 +203,14 @@ export class BusinessAnomalyMonitor {
         severity: ['high', 'critical'],
         conditions: {
           consecutiveAnomalies: 2,
-          valueThreshold: 5
+          valueThreshold: 5,
         },
         cooldownPeriod: 120,
         escalation: {
           immediate: ['cs-team@company.com'],
           after30min: ['vp-cs@company.com'],
-          after2hours: ['exec-team@company.com']
-        }
+          after2hours: ['exec-team@company.com'],
+        },
       },
       {
         id: 'system_performance',
@@ -214,18 +218,18 @@ export class BusinessAnomalyMonitor {
         severity: ['critical'],
         conditions: {
           valueThreshold: 1000,
-          consecutiveAnomalies: 3
+          consecutiveAnomalies: 3,
         },
         cooldownPeriod: 30,
         escalation: {
           immediate: ['dev-team@company.com'],
           after30min: ['cto@company.com'],
-          after2hours: []
-        }
-      }
+          after2hours: [],
+        },
+      },
     ]
 
-    rules.forEach(rule => {
+    rules.forEach((rule) => {
       this.alertRules.set(rule.id, rule)
     })
   }
@@ -256,9 +260,9 @@ export class BusinessAnomalyMonitor {
       properties: {
         metricName,
         dataPoints: dataPoints.length,
-        anomaliesDetected: anomalies.filter(a => a.isAnomaly).length,
-        maxSeverity: this.getMaxSeverity(anomalies)
-      }
+        anomaliesDetected: anomalies.filter((a) => a.isAnomaly).length,
+        maxSeverity: this.getMaxSeverity(anomalies),
+      },
     })
 
     return anomalies
@@ -269,7 +273,7 @@ export class BusinessAnomalyMonitor {
    */
   private async processAnomaly(metricName: string, anomaly: AnomalyResult): Promise<void> {
     const metric = this.metrics.get(metricName)!
-    
+
     // Check alert rules
     for (const [ruleId, rule] of this.alertRules) {
       if (rule.metricName !== metricName) continue
@@ -316,9 +320,13 @@ export class BusinessAnomalyMonitor {
   /**
    * Trigger an alert
    */
-  private async triggerAlert(ruleId: string, metric: BusinessMetric, anomaly: AnomalyResult): Promise<void> {
+  private async triggerAlert(
+    ruleId: string,
+    metric: BusinessMetric,
+    anomaly: AnomalyResult
+  ): Promise<void> {
     const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    
+
     const alert: AnomalyAlert = {
       id: alertId,
       timestamp: new Date(),
@@ -328,11 +336,11 @@ export class BusinessAnomalyMonitor {
       businessImpact: this.calculateBusinessImpact(metric, anomaly),
       recommendedActions: [
         ...anomaly.recommendations,
-        ...this.getBusinessRecommendations(metric, anomaly)
+        ...this.getBusinessRecommendations(metric, anomaly),
       ],
       alertsSent: [],
       acknowledged: false,
-      resolved: false
+      resolved: false,
     }
 
     // Store alert
@@ -360,8 +368,8 @@ export class BusinessAnomalyMonitor {
         metricName: metric.name,
         severity: anomaly.severity,
         anomalyScore: anomaly.anomalyScore,
-        businessImpact: alert.businessImpact
-      }
+        businessImpact: alert.businessImpact,
+      },
     })
   }
 
@@ -370,11 +378,14 @@ export class BusinessAnomalyMonitor {
    */
   private async sendAlerts(alert: AnomalyAlert, recipients: string[]): Promise<void> {
     const metric = this.metrics.get(alert.metricName)!
-    
+
     for (const channel of metric.alertChannels) {
       switch (channel) {
         case 'email':
-          await this.sendEmailAlert(alert, recipients.filter(r => r.includes('@')))
+          await this.sendEmailAlert(
+            alert,
+            recipients.filter((r) => r.includes('@'))
+          )
           break
         case 'slack':
           await this.sendSlackAlert(alert)
@@ -397,23 +408,23 @@ export class BusinessAnomalyMonitor {
   private calculateBusinessImpact(metric: BusinessMetric, anomaly: AnomalyResult): string {
     const { revenueImpact } = metric.businessContext
     const severity = anomaly.severity
-    
+
     if (revenueImpact === 'high' && (severity === 'high' || severity === 'critical')) {
       return 'High revenue impact - immediate attention required'
     }
-    
+
     if (metric.type === 'revenue' && anomaly.value < anomaly.context.historicalAverage * 0.7) {
       return 'Significant revenue decrease detected'
     }
-    
+
     if (metric.type === 'users' && anomaly.value < anomaly.context.historicalAverage * 0.8) {
       return 'User engagement decline detected'
     }
-    
+
     if (metric.type === 'system' && severity === 'critical') {
       return 'System performance issue - may affect user experience'
     }
-    
+
     return `${severity} anomaly in ${metric.description.toLowerCase()}`
   }
 
@@ -422,47 +433,47 @@ export class BusinessAnomalyMonitor {
    */
   private getBusinessRecommendations(metric: BusinessMetric, anomaly: AnomalyResult): string[] {
     const recommendations = []
-    
+
     if (metric.type === 'revenue' && anomaly.value < anomaly.context.historicalAverage) {
       recommendations.push('Review payment processing and billing systems')
       recommendations.push('Check for customer support issues or complaints')
       recommendations.push('Analyze competitor activity and market conditions')
     }
-    
+
     if (metric.type === 'users' && anomaly.severity === 'high') {
       recommendations.push('Review recent product changes or deployments')
       recommendations.push('Check user onboarding and engagement flows')
       recommendations.push('Analyze customer feedback and support tickets')
     }
-    
+
     if (metric.type === 'system') {
       recommendations.push('Check system logs and error rates')
       recommendations.push('Review recent infrastructure changes')
       recommendations.push('Monitor third-party service dependencies')
     }
-    
+
     return recommendations
   }
 
   // Alert channel implementations (simplified)
   private async sendEmailAlert(alert: AnomalyAlert, recipients: string[]): Promise<void> {
     // Implementation would integrate with email service
-    console.log(`Email alert sent to ${recipients.join(', ')}:`, alert.businessImpact)
+    console.log(`Sending email alert for ${alert.type} with impact: ${alert.businessImpact}`)
   }
 
   private async sendSlackAlert(alert: AnomalyAlert): Promise<void> {
     // Implementation would integrate with Slack API
-    console.log('Slack alert sent:', alert.businessImpact)
+    
   }
 
   private async sendWebhookAlert(alert: AnomalyAlert): Promise<void> {
     // Implementation would send HTTP webhook
-    console.log('Webhook alert sent:', alert.businessImpact)
+    
   }
 
   private async updateDashboardAlert(alert: AnomalyAlert): Promise<void> {
     // Implementation would update real-time dashboard
-    console.log('Dashboard alert updated:', alert.businessImpact)
+    
   }
 
   private async escalateAlert(alertId: string, recipients: string[]): Promise<void> {
@@ -473,7 +484,7 @@ export class BusinessAnomalyMonitor {
   }
 
   private getMaxSeverity(anomalies: AnomalyResult[]): string {
-    const severities = anomalies.map(a => a.severity)
+    const severities = anomalies.map((a) => a.severity)
     if (severities.includes('critical')) return 'critical'
     if (severities.includes('high')) return 'high'
     if (severities.includes('medium')) return 'medium'
@@ -506,7 +517,7 @@ export class BusinessAnomalyMonitor {
   }
 
   getActiveAlerts(): AnomalyAlert[] {
-    return Array.from(this.activeAlerts.values()).filter(alert => !alert.resolved)
+    return Array.from(this.activeAlerts.values()).filter((alert) => !alert.resolved)
   }
 
   getMetrics(): BusinessMetric[] {

@@ -1,74 +1,74 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useState, useEffect } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Switch } from '@/components/ui/switch'
+import { Progress } from '@/components/ui/progress'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useAuth } from '@/hooks/useAuth'
 
 interface ConsentPreference {
-  id: string;
-  category: 'strictly_necessary' | 'performance' | 'functional' | 'targeting' | 'marketing';
-  name: string;
-  description: string;
-  purpose: string;
-  required: boolean;
-  enabled: boolean;
-  lastUpdated: Date;
-  expires?: Date;
+  id: string
+  category: 'strictly_necessary' | 'performance' | 'functional' | 'targeting' | 'marketing'
+  name: string
+  description: string
+  purpose: string
+  required: boolean
+  enabled: boolean
+  lastUpdated: Date
+  expires?: Date
 }
 
 interface DataCategory {
-  category: string;
-  description: string;
-  dataTypes: string[];
-  purpose: string[];
-  retention: string;
-  thirdParties: string[];
-  canExport: boolean;
-  canDelete: boolean;
+  category: string
+  description: string
+  dataTypes: string[]
+  purpose: string[]
+  retention: string
+  thirdParties: string[]
+  canExport: boolean
+  canDelete: boolean
 }
 
 interface PrivacyRequest {
-  id: string;
-  type: 'access' | 'export' | 'delete' | 'correction' | 'restrict';
-  status: 'pending' | 'processing' | 'completed' | 'rejected';
-  requestDate: Date;
-  completedDate?: Date;
-  description: string;
-  downloadUrl?: string;
+  id: string
+  type: 'access' | 'export' | 'delete' | 'correction' | 'restrict'
+  status: 'pending' | 'processing' | 'completed' | 'rejected'
+  requestDate: Date
+  completedDate?: Date
+  description: string
+  downloadUrl?: string
 }
 
 interface PrivacyDashboardData {
-  consentPreferences: ConsentPreference[];
-  dataCategories: DataCategory[];
-  recentRequests: PrivacyRequest[];
-  privacyScore: number;
+  consentPreferences: ConsentPreference[]
+  dataCategories: DataCategory[]
+  recentRequests: PrivacyRequest[]
+  privacyScore: number
   dataRetentionSummary: {
-    totalCategories: number;
-    dataVolume: string;
-    oldestData: Date;
-    nextDeletion: Date;
-  };
+    totalCategories: number
+    dataVolume: string
+    oldestData: Date
+    nextDeletion: Date
+  }
 }
 
 export default function PrivacyPortal() {
-  const { user } = useAuth();
-  const [dashboardData, setDashboardData] = useState<PrivacyDashboardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [requestInProgress, setRequestInProgress] = useState<string | null>(null);
-  const [selectedTab, setSelectedTab] = useState('overview');
+  const { user } = useAuth()
+  const [dashboardData, setDashboardData] = useState<PrivacyDashboardData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [requestInProgress, setRequestInProgress] = useState<string | null>(null)
+  const [selectedTab, setSelectedTab] = useState('overview')
 
   useEffect(() => {
-    loadPrivacyDashboard();
-  }, []);
+    loadPrivacyDashboard()
+  }, [])
 
   const loadPrivacyDashboard = async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
       // Mock data - in real implementation, fetch from API
       const mockData: PrivacyDashboardData = {
@@ -81,7 +81,7 @@ export default function PrivacyPortal() {
             purpose: 'Authentication, security, and core functionality',
             required: true,
             enabled: true,
-            lastUpdated: new Date('2024-01-01')
+            lastUpdated: new Date('2024-01-01'),
           },
           {
             id: 'performance',
@@ -92,7 +92,7 @@ export default function PrivacyPortal() {
             required: false,
             enabled: true,
             lastUpdated: new Date('2024-06-01'),
-            expires: new Date('2025-06-01')
+            expires: new Date('2025-06-01'),
           },
           {
             id: 'functional',
@@ -102,7 +102,7 @@ export default function PrivacyPortal() {
             purpose: 'User experience personalization',
             required: false,
             enabled: false,
-            lastUpdated: new Date('2024-03-15')
+            lastUpdated: new Date('2024-03-15'),
           },
           {
             id: 'marketing',
@@ -113,7 +113,7 @@ export default function PrivacyPortal() {
             required: false,
             enabled: true,
             lastUpdated: new Date('2024-07-01'),
-            expires: new Date('2025-07-01')
+            expires: new Date('2025-07-01'),
           },
           {
             id: 'targeting',
@@ -123,8 +123,8 @@ export default function PrivacyPortal() {
             purpose: 'Advertising personalization and tracking',
             required: false,
             enabled: false,
-            lastUpdated: new Date('2024-02-01')
-          }
+            lastUpdated: new Date('2024-02-01'),
+          },
         ],
         dataCategories: [
           {
@@ -135,7 +135,7 @@ export default function PrivacyPortal() {
             retention: '7 years after account closure',
             thirdParties: ['Authentication Provider'],
             canExport: true,
-            canDelete: true
+            canDelete: true,
           },
           {
             category: 'Usage Analytics',
@@ -145,7 +145,7 @@ export default function PrivacyPortal() {
             retention: '2 years',
             thirdParties: ['Google Analytics', 'Mixpanel'],
             canExport: true,
-            canDelete: true
+            canDelete: true,
           },
           {
             category: 'Communication Data',
@@ -155,7 +155,7 @@ export default function PrivacyPortal() {
             retention: '3 years',
             thirdParties: ['Support Platform'],
             canExport: true,
-            canDelete: false
+            canDelete: false,
           },
           {
             category: 'Voice Data',
@@ -165,8 +165,8 @@ export default function PrivacyPortal() {
             retention: '30 days',
             thirdParties: ['Twilio', 'Speech Processing Service'],
             canExport: true,
-            canDelete: true
-          }
+            canDelete: true,
+          },
         ],
         recentRequests: [
           {
@@ -176,124 +176,121 @@ export default function PrivacyPortal() {
             requestDate: new Date('2024-08-10'),
             completedDate: new Date('2024-08-12'),
             description: 'Data export request for all personal information',
-            downloadUrl: '/api/privacy/downloads/user_data_20240812.zip'
+            downloadUrl: '/api/privacy/downloads/user_data_20240812.zip',
           },
           {
             id: 'req_002',
             type: 'delete',
             status: 'processing',
             requestDate: new Date('2024-08-14'),
-            description: 'Delete voice recording data older than 30 days'
-          }
+            description: 'Delete voice recording data older than 30 days',
+          },
         ],
         privacyScore: 85,
         dataRetentionSummary: {
           totalCategories: 4,
           dataVolume: '2.3 MB',
           oldestData: new Date('2023-01-15'),
-          nextDeletion: new Date('2024-09-01')
-        }
-      };
+          nextDeletion: new Date('2024-09-01'),
+        },
+      }
 
-      setDashboardData(mockData);
+      setDashboardData(mockData)
     } catch (error) {
-      console.error('Failed to load privacy dashboard:', error);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const updateConsentPreference = async (preferenceId: string, enabled: boolean) => {
-    if (!dashboardData) return;
+    if (!dashboardData) return
 
     try {
       // Update local state immediately for better UX
-      const updatedPreferences = dashboardData.consentPreferences.map(pref =>
-        pref.id === preferenceId 
-          ? { ...pref, enabled, lastUpdated: new Date() }
-          : pref
-      );
+      const updatedPreferences = dashboardData.consentPreferences.map((pref) =>
+        pref.id === preferenceId ? { ...pref, enabled, lastUpdated: new Date() } : pref
+      )
 
       setDashboardData({
         ...dashboardData,
-        consentPreferences: updatedPreferences
-      });
+        consentPreferences: updatedPreferences,
+      })
 
       // API call to update consent
       await fetch('/api/privacy/consent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ preferenceId, enabled })
-      });
-
+        body: JSON.stringify({ preferenceId, enabled }),
+      })
     } catch (error) {
-      console.error('Failed to update consent preference:', error);
       // Revert on error
-      loadPrivacyDashboard();
+      loadPrivacyDashboard()
     }
-  };
+  }
 
   const requestDataAccess = async (type: 'access' | 'export' | 'delete' | 'correction') => {
-    setRequestInProgress(type);
+    setRequestInProgress(type)
     try {
       const response = await fetch('/api/privacy/requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type })
-      });
+        body: JSON.stringify({ type }),
+      })
 
       if (response.ok) {
-        await loadPrivacyDashboard(); // Refresh to show new request
+        await loadPrivacyDashboard() // Refresh to show new request
       }
     } catch (error) {
-      console.error(`Failed to submit ${type} request:`, error);
     } finally {
-      setRequestInProgress(null);
+      setRequestInProgress(null)
     }
-  };
+  }
 
   const downloadData = (downloadUrl: string) => {
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = '';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = ''
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
-  const getConsentStatusColor = (enabled: boolean, required: boolean) => {
-    if (required) return 'bg-gray-500';
-    return enabled ? 'bg-green-500' : 'bg-red-500';
-  };
+  const getConsentStatusColor = (_enabled: boolean, _required: boolean) => {
+    if (required) return 'bg-gray-500'
+    return enabled ? 'bg-green-500' : 'bg-red-500'
+  }
 
   const getRequestStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-500';
-      case 'processing': return 'bg-blue-500';
-      case 'pending': return 'bg-yellow-500';
-      case 'rejected': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'completed':
+        return 'bg-green-500'
+      case 'processing':
+        return 'bg-blue-500'
+      case 'pending':
+        return 'bg-yellow-500'
+      case 'rejected':
+        return 'bg-red-500'
+      default:
+        return 'bg-gray-500'
     }
-  };
+  }
 
   if (isLoading || !dashboardData) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
           <p>Loading privacy dashboard...</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">Privacy Control Center</h1>
-        <p className="text-muted-foreground">
-          Manage your privacy preferences and data rights
-        </p>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div className="mb-8 text-center">
+        <h1 className="mb-2 text-3xl font-bold">Privacy Control Center</h1>
+        <p className="text-muted-foreground">Manage your privacy preferences and data rights</p>
       </div>
 
       {/* Privacy Score Overview */}
@@ -301,7 +298,7 @@ export default function PrivacyPortal() {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             Your Privacy Score
-            <Badge variant="outline" className="text-lg px-3 py-1">
+            <Badge variant="outline" className="px-3 py-1 text-lg">
               {dashboardData.privacyScore}%
             </Badge>
           </CardTitle>
@@ -311,22 +308,28 @@ export default function PrivacyPortal() {
         </CardHeader>
         <CardContent>
           <Progress value={dashboardData.privacyScore} className="mb-4" />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+          <div className="grid grid-cols-1 gap-4 text-center md:grid-cols-4">
             <div>
-              <div className="text-2xl font-bold">{dashboardData.dataRetentionSummary.totalCategories}</div>
-              <div className="text-sm text-muted-foreground">Data Categories</div>
+              <div className="text-2xl font-bold">
+                {dashboardData.dataRetentionSummary.totalCategories}
+              </div>
+              <div className="text-muted-foreground text-sm">Data Categories</div>
             </div>
             <div>
-              <div className="text-2xl font-bold">{dashboardData.dataRetentionSummary.dataVolume}</div>
-              <div className="text-sm text-muted-foreground">Total Data</div>
+              <div className="text-2xl font-bold">
+                {dashboardData.dataRetentionSummary.dataVolume}
+              </div>
+              <div className="text-muted-foreground text-sm">Total Data</div>
             </div>
             <div>
-              <div className="text-2xl font-bold">{dashboardData.consentPreferences.filter(p => p.enabled).length}</div>
-              <div className="text-sm text-muted-foreground">Active Consents</div>
+              <div className="text-2xl font-bold">
+                {dashboardData.consentPreferences.filter((p) => p.enabled).length}
+              </div>
+              <div className="text-muted-foreground text-sm">Active Consents</div>
             </div>
             <div>
               <div className="text-2xl font-bold">{dashboardData.recentRequests.length}</div>
-              <div className="text-sm text-muted-foreground">Privacy Requests</div>
+              <div className="text-muted-foreground text-sm">Privacy Requests</div>
             </div>
           </div>
         </CardContent>
@@ -341,17 +344,20 @@ export default function PrivacyPortal() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {dashboardData.recentRequests.slice(0, 3).map(request => (
-                  <div key={request.id} className="flex items-center justify-between p-2 border rounded">
+                {dashboardData.recentRequests.slice(0, 3).map((request) => (
+                  <div
+                    key={request.id}
+                    className="flex items-center justify-between rounded border p-2"
+                  >
                     <div>
                       <div className="font-medium capitalize">{request.type} Request</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-muted-foreground text-sm">
                         {request.requestDate.toLocaleDateString()}
                       </div>
                     </div>
@@ -397,13 +403,18 @@ export default function PrivacyPortal() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {dashboardData.consentPreferences.map(preference => (
-                <div key={preference.id} className="flex items-center justify-between p-4 border rounded">
+              {dashboardData.consentPreferences.map((preference) => (
+                <div
+                  key={preference.id}
+                  className="flex items-center justify-between rounded border p-4"
+                >
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="mb-1 flex items-center gap-2">
                       <h4 className="font-medium">{preference.name}</h4>
                       {preference.required && (
-                        <Badge variant="outline" className="text-xs">Required</Badge>
+                        <Badge variant="outline" className="text-xs">
+                          Required
+                        </Badge>
                       )}
                       {preference.expires && (
                         <Badge variant="outline" className="text-xs">
@@ -411,9 +422,9 @@ export default function PrivacyPortal() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground mb-1">{preference.description}</p>
-                    <p className="text-xs text-muted-foreground">Purpose: {preference.purpose}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground mb-1 text-sm">{preference.description}</p>
+                    <p className="text-muted-foreground text-xs">Purpose: {preference.purpose}</p>
+                    <p className="text-muted-foreground text-xs">
                       Last updated: {preference.lastUpdated.toLocaleDateString()}
                     </p>
                   </div>
@@ -438,24 +449,28 @@ export default function PrivacyPortal() {
             </CardHeader>
             <CardContent className="space-y-4">
               {dashboardData.dataCategories.map((category, index) => (
-                <div key={index} className="p-4 border rounded">
-                  <div className="flex items-center justify-between mb-3">
+                <div key={index} className="rounded border p-4">
+                  <div className="mb-3 flex items-center justify-between">
                     <h4 className="font-medium">{category.category}</h4>
                     <div className="flex gap-2">
                       {category.canExport && (
-                        <Badge variant="outline" className="text-xs bg-blue-50">Exportable</Badge>
+                        <Badge variant="outline" className="bg-blue-50 text-xs">
+                          Exportable
+                        </Badge>
                       )}
                       {category.canDelete && (
-                        <Badge variant="outline" className="text-xs bg-red-50">Deletable</Badge>
+                        <Badge variant="outline" className="bg-red-50 text-xs">
+                          Deletable
+                        </Badge>
                       )}
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-3">{category.description}</p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <p className="text-muted-foreground mb-3 text-sm">{category.description}</p>
+
+                  <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
                     <div>
                       <strong>Data Types:</strong>
-                      <ul className="list-disc list-inside text-muted-foreground">
+                      <ul className="text-muted-foreground list-inside list-disc">
                         {category.dataTypes.map((type, idx) => (
                           <li key={idx}>{type}</li>
                         ))}
@@ -463,22 +478,25 @@ export default function PrivacyPortal() {
                     </div>
                     <div>
                       <strong>Purpose:</strong>
-                      <ul className="list-disc list-inside text-muted-foreground">
+                      <ul className="text-muted-foreground list-inside list-disc">
                         {category.purpose.map((purpose, idx) => (
                           <li key={idx}>{purpose}</li>
                         ))}
                       </ul>
                     </div>
                   </div>
-                  
+
                   <div className="mt-3 text-sm">
-                    <strong>Retention:</strong> <span className="text-muted-foreground">{category.retention}</span>
+                    <strong>Retention:</strong>{' '}
+                    <span className="text-muted-foreground">{category.retention}</span>
                   </div>
-                  
+
                   {category.thirdParties.length > 0 && (
                     <div className="mt-2 text-sm">
                       <strong>Third Parties:</strong>{' '}
-                      <span className="text-muted-foreground">{category.thirdParties.join(', ')}</span>
+                      <span className="text-muted-foreground">
+                        {category.thirdParties.join(', ')}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -497,7 +515,7 @@ export default function PrivacyPortal() {
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Request Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
                 <Button
                   variant="outline"
                   disabled={requestInProgress === 'access'}
@@ -505,7 +523,7 @@ export default function PrivacyPortal() {
                   className="h-20 flex-col"
                 >
                   {requestInProgress === 'access' ? 'Processing...' : 'Access My Data'}
-                  <span className="text-xs text-muted-foreground mt-1">
+                  <span className="text-muted-foreground mt-1 text-xs">
                     View what data we have about you
                   </span>
                 </Button>
@@ -517,9 +535,7 @@ export default function PrivacyPortal() {
                   className="h-20 flex-col"
                 >
                   {requestInProgress === 'export' ? 'Processing...' : 'Export My Data'}
-                  <span className="text-xs text-muted-foreground mt-1">
-                    Download all your data
-                  </span>
+                  <span className="text-muted-foreground mt-1 text-xs">Download all your data</span>
                 </Button>
 
                 <Button
@@ -529,7 +545,7 @@ export default function PrivacyPortal() {
                   className="h-20 flex-col"
                 >
                   {requestInProgress === 'correction' ? 'Processing...' : 'Correct My Data'}
-                  <span className="text-xs text-muted-foreground mt-1">
+                  <span className="text-muted-foreground mt-1 text-xs">
                     Request data corrections
                   </span>
                 </Button>
@@ -541,7 +557,7 @@ export default function PrivacyPortal() {
                   className="h-20 flex-col border-red-200 text-red-600 hover:bg-red-50"
                 >
                   {requestInProgress === 'delete' ? 'Processing...' : 'Delete My Data'}
-                  <span className="text-xs text-muted-foreground mt-1">
+                  <span className="text-muted-foreground mt-1 text-xs">
                     Permanently delete your data
                   </span>
                 </Button>
@@ -549,14 +565,17 @@ export default function PrivacyPortal() {
 
               {/* Request History */}
               <div>
-                <h4 className="font-medium mb-3">Request History</h4>
+                <h4 className="mb-3 font-medium">Request History</h4>
                 <div className="space-y-3">
-                  {dashboardData.recentRequests.map(request => (
-                    <div key={request.id} className="flex items-center justify-between p-3 border rounded">
+                  {dashboardData.recentRequests.map((request) => (
+                    <div
+                      key={request.id}
+                      className="flex items-center justify-between rounded border p-3"
+                    >
                       <div>
                         <div className="font-medium capitalize">{request.type} Request</div>
-                        <div className="text-sm text-muted-foreground">{request.description}</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-muted-foreground text-sm">{request.description}</div>
+                        <div className="text-muted-foreground text-xs">
                           Requested: {request.requestDate.toLocaleDateString()}
                           {request.completedDate && (
                             <span> | Completed: {request.completedDate.toLocaleDateString()}</span>
@@ -568,10 +587,7 @@ export default function PrivacyPortal() {
                           {request.status}
                         </Badge>
                         {request.downloadUrl && request.status === 'completed' && (
-                          <Button 
-                            size="sm" 
-                            onClick={() => downloadData(request.downloadUrl!)}
-                          >
+                          <Button size="sm" onClick={() => downloadData(request.downloadUrl!)}>
                             Download
                           </Button>
                         )}
@@ -585,5 +601,5 @@ export default function PrivacyPortal() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

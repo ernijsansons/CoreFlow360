@@ -21,7 +21,7 @@ import {
   RefreshCw,
   Settings,
   Eye,
-  Send
+  Send,
 } from 'lucide-react'
 import useWebSocketAnalytics from '@/hooks/useWebSocketAnalytics'
 
@@ -43,9 +43,9 @@ export default function WebSocketConnectionPanel() {
     reconnect,
     subscribe,
     unsubscribe,
-    trackEvent
+    trackEvent,
   } = useWebSocketAnalytics({
-    autoConnect: false // Manual control for debug panel
+    autoConnect: false, // Manual control for debug panel
   })
 
   const [selectedSubscription, setSelectedSubscription] = useState('')
@@ -60,38 +60,47 @@ export default function WebSocketConnectionPanel() {
     'analytics:conversions',
     'dashboard:metrics',
     'dashboard:alerts',
-    'events:realtime'
+    'events:realtime',
   ]
 
   // Log connection events
   useEffect(() => {
     const timestamp = new Date().toLocaleTimeString()
-    
+
     if (isConnected) {
-      setConnectionLog(prev => [...prev, `${timestamp} - Connected (${metrics.connectionId})`])
+      setConnectionLog((prev) => [...prev, `${timestamp} - Connected (${metrics.connectionId})`])
     } else if (error) {
-      setConnectionLog(prev => [...prev, `${timestamp} - Error: ${error}`])
+      setConnectionLog((prev) => [...prev, `${timestamp} - Error: ${error}`])
     } else if (isConnecting) {
-      setConnectionLog(prev => [...prev, `${timestamp} - Connecting...`])
+      setConnectionLog((prev) => [...prev, `${timestamp} - Connecting...`])
     }
   }, [isConnected, isConnecting, error, metrics.connectionId])
 
   const handleSubscribe = async () => {
     if (selectedSubscription) {
       await subscribe(selectedSubscription)
-      setConnectionLog(prev => [...prev, `${new Date().toLocaleTimeString()} - Subscribed to ${selectedSubscription}`])
+      setConnectionLog((prev) => [
+        ...prev,
+        `${new Date().toLocaleTimeString()} - Subscribed to ${selectedSubscription}`,
+      ])
     }
   }
 
   const handleUnsubscribe = async (channel: string) => {
     await unsubscribe(channel)
-    setConnectionLog(prev => [...prev, `${new Date().toLocaleTimeString()} - Unsubscribed from ${channel}`])
+    setConnectionLog((prev) => [
+      ...prev,
+      `${new Date().toLocaleTimeString()} - Unsubscribed from ${channel}`,
+    ])
   }
 
   const handleSendTestMessage = () => {
     if (testMessage.trim()) {
       trackEvent('test_message', { message: testMessage, timestamp: new Date() })
-      setConnectionLog(prev => [...prev, `${new Date().toLocaleTimeString()} - Sent test message: ${testMessage}`])
+      setConnectionLog((prev) => [
+        ...prev,
+        `${new Date().toLocaleTimeString()} - Sent test message: ${testMessage}`,
+      ])
       setTestMessage('')
     }
   }
@@ -105,21 +114,25 @@ export default function WebSocketConnectionPanel() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <Server className="w-6 h-6 text-violet-400" />
+          <Server className="h-6 w-6 text-violet-400" />
           <h2 className="text-xl font-bold text-white">WebSocket Connection</h2>
         </div>
-        
-        <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${
-          isConnected ? 'bg-green-600/20 text-green-400' :
-          isConnecting ? 'bg-yellow-600/20 text-yellow-400' :
-          'bg-red-600/20 text-red-400'
-        }`}>
+
+        <div
+          className={`flex items-center space-x-2 rounded-full px-3 py-1 ${
+            isConnected
+              ? 'bg-green-600/20 text-green-400'
+              : isConnecting
+                ? 'bg-yellow-600/20 text-yellow-400'
+                : 'bg-red-600/20 text-red-400'
+          }`}
+        >
           {isConnected ? (
-            <Wifi className="w-4 h-4" />
+            <Wifi className="h-4 w-4" />
           ) : isConnecting ? (
-            <RefreshCw className="w-4 h-4 animate-spin" />
+            <RefreshCw className="h-4 w-4 animate-spin" />
           ) : (
-            <WifiOff className="w-4 h-4" />
+            <WifiOff className="h-4 w-4" />
           )}
           <span className="text-sm font-medium">
             {isConnected ? 'Connected' : isConnecting ? 'Connecting' : 'Disconnected'}
@@ -127,26 +140,26 @@ export default function WebSocketConnectionPanel() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Connection Control */}
         <div className="lg:col-span-1">
-          <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Connection Control</h3>
-            
+          <div className="rounded-xl border border-gray-700/50 bg-gray-800/40 p-6 backdrop-blur-sm">
+            <h3 className="mb-4 text-lg font-semibold text-white">Connection Control</h3>
+
             <div className="space-y-4">
               {/* Connection Buttons */}
               <div className="flex space-x-2">
                 <button
                   onClick={connect}
                   disabled={isConnected || isConnecting}
-                  className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                  className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Connect
                 </button>
                 <button
                   onClick={disconnect}
                   disabled={!isConnected}
-                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                  className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Disconnect
                 </button>
@@ -155,42 +168,42 @@ export default function WebSocketConnectionPanel() {
               <button
                 onClick={reconnect}
                 disabled={!isConnected && !error}
-                className="w-full px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                className="w-full rounded-lg bg-orange-600 px-4 py-2 text-white transition-colors hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Reconnect
               </button>
 
               {/* Connection Metrics */}
-              <div className="space-y-3 pt-4 border-t border-gray-700/50">
+              <div className="space-y-3 border-t border-gray-700/50 pt-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400 text-sm">Latency</span>
+                  <span className="text-sm text-gray-400">Latency</span>
                   <div className="flex items-center space-x-1">
-                    <Signal className="w-4 h-4 text-green-400" />
-                    <span className="text-white font-mono">{metrics.latency || 0}ms</span>
+                    <Signal className="h-4 w-4 text-green-400" />
+                    <span className="font-mono text-white">{metrics.latency || 0}ms</span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400 text-sm">Messages</span>
+                  <span className="text-sm text-gray-400">Messages</span>
                   <div className="flex items-center space-x-1">
-                    <MessageSquare className="w-4 h-4 text-blue-400" />
-                    <span className="text-white font-mono">{metrics.messagesReceived}</span>
+                    <MessageSquare className="h-4 w-4 text-blue-400" />
+                    <span className="font-mono text-white">{metrics.messagesReceived}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400 text-sm">Reconnects</span>
+                  <span className="text-sm text-gray-400">Reconnects</span>
                   <div className="flex items-center space-x-1">
-                    <RefreshCw className="w-4 h-4 text-orange-400" />
-                    <span className="text-white font-mono">{metrics.reconnectAttempts}</span>
+                    <RefreshCw className="h-4 w-4 text-orange-400" />
+                    <span className="font-mono text-white">{metrics.reconnectAttempts}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400 text-sm">Last Update</span>
+                  <span className="text-sm text-gray-400">Last Update</span>
                   <div className="flex items-center space-x-1">
-                    <Clock className="w-4 h-4 text-purple-400" />
-                    <span className="text-white font-mono text-xs">
+                    <Clock className="h-4 w-4 text-purple-400" />
+                    <span className="font-mono text-xs text-white">
                       {metrics.lastUpdate ? metrics.lastUpdate.toLocaleTimeString() : 'Never'}
                     </span>
                   </div>
@@ -199,12 +212,12 @@ export default function WebSocketConnectionPanel() {
 
               {/* Error Display */}
               {error && (
-                <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
-                  <div className="flex items-center space-x-2 text-red-400 mb-1">
-                    <AlertTriangle className="w-4 h-4" />
+                <div className="rounded-lg border border-red-500/30 bg-red-900/20 p-3">
+                  <div className="mb-1 flex items-center space-x-2 text-red-400">
+                    <AlertTriangle className="h-4 w-4" />
                     <span className="font-medium">Error</span>
                   </div>
-                  <p className="text-red-300 text-sm">{error}</p>
+                  <p className="text-sm text-red-300">{error}</p>
                 </div>
               )}
             </div>
@@ -212,28 +225,30 @@ export default function WebSocketConnectionPanel() {
         </div>
 
         {/* Subscriptions & Testing */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6 lg:col-span-2">
           {/* Subscriptions */}
-          <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Channel Subscriptions</h3>
-            
+          <div className="rounded-xl border border-gray-700/50 bg-gray-800/40 p-6 backdrop-blur-sm">
+            <h3 className="mb-4 text-lg font-semibold text-white">Channel Subscriptions</h3>
+
             <div className="space-y-4">
               {/* Subscribe to new channel */}
               <div className="flex space-x-2">
                 <select
                   value={selectedSubscription}
                   onChange={(e) => setSelectedSubscription(e.target.value)}
-                  className="flex-1 bg-gray-700/50 border border-gray-600/50 rounded-lg px-3 py-2 text-white"
+                  className="flex-1 rounded-lg border border-gray-600/50 bg-gray-700/50 px-3 py-2 text-white"
                 >
                   <option value="">Select channel...</option>
-                  {availableChannels.map(channel => (
-                    <option key={channel} value={channel}>{channel}</option>
+                  {availableChannels.map((channel) => (
+                    <option key={channel} value={channel}>
+                      {channel}
+                    </option>
                   ))}
                 </select>
                 <button
                   onClick={handleSubscribe}
                   disabled={!selectedSubscription || !isConnected}
-                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white rounded-lg transition-colors"
+                  className="rounded-lg bg-violet-600 px-4 py-2 text-white transition-colors hover:bg-violet-700 disabled:opacity-50"
                 >
                   Subscribe
                 </button>
@@ -241,17 +256,22 @@ export default function WebSocketConnectionPanel() {
 
               {/* Active subscriptions */}
               <div className="space-y-2">
-                <h4 className="text-white font-medium">Active Subscriptions ({metrics.subscriptions.length})</h4>
+                <h4 className="font-medium text-white">
+                  Active Subscriptions ({metrics.subscriptions.length})
+                </h4>
                 {metrics.subscriptions.length === 0 ? (
-                  <p className="text-gray-400 text-sm">No active subscriptions</p>
+                  <p className="text-sm text-gray-400">No active subscriptions</p>
                 ) : (
                   <div className="space-y-1">
-                    {metrics.subscriptions.map(subscription => (
-                      <div key={subscription} className="flex items-center justify-between p-2 bg-gray-700/20 rounded-lg">
-                        <span className="text-white text-sm font-mono">{subscription}</span>
+                    {metrics.subscriptions.map((subscription) => (
+                      <div
+                        key={subscription}
+                        className="flex items-center justify-between rounded-lg bg-gray-700/20 p-2"
+                      >
+                        <span className="font-mono text-sm text-white">{subscription}</span>
                         <button
                           onClick={() => handleUnsubscribe(subscription)}
-                          className="px-2 py-1 text-xs bg-red-600/20 text-red-400 rounded hover:bg-red-600/30 transition-colors"
+                          className="rounded bg-red-600/20 px-2 py-1 text-xs text-red-400 transition-colors hover:bg-red-600/30"
                         >
                           Unsubscribe
                         </button>
@@ -264,24 +284,24 @@ export default function WebSocketConnectionPanel() {
           </div>
 
           {/* Test Message */}
-          <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Send Test Message</h3>
-            
+          <div className="rounded-xl border border-gray-700/50 bg-gray-800/40 p-6 backdrop-blur-sm">
+            <h3 className="mb-4 text-lg font-semibold text-white">Send Test Message</h3>
+
             <div className="flex space-x-2">
               <input
                 type="text"
                 value={testMessage}
                 onChange={(e) => setTestMessage(e.target.value)}
                 placeholder="Enter test message..."
-                className="flex-1 bg-gray-700/50 border border-gray-600/50 rounded-lg px-3 py-2 text-white placeholder-gray-400"
+                className="flex-1 rounded-lg border border-gray-600/50 bg-gray-700/50 px-3 py-2 text-white placeholder-gray-400"
                 onKeyPress={(e) => e.key === 'Enter' && handleSendTestMessage()}
               />
               <button
                 onClick={handleSendTestMessage}
                 disabled={!testMessage.trim() || !isConnected}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg transition-colors"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
               >
-                <Send className="w-4 h-4" />
+                <Send className="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -289,20 +309,20 @@ export default function WebSocketConnectionPanel() {
       </div>
 
       {/* Connection Log */}
-      <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="rounded-xl border border-gray-700/50 bg-gray-800/40 p-6 backdrop-blur-sm">
+        <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-white">Connection Log</h3>
           <button
             onClick={clearLog}
-            className="px-3 py-1 text-sm bg-gray-600/20 text-gray-400 rounded hover:bg-gray-600/30 transition-colors"
+            className="rounded bg-gray-600/20 px-3 py-1 text-sm text-gray-400 transition-colors hover:bg-gray-600/30"
           >
             Clear
           </button>
         </div>
-        
-        <div className="bg-gray-900/50 rounded-lg p-4 h-48 overflow-y-auto">
+
+        <div className="h-48 overflow-y-auto rounded-lg bg-gray-900/50 p-4">
           {connectionLog.length === 0 ? (
-            <p className="text-gray-500 text-sm">No log entries yet...</p>
+            <p className="text-sm text-gray-500">No log entries yet...</p>
           ) : (
             <div className="space-y-1">
               {connectionLog.map((entry, index) => (
@@ -310,7 +330,7 @@ export default function WebSocketConnectionPanel() {
                   key={index}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-sm font-mono text-gray-300"
+                  className="font-mono text-sm text-gray-300"
                 >
                   {entry}
                 </motion.div>

@@ -6,15 +6,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
-
-
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const category = searchParams.get('category')
     const industryOnly = searchParams.get('industryOnly') === 'true'
 
-    let whereClause: any = { isActive: true }
+    const whereClause: unknown = { isActive: true }
 
     if (category) {
       whereClause.category = category
@@ -26,13 +24,10 @@ export async function GET(request: NextRequest) {
 
     const modules = await prisma.moduleDefinition.findMany({
       where: whereClause,
-      orderBy: [
-        { category: 'asc' },
-        { perUserPrice: 'asc' }
-      ]
+      orderBy: [{ category: 'asc' }, { perUserPrice: 'asc' }],
     })
 
-    const formattedModules = modules.map(module => ({
+    const formattedModules = modules.map((module) => ({
       moduleKey: module.moduleKey,
       name: module.name,
       description: module.description,
@@ -41,33 +36,36 @@ export async function GET(request: NextRequest) {
         basePrice: module.basePrice,
         perUserPrice: module.perUserPrice,
         setupFee: module.setupFee,
-        currency: 'USD'
+        currency: 'USD',
       },
       constraints: {
         minUserCount: module.minUserCount,
         maxUserCount: module.maxUserCount,
         enterpriseOnly: module.enterpriseOnly,
-        defaultEnabled: module.defaultEnabled
+        defaultEnabled: module.defaultEnabled,
       },
       dependencies: JSON.parse(module.dependencies || '[]'),
       conflicts: JSON.parse(module.conflicts || '[]'),
       features: {
         aiCapabilities: JSON.parse(module.aiCapabilities || '{}'),
         featureFlags: JSON.parse(module.featureFlags || '{}'),
-        crossModuleEvents: JSON.parse(module.crossModuleEvents || '[]')
+        crossModuleEvents: JSON.parse(module.crossModuleEvents || '[]'),
       },
       version: module.version,
-      updatedAt: module.updatedAt
+      updatedAt: module.updatedAt,
     }))
 
     // Group modules by category for better organization
-    const categorizedModules = formattedModules.reduce((acc, module) => {
-      if (!acc[module.category]) {
-        acc[module.category] = []
-      }
-      acc[module.category].push(module)
-      return acc
-    }, {} as Record<string, typeof formattedModules>)
+    const categorizedModules = formattedModules.reduce(
+      (acc, module) => {
+        if (!acc[module.category]) {
+          acc[module.category] = []
+        }
+        acc[module.category].push(module)
+        return acc
+      },
+      {} as Record<string, typeof formattedModules>
+    )
 
     return NextResponse.json({
       modules: formattedModules,
@@ -76,17 +74,12 @@ export async function GET(request: NextRequest) {
         totalModules: formattedModules.length,
         categories: Object.keys(categorizedModules),
         priceRange: {
-          min: Math.min(...formattedModules.map(m => m.pricing.perUserPrice)),
-          max: Math.max(...formattedModules.map(m => m.pricing.perUserPrice))
-        }
-      }
+          min: Math.min(...formattedModules.map((m) => m.pricing.perUserPrice)),
+          max: Math.max(...formattedModules.map((m) => m.pricing.perUserPrice)),
+        },
+      },
     })
-
   } catch (error) {
-    console.error('Error fetching modules:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch modules' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch modules' }, { status: 500 })
   }
 }

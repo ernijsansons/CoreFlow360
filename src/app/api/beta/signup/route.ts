@@ -1,6 +1,6 @@
 /**
  * Beta Signup API Endpoint
- * 
+ *
  * Handles beta user registration with consciousness-based prioritization
  * and automated follow-up sequences.
  */
@@ -22,7 +22,7 @@ const betaSignupSchema = z.object({
   currentChallenges: z.array(z.string()).min(1, 'At least one challenge is required'),
   consciousnessLevel: z.number().min(1).max(10),
   referralSource: z.string().optional(),
-  priorityScore: z.number().min(0).max(500)
+  priorityScore: z.number().min(0).max(500),
 })
 
 type BetaSignupData = z.infer<typeof betaSignupSchema>
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user already signed up (using new schema)
     const existingUser = await prisma.user.findUnique({
-      where: { email: validatedData.email }
+      where: { email: validatedData.email },
     })
 
     if (existingUser) {
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         referralSource: validatedData.referralSource || 'direct',
         priorityScore: validatedData.priorityScore,
         status: 'beta_pending',
-        
+
         // Store additional data in JSON fields if available
         metadata: {
           currentChallenges: validatedData.currentChallenges,
@@ -91,9 +91,9 @@ export async function POST(request: NextRequest) {
           signupSource: 'consciousness-awakening-form',
           userAgent: request.headers.get('user-agent'),
           ipAddress: ip,
-          betaTier: determineBetaTier(validatedData.priorityScore)
-        }
-      }
+          betaTier: determineBetaTier(validatedData.priorityScore),
+        },
+      },
     })
 
     // Determine beta tier based on priority score
@@ -111,27 +111,21 @@ export async function POST(request: NextRequest) {
         consciousnessLevel: validatedData.consciousnessLevel,
         priorityScore: validatedData.priorityScore,
         expectedInviteDate: calculateExpectedInviteDate(betaTier),
-        consciousnessInsights: enhancedConsciousnessData.insights
-      }
+        consciousnessInsights: enhancedConsciousnessData.insights,
+      },
     })
-
   } catch (error) {
-    console.error('Beta signup error:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Validation failed',
-          details: error.errors.map(e => ({ field: e.path.join('.'), message: e.message }))
+          details: error.errors.map((e) => ({ field: e.path.join('.'), message: e.message })),
         },
         { status: 400 }
       )
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error. Please try again.' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error. Please try again.' }, { status: 500 })
   }
 }
 
@@ -145,13 +139,12 @@ async function calculateEnhancedConsciousness(data: BetaSignupData) {
   const industryComplexity = getIndustryComplexity(industry)
   const sizeComplexity = getSizeComplexity(companySize)
 
-  const intelligenceGap = Math.min(
-    challengeComplexity + industryComplexity + sizeComplexity,
-    100
-  )
+  const intelligenceGap = Math.min(challengeComplexity + industryComplexity + sizeComplexity, 100)
 
   // Transformation Readiness Score
-  const executiveLevel = ['CEO/Founder', 'CTO/VP Engineering', 'VP Operations'].includes(role) ? 50 : 30
+  const executiveLevel = ['CEO/Founder', 'CTO/VP Engineering', 'VP Operations'].includes(role)
+    ? 50
+    : 30
   const consciousnessReadiness = consciousnessLevel < 5 ? 40 : 20 // Lower consciousness = higher readiness for change
   const transformationReadiness = Math.min(executiveLevel + consciousnessReadiness, 100)
 
@@ -168,7 +161,7 @@ async function calculateEnhancedConsciousness(data: BetaSignupData) {
     intelligenceGap,
     transformationReadiness,
     complexity,
-    expectedROI
+    expectedROI,
   })
 
   return {
@@ -176,7 +169,7 @@ async function calculateEnhancedConsciousness(data: BetaSignupData) {
     readiness: transformationReadiness,
     complexity,
     expectedROI,
-    insights
+    insights,
   }
 }
 
@@ -187,21 +180,21 @@ function getRoleMultiplier(role: string): number {
     'VP Operations': 1.3,
     'Director of Technology': 1.2,
     'IT Manager': 1.1,
-    'Business Operations Manager': 1.0
+    'Business Operations Manager': 1.0,
   }
   return multipliers[role] || 1.0
 }
 
 function getIndustryComplexity(industry: string): number {
   const complexities: Record<string, number> = {
-    'Manufacturing': 40,
+    Manufacturing: 40,
     'Financial Services': 35,
-    'Healthcare': 35,
+    Healthcare: 35,
     'Technology/Software': 30,
     'Professional Services': 25,
     'Retail/E-commerce': 25,
-    'Education': 20,
-    'Non-profit': 15
+    Education: 20,
+    'Non-profit': 15,
   }
   return complexities[industry] || 25
 }
@@ -212,7 +205,7 @@ function getSizeComplexity(companySize: string): number {
     '201-1000 employees': 40,
     '51-200 employees': 30,
     '11-50 employees': 20,
-    '1-10 employees': 10
+    '1-10 employees': 10,
   }
   return complexities[companySize] || 25
 }
@@ -223,7 +216,7 @@ function getSizeROI(companySize: string): number {
     '201-1000 employees': 1000000, // $1M
     '51-200 employees': 500000, // $500K
     '11-50 employees': 200000, // $200K
-    '1-10 employees': 100000 // $100K
+    '1-10 employees': 100000, // $100K
   }
   return baseROIs[companySize] || 200000
 }
@@ -238,16 +231,16 @@ function determineBetaTier(priorityScore: number): string {
 function calculateExpectedInviteDate(betaTier: string): Date {
   const now = new Date()
   const daysToAdd = {
-    'platinum': 3,   // 3 days
-    'gold': 7,       // 1 week
-    'silver': 14,    // 2 weeks
-    'bronze': 30     // 1 month
+    platinum: 3, // 3 days
+    gold: 7, // 1 week
+    silver: 14, // 2 weeks
+    bronze: 30, // 1 month
   }
-  
+
   const days = daysToAdd[betaTier as keyof typeof daysToAdd] || 30
   const inviteDate = new Date(now)
   inviteDate.setDate(now.getDate() + days)
-  
+
   return inviteDate
 }
 
@@ -282,22 +275,26 @@ function generateConsciousnessInsights(
   if (data.currentChallenges.includes('Departments operate in silos')) {
     insights.push('Breaking silos can unlock 300-500% intelligence multiplication')
   }
-  
+
   if (data.currentChallenges.includes('Manual processes slow us down')) {
     insights.push('Process consciousness typically saves 40+ hours per employee monthly')
   }
 
   // ROI Insights
   if (analysis.expectedROI > 1000000) {
-    insights.push(`Projected first-year consciousness ROI: $${(analysis.expectedROI / 1000000).toFixed(1)}M+`)
+    insights.push(
+      `Projected first-year consciousness ROI: $${(analysis.expectedROI / 1000000).toFixed(1)}M+`
+    )
   } else {
-    insights.push(`Projected first-year consciousness ROI: $${(analysis.expectedROI / 1000).toFixed(0)}K+`)
+    insights.push(
+      `Projected first-year consciousness ROI: $${(analysis.expectedROI / 1000).toFixed(0)}K+`
+    )
   }
 
   return insights.slice(0, 3) // Return top 3 insights
 }
 
-async function trackBetaSignupEvent(betaUser: any, analysis: any) {
+async function trackBetaSignupEvent(betaUser: unknown, analysis: unknown) {
   try {
     // Simple console logging for now - in production would send to analytics service
     console.log('[Beta Signup Analytics]', {
@@ -308,32 +305,30 @@ async function trackBetaSignupEvent(betaUser: any, analysis: any) {
       consciousnessLevel: betaUser.consciousnessLevel,
       priorityScore: betaUser.priorityScore,
       intelligenceGap: analysis.intelligenceGap,
-      expectedROI: analysis.expectedROI
+      expectedROI: analysis.expectedROI,
     })
-  } catch (error) {
-    console.error('Failed to track beta signup event:', error)
-  }
+  } catch (error) {}
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Get beta program statistics (using new user table structure)
     const totalSignups = await prisma.user.count({
-      where: { status: { contains: 'beta' } }
+      where: { status: { contains: 'beta' } },
     })
 
     const pendingSignups = await prisma.user.count({
-      where: { status: 'beta_pending' }
+      where: { status: 'beta_pending' },
     })
 
     const approvedSignups = await prisma.user.count({
-      where: { status: 'beta_approved' }
+      where: { status: 'beta_approved' },
     })
 
     const industryBreakdown = await prisma.user.groupBy({
       by: ['industry'],
       where: { status: { contains: 'beta' } },
-      _count: { industry: true }
+      _count: { industry: true },
     })
 
     return NextResponse.json({
@@ -342,21 +337,21 @@ export async function GET(request: NextRequest) {
         total_signups: totalSignups,
         pending: pendingSignups,
         approved: approvedSignups,
-        active: approvedSignups // Simplified for now
+        active: approvedSignups, // Simplified for now
       },
-      industryBreakdown: industryBreakdown.map(item => ({
+      industryBreakdown: industryBreakdown.map((item) => ({
         industry_vertical: item.industry,
-        count: item._count.industry
-      }))
+        count: item._count.industry,
+      })),
     })
-
   } catch (error) {
-    console.error('[Beta Stats Error]', error)
-    
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to fetch beta program statistics'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to fetch beta program statistics',
+      },
+      { status: 500 }
+    )
   }
 }
 

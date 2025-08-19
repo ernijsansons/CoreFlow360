@@ -8,13 +8,13 @@ export const runtime = 'edge'
 
 const QuantumEvolutionDashboard = dynamic(
   () => import('@/components/consciousness/dashboard/QuantumEvolutionDashboard'),
-  { 
+  {
     ssr: false,
     loading: () => (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-black">
         <div className="text-white">Loading quantum dashboard...</div>
       </div>
-    )
+    ),
   }
 )
 

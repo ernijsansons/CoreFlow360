@@ -4,7 +4,7 @@
  */
 
 // Base API Response Types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: ApiError
@@ -16,7 +16,7 @@ export interface ApiError {
   type: string
   message: string
   code: string
-  details?: any
+  details?: unknown
   requestId?: string
 }
 
@@ -27,7 +27,7 @@ export interface ApiMeta {
   totalPages?: number
   hasNext?: boolean
   hasPrev?: boolean
-  [key: string]: any
+  [key: string]: unknown
 }
 
 // Pagination
@@ -105,18 +105,12 @@ export interface Customer {
     avatar?: string
   }
   industryType?: string
-  industryData?: Record<string, any>
+  industryData?: Record<string, unknown>
   createdAt: string
   updatedAt: string
 }
 
-export type CustomerStatus = 
-  | 'LEAD' 
-  | 'PROSPECT' 
-  | 'CUSTOMER' 
-  | 'CHAMPION' 
-  | 'AT_RISK' 
-  | 'CHURNED'
+export type CustomerStatus = 'LEAD' | 'PROSPECT' | 'CUSTOMER' | 'CHAMPION' | 'AT_RISK' | 'CHURNED'
 
 export interface CreateCustomerRequest {
   firstName: string
@@ -126,7 +120,7 @@ export interface CreateCustomerRequest {
   address?: string
   company?: string
   industryType?: string
-  industryData?: Record<string, any>
+  industryData?: Record<string, unknown>
 }
 
 export interface UpdateCustomerRequest extends Partial<CreateCustomerRequest> {
@@ -164,18 +158,9 @@ export interface Subscription {
   }
 }
 
-export type SubscriptionStatus = 
-  | 'ACTIVE' 
-  | 'TRIAL' 
-  | 'PAST_DUE' 
-  | 'CANCELLED' 
-  | 'EXPIRED'
+export type SubscriptionStatus = 'ACTIVE' | 'TRIAL' | 'PAST_DUE' | 'CANCELLED' | 'EXPIRED'
 
-export type SubscriptionTier = 
-  | 'starter' 
-  | 'professional' 
-  | 'enterprise' 
-  | 'ultimate'
+export type SubscriptionTier = 'starter' | 'professional' | 'enterprise' | 'ultimate'
 
 export type BillingCycle = 'monthly' | 'annual'
 
@@ -195,7 +180,7 @@ export interface FeedbackRequest {
   priority?: FeedbackPriority
   category?: string
   userEmail?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   attachments?: string[]
   // Bug report specific
   reproductionSteps?: string
@@ -205,17 +190,9 @@ export interface FeedbackRequest {
   screenshot?: string
 }
 
-export type FeedbackType = 
-  | 'feature_request' 
-  | 'bug_report' 
-  | 'general_feedback' 
-  | 'testimonial'
+export type FeedbackType = 'feature_request' | 'bug_report' | 'general_feedback' | 'testimonial'
 
-export type FeedbackPriority = 
-  | 'low' 
-  | 'medium' 
-  | 'high' 
-  | 'critical'
+export type FeedbackPriority = 'low' | 'medium' | 'high' | 'critical'
 
 export interface FeedbackResponse {
   id: string
@@ -235,12 +212,12 @@ export interface Module {
   usage?: ModuleUsage
 }
 
-export type ModuleCategory = 
-  | 'crm' 
-  | 'accounting' 
-  | 'hr' 
-  | 'inventory' 
-  | 'projects' 
+export type ModuleCategory =
+  | 'crm'
+  | 'accounting'
+  | 'hr'
+  | 'inventory'
+  | 'projects'
   | 'ai_enhancement'
 
 export interface ModuleUsage {
@@ -302,12 +279,12 @@ export interface PricingCalculationResponse {
 export interface SurveyResponse {
   surveyId: string
   surveyTitle: string
-  responses: Record<string, any>
+  responses: Record<string, unknown>
   userId?: string
   userEmail?: string
   completedAt?: string
   timeSpent?: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 // Interview Types
@@ -325,10 +302,7 @@ export interface InterviewRequest {
   availabilityNotes?: string
 }
 
-export type InterviewType = 
-  | 'user_interview' 
-  | 'feature_feedback' 
-  | 'industry_expert'
+export type InterviewType = 'user_interview' | 'feature_feedback' | 'industry_expert'
 
 // Audit Log Types
 export interface AuditLog {
@@ -336,18 +310,12 @@ export interface AuditLog {
   action: AuditAction
   entityType: string
   entityId: string
-  oldValues?: any
-  newValues?: any
-  metadata?: Record<string, any>
+  oldValues?: unknown
+  newValues?: unknown
+  metadata?: Record<string, unknown>
   userId: string
   tenantId: string
   createdAt: string
 }
 
-export type AuditAction = 
-  | 'CREATE' 
-  | 'UPDATE' 
-  | 'DELETE' 
-  | 'VIEW' 
-  | 'EXPORT' 
-  | 'IMPORT'
+export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'VIEW' | 'EXPORT' | 'IMPORT'

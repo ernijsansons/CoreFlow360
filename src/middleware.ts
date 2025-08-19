@@ -41,24 +41,21 @@ const PUBLIC_ROUTES = [
   '/developers',
   '/marketplace',
   '/ai-agent-selection',
-  '/marketing'
+  '/marketing',
+  '/automation',
 ]
 
 // Admin-only routes
-const ADMIN_ROUTES = [
-  '/admin',
-  '/super-admin'
-]
+const ADMIN_ROUTES = ['/admin', '/super-admin']
 
 export async function middleware(request: NextRequest) {
-  // EMERGENCY: Skip middleware during build phase
+  // Skip middleware during build phase
   if (isBuildPhase()) {
-    console.log('[Middleware] Build phase detected - skipping middleware')
     return NextResponse.next()
   }
 
   const { pathname } = request.nextUrl
-  
+
   // Allow all static files and API routes
   if (
     pathname.startsWith('/_next') ||
@@ -70,20 +67,22 @@ export async function middleware(request: NextRequest) {
   }
 
   // Check if route is public
-  const isPublicRoute = PUBLIC_ROUTES.some(route => 
-    pathname === route || pathname.startsWith(`${route}/`)
+  const isPublicRoute = PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
   )
-  
+
   // Get session token safely
   let token = null
   try {
     const { getToken } = await import('next-auth/jwt')
-    token = await getToken({ 
-      req: request, 
-      secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || 'dev-secret-minimum-32-characters-long-for-security'
+    token = await getToken({
+      req: request,
+      secret:
+        process.env.NEXTAUTH_SECRET ||
+        process.env.AUTH_SECRET ||
+        'dev-secret-minimum-32-characters-long-for-security',
     })
   } catch (error) {
-    console.error('[Middleware] Auth token error:', error)
     // Continue without token on error
   }
 
@@ -95,15 +94,14 @@ export async function middleware(request: NextRequest) {
     }
 
     // Check admin routes
-    if (ADMIN_ROUTES.some(route => pathname.startsWith(route))) {
+    if (ADMIN_ROUTES.some((route) => pathname.startsWith(route))) {
       const userRole = token.role as string
-      
+
       if (pathname.startsWith('/super-admin') && userRole !== 'SUPER_ADMIN') {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       }
-      
-      if (pathname.startsWith('/admin') && 
-          !['ADMIN', 'SUPER_ADMIN'].includes(userRole)) {
+
+      if (pathname.startsWith('/admin') && !['ADMIN', 'SUPER_ADMIN'].includes(userRole)) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       }
     }
@@ -114,7 +112,7 @@ export async function middleware(request: NextRequest) {
     response.headers.set('X-Content-Type-Options', 'nosniff')
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
     response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
-    
+
     return response
   }
 
@@ -132,7 +130,7 @@ export async function middleware(request: NextRequest) {
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
-  
+
   return response
 }
 
@@ -146,5 +144,5 @@ export const config = {
     '/profile/:path*',
     // Match API routes that need auth (excluding auth endpoints)
     '/api/((?!auth|health|ping).*)',
-  ]
+  ],
 }

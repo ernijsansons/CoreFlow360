@@ -15,7 +15,7 @@ interface CacheOptions {
 /**
  * Create a cache key from query parameters
  */
-function createCacheKey(prefix: string, params: any): string {
+function createCacheKey(prefix: string, params: unknown): string {
   const sorted = JSON.stringify(params, Object.keys(params).sort())
   const hash = crypto.createHash('md5').update(sorted).digest('hex')
   return `query:${prefix}:${hash}`
@@ -31,19 +31,19 @@ export async function cachedQuery<T>(
 ): Promise<T> {
   const cacheKey = options.key || createCacheKey(queryName, { queryName })
   const ttl = options.ttl || CACHE_TTL.MEDIUM
-  
+
   // Try to get from cache
   const cached = await redis.get<T>(cacheKey)
   if (cached !== null) {
     return cached
   }
-  
+
   // Execute query
   const result = await queryFn()
-  
+
   // Cache result
   await redis.set(cacheKey, result, ttl)
-  
+
   // Add to cache tags for invalidation
   if (options.tags) {
     for (const tag of options.tags) {
@@ -51,7 +51,7 @@ export async function cachedQuery<T>(
       await redis.expire(`cache:tag:${tag}`, CACHE_TTL.DAY)
     }
   }
-  
+
   return result
 }
 
@@ -69,7 +69,7 @@ export async function invalidateByTag(tag: string): Promise<void> {
 /**
  * Cached Prisma query wrapper
  */
-export function withCache<T extends (...args: any[]) => Promise<any>>(
+export function withCache<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   options: {
     ttl?: number
@@ -79,20 +79,13 @@ export function withCache<T extends (...args: any[]) => Promise<any>>(
 ): T {
   return (async (...args: Parameters<T>) => {
     // Create cache key from function name and arguments
-    const key = createCacheKey(
-      options.keyPrefix || fn.name || 'query',
-      args
-    )
-    
-    return cachedQuery(
+    const key = createCacheKey(options.keyPrefix || fn.name || 'query', args)
+
+    return cachedQuery(key, () => fn(...args), {
+      ttl: options.ttl,
       key,
-      () => fn(...args),
-      {
-        ttl: options.ttl,
-        key,
-        tags: options.tags
-      }
-    )
+      tags: options.tags,
+    })
   }) as T
 }
 
@@ -103,77 +96,57 @@ export const queryCache = {
   /**
    * Cache user by ID
    */
-  async user(userId: string, queryFn: () => Promise<any>) {
-    return cachedQuery(
-      'user',
-      queryFn,
-      {
-        key: `user:${userId}`,
-        ttl: CACHE_TTL.MEDIUM,
-        tags: ['user', `user:${userId}`]
-      }
-    )
+  async user(userId: string, queryFn: () => Promise<unknown>) {
+    return cachedQuery('user', queryFn, {
+      key: `user:${userId}`,
+      ttl: CACHE_TTL.MEDIUM,
+      tags: ['user', `user:${userId}`],
+    })
   },
-  
+
   /**
    * Cache tenant data
    */
-  async tenant(tenantId: string, queryFn: () => Promise<any>) {
-    return cachedQuery(
-      'tenant',
-      queryFn,
-      {
-        key: `tenant:${tenantId}`,
-        ttl: CACHE_TTL.LONG,
-        tags: ['tenant', `tenant:${tenantId}`]
-      }
-    )
+  async tenant(tenantId: string, queryFn: () => Promise<unknown>) {
+    return cachedQuery('tenant', queryFn, {
+      key: `tenant:${tenantId}`,
+      ttl: CACHE_TTL.LONG,
+      tags: ['tenant', `tenant:${tenantId}`],
+    })
   },
-  
+
   /**
    * Cache customer list
    */
-  async customerList(params: any, queryFn: () => Promise<any>) {
-    return cachedQuery(
-      'customers',
-      queryFn,
-      {
-        key: createCacheKey('customers', params),
-        ttl: CACHE_TTL.SHORT,
-        tags: ['customers', `tenant:${params.tenantId}`]
-      }
-    )
+  async customerList(params: unknown, queryFn: () => Promise<unknown>) {
+    return cachedQuery('customers', queryFn, {
+      key: createCacheKey('customers', params),
+      ttl: CACHE_TTL.SHORT,
+      tags: ['customers', `tenant:${params.tenantId}`],
+    })
   },
-  
+
   /**
    * Cache metrics data
    */
-  async metrics(params: any, queryFn: () => Promise<any>) {
-    return cachedQuery(
-      'metrics',
-      queryFn,
-      {
-        key: createCacheKey('metrics', params),
-        ttl: params.realtime ? 30 : CACHE_TTL.MEDIUM,
-        tags: ['metrics', `tenant:${params.tenantId}`]
-      }
-    )
+  async metrics(params: unknown, queryFn: () => Promise<unknown>) {
+    return cachedQuery('metrics', queryFn, {
+      key: createCacheKey('metrics', params),
+      ttl: params.realtime ? 30 : CACHE_TTL.MEDIUM,
+      tags: ['metrics', `tenant:${params.tenantId}`],
+    })
   },
-  
+
   /**
    * Cache subscription data
    */
-  async subscription(userId: string, queryFn: () => Promise<any>) {
-    return cachedQuery(
-      'subscription',
-      queryFn,
-      {
-        key: `subscription:${userId}`,
-        ttl: CACHE_TTL.MEDIUM,
-        tags: ['subscription', `user:${userId}`]
-      }
-    )
-  }
+  async subscription(userId: string, queryFn: () => Promise<unknown>) {
+    return cachedQuery('subscription', queryFn, {
+      key: `subscription:${userId}`,
+      ttl: CACHE_TTL.MEDIUM,
+      tags: ['subscription', `user:${userId}`],
+    })
+  },
 }
 
 /**
@@ -186,14 +159,14 @@ export const cacheInvalidation = {
   async user(userId: string) {
     await invalidateByTag(`user:${userId}`)
   },
-  
+
   /**
    * Invalidate all tenant-related caches
    */
   async tenant(tenantId: string) {
     await invalidateByTag(`tenant:${tenantId}`)
   },
-  
+
   /**
    * Invalidate customer caches for a tenant
    */
@@ -201,14 +174,14 @@ export const cacheInvalidation = {
     await invalidateByTag('customers')
     await invalidateByTag(`tenant:${tenantId}`)
   },
-  
+
   /**
    * Invalidate subscription caches
    */
   async subscription(userId: string) {
     await invalidateByTag('subscription')
     await invalidateByTag(`user:${userId}`)
-  }
+  },
 }
 
 /**
@@ -218,29 +191,29 @@ export const cacheWarmer = {
   /**
    * Warm tenant cache
    */
-  async warmTenant(tenantId: string, dataFetcher: () => Promise<any>) {
+  async warmTenant(tenantId: string, dataFetcher: () => Promise<unknown>) {
     const data = await dataFetcher()
     await redis.set(`tenant:${tenantId}`, data, CACHE_TTL.LONG)
   },
-  
+
   /**
    * Warm user sessions
    */
-  async warmUserSessions(userIds: string[], sessionFetcher: (userId: string) => Promise<any>) {
+  async warmUserSessions(userIds: string[], sessionFetcher: (userId: string) => Promise<unknown>) {
     const promises = userIds.map(async (userId) => {
       const session = await sessionFetcher(userId)
       if (session) {
         await redis.set(`session:${userId}`, session, CACHE_TTL.LONG)
       }
     })
-    
+
     await Promise.all(promises)
   },
-  
+
   /**
    * Warm metric caches
    */
-  async warmMetrics(tenantIds: string[], metricsFetcher: (tenantId: string) => Promise<any>) {
+  async warmMetrics(tenantIds: string[], metricsFetcher: (tenantId: string) => Promise<unknown>) {
     const promises = tenantIds.map(async (tenantId) => {
       const metrics = await metricsFetcher(tenantId)
       await redis.set(
@@ -249,7 +222,7 @@ export const cacheWarmer = {
         CACHE_TTL.MEDIUM
       )
     })
-    
+
     await Promise.all(promises)
-  }
+  },
 }

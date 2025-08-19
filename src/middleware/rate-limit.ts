@@ -16,10 +16,8 @@ export const authRateLimit = rateLimit({
   skipSuccessfulRequests: false,
   keyGenerator: (req) => {
     // Use IP address as key
-    return req.headers.get('x-forwarded-for') || 
-           req.headers.get('x-real-ip') || 
-           'unknown'
-  }
+    return req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+  },
 })
 
 // Rate limiter for general API endpoints
@@ -32,13 +30,11 @@ export const apiRateLimit = rateLimit({
   skipSuccessfulRequests: false,
   keyGenerator: (req) => {
     // Use authenticated user ID if available, otherwise IP
-    const userId = (req as any).auth?.user?.id
+    const userId = (req as unknown).auth?.user?.id
     if (userId) return `user:${userId}`
-    
-    return req.headers.get('x-forwarded-for') || 
-           req.headers.get('x-real-ip') || 
-           'unknown'
-  }
+
+    return req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+  },
 })
 
 // Rate limiter for public endpoints
@@ -47,7 +43,7 @@ export const publicRateLimit = rateLimit({
   max: 30, // Limit each IP to 30 requests per minute
   message: 'Too many requests from this IP, please try again later',
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
 })
 
 // Rate limiter for file uploads
@@ -57,7 +53,7 @@ export const uploadRateLimit = rateLimit({
   message: 'Upload limit exceeded, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: false
+  skipSuccessfulRequests: false,
 })
 
 // Helper to create tenant-specific rate limiters
@@ -69,19 +65,17 @@ export function createTenantRateLimit(options: {
   return rateLimit({
     ...options,
     keyGenerator: (req) => {
-      const tenantId = (req as any).auth?.user?.tenantId
-      const userId = (req as any).auth?.user?.id
-      
+      const tenantId = (req as unknown).auth?.user?.tenantId
+      const userId = (req as unknown).auth?.user?.id
+
       if (tenantId && userId) {
         return `tenant:${tenantId}:user:${userId}`
       }
-      
-      return req.headers.get('x-forwarded-for') || 
-             req.headers.get('x-real-ip') || 
-             'unknown'
+
+      return req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
     },
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
   })
 }
 
@@ -89,7 +83,7 @@ export function createTenantRateLimit(options: {
 export const premiumApiRateLimit = createTenantRateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 1000, // 1000 requests per minute for premium users
-  message: 'Rate limit exceeded for premium tier'
+  message: 'Rate limit exceeded for premium tier',
 })
 
 // Export types for TypeScript

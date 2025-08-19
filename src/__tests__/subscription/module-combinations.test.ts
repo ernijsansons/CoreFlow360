@@ -12,7 +12,7 @@ import { prisma } from '@/lib/db'
 describe('Module Combinations Test Suite', () => {
   const testTenantId = 'test-tenant-combinations'
   const allModules = ['crm', 'accounting', 'hr', 'inventory', 'projects', 'marketing']
-  
+
   beforeEach(async () => {
     // Create test tenant subscription
     await prisma.tenantSubscription.create({
@@ -22,10 +22,10 @@ describe('Module Combinations Test Suite', () => {
         activeModules: JSON.stringify({}),
         pricingPlan: JSON.stringify({ test: true }),
         billingCycle: 'monthly',
-        status: 'active'
-      }
+        status: 'active',
+      },
     })
-    
+
     // Clear event bus cache
     eventBus.clearTenantCache()
   })
@@ -33,23 +33,23 @@ describe('Module Combinations Test Suite', () => {
   afterEach(async () => {
     // Clean up test data
     await prisma.subscriptionEvent.deleteMany({
-      where: { tenantSubscriptionId: testTenantId }
+      where: { tenantSubscriptionId: testTenantId },
     })
-    
+
     await prisma.tenantSubscription.delete({
-      where: { tenantId: testTenantId }
+      where: { tenantId: testTenantId },
     })
   })
 
   describe('Single Module Activation', () => {
-    allModules.forEach(module => {
+    allModules.forEach((module) => {
       it(`should activate ${module} module independently`, async () => {
         const result = await moduleManager.activateModule(testTenantId, module)
-        
+
         expect(result.success).toBe(true)
         expect(result.activeModules).toContain(module)
         expect(result.activeModules.length).toBe(1)
-        
+
         // Verify module is active
         const isActive = await moduleManager.isModuleActive(testTenantId, module)
         expect(isActive).toBe(true)
@@ -64,22 +64,22 @@ describe('Module Combinations Test Suite', () => {
       ['crm', 'inventory'],
       ['accounting', 'inventory'],
       ['hr', 'projects'],
-      ['projects', 'marketing']
+      ['projects', 'marketing'],
     ]
 
     twoModuleCombos.forEach(([module1, module2]) => {
       it(`should activate ${module1} + ${module2} combination`, async () => {
         // Activate first module
         await moduleManager.activateModule(testTenantId, module1)
-        
+
         // Activate second module
         const result = await moduleManager.activateModule(testTenantId, module2)
-        
+
         expect(result.success).toBe(true)
         expect(result.activeModules).toContain(module1)
         expect(result.activeModules).toContain(module2)
         expect(result.activeModules.length).toBe(2)
-        
+
         // Verify cross-module events are enabled
         const crossModuleEnabled = await eventBus.enableCrossModuleEvents(
           module1,
@@ -95,29 +95,29 @@ describe('Module Combinations Test Suite', () => {
     const bundles = [
       {
         name: 'Starter Bundle',
-        modules: ['crm', 'accounting']
+        modules: ['crm', 'accounting'],
       },
       {
         name: 'Professional Bundle',
-        modules: ['crm', 'accounting', 'hr', 'projects']
+        modules: ['crm', 'accounting', 'hr', 'projects'],
       },
       {
         name: 'Enterprise Bundle',
-        modules: allModules
-      }
+        modules: allModules,
+      },
     ]
 
-    bundles.forEach(bundle => {
+    bundles.forEach((bundle) => {
       it(`should activate ${bundle.name} with all modules`, async () => {
         // Activate all modules in bundle
         for (const moduleName of bundle.modules) {
           await moduleManager.activateModule(testTenantId, moduleName)
         }
-        
+
         const activeModules = await moduleManager.getActiveModules(testTenantId)
         expect(activeModules.length).toBe(bundle.modules.length)
-        
-        bundle.modules.forEach(module => {
+
+        bundle.modules.forEach((module) => {
           expect(activeModules).toContain(module)
         })
       })
@@ -129,11 +129,11 @@ describe('Module Combinations Test Suite', () => {
       // Activate required modules
       await moduleManager.activateModule(testTenantId, 'crm')
       await moduleManager.activateModule(testTenantId, 'accounting')
-      
+
       // Get available workflows
       const workflows = await workflowEngine.getActiveWorkflows(testTenantId)
-      
-      const leadToCash = workflows.find(w => w.id === 'lead-to-cash')
+
+      const leadToCash = workflows.find((w) => w.id === 'lead-to-cash')
       expect(leadToCash).toBeDefined()
       expect(leadToCash?.requiredModules).toEqual(['crm', 'accounting'])
     })
@@ -143,11 +143,11 @@ describe('Module Combinations Test Suite', () => {
       await moduleManager.activateModule(testTenantId, 'crm')
       await moduleManager.activateModule(testTenantId, 'inventory')
       await moduleManager.activateModule(testTenantId, 'projects')
-      
+
       // Get available workflows
       const workflows = await workflowEngine.getActiveWorkflows(testTenantId)
-      
-      const demandForecast = workflows.find(w => w.id === 'demand-forecast')
+
+      const demandForecast = workflows.find((w) => w.id === 'demand-forecast')
       expect(demandForecast).toBeDefined()
       expect(demandForecast?.requiredModules).toEqual(['crm', 'inventory', 'projects'])
     })
@@ -156,11 +156,11 @@ describe('Module Combinations Test Suite', () => {
       // Activate required modules
       await moduleManager.activateModule(testTenantId, 'hr')
       await moduleManager.activateModule(testTenantId, 'crm')
-      
+
       // Get available workflows
       const workflows = await workflowEngine.getActiveWorkflows(testTenantId)
-      
-      const perfSales = workflows.find(w => w.id === 'performance-sales')
+
+      const perfSales = workflows.find((w) => w.id === 'performance-sales')
       expect(perfSales).toBeDefined()
       expect(perfSales?.requiredModules).toEqual(['hr', 'crm'])
     })
@@ -172,10 +172,10 @@ describe('Module Combinations Test Suite', () => {
       await moduleManager.activateModule(testTenantId, 'crm')
       await moduleManager.activateModule(testTenantId, 'accounting')
       await moduleManager.activateModule(testTenantId, 'hr')
-      
+
       // Deactivate one module
       const result = await moduleManager.deactivateModule(testTenantId, 'accounting')
-      
+
       expect(result.success).toBe(true)
       expect(result.activeModules).toContain('crm')
       expect(result.activeModules).toContain('hr')
@@ -187,17 +187,17 @@ describe('Module Combinations Test Suite', () => {
       // Activate modules for workflow
       await moduleManager.activateModule(testTenantId, 'crm')
       await moduleManager.activateModule(testTenantId, 'accounting')
-      
+
       // Verify workflow is available
       let workflows = await workflowEngine.getActiveWorkflows(testTenantId)
-      expect(workflows.some(w => w.id === 'lead-to-cash')).toBe(true)
-      
+      expect(workflows.some((w) => w.id === 'lead-to-cash')).toBe(true)
+
       // Deactivate required module
       await moduleManager.deactivateModule(testTenantId, 'accounting')
-      
+
       // Verify workflow is no longer available
       workflows = await workflowEngine.getActiveWorkflows(testTenantId)
-      expect(workflows.some(w => w.id === 'lead-to-cash')).toBe(false)
+      expect(workflows.some((w) => w.id === 'lead-to-cash')).toBe(false)
     })
   })
 
@@ -215,13 +215,13 @@ describe('Module Combinations Test Suite', () => {
       // Activate modules
       await moduleManager.activateModule(testTenantId, 'crm')
       await moduleManager.activateModule(testTenantId, 'accounting')
-      
+
       // Check events
       const events = await prisma.subscriptionEvent.findMany({
         where: { tenantSubscriptionId: testTenantId },
-        orderBy: { createdAt: 'asc' }
+        orderBy: { createdAt: 'asc' },
       })
-      
+
       expect(events.length).toBeGreaterThanOrEqual(2)
       expect(events[0].eventType).toBe('module_activated')
       expect(JSON.parse(events[0].newState).module).toBe('crm')
@@ -232,10 +232,10 @@ describe('Module Combinations Test Suite', () => {
     it('should handle activating already active module', async () => {
       // Activate module
       await moduleManager.activateModule(testTenantId, 'crm')
-      
+
       // Try to activate again
       const result = await moduleManager.activateModule(testTenantId, 'crm')
-      
+
       expect(result.success).toBe(true)
       expect(result.message).toContain('already active')
       expect(result.activeModules.length).toBe(1)
@@ -244,7 +244,7 @@ describe('Module Combinations Test Suite', () => {
     it('should handle deactivating inactive module', async () => {
       // Try to deactivate module that's not active
       const result = await moduleManager.deactivateModule(testTenantId, 'crm')
-      
+
       expect(result.success).toBe(true)
       expect(result.message).toContain('not active')
       expect(result.activeModules.length).toBe(0)
@@ -253,14 +253,14 @@ describe('Module Combinations Test Suite', () => {
     it('should handle rapid activation/deactivation', async () => {
       // Rapidly toggle modules
       const promises = []
-      
+
       for (let i = 0; i < 5; i++) {
         promises.push(moduleManager.activateModule(testTenantId, 'crm'))
         promises.push(moduleManager.deactivateModule(testTenantId, 'crm'))
       }
-      
+
       await Promise.all(promises)
-      
+
       // Final state should be consistent
       const activeModules = await moduleManager.getActiveModules(testTenantId)
       expect(activeModules.length).toBeLessThanOrEqual(1)

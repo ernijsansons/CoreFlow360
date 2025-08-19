@@ -5,7 +5,12 @@
  */
 
 import { auditOrchestrator, AuditScope, AuditCriteria } from '../lib/audit/audit-orchestration'
-import { securityAuditor, performanceAuditor, architectureAuditor, businessLogicAuditor } from '../lib/audit/specialized-auditors'
+import {
+  securityAuditor,
+  performanceAuditor,
+  architectureAuditor,
+  businessLogicAuditor,
+} from '../lib/audit/specialized-auditors'
 import { logger } from '../lib/logging/logger'
 import { writeFileSync } from 'fs'
 import { join } from 'path'
@@ -23,24 +28,24 @@ async function main() {
   const args = process.argv.slice(2)
   const options = parseArgs(args)
 
-  console.log('🔍 CoreFlow360 Master SaaS Audit Framework')
-  console.log('=' * 60)
-  console.log(`Audit Scope: ${options.scope.join(', ')}`)
-  console.log(`Output Format: ${options.format}`)
-  console.log(`Priority Filter: ${options.priority || 'all'}`)
-  console.log('')
+  
+  
+  }`)
+  
+  
+  
 
   if (options.dryRun) {
-    console.log('🔍 DRY RUN MODE - Simulating audit process...')
+    console.log('DRY RUN MODE - No audits will be executed')
     return performDryRun(options)
   }
 
   try {
     await runMasterAudit(options)
   } catch (error) {
-    console.error('❌ Master audit failed:', error)
+    
     logger.error('Master audit execution failed', error as Error, {
-      component: 'audit_runner'
+      component: 'audit_runner',
     })
     process.exit(1)
   }
@@ -48,15 +53,15 @@ async function main() {
 
 async function runMasterAudit(options: AuditRunOptions) {
   const startTime = Date.now()
-  
+
   logger.info('Starting master audit execution', {
     scope: options.scope,
-    component: 'audit_runner'
+    component: 'audit_runner',
   })
 
-  console.log('📋 Phase 1: Context Loading and Scope Definition')
-  console.log('-'.repeat(50))
   
+  )
+
   // Define audit scope based on options
   const auditScope: AuditScope = {
     codebase: options.scope.includes('codebase') || options.scope.includes('all'),
@@ -68,7 +73,7 @@ async function runMasterAudit(options: AuditRunOptions) {
     scalability: options.scope.includes('scalability') || options.scope.includes('all'),
     maintainability: options.scope.includes('maintainability') || options.scope.includes('all'),
     compliance: options.scope.includes('compliance') || options.scope.includes('all'),
-    deployment: options.scope.includes('deployment') || options.scope.includes('all')
+    deployment: options.scope.includes('deployment') || options.scope.includes('all'),
   }
 
   const auditCriteria: AuditCriteria = {
@@ -76,71 +81,71 @@ async function runMasterAudit(options: AuditRunOptions) {
       'Zero critical security vulnerabilities',
       'All performance thresholds met',
       'Clean architecture patterns maintained',
-      'Business logic integrity verified'
+      'Business logic integrity verified',
     ],
     priority_areas: options.scope,
     risk_tolerance: 'low',
     timeline: '2 hours',
-    stakeholders: ['development_team', 'security_team', 'product_team']
+    stakeholders: ['development_team', 'security_team', 'product_team'],
   }
 
   // Load context
   const contextId = await auditOrchestrator.loadContext(auditScope, auditCriteria)
-  console.log(`✅ Context loaded: ${contextId}`)
+  
 
-  console.log('\n🏗️ Phase 2: Intelligent Batching')
-  console.log('-'.repeat(50))
   
+  )
+
   const batches = auditOrchestrator.createAuditBatches(contextId)
-  console.log(`📦 Created ${batches.length} audit batches:`)
   
+
   batches.forEach((batch, index) => {
     const duration = Math.round(batch.estimated_duration / 60)
-    console.log(`  ${index + 1}. ${batch.name} (${batch.audits.length} audits, ~${duration}min)`)
+    `)
     if (options.verbose) {
-      console.log(`     Audits: ${batch.audits.join(', ')}`)
+      }`)
       if (batch.dependencies.length > 0) {
-        console.log(`     Dependencies: ${batch.dependencies.join(', ')}`)
+        }`)
       }
     }
   })
 
-  console.log('\n⚡ Phase 3: Progressive Execution')
-  console.log('-'.repeat(50))
+  
+  )
 
   // Execute specialized audits concurrently where possible
   const auditPromises = []
 
   if (auditScope.security) {
-    console.log('🔐 Running security audits...')
+    
     auditPromises.push(runSecurityAudits())
   }
 
   if (auditScope.performance) {
-    console.log('⚡ Running performance audits...')
+    
     auditPromises.push(runPerformanceAudits())
   }
 
   if (auditScope.architecture) {
-    console.log('🏗️ Running architecture audits...')
+    
     auditPromises.push(runArchitectureAudits())
   }
 
   if (auditScope.business_logic) {
-    console.log('💼 Running business logic audits...')
+    
     auditPromises.push(runBusinessLogicAudits())
   }
 
   // Execute all audits
-  console.log(`\n🚀 Executing ${auditPromises.length} audit categories...`)
-  const auditResults = await Promise.all(auditPromises)
   
+  const auditResults = await Promise.all(auditPromises)
+
   // Flatten results
   const allFindings = auditResults.flat()
-  console.log(`📊 Collected ${allFindings.length} findings across all audits`)
+  
 
-  console.log('\n🔬 Phase 4: Synthesis and Action Planning')
-  console.log('-'.repeat(50))
+  
+  )
 
   // Execute orchestrator pipeline for comprehensive analysis
   const orchestrationResults = await auditOrchestrator.executeAuditPipeline(contextId)
@@ -150,22 +155,26 @@ async function runMasterAudit(options: AuditRunOptions) {
   const duration = Date.now() - startTime
   await generateAuditReport(synthesis, allFindings, duration, options)
 
-  console.log('\n🎉 Master Audit Completed Successfully!')
-  console.log('=' * 60)
-  console.log(`Total Duration: ${Math.round(duration / 1000)}s`)
-  console.log(`Total Findings: ${synthesis.key_findings.length}`)
-  console.log(`Critical Issues: ${synthesis.key_findings.filter(f => f.severity === 'critical').length}`)
-  console.log(`High Priority: ${synthesis.key_findings.filter(f => f.severity === 'high').length}`)
-  console.log(`Implementation ROI: ${synthesis.roi_analysis.payback_period} months payback`)
   
+  
+  }s`)
+  
+  console.log(
+    `Critical Issues: ${synthesis.key_findings.filter((f) => f.severity === 'critical').length}`
+  )
+  console.log(
+    `High Priority: ${synthesis.key_findings.filter((f) => f.severity === 'high').length}`
+  )
+  
+
   if (options.output) {
-    console.log(`📄 Report saved to: ${options.output}`)
+    
   }
 
   // Summary recommendations
-  console.log('\n💡 Top 3 Immediate Actions:')
+  console.log('🔍 Implementation roadmap (Phase 1):')
   synthesis.implementation_roadmap.phase_1_immediate.slice(0, 3).forEach((finding, index) => {
-    console.log(`  ${index + 1}. ${finding.title} (${finding.severity} severity)`)
+    console.log(`   ${index + 1}. ${finding}`)
   })
 }
 
@@ -174,11 +183,11 @@ async function runSecurityAudits() {
   const findings = []
 
   // Run all security audit methods
-  findings.push(...await securityAuditor.auditAuthentication(projectRoot))
-  findings.push(...await securityAuditor.auditInputValidation(projectRoot))
-  findings.push(...await securityAuditor.auditDataProtection(projectRoot))
+  findings.push(...(await securityAuditor.auditAuthentication(projectRoot)))
+  findings.push(...(await securityAuditor.auditInputValidation(projectRoot)))
+  findings.push(...(await securityAuditor.auditDataProtection(projectRoot)))
 
-  console.log(`  ✅ Security audit completed: ${findings.length} findings`)
+  
   return findings
 }
 
@@ -187,11 +196,11 @@ async function runPerformanceAudits() {
   const findings = []
 
   // Run all performance audit methods
-  findings.push(...await performanceAuditor.auditDatabaseQueries(projectRoot))
-  findings.push(...await performanceAuditor.auditCachingStrategy(projectRoot))
-  findings.push(...await performanceAuditor.auditBundleSize(projectRoot))
+  findings.push(...(await performanceAuditor.auditDatabaseQueries(projectRoot)))
+  findings.push(...(await performanceAuditor.auditCachingStrategy(projectRoot)))
+  findings.push(...(await performanceAuditor.auditBundleSize(projectRoot)))
 
-  console.log(`  ✅ Performance audit completed: ${findings.length} findings`)
+  
   return findings
 }
 
@@ -200,10 +209,10 @@ async function runArchitectureAudits() {
   const findings = []
 
   // Run all architecture audit methods
-  findings.push(...await architectureAuditor.auditLayeredArchitecture(projectRoot))
-  findings.push(...await architectureAuditor.auditAPIDesign(projectRoot))
+  findings.push(...(await architectureAuditor.auditLayeredArchitecture(projectRoot)))
+  findings.push(...(await architectureAuditor.auditAPIDesign(projectRoot)))
 
-  console.log(`  ✅ Architecture audit completed: ${findings.length} findings`)
+  
   return findings
 }
 
@@ -212,32 +221,37 @@ async function runBusinessLogicAudits() {
   const findings = []
 
   // Run all business logic audit methods
-  findings.push(...await businessLogicAuditor.auditDataIntegrity(projectRoot))
-  findings.push(...await businessLogicAuditor.auditBusinessRules(projectRoot))
+  findings.push(...(await businessLogicAuditor.auditDataIntegrity(projectRoot)))
+  findings.push(...(await businessLogicAuditor.auditBusinessRules(projectRoot)))
 
-  console.log(`  ✅ Business logic audit completed: ${findings.length} findings`)
+  
   return findings
 }
 
-async function generateAuditReport(synthesis: any, findings: any[], duration: number, options: AuditRunOptions) {
+async function generateAuditReport(
+  synthesis: unknown,
+  findings: unknown[],
+  duration: number,
+  options: AuditRunOptions
+) {
   const reportData = {
     metadata: {
       timestamp: new Date().toISOString(),
       duration_ms: duration,
       scope: options.scope,
-      total_findings: findings.length
+      total_findings: findings.length,
     },
     executive_summary: synthesis.executive_summary,
     key_metrics: {
-      critical_issues: findings.filter(f => f.severity === 'critical').length,
-      high_issues: findings.filter(f => f.severity === 'high').length,
-      medium_issues: findings.filter(f => f.severity === 'medium').length,
-      low_issues: findings.filter(f => f.severity === 'low').length
+      critical_issues: findings.filter((f) => f.severity === 'critical').length,
+      high_issues: findings.filter((f) => f.severity === 'high').length,
+      medium_issues: findings.filter((f) => f.severity === 'medium').length,
+      low_issues: findings.filter((f) => f.severity === 'low').length,
     },
     risk_assessment: synthesis.risk_assessment,
     implementation_roadmap: synthesis.implementation_roadmap,
     roi_analysis: synthesis.roi_analysis,
-    detailed_findings: findings
+    detailed_findings: findings,
   }
 
   const outputPath = options.output || `audit-report-${Date.now()}.${options.format || 'json'}`
@@ -254,7 +268,7 @@ async function generateAuditReport(synthesis: any, findings: any[], duration: nu
   }
 }
 
-async function generateHTMLReport(data: any, outputPath: string) {
+async function generateHTMLReport(data: unknown, outputPath: string) {
   const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -328,33 +342,44 @@ async function generateHTMLReport(data: any, outputPath: string) {
             <div class="roadmap">
                 <div class="phase">
                     <h3>🚨 Phase 1: Immediate Actions</h3>
-                    ${data.implementation_roadmap.phase_1_immediate.map((finding: any) => 
-                        `<div class="finding severity-${finding.severity}">
+                    ${data.implementation_roadmap.phase_1_immediate
+                      .map(
+                        (finding: unknown) =>
+                          `<div class="finding severity-${finding.severity}">
                             <h4>${finding.title}</h4>
                             <p>${finding.description}</p>
                             <div class="meta">Effort: ${finding.effort} | Cost: ${finding.implementation_cost}h</div>
                         </div>`
-                    ).join('')}
+                      )
+                      .join('')}
                 </div>
                 <div class="phase">
                     <h3>⏳ Phase 2: Short Term</h3>
-                    ${data.implementation_roadmap.phase_2_short_term.slice(0, 5).map((finding: any) => 
-                        `<div class="finding severity-${finding.severity}">
+                    ${data.implementation_roadmap.phase_2_short_term
+                      .slice(0, 5)
+                      .map(
+                        (finding: unknown) =>
+                          `<div class="finding severity-${finding.severity}">
                             <h4>${finding.title}</h4>
                             <p>${finding.description}</p>
                             <div class="meta">Effort: ${finding.effort} | Cost: ${finding.implementation_cost}h</div>
                         </div>`
-                    ).join('')}
+                      )
+                      .join('')}
                 </div>
                 <div class="phase">
                     <h3>📈 Phase 3: Long Term</h3>
-                    ${data.implementation_roadmap.phase_3_long_term.slice(0, 5).map((finding: any) => 
-                        `<div class="finding severity-${finding.severity}">
+                    ${data.implementation_roadmap.phase_3_long_term
+                      .slice(0, 5)
+                      .map(
+                        (finding: unknown) =>
+                          `<div class="finding severity-${finding.severity}">
                             <h4>${finding.title}</h4>
                             <p>${finding.description}</p>
                             <div class="meta">Effort: ${finding.effort} | Cost: ${finding.implementation_cost}h</div>
                         </div>`
-                    ).join('')}
+                      )
+                      .join('')}
                 </div>
             </div>
         </div>
@@ -387,7 +412,7 @@ async function generateHTMLReport(data: any, outputPath: string) {
   writeFileSync(outputPath, html)
 }
 
-async function generateMarkdownReport(data: any, outputPath: string) {
+async function generateMarkdownReport(data: unknown, outputPath: string) {
   const markdown = `
 # 🔍 CoreFlow360 Master Audit Report
 
@@ -413,20 +438,27 @@ ${data.executive_summary}
 
 ### 🚨 Phase 1: Immediate Actions (Critical)
 
-${data.implementation_roadmap.phase_1_immediate.map((finding: any, index: number) => 
-  `${index + 1}. **${finding.title}** (${finding.severity})
+${data.implementation_roadmap.phase_1_immediate
+  .map(
+    (finding: unknown, index: number) =>
+      `${index + 1}. **${finding.title}** (${finding.severity})
    - ${finding.description}
    - Effort: ${finding.effort} | Cost: ${finding.implementation_cost}h
    - Business Value: ${finding.business_value}`
-).join('\n\n')}
+  )
+  .join('\n\n')}
 
 ### ⏳ Phase 2: Short Term (Next 30 days)
 
-${data.implementation_roadmap.phase_2_short_term.slice(0, 10).map((finding: any, index: number) => 
-  `${index + 1}. **${finding.title}** (${finding.severity})
+${data.implementation_roadmap.phase_2_short_term
+  .slice(0, 10)
+  .map(
+    (finding: unknown, index: number) =>
+      `${index + 1}. **${finding.title}** (${finding.severity})
    - ${finding.description}
    - Effort: ${finding.effort} | Cost: ${finding.implementation_cost}h`
-).join('\n\n')}
+  )
+  .join('\n\n')}
 
 ## 💰 Return on Investment Analysis
 
@@ -452,49 +484,43 @@ ${data.risk_assessment.critical_risks.map((risk: string) => `- ${risk}`).join('\
   writeFileSync(outputPath, markdown)
 }
 
-async function performDryRun(options: AuditRunOptions) {
-  console.log('🔍 Simulating audit execution...\n')
+async function performDryRun(_options: AuditRunOptions) {
   
+
   const simulatedBatches = [
     { name: 'Security & Authentication', audits: 6, duration: 90 },
     { name: 'Performance & Scalability', audits: 5, duration: 75 },
     { name: 'Architecture & Design', audits: 4, duration: 60 },
     { name: 'Business Logic & Data', audits: 7, duration: 85 },
-    { name: 'User Experience & Accessibility', audits: 4, duration: 50 }
+    { name: 'User Experience & Accessibility', audits: 4, duration: 50 },
   ]
 
-  console.log('📦 Audit Batches:')
+  
   simulatedBatches.forEach((batch, index) => {
-    console.log(`  ${index + 1}. ${batch.name}`)
-    console.log(`     ${batch.audits} audits, ~${batch.duration} minutes`)
+    
+    
   })
 
   const totalDuration = simulatedBatches.reduce((sum, batch) => sum + batch.duration, 0)
   const totalAudits = simulatedBatches.reduce((sum, batch) => sum + batch.audits, 0)
 
-  console.log('\n📊 Estimated Execution:')
-  console.log(`  Total Audits: ${totalAudits}`)
-  console.log(`  Total Duration: ${Math.round(totalDuration / 60)} hours`)
-  console.log(`  Parallel Execution: ~${Math.round(totalDuration / 3 / 60)} hours`)
+  console.log(`
+🏁 Master audit simulation completed:
+Total audits: ${totalAudits}
+Estimated time: ${(totalAudits * 2).toFixed(1)} hours`)
 
-  console.log('\n💡 Expected Findings:')
-  console.log('  • 2-5 Critical security issues')
-  console.log('  • 8-12 High priority improvements')
-  console.log('  • 15-25 Medium priority optimizations')
-  console.log('  • 20-40 Low priority enhancements')
-
-  console.log('\n✅ Dry run completed - Ready for actual audit execution')
+  return { totalAudits, estimatedHours: totalAudits * 2 }
 }
 
 function parseArgs(args: string[]): AuditRunOptions {
   const options: AuditRunOptions = {
     scope: ['all'],
-    format: 'json'
+    format: 'json',
   }
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]
-    
+
     switch (arg) {
       case '--scope':
       case '-s':

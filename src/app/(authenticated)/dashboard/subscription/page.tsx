@@ -12,17 +12,17 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  CreditCard, 
-  Package, 
-  Activity, 
+import {
+  CreditCard,
+  Package,
+  Activity,
   Settings,
   ChevronRight,
   Check,
   X,
   AlertCircle,
   Zap,
-  TrendingUp
+  TrendingUp,
 } from 'lucide-react'
 import { api, ApiError } from '@/lib/api-client'
 
@@ -79,7 +79,6 @@ export default function SubscriptionPage() {
         setSubscription(response.data)
       }
     } catch (error) {
-      console.error('Failed to fetch subscription:', error)
       if (error instanceof ApiError) {
         // Could show error toast here
       }
@@ -93,7 +92,6 @@ export default function SubscriptionPage() {
         setModules(response.data.allModules)
       }
     } catch (error) {
-      console.error('Failed to fetch modules:', error)
       if (error instanceof ApiError) {
         // Could show error toast here
       }
@@ -104,8 +102,8 @@ export default function SubscriptionPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="border-primary h-12 w-12 animate-spin rounded-full border-b-2"></div>
       </div>
     )
   }
@@ -121,9 +119,9 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Subscription Management</h1>
+        <h1 className="mb-2 text-3xl font-bold">Subscription Management</h1>
         <p className="text-muted-foreground">
           Manage your CoreFlow360 subscription, modules, and usage
         </p>
@@ -152,7 +150,7 @@ export default function SubscriptionPage() {
                       <h3 className="text-2xl font-bold">{subscription.bundle.name}</h3>
                       <p className="text-muted-foreground capitalize">{subscription.tier} Tier</p>
                     </div>
-                    <Badge 
+                    <Badge
                       variant={subscription.status === 'ACTIVE' ? 'default' : 'secondary'}
                       className="px-3 py-1"
                     >
@@ -162,16 +160,18 @@ export default function SubscriptionPage() {
 
                   <div className="grid grid-cols-3 gap-4 py-4">
                     <div>
-                      <p className="text-sm text-muted-foreground">Monthly Cost</p>
+                      <p className="text-muted-foreground text-sm">Monthly Cost</p>
                       <p className="text-2xl font-semibold">${subscription.price}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Users</p>
+                      <p className="text-muted-foreground text-sm">Users</p>
                       <p className="text-2xl font-semibold">{subscription.users}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Billing Cycle</p>
-                      <p className="text-2xl font-semibold capitalize">{subscription.billingCycle}</p>
+                      <p className="text-muted-foreground text-sm">Billing Cycle</p>
+                      <p className="text-2xl font-semibold capitalize">
+                        {subscription.billingCycle}
+                      </p>
                     </div>
                   </div>
 
@@ -198,9 +198,7 @@ export default function SubscriptionPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{subscription?.activeModules.length || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  of {modules.length} available
-                </p>
+                <p className="text-muted-foreground text-xs">of {modules.length} available</p>
               </CardContent>
             </Card>
 
@@ -212,11 +210,11 @@ export default function SubscriptionPage() {
                 <div className="text-2xl font-bold">
                   {subscription?.usage.api_calls.used.toLocaleString() || 0}
                 </div>
-                <Progress 
+                <Progress
                   value={usagePercentage(
                     subscription?.usage.api_calls.used || 0,
                     subscription?.usage.api_calls.limit || 1
-                  )} 
+                  )}
                   className="mt-2"
                 />
               </CardContent>
@@ -227,14 +225,12 @@ export default function SubscriptionPage() {
                 <CardTitle className="text-sm font-medium">Storage Used</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {subscription?.usage.storage.used || 0} GB
-                </div>
-                <Progress 
+                <div className="text-2xl font-bold">{subscription?.usage.storage.used || 0} GB</div>
+                <Progress
                   value={usagePercentage(
                     subscription?.usage.storage.used || 0,
                     subscription?.usage.storage.limit || 1
-                  )} 
+                  )}
                   className="mt-2"
                 />
               </CardContent>
@@ -246,29 +242,33 @@ export default function SubscriptionPage() {
           <Card>
             <CardHeader>
               <CardTitle>Available Modules</CardTitle>
-              <CardDescription>
-                Modules included in your subscription
-              </CardDescription>
+              <CardDescription>Modules included in your subscription</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 {modules.map((module) => (
                   <div
                     key={module.id}
-                    className="flex items-center justify-between p-4 rounded-lg border"
+                    className="flex items-center justify-between rounded-lg border p-4"
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`p-2 rounded-lg ${
-                        module.accessible ? 'bg-primary/10' : 'bg-muted'
-                      }`}>
-                        <Package className={`h-5 w-5 ${
-                          module.accessible ? 'text-primary' : 'text-muted-foreground'
-                        }`} />
+                      <div
+                        className={`rounded-lg p-2 ${
+                          module.accessible ? 'bg-primary/10' : 'bg-muted'
+                        }`}
+                      >
+                        <Package
+                          className={`h-5 w-5 ${
+                            module.accessible ? 'text-primary' : 'text-muted-foreground'
+                          }`}
+                        />
                       </div>
                       <div>
                         <h4 className="font-medium">{module.name}</h4>
-                        <p className="text-sm text-muted-foreground">{module.description}</p>
-                        <Badge variant="outline" className="mt-1">{module.category}</Badge>
+                        <p className="text-muted-foreground text-sm">{module.description}</p>
+                        <Badge variant="outline" className="mt-1">
+                          {module.category}
+                        </Badge>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -281,7 +281,7 @@ export default function SubscriptionPage() {
                         </>
                       ) : (
                         <>
-                          <X className="h-5 w-5 text-muted-foreground" />
+                          <X className="text-muted-foreground h-5 w-5" />
                           <Button variant="outline" size="sm">
                             <Zap className="mr-1 h-3 w-3" />
                             Upgrade
@@ -300,75 +300,76 @@ export default function SubscriptionPage() {
           <Card>
             <CardHeader>
               <CardTitle>Resource Usage</CardTitle>
-              <CardDescription>
-                Monitor your usage across different resources
-              </CardDescription>
+              <CardDescription>Monitor your usage across different resources</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {subscription && (
                 <>
                   {/* API Calls */}
                   <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="mb-2 flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">API Calls</h4>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-muted-foreground text-sm">
                           Daily limit resets at midnight
                         </p>
                       </div>
                       <span className="text-sm font-medium">
-                        {formatNumber(subscription.usage.api_calls.used)} / {formatNumber(subscription.usage.api_calls.limit)}
+                        {formatNumber(subscription.usage.api_calls.used)} /{' '}
+                        {formatNumber(subscription.usage.api_calls.limit)}
                       </span>
                     </div>
-                    <Progress 
+                    <Progress
                       value={usagePercentage(
                         subscription.usage.api_calls.used,
                         subscription.usage.api_calls.limit
-                      )} 
+                      )}
                       className="h-2"
                     />
                   </div>
 
                   {/* Storage */}
                   <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="mb-2 flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">Storage</h4>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-muted-foreground text-sm">
                           Total storage used across all modules
                         </p>
                       </div>
                       <span className="text-sm font-medium">
-                        {subscription.usage.storage.used} GB / {formatNumber(subscription.usage.storage.limit)} GB
+                        {subscription.usage.storage.used} GB /{' '}
+                        {formatNumber(subscription.usage.storage.limit)} GB
                       </span>
                     </div>
-                    <Progress 
+                    <Progress
                       value={usagePercentage(
                         subscription.usage.storage.used,
                         subscription.usage.storage.limit
-                      )} 
+                      )}
                       className="h-2"
                     />
                   </div>
 
                   {/* Users */}
                   <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="mb-2 flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">Active Users</h4>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-muted-foreground text-sm">
                           Number of users in your organization
                         </p>
                       </div>
                       <span className="text-sm font-medium">
-                        {subscription.usage.users.used} / {formatNumber(subscription.usage.users.limit)}
+                        {subscription.usage.users.used} /{' '}
+                        {formatNumber(subscription.usage.users.limit)}
                       </span>
                     </div>
-                    <Progress 
+                    <Progress
                       value={usagePercentage(
                         subscription.usage.users.used,
                         subscription.usage.users.limit
-                      )} 
+                      )}
                       className="h-2"
                     />
                   </div>
@@ -376,12 +377,12 @@ export default function SubscriptionPage() {
               )}
 
               {/* Usage Tips */}
-              <div className="mt-6 p-4 bg-muted rounded-lg">
-                <div className="flex gap-2 mb-2">
-                  <AlertCircle className="h-5 w-5 text-primary" />
+              <div className="bg-muted mt-6 rounded-lg p-4">
+                <div className="mb-2 flex gap-2">
+                  <AlertCircle className="text-primary h-5 w-5" />
                   <h4 className="font-medium">Usage Tips</h4>
                 </div>
-                <ul className="text-sm text-muted-foreground space-y-1">
+                <ul className="text-muted-foreground space-y-1 text-sm">
                   <li>• API calls reset daily at midnight UTC</li>
                   <li>• Upgrade to Ultimate tier for unlimited resources</li>
                   <li>• Monitor usage regularly to avoid service interruptions</li>
@@ -395,21 +396,21 @@ export default function SubscriptionPage() {
           <Card>
             <CardHeader>
               <CardTitle>Billing Information</CardTitle>
-              <CardDescription>
-                Manage your payment method and billing details
-              </CardDescription>
+              <CardDescription>Manage your payment method and billing details</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center justify-between rounded-lg border p-4">
                   <div className="flex items-center gap-3">
                     <CreditCard className="h-5 w-5" />
                     <div>
                       <p className="font-medium">•••• •••• •••• 4242</p>
-                      <p className="text-sm text-muted-foreground">Expires 12/24</p>
+                      <p className="text-muted-foreground text-sm">Expires 12/24</p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm">Update</Button>
+                  <Button variant="outline" size="sm">
+                    Update
+                  </Button>
                 </div>
 
                 <div className="space-y-2">
@@ -428,12 +429,8 @@ export default function SubscriptionPage() {
                 </div>
 
                 <div className="flex gap-2 pt-4">
-                  <Button variant="outline">
-                    Download Invoice
-                  </Button>
-                  <Button variant="outline">
-                    View Billing History
-                  </Button>
+                  <Button variant="outline">Download Invoice</Button>
+                  <Button variant="outline">View Billing History</Button>
                 </div>
               </div>
             </CardContent>

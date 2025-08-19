@@ -18,62 +18,93 @@ const BugReportSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().min(1).max(2000),
   severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional(),
-  category: z.enum([
-    'UI_UX', 'API', 'DATABASE', 'PERFORMANCE', 'SECURITY', 
-    'INTEGRATION', 'AUTHENTICATION', 'PAYMENT', 'AI_ML', 
-    'CONSCIOUSNESS', 'BUSINESS_LOGIC', 'INFRASTRUCTURE'
-  ]).optional(),
+  category: z
+    .enum([
+      'UI_UX',
+      'API',
+      'DATABASE',
+      'PERFORMANCE',
+      'SECURITY',
+      'INTEGRATION',
+      'AUTHENTICATION',
+      'PAYMENT',
+      'AI_ML',
+      'CONSCIOUSNESS',
+      'BUSINESS_LOGIC',
+      'INFRASTRUCTURE',
+    ])
+    .optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   tags: z.array(z.string()).optional(),
-  technicalDetails: z.object({
-    errorMessage: z.string().optional(),
-    stackTrace: z.string().optional(),
-    componentName: z.string().optional(),
-    apiEndpoint: z.string().optional(),
-    databaseQuery: z.string().optional(),
-    performanceMetrics: z.object({
-      responseTime: z.number().optional(),
-      memoryUsage: z.number().optional(),
-      cpuUsage: z.number().optional()
-    }).optional()
-  }).optional(),
-  businessImpact: z.object({
-    affectedUsers: z.number().optional(),
-    revenueImpact: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional(),
-    featureImpact: z.array(z.string()).optional(),
-    customerImpact: z.string().optional()
-  }).optional(),
+  technicalDetails: z
+    .object({
+      errorMessage: z.string().optional(),
+      stackTrace: z.string().optional(),
+      componentName: z.string().optional(),
+      apiEndpoint: z.string().optional(),
+      databaseQuery: z.string().optional(),
+      performanceMetrics: z
+        .object({
+          responseTime: z.number().optional(),
+          memoryUsage: z.number().optional(),
+          cpuUsage: z.number().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+  businessImpact: z
+    .object({
+      affectedUsers: z.number().optional(),
+      revenueImpact: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional(),
+      featureImpact: z.array(z.string()).optional(),
+      customerImpact: z.string().optional(),
+    })
+    .optional(),
   reproductionSteps: z.array(z.string()).optional(),
   expectedBehavior: z.string().optional(),
   actualBehavior: z.string().optional(),
-  metadata: z.object({
-    userId: z.string().optional(),
-    tenantId: z.string().optional(),
-    sessionId: z.string().optional(),
-    userAgent: z.string().optional(),
-    url: z.string().optional(),
-    environment: z.enum(['development', 'staging', 'production']).optional(),
-    browser: z.string().optional(),
-    os: z.string().optional(),
-    screenResolution: z.string().optional(),
-    networkType: z.string().optional()
-  }).optional()
+  metadata: z
+    .object({
+      userId: z.string().optional(),
+      tenantId: z.string().optional(),
+      sessionId: z.string().optional(),
+      userAgent: z.string().optional(),
+      url: z.string().optional(),
+      environment: z.enum(['development', 'staging', 'production']).optional(),
+      browser: z.string().optional(),
+      os: z.string().optional(),
+      screenResolution: z.string().optional(),
+      networkType: z.string().optional(),
+    })
+    .optional(),
 })
 
 const BugUpdateSchema = z.object({
-  status: z.enum([
-    'NEW', 'TRIAGED', 'IN_PROGRESS', 'REVIEW', 'TESTING', 
-    'RESOLVED', 'VERIFIED', 'CLOSED', 'DUPLICATE', 'WONT_FIX'
-  ]).optional(),
+  status: z
+    .enum([
+      'NEW',
+      'TRIAGED',
+      'IN_PROGRESS',
+      'REVIEW',
+      'TESTING',
+      'RESOLVED',
+      'VERIFIED',
+      'CLOSED',
+      'DUPLICATE',
+      'WONT_FIX',
+    ])
+    .optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   tags: z.array(z.string()).optional(),
-  resolution: z.object({
-    description: z.string(),
-    fixType: z.enum(['HOTFIX', 'PATCH', 'FEATURE_UPDATE', 'CONFIGURATION']),
-    codeChanges: z.array(z.string()).optional(),
-    testingSteps: z.array(z.string()),
-    rollbackPlan: z.string().optional()
-  }).optional()
+  resolution: z
+    .object({
+      description: z.string(),
+      fixType: z.enum(['HOTFIX', 'PATCH', 'FEATURE_UPDATE', 'CONFIGURATION']),
+      codeChanges: z.array(z.string()).optional(),
+      testingSteps: z.array(z.string()),
+      rollbackPlan: z.string().optional(),
+    })
+    .optional(),
 })
 
 // ============================================================================
@@ -83,18 +114,18 @@ const BugUpdateSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const clientIP = request.ip || headers().get('x-forwarded-for') || 'unknown'
-    
+
     // Rate limiting
     const rateLimitResult = await rateLimit(request, {
       requests: 50,
-      window: 60
+      window: 60,
     })
 
     if (!rateLimitResult.success) {
       return NextResponse.json(
-        { 
+        {
           error: 'Rate limit exceeded',
-          resetTime: rateLimitResult.resetTime
+          resetTime: rateLimitResult.resetTime,
         },
         { status: 429 }
       )
@@ -107,33 +138,29 @@ export async function POST(request: NextRequest) {
     switch (endpoint) {
       case 'report':
         return await handleBugReport(body)
-      
+
       case 'update':
         return await handleBugUpdate(body)
-      
+
       case 'start':
         return await handleStartBot()
-      
+
       case 'stop':
         return await handleStopBot()
-      
+
       case 'status':
         return await handleBotStatus()
-      
-      default:
-        return NextResponse.json(
-          { error: 'Invalid endpoint' },
-          { status: 404 }
-        )
-    }
 
+      default:
+        return NextResponse.json({ error: 'Invalid endpoint' }, { status: 404 })
+    }
   } catch (error) {
     logger.error('Bug bot API error:', error)
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )
@@ -143,18 +170,18 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const clientIP = request.ip || headers().get('x-forwarded-for') || 'unknown'
-    
+
     // Rate limiting
     const rateLimitResult = await rateLimit(request, {
       requests: 100,
-      window: 60
+      window: 60,
     })
 
     if (!rateLimitResult.success) {
       return NextResponse.json(
-        { 
+        {
           error: 'Rate limit exceeded',
-          resetTime: rateLimitResult.resetTime
+          resetTime: rateLimitResult.resetTime,
         },
         { status: 429 }
       )
@@ -167,37 +194,30 @@ export async function GET(request: NextRequest) {
     switch (endpoint) {
       case 'bugs':
         return await handleGetBugs(searchParams)
-      
+
       case 'bug':
         const bugId = searchParams.get('id')
         if (!bugId) {
-          return NextResponse.json(
-            { error: 'Bug ID is required' },
-            { status: 400 }
-          )
+          return NextResponse.json({ error: 'Bug ID is required' }, { status: 400 })
         }
         return await handleGetBug(bugId)
-      
+
       case 'statistics':
         return await handleGetStatistics()
-      
+
       case 'active':
         return await handleGetActiveBugs()
-      
-      default:
-        return NextResponse.json(
-          { error: 'Invalid endpoint' },
-          { status: 404 }
-        )
-    }
 
+      default:
+        return NextResponse.json({ error: 'Invalid endpoint' }, { status: 404 })
+    }
   } catch (error) {
     logger.error('Bug bot API error:', error)
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )
@@ -208,7 +228,7 @@ export async function GET(request: NextRequest) {
 // HANDLERS
 // ============================================================================
 
-async function handleBugReport(body: any) {
+async function handleBugReport(body: unknown) {
   try {
     // Validate request body
     const validatedData = BugReportSchema.parse(body)
@@ -224,31 +244,30 @@ async function handleBugReport(body: any) {
         ...validatedData.metadata,
         userAgent: userAgent || undefined,
         url: referer || undefined,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     }
 
     // Report bug
     const bugReport = await bugBot.reportBug(enhancedData)
 
-    logger.info('Bug reported successfully', { 
+    logger.info('Bug reported successfully', {
       bugId: bugReport.id,
       severity: bugReport.severity,
-      category: bugReport.category
+      category: bugReport.category,
     })
 
     return NextResponse.json({
       success: true,
       bug: bugReport,
-      message: 'Bug reported successfully'
+      message: 'Bug reported successfully',
     })
-
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Validation error',
-          details: error.errors
+          details: error.errors,
         },
         { status: 400 }
       )
@@ -259,15 +278,12 @@ async function handleBugReport(body: any) {
   }
 }
 
-async function handleBugUpdate(body: any) {
+async function handleBugUpdate(body: unknown) {
   try {
     const { bugId, ...updateData } = body
 
     if (!bugId) {
-      return NextResponse.json(
-        { error: 'Bug ID is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Bug ID is required' }, { status: 400 })
     }
 
     // Validate update data
@@ -276,40 +292,36 @@ async function handleBugUpdate(body: any) {
     // Get existing bug
     const existingBug = await bugBot.getBugById(bugId)
     if (!existingBug) {
-      return NextResponse.json(
-        { error: 'Bug not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Bug not found' }, { status: 404 })
     }
 
     // Update bug
     const updatedBug: BugReport = {
       ...existingBug,
       ...validatedData,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }
 
     // Store updated bug
     await bugBot['storeBugReport'](updatedBug)
 
-    logger.info('Bug updated successfully', { 
+    logger.info('Bug updated successfully', {
       bugId,
       status: updatedBug.status,
-      priority: updatedBug.priority
+      priority: updatedBug.priority,
     })
 
     return NextResponse.json({
       success: true,
       bug: updatedBug,
-      message: 'Bug updated successfully'
+      message: 'Bug updated successfully',
     })
-
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Validation error',
-          details: error.errors
+          details: error.errors,
         },
         { status: 400 }
       )
@@ -326,9 +338,8 @@ async function handleStartBot() {
 
     return NextResponse.json({
       success: true,
-      message: 'Bug bot started successfully'
+      message: 'Bug bot started successfully',
     })
-
   } catch (error) {
     logger.error('Failed to start bug bot:', error)
     throw error
@@ -341,9 +352,8 @@ async function handleStopBot() {
 
     return NextResponse.json({
       success: true,
-      message: 'Bug bot stopped successfully'
+      message: 'Bug bot stopped successfully',
     })
-
   } catch (error) {
     logger.error('Failed to stop bug bot:', error)
     throw error
@@ -360,10 +370,9 @@ async function handleBotStatus() {
       status: {
         isRunning: true, // This would be a property of the bug bot
         activeBugsCount: activeBugs.length,
-        statistics
-      }
+        statistics,
+      },
     })
-
   } catch (error) {
     logger.error('Failed to get bot status:', error)
     throw error
@@ -385,15 +394,15 @@ async function handleGetBugs(searchParams: URLSearchParams) {
     let filteredBugs = bugs
 
     if (status) {
-      filteredBugs = filteredBugs.filter(bug => bug.status === status)
+      filteredBugs = filteredBugs.filter((bug) => bug.status === status)
     }
 
     if (severity) {
-      filteredBugs = filteredBugs.filter(bug => bug.severity === severity)
+      filteredBugs = filteredBugs.filter((bug) => bug.severity === severity)
     }
 
     if (category) {
-      filteredBugs = filteredBugs.filter(bug => bug.category === category)
+      filteredBugs = filteredBugs.filter((bug) => bug.category === category)
     }
 
     // Apply pagination
@@ -406,10 +415,9 @@ async function handleGetBugs(searchParams: URLSearchParams) {
         total: filteredBugs.length,
         limit,
         offset,
-        hasMore: offset + limit < filteredBugs.length
-      }
+        hasMore: offset + limit < filteredBugs.length,
+      },
     })
-
   } catch (error) {
     logger.error('Failed to get bugs:', error)
     throw error
@@ -421,17 +429,13 @@ async function handleGetBug(bugId: string) {
     const bug = await bugBot.getBugById(bugId)
 
     if (!bug) {
-      return NextResponse.json(
-        { error: 'Bug not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Bug not found' }, { status: 404 })
     }
 
     return NextResponse.json({
       success: true,
-      bug
+      bug,
     })
-
   } catch (error) {
     logger.error('Failed to get bug:', error)
     throw error
@@ -444,9 +448,8 @@ async function handleGetStatistics() {
 
     return NextResponse.json({
       success: true,
-      statistics
+      statistics,
     })
-
   } catch (error) {
     logger.error('Failed to get statistics:', error)
     throw error
@@ -460,9 +463,8 @@ async function handleGetActiveBugs() {
     return NextResponse.json({
       success: true,
       bugs: activeBugs,
-      count: activeBugs.length
+      count: activeBugs.length,
     })
-
   } catch (error) {
     logger.error('Failed to get active bugs:', error)
     throw error

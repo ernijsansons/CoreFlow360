@@ -23,14 +23,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     // Require super admin permission
     const session = await requirePermission('system:manage')
-    
+
     const { id: keyId } = await params
-    
+
     if (!keyId) {
-      return NextResponse.json(
-        { error: 'API key ID is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'API key ID is required' }, { status: 400 })
     }
 
     const result = await credentialManager.getAPIKey(
@@ -41,27 +38,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     )
 
     return NextResponse.json(result)
-  } catch (error: any) {
-    console.error('API Key retrieval error:', error)
-    
+  } catch (error: unknown) {
     if (error.message === 'API key not found') {
-      return NextResponse.json(
-        { error: 'API key not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'API key not found' }, { status: 404 })
     }
-    
+
     if (error.message === 'Unauthorized' || error.message === 'Forbidden') {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
-    
-    return NextResponse.json(
-      { error: 'Failed to retrieve API key' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to retrieve API key' }, { status: 500 })
   }
 }
 
@@ -72,28 +58,25 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     // Require super admin permission
     const session = await requirePermission('system:manage')
-    
+
     const { id: keyId } = await params
-    
+
     if (!keyId) {
-      return NextResponse.json(
-        { error: 'API key ID is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'API key ID is required' }, { status: 400 })
     }
 
     const body = await request.json()
-    
+
     // Validate request body
     const validatedData = updateAPIKeySchema.parse(body)
-    
+
     const updateRequest: UpdateAPIKeyRequest = {
       name: validatedData.name,
       description: validatedData.description,
       key: validatedData.key,
       rotationDays: validatedData.rotationDays,
       expiresAt: validatedData.expiresAt,
-      status: validatedData.status
+      status: validatedData.status,
     }
 
     const result = await credentialManager.updateAPIKey(
@@ -107,51 +90,40 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (!result.success) {
       return NextResponse.json(
-        { 
-          error: result.message, 
+        {
+          error: result.message,
           details: result.errors,
-          warnings: result.warnings 
+          warnings: result.warnings,
         },
         { status: 400 }
       )
     }
 
     return NextResponse.json(result)
-  } catch (error: any) {
-    console.error('API Key update error:', error)
-    
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Validation failed',
-          details: error.errors.map(e => ({
+          details: error.errors.map((e) => ({
             field: e.path.join('.'),
             message: e.message,
-            code: e.code
-          }))
+            code: e.code,
+          })),
         },
         { status: 400 }
       )
     }
-    
+
     if (error.message === 'API key not found') {
-      return NextResponse.json(
-        { error: 'API key not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'API key not found' }, { status: 404 })
     }
-    
+
     if (error.message === 'Unauthorized' || error.message === 'Forbidden') {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
-    
-    return NextResponse.json(
-      { error: 'Failed to update API key' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to update API key' }, { status: 500 })
   }
 }
 
@@ -162,14 +134,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     // Require super admin permission
     const session = await requirePermission('system:manage')
-    
+
     const { id: keyId } = await params
-    
+
     if (!keyId) {
-      return NextResponse.json(
-        { error: 'API key ID is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'API key ID is required' }, { status: 400 })
     }
 
     const result = await credentialManager.deleteAPIKey(
@@ -181,33 +150,19 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     )
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.message },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: result.message }, { status: 400 })
     }
 
     return NextResponse.json(result)
-  } catch (error: any) {
-    console.error('API Key deletion error:', error)
-    
+  } catch (error: unknown) {
     if (error.message === 'API key not found') {
-      return NextResponse.json(
-        { error: 'API key not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'API key not found' }, { status: 404 })
     }
-    
+
     if (error.message === 'Unauthorized' || error.message === 'Forbidden') {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
-    
-    return NextResponse.json(
-      { error: 'Failed to delete API key' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to delete API key' }, { status: 500 })
   }
 }

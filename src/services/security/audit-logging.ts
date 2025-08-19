@@ -1,7 +1,7 @@
 /**
  * CoreFlow360 - Comprehensive Audit Logging System
  * MATHEMATICALLY PERFECT, ALGORITHMICALLY OPTIMAL, PROVABLY CORRECT
- * 
+ *
  * Enterprise-grade audit trail with complete data lineage and compliance support
  */
 
@@ -25,16 +25,11 @@ const AUDIT_CONFIG = {
     'privateKey',
     'socialSecurityNumber',
     'creditCardNumber',
-    'bankAccountNumber'
+    'bankAccountNumber',
   ],
-  criticalActions: [
-    'DELETE',
-    'EXPORT',
-    'LOGIN',
-    'LOGOUT'
-  ],
+  criticalActions: ['DELETE', 'EXPORT', 'LOGIN', 'LOGOUT'],
   bufferSize: 100,
-  flushInterval: 5000 // 5 seconds
+  flushInterval: 5000, // 5 seconds
 } as const
 
 export interface AuditLogEntry {
@@ -130,7 +125,6 @@ class AuditBuffer {
     try {
       await this.persistEntries(entriesToFlush)
     } catch (error) {
-      console.error('AUDIT_ERROR: Failed to flush audit logs:', error)
       // Re-add to buffer for retry (implement exponential backoff in production)
       this.buffer.unshift(...entriesToFlush)
     }
@@ -140,7 +134,7 @@ class AuditBuffer {
     const sanitizedEntries = entries.map(this.sanitizeAuditEntry)
 
     await prisma.auditLog.createMany({
-      data: sanitizedEntries.map(entry => ({
+      data: sanitizedEntries.map((entry) => ({
         action: entry.action,
         entityType: entry.entityType,
         entityId: entry.entityId,
@@ -151,9 +145,9 @@ class AuditBuffer {
         metadata: JSON.stringify({
           ...entry.metadata,
           request: entry.request,
-          timestamp: entry.timestamp?.toISOString() || new Date().toISOString()
-        })
-      }))
+          timestamp: entry.timestamp?.toISOString() || new Date().toISOString(),
+        }),
+      })),
     })
   }
 
@@ -224,8 +218,8 @@ export class AuditLogger {
         ...entry.metadata,
         auditId: generateAuditId(),
         version: '1.0',
-        source: 'CoreFlow360'
-      }
+        source: 'CoreFlow360',
+      },
     }
 
     auditBuffer.add(enrichedEntry)
@@ -249,7 +243,7 @@ export class AuditLogger {
       tenantId,
       userId,
       newValues,
-      request: request ? extractRequestContext(request) : undefined
+      request: request ? extractRequestContext(request) : undefined,
     })
   }
 
@@ -273,7 +267,7 @@ export class AuditLogger {
       userId,
       oldValues,
       newValues,
-      request: request ? extractRequestContext(request) : undefined
+      request: request ? extractRequestContext(request) : undefined,
     })
   }
 
@@ -295,7 +289,7 @@ export class AuditLogger {
       tenantId,
       userId,
       oldValues,
-      request: request ? extractRequestContext(request) : undefined
+      request: request ? extractRequestContext(request) : undefined,
     })
   }
 
@@ -318,9 +312,9 @@ export class AuditLogger {
       metadata: {
         ...metadata,
         success,
-        loginAttempt: true
+        loginAttempt: true,
       },
-      request: request ? extractRequestContext(request) : undefined
+      request: request ? extractRequestContext(request) : undefined,
     })
   }
 
@@ -344,9 +338,9 @@ export class AuditLogger {
       metadata: {
         exportType,
         recordCount,
-        exportTimestamp: new Date().toISOString()
+        exportTimestamp: new Date().toISOString(),
       },
-      request: request ? extractRequestContext(request) : undefined
+      request: request ? extractRequestContext(request) : undefined,
     })
   }
 
@@ -359,7 +353,7 @@ export class AuditLogger {
     hasMore: boolean
   }> {
     const where: Record<string, unknown> = {
-      tenantId: query.tenantId
+      tenantId: query.tenantId,
     }
 
     if (query.userId) where.userId = query.userId
@@ -380,41 +374,37 @@ export class AuditLogger {
         skip: query.offset || 0,
         include: {
           user: {
-            select: { name: true, email: true }
-          }
-        }
+            select: { name: true, email: true },
+          },
+        },
       }),
-      prisma.auditLog.count({ where })
+      prisma.auditLog.count({ where }),
     ])
 
     return {
       logs,
       total,
-      hasMore: (query.offset || 0) + logs.length < total
+      hasMore: (query.offset || 0) + logs.length < total,
     }
   }
 
   /**
    * Generate comprehensive audit summary
    */
-  static async generateSummary(
-    tenantId: string,
-    from: Date,
-    to: Date
-  ): Promise<AuditSummary> {
+  static async generateSummary(tenantId: string, from: Date, to: Date): Promise<AuditSummary> {
     const logs = await prisma.auditLog.findMany({
       where: {
         tenantId,
         createdAt: {
           gte: from,
-          lte: to
-        }
+          lte: to,
+        },
       },
       include: {
         user: {
-          select: { name: true, email: true }
-        }
-      }
+          select: { name: true, email: true },
+        },
+      },
     })
 
     const actionBreakdown: Record<AuditAction, number> = {
@@ -424,7 +414,7 @@ export class AuditLogger {
       LOGIN: 0,
       LOGOUT: 0,
       EXPORT: 0,
-      IMPORT: 0
+      IMPORT: 0,
     }
 
     const entityBreakdown: Record<string, number> = {}
@@ -450,7 +440,7 @@ export class AuditLogger {
       userBreakdown,
       timeRange: { from, to },
       riskScore,
-      anomalies
+      anomalies,
     }
   }
 
@@ -470,22 +460,24 @@ export class AuditLogger {
       hourlyVolume.set(hour, (hourlyVolume.get(hour) || 0) + 1)
     }
 
-    const avgHourlyVolume = Array.from(hourlyVolume.values()).reduce((a, b) => a + b, 0) / hourlyVolume.size
+    const avgHourlyVolume =
+      Array.from(hourlyVolume.values()).reduce((a, b) => a + b, 0) / hourlyVolume.size
     for (const [hour, volume] of hourlyVolume.entries()) {
-      if (volume > avgHourlyVolume * 3) { // 3x normal volume
+      if (volume > avgHourlyVolume * 3) {
+        // 3x normal volume
         anomalies.push({
           type: 'unusual_volume',
           description: `Unusual activity volume detected: ${volume} actions (${(volume / avgHourlyVolume).toFixed(1)}x normal)`,
           severity: volume > avgHourlyVolume * 5 ? 'critical' : 'high',
           entities: ['system'],
           timestamp: new Date(hour + ':00:00.000Z'),
-          riskScore: Math.min(100, (volume / avgHourlyVolume) * 20)
+          riskScore: Math.min(100, (volume / avgHourlyVolume) * 20),
         })
       }
     }
 
     // Detect suspicious delete patterns
-    const deleteLogs = logs.filter(log => log.action === 'DELETE')
+    const deleteLogs = logs.filter((log) => log.action === 'DELETE')
     const deletesByUser = new Map<string, number>()
     for (const log of deleteLogs) {
       if (log.userId) {
@@ -494,14 +486,15 @@ export class AuditLogger {
     }
 
     for (const [userId, deleteCount] of deletesByUser.entries()) {
-      if (deleteCount > 10) { // More than 10 deletes
+      if (deleteCount > 10) {
+        // More than 10 deletes
         anomalies.push({
           type: 'suspicious_access',
           description: `High number of delete operations by user: ${deleteCount} deletes`,
           severity: deleteCount > 50 ? 'critical' : 'medium',
           entities: [userId],
           timestamp: new Date(),
-          riskScore: Math.min(100, deleteCount * 2)
+          riskScore: Math.min(100, deleteCount * 2),
         })
       }
     }
@@ -518,10 +511,17 @@ export class AuditLogger {
     // Base risk from action types
     for (const log of logs) {
       switch (log.action) {
-        case 'DELETE': riskScore += 3; break
-        case 'EXPORT': riskScore += 5; break
-        case 'LOGIN': riskScore += log.metadata?.success ? 0 : 10; break
-        default: riskScore += 1
+        case 'DELETE':
+          riskScore += 3
+          break
+        case 'EXPORT':
+          riskScore += 5
+          break
+        case 'LOGIN':
+          riskScore += log.metadata?.success ? 0 : 10
+          break
+        default:
+          riskScore += 1
       }
     }
 
@@ -531,7 +531,7 @@ export class AuditLogger {
     }
 
     // Normalize to 0-100 scale
-    return Math.min(100, riskScore / logs.length * 10)
+    return Math.min(100, (riskScore / logs.length) * 10)
   }
 
   /**
@@ -550,8 +550,8 @@ export class AuditLogger {
       where: {
         ...where,
         action: { in: ['CREATE', 'UPDATE'] },
-        createdAt: { lt: operationalCutoff }
-      }
+        createdAt: { lt: operationalCutoff },
+      },
     })
 
     // Delete standard logs older than 3 years
@@ -559,8 +559,8 @@ export class AuditLogger {
       where: {
         ...where,
         action: { in: ['LOGIN', 'LOGOUT', 'IMPORT'] },
-        createdAt: { lt: standardCutoff }
-      }
+        createdAt: { lt: standardCutoff },
+      },
     })
 
     // Delete critical logs older than 7 years
@@ -568,8 +568,8 @@ export class AuditLogger {
       where: {
         ...where,
         action: { in: ['DELETE', 'EXPORT'] },
-        createdAt: { lt: criticalCutoff }
-      }
+        createdAt: { lt: criticalCutoff },
+      },
     })
   }
 }
@@ -584,12 +584,12 @@ function extractRequestContext(request: NextRequest): AuditRequestContext {
     method: request.method,
     url: request.url,
     headers: Object.fromEntries(
-      Array.from(request.headers.entries()).filter(([key]) => 
-        !key.toLowerCase().includes('authorization') && 
-        !key.toLowerCase().includes('cookie')
+      Array.from(request.headers.entries()).filter(
+        ([key]) =>
+          !key.toLowerCase().includes('authorization') && !key.toLowerCase().includes('cookie')
       )
     ),
-    sessionId: request.headers.get('x-session-id') || undefined
+    sessionId: request.headers.get('x-session-id') || undefined,
   }
 }
 

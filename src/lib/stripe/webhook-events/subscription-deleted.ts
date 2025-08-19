@@ -7,19 +7,14 @@ import { prisma } from '@/lib/db'
 import { moduleManager } from '@/services/subscription/module-manager'
 import { publishModuleEvent } from '@/services/events/subscription-aware-event-bus'
 
-
-
 export async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   try {
-    console.log(`🗑️ Subscription deleted: ${subscription.id}`)
-    
     // Find legacy tenant subscription
     const legacySubscription = await prisma.legacyTenantSubscription.findFirst({
-      where: { stripeSubscriptionId: subscription.id }
+      where: { stripeSubscriptionId: subscription.id },
     })
 
     if (!legacySubscription) {
-      console.error('Tenant subscription not found for Stripe subscription:', subscription.id)
       return
     }
 
@@ -27,8 +22,8 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
     await prisma.tenant.update({
       where: { id: legacySubscription.tenantId },
       data: {
-        subscriptionStatus: 'CANCELLED'
-      }
+        subscriptionStatus: 'CANCELLED',
+      },
     })
 
     // Deactivate all modules
@@ -43,22 +38,22 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
       data: {
         status: 'cancelled',
         activeModules: JSON.stringify({}),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     })
 
     // Update bundle subscriptions
     await prisma.tenantBundleSubscription.updateMany({
-      where: { 
+      where: {
         tenantId: legacySubscription.tenantId,
-        externalServiceId: subscription.id
+        externalServiceId: subscription.id,
       },
       data: {
         status: 'cancelled',
         endDate: new Date(),
         deactivatedAt: new Date(),
-        cancellationReason: 'stripe_deletion'
-      }
+        cancellationReason: 'stripe_deletion',
+      },
     })
 
     // Log event
@@ -68,10 +63,10 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
         eventType: 'cancelled',
         newState: JSON.stringify({
           reason: 'stripe_deletion',
-          subscription_id: subscription.id
+          subscription_id: subscription.id,
         }),
-        effectiveDate: new Date()
-      }
+        effectiveDate: new Date(),
+      },
     })
 
     // Create billing event
@@ -88,9 +83,9 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
         paymentStatus: 'cancelled',
         metadata: JSON.stringify({
           cancellation_reason: 'stripe_deletion',
-          cancelled_at: subscription.canceled_at
-        })
-      }
+          cancelled_at: subscription.canceled_at,
+        }),
+      },
     })
 
     // Publish cancellation event
@@ -100,10 +95,5 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
       legacySubscription.tenantId,
       { reason: 'stripe_deletion', subscriptionId: subscription.id }
     )
-
-    console.log(`❌ Subscription cancelled for tenant ${legacySubscription.tenantId}`)
-
-  } catch (error) {
-    console.error('Error handling subscription deletion:', error)
-  }
+  } catch (error) {}
 }

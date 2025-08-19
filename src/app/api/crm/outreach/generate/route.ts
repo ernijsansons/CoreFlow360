@@ -11,9 +11,9 @@ const generateOutreachSchema = z.object({
     company: z.string(),
     industry: z.string(),
     challenges: z.array(z.string()).optional(),
-    preferences: z.array(z.string()).optional()
+    preferences: z.array(z.string()).optional(),
   }),
-  aiPrompt: z.string()
+  aiPrompt: z.string(),
 })
 
 export async function POST(request: NextRequest) {
@@ -43,30 +43,30 @@ export async function POST(request: NextRequest) {
         targetCompany: validatedData.targetProfile.company,
         content: generatedContent,
         metadata: JSON.stringify(validatedData),
-        status: 'READY'
-      }
+        status: 'READY',
+      },
     })
 
     return NextResponse.json({
       id: outreachContent.id,
       content: generatedContent,
       preview: generatePreview(validatedData.method, generatedContent),
-      channels: getChannelsForMethod(validatedData.method)
+      channels: getChannelsForMethod(validatedData.method),
     })
   } catch (error) {
-    console.error('Error generating outreach content:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate outreach content' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to generate outreach content' }, { status: 500 })
   }
 }
 
-async function generateCreativeContent(method: string, targetProfile: any, aiPrompt: string) {
+async function generateCreativeContent(
+  _method: string,
+  _targetProfile: unknown,
+  _aiPrompt: string
+) {
   // Simulate AI-powered creative content generation
   // In production, this would call OpenAI or Claude API with sophisticated prompts
-  
-  const contentMap: Record<string, any> = {
+
+  const contentMap: Record<string, unknown> = {
     'personalized-infographic': {
       type: 'visual',
       format: 'infographic',
@@ -77,22 +77,22 @@ async function generateCreativeContent(method: string, targetProfile: any, aiPro
           type: 'metric',
           label: 'Revenue Growth',
           value: '+250%',
-          visual: 'growth-chart'
+          visual: 'growth-chart',
         },
         {
           type: 'metric',
           label: 'Time Saved',
           value: '15 hrs/week',
-          visual: 'clock-icon'
+          visual: 'clock-icon',
         },
         {
           type: 'personalized-message',
-          text: `${targetProfile.name}, imagine ${targetProfile.company} operating at peak efficiency...`
-        }
+          text: `${targetProfile.name}, imagine ${targetProfile.company} operating at peak efficiency...`,
+        },
       ],
-      callToAction: 'See Your Custom Growth Plan'
+      callToAction: 'See Your Custom Growth Plan',
     },
-    
+
     'ai-ceo-conversation': {
       type: 'video',
       format: 'personalized-video',
@@ -102,34 +102,34 @@ async function generateCreativeContent(method: string, targetProfile: any, aiPro
       duration: 90,
       style: 'professional',
       background: 'modern-office',
-      avatar: 'executive-male'
+      avatar: 'executive-male',
     },
-    
+
     'executive-survival-kit': {
       type: 'physical',
       format: 'care-package',
       items: [
         {
           item: 'Custom Stress Ball',
-          personalization: `${targetProfile.company} logo`
+          personalization: `${targetProfile.company} logo`,
         },
         {
           item: 'Executive Planner',
-          personalization: `${targetProfile.name}'s 2024 Success Roadmap`
+          personalization: `${targetProfile.name}'s 2024 Success Roadmap`,
         },
         {
           item: 'Coffee Blend',
-          personalization: 'Fuel for Champions'
+          personalization: 'Fuel for Champions',
         },
         {
           item: 'Success Blueprint',
-          personalization: `${targetProfile.company}'s Path to Market Leadership`
-        }
+          personalization: `${targetProfile.company}'s Path to Market Leadership`,
+        },
       ],
       packaging: 'premium-box',
-      note: `${targetProfile.name}, thought you could use this while conquering the ${targetProfile.industry} market!`
+      note: `${targetProfile.name}, thought you could use this while conquering the ${targetProfile.industry} market!`,
     },
-    
+
     'linkedin-takeover': {
       type: 'social',
       format: 'coordinated-campaign',
@@ -137,42 +137,44 @@ async function generateCreativeContent(method: string, targetProfile: any, aiPro
         {
           author: 'Industry Leader 1',
           content: `Just had an amazing conversation with companies like ${targetProfile.company} about the future of ${targetProfile.industry}...`,
-          timing: 'Day 1, 9 AM'
+          timing: 'Day 1, 9 AM',
         },
         {
           author: 'Industry Leader 2',
           content: `${targetProfile.name} and the team at ${targetProfile.company} should check this out...`,
           timing: 'Day 2, 2 PM',
-          mention: true
+          mention: true,
         },
         {
           author: 'Customer Success Story',
           content: `Before working with @YourCompany, we faced similar challenges to ${targetProfile.company}...`,
-          timing: 'Day 3, 11 AM'
-        }
-      ]
-    }
+          timing: 'Day 3, 11 AM',
+        },
+      ],
+    },
   }
 
-  return contentMap[method] || {
-    type: 'text',
-    format: 'email',
-    subject: `${targetProfile.name}, Quick Question About ${targetProfile.company}`,
-    body: `Personalized message for ${targetProfile.name} at ${targetProfile.company}`,
-    personalization: {
-      industry_insights: true,
-      company_research: true,
-      role_specific: true
+  return (
+    contentMap[method] || {
+      type: 'text',
+      format: 'email',
+      subject: `${targetProfile.name}, Quick Question About ${targetProfile.company}`,
+      body: `Personalized message for ${targetProfile.name} at ${targetProfile.company}`,
+      personalization: {
+        industry_insights: true,
+        company_research: true,
+        role_specific: true,
+      },
     }
-  }
+  )
 }
 
-function generatePreview(method: string, content: any) {
+function generatePreview(method: string, content: unknown) {
   // Generate preview URL or data for the content
   return {
     type: content.type,
     thumbnailUrl: `/api/crm/outreach/preview/${method}`,
-    previewData: content.type === 'visual' ? content.elements : content
+    previewData: content.type === 'visual' ? content.elements : content,
   }
 }
 
@@ -184,8 +186,8 @@ function getChannelsForMethod(method: string) {
     'linkedin-takeover': ['linkedin', 'social-media'],
     'virtual-office-tour': ['email', 'calendar-invite', 'vr-headset'],
     'gamified-savings-quest': ['email', 'sms', 'web-app'],
-    'personalized-podcast': ['email', 'spotify', 'apple-podcasts']
+    'personalized-podcast': ['email', 'spotify', 'apple-podcasts'],
   }
-  
+
   return channelMap[method] || ['email']
 }

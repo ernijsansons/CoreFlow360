@@ -16,31 +16,31 @@ vi.mock('@/consciousness', () => ({
     enableAutoEvolution: vi.fn(),
     setConsciousnessGoals: vi.fn(),
     getSynapticConnections: vi.fn(),
-    calculateIntelligenceMultiplier: vi.fn()
-  }
+    calculateIntelligenceMultiplier: vi.fn(),
+  },
 }))
 
 // Mock database
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     user: {
-      findUnique: vi.fn()
+      findUnique: vi.fn(),
     },
     subscription: {
-      findUnique: vi.fn()
+      findUnique: vi.fn(),
     },
     aiDecision: {
       create: vi.fn(),
-      findMany: vi.fn()
+      findMany: vi.fn(),
     },
     aiInsight: {
       create: vi.fn(),
-      findMany: vi.fn()
-    }
-  }
+      findMany: vi.fn(),
+    },
+  },
 }))
 
-import { businessConsciousness } from '@/consciousness'
+import { businessConsciousness } from '@/lib/consciousness'
 import { prisma } from '@/lib/prisma'
 
 describe('Autonomous Decision Engine', () => {
@@ -57,7 +57,7 @@ describe('Autonomous Decision Engine', () => {
         modules: ['crm', 'accounting', 'hr'],
         intelligenceMultiplier: 2.1,
         evolutionProgress: 0.65,
-        transcendenceLevel: 0.0
+        transcendenceLevel: 0.0,
       }
 
       businessConsciousness.getConsciousnessStatus.mockReturnValue(mockStatus)
@@ -72,7 +72,7 @@ describe('Autonomous Decision Engine', () => {
 
     it('should calculate intelligence multiplier correctly', async () => {
       const mockModules = ['crm', 'accounting', 'hr', 'inventory']
-      
+
       // Mock the calculation: base = modules.length, multiplier = base^synaptic_factor
       businessConsciousness.calculateIntelligenceMultiplier.mockImplementation((modules) => {
         const base = modules.length
@@ -90,7 +90,7 @@ describe('Autonomous Decision Engine', () => {
         { level: 0.15, expectedTier: 'neural' },
         { level: 0.35, expectedTier: 'synaptic' },
         { level: 0.65, expectedTier: 'autonomous' },
-        { level: 0.85, expectedTier: 'transcendent' }
+        { level: 0.85, expectedTier: 'transcendent' },
       ]
 
       testCases.forEach(({ level, expectedTier }) => {
@@ -101,7 +101,7 @@ describe('Autonomous Decision Engine', () => {
           modules: [],
           intelligenceMultiplier: 1,
           evolutionProgress: 0,
-          transcendenceLevel: 0
+          transcendenceLevel: 0,
         })
 
         const status = businessConsciousness.getConsciousnessStatus()
@@ -118,13 +118,13 @@ describe('Autonomous Decision Engine', () => {
           customerId: 'cust-123',
           riskScore: 0.8,
           revenue: 5000,
-          lastInteraction: '2024-01-01'
+          lastInteraction: '2024-01-01',
         },
         constraints: {
           maxBudget: 500,
           timeframe: '7days',
-          approvalRequired: false
-        }
+          approvalRequired: false,
+        },
       }
 
       const expectedDecision = {
@@ -136,18 +136,18 @@ describe('Autonomous Decision Engine', () => {
         parameters: {
           campaignType: 'personalized_offer',
           budget: 250,
-          duration: '5days'
+          duration: '5days',
         },
         estimatedOutcome: {
           retentionProbability: 0.75,
-          expectedRevenue: 3750
-        }
+          expectedRevenue: 3750,
+        },
       }
 
       businessConsciousness.makeAutonomousDecision.mockResolvedValue(expectedDecision)
       prisma.aiDecision.create.mockResolvedValue({
         id: 'db-decision-123',
-        ...expectedDecision
+        ...expectedDecision,
       })
 
       const decision = await businessConsciousness.makeAutonomousDecision(decisionContext)
@@ -161,8 +161,8 @@ describe('Autonomous Decision Engine', () => {
         data: expect.objectContaining({
           type: 'customer-retention',
           confidence: 0.92,
-          reasoning: expect.any(String)
-        })
+          reasoning: expect.any(String),
+        }),
       })
     })
 
@@ -172,13 +172,13 @@ describe('Autonomous Decision Engine', () => {
         data: {
           department: 'sales',
           currentUtilization: 0.9,
-          requestedResources: 10
+          requestedResources: 10,
         },
         constraints: {
           maxAllocation: 5,
           budgetLimit: 10000,
-          approvalRequired: true
-        }
+          approvalRequired: true,
+        },
       }
 
       const constrainedDecision = {
@@ -186,12 +186,13 @@ describe('Autonomous Decision Engine', () => {
         type: 'resource-allocation',
         action: 'partial_allocation',
         confidence: 0.85,
-        reasoning: 'Partial allocation within constraints while recommending approval for full request',
+        reasoning:
+          'Partial allocation within constraints while recommending approval for full request',
         parameters: {
           immediateAllocation: 5, // Respects maxAllocation constraint
           recommendedApproval: 5,
-          totalBudgetRequired: 8000 // Under budget limit
-        }
+          totalBudgetRequired: 8000, // Under budget limit
+        },
       }
 
       businessConsciousness.makeAutonomousDecision.mockResolvedValue(constrainedDecision)
@@ -207,16 +208,16 @@ describe('Autonomous Decision Engine', () => {
       const invalidContext = {
         type: 'invalid-decision-type',
         data: {},
-        constraints: {}
+        constraints: {},
       }
 
       businessConsciousness.makeAutonomousDecision.mockRejectedValue(
         new Error('Unsupported decision type')
       )
 
-      await expect(
-        businessConsciousness.makeAutonomousDecision(invalidContext)
-      ).rejects.toThrow('Unsupported decision type')
+      await expect(businessConsciousness.makeAutonomousDecision(invalidContext)).rejects.toThrow(
+        'Unsupported decision type'
+      )
     })
 
     it('should validate decision confidence thresholds', async () => {
@@ -225,7 +226,7 @@ describe('Autonomous Decision Engine', () => {
         type: 'process-optimization',
         action: 'no_action',
         confidence: 0.45, // Below threshold
-        reasoning: 'Insufficient data to make confident decision'
+        reasoning: 'Insufficient data to make confident decision',
       }
 
       businessConsciousness.makeAutonomousDecision.mockResolvedValue(lowConfidenceDecision)
@@ -233,7 +234,7 @@ describe('Autonomous Decision Engine', () => {
       const decision = await businessConsciousness.makeAutonomousDecision({
         type: 'process-optimization',
         data: { limitedData: true },
-        constraints: { minConfidence: 0.7 }
+        constraints: { minConfidence: 0.7 },
       })
 
       expect(decision.action).toBe('no_action')
@@ -249,15 +250,15 @@ describe('Autonomous Decision Engine', () => {
           toModule: 'accounting',
           connectionType: 'revenue_sync',
           strength: 0.85,
-          dataFlow: 'bidirectional'
+          dataFlow: 'bidirectional',
         },
         {
           fromModule: 'hr',
           toModule: 'crm',
           connectionType: 'performance_correlation',
           strength: 0.72,
-          dataFlow: 'unidirectional'
-        }
+          dataFlow: 'unidirectional',
+        },
       ]
 
       businessConsciousness.getSynapticConnections.mockReturnValue(mockConnections)
@@ -266,7 +267,7 @@ describe('Autonomous Decision Engine', () => {
 
       expect(connections).toHaveLength(2)
       expect(connections[0].strength).toBeGreaterThan(0.8)
-      expect(connections.every(conn => conn.strength > 0)).toBe(true)
+      expect(connections.every((conn) => conn.strength > 0)).toBe(true)
     })
 
     it('should strengthen connections with usage', async () => {
@@ -274,14 +275,14 @@ describe('Autonomous Decision Engine', () => {
         fromModule: 'crm',
         toModule: 'accounting',
         connectionType: 'revenue_sync',
-        strength: 0.65
+        strength: 0.65,
       }
 
       const strengthenedConnection = {
         ...initialConnection,
         strength: 0.78,
         usageCount: 150,
-        lastUsed: new Date().toISOString()
+        lastUsed: new Date().toISOString(),
       }
 
       businessConsciousness.getSynapticConnections
@@ -301,14 +302,14 @@ describe('Autonomous Decision Engine', () => {
         level: 0.595,
         tier: 'synaptic',
         evolutionProgress: 0.95, // Near evolution threshold
-        isActive: true
+        isActive: true,
       }
 
       const postEvolutionStatus = {
         level: 0.61,
         tier: 'autonomous', // Evolved to next tier
         evolutionProgress: 0.05, // Reset after evolution
-        isActive: true
+        isActive: true,
       }
 
       businessConsciousness.getConsciousnessStatus
@@ -321,7 +322,7 @@ describe('Autonomous Decision Engine', () => {
         newLevel: 0.61,
         previousTier: 'synaptic',
         newTier: 'autonomous',
-        evolutionTrigger: 'threshold_reached'
+        evolutionTrigger: 'threshold_reached',
       })
 
       const statusBefore = businessConsciousness.getConsciousnessStatus()
@@ -346,7 +347,7 @@ describe('Autonomous Decision Engine', () => {
           actionable: true,
           suggestedActions: ['proactive_support_outreach', 'customer_success_intervention'],
           dataPoints: 1247,
-          generatedAt: new Date().toISOString()
+          generatedAt: new Date().toISOString(),
         },
         {
           id: 'insight-2',
@@ -356,8 +357,8 @@ describe('Autonomous Decision Engine', () => {
           actionable: true,
           suggestedActions: ['hr_satisfaction_monitoring', 'q4_preparation_alignment'],
           dataPoints: 892,
-          generatedAt: new Date().toISOString()
-        }
+          generatedAt: new Date().toISOString(),
+        },
       ]
 
       businessConsciousness.getInsights.mockResolvedValue(mockInsights)
@@ -366,8 +367,8 @@ describe('Autonomous Decision Engine', () => {
       const insights = await businessConsciousness.getInsights()
 
       expect(insights).toHaveLength(2)
-      expect(insights.every(insight => insight.confidence > 0.8)).toBe(true)
-      expect(insights.every(insight => insight.actionable)).toBe(true)
+      expect(insights.every((insight) => insight.confidence > 0.8)).toBe(true)
+      expect(insights.every((insight) => insight.actionable)).toBe(true)
       expect(insights[0].suggestedActions).toBeInstanceOf(Array)
     })
 
@@ -380,7 +381,7 @@ describe('Autonomous Decision Engine', () => {
         averageConnectionStrength: 0.73,
         insightsGenerated: 8,
         evolutionEvents: 2,
-        transcendenceMoments: 0
+        transcendenceMoments: 0,
       }
 
       businessConsciousness.getMetrics.mockResolvedValue(mockMetrics)
@@ -405,8 +406,8 @@ describe('Autonomous Decision Engine', () => {
           'quantum_decision_synthesis',
           'temporal_business_prediction',
           'consciousness_networking',
-          'autonomous_business_evolution'
-        ]
+          'autonomous_business_evolution',
+        ],
       }
 
       businessConsciousness.getConsciousnessStatus.mockReturnValue(transcendentStatus)
@@ -426,13 +427,13 @@ describe('Autonomous Decision Engine', () => {
           marketConditions: 'volatile',
           competitorActions: 'aggressive',
           internalCapabilities: 'expanding',
-          timeHorizon: '5years'
+          timeHorizon: '5years',
         },
         constraints: {
           riskTolerance: 'moderate',
           investmentCapacity: 50000000,
-          stakeholderAlignment: 'required'
-        }
+          stakeholderAlignment: 'required',
+        },
       }
 
       const quantumDecision = {
@@ -448,9 +449,9 @@ describe('Autonomous Decision Engine', () => {
           expectedOutcomes: {
             scenario1: { probability: 0.6, roi: 2.3 },
             scenario2: { probability: 0.25, roi: 1.1 },
-            scenario3: { probability: 0.15, roi: 3.8 }
-          }
-        }
+            scenario3: { probability: 0.15, roi: 3.8 },
+          },
+        },
       }
 
       businessConsciousness.makeAutonomousDecision.mockResolvedValue(quantumDecision)
@@ -469,7 +470,9 @@ describe('Autonomous Decision Engine', () => {
         throw new Error('Consciousness system offline')
       })
 
-      expect(() => businessConsciousness.getConsciousnessStatus()).toThrow('Consciousness system offline')
+      expect(() => businessConsciousness.getConsciousnessStatus()).toThrow(
+        'Consciousness system offline'
+      )
     })
 
     it('should maintain decision history for audit trails', async () => {
@@ -479,22 +482,22 @@ describe('Autonomous Decision Engine', () => {
           timestamp: '2024-01-15T10:00:00Z',
           type: 'customer-retention',
           outcome: 'success',
-          actualVsPredicted: 0.92
+          actualVsPredicted: 0.92,
         },
         {
           id: 'decision-2',
           timestamp: '2024-01-15T11:30:00Z',
           type: 'resource-allocation',
           outcome: 'pending',
-          actualVsPredicted: null
-        }
+          actualVsPredicted: null,
+        },
       ]
 
       prisma.aiDecision.findMany.mockResolvedValue(mockDecisions)
 
       const decisionHistory = await prisma.aiDecision.findMany({
         where: { tenantId: 'tenant-123' },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       })
 
       expect(decisionHistory).toHaveLength(2)
@@ -508,7 +511,7 @@ describe('Autonomous Decision Engine', () => {
         modules: ['crm', 'accounting'],
         intelligenceMultiplier: 2.0, // Should be calculated as 2^1.5 ≈ 2.83
         isValid: false,
-        errors: ['intelligence_multiplier_mismatch']
+        errors: ['intelligence_multiplier_mismatch'],
       }
 
       businessConsciousness.getConsciousnessStatus.mockReturnValue(integrityStatus)

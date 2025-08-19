@@ -2,7 +2,11 @@
  * Auth wrapper to handle build-time and runtime auth safely
  */
 
-import { getServerSession } from './auth'
+import {
+  getServerSession as authGetServerSession,
+  signIn as authSignIn,
+  signOut as authSignOut,
+} from './auth-simple'
 import type { Session } from 'next-auth'
 
 // Build-time detection
@@ -24,20 +28,22 @@ export async function getSession(): Promise<Session | null> {
 
   try {
     // Attempt to get session
-    const session = await getServerSession()
-    
+    const session = await authGetServerSession()
+
     // Validate session object
     if (session && typeof session === 'object' && 'user' in session) {
       return session
     }
-    
+
     // If session is an error object or invalid, return null
     return null
   } catch (error) {
     // Log error but don't throw - return null instead
-    console.error('[Auth Wrapper] Session error:', error)
+
     return null
   }
 }
 
-export { signIn, signOut } from './auth'
+export const getServerSession = authGetServerSession
+export const signIn = authSignIn
+export const signOut = authSignOut

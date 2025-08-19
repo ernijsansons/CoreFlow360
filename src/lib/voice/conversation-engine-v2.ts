@@ -1,118 +1,114 @@
 /**
  * CoreFlow360 Enhanced AI Conversation Engine v2
- * 
+ *
  * Revenue-generating conversations that convert at 47%+
  * This isn't just AI - it's a SALES MACHINE that outperforms humans
  */
 
-import { ConversationAnalyzer } from './analyzers/conversation-analyzer';
-import { EmotionDetector } from './analyzers/emotion-detector';
-import { ObjectionHandler } from './analyzers/objection-handler';
-import { IndustryKnowledge } from './knowledge/industry-knowledge';
-import { VapiClient } from '@vapi-ai/server-sdk';
-import { getVoicePerformanceTracker } from './performance-tracker';
-import { prisma } from '../prisma';
+import { ConversationAnalyzer } from './analyzers/conversation-analyzer'
+import { EmotionDetector } from './analyzers/emotion-detector'
+import { ObjectionHandler } from './analyzers/objection-handler'
+import { IndustryKnowledge } from './knowledge/industry-knowledge'
+import { VapiClient } from '@vapi-ai/server-sdk'
+import { getVoicePerformanceTracker } from './performance-tracker'
+import { prisma } from '../prisma'
 
 export interface CallParams {
-  phoneNumber: string;
-  customerName?: string;
-  industry: string;
-  tenantId: string;
-  goal: 'qualification' | 'appointment' | 'follow_up';
-  customerData?: CustomerContext;
-  metadata?: Record<string, any>;
-  startTime: number;
+  phoneNumber: string
+  customerName?: string
+  industry: string
+  tenantId: string
+  goal: 'qualification' | 'appointment' | 'follow_up'
+  customerData?: CustomerContext
+  metadata?: Record<string, unknown>
+  startTime: number
 }
 
 export interface CustomerContext {
-  previousCalls: number;
-  lastContact: Date;
-  qualification: number;
-  preferences: Record<string, any>;
-  notes: string[];
-  painPoints: string[];
-  urgencyLevel: 'low' | 'medium' | 'high' | 'emergency';
-  budget: number;
-  decisionMaker: boolean;
+  previousCalls: number
+  lastContact: Date
+  qualification: number
+  preferences: Record<string, unknown>
+  notes: string[]
+  painPoints: string[]
+  urgencyLevel: 'low' | 'medium' | 'high' | 'emergency'
+  budget: number
+  decisionMaker: boolean
 }
 
 export interface ConversationEvent {
-  type: 'utterance' | 'emotion_change' | 'objection_detected' | 'buying_signal';
-  callId: string;
-  timestamp: Date;
-  speaker: 'ai' | 'customer';
-  text?: string;
-  confidence?: number;
-  audioFeatures?: AudioFeatures;
-  analysis?: any;
+  type: 'utterance' | 'emotion_change' | 'objection_detected' | 'buying_signal'
+  callId: string
+  timestamp: Date
+  speaker: 'ai' | 'customer'
+  text?: string
+  confidence?: number
+  audioFeatures?: AudioFeatures
+  analysis?: unknown
 }
 
 export interface AudioFeatures {
-  pitch: number;
-  energy: number;
-  speechRate: number;
-  pauseDuration: number;
-  volume: number;
+  pitch: number
+  energy: number
+  speechRate: number
+  pauseDuration: number
+  volume: number
 }
 
 export interface PromptContext {
-  industry: string;
-  customerContext: CustomerContext;
-  emotionalState: string;
-  conversationGoal: string;
-  companyPolicies: any;
-  competitorInfo: string;
-  seasonalFactors: string;
-  bestPractices: string[];
-  currentTime: Date;
+  industry: string
+  customerContext: CustomerContext
+  emotionalState: string
+  conversationGoal: string
+  companyPolicies: unknown
+  competitorInfo: string
+  seasonalFactors: string
+  bestPractices: string[]
+  currentTime: Date
 }
 
 export class ConversationEngineV2 {
-  private vapi: VapiClient;
-  private analyzer: ConversationAnalyzer;
-  private emotionDetector: EmotionDetector;
-  private objectionHandler: ObjectionHandler;
-  private industryKnowledge: IndustryKnowledge;
-  
+  private vapi: VapiClient
+  private analyzer: ConversationAnalyzer
+  private emotionDetector: EmotionDetector
+  private objectionHandler: ObjectionHandler
+  private industryKnowledge: IndustryKnowledge
+
   // Active conversations state
-  private activeConversations: Map<string, ConversationState> = new Map();
-  private realtimeCoaching: Map<string, CoachingSession> = new Map();
+  private activeConversations: Map<string, ConversationState> = new Map()
+  private realtimeCoaching: Map<string, CoachingSession> = new Map()
 
   constructor() {
     this.vapi = new VapiClient({
       apiKey: process.env.VAPI_API_KEY!,
-    });
-    
-    this.analyzer = new ConversationAnalyzer();
-    this.emotionDetector = new EmotionDetector();
-    this.objectionHandler = new ObjectionHandler();
-    this.industryKnowledge = new IndustryKnowledge();
-    
-    console.log('🧠 Enhanced Conversation Engine v2 initialized');
+    })
+
+    this.analyzer = new ConversationAnalyzer()
+    this.emotionDetector = new EmotionDetector()
+    this.objectionHandler = new ObjectionHandler()
+    this.industryKnowledge = new IndustryKnowledge()
   }
 
-  async enhanceConversation(callId: string, params: CallParams): Promise<any> {
-    console.log(`🚀 Enhancing conversation for ${params.phoneNumber} in ${params.industry}`);
-    
+  async enhanceConversation(callId: string, params: CallParams): Promise<unknown> {
     try {
       // Initialize conversation tracking
-      this.initializeConversationTracking(callId, params);
-      
+      this.initializeConversationTracking(callId, params)
+
       // Load comprehensive context
-      const context = await this.buildComprehensiveContext(params);
-      
+      const context = await this.buildComprehensiveContext(params)
+
       // Generate dynamic system prompt with REAL intelligence
-      const systemPrompt = await this.buildIntelligentPrompt(context);
-      
+      const systemPrompt = await this.buildIntelligentPrompt(context)
+
       // Select optimal voice and settings
-      const voiceConfig = await this.selectOptimalVoice(params);
-      
+      const voiceConfig = await this.selectOptimalVoice(params)
+
       // Configure Vapi with advanced features
       const enhancedConfig = {
         phoneNumberId: process.env.VAPI_PHONE_NUMBER_ID,
         customer: {
           number: params.phoneNumber,
-          name: params.customerName || 'Valued Customer'
+          name: params.customerName || 'Valued Customer',
         },
         assistant: {
           firstMessage: await this.generatePersonalizedOpening(context),
@@ -123,17 +119,17 @@ export class ConversationEngineV2 {
             systemPrompt,
             maxTokens: 300, // Keep responses concise
             frequencyPenalty: 0.1,
-            presencePenalty: 0.1
+            presencePenalty: 0.1,
           },
           voice: voiceConfig,
-          
+
           // Advanced conversation controls
           interruptionThreshold: this.calculateInterruptionThreshold(params),
           backchannel: true,
           responseTiming: 'balanced',
           endCallAfterSilence: '10s',
           maxCallDuration: '20m',
-          
+
           // Enhanced functions for revenue generation
           functions: [
             this.createQualificationFunction(),
@@ -141,17 +137,17 @@ export class ConversationEngineV2 {
             this.createTransferFunction(),
             this.createFollowUpFunction(),
             this.createUrgencyFunction(),
-            this.createValuePropFunction()
+            this.createValuePropFunction(),
           ],
-          
+
           // Real-time webhooks for intervention
           webhooks: {
             onUtteranceEnd: `${process.env.API_URL}/webhooks/utterance`,
             onFunctionCall: `${process.env.API_URL}/webhooks/function-call`,
-            onCallEnd: `${process.env.API_URL}/webhooks/call-end`
-          }
+            onCallEnd: `${process.env.API_URL}/webhooks/call-end`,
+          },
         },
-        
+
         // Enhanced metadata for tracking
         metadata: {
           ...params.metadata,
@@ -162,32 +158,29 @@ export class ConversationEngineV2 {
           aiPersona: context.companyPolicies?.aiPersona || 'Sarah',
           expectedRevenue: this.calculateExpectedRevenue(params),
           customerLTV: this.calculateCustomerLTV(params.customerData),
-          urgencyLevel: params.customerData?.urgencyLevel || 'medium'
-        }
-      };
-      
+          urgencyLevel: params.customerData?.urgencyLevel || 'medium',
+        },
+      }
+
       // Create the enhanced call
-      const call = await this.vapi.calls.create(enhancedConfig);
-      
+      const call = await this.vapi.calls.create(enhancedConfig)
+
       // Start real-time monitoring
-      await this.startRealtimeMonitoring(callId, params);
-      
+      await this.startRealtimeMonitoring(callId, params)
+
       // Record performance metrics
       getVoicePerformanceTracker().startCallTracking(callId, {
         tenantId: params.tenantId,
         provider: 'vapi',
-        industry: params.industry
-      });
-      
-      return call;
-      
+        industry: params.industry,
+      })
+
+      return call
     } catch (error) {
-      console.error('💥 Conversation enhancement failed:', error);
-      
       // Record failure for analysis
-      await this.recordConversationFailure(callId, error as Error, params);
-      
-      throw error;
+      await this.recordConversationFailure(callId, error as Error, params)
+
+      throw error
     }
   }
 
@@ -198,24 +191,24 @@ export class ConversationEngineV2 {
       competitorData,
       seasonalContext,
       companyPolicies,
-      bestPractices
+      bestPractices,
     ] = await Promise.all([
       this.loadCustomerHistory(params.phoneNumber, params.tenantId),
       this.industryKnowledge.getIntelligence(params.industry),
       this.loadCompetitorIntelligence(params.industry),
       this.getSeasonalContext(params.industry),
       this.loadCompanyPolicies(params.tenantId),
-      this.getBestPractices(params.industry, params.goal)
-    ]);
-    
+      this.getBestPractices(params.industry, params.goal),
+    ])
+
     // Merge customer data with history
     const enhancedCustomerContext: CustomerContext = {
       ...params.customerData!,
       ...customerHistory,
       previousCalls: customerHistory?.previousCalls || 0,
-      qualification: customerHistory?.qualification || 0
-    };
-    
+      qualification: customerHistory?.qualification || 0,
+    }
+
     return {
       industry: params.industry,
       customerContext: enhancedCustomerContext,
@@ -225,15 +218,15 @@ export class ConversationEngineV2 {
       competitorInfo: competitorData,
       seasonalFactors: seasonalContext,
       bestPractices,
-      currentTime: new Date()
-    };
+      currentTime: new Date(),
+    }
   }
 
   private buildIntelligentPrompt(context: PromptContext): string {
-    const timeContext = this.getTimeContext(context.currentTime);
-    const urgencyFactors = this.getUrgencyFactors(context);
-    const personalization = this.getPersonalizationHooks(context.customerContext);
-    
+    const timeContext = this.getTimeContext(context.currentTime)
+    const urgencyFactors = this.getUrgencyFactors(context)
+    const personalization = this.getPersonalizationHooks(context.customerContext)
+
     return `You are ${context.companyPolicies?.aiPersona || 'Sarah'}, an elite ${context.industry} specialist with deep expertise and genuine care for customers.
 
 ## CORE IDENTITY
@@ -354,177 +347,174 @@ ${JSON.stringify(context.companyPolicies, null, 2)}
 Remember: Your goal is to HELP first, sell second. Build trust through expertise. Every conversation should feel valuable to the customer even if they don't buy.
 
 Current conversation priority: ${urgencyFactors.priority}
-Success probability: ${this.calculateSuccessProbability(context)}%`;
+Success probability: ${this.calculateSuccessProbability(context)}%`
   }
 
   private async generatePersonalizedOpening(context: PromptContext): string {
-    const timeGreeting = this.getTimeGreeting();
-    const personalization = this.getPersonalizationHooks(context.customerContext);
-    
+    const timeGreeting = this.getTimeGreeting()
+    const personalization = this.getPersonalizationHooks(context.customerContext)
+
     const templates = {
       qualification: {
         new_customer: `${timeGreeting} {name}, this is ${context.companyPolicies?.aiPersona || 'Sarah'} from ${context.companyPolicies?.companyName || 'CoreFlow360'}. I understand you're interested in our ${context.industry} services. Do you have a quick moment to chat?`,
-        
+
         returning_customer: `${timeGreeting} {name}, this is ${context.companyPolicies?.aiPersona || 'Sarah'} from ${context.companyPolicies?.companyName || 'CoreFlow360'}. I see we've helped you before with ${personalization.previousService}. How can I help you today?`,
-        
-        urgent: `${timeGreeting} {name}, this is ${context.companyPolicies?.aiPersona || 'Sarah'} from ${context.companyPolicies?.companyName || 'CoreFlow360'}. I got your urgent message about ${personalization.issue}. That sounds really frustrating. I can actually get someone out there today - would that help?`
+
+        urgent: `${timeGreeting} {name}, this is ${context.companyPolicies?.aiPersona || 'Sarah'} from ${context.companyPolicies?.companyName || 'CoreFlow360'}. I got your urgent message about ${personalization.issue}. That sounds really frustrating. I can actually get someone out there today - would that help?`,
       },
-      
+
       appointment: {
         standard: `${timeGreeting} {name}, this is ${context.companyPolicies?.aiPersona || 'Sarah'} from ${context.companyPolicies?.companyName || 'CoreFlow360'}. I understand you're dealing with ${personalization.issue}. ${this.getUrgencyHook(context)} I can get a certified technician out there today. Would that work for you?`,
-        
-        callback: `${timeGreeting} {name}, this is ${context.companyPolicies?.aiPersona || 'Sarah'} from ${context.companyPolicies?.companyName || 'CoreFlow360'} returning your call. I see you need help with ${personalization.issue}. I actually have someone finishing up nearby who could stop by today. What time would work better - morning or afternoon?`
+
+        callback: `${timeGreeting} {name}, this is ${context.companyPolicies?.aiPersona || 'Sarah'} from ${context.companyPolicies?.companyName || 'CoreFlow360'} returning your call. I see you need help with ${personalization.issue}. I actually have someone finishing up nearby who could stop by today. What time would work better - morning or afternoon?`,
       },
-      
+
       follow_up: {
         standard: `${timeGreeting} {name}, this is ${context.companyPolicies?.aiPersona || 'Sarah'} from ${context.companyPolicies?.companyName || 'CoreFlow360'}. I wanted to follow up on our conversation about ${personalization.previousTopic}. How did that work out for you?`,
-        
-        no_show: `${timeGreeting} {name}, this is ${context.companyPolicies?.aiPersona || 'Sarah'} from ${context.companyPolicies?.companyName || 'CoreFlow360'}. I noticed we missed you for your appointment yesterday. No worries at all - things come up. Should we reschedule for today or tomorrow?`
-      }
-    };
-    
-    // Select appropriate template
-    const goalTemplates = templates[context.conversationGoal];
-    let template: string;
-    
-    if (context.customerContext.urgencyLevel === 'emergency') {
-      template = templates.qualification.urgent;
-    } else if (context.customerContext.previousCalls > 0) {
-      template = goalTemplates.returning_customer || goalTemplates.standard;
-    } else {
-      template = goalTemplates.standard;
+
+        no_show: `${timeGreeting} {name}, this is ${context.companyPolicies?.aiPersona || 'Sarah'} from ${context.companyPolicies?.companyName || 'CoreFlow360'}. I noticed we missed you for your appointment yesterday. No worries at all - things come up. Should we reschedule for today or tomorrow?`,
+      },
     }
-    
+
+    // Select appropriate template
+    const goalTemplates = templates[context.conversationGoal]
+    let template: string
+
+    if (context.customerContext.urgencyLevel === 'emergency') {
+      template = templates.qualification.urgent
+    } else if (context.customerContext.previousCalls > 0) {
+      template = goalTemplates.returning_customer || goalTemplates.standard
+    } else {
+      template = goalTemplates.standard
+    }
+
     // Apply personalization
     return template
       .replace('{name}', personalization.customerName)
       .replace('{issue}', personalization.issue)
       .replace('{previousService}', personalization.previousService)
-      .replace('{previousTopic}', personalization.previousTopic);
+      .replace('{previousTopic}', personalization.previousTopic)
   }
 
-  private async selectOptimalVoice(params: CallParams): Promise<any> {
+  private async selectOptimalVoice(params: CallParams): Promise<unknown> {
     // Voice optimization based on industry, time, and customer profile
     const voiceProfiles = {
       hvac: {
         professional: { voiceId: 'sarah', stability: 0.8, similarityBoost: 0.75 },
         friendly: { voiceId: 'jessica', stability: 0.85, similarityBoost: 0.7 },
-        technical: { voiceId: 'daniel', stability: 0.9, similarityBoost: 0.8 }
+        technical: { voiceId: 'daniel', stability: 0.9, similarityBoost: 0.8 },
       },
       plumbing: {
         trustworthy: { voiceId: 'daniel', stability: 0.9, similarityBoost: 0.8 },
-        empathetic: { voiceId: 'sarah', stability: 0.8, similarityBoost: 0.75 }
+        empathetic: { voiceId: 'sarah', stability: 0.8, similarityBoost: 0.75 },
       },
       electrical: {
         confident: { voiceId: 'jessica', stability: 0.85, similarityBoost: 0.7 },
-        safety_focused: { voiceId: 'sarah', stability: 0.9, similarityBoost: 0.8 }
-      }
-    };
-    
-    // Select based on customer context and goal
-    let voiceType = 'professional';
-    
-    if (params.customerData?.urgencyLevel === 'emergency') {
-      voiceType = 'trustworthy';
-    } else if (params.goal === 'qualification') {
-      voiceType = 'friendly';
-    } else if (params.customerData?.previousCalls && params.customerData.previousCalls > 0) {
-      voiceType = 'empathetic';
+        safety_focused: { voiceId: 'sarah', stability: 0.9, similarityBoost: 0.8 },
+      },
     }
-    
-    const industryVoices = voiceProfiles[params.industry] || voiceProfiles.hvac;
-    const selectedVoice = industryVoices[voiceType] || industryVoices.professional;
-    
+
+    // Select based on customer context and goal
+    let voiceType = 'professional'
+
+    if (params.customerData?.urgencyLevel === 'emergency') {
+      voiceType = 'trustworthy'
+    } else if (params.goal === 'qualification') {
+      voiceType = 'friendly'
+    } else if (params.customerData?.previousCalls && params.customerData.previousCalls > 0) {
+      voiceType = 'empathetic'
+    }
+
+    const industryVoices = voiceProfiles[params.industry] || voiceProfiles.hvac
+    const selectedVoice = industryVoices[voiceType] || industryVoices.professional
+
     return {
       provider: 'eleven_labs',
       voiceId: selectedVoice.voiceId,
       stability: selectedVoice.stability,
       similarityBoost: selectedVoice.similarityBoost,
       style: 0.25, // Natural conversation style
-      useSpeakerBoost: true
-    };
+      useSpeakerBoost: true,
+    }
   }
 
   // Real-time conversation handling
   async handleRealtimeUpdate(event: ConversationEvent): Promise<void> {
-    const conversation = this.activeConversations.get(event.callId);
-    if (!conversation) return;
-    
+    const conversation = this.activeConversations.get(event.callId)
+    if (!conversation) return
+
     switch (event.type) {
       case 'utterance':
-        await this.processUtterance(event, conversation);
-        break;
-        
+        await this.processUtterance(event, conversation)
+        break
+
       case 'emotion_change':
-        await this.handleEmotionChange(event, conversation);
-        break;
-        
+        await this.handleEmotionChange(event, conversation)
+        break
+
       case 'objection_detected':
-        await this.handleObjection(event, conversation);
-        break;
-        
+        await this.handleObjection(event, conversation)
+        break
+
       case 'buying_signal':
-        await this.handleBuyingSignal(event, conversation);
-        break;
+        await this.handleBuyingSignal(event, conversation)
+        break
     }
   }
 
-  private async processUtterance(event: ConversationEvent, conversation: ConversationState): Promise<void> {
-    if (!event.text) return;
-    
+  private async processUtterance(
+    event: ConversationEvent,
+    conversation: ConversationState
+  ): Promise<void> {
+    if (!event.text) return
+
     // Real-time analysis
-    const [
-      emotion,
-      intent,
-      entities,
-      buyingSignals,
-      objections,
-      sentiment
-    ] = await Promise.all([
+    const [emotion, intent, entities, buyingSignals, objections, sentiment] = await Promise.all([
       this.emotionDetector.analyze(event.text, event.audioFeatures),
       this.analyzer.detectIntent(event.text),
       this.analyzer.extractEntities(event.text),
       this.analyzer.detectBuyingSignals(event.text),
       this.objectionHandler.detect(event.text),
-      this.analyzer.analyzeSentiment(event.text)
-    ]);
-    
+      this.analyzer.analyzeSentiment(event.text),
+    ])
+
     // Update conversation state
-    conversation.currentEmotion = emotion;
-    conversation.detectedIntent = intent;
-    conversation.entities.push(...entities);
-    conversation.sentimentHistory.push(sentiment);
-    
+    conversation.currentEmotion = emotion
+    conversation.detectedIntent = intent
+    conversation.entities.push(...entities)
+    conversation.sentimentHistory.push(sentiment)
+
     // Calculate real-time insights
-    const talkRatio = conversation.aiWordCount / (conversation.aiWordCount + conversation.customerWordCount);
-    const conversationFlow = this.assessConversationFlow(conversation);
-    
+    const talkRatio =
+      conversation.aiWordCount / (conversation.aiWordCount + conversation.customerWordCount)
+    const conversationFlow = this.assessConversationFlow(conversation)
+
     // Trigger interventions if needed
     if (emotion.valence < -0.5 && event.speaker === 'customer') {
-      await this.injectEmpathy(event.callId, emotion.primary);
+      await this.injectEmpathy(event.callId, emotion.primary)
     }
-    
+
     if (talkRatio > 0.7) {
-      await this.injectListening(event.callId);
+      await this.injectListening(event.callId)
     }
-    
+
     if (buyingSignals.length > 0) {
-      await this.triggerClosure(event.callId, buyingSignals[0]);
+      await this.triggerClosure(event.callId, buyingSignals[0])
     }
-    
+
     if (objections.length > 0) {
-      await this.handleObjectionInRealTime(event.callId, objections[0]);
+      await this.handleObjectionInRealTime(event.callId, objections[0])
     }
-    
+
     // Record performance data
-    getVoicePerformanceTracker().recordAIConfidence(event.callId, event.confidence || 0);
-    
+    getVoicePerformanceTracker().recordAIConfidence(event.callId, event.confidence || 0)
+
     if (event.speaker === 'customer') {
-      conversation.customerWordCount += event.text.split(' ').length;
+      conversation.customerWordCount += event.text.split(' ').length
     } else {
-      conversation.aiWordCount += event.text.split(' ').length;
+      conversation.aiWordCount += event.text.split(' ').length
     }
-    
+
     // Store event for analysis
     await this.storeConversationEvent(event, {
       emotion,
@@ -533,8 +523,8 @@ Success probability: ${this.calculateSuccessProbability(context)}%`;
       objections,
       sentiment,
       talkRatio,
-      conversationFlow
-    });
+      conversationFlow,
+    })
   }
 
   // Helper functions for conversation intelligence
@@ -545,22 +535,30 @@ Success probability: ${this.calculateSuccessProbability(context)}%`;
       parameters: {
         type: 'object',
         properties: {
-          score: { 
-            type: 'number', 
-            minimum: 1, 
+          score: {
+            type: 'number',
+            minimum: 1,
             maximum: 10,
-            description: 'Score 1-10: Pain(0-3) + Urgency(0-2) + Authority(0-2) + Budget(0-3)'
+            description: 'Score 1-10: Pain(0-3) + Urgency(0-2) + Authority(0-2) + Budget(0-3)',
           },
           pain_score: { type: 'number', minimum: 0, maximum: 3 },
           urgency_score: { type: 'number', minimum: 0, maximum: 2 },
           authority_score: { type: 'number', minimum: 0, maximum: 2 },
           budget_score: { type: 'number', minimum: 0, maximum: 3 },
           reasoning: { type: 'string', description: 'Why this score was assigned' },
-          next_action: { type: 'string', enum: ['continue_discovery', 'present_solution', 'schedule_appointment', 'transfer_human'] }
+          next_action: {
+            type: 'string',
+            enum: [
+              'continue_discovery',
+              'present_solution',
+              'schedule_appointment',
+              'transfer_human',
+            ],
+          },
         },
-        required: ['score', 'reasoning', 'next_action']
-      }
-    };
+        required: ['score', 'reasoning', 'next_action'],
+      },
+    }
   }
 
   private createAppointmentFunction() {
@@ -572,36 +570,47 @@ Success probability: ${this.calculateSuccessProbability(context)}%`;
         properties: {
           preferred_date: { type: 'string', description: 'YYYY-MM-DD format' },
           preferred_time: { type: 'string', description: 'HH:MM format' },
-          time_flexibility: { type: 'string', enum: ['morning', 'afternoon', 'evening', 'anytime'] },
+          time_flexibility: {
+            type: 'string',
+            enum: ['morning', 'afternoon', 'evening', 'anytime'],
+          },
           service_type: { type: 'string' },
           urgency: { type: 'string', enum: ['same_day', 'next_day', 'this_week', 'flexible'] },
           special_requirements: { type: 'string' },
           estimated_value: { type: 'number', description: 'Expected job value in dollars' },
-          confidence_level: { type: 'number', minimum: 1, maximum: 10, description: 'How confident is the appointment' }
+          confidence_level: {
+            type: 'number',
+            minimum: 1,
+            maximum: 10,
+            description: 'How confident is the appointment',
+          },
         },
-        required: ['preferred_date', 'service_type', 'urgency', 'confidence_level']
-      }
-    };
+        required: ['preferred_date', 'service_type', 'urgency', 'confidence_level'],
+      },
+    }
   }
 
   private async injectEmpathy(callId: string, emotionType: string): Promise<void> {
     const empathyPrompts = {
-      frustrated: "The customer sounds frustrated. Acknowledge their frustration with genuine empathy: 'I can hear how frustrating this must be for you.' Then focus on solving their problem quickly.",
-      worried: "The customer seems worried. Address their concerns: 'I understand your concern, and that's completely valid.' Then provide reassurance through your expertise.",
-      angry: "The customer is upset. Stay calm and empathetic: 'I'm really sorry you're dealing with this. Let me make sure we get this fixed properly.' Focus on solutions.",
-      confused: "The customer seems confused. Simplify your explanation: 'Let me break this down simply.' Use clear, jargon-free language."
-    };
-    
-    const prompt = empathyPrompts[emotionType] || empathyPrompts.frustrated;
-    await this.injectRealtimePrompt(callId, prompt);
+      frustrated:
+        "The customer sounds frustrated. Acknowledge their frustration with genuine empathy: 'I can hear how frustrating this must be for you.' Then focus on solving their problem quickly.",
+      worried:
+        "The customer seems worried. Address their concerns: 'I understand your concern, and that's completely valid.' Then provide reassurance through your expertise.",
+      angry:
+        "The customer is upset. Stay calm and empathetic: 'I'm really sorry you're dealing with this. Let me make sure we get this fixed properly.' Focus on solutions.",
+      confused:
+        "The customer seems confused. Simplify your explanation: 'Let me break this down simply.' Use clear, jargon-free language.",
+    }
+
+    const prompt = empathyPrompts[emotionType] || empathyPrompts.frustrated
+    await this.injectRealtimePrompt(callId, prompt)
   }
 
   private async injectRealtimePrompt(callId: string, prompt: string): Promise<void> {
     // In a real implementation, this would use Vapi's real-time prompt injection
-    console.log(`💬 Injecting coaching for ${callId}: ${prompt}`);
-    
+
     // Store coaching intervention
-    await this.recordCoachingIntervention(callId, prompt);
+    await this.recordCoachingIntervention(callId, prompt)
   }
 
   // Performance tracking integration
@@ -618,25 +627,25 @@ Success probability: ${this.calculateSuccessProbability(context)}%`;
       objectionCount: 0,
       buyingSignalCount: 0,
       qualificationScore: 0,
-      coachingInterventions: 0
-    };
-    
-    this.activeConversations.set(callId, conversationState);
-    
+      coachingInterventions: 0,
+    }
+
+    this.activeConversations.set(callId, conversationState)
+
     // Start performance tracking
     getVoicePerformanceTracker().startCallTracking(callId, {
       tenantId: params.tenantId,
       provider: 'vapi',
-      industry: params.industry
-    });
+      industry: params.industry,
+    })
   }
 
   // Additional helper methods would be implemented here...
   private getTimeGreeting(): string {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good morning'
+    if (hour < 17) return 'Good afternoon'
+    return 'Good evening'
   }
 
   private calculateExpectedRevenue(params: CallParams): number {
@@ -645,10 +654,10 @@ Success probability: ${this.calculateSuccessProbability(context)}%`;
       hvac: 350,
       plumbing: 275,
       electrical: 425,
-      general: 300
-    };
-    
-    return revenueMap[params.industry] || revenueMap.general;
+      general: 300,
+    }
+
+    return revenueMap[params.industry] || revenueMap.general
   }
 
   // ... many more helper methods would be implemented
@@ -656,25 +665,25 @@ Success probability: ${this.calculateSuccessProbability(context)}%`;
 
 // Supporting interfaces
 interface ConversationState {
-  callId: string;
-  startTime: Date;
-  currentEmotion: any;
-  detectedIntent: any;
-  entities: any[];
-  sentimentHistory: any[];
-  aiWordCount: number;
-  customerWordCount: number;
-  objectionCount: number;
-  buyingSignalCount: number;
-  qualificationScore: number;
-  coachingInterventions: number;
+  callId: string
+  startTime: Date
+  currentEmotion: unknown
+  detectedIntent: unknown
+  entities: unknown[]
+  sentimentHistory: unknown[]
+  aiWordCount: number
+  customerWordCount: number
+  objectionCount: number
+  buyingSignalCount: number
+  qualificationScore: number
+  coachingInterventions: number
 }
 
 interface CoachingSession {
-  callId: string;
-  interventions: string[];
-  performanceMetrics: any;
+  callId: string
+  interventions: string[]
+  performanceMetrics: unknown
 }
 
 // Export singleton
-export const conversationEngine = new ConversationEngineV2();
+export const conversationEngine = new ConversationEngineV2()

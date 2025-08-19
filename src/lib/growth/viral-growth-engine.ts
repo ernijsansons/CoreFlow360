@@ -1,6 +1,6 @@
 /**
  * CoreFlow360 Advanced Viral Growth Engine
- * 
+ *
  * Sophisticated viral mechanisms with internal referrals, social sharing,
  * network effects, and automated growth loops
  */
@@ -118,7 +118,6 @@ export class ViralGrowthEngine {
     this.initializeCampaigns()
     this.initializeShareTemplates()
     this.initializeGrowthHooks()
-    console.log('🚀 Viral Growth Engine initialized with', this.campaigns.size, 'campaigns')
   }
 
   private initializeCampaigns(): void {
@@ -136,26 +135,26 @@ export class ViralGrowthEngine {
             value: 'premium_ai_agents',
             description: 'Unlock 3 premium AI agents',
             tier: 'bronze',
-            requirements: { referrals: 1, conversions: 1 }
+            requirements: { referrals: 1, conversions: 1 },
           },
           {
             type: 'discount',
             value: 50,
             description: '50% off next billing cycle',
             tier: 'silver',
-            requirements: { referrals: 3, conversions: 2 }
+            requirements: { referrals: 3, conversions: 2 },
           },
           {
             type: 'cash',
             value: 100,
             description: '$100 cash reward',
             tier: 'gold',
-            requirements: { referrals: 5, conversions: 3, revenue: 500 }
-          }
+            requirements: { referrals: 5, conversions: 3, revenue: 500 },
+          },
         ],
         conditions: [
           { trigger: 'sign_up', description: 'Friend signs up using your link' },
-          { trigger: 'first_purchase', description: 'Friend makes their first purchase' }
+          { trigger: 'first_purchase', description: 'Friend makes their first purchase' },
         ],
         metrics: {
           shares: 2847,
@@ -165,10 +164,10 @@ export class ViralGrowthEngine {
           revenue: 42300,
           viralCoefficient: 1.8,
           cycletime: 72,
-          conversionRate: 14.9
+          conversionRate: 14.9,
         },
         targetAudience: ['existing_customers', 'power_users'],
-        channels: ['email', 'social', 'in_app']
+        channels: ['email', 'social', 'in_app'],
       },
 
       {
@@ -184,19 +183,19 @@ export class ViralGrowthEngine {
             value: 'influencer',
             description: 'Influencer badge and profile boost',
             tier: 'bronze',
-            requirements: { shares: 10 }
+            requirements: { shares: 10 },
           },
           {
             type: 'feature_unlock',
             value: 'custom_branding',
             description: 'Custom branding for shared content',
             tier: 'silver',
-            requirements: { shares: 25, conversions: 5 }
-          }
+            requirements: { shares: 25, conversions: 5 },
+          },
         ],
         conditions: [
           { trigger: 'achievement', description: 'User unlocks significant achievement' },
-          { trigger: 'milestone', description: 'User reaches business milestone' }
+          { trigger: 'milestone', description: 'User reaches business milestone' },
         ],
         metrics: {
           shares: 5632,
@@ -206,10 +205,10 @@ export class ViralGrowthEngine {
           revenue: 18500,
           viralCoefficient: 1.3,
           cycletime: 48,
-          conversionRate: 15.1
+          conversionRate: 15.1,
         },
         targetAudience: ['active_users', 'achievers'],
-        channels: ['linkedin', 'twitter', 'facebook']
+        channels: ['linkedin', 'twitter', 'facebook'],
       },
 
       {
@@ -225,19 +224,17 @@ export class ViralGrowthEngine {
             value: 'team_collaboration',
             description: 'Advanced team collaboration features',
             tier: 'bronze',
-            requirements: { referrals: 3 }
+            requirements: { referrals: 3 },
           },
           {
             type: 'discount',
             value: 25,
             description: '25% off team plans permanently',
             tier: 'gold',
-            requirements: { referrals: 10, conversions: 5, revenue: 1000 }
-          }
+            requirements: { referrals: 10, conversions: 5, revenue: 1000 },
+          },
         ],
-        conditions: [
-          { trigger: 'sign_up', description: 'Successful business contact sign-up' }
-        ],
+        conditions: [{ trigger: 'sign_up', description: 'Successful business contact sign-up' }],
         metrics: {
           shares: 1234,
           clicks: 3456,
@@ -246,14 +243,14 @@ export class ViralGrowthEngine {
           revenue: 25600,
           viralCoefficient: 2.1,
           cycletime: 96,
-          conversionRate: 16.3
+          conversionRate: 16.3,
         },
         targetAudience: ['business_users', 'team_leaders'],
-        channels: ['email', 'linkedin', 'in_app']
-      }
+        channels: ['email', 'linkedin', 'in_app'],
+      },
     ]
 
-    campaigns.forEach(campaign => {
+    campaigns.forEach((campaign) => {
       this.campaigns.set(campaign.id, campaign)
     })
   }
@@ -273,7 +270,7 @@ The AI-powered business automation is a game changer - saving hours every day an
 Want to see what AI can do for your business? Check it out: {referralUrl}
 
 #AI #BusinessAutomation #Productivity #TechInnovation`,
-        viralScore: 85
+        viralScore: 85,
       },
       {
         id: 'milestone_twitter',
@@ -289,7 +286,7 @@ Thanks to @CoreFlow360's AI automation:
 Ready to transform your business? {referralUrl}
 
 #AIRevolution #BusinessGrowth #Milestone`,
-        viralScore: 78
+        viralScore: 78,
       },
       {
         id: 'results_email',
@@ -316,11 +313,11 @@ I'm happy to walk you through how I set everything up if you're interested.
 
 Best regards,
 {senderName}`,
-        viralScore: 92
-      }
+        viralScore: 92,
+      },
     ]
 
-    templates.forEach(template => {
+    templates.forEach((template) => {
       this.shareTemplates.set(template.id, template)
     })
   }
@@ -328,36 +325,36 @@ Best regards,
   private initializeGrowthHooks(): void {
     // Growth hooks are triggered at specific user journey points
     const hooks: Record<string, GrowthHook[]> = {
-      'user_signup': [
+      user_signup: [
         {
           id: 'welcome_referral',
           type: 'referral_prompt',
           trigger: 'immediate',
           message: 'Know someone who could benefit? Invite them and both get premium features!',
           reward: 'Get 3 premium AI agents free when your friend signs up',
-          cta: 'Invite Friends'
-        }
+          cta: 'Invite Friends',
+        },
       ],
-      'first_success': [
+      first_success: [
         {
           id: 'achievement_share',
           type: 'social_share',
           trigger: 'after_success',
           message: 'Amazing work! Share your success to inspire others',
           reward: 'Build your professional brand and unlock influencer features',
-          cta: 'Share Achievement'
-        }
+          cta: 'Share Achievement',
+        },
       ],
-      'milestone_reached': [
+      milestone_reached: [
         {
           id: 'milestone_celebration',
           type: 'content_viral',
           trigger: 'milestone_achieved',
-          message: 'Celebrate this milestone! Show others what\'s possible',
+          message: "Celebrate this milestone! Show others what's possible",
           reward: 'Increase your professional visibility and network',
-          cta: 'Share Milestone'
-        }
-      ]
+          cta: 'Share Milestone',
+        },
+      ],
     }
 
     Object.entries(hooks).forEach(([event, hookList]) => {
@@ -369,8 +366,8 @@ Best regards,
    * Generate a referral link for a user
    */
   async generateReferralLink(
-    userId: string, 
-    campaignId: string, 
+    userId: string,
+    campaignId: string,
     customMessage?: string
   ): Promise<ReferralLink> {
     const campaign = this.campaigns.get(campaignId)
@@ -390,7 +387,7 @@ Best regards,
       clicks: 0,
       conversions: 0,
       revenue: 0,
-      isActive: true
+      isActive: true,
     }
 
     // Store in user profile
@@ -398,31 +395,27 @@ Best regards,
     profile.referralLinks.push(referralLink)
     this.userProfiles.set(userId, profile)
 
-    console.log(`🔗 Generated referral link for user ${userId}: ${referralLink.url}`)
     return referralLink
   }
 
   /**
    * Track referral click and attribution
    */
-  async trackReferralClick(referralCode: string, metadata?: any): Promise<void> {
+  async trackReferralClick(_referralCode: string, metadata?: unknown): Promise<void> {
     const profile = this.findUserByReferralCode(referralCode)
     if (!profile) {
-      console.warn(`Referral code ${referralCode} not found`)
       return
     }
 
-    const link = profile.referralLinks.find(l => l.code === referralCode)
+    const link = profile.referralLinks.find((l) => l.code === referralCode)
     if (link) {
       link.clicks++
-      
+
       // Track in campaign metrics
       const campaign = this.campaigns.get(link.campaignId)
       if (campaign) {
         campaign.metrics.clicks++
       }
-
-      console.log(`👆 Referral click tracked: ${referralCode}`)
     }
   }
 
@@ -430,14 +423,14 @@ Best regards,
    * Process referral conversion
    */
   async processReferralConversion(
-    referralCode: string, 
-    newUserId: string, 
+    referralCode: string,
+    newUserId: string,
     conversionValue: number = 0
   ): Promise<void> {
     const referrerProfile = this.findUserByReferralCode(referralCode)
     if (!referrerProfile) return
 
-    const link = referrerProfile.referralLinks.find(l => l.code === referralCode)
+    const link = referrerProfile.referralLinks.find((l) => l.code === referralCode)
     if (!link) return
 
     // Update link metrics
@@ -465,8 +458,6 @@ Best regards,
 
     // Process rewards
     await this.processReferralRewards(referrerProfile, link, conversionValue)
-
-    console.log(`✅ Referral conversion processed: ${referralCode} -> ${newUserId}`)
   }
 
   /**
@@ -475,7 +466,7 @@ Best regards,
   async generateShareableContent(
     userId: string,
     contentType: 'achievement' | 'milestone' | 'result',
-    data: any,
+    data: unknown,
     platform: string
   ): Promise<ShareContent> {
     const template = this.findBestTemplate(contentType, platform)
@@ -498,27 +489,28 @@ Best regards,
       templateId: template.id,
       referralUrl: referralLink.url,
       estimatedViralScore: template.viralScore,
-      createdAt: new Date()
+      createdAt: new Date(),
     }
 
-    console.log(`📤 Shareable content generated for user ${userId} on ${platform}`)
     return shareData
   }
 
   /**
    * Track social share performance
    */
-  async trackSocialShare(shareId: string, engagement: Partial<SocialShareData['engagement']>): Promise<void> {
+  async trackSocialShare(
+    shareId: string,
+    engagement: Partial<SocialShareData['engagement']>
+  ): Promise<void> {
     // Find and update share data
     for (const profile of this.userProfiles.values()) {
-      const share = profile.socialShares.find(s => s.id === shareId)
+      const share = profile.socialShares.find((s) => s.id === shareId)
       if (share) {
         Object.assign(share.engagement, engagement)
-        
+
         // Update viral score based on engagement
         profile.viralScore += this.calculateEngagementScore(engagement)
-        
-        console.log(`📊 Social share engagement tracked: ${shareId}`)
+
         break
       }
     }
@@ -561,7 +553,7 @@ Best regards,
         potentialReward: this.getNextReward(profile, campaign),
         difficulty: this.assessDifficulty(profile, campaign),
         estimatedTime: this.estimateCompletionTime(campaign),
-        viralPotential: campaign.metrics.viralCoefficient
+        viralPotential: campaign.metrics.viralCoefficient,
       }
 
       opportunities.push(opportunity)
@@ -573,7 +565,7 @@ Best regards,
   /**
    * Trigger growth hooks based on user events
    */
-  async triggerGrowthHooks(userId: string, event: string, data?: any): Promise<GrowthHook[]> {
+  async triggerGrowthHooks(userId: string, event: string, data?: unknown): Promise<GrowthHook[]> {
     const hooks = this.growthHooks.get(event) || []
     const triggeredHooks: GrowthHook[] = []
 
@@ -600,7 +592,7 @@ Best regards,
         nextTierProgress: 0,
         referralLinks: [],
         socialShares: [],
-        networkInvites: []
+        networkInvites: [],
       }
       this.userProfiles.set(userId, profile)
     }
@@ -613,7 +605,7 @@ Best regards,
 
   private findUserByReferralCode(code: string): UserViralProfile | null {
     for (const profile of this.userProfiles.values()) {
-      if (profile.referralLinks.some(link => link.code === code && link.isActive)) {
+      if (profile.referralLinks.some((link) => link.code === code && link.isActive)) {
         return profile
       }
     }
@@ -623,10 +615,11 @@ Best regards,
   private calculateViralScore(profile: UserViralProfile): number {
     const baseScore = profile.successfulReferrals * 10
     const revenueScore = profile.totalRevenue * 0.01
-    const engagementScore = profile.socialShares.reduce((sum, share) => 
-      sum + (share.engagement.views * 0.1 + share.engagement.shares * 2), 0
+    const engagementScore = profile.socialShares.reduce(
+      (sum, share) => sum + (share.engagement.views * 0.1 + share.engagement.shares * 2),
+      0
     )
-    
+
     return Math.min(100, baseScore + revenueScore + engagementScore)
   }
 
@@ -636,18 +629,18 @@ Best regards,
       silver: { referrals: 5, revenue: 1000 },
       gold: { referrals: 15, revenue: 5000 },
       platinum: { referrals: 50, revenue: 25000 },
-      diamond: { referrals: 100, revenue: 100000 }
+      diamond: { referrals: 100, revenue: 100000 },
     }
 
     const currentTierIndex = Object.keys(tiers).indexOf(profile.currentTier)
     const nextTier = Object.keys(tiers)[currentTierIndex + 1] as keyof typeof tiers
 
-    if (nextTier && 
-        profile.successfulReferrals >= tiers[nextTier].referrals && 
-        profile.totalRevenue >= tiers[nextTier].revenue) {
-      
+    if (
+      nextTier &&
+      profile.successfulReferrals >= tiers[nextTier].referrals &&
+      profile.totalRevenue >= tiers[nextTier].revenue
+    ) {
       profile.currentTier = nextTier
-      console.log(`🏆 User ${profile.userId} promoted to ${nextTier} tier!`)
     }
 
     // Calculate progress to next tier
@@ -667,8 +660,8 @@ Best regards,
   }
 
   private async processReferralRewards(
-    profile: UserViralProfile, 
-    link: ReferralLink, 
+    profile: UserViralProfile,
+    link: ReferralLink,
     conversionValue: number
   ): Promise<void> {
     const campaign = this.campaigns.get(link.campaignId)
@@ -683,15 +676,15 @@ Best regards,
 
   private meetsRewardRequirements(profile: UserViralProfile, reward: ViralReward): boolean {
     const req = reward.requirements
-    
-    return (!req.referrals || profile.totalReferrals >= req.referrals) &&
-           (!req.conversions || profile.successfulReferrals >= req.conversions) &&
-           (!req.revenue || profile.totalRevenue >= req.revenue)
+
+    return (
+      (!req.referrals || profile.totalReferrals >= req.referrals) &&
+      (!req.conversions || profile.successfulReferrals >= req.conversions) &&
+      (!req.revenue || profile.totalRevenue >= req.revenue)
+    )
   }
 
   private async grantReward(userId: string, reward: ViralReward): Promise<void> {
-    console.log(`🎁 Granting reward to user ${userId}:`, reward.description)
-    
     // In production, this would integrate with the rewards system
     switch (reward.type) {
       case 'feature_unlock':
@@ -708,40 +701,43 @@ Best regards,
 
   private findBestTemplate(contentType: string, platform: string): ShareTemplate | null {
     const templates = Array.from(this.shareTemplates.values())
-      .filter(t => t.contentType === contentType && t.platform === platform)
+      .filter((t) => t.contentType === contentType && t.platform === platform)
       .sort((a, b) => b.viralScore - a.viralScore)
-    
+
     return templates[0] || null
   }
 
-  private processTemplate(template: ShareTemplate, data: any, referralUrl: string): string {
+  private processTemplate(template: ShareTemplate, data: unknown, referralUrl: string): string {
     let content = template.template
-    
+
     // Replace placeholders with actual data
     content = content.replace(/{(\w+)}/g, (match, key) => {
       if (key === 'referralUrl') return referralUrl
       return data[key] || match
     })
-    
+
     return content
   }
 
   private calculateEngagementScore(engagement: Partial<SocialShareData['engagement']>): number {
     const { views = 0, likes = 0, comments = 0, shares = 0, clicks = 0 } = engagement
-    return (views * 0.1) + (likes * 0.5) + (comments * 1) + (shares * 2) + (clicks * 1.5)
+    return views * 0.1 + likes * 0.5 + comments * 1 + shares * 2 + clicks * 1.5
   }
 
   private getNextReward(profile: UserViralProfile, campaign: ViralCampaign): ViralReward | null {
-    return campaign.rewards.find(reward => !this.meetsRewardRequirements(profile, reward))
+    return campaign.rewards.find((reward) => !this.meetsRewardRequirements(profile, reward))
   }
 
-  private assessDifficulty(profile: UserViralProfile, campaign: ViralCampaign): 'easy' | 'medium' | 'hard' {
+  private assessDifficulty(
+    profile: UserViralProfile,
+    campaign: ViralCampaign
+  ): 'easy' | 'medium' | 'hard' {
     const nextReward = this.getNextReward(profile, campaign)
     if (!nextReward) return 'easy'
 
     const req = nextReward.requirements
     const totalRequired = (req.referrals || 0) + (req.conversions || 0)
-    
+
     if (totalRequired <= 3) return 'easy'
     if (totalRequired <= 10) return 'medium'
     return 'hard'
@@ -749,22 +745,28 @@ Best regards,
 
   private estimateCompletionTime(campaign: ViralCampaign): string {
     const cycletime = campaign.metrics.cycletime
-    
+
     if (cycletime <= 24) return '1 day'
     if (cycletime <= 72) return '3 days'
     if (cycletime <= 168) return '1 week'
     return '2+ weeks'
   }
 
-  private async shouldTriggerHook(userId: string, hook: GrowthHook, data?: any): Promise<boolean> {
+  private async shouldTriggerHook(
+    _userId: string,
+    _hook: GrowthHook,
+    data?: unknown
+  ): Promise<boolean> {
     // Implement logic to determine if hook should be triggered
     // Could check user preferences, previous interactions, etc.
     return true
   }
 
-  private async executeGrowthHook(userId: string, hook: GrowthHook, data?: any): Promise<void> {
-    console.log(`🎯 Executing growth hook: ${hook.id} for user ${userId}`)
-    
+  private async executeGrowthHook(
+    _userId: string,
+    _hook: GrowthHook,
+    data?: unknown
+  ): Promise<void> {
     // In production, this would show UI prompts, send notifications, etc.
     switch (hook.type) {
       case 'referral_prompt':

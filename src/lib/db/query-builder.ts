@@ -18,11 +18,9 @@ export class QueryBuilder {
      * Get customer lifetime value
      */
     async getLifetimeValue(tenantId: string, customerId?: string) {
-      const whereClause = customerId 
-        ? Prisma.sql`AND c.id = ${customerId}`
-        : Prisma.empty
-      
-      return await db.$queryRaw<any[]>`
+      const whereClause = customerId ? Prisma.sql`AND c.id = ${customerId}` : Prisma.empty
+
+      return await db.$queryRaw<unknown[]>`
         SELECT 
           c.id,
           c.name,
@@ -41,15 +39,15 @@ export class QueryBuilder {
         ORDER BY lifetime_value DESC
       `
     },
-    
+
     /**
      * Customer engagement score
      */
     async getEngagementScore(tenantId: string, days: number = 90) {
       const sinceDate = new Date()
       sinceDate.setDate(sinceDate.getDate() - days)
-      
-      return await db.$queryRaw<any[]>`
+
+      return await db.$queryRaw<unknown[]>`
         WITH customer_activity AS (
           SELECT 
             c.id,
@@ -85,12 +83,12 @@ export class QueryBuilder {
         ORDER BY engagement_score DESC
       `
     },
-    
+
     /**
      * Customer segmentation
      */
     async getSegmentation(tenantId: string) {
-      return await db.$queryRaw<any[]>`
+      return await db.$queryRaw<unknown[]>`
         WITH customer_metrics AS (
           SELECT 
             c.id,
@@ -118,9 +116,9 @@ export class QueryBuilder {
         FROM customer_metrics
         ORDER BY total_spent DESC
       `
-    }
+    },
   }
-  
+
   /**
    * Sales analytics queries
    */
@@ -129,13 +127,14 @@ export class QueryBuilder {
      * Sales funnel analysis
      */
     async getFunnelAnalysis(tenantId: string, period: 'week' | 'month' | 'quarter' = 'month') {
-      const periodClause = period === 'week' ? 
-        Prisma.sql`DATE_TRUNC('week', d."createdAt")` :
-        period === 'quarter' ?
-        Prisma.sql`DATE_TRUNC('quarter', d."createdAt")` :
-        Prisma.sql`DATE_TRUNC('month', d."createdAt")`
-      
-      return await db.$queryRaw<any[]>`
+      const periodClause =
+        period === 'week'
+          ? Prisma.sql`DATE_TRUNC('week', d."createdAt")`
+          : period === 'quarter'
+            ? Prisma.sql`DATE_TRUNC('quarter', d."createdAt")`
+            : Prisma.sql`DATE_TRUNC('month', d."createdAt")`
+
+      return await db.$queryRaw<unknown[]>`
         SELECT 
           ${periodClause} as period,
           COUNT(*) as total_deals,
@@ -153,15 +152,15 @@ export class QueryBuilder {
         ORDER BY period DESC
       `
     },
-    
+
     /**
      * Sales performance by user
      */
     async getPerformanceByUser(tenantId: string, period: number = 90) {
       const sinceDate = new Date()
       sinceDate.setDate(sinceDate.getDate() - period)
-      
-      return await db.$queryRaw<any[]>`
+
+      return await db.$queryRaw<unknown[]>`
         SELECT 
           u.id,
           u.name,
@@ -186,12 +185,12 @@ export class QueryBuilder {
         ORDER BY total_revenue DESC NULLS LAST
       `
     },
-    
+
     /**
      * Revenue forecast
      */
     async getRevenueForecast(tenantId: string) {
-      return await db.$queryRaw<any[]>`
+      return await db.$queryRaw<unknown[]>`
         WITH monthly_revenue AS (
           SELECT 
             DATE_TRUNC('month', i."createdAt") as month,
@@ -230,9 +229,9 @@ export class QueryBuilder {
         FULL OUTER JOIN pipeline_value pv ON mr.month = pv.month
         ORDER BY month
       `
-    }
+    },
   }
-  
+
   /**
    * Business intelligence queries
    */
@@ -243,8 +242,8 @@ export class QueryBuilder {
     async getExecutiveMetrics(tenantId: string, period: number = 30) {
       const sinceDate = new Date()
       sinceDate.setDate(sinceDate.getDate() - period)
-      
-      const [metrics] = await db.$queryRaw<any[]>`
+
+      const [metrics] = await db.$queryRaw<unknown[]>`
         WITH period_metrics AS (
           SELECT 
             -- Customer metrics
@@ -284,15 +283,15 @@ export class QueryBuilder {
           END as close_rate
         FROM period_metrics
       `
-      
+
       return metrics
     },
-    
+
     /**
      * Churn analysis
      */
     async getChurnAnalysis(tenantId: string) {
-      return await db.$queryRaw<any[]>`
+      return await db.$queryRaw<unknown[]>`
         WITH customer_activity AS (
           SELECT 
             c.id,
@@ -330,12 +329,12 @@ export class QueryBuilder {
         ORDER BY days_inactive DESC
       `
     },
-    
+
     /**
      * Growth metrics over time
      */
     async getGrowthMetrics(tenantId: string, months: number = 12) {
-      return await db.$queryRaw<any[]>`
+      return await db.$queryRaw<unknown[]>`
         WITH monthly_metrics AS (
           SELECT 
             DATE_TRUNC('month', date_series) as month,
@@ -389,6 +388,6 @@ export class QueryBuilder {
         FROM monthly_metrics
         ORDER BY month
       `
-    }
+    },
   }
 }

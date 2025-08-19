@@ -4,24 +4,24 @@
  */
 
 import { test, expect, Page } from '@playwright/test'
-import { testConfig } from '@/test-config'
+import { testConfig } from '@/lib/test-config'
 
 // Test data
 const TEST_ORCHESTRATION_REQUEST = {
   taskType: 'ANALYZE_CUSTOMER',
   input: {
     customerId: 'test-customer-123',
-    includeHistory: true
+    includeHistory: true,
   },
   context: {
     priority: 'medium',
-    department: 'sales'
+    department: 'sales',
   },
   requirements: {
     maxExecutionTime: 30000,
     accuracyThreshold: 0.8,
-    explainability: true
-  }
+    explainability: true,
+  },
 }
 
 test.describe('AI Orchestration API', () => {
@@ -34,12 +34,12 @@ test.describe('AI Orchestration API', () => {
         email: 'test-ai@example.com',
         password: testConfig.auth.defaultPassword,
         name: 'AI Test User',
-        companyName: 'AI Test Company'
-      }
+        companyName: 'AI Test Company',
+      },
     })
-    
+
     expect(loginResponse.ok()).toBeTruthy()
-    
+
     // Get session cookie for subsequent requests
     const cookies = loginResponse.headers()['set-cookie']
     authToken = cookies || ''
@@ -47,7 +47,7 @@ test.describe('AI Orchestration API', () => {
 
   test('should require authentication for AI orchestration', async ({ request }) => {
     const response = await request.post('/api/ai/orchestrate', {
-      data: TEST_ORCHESTRATION_REQUEST
+      data: TEST_ORCHESTRATION_REQUEST,
     })
 
     expect(response.status()).toBe(401)
@@ -65,15 +65,15 @@ test.describe('AI Orchestration API', () => {
 
     // Extract session cookies
     const cookies = await page.context().cookies()
-    const sessionCookie = cookies.find(cookie => cookie.name.includes('session'))
+    const sessionCookie = cookies.find((cookie) => cookie.name.includes('session'))
 
     if (sessionCookie) {
       // Make API request with session
       const response = await request.post('/api/ai/orchestrate', {
         data: TEST_ORCHESTRATION_REQUEST,
         headers: {
-          'Cookie': `${sessionCookie.name}=${sessionCookie.value}`
-        }
+          Cookie: `${sessionCookie.name}=${sessionCookie.value}`,
+        },
       })
 
       if (response.status() === 200) {
@@ -85,7 +85,7 @@ test.describe('AI Orchestration API', () => {
         expect(data.result.executionMetadata.subscriptionTier).toBeDefined()
       } else {
         // Log response for debugging
-        console.log('AI Orchestration Response:', response.status(), await response.text())
+        // // // // // // // // // // // // // // // // // // // // console.log('AI Orchestration Response:', response.status(), await response.text())
       }
     }
   })
@@ -98,18 +98,18 @@ test.describe('AI Orchestration API', () => {
     await page.click('button[type="submit"]')
 
     const cookies = await page.context().cookies()
-    const sessionCookie = cookies.find(cookie => cookie.name.includes('session'))
+    const sessionCookie = cookies.find((cookie) => cookie.name.includes('session'))
 
     if (sessionCookie) {
       // Send invalid request
       const response = await request.post('/api/ai/orchestrate', {
         data: {
           // Missing required fields
-          input: { customerId: 'test' }
+          input: { customerId: 'test' },
         },
         headers: {
-          'Cookie': `${sessionCookie.name}=${sessionCookie.value}`
-        }
+          Cookie: `${sessionCookie.name}=${sessionCookie.value}`,
+        },
       })
 
       expect(response.status()).toBe(400)
@@ -126,24 +126,26 @@ test.describe('AI Orchestration API', () => {
     await page.click('button[type="submit"]')
 
     const cookies = await page.context().cookies()
-    const sessionCookie = cookies.find(cookie => cookie.name.includes('session'))
+    const sessionCookie = cookies.find((cookie) => cookie.name.includes('session'))
 
     if (sessionCookie) {
       // Make multiple rapid requests to trigger rate limiting
-      const requests = Array(15).fill(null).map(() =>
-        request.post('/api/ai/orchestrate', {
-          data: TEST_ORCHESTRATION_REQUEST,
-          headers: {
-            'Cookie': `${sessionCookie.name}=${sessionCookie.value}`
-          }
-        })
-      )
+      const requests = Array(15)
+        .fill(null)
+        .map(() =>
+          request.post('/api/ai/orchestrate', {
+            data: TEST_ORCHESTRATION_REQUEST,
+            headers: {
+              Cookie: `${sessionCookie.name}=${sessionCookie.value}`,
+            },
+          })
+        )
 
       const responses = await Promise.all(requests)
-      
+
       // At least some requests should be rate limited
-      const rateLimitedResponses = responses.filter(r => r.status() === 429)
-      
+      const rateLimitedResponses = responses.filter((r) => r.status() === 429)
+
       // Note: This test might be flaky depending on actual rate limiting implementation
       // In a real scenario, you'd configure the rate limit to be very low for testing
     }
@@ -157,13 +159,13 @@ test.describe('AI Orchestration API', () => {
     await page.click('button[type="submit"]')
 
     const cookies = await page.context().cookies()
-    const sessionCookie = cookies.find(cookie => cookie.name.includes('session'))
+    const sessionCookie = cookies.find((cookie) => cookie.name.includes('session'))
 
     if (sessionCookie) {
       const response = await request.get('/api/ai/orchestrate', {
         headers: {
-          'Cookie': `${sessionCookie.name}=${sessionCookie.value}`
-        }
+          Cookie: `${sessionCookie.name}=${sessionCookie.value}`,
+        },
       })
 
       if (response.status() === 200) {
@@ -190,7 +192,7 @@ test.describe('Subscription-Aware Features', () => {
 
     // Should show AI features for admin user
     await expect(page.locator('text=AI Insights')).toBeVisible()
-    
+
     // Navigate to different sections to check feature availability
     // This would depend on your actual UI implementation
   })
@@ -211,7 +213,7 @@ test.describe('Subscription-Aware Features', () => {
 test.describe('Error Boundaries', () => {
   test('should handle React errors gracefully', async ({ page }) => {
     await page.goto('/dashboard')
-    
+
     // Simulate a JavaScript error
     await page.evaluate(() => {
       // Trigger an error in React
@@ -230,7 +232,7 @@ test.describe('Error Boundaries', () => {
 
     // Go to a page that might have errors
     await page.goto('/dashboard')
-    
+
     // If an error boundary is shown, test the retry functionality
     const retryButton = page.locator('button:has-text("Try Again")')
     if (await retryButton.isVisible()) {
@@ -244,7 +246,7 @@ test.describe('Error Boundaries', () => {
 test.describe('Performance', () => {
   test('should load dashboard within performance budget', async ({ page }) => {
     const startTime = Date.now()
-    
+
     await page.goto('/login')
     await page.fill('input[name="email"]', testConfig.auth.adminEmail)
     await page.fill('input[name="password"]', testConfig.auth.demoPassword)
@@ -252,9 +254,9 @@ test.describe('Performance', () => {
 
     // Wait for dashboard to fully load
     await expect(page.locator('text=Welcome back')).toBeVisible()
-    
+
     const loadTime = Date.now() - startTime
-    
+
     // Dashboard should load within 3 seconds
     expect(loadTime).toBeLessThan(3000)
   })
@@ -268,7 +270,7 @@ test.describe('Performance', () => {
 
     // Navigate to admin page which might load lots of data
     await page.goto('/admin')
-    
+
     // Check that the page loads without timing out
     await expect(page.locator('text=Admin Portal')).toBeVisible({ timeout: 10000 })
   })
@@ -320,7 +322,7 @@ test.describe('Security', () => {
 
     // Check that sensitive data is not exposed in the page content
     const content = await page.content()
-    
+
     // Should not contain raw passwords, API keys, etc.
     expect(content).not.toContain('password')
     expect(content).not.toContain('api_key')

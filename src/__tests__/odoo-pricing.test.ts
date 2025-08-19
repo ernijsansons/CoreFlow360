@@ -16,7 +16,7 @@ describe('Odoo-Style Pricing Engine', () => {
         pricingModel: 'standard' as const,
         contractType: 'subscription' as const,
         deploymentType: 'cloud' as const,
-        supportLevel: 'standard' as const
+        supportLevel: 'standard' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
@@ -36,7 +36,7 @@ describe('Odoo-Style Pricing Engine', () => {
         pricingModel: 'enterprise' as const,
         contractType: 'subscription' as const,
         deploymentType: 'cloud' as const,
-        supportLevel: 'enterprise' as const
+        supportLevel: 'enterprise' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
@@ -55,14 +55,14 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 100,
         billingCycle: 'monthly' as const,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const volumeDiscount = result.discounts.find(d => d.type === 'volume')
+
+      const volumeDiscount = result.discounts.find((d) => d.type === 'volume')
       expect(volumeDiscount).toBeDefined()
-      expect(volumeDiscount?.percentage).toBe(0.20) // 20% for 100+ users
+      expect(volumeDiscount?.percentage).toBe(0.2) // 20% for 100+ users
       expect(volumeDiscount?.amount).toBeGreaterThan(0)
     })
 
@@ -71,12 +71,12 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 300,
         billingCycle: 'monthly' as const,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const volumeDiscount = result.discounts.find(d => d.type === 'volume')
+
+      const volumeDiscount = result.discounts.find((d) => d.type === 'volume')
       expect(volumeDiscount?.percentage).toBe(0.25) // 25% for 250+ users
     })
 
@@ -85,12 +85,12 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 5,
         billingCycle: 'monthly' as const,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const volumeDiscount = result.discounts.find(d => d.type === 'volume')
+
+      const volumeDiscount = result.discounts.find((d) => d.type === 'volume')
       expect(volumeDiscount).toBeUndefined()
     })
   })
@@ -102,12 +102,12 @@ describe('Odoo-Style Pricing Engine', () => {
         userCount: 10,
         billingCycle: 'monthly' as const,
         pricingModel: 'standard' as const,
-        commitmentPeriod: 12
+        commitmentPeriod: 12,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const commitmentDiscount = result.discounts.find(d => d.type === 'commitment')
+
+      const commitmentDiscount = result.discounts.find((d) => d.type === 'commitment')
       expect(commitmentDiscount).toBeDefined()
       expect(commitmentDiscount?.percentage).toBe(0.15) // 15% for 12+ months
     })
@@ -118,12 +118,12 @@ describe('Odoo-Style Pricing Engine', () => {
         userCount: 10,
         billingCycle: 'monthly' as const,
         pricingModel: 'standard' as const,
-        commitmentPeriod: 48
+        commitmentPeriod: 48,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const commitmentDiscount = result.discounts.find(d => d.type === 'commitment')
+
+      const commitmentDiscount = result.discounts.find((d) => d.type === 'commitment')
       expect(commitmentDiscount?.percentage).toBe(0.25) // 25% for 36+ months
     })
   })
@@ -134,12 +134,12 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 10,
         billingCycle: 'annual' as const,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const billingDiscount = result.discounts.find(d => d.name.includes('Annual'))
+
+      const billingDiscount = result.discounts.find((d) => d.name.includes('Annual'))
       expect(billingDiscount).toBeDefined()
       expect(billingDiscount?.percentage).toBe(0.15) // 15% for annual billing
     })
@@ -149,12 +149,12 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 10,
         billingCycle: 'quarterly' as const,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const billingDiscount = result.discounts.find(d => d.name.includes('Quarterly'))
+
+      const billingDiscount = result.discounts.find((d) => d.name.includes('Quarterly'))
       expect(billingDiscount).toBeDefined()
       expect(billingDiscount?.percentage).toBe(0.05) // 5% for quarterly billing
     })
@@ -167,12 +167,12 @@ describe('Odoo-Style Pricing Engine', () => {
         userCount: 10,
         billingCycle: 'monthly' as const,
         pricingModel: 'standard' as const,
-        partnerDiscount: 0.15
+        partnerDiscount: 0.15,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const partnerDiscount = result.discounts.find(d => d.type === 'partner')
+
+      const partnerDiscount = result.discounts.find((d) => d.type === 'partner')
       expect(partnerDiscount).toBeDefined()
       expect(partnerDiscount?.percentage).toBe(0.15)
     })
@@ -183,12 +183,12 @@ describe('Odoo-Style Pricing Engine', () => {
         userCount: 10,
         billingCycle: 'monthly' as const,
         pricingModel: 'standard' as const,
-        earlyAdopterDiscount: true
+        earlyAdopterDiscount: true,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const earlyAdopterDiscount = result.discounts.find(d => d.type === 'early_adopter')
+
+      const earlyAdopterDiscount = result.discounts.find((d) => d.type === 'early_adopter')
       expect(earlyAdopterDiscount).toBeDefined()
       expect(earlyAdopterDiscount?.percentage).toBe(0.15)
     })
@@ -199,14 +199,14 @@ describe('Odoo-Style Pricing Engine', () => {
         userCount: 10,
         billingCycle: 'monthly' as const,
         pricingModel: 'standard' as const,
-        loyaltyDiscount: 0.10
+        loyaltyDiscount: 0.1,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const loyaltyDiscount = result.discounts.find(d => d.type === 'loyalty')
+
+      const loyaltyDiscount = result.discounts.find((d) => d.type === 'loyalty')
       expect(loyaltyDiscount).toBeDefined()
-      expect(loyaltyDiscount?.percentage).toBe(0.10)
+      expect(loyaltyDiscount?.percentage).toBe(0.1)
     })
   })
 
@@ -217,12 +217,14 @@ describe('Odoo-Style Pricing Engine', () => {
         userCount: 50,
         billingCycle: 'monthly' as const,
         pricingModel: 'standard' as const,
-        implementationServices: true
+        implementationServices: true,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const implementationService = result.servicePricing.find(s => s.serviceType === 'implementation')
+
+      const implementationService = result.servicePricing.find(
+        (s) => s.serviceType === 'implementation'
+      )
       expect(implementationService).toBeDefined()
       expect(implementationService?.price).toBe(15000) // For 50 users
     })
@@ -233,12 +235,12 @@ describe('Odoo-Style Pricing Engine', () => {
         userCount: 20,
         billingCycle: 'monthly' as const,
         pricingModel: 'standard' as const,
-        supportLevel: 'premium' as const
+        supportLevel: 'premium' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const supportService = result.servicePricing.find(s => s.serviceType === 'support')
+
+      const supportService = result.servicePricing.find((s) => s.serviceType === 'support')
       expect(supportService).toBeDefined()
       expect(supportService?.price).toBe(400) // 20 users * 10 * 2 (premium multiplier)
     })
@@ -251,11 +253,11 @@ describe('Odoo-Style Pricing Engine', () => {
         userCount: 10,
         billingCycle: 'monthly' as const,
         pricingModel: 'standard' as const,
-        region: 'US'
+        region: 'US',
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
+
       expect(result.billingBreakdown.taxes).toBeGreaterThan(0)
       expect(result.billingBreakdown.total).toBeGreaterThan(result.billingBreakdown.subtotal)
     })
@@ -265,11 +267,11 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 10,
         billingCycle: 'quarterly' as const,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
+
       expect(result.paymentSchedule).toHaveLength(4) // 4 quarters
       expect(result.paymentSchedule[0].period).toBe('Q1')
     })
@@ -281,11 +283,11 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 10,
         billingCycle: 'monthly' as const,
-        pricingModel: 'enterprise' as const
+        pricingModel: 'enterprise' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
+
       expect(result.features.enterprise).toContain('Advanced analytics')
       expect(result.features.enterprise).toContain('Custom integrations')
       expect(result.features.enterprise).toContain('White-label options')
@@ -296,11 +298,11 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 10,
         billingCycle: 'monthly' as const,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
+
       expect(result.features.enterprise).toHaveLength(0)
     })
   })
@@ -311,12 +313,12 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 150,
         billingCycle: 'monthly' as const,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const userLimitation = result.limitations.find(l => l.type === 'users')
+
+      const userLimitation = result.limitations.find((l) => l.type === 'users')
       expect(userLimitation).toBeDefined()
       expect(userLimitation?.current).toBe(150)
       expect(userLimitation?.limit).toBe(100)
@@ -327,12 +329,12 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 10,
         billingCycle: 'monthly' as const,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
-      const costSavingRecommendation = result.recommendations.find(r => r.type === 'cost_saving')
+
+      const costSavingRecommendation = result.recommendations.find((r) => r.type === 'cost_saving')
       expect(costSavingRecommendation).toBeDefined()
       expect(costSavingRecommendation?.title).toContain('Annual Billing')
     })
@@ -345,11 +347,11 @@ describe('Odoo-Style Pricing Engine', () => {
         userCount: 25,
         billingCycle: 'annual' as const,
         pricingModel: 'standard' as const,
-        implementationServices: true
+        implementationServices: true,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
+
       expect(result.roi.implementationCost).toBeGreaterThan(0)
       expect(result.roi.annualSavings).toBeGreaterThan(0)
       expect(result.roi.paybackPeriod).toBeGreaterThan(0)
@@ -363,11 +365,11 @@ describe('Odoo-Style Pricing Engine', () => {
         userCount: 50,
         billingCycle: 'annual' as const,
         pricingModel: 'standard' as const,
-        supportLevel: 'premium' as const
+        supportLevel: 'premium' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
+
       expect(result.tco.softwareCosts).toBeGreaterThan(0)
       expect(result.tco.implementationCosts).toBeGreaterThan(0)
       expect(result.tco.maintenanceCosts).toBeGreaterThan(0)
@@ -382,16 +384,18 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm', 'accounting'],
         userCount: 100,
         billingCycle: 'annual' as const,
-        pricingModel: 'enterprise' as const
+        pricingModel: 'enterprise' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
+
       expect(result.competitiveAnalysis.competitors).toHaveLength(2)
       expect(result.competitiveAnalysis.advantages).toHaveLength(4)
       expect(result.competitiveAnalysis.differentiators).toHaveLength(4)
-      
-      const odooCompetitor = result.competitiveAnalysis.competitors.find(c => c.name === 'Odoo Enterprise')
+
+      const odooCompetitor = result.competitiveAnalysis.competitors.find(
+        (c) => c.name === 'Odoo Enterprise'
+      )
       expect(odooCompetitor).toBeDefined()
       expect(odooCompetitor?.pricing).toBeGreaterThan(result.billingBreakdown.annualEquivalent)
     })
@@ -404,11 +408,11 @@ describe('Odoo-Style Pricing Engine', () => {
         userCount: 10,
         billingCycle: 'annual' as const,
         pricingModel: 'standard' as const,
-        supportLevel: 'enterprise' as const
+        supportLevel: 'enterprise' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
+
       expect(result.terms.contractLength).toBe('12 months')
       expect(result.terms.cancellationPolicy).toBe('30-day notice required')
       expect(result.terms.upgradePolicy).toBe('Pro-rated upgrades available')
@@ -423,11 +427,11 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 1,
         billingCycle: 'monthly' as const,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
+
       expect(result.netPrice).toBeGreaterThan(0)
       expect(result.modulePricing[0].userCount).toBe(1)
     })
@@ -437,11 +441,11 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 10000,
         billingCycle: 'monthly' as const,
-        pricingModel: 'enterprise' as const
+        pricingModel: 'enterprise' as const,
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
+
       expect(result.netPrice).toBeGreaterThan(0)
       expect(result.modulePricing[0].userCount).toBe(10000)
     })
@@ -453,12 +457,12 @@ describe('Odoo-Style Pricing Engine', () => {
         billingCycle: 'annual' as const, // Billing discount
         pricingModel: 'standard' as const,
         commitmentPeriod: 24, // Commitment discount
-        partnerDiscount: 0.10, // Partner discount
-        earlyAdopterDiscount: true // Early adopter discount
+        partnerDiscount: 0.1, // Partner discount
+        earlyAdopterDiscount: true, // Early adopter discount
       }
 
       const result = await odooPricingEngine.calculateOdooPricing(request)
-      
+
       expect(result.discounts.length).toBeGreaterThan(3)
       expect(result.totalDiscount).toBeGreaterThan(0)
       expect(result.netPrice).toBeLessThan(result.basePrice)
@@ -471,7 +475,7 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 0,
         billingCycle: 'monthly' as const,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       await expect(odooPricingEngine.calculateOdooPricing(request)).rejects.toThrow()
@@ -482,7 +486,7 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: [],
         userCount: 10,
         billingCycle: 'monthly' as const,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       await expect(odooPricingEngine.calculateOdooPricing(request)).rejects.toThrow()
@@ -493,7 +497,7 @@ describe('Odoo-Style Pricing Engine', () => {
         modules: ['crm'],
         userCount: 10,
         billingCycle: 'invalid' as any,
-        pricingModel: 'standard' as const
+        pricingModel: 'standard' as const,
       }
 
       await expect(odooPricingEngine.calculateOdooPricing(request)).rejects.toThrow()

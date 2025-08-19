@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { pricingEngine } from '@/lib/unified-pricing-engine'
-import { moduleManager } from '@/services/subscription/module-manager'
+import { moduleManager } from '@/lib/services/subscription/module-manager'
 
 describe('Business Logic Test Suite', () => {
   describe('Unified Pricing Engine', () => {
@@ -15,7 +15,7 @@ describe('Business Logic Test Suite', () => {
         userCount: 10,
         billingCycle: 'monthly' as const,
         applyDiscounts: true,
-        includeSetupFees: true
+        includeSetupFees: true,
       }
 
       const result1 = await pricingEngine.calculatePricing(request)
@@ -31,12 +31,12 @@ describe('Business Logic Test Suite', () => {
         modules: ['crm', 'accounting', 'projects'], // Core bundle
         userCount: 10,
         billingCycle: 'monthly' as const,
-        applyDiscounts: true
+        applyDiscounts: true,
       }
 
       const result = await pricingEngine.calculatePricing(request)
-      
-      const bundleDiscount = result.discounts.find(d => d.type === 'bundle')
+
+      const bundleDiscount = result.discounts.find((d) => d.type === 'bundle')
       expect(bundleDiscount).toBeDefined()
       expect(bundleDiscount?.name).toBe('Core Business Bundle')
       expect(bundleDiscount?.percentage).toBe(0.15)
@@ -47,14 +47,14 @@ describe('Business Logic Test Suite', () => {
         modules: ['crm'],
         userCount: 100,
         billingCycle: 'monthly' as const,
-        applyDiscounts: true
+        applyDiscounts: true,
       }
 
       const result = await pricingEngine.calculatePricing(request)
-      
-      const volumeDiscount = result.discounts.find(d => d.type === 'volume')
+
+      const volumeDiscount = result.discounts.find((d) => d.type === 'volume')
       expect(volumeDiscount).toBeDefined()
-      expect(volumeDiscount?.percentage).toBe(0.20) // 20% for 100+ users
+      expect(volumeDiscount?.percentage).toBe(0.2) // 20% for 100+ users
     })
 
     it('should apply annual billing discount', async () => {
@@ -62,36 +62,40 @@ describe('Business Logic Test Suite', () => {
         modules: ['crm'],
         userCount: 10,
         billingCycle: 'annual' as const,
-        applyDiscounts: true
+        applyDiscounts: true,
       }
 
       const result = await pricingEngine.calculatePricing(request)
-      
-      const annualDiscount = result.discounts.find(d => d.type === 'annual')
+
+      const annualDiscount = result.discounts.find((d) => d.type === 'annual')
       expect(annualDiscount).toBeDefined()
-      expect(annualDiscount?.percentage).toBe(0.10)
+      expect(annualDiscount?.percentage).toBe(0.1)
     })
 
     it('should validate module dependencies', async () => {
       const request = {
         modules: ['manufacturing'], // Requires inventory and projects
         userCount: 10,
-        billingCycle: 'monthly' as const
+        billingCycle: 'monthly' as const,
       }
 
-      await expect(pricingEngine.calculatePricing(request)).rejects.toThrow('Dependency validation failed')
+      await expect(pricingEngine.calculatePricing(request)).rejects.toThrow(
+        'Dependency validation failed'
+      )
     })
 
     it('should generate appropriate recommendations', async () => {
       const request = {
         modules: ['crm'],
         userCount: 10,
-        billingCycle: 'monthly' as const
+        billingCycle: 'monthly' as const,
       }
 
       const result = await pricingEngine.calculatePricing(request)
-      
-      expect(result.recommendations).toContain('Add Project Management for better customer project tracking')
+
+      expect(result.recommendations).toContain(
+        'Add Project Management for better customer project tracking'
+      )
     })
 
     it('should handle edge cases correctly', async () => {
@@ -99,7 +103,7 @@ describe('Business Logic Test Suite', () => {
       const minRequest = {
         modules: ['crm'],
         userCount: 1,
-        billingCycle: 'monthly' as const
+        billingCycle: 'monthly' as const,
       }
       const minResult = await pricingEngine.calculatePricing(minRequest)
       expect(minResult.finalPrice).toBeGreaterThan(0)
@@ -108,7 +112,7 @@ describe('Business Logic Test Suite', () => {
       const maxRequest = {
         modules: ['crm'],
         userCount: 10000,
-        billingCycle: 'monthly' as const
+        billingCycle: 'monthly' as const,
       }
       const maxResult = await pricingEngine.calculatePricing(maxRequest)
       expect(maxResult.finalPrice).toBeGreaterThan(0)
@@ -121,7 +125,7 @@ describe('Business Logic Test Suite', () => {
       // For now, we'll test the validation logic
       const modules = ['manufacturing']
       const validation = await moduleManager.validateModuleDependencies(modules)
-      
+
       expect(validation.isValid).toBe(false)
       expect(validation.errors).toContain("Module 'manufacturing' requires 'inventory'")
     })
@@ -130,7 +134,7 @@ describe('Business Logic Test Suite', () => {
       // Test module conflict validation
       const modules = ['crm', 'conflicting_module'] // Assuming there's a conflict
       const validation = await moduleManager.validateModuleDependencies(modules)
-      
+
       // This would fail if there are actual conflicts defined
       expect(validation.isValid).toBeDefined()
     })
@@ -141,7 +145,7 @@ describe('Business Logic Test Suite', () => {
       const request = {
         modules: ['crm', 'accounting'],
         userCount: 25,
-        billingCycle: 'monthly' as const
+        billingCycle: 'monthly' as const,
       }
 
       // Test unified pricing engine
@@ -158,27 +162,31 @@ describe('Business Logic Test Suite', () => {
       const request = {
         modules: ['crm'],
         userCount: 0, // Invalid
-        billingCycle: 'monthly' as const
+        billingCycle: 'monthly' as const,
       }
 
-      await expect(pricingEngine.calculatePricing(request)).rejects.toThrow('User count must be at least 1')
+      await expect(pricingEngine.calculatePricing(request)).rejects.toThrow(
+        'User count must be at least 1'
+      )
     })
 
     it('should enforce module requirements', async () => {
       const request = {
         modules: [], // Invalid - no modules
         userCount: 10,
-        billingCycle: 'monthly' as const
+        billingCycle: 'monthly' as const,
       }
 
-      await expect(pricingEngine.calculatePricing(request)).rejects.toThrow('At least one module required')
+      await expect(pricingEngine.calculatePricing(request)).rejects.toThrow(
+        'At least one module required'
+      )
     })
 
     it('should handle invalid module names', async () => {
       const request = {
         modules: ['invalid_module'],
         userCount: 10,
-        billingCycle: 'monthly' as const
+        billingCycle: 'monthly' as const,
       }
 
       await expect(pricingEngine.calculatePricing(request)).rejects.toThrow('Invalid modules')
@@ -191,14 +199,14 @@ describe('Business Logic Test Suite', () => {
         modules: ['crm', 'accounting', 'projects'], // Core bundle (15%)
         userCount: 100, // Volume discount (20%)
         billingCycle: 'monthly' as const,
-        applyDiscounts: true
+        applyDiscounts: true,
       }
 
       const result = await pricingEngine.calculatePricing(request)
-      
+
       // Should apply volume discount (20%) instead of bundle discount (15%)
-      const volumeDiscount = result.discounts.find(d => d.type === 'volume')
-      expect(volumeDiscount?.percentage).toBe(0.20)
+      const volumeDiscount = result.discounts.find((d) => d.type === 'volume')
+      expect(volumeDiscount?.percentage).toBe(0.2)
     })
 
     it('should calculate progressive discounts correctly', async () => {
@@ -207,12 +215,12 @@ describe('Business Logic Test Suite', () => {
         userCount: 10,
         billingCycle: 'monthly' as const,
         billingOrder: 3, // Third business
-        applyDiscounts: true
+        applyDiscounts: true,
       }
 
       const result = await pricingEngine.calculatePricing(request)
-      
-      const progressiveDiscount = result.discounts.find(d => d.type === 'progressive')
+
+      const progressiveDiscount = result.discounts.find((d) => d.type === 'progressive')
       expect(progressiveDiscount?.percentage).toBe(0.35) // 35% for 3rd business
     })
   })
@@ -223,7 +231,7 @@ describe('Business Logic Test Suite', () => {
         modules: ['projects'], // Has setup fee
         userCount: 10,
         billingCycle: 'monthly' as const,
-        includeSetupFees: true
+        includeSetupFees: true,
       }
 
       const result = await pricingEngine.calculatePricing(request)
@@ -235,7 +243,7 @@ describe('Business Logic Test Suite', () => {
         modules: ['projects'],
         userCount: 10,
         billingCycle: 'monthly' as const,
-        includeSetupFees: false
+        includeSetupFees: false,
       }
 
       const result = await pricingEngine.calculatePricing(request)
@@ -249,14 +257,14 @@ describe('Business Logic Test Suite', () => {
         modules: ['crm'],
         userCount: 10,
         billingCycle: 'monthly' as const,
-        applyDiscounts: false
+        applyDiscounts: false,
       }
 
       const annualRequest = {
         modules: ['crm'],
         userCount: 10,
         billingCycle: 'annual' as const,
-        applyDiscounts: true
+        applyDiscounts: true,
       }
 
       const monthlyResult = await pricingEngine.calculatePricing(monthlyRequest)
@@ -272,12 +280,14 @@ describe('Business Logic Test Suite', () => {
       const request = {
         modules: ['crm'],
         userCount: 10,
-        billingCycle: 'monthly' as const
+        billingCycle: 'monthly' as const,
       }
 
       const result = await pricingEngine.calculatePricing(request)
-      
-      expect(result.recommendations).toContain('Add Project Management for better customer project tracking')
+
+      expect(result.recommendations).toContain(
+        'Add Project Management for better customer project tracking'
+      )
     })
 
     it('should recommend industry-specific modules', async () => {
@@ -285,12 +295,14 @@ describe('Business Logic Test Suite', () => {
         modules: ['crm'],
         userCount: 10,
         billingCycle: 'monthly' as const,
-        industry: 'MANUFACTURING'
+        industry: 'MANUFACTURING',
       }
 
       const result = await pricingEngine.calculatePricing(request)
-      
-      expect(result.recommendations).toContain('Add Inventory Management for manufacturing operations')
+
+      expect(result.recommendations).toContain(
+        'Add Inventory Management for manufacturing operations'
+      )
     })
   })
 
@@ -299,11 +311,11 @@ describe('Business Logic Test Suite', () => {
       const request = {
         modules: ['crm'],
         userCount: 150,
-        billingCycle: 'monthly' as const
+        billingCycle: 'monthly' as const,
       }
 
       const result = await pricingEngine.calculatePricing(request)
-      
+
       expect(result.warnings).toContain('Consider Enterprise tier for better support and features')
     })
 
@@ -311,11 +323,11 @@ describe('Business Logic Test Suite', () => {
       const request = {
         modules: ['manufacturing'],
         userCount: 10,
-        billingCycle: 'monthly' as const
+        billingCycle: 'monthly' as const,
       }
 
       const result = await pricingEngine.calculatePricing(request)
-      
+
       expect(result.warnings).toContain('Manufacturing module works best with Inventory Management')
     })
   })

@@ -11,7 +11,7 @@ export function MobileOptimizer() {
     // Add mobile-specific CSS classes
     if (isMobile()) {
       document.documentElement.classList.add('mobile-device')
-      
+
       if (isSlowConnection()) {
         document.documentElement.classList.add('slow-connection')
       }
@@ -69,7 +69,6 @@ export function MobileOptimizer() {
       `
       document.head.appendChild(style)
     }
-
   }, [])
 
   return null

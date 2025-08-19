@@ -5,35 +5,30 @@
  * HYPERSCALE PERFORMANCE: Sub-100ms AI routing
  */
 
-import { 
-  BundleDefinition, 
-  AICapability, 
-  SecurityContext, 
+import {
+  BundleDefinition,
+  AICapability,
+  SecurityContext,
   PerformanceBudgets,
   getBundleById,
   validateBundleCompatibility,
   BundleId,
-  AI_CAPABILITIES
+  AI_CAPABILITIES,
 } from '@/types/bundles'
 
-import { 
-  AIFlowContext, 
-  AIFlowRequest, 
-  AIResult,
-  AIRequestLog
-} from './contexts/ai-flow-context'
+import { AIFlowContext, AIFlowRequest, AIResult, AIRequestLog } from './contexts/ai-flow-context'
 
 import { UnifiedAIService } from './interfaces/ai-services'
 import { WorkflowRouter } from './orchestration/workflow-router'
 import { PerformanceTracker } from './monitoring/performance-tracker'
 import { AICache } from './cache/ai-cache'
-import { 
-  createSecurityContext, 
+import {
+  createSecurityContext,
   validateSecurityContext,
   sanitizeContextForLogging,
   hasPermission,
   createRateLimitKey,
-  getRateLimitForTier
+  getRateLimitForTier,
 } from './security/context-validator'
 
 // Import external service implementations
@@ -60,7 +55,7 @@ export class AIBundleOrchestrator {
       finrobot: createFinRobotService(),
       idurar: createIDURARService(),
       erpnext: createERPNextService(),
-      dolibarr: createDolibarrService()
+      dolibarr: createDolibarrService(),
     }
 
     // Initialize components
@@ -106,7 +101,7 @@ export class AIBundleOrchestrator {
         success: result.success,
         error: result.errors?.[0],
         cacheHit: result.cacheHit,
-        fallbackUsed: result.fallbackUsed
+        fallbackUsed: result.fallbackUsed,
       }
       this.performanceTracker.logRequest(log)
 
@@ -116,7 +111,6 @@ export class AIBundleOrchestrator {
       }
 
       return result
-
     } catch (error) {
       // Log error
       const log: AIRequestLog = {
@@ -129,7 +123,7 @@ export class AIBundleOrchestrator {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
         cacheHit: false,
-        fallbackUsed: false
+        fallbackUsed: false,
       }
       this.performanceTracker.logRequest(log)
 
@@ -142,7 +136,7 @@ export class AIBundleOrchestrator {
         executionTime: Date.now() - startTime,
         tokensUsed: 0,
         cacheHit: false,
-        fallbackUsed: false
+        fallbackUsed: false,
       }
     }
   }
@@ -182,7 +176,7 @@ export class AIBundleOrchestrator {
   private async validateBundleAccess(request: AIFlowRequest): Promise<void> {
     const [service] = request.workflow.split('.')
     const requiredBundle = this.getRequiredBundleForService(service)
-    
+
     if (requiredBundle && !request.context.activeBundles.includes(requiredBundle)) {
       throw new Error(`Bundle ${requiredBundle} is required for ${service} workflows`)
     }
@@ -194,9 +188,9 @@ export class AIBundleOrchestrator {
       finrobot: 'enterprise',
       idurar: 'business',
       erpnext: 'business',
-      dolibarr: 'starter'
+      dolibarr: 'starter',
     }
-    
+
     return bundleMap[service] || null
   }
 
@@ -204,20 +198,20 @@ export class AIBundleOrchestrator {
     const key = createRateLimitKey(context)
     const limits = getRateLimitForTier(context.rateLimitTier)
     const now = Date.now()
-    
+
     let rateLimitInfo = this.rateLimitMap.get(key)
-    
+
     if (!rateLimitInfo || rateLimitInfo.resetTime < now) {
       rateLimitInfo = {
         count: 0,
-        resetTime: now + limits.window
+        resetTime: now + limits.window,
       }
     }
-    
+
     if (rateLimitInfo.count >= limits.requests) {
       throw new Error('Rate limit exceeded')
     }
-    
+
     rateLimitInfo.count++
     this.rateLimitMap.set(key, rateLimitInfo)
   }
@@ -228,32 +222,38 @@ export class AIBundleOrchestrator {
     result: AIResult
   ): Promise<void> {
     const sanitizedContext = sanitizeContextForLogging(context)
-    
+
     console.log('AI Audit Log:', {
       context: sanitizedContext,
       workflow: request.workflow,
       success: result.success,
       executionTime: result.executionTime,
       tokensUsed: result.tokensUsed,
-      cacheHit: result.cacheHit
+      cacheHit: result.cacheHit,
     })
   }
 
   private startPeriodicCleanup(): void {
     // Clean up rate limit map every 5 minutes
-    setInterval(() => {
-      const now = Date.now()
-      for (const [key, info] of this.rateLimitMap.entries()) {
-        if (info.resetTime < now) {
-          this.rateLimitMap.delete(key)
+    setInterval(
+      () => {
+        const now = Date.now()
+        for (const [key, info] of this.rateLimitMap.entries()) {
+          if (info.resetTime < now) {
+            this.rateLimitMap.delete(key)
+          }
         }
-      }
-    }, 5 * 60 * 1000)
+      },
+      5 * 60 * 1000
+    )
 
     // Prune cache every hour
-    setInterval(() => {
-      this.cache.prune()
-    }, 60 * 60 * 1000)
+    setInterval(
+      () => {
+        this.cache.prune()
+      },
+      60 * 60 * 1000
+    )
   }
 }
 
@@ -274,11 +274,11 @@ export function getAIOrchestrator(): AIBundleOrchestrator {
 // CONVENIENCE EXPORTS
 // ============================================================================
 
-export { 
-  AIFlowContext, 
-  AIFlowRequest, 
+export {
+  AIFlowContext,
+  AIFlowRequest,
   AIResult,
   createSecurityContext,
   validateSecurityContext,
-  hasPermission
+  hasPermission,
 }

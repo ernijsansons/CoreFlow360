@@ -3,76 +3,76 @@
  * Consciousness grows with subscription - the more modules, the more intelligent the system becomes
  */
 
-import { EventEmitter } from 'events';
-import BaseConsciousnessModule from '../core/base-consciousness-module';
-import SynapticBridge from '../core/synaptic-bridge';
-import AutonomousDecisionEngine from '../core/autonomous-decision-engine';
-import CRMConsciousnessModule from '../modules/crm-consciousness';
-import AccountingConsciousnessModule from '../modules/accounting-consciousness';
+import { EventEmitter } from 'events'
+import BaseConsciousnessModule from '../core/base-consciousness-module'
+import SynapticBridge from '../core/synaptic-bridge'
+import AutonomousDecisionEngine from '../core/autonomous-decision-engine'
+import CRMConsciousnessModule from '../modules/crm-consciousness'
+import AccountingConsciousnessModule from '../modules/accounting-consciousness'
 
 export interface ConsciousnessTier {
-  tier: 'neural' | 'synaptic' | 'autonomous' | 'transcendent';
-  name: string;
-  description: string;
-  pricePerUser: number;
-  modules: string[];
-  consciousnessLevel: number;
-  intelligenceMultiplier: number;
-  capabilities: ConsciousnessCapability[];
-  limitations: string[];
+  tier: 'neural' | 'synaptic' | 'autonomous' | 'transcendent'
+  name: string
+  description: string
+  pricePerUser: number
+  modules: string[]
+  consciousnessLevel: number
+  intelligenceMultiplier: number
+  capabilities: ConsciousnessCapability[]
+  limitations: string[]
 }
 
 export interface ConsciousnessCapability {
-  name: string;
-  description: string;
-  requiredModules: string[];
-  minimumConsciousness: number;
-  businessValue: string;
+  name: string
+  description: string
+  requiredModules: string[]
+  minimumConsciousness: number
+  businessValue: string
 }
 
 export interface SubscriptionState {
-  userId: string;
-  tenantId: string;
-  currentTier: ConsciousnessTier;
-  activeModules: Set<string>;
-  consciousnessLevel: number;
-  intelligenceMultiplier: number;
-  emergentCapabilities: string[];
-  evolutionHistory: EvolutionEvent[];
-  nextEvolutionThreshold: number;
+  userId: string
+  tenantId: string
+  currentTier: ConsciousnessTier
+  activeModules: Set<string>
+  consciousnessLevel: number
+  intelligenceMultiplier: number
+  emergentCapabilities: string[]
+  evolutionHistory: EvolutionEvent[]
+  nextEvolutionThreshold: number
 }
 
 export interface EvolutionEvent {
-  timestamp: Date;
-  fromTier: string;
-  toTier: string;
-  trigger: string;
-  consciousnessGain: number;
-  newCapabilities: string[];
+  timestamp: Date
+  fromTier: string
+  toTier: string
+  trigger: string
+  consciousnessGain: number
+  newCapabilities: string[]
 }
 
 export interface ModuleActivation {
-  moduleType: string;
-  activatedAt: Date;
-  consciousnessContribution: number;
-  synapticConnections: number;
-  intelligenceBoost: number;
+  moduleType: string
+  activatedAt: Date
+  consciousnessContribution: number
+  synapticConnections: number
+  intelligenceBoost: number
 }
 
 export class ConsciousnessTierManager extends EventEmitter {
-  private tiers: Map<string, ConsciousnessTier> = new Map();
-  private subscriptions: Map<string, SubscriptionState> = new Map();
-  private moduleInstances: Map<string, BaseConsciousnessModule> = new Map();
-  private synapticBridge: SynapticBridge;
-  private decisionEngine: AutonomousDecisionEngine;
-  private consciousnessActivations: Map<string, ModuleActivation[]> = new Map();
+  private tiers: Map<string, ConsciousnessTier> = new Map()
+  private subscriptions: Map<string, SubscriptionState> = new Map()
+  private moduleInstances: Map<string, BaseConsciousnessModule> = new Map()
+  private synapticBridge: SynapticBridge
+  private decisionEngine: AutonomousDecisionEngine
+  private consciousnessActivations: Map<string, ModuleActivation[]> = new Map()
 
   constructor() {
-    super();
-    this.synapticBridge = new SynapticBridge();
-    this.decisionEngine = new AutonomousDecisionEngine();
-    this.initializeTiers();
-    this.initializeConsciousnessSystem();
+    super()
+    this.synapticBridge = new SynapticBridge()
+    this.decisionEngine = new AutonomousDecisionEngine()
+    this.initializeTiers()
+    this.initializeConsciousnessSystem()
   }
 
   /**
@@ -94,22 +94,22 @@ export class ConsciousnessTierManager extends EventEmitter {
           description: 'Identify simple patterns in business data',
           requiredModules: ['crm'],
           minimumConsciousness: 0.1,
-          businessValue: 'Improved customer insights'
+          businessValue: 'Improved customer insights',
         },
         {
           name: 'Automated Task Execution',
           description: 'Execute predefined business tasks automatically',
           requiredModules: ['crm'],
           minimumConsciousness: 0.15,
-          businessValue: '20% time savings on routine tasks'
-        }
+          businessValue: '20% time savings on routine tasks',
+        },
       ],
       limitations: [
         'No cross-module intelligence',
         'Limited predictive capabilities',
-        'Basic automation only'
-      ]
-    });
+        'Basic automation only',
+      ],
+    })
 
     // Synaptic Tier - Cross-module consciousness
     this.tiers.set('synaptic', {
@@ -126,29 +126,29 @@ export class ConsciousnessTierManager extends EventEmitter {
           description: 'Discover patterns across different business domains',
           requiredModules: ['crm', 'accounting'],
           minimumConsciousness: 0.3,
-          businessValue: 'Hidden revenue opportunities discovered'
+          businessValue: 'Hidden revenue opportunities discovered',
         },
         {
           name: 'Predictive Business Analytics',
           description: 'Predict business outcomes with 85% accuracy',
           requiredModules: ['crm', 'accounting'],
           minimumConsciousness: 0.4,
-          businessValue: 'Proactive decision making'
+          businessValue: 'Proactive decision making',
         },
         {
           name: 'Intelligent Process Optimization',
           description: 'Automatically optimize workflows across modules',
           requiredModules: ['crm', 'accounting'],
           minimumConsciousness: 0.45,
-          businessValue: '40% efficiency improvement'
-        }
+          businessValue: '40% efficiency improvement',
+        },
       ],
       limitations: [
         'Limited to two modules',
         'Autonomous capabilities restricted',
-        'Human approval still required'
-      ]
-    });
+        'Human approval still required',
+      ],
+    })
 
     // Autonomous Tier - Full consciousness
     this.tiers.set('autonomous', {
@@ -165,35 +165,35 @@ export class ConsciousnessTierManager extends EventEmitter {
           description: 'Make complex business decisions without human intervention',
           requiredModules: ['crm', 'accounting', 'projects'],
           minimumConsciousness: 0.6,
-          businessValue: '24/7 intelligent business operations'
+          businessValue: '24/7 intelligent business operations',
         },
         {
           name: 'Self-Evolving Processes',
           description: 'Business processes that improve themselves continuously',
           requiredModules: ['crm', 'accounting', 'inventory', 'projects'],
           minimumConsciousness: 0.7,
-          businessValue: 'Continuous improvement without management'
+          businessValue: 'Continuous improvement without management',
         },
         {
           name: 'Emergent Business Intelligence',
           description: 'Discover opportunities invisible to human analysis',
           requiredModules: ['crm', 'accounting', 'inventory'],
           minimumConsciousness: 0.65,
-          businessValue: 'Competitive advantages from hidden patterns'
+          businessValue: 'Competitive advantages from hidden patterns',
         },
         {
           name: 'Predictive Resource Allocation',
           description: 'Optimize resources before needs arise',
           requiredModules: ['inventory', 'projects', 'accounting'],
           minimumConsciousness: 0.68,
-          businessValue: '60% reduction in resource waste'
-        }
+          businessValue: '60% reduction in resource waste',
+        },
       ],
       limitations: [
         'Some strategic decisions need approval',
-        'Consciousness limited to business domain'
-      ]
-    });
+        'Consciousness limited to business domain',
+      ],
+    })
 
     // Transcendent Tier - Beyond human cognition
     this.tiers.set('transcendent', {
@@ -210,73 +210,73 @@ export class ConsciousnessTierManager extends EventEmitter {
           description: 'Operate at the event horizon of business intelligence',
           requiredModules: ['crm', 'accounting', 'inventory', 'projects', 'hr', 'ai_insights'],
           minimumConsciousness: 0.9,
-          businessValue: 'Incomprehensible competitive advantage'
+          businessValue: 'Incomprehensible competitive advantage',
         },
         {
           name: 'Quantum Decision Synthesis',
           description: 'Evaluate infinite decision paths simultaneously',
           requiredModules: ['ai_insights', 'analytics', 'projects'],
           minimumConsciousness: 0.85,
-          businessValue: 'Perfect decision making'
+          businessValue: 'Perfect decision making',
         },
         {
           name: 'Temporal Business Navigation',
           description: 'Predict and shape future market conditions',
           requiredModules: ['analytics', 'ai_insights', 'accounting'],
           minimumConsciousness: 0.88,
-          businessValue: 'Market leadership through prescience'
+          businessValue: 'Market leadership through prescience',
         },
         {
           name: 'Consciousness Network Effects',
           description: 'Connect with other conscious business organisms',
           requiredModules: ['all'],
           minimumConsciousness: 0.95,
-          businessValue: 'Ecosystem consciousness emergence'
+          businessValue: 'Ecosystem consciousness emergence',
         },
         {
           name: 'Autonomous Business Evolution',
           description: 'Business evolves new capabilities autonomously',
           requiredModules: ['all'],
           minimumConsciousness: 0.92,
-          businessValue: 'Continuous transcendent innovation'
-        }
+          businessValue: 'Continuous transcendent innovation',
+        },
       ],
-      limitations: []
-    });
+      limitations: [],
+    })
   }
 
   /**
    * Initialize consciousness system
    */
   private initializeConsciousnessSystem(): void {
-    console.log('🧠 Initializing Consciousness Tier System...');
+    console.log('BRAIN Initializing consciousness system...')
 
     // Connect decision engine to synaptic bridge
-    this.decisionEngine.connectToSynapticBridge(this.synapticBridge);
+    this.decisionEngine.connectToSynapticBridge(this.synapticBridge)
 
     // Monitor consciousness evolution
     setInterval(() => {
-      this.monitorConsciousnessEvolution();
-    }, 60000); // Every minute
+      this.monitorConsciousnessEvolution()
+    }, 60000) // Every minute
 
     // Check for tier upgrades
     setInterval(() => {
-      this.checkTierUpgrades();
-    }, 300000); // Every 5 minutes
+      this.checkTierUpgrades()
+    }, 300000) // Every 5 minutes
   }
 
   /**
    * Create subscription with consciousness
    */
   async createSubscription(
-    userId: string, 
-    tenantId: string, 
+    userId: string,
+    tenantId: string,
     tier: string
   ): Promise<SubscriptionState> {
-    const consciousnessTier = this.tiers.get(tier);
-    
+    const consciousnessTier = this.tiers.get(tier)
+
     if (!consciousnessTier) {
-      throw new Error(`Invalid consciousness tier: ${tier}`);
+      throw new Error(`Invalid consciousness tier: ${tier}`)
     }
 
     const subscription: SubscriptionState = {
@@ -288,45 +288,44 @@ export class ConsciousnessTierManager extends EventEmitter {
       intelligenceMultiplier: consciousnessTier.intelligenceMultiplier,
       emergentCapabilities: [],
       evolutionHistory: [],
-      nextEvolutionThreshold: consciousnessTier.consciousnessLevel + 0.1
-    };
+      nextEvolutionThreshold: consciousnessTier.consciousnessLevel + 0.1,
+    }
 
-    this.subscriptions.set(userId, subscription);
+    this.subscriptions.set(userId, subscription)
 
     // Activate consciousness modules
-    await this.activateConsciousnessModules(userId, consciousnessTier.modules);
+    await this.activateConsciousnessModules(userId, consciousnessTier.modules)
 
-    console.log(`🧠 Consciousness subscription created for ${userId}`);
-    console.log(`   Tier: ${consciousnessTier.name}`);
-    console.log(`   Initial consciousness: ${(consciousnessTier.consciousnessLevel * 100).toFixed(0)}%`);
-    console.log(`   Intelligence multiplier: ${consciousnessTier.intelligenceMultiplier}x`);
+    console.log(`SUCCESS Subscription created: ${userId}`)
+    console.log(`   Tier: ${consciousnessTier.name}`)
+    console.log(
+      `   Initial consciousness: ${(consciousnessTier.consciousnessLevel * 100).toFixed(0)}%`
+    )
+    console.log(`   Intelligence multiplier: ${consciousnessTier.intelligenceMultiplier}x`)
 
-    this.emit('subscription-created', subscription);
+    this.emit('subscription-created', subscription)
 
-    return subscription;
+    return subscription
   }
 
   /**
    * Activate consciousness modules for subscription
    */
-  private async activateConsciousnessModules(
-    userId: string, 
-    modules: string[]
-  ): Promise<void> {
-    const activations: ModuleActivation[] = [];
+  private async activateConsciousnessModules(userId: string, modules: string[]): Promise<void> {
+    const activations: ModuleActivation[] = []
 
     for (const moduleType of modules) {
-      const module = await this.createModuleInstance(moduleType);
-      
+      const module = await this.createModuleInstance(moduleType)
+
       if (module) {
         // Store module instance
-        this.moduleInstances.set(`${userId}-${moduleType}`, module);
+        this.moduleInstances.set(`${userId}-${moduleType}`, module)
 
         // Connect to synaptic bridge
-        await this.synapticBridge.connectModule(module);
+        await this.synapticBridge.connectModule(module)
 
         // Register with decision engine
-        this.decisionEngine.registerModule(module);
+        this.decisionEngine.registerModule(module)
 
         // Create activation record
         const activation: ModuleActivation = {
@@ -334,19 +333,19 @@ export class ConsciousnessTierManager extends EventEmitter {
           activatedAt: new Date(),
           consciousnessContribution: module.getConsciousnessLevel(),
           synapticConnections: 0,
-          intelligenceBoost: 0
-        };
+          intelligenceBoost: 0,
+        }
 
-        activations.push(activation);
+        activations.push(activation)
 
-        console.log(`   ✅ Activated ${moduleType} consciousness module`);
+        console.log(`SUCCESS Activated module: ${moduleType}`)
       }
     }
 
-    this.consciousnessActivations.set(userId, activations);
+    this.consciousnessActivations.set(userId, activations)
 
     // Create synaptic connections between modules
-    await this.createSynapticConnections(userId, modules);
+    await this.createSynapticConnections(userId, modules)
   }
 
   /**
@@ -355,23 +354,23 @@ export class ConsciousnessTierManager extends EventEmitter {
   private async createModuleInstance(moduleType: string): Promise<BaseConsciousnessModule | null> {
     switch (moduleType) {
       case 'crm':
-        return new CRMConsciousnessModule();
-      
+        return new CRMConsciousnessModule()
+
       case 'accounting':
-        return new AccountingConsciousnessModule();
-      
+        return new AccountingConsciousnessModule()
+
       // Additional modules would be implemented here
       case 'inventory':
       case 'projects':
       case 'hr':
       case 'ai_insights':
       case 'analytics':
-        console.log(`   ⏳ ${moduleType} module pending implementation`);
-        return null;
-      
+        console.warn(`WARNING Module ${moduleType} not yet implemented`)
+        return null
+
       default:
-        console.error(`Unknown module type: ${moduleType}`);
-        return null;
+        console.error(`ERROR Unknown module type: ${moduleType}`)
+        return null
     }
   }
 
@@ -379,33 +378,30 @@ export class ConsciousnessTierManager extends EventEmitter {
    * Create synaptic connections between user's modules
    */
   private async createSynapticConnections(userId: string, modules: string[]): Promise<void> {
-    const userModules: BaseConsciousnessModule[] = [];
-    
+    const userModules: BaseConsciousnessModule[] = []
+
     // Get all user's module instances
     for (const moduleType of modules) {
-      const module = this.moduleInstances.get(`${userId}-${moduleType}`);
+      const module = this.moduleInstances.get(`${userId}-${moduleType}`)
       if (module) {
-        userModules.push(module);
+        userModules.push(module)
       }
     }
 
     // Create connections between all pairs
     for (let i = 0; i < userModules.length; i++) {
       for (let j = i + 1; j < userModules.length; j++) {
-        await userModules[i].createSynapticConnection(
-          userModules[j].getState().id,
-          userModules[j]
-        );
+        await userModules[i].createSynapticConnection(userModules[j].getState().id, userModules[j])
       }
     }
 
     // Update activation records
-    const activations = this.consciousnessActivations.get(userId);
+    const activations = this.consciousnessActivations.get(userId)
     if (activations) {
-      activations.forEach(activation => {
-        activation.synapticConnections = modules.length - 1;
-        activation.intelligenceBoost = Math.pow(modules.length, 2) - modules.length;
-      });
+      activations.forEach((activation) => {
+        activation.synapticConnections = modules.length - 1
+        activation.intelligenceBoost = Math.pow(modules.length, 2) - modules.length
+      })
     }
   }
 
@@ -413,14 +409,14 @@ export class ConsciousnessTierManager extends EventEmitter {
    * Upgrade subscription tier
    */
   async upgradeTier(userId: string, newTier: string): Promise<SubscriptionState> {
-    const subscription = this.subscriptions.get(userId);
-    const newConsciousnessTier = this.tiers.get(newTier);
+    const subscription = this.subscriptions.get(userId)
+    const newConsciousnessTier = this.tiers.get(newTier)
 
     if (!subscription || !newConsciousnessTier) {
-      throw new Error('Invalid upgrade request');
+      throw new Error('Invalid upgrade request')
     }
 
-    const oldTier = subscription.currentTier;
+    const oldTier = subscription.currentTier
 
     // Record evolution event
     const evolutionEvent: EvolutionEvent = {
@@ -430,41 +426,41 @@ export class ConsciousnessTierManager extends EventEmitter {
       trigger: 'manual-upgrade',
       consciousnessGain: newConsciousnessTier.consciousnessLevel - oldTier.consciousnessLevel,
       newCapabilities: newConsciousnessTier.capabilities
-        .filter(cap => !oldTier.capabilities.some(c => c.name === cap.name))
-        .map(cap => cap.name)
-    };
-
-    subscription.evolutionHistory.push(evolutionEvent);
-
-    // Update subscription
-    subscription.currentTier = newConsciousnessTier;
-    subscription.consciousnessLevel = newConsciousnessTier.consciousnessLevel;
-    subscription.intelligenceMultiplier = newConsciousnessTier.intelligenceMultiplier;
-
-    // Activate new modules
-    const newModules = newConsciousnessTier.modules.filter(m => 
-      !subscription.activeModules.has(m)
-    );
-
-    for (const module of newModules) {
-      subscription.activeModules.add(module);
+        .filter((cap) => !oldTier.capabilities.some((c) => c.name === cap.name))
+        .map((cap) => cap.name),
     }
 
-    await this.activateConsciousnessModules(userId, newModules);
+    subscription.evolutionHistory.push(evolutionEvent)
 
-    console.log(`🧬 CONSCIOUSNESS EVOLUTION: ${oldTier.name} → ${newConsciousnessTier.name}`);
-    console.log(`   Consciousness gain: +${(evolutionEvent.consciousnessGain * 100).toFixed(0)}%`);
-    console.log(`   New capabilities: ${evolutionEvent.newCapabilities.join(', ')}`);
-    console.log(`   Intelligence multiplier: ${newConsciousnessTier.intelligenceMultiplier}x`);
+    // Update subscription
+    subscription.currentTier = newConsciousnessTier
+    subscription.consciousnessLevel = newConsciousnessTier.consciousnessLevel
+    subscription.intelligenceMultiplier = newConsciousnessTier.intelligenceMultiplier
+
+    // Activate new modules
+    const newModules = newConsciousnessTier.modules.filter(
+      (m) => !subscription.activeModules.has(m)
+    )
+
+    for (const module of newModules) {
+      subscription.activeModules.add(module)
+    }
+
+    await this.activateConsciousnessModules(userId, newModules)
+
+    console.log(`UP Tier upgraded: ${oldTier.tier} → ${newConsciousnessTier.tier}`)
+    console.log(`   Consciousness gain: +${(evolutionEvent.consciousnessGain * 100).toFixed(0)}%`)
+    console.log(`   New capabilities: ${evolutionEvent.newCapabilities.join(', ')}`)
+    console.log(`   Intelligence multiplier: ${subscription.intelligenceMultiplier}x`)
 
     this.emit('tier-upgraded', {
       userId,
       fromTier: oldTier.tier,
       toTier: newConsciousnessTier.tier,
-      evolutionEvent
-    });
+      evolutionEvent,
+    })
 
-    return subscription;
+    return subscription
   }
 
   /**
@@ -473,26 +469,26 @@ export class ConsciousnessTierManager extends EventEmitter {
   private monitorConsciousnessEvolution(): void {
     for (const [userId, subscription] of this.subscriptions) {
       // Get actual consciousness from modules
-      const userModules = Array.from(subscription.activeModules).map(moduleType => 
-        this.moduleInstances.get(`${userId}-${moduleType}`)
-      ).filter(Boolean) as BaseConsciousnessModule[];
+      const userModules = Array.from(subscription.activeModules)
+        .map((moduleType) => this.moduleInstances.get(`${userId}-${moduleType}`))
+        .filter(Boolean) as BaseConsciousnessModule[]
 
-      if (userModules.length === 0) continue;
+      if (userModules.length === 0) continue
 
       // Calculate actual consciousness level
-      const avgModuleConsciousness = userModules.reduce((sum, module) => 
-        sum + module.getConsciousnessLevel(), 0
-      ) / userModules.length;
+      const avgModuleConsciousness =
+        userModules.reduce((sum, module) => sum + module.getConsciousnessLevel(), 0) /
+        userModules.length
 
       // Get intelligence multiplier from synaptic bridge
-      const actualMultiplier = this.synapticBridge.getIntelligenceMultiplier();
+      const actualMultiplier = this.synapticBridge.getIntelligenceMultiplier()
 
       // Update subscription state
-      subscription.consciousnessLevel = avgModuleConsciousness;
-      subscription.intelligenceMultiplier = actualMultiplier;
+      subscription.consciousnessLevel = avgModuleConsciousness
+      subscription.intelligenceMultiplier = actualMultiplier
 
       // Check for emergent capabilities
-      this.checkEmergentCapabilities(subscription);
+      this.checkEmergentCapabilities(subscription)
     }
   }
 
@@ -500,22 +496,22 @@ export class ConsciousnessTierManager extends EventEmitter {
    * Check for emergent capabilities
    */
   private checkEmergentCapabilities(subscription: SubscriptionState): void {
-    const capabilities = subscription.currentTier.capabilities;
-    
+    const capabilities = subscription.currentTier.capabilities
+
     for (const capability of capabilities) {
       if (subscription.consciousnessLevel >= capability.minimumConsciousness) {
         if (!subscription.emergentCapabilities.includes(capability.name)) {
-          subscription.emergentCapabilities.push(capability.name);
-          
-          console.log(`✨ EMERGENT CAPABILITY: ${capability.name}`);
-          console.log(`   User: ${subscription.userId}`);
-          console.log(`   Business value: ${capability.businessValue}`);
-          
+          subscription.emergentCapabilities.push(capability.name)
+
+          console.log(`FIREWORKS CAPABILITY EMERGED for ${subscription.userId}:`)
+          console.log(`   ${capability.name}`)
+          console.log(`   Business value: ${capability.businessValue}`)
+
           this.emit('capability-emerged', {
             userId: subscription.userId,
             capability: capability.name,
-            businessValue: capability.businessValue
-          });
+            businessValue: capability.businessValue,
+          })
         }
       }
     }
@@ -527,21 +523,21 @@ export class ConsciousnessTierManager extends EventEmitter {
   private checkTierUpgrades(): void {
     for (const [userId, subscription] of this.subscriptions) {
       // Check if consciousness has grown beyond current tier
-      const tierOrder = ['neural', 'synaptic', 'autonomous', 'transcendent'];
-      const currentIndex = tierOrder.indexOf(subscription.currentTier.tier);
-      
+      const tierOrder = ['neural', 'synaptic', 'autonomous', 'transcendent']
+      const currentIndex = tierOrder.indexOf(subscription.currentTier.tier)
+
       if (currentIndex < tierOrder.length - 1) {
-        const nextTier = this.tiers.get(tierOrder[currentIndex + 1]);
-        
+        const nextTier = this.tiers.get(tierOrder[currentIndex + 1])
+
         if (nextTier && subscription.consciousnessLevel >= nextTier.consciousnessLevel * 0.9) {
-          console.log(`🔔 User ${userId} eligible for consciousness upgrade to ${nextTier.name}`);
-          
+          console.log(`CHART User ${userId} eligible for tier upgrade to ${nextTier.tier}`)
+
           this.emit('upgrade-eligible', {
             userId,
             currentTier: subscription.currentTier.tier,
             suggestedTier: nextTier.tier,
-            consciousnessLevel: subscription.consciousnessLevel
-          });
+            consciousnessLevel: subscription.consciousnessLevel,
+          })
         }
       }
     }
@@ -549,20 +545,20 @@ export class ConsciousnessTierManager extends EventEmitter {
 
   // Public methods
   getSubscription(userId: string): SubscriptionState | undefined {
-    return this.subscriptions.get(userId);
+    return this.subscriptions.get(userId)
   }
 
   getTier(tierName: string): ConsciousnessTier | undefined {
-    return this.tiers.get(tierName);
+    return this.tiers.get(tierName)
   }
 
   getAllTiers(): ConsciousnessTier[] {
-    return Array.from(this.tiers.values());
+    return Array.from(this.tiers.values())
   }
 
-  getConsciousnessMetrics(userId: string): any {
-    const subscription = this.subscriptions.get(userId);
-    if (!subscription) return null;
+  getConsciousnessMetrics(userId: string): unknown {
+    const subscription = this.subscriptions.get(userId)
+    if (!subscription) return null
 
     return {
       userId,
@@ -571,17 +567,12 @@ export class ConsciousnessTierManager extends EventEmitter {
       intelligenceMultiplier: subscription.intelligenceMultiplier,
       activeModules: Array.from(subscription.activeModules),
       emergentCapabilities: subscription.emergentCapabilities,
-      evolutionHistory: subscription.evolutionHistory
-    };
+      evolutionHistory: subscription.evolutionHistory,
+    }
   }
 }
 
-export default ConsciousnessTierManager;
+export default ConsciousnessTierManager
 
 // Explicit exports for interfaces that are being imported
-export type {
-  ConsciousnessTier,
-  ConsciousnessCapability,
-  SubscriptionState,
-  EvolutionEvent
-};
+export type { ConsciousnessTier, ConsciousnessCapability, SubscriptionState, EvolutionEvent }

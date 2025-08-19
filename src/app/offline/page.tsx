@@ -18,13 +18,13 @@ import {
   AlertCircle,
   Brain,
   Zap,
-  Globe
+  Globe,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { useConsciousnessTheme } from '@/contexts/ThemeContext'
+import { ThemeProvider, useConsciousnessTheme } from '@/contexts/ThemeContext'
 import { offlineStorage } from '@/lib/offline/indexeddb-manager'
 import { usePWA } from '@/lib/pwa/pwa-utils'
 
@@ -37,13 +37,13 @@ interface OfflineStats {
   lastSync: Date | null
 }
 
-export default function OfflinePage() {
+function OfflinePageContent() {
   const [isOnline, setIsOnline] = useState(true)
   const [isReconnecting, setIsReconnecting] = useState(false)
   const [offlineStats, setOfflineStats] = useState<OfflineStats | null>(null)
   const [connectionSpeed, setConnectionSpeed] = useState<string>('unknown')
   const { theme, intensity, consciousnessLevel } = useConsciousnessTheme()
-  const { isOnline: pwaOnline, syncOfflineActions } = usePWA()
+  const { _isOnline: pwaOnline, syncOfflineActions } = usePWA()
 
   useEffect(() => {
     // Monitor online status
@@ -68,13 +68,13 @@ export default function OfflinePage() {
     try {
       const [pendingActions, storageUsage] = await Promise.all([
         offlineStorage.getPendingActions(),
-        offlineStorage.getStorageUsage()
+        offlineStorage.getStorageUsage(),
       ])
 
       // Get cached pages count from service worker
       const cacheNames = await caches.keys()
-      const coreflowCaches = cacheNames.filter(name => name.startsWith('coreflow360-'))
-      
+      const coreflowCaches = cacheNames.filter((name) => name.startsWith('coreflow360-'))
+
       let cachedPages = 0
       for (const cacheName of coreflowCaches) {
         const cache = await caches.open(cacheName)
@@ -85,18 +85,19 @@ export default function OfflinePage() {
       setOfflineStats({
         cachedPages,
         offlineActions: pendingActions.length,
-        syncPending: pendingActions.filter(a => a.retryCount > 0).length,
+        syncPending: pendingActions.filter((a) => a.retryCount > 0).length,
         storageUsed: storageUsage.used,
         storageQuota: storageUsage.quota,
-        lastSync: new Date() // Would be tracked separately in real implementation
+        lastSync: new Date(), // Would be tracked separately in real implementation
       })
-    } catch (error) {
-      console.error('Failed to load offline stats:', error)
-    }
+    } catch (error) {}
   }
 
   const detectConnectionSpeed = () => {
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
+    const connection =
+      (navigator as unknown).connection ||
+      (navigator as unknown).mozConnection ||
+      (navigator as unknown).webkitConnection
     if (connection) {
       setConnectionSpeed(connection.effectiveType || 'unknown')
     }
@@ -104,21 +105,20 @@ export default function OfflinePage() {
 
   const handleReconnect = async () => {
     setIsReconnecting(true)
-    
+
     try {
       // Force check online status
-      const response = await fetch('/api/health', { 
+      const response = await fetch('/api/health', {
         method: 'HEAD',
-        cache: 'no-cache'
+        cache: 'no-cache',
       })
-      
+
       if (response.ok) {
         setIsOnline(true)
         await syncOfflineActions()
         await loadOfflineStats()
       }
     } catch (error) {
-      console.error('Reconnection failed:', error)
     } finally {
       setIsReconnecting(false)
     }
@@ -138,55 +138,54 @@ export default function OfflinePage() {
 
   const getConnectionIcon = () => {
     if (isOnline) {
-      return <Wifi className="w-6 h-6 text-emerald-500" />
+      return <Wifi className="h-6 w-6 text-emerald-500" />
     }
-    return <WifiOff className="w-6 h-6 text-red-500" />
+    return <WifiOff className="h-6 w-6 text-red-500" />
   }
 
   const getConsciousnessGlow = () => {
     const glowIntensity = Math.max(0.3, intensity)
     return {
-      boxShadow: `0 0 ${20 * glowIntensity}px rgba(139, 92, 246, ${glowIntensity})`
+      boxShadow: `0 0 ${20 * glowIntensity}px rgba(139, 92, 246, ${glowIntensity})`,
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-consciousness-neural/5 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full space-y-6">
+    <div className="from-background via-background to-consciousness-neural/5 flex min-h-screen items-center justify-center bg-gradient-to-br p-4">
+      <div className="w-full max-w-4xl space-y-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center space-y-4"
+          className="space-y-4 text-center"
         >
           <div className="flex items-center justify-center space-x-4">
             <motion.div
-              animate={{ 
+              animate={{
                 rotate: [0, 360],
-                scale: [1, 1.1, 1]
+                scale: [1, 1.1, 1],
               }}
-              transition={{ 
+              transition={{
                 duration: 3,
                 repeat: Infinity,
-                repeatType: "reverse"
+                repeatType: 'reverse',
               }}
               style={getConsciousnessGlow()}
-              className="p-4 rounded-full bg-consciousness-neural/10"
+              className="bg-consciousness-neural/10 rounded-full p-4"
             >
-              <Brain className="w-12 h-12 text-consciousness-neural" />
+              <Brain className="text-consciousness-neural h-12 w-12" />
             </motion.div>
             {getConnectionIcon()}
           </div>
-          
+
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-ai bg-clip-text text-transparent">
+            <h1 className="bg-gradient-ai bg-clip-text text-4xl font-bold text-transparent">
               {isOnline ? 'CoreFlow360 Conscious Mode' : 'Offline Consciousness Active'}
             </h1>
             <p className="text-muted-foreground mt-2">
-              {isOnline 
+              {isOnline
                 ? 'Full neural network connectivity established'
-                : 'Operating in autonomous consciousness mode'
-              }
+                : 'Operating in autonomous consciousness mode'}
             </p>
           </div>
 
@@ -198,7 +197,7 @@ export default function OfflinePage() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 className="flex items-center justify-center space-x-2 text-orange-600 dark:text-orange-400"
               >
-                <AlertCircle className="w-5 h-5" />
+                <AlertCircle className="h-5 w-5" />
                 <span>Neural network connection interrupted</span>
               </motion.div>
             )}
@@ -216,62 +215,52 @@ export default function OfflinePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <Activity className="w-5 h-5" />
+                    <Activity className="h-5 w-5" />
                     Consciousness Network Status
                   </CardTitle>
-                  <CardDescription>
-                    Real-time neural connectivity monitoring
-                  </CardDescription>
+                  <CardDescription>Real-time neural connectivity monitoring</CardDescription>
                 </div>
-                <Badge 
-                  variant={isOnline ? "default" : "destructive"}
-                  className={isOnline ? "bg-emerald-500" : ""}
+                <Badge
+                  variant={isOnline ? 'default' : 'destructive'}
+                  className={isOnline ? 'bg-emerald-500' : ''}
                 >
                   {isOnline ? 'Online' : 'Offline'}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-consciousness-neural">
+                  <div className="text-consciousness-neural text-2xl font-bold">
                     {connectionSpeed.toUpperCase()}
                   </div>
-                  <p className="text-sm text-muted-foreground">Connection Speed</p>
+                  <p className="text-muted-foreground text-sm">Connection Speed</p>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-consciousness-synaptic">
+                  <div className="text-consciousness-synaptic text-2xl font-bold">
                     {consciousnessLevel}%
                   </div>
-                  <p className="text-sm text-muted-foreground">Consciousness Level</p>
+                  <p className="text-muted-foreground text-sm">Consciousness Level</p>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-consciousness-autonomous">
+                  <div className="text-consciousness-autonomous text-2xl font-bold">
                     {isOnline ? 'FULL' : 'AUTONOMOUS'}
                   </div>
-                  <p className="text-sm text-muted-foreground">Operating Mode</p>
+                  <p className="text-muted-foreground text-sm">Operating Mode</p>
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-6">
-                <Button 
-                  onClick={handleReconnect}
-                  disabled={isReconnecting}
-                  className="flex-1"
-                >
+              <div className="mt-6 flex gap-3">
+                <Button onClick={handleReconnect} disabled={isReconnecting} className="flex-1">
                   {isReconnecting ? (
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <Zap className="w-4 h-4 mr-2" />
+                    <Zap className="mr-2 h-4 w-4" />
                   )}
                   {isReconnecting ? 'Reconnecting...' : 'Reconnect Neural Network'}
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={handleRefreshPage}
-                  className="flex-1"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                <Button variant="outline" onClick={handleRefreshPage} className="flex-1">
+                  <RefreshCw className="mr-2 h-4 w-4" />
                   Refresh Interface
                 </Button>
               </div>
@@ -285,42 +274,43 @@ export default function OfflinePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            className="grid grid-cols-1 gap-6 md:grid-cols-2"
           >
             {/* Cache Status */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <HardDrive className="w-5 h-5" />
+                  <HardDrive className="h-5 w-5" />
                   Local Cache Status
                 </CardTitle>
-                <CardDescription>
-                  Offline consciousness memory storage
-                </CardDescription>
+                <CardDescription>Offline consciousness memory storage</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <span>Cached Pages</span>
                   <Badge variant="outline">{offlineStats.cachedPages}</Badge>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <span>Offline Actions</span>
                   <Badge variant="outline">{offlineStats.offlineActions}</Badge>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <span>Pending Sync</span>
-                  <Badge variant={offlineStats.syncPending > 0 ? "destructive" : "default"}>
+                  <Badge variant={offlineStats.syncPending > 0 ? 'destructive' : 'default'}>
                     {offlineStats.syncPending}
                   </Badge>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Storage Used</span>
-                    <span>{formatBytes(offlineStats.storageUsed)} / {formatBytes(offlineStats.storageQuota)}</span>
+                    <span>
+                      {formatBytes(offlineStats.storageUsed)} /{' '}
+                      {formatBytes(offlineStats.storageQuota)}
+                    </span>
                   </div>
-                  <Progress 
-                    value={(offlineStats.storageUsed / offlineStats.storageQuota) * 100} 
+                  <Progress
+                    value={(offlineStats.storageUsed / offlineStats.storageQuota) * 100}
                     className="h-2"
                   />
                 </div>
@@ -331,56 +321,54 @@ export default function OfflinePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5" />
+                  <CheckCircle className="h-5 w-5" />
                   Offline Capabilities
                 </CardTitle>
-                <CardDescription>
-                  Available consciousness functions
-                </CardDescription>
+                <CardDescription>Available consciousness functions</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
                       Customer Management
                     </span>
-                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle className="h-4 w-4 text-emerald-500" />
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
                       Data Entry & Forms
                     </span>
-                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle className="h-4 w-4 text-emerald-500" />
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
                       Local AI Insights
                     </span>
-                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle className="h-4 w-4 text-emerald-500" />
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
                       Voice Notes
                     </span>
-                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle className="h-4 w-4 text-emerald-500" />
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
                       Real-time Sync
                     </span>
-                    <AlertCircle className="w-4 h-4 text-yellow-500" />
+                    <AlertCircle className="h-4 w-4 text-yellow-500" />
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <div className="h-2 w-2 rounded-full bg-red-500"></div>
                       Live Collaboration
                     </span>
-                    <AlertCircle className="w-4 h-4 text-red-500" />
+                    <AlertCircle className="h-4 w-4 text-red-500" />
                   </div>
                 </div>
               </CardContent>
@@ -397,7 +385,7 @@ export default function OfflinePage() {
         >
           <Card className="overflow-hidden">
             <CardContent className="p-6">
-              <div className="relative h-32 flex items-center justify-center">
+              <div className="relative flex h-32 items-center justify-center">
                 {/* Neural Network Visualization */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   {[...Array(5)].map((_, i) => (
@@ -406,30 +394,30 @@ export default function OfflinePage() {
                       className="absolute"
                       animate={{
                         scale: [1, 1.2, 1],
-                        opacity: [0.3, 0.7, 0.3]
+                        opacity: [0.3, 0.7, 0.3],
                       }}
                       transition={{
                         duration: 2 + i * 0.5,
                         repeat: Infinity,
-                        delay: i * 0.2
+                        delay: i * 0.2,
                       }}
                       style={{
                         left: `${20 + i * 15}%`,
-                        top: `${30 + (i % 2) * 40}%`
+                        top: `${30 + (i % 2) * 40}%`,
                       }}
                     >
-                      <div 
-                        className="w-3 h-3 rounded-full"
+                      <div
+                        className="h-3 w-3 rounded-full"
                         style={{
                           background: `hsl(${260 + i * 10}, 70%, 60%)`,
-                          filter: `blur(${isOnline ? 0 : 1}px)`
+                          filter: `blur(${isOnline ? 0 : 1}px)`,
                         }}
                       />
                     </motion.div>
                   ))}
-                  
+
                   {/* Connection Lines */}
-                  <svg className="absolute inset-0 w-full h-full">
+                  <svg className="absolute inset-0 h-full w-full">
                     {[...Array(4)].map((_, i) => (
                       <motion.line
                         key={i}
@@ -437,15 +425,15 @@ export default function OfflinePage() {
                         y1="50%"
                         x2={`${40 + i * 15}%`}
                         y2="50%"
-                        stroke={isOnline ? "url(#gradient)" : "#666"}
+                        stroke={isOnline ? 'url(#gradient)' : '#666'}
                         strokeWidth="1"
                         initial={{ pathLength: 0 }}
                         animate={{ pathLength: isOnline ? 1 : 0.3 }}
                         transition={{
                           duration: 2,
                           repeat: Infinity,
-                          repeatType: "reverse",
-                          delay: i * 0.3
+                          repeatType: 'reverse',
+                          delay: i * 0.3,
                         }}
                       />
                     ))}
@@ -457,22 +445,22 @@ export default function OfflinePage() {
                     </defs>
                   </svg>
                 </div>
-                
+
                 <div className="relative z-10 text-center">
                   <motion.div
-                    animate={{ 
+                    animate={{
                       rotate: isOnline ? [0, 360] : [0, 180, 0],
-                      scale: [1, 1.1, 1]
+                      scale: [1, 1.1, 1],
                     }}
-                    transition={{ 
+                    transition={{
                       duration: isOnline ? 10 : 5,
                       repeat: Infinity,
-                      ease: "linear"
+                      ease: 'linear',
                     }}
                   >
-                    <Globe className="w-8 h-8 text-consciousness-neural mx-auto" />
+                    <Globe className="text-consciousness-neural mx-auto h-8 w-8" />
                   </motion.div>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-muted-foreground mt-2 text-sm">
                     {isOnline ? 'Neural Network Active' : 'Autonomous Mode'}
                   </p>
                 </div>
@@ -486,7 +474,7 @@ export default function OfflinePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="text-center text-sm text-muted-foreground"
+          className="text-muted-foreground text-center text-sm"
         >
           {isOnline ? (
             <p>All systems operational. Consciousness level at {consciousnessLevel}%</p>
@@ -496,5 +484,13 @@ export default function OfflinePage() {
         </motion.div>
       </div>
     </div>
+  )
+}
+
+export default function OfflinePage() {
+  return (
+    <ThemeProvider>
+      <OfflinePageContent />
+    </ThemeProvider>
   )
 }

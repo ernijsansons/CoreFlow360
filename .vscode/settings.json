@@ -26,5 +26,15 @@
     "typescript.disableAutomaticTypeAcquisition":  true,
     "git.autoFetch": false,
     "git.enabled": false,
-    "search.followSymlinks": false
+    "search.followSymlinks": false,
+    "terminal.integrated.commandsToSkipShell": false,
+    "terminal.integrated.sendKeybindingsToShell": true,
+    "terminal.integrated.allowChords": true,
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.profiles.windows": {
+      "PowerShell": {
+        "source": "PowerShell",
+        "args": ["-NoLogo"]
+      }
+    }
 }

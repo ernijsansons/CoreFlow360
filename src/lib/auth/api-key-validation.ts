@@ -14,7 +14,7 @@ const ApiKeySchema = z.object({
   scope: z.array(z.string()),
   rateLimit: z.number().default(1000),
   expiresAt: z.date().optional(),
-  isActive: z.boolean().default(true)
+  isActive: z.boolean().default(true),
 })
 
 export type ApiKey = z.infer<typeof ApiKeySchema>
@@ -31,7 +31,7 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
     // Hash the API key for lookup
     const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex')
     const cacheKey = `api_key:${keyHash}`
-    
+
     // Check cache first
     const cached = await redis.get(cacheKey)
     if (cached) {
@@ -44,21 +44,23 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
     const validKeys = [
       process.env.COREFLOW_API_KEY,
       process.env.STRIPE_SECRET_KEY,
-      process.env.INTERNAL_API_KEY
+      process.env.INTERNAL_API_KEY,
     ].filter(Boolean)
 
     const isValid = validKeys.includes(apiKey)
 
     // Cache result for 1 hour
-    await redis.setex(cacheKey, 3600, JSON.stringify({
-      isActive: isValid,
-      expiresAt: null
-    }))
+    await redis.setex(
+      cacheKey,
+      3600,
+      JSON.stringify({
+        isActive: isValid,
+        expiresAt: null,
+      })
+    )
 
     return isValid
-
   } catch (error) {
-    console.error('API key validation failed:', error)
     return false
   }
 }
@@ -77,7 +79,7 @@ export async function getApiKeyMetadata(apiKey: string): Promise<Partial<ApiKey>
   try {
     const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex')
     const cacheKey = `api_key_meta:${keyHash}`
-    
+
     const cached = await redis.get(cacheKey)
     if (cached) {
       return JSON.parse(cached)
@@ -89,17 +91,15 @@ export async function getApiKeyMetadata(apiKey: string): Promise<Partial<ApiKey>
       const metadata = {
         scope: ['events:write', 'analytics:read'],
         rateLimit: 1000,
-        isActive: true
+        isActive: true,
       }
-      
+
       await redis.setex(cacheKey, 3600, JSON.stringify(metadata))
       return metadata
     }
 
     return null
-
   } catch (error) {
-    console.error('Failed to get API key metadata:', error)
     return null
   }
 }

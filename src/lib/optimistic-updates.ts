@@ -3,7 +3,7 @@
  * Handle optimistic updates with server synchronization and rollback
  */
 
-export interface OptimisticUpdate<T = any> {
+export interface OptimisticUpdate<T = unknown> {
   id: string
   data: T
   timestamp: number
@@ -12,7 +12,7 @@ export interface OptimisticUpdate<T = any> {
   rollback?: () => void
 }
 
-export interface OptimisticUpdateOptions<T = any> {
+export interface OptimisticUpdateOptions<T = unknown> {
   timeout?: number
   retryAttempts?: number
   retryDelay?: number
@@ -21,7 +21,7 @@ export interface OptimisticUpdateOptions<T = any> {
   onRollback?: (data: T) => void
 }
 
-export class OptimisticUpdateManager<T = any> {
+export class OptimisticUpdateManager<T = unknown> {
   private updates = new Map<string, OptimisticUpdate<T>>()
   private listeners = new Set<(updates: OptimisticUpdate<T>[]) => void>()
 
@@ -40,7 +40,7 @@ export class OptimisticUpdateManager<T = any> {
       retryDelay = 1000,
       onSuccess,
       onError,
-      onRollback
+      onRollback,
     } = options
 
     // Create optimistic update
@@ -48,7 +48,7 @@ export class OptimisticUpdateManager<T = any> {
       id,
       data,
       timestamp: Date.now(),
-      status: 'pending'
+      status: 'pending',
     }
 
     // Store original data for rollback
@@ -65,9 +65,9 @@ export class OptimisticUpdateManager<T = any> {
         try {
           const result = await Promise.race([
             serverUpdate(),
-            new Promise<never>((_, reject) => 
+            new Promise<never>((_, reject) =>
               setTimeout(() => reject(new Error('Request timeout')), timeout)
-            )
+            ),
           ])
 
           // Update successful
@@ -78,12 +78,11 @@ export class OptimisticUpdateManager<T = any> {
 
           onSuccess?.(result)
           return result
-
         } catch (error) {
           lastError = error as Error
-          
+
           if (attempt < retryAttempts) {
-            await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt + 1)))
+            await new Promise((resolve) => setTimeout(resolve, retryDelay * (attempt + 1)))
           }
         }
       }
@@ -100,7 +99,6 @@ export class OptimisticUpdateManager<T = any> {
       onRollback?.(originalData)
 
       throw lastError!
-
     } catch (error) {
       // Handle unexpected errors
       update.status = 'error'
@@ -128,7 +126,7 @@ export class OptimisticUpdateManager<T = any> {
    * Get all pending updates
    */
   getPendingUpdates(): OptimisticUpdate<T>[] {
-    return Array.from(this.updates.values()).filter(u => u.status === 'pending')
+    return Array.from(this.updates.values()).filter((u) => u.status === 'pending')
   }
 
   /**
@@ -185,14 +183,14 @@ export class OptimisticUpdateManager<T = any> {
    */
   private notifyListeners(): void {
     const updates = this.getAllUpdates()
-    this.listeners.forEach(listener => listener(updates))
+    this.listeners.forEach((listener) => listener(updates))
   }
 }
 
 /**
  * React hook for optimistic updates
  */
-export function useOptimisticUpdates<T = any>() {
+export function useOptimisticUpdates<T = unknown>() {
   const manager = new OptimisticUpdateManager<T>()
 
   const createUpdate = async (
@@ -217,14 +215,14 @@ export function useOptimisticUpdates<T = any>() {
     getAllUpdates,
     clearCompletedUpdates,
     clearAllUpdates,
-    subscribe: manager.subscribe.bind(manager)
+    subscribe: manager.subscribe.bind(manager),
   }
 }
 
 /**
  * Create optimistic update for API calls
  */
-export function createOptimisticAPIUpdate<T = any>(
+export function createOptimisticAPIUpdate<T = unknown>(
   apiCall: () => Promise<T>,
   options: OptimisticUpdateOptions = {}
 ) {
@@ -237,7 +235,7 @@ export function createOptimisticAPIUpdate<T = any>(
 /**
  * Batch optimistic updates
  */
-export class BatchOptimisticUpdates<T = any> {
+export class BatchOptimisticUpdates<T = unknown> {
   private manager = new OptimisticUpdateManager<T>()
   private batch: Array<{
     id: string
@@ -304,18 +302,3 @@ export class BatchOptimisticUpdates<T = any> {
     return this.batch.length
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

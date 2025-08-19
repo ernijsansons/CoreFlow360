@@ -16,48 +16,48 @@ vi.mock('stripe', () => {
           create: vi.fn().mockResolvedValue({
             id: 'cs_test_123',
             url: 'https://checkout.stripe.com/test',
-            customer: 'cus_test_123'
-          })
-        }
+            customer: 'cus_test_123',
+          }),
+        },
       },
       customers: {
         list: vi.fn().mockResolvedValue({ data: [] }),
         create: vi.fn().mockResolvedValue({
           id: 'cus_test_123',
-          email: 'test@example.com'
+          email: 'test@example.com',
         }),
         update: vi.fn().mockResolvedValue({
-          id: 'cus_test_123'
-        })
+          id: 'cus_test_123',
+        }),
       },
       webhooks: {
-        constructEvent: vi.fn()
+        constructEvent: vi.fn(),
       },
       billingPortal: {
         sessions: {
           create: vi.fn().mockResolvedValue({
             id: 'bps_test_123',
-            url: 'https://billing.stripe.com/test'
-          })
-        }
+            url: 'https://billing.stripe.com/test',
+          }),
+        },
       },
       subscriptions: {
         retrieve: vi.fn().mockResolvedValue({
           id: 'sub_test_123',
           items: {
-            data: []
+            data: [],
           },
           current_period_start: Math.floor(Date.now() / 1000),
-          current_period_end: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60
-        })
+          current_period_end: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+        }),
       },
       subscriptionItems: {
         createUsageRecord: vi.fn().mockResolvedValue({
           id: 'usage_test_123',
-          timestamp: Math.floor(Date.now() / 1000)
-        })
-      }
-    }))
+          timestamp: Math.floor(Date.now() / 1000),
+        }),
+      },
+    })),
   }
 })
 
@@ -72,7 +72,7 @@ describe('Stripe Integration Test Suite', () => {
   describe('Checkout Session Creation', () => {
     it('should create a checkout session with correct parameters', async () => {
       const { POST } = await import('@/app/api/stripe/create-checkout/route')
-      
+
       const request = new NextRequest('http://localhost:3000/api/stripe/create-checkout', {
         method: 'POST',
         body: JSON.stringify({
@@ -84,8 +84,8 @@ describe('Stripe Integration Test Suite', () => {
           customerName: 'Test User',
           companyName: 'Test Company',
           successUrl: 'http://localhost:3000/success',
-          cancelUrl: 'http://localhost:3000/cancel'
-        })
+          cancelUrl: 'http://localhost:3000/cancel',
+        }),
       })
 
       const response = await POST(request)
@@ -100,14 +100,14 @@ describe('Stripe Integration Test Suite', () => {
           mode: 'subscription',
           customer: 'cus_test_123',
           success_url: expect.stringContaining('session_id={CHECKOUT_SESSION_ID}'),
-          cancel_url: 'http://localhost:3000/cancel'
+          cancel_url: 'http://localhost:3000/cancel',
         })
       )
     })
 
     it('should handle bundle subscriptions', async () => {
       const { POST } = await import('@/app/api/stripe/create-checkout/route')
-      
+
       const request = new NextRequest('http://localhost:3000/api/stripe/create-checkout', {
         method: 'POST',
         body: JSON.stringify({
@@ -120,8 +120,8 @@ describe('Stripe Integration Test Suite', () => {
           customerName: 'Test User',
           companyName: 'Test Company',
           successUrl: 'http://localhost:3000/success',
-          cancelUrl: 'http://localhost:3000/cancel'
-        })
+          cancelUrl: 'http://localhost:3000/cancel',
+        }),
       })
 
       const response = await POST(request)
@@ -136,7 +136,7 @@ describe('Stripe Integration Test Suite', () => {
   describe('Webhook Processing', () => {
     it('should process checkout.session.completed event', async () => {
       const { POST } = await import('@/app/api/stripe/webhook/route')
-      
+
       const event = {
         type: 'checkout.session.completed',
         data: {
@@ -148,10 +148,10 @@ describe('Stripe Integration Test Suite', () => {
               tenant_id: 'test-tenant',
               modules: 'crm,accounting',
               user_count: '10',
-              billing_cycle: 'monthly'
-            }
-          }
-        }
+              billing_cycle: 'monthly',
+            },
+          },
+        },
       }
 
       mockStripe.webhooks.constructEvent.mockReturnValue(event)
@@ -159,9 +159,9 @@ describe('Stripe Integration Test Suite', () => {
       const request = new NextRequest('http://localhost:3000/api/stripe/webhook', {
         method: 'POST',
         headers: {
-          'stripe-signature': 'test-signature'
+          'stripe-signature': 'test-signature',
         },
-        body: JSON.stringify(event)
+        body: JSON.stringify(event),
       })
 
       const response = await POST(request)
@@ -173,7 +173,7 @@ describe('Stripe Integration Test Suite', () => {
 
     it('should handle subscription cancellation', async () => {
       const { POST } = await import('@/app/api/stripe/webhook/route')
-      
+
       const event = {
         type: 'customer.subscription.deleted',
         data: {
@@ -182,10 +182,10 @@ describe('Stripe Integration Test Suite', () => {
             customer: 'cus_test_123',
             status: 'canceled',
             metadata: {
-              tenant_id: 'test-tenant'
-            }
-          }
-        }
+              tenant_id: 'test-tenant',
+            },
+          },
+        },
       }
 
       mockStripe.webhooks.constructEvent.mockReturnValue(event)
@@ -193,19 +193,19 @@ describe('Stripe Integration Test Suite', () => {
       const request = new NextRequest('http://localhost:3000/api/stripe/webhook', {
         method: 'POST',
         headers: {
-          'stripe-signature': 'test-signature'
+          'stripe-signature': 'test-signature',
         },
-        body: JSON.stringify(event)
+        body: JSON.stringify(event),
       })
 
       const response = await POST(request)
-      
+
       expect(response.status).toBe(200)
     })
 
     it('should handle payment failure', async () => {
       const { POST } = await import('@/app/api/stripe/webhook/route')
-      
+
       const event = {
         type: 'invoice.payment_failed',
         data: {
@@ -214,9 +214,9 @@ describe('Stripe Integration Test Suite', () => {
             subscription: 'sub_test_123',
             total: 15000,
             amount_paid: 0,
-            attempt_count: 1
-          }
-        }
+            attempt_count: 1,
+          },
+        },
       }
 
       mockStripe.webhooks.constructEvent.mockReturnValue(event)
@@ -224,13 +224,13 @@ describe('Stripe Integration Test Suite', () => {
       const request = new NextRequest('http://localhost:3000/api/stripe/webhook', {
         method: 'POST',
         headers: {
-          'stripe-signature': 'test-signature'
+          'stripe-signature': 'test-signature',
         },
-        body: JSON.stringify(event)
+        body: JSON.stringify(event),
       })
 
       const response = await POST(request)
-      
+
       expect(response.status).toBe(200)
     })
   })
@@ -238,13 +238,13 @@ describe('Stripe Integration Test Suite', () => {
   describe('Customer Portal', () => {
     it('should create customer portal session', async () => {
       const { POST } = await import('@/app/api/stripe/customer-portal/route')
-      
+
       const request = new NextRequest('http://localhost:3000/api/stripe/customer-portal', {
         method: 'POST',
         body: JSON.stringify({
           tenantId: 'test-tenant',
-          returnUrl: 'http://localhost:3000/dashboard'
-        })
+          returnUrl: 'http://localhost:3000/dashboard',
+        }),
       })
 
       const response = await POST(request)
@@ -255,7 +255,7 @@ describe('Stripe Integration Test Suite', () => {
       expect(data.portalUrl).toBe('https://billing.stripe.com/test')
       expect(mockStripe.billingPortal.sessions.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          return_url: 'http://localhost:3000/dashboard'
+          return_url: 'http://localhost:3000/dashboard',
         })
       )
     })
@@ -264,15 +264,15 @@ describe('Stripe Integration Test Suite', () => {
   describe('Usage Reporting', () => {
     it('should report usage metrics to Stripe', async () => {
       const { POST } = await import('@/app/api/stripe/usage-reporting/route')
-      
+
       const request = new NextRequest('http://localhost:3000/api/stripe/usage-reporting', {
         method: 'POST',
         body: JSON.stringify({
           tenantId: 'test-tenant',
           metric: 'api_calls',
           quantity: 1000,
-          action: 'increment'
-        })
+          action: 'increment',
+        }),
       })
 
       const response = await POST(request)
@@ -284,18 +284,18 @@ describe('Stripe Integration Test Suite', () => {
 
     it('should validate metric types', async () => {
       const { POST } = await import('@/app/api/stripe/usage-reporting/route')
-      
+
       const request = new NextRequest('http://localhost:3000/api/stripe/usage-reporting', {
         method: 'POST',
         body: JSON.stringify({
           tenantId: 'test-tenant',
           metric: 'invalid_metric',
-          quantity: 100
-        })
+          quantity: 100,
+        }),
       })
 
       const response = await POST(request)
-      
+
       expect(response.status).toBe(400)
     })
   })
@@ -303,7 +303,7 @@ describe('Stripe Integration Test Suite', () => {
   describe('Error Handling', () => {
     it('should handle invalid webhook signatures', async () => {
       const { POST } = await import('@/app/api/stripe/webhook/route')
-      
+
       mockStripe.webhooks.constructEvent.mockImplementation(() => {
         throw new Error('Invalid signature')
       })
@@ -311,9 +311,9 @@ describe('Stripe Integration Test Suite', () => {
       const request = new NextRequest('http://localhost:3000/api/stripe/webhook', {
         method: 'POST',
         headers: {
-          'stripe-signature': 'invalid-signature'
+          'stripe-signature': 'invalid-signature',
         },
-        body: JSON.stringify({})
+        body: JSON.stringify({}),
       })
 
       const response = await POST(request)
@@ -325,17 +325,17 @@ describe('Stripe Integration Test Suite', () => {
 
     it('should handle missing required fields', async () => {
       const { POST } = await import('@/app/api/stripe/create-checkout/route')
-      
+
       const request = new NextRequest('http://localhost:3000/api/stripe/create-checkout', {
         method: 'POST',
         body: JSON.stringify({
-          tenantId: 'test-tenant'
+          tenantId: 'test-tenant',
           // Missing required fields
-        })
+        }),
       })
 
       const response = await POST(request)
-      
+
       expect(response.status).toBe(400)
     })
   })

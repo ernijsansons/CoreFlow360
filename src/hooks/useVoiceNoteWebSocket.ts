@@ -34,16 +34,16 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
     reconnectDelay = 2000,
     onTranscription,
     onError,
-    onConnectionChange
+    onConnectionChange,
   } = options
 
   const { data: session } = useSession()
-  
+
   const [isConnected, setIsConnected] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const [transcriptionActive, setTranscriptionActive] = useState(false)
-  
+
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const reconnectCountRef = useRef(0)
@@ -69,17 +69,16 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
     try {
       // Get auth token (implement based on your auth system)
       const token = await getAuthToken()
-      
+
       const wsUrl = `${process.env.NEXT_PUBLIC_VOICE_NOTE_WS_URL || 'ws://localhost:8081'}?token=${token}`
       const ws = new WebSocket(wsUrl)
-      
+
       ws.onopen = () => {
-        console.log('🔗 Voice Note WebSocket connected')
         setIsConnected(true)
         setIsConnecting(false)
         setError(null)
         reconnectCountRef.current = 0
-        
+
         if (onConnectionChange) {
           onConnectionChange(true)
         }
@@ -89,27 +88,23 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
         try {
           const data = JSON.parse(event.data)
           handleWebSocketMessage(data)
-        } catch (err) {
-          console.error('Error parsing WebSocket message:', err)
-        }
+        } catch (err) {}
       }
 
       ws.onerror = (event) => {
-        console.error('WebSocket error:', event)
         const error = new Error('WebSocket connection error')
         setError(error)
-        
+
         if (onError) {
           onError(error)
         }
       }
 
       ws.onclose = (event) => {
-        console.log('WebSocket closed:', event.code, event.reason)
         setIsConnected(false)
         setIsConnecting(false)
         setTranscriptionActive(false)
-        
+
         if (onConnectionChange) {
           onConnectionChange(false)
         }
@@ -121,12 +116,10 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
       }
 
       wsRef.current = ws
-
-    } catch (error: any) {
-      console.error('Failed to connect WebSocket:', error)
+    } catch (error: unknown) {
       setError(error)
       setIsConnecting(false)
-      
+
       if (onError) {
         onError(error)
       }
@@ -161,17 +154,17 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
 
     try {
       // Send start transcription message
-      wsRef.current.send(JSON.stringify({
-        type: 'start_transcription'
-      }))
+      wsRef.current.send(
+        JSON.stringify({
+          type: 'start_transcription',
+        })
+      )
 
       // Setup audio processing
       await setupAudioProcessing(stream)
-      
-      setTranscriptionActive(true)
 
-    } catch (error: any) {
-      console.error('Failed to start transcription:', error)
+      setTranscriptionActive(true)
+    } catch (error: unknown) {
       throw error
     }
   }, [])
@@ -181,9 +174,11 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
    */
   const stopTranscription = useCallback(() => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({
-        type: 'stop_transcription'
-      }))
+      wsRef.current.send(
+        JSON.stringify({
+          type: 'stop_transcription',
+        })
+      )
     }
 
     // Cleanup audio processing
@@ -210,11 +205,13 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
 
     // Convert to base64 for transmission
     const base64Audio = arrayBufferToBase64(audioData)
-    
-    wsRef.current.send(JSON.stringify({
-      type: 'audio_data',
-      audio: base64Audio
-    }))
+
+    wsRef.current.send(
+      JSON.stringify({
+        type: 'audio_data',
+        audio: base64Audio,
+      })
+    )
   }, [])
 
   /**
@@ -223,9 +220,11 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
   const setupAudioProcessing = async (stream: MediaStream) => {
     try {
       // Create audio context
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({
-        sampleRate: 16000
-      })
+      audioContextRef.current = new (window.AudioContext || (window as unknown).webkitAudioContext)(
+        {
+          sampleRate: 16000,
+        }
+      )
 
       const source = audioContextRef.current.createMediaStreamSource(stream)
 
@@ -238,16 +237,14 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
 
         const inputData = event.inputBuffer.getChannelData(0)
         const pcmData = convertFloat32ToInt16(inputData)
-        
+
         sendAudioData(pcmData.buffer)
       }
 
       // Connect audio nodes
       source.connect(audioProcessorRef.current)
       audioProcessorRef.current.connect(audioContextRef.current.destination)
-
     } catch (error) {
-      console.error('Failed to setup audio processing:', error)
       throw error
     }
   }
@@ -255,28 +252,21 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
   /**
    * Handle incoming WebSocket messages
    */
-  const handleWebSocketMessage = (data: any) => {
+  const handleWebSocketMessage = (data: unknown) => {
     switch (data.type) {
       case 'connection':
-        console.log('Connection confirmed:', data.connectionId)
         break
 
       case 'transcription':
         if (onTranscription) {
-          onTranscription(
-            data.transcript,
-            data.isFinal,
-            data.confidence
-          )
+          onTranscription(data.transcript, data.isFinal, data.confidence)
         }
         break
 
       case 'transcription_started':
-        console.log('Transcription started')
         break
 
       case 'transcription_stopped':
-        console.log('Transcription stopped:', data.reason)
         setTranscriptionActive(false)
         break
 
@@ -293,7 +283,6 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
         break
 
       default:
-        console.warn('Unknown message type:', data.type)
     }
   }
 
@@ -302,9 +291,7 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
    */
   const scheduleReconnect = () => {
     reconnectCountRef.current++
-    
-    console.log(`Scheduling reconnect attempt ${reconnectCountRef.current}/${reconnectAttempts}`)
-    
+
     reconnectTimeoutRef.current = setTimeout(() => {
       connect()
     }, reconnectDelay * reconnectCountRef.current)
@@ -337,7 +324,7 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
     const int16 = new Int16Array(buffer.length)
     for (let i = 0; i < buffer.length; i++) {
       const s = Math.max(-1, Math.min(1, buffer[i]))
-      int16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF
+      int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff
     }
     return int16
   }
@@ -385,6 +372,6 @@ export function useVoiceNoteWebSocket(options: UseVoiceNoteWebSocketOptions = {}
     disconnect,
     startTranscription,
     stopTranscription,
-    sendAudioData
+    sendAudioData,
   }
 }

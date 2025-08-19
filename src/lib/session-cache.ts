@@ -5,7 +5,12 @@
 
 import { redis, sessionCache } from './redis'
 import type { Adapter } from '@auth/core/adapters'
-import type { AdapterUser, AdapterAccount, AdapterSession, VerificationToken } from '@auth/core/adapters'
+import type {
+  AdapterUser,
+  AdapterAccount,
+  AdapterSession,
+  VerificationToken,
+} from '@auth/core/adapters'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { PrismaClient } from '@prisma/client'
 import crypto from 'crypto'
@@ -51,7 +56,7 @@ export class SessionCacheManager {
       tenantId: session.tenantId || '',
       userRole: '',
       permissions: [],
-      lastActivity: new Date()
+      lastActivity: new Date(),
     }
 
     // Get user data to populate session
@@ -60,16 +65,15 @@ export class SessionCacheManager {
       select: {
         role: true,
         permissions: true,
-        tenantId: true
-      }
+        tenantId: true,
+      },
     })
 
     if (user) {
       sessionData.tenantId = user.tenantId || ''
       sessionData.userRole = user.role
-      sessionData.permissions = typeof user.permissions === 'string' 
-        ? JSON.parse(user.permissions) 
-        : user.permissions || []
+      sessionData.permissions =
+        typeof user.permissions === 'string' ? JSON.parse(user.permissions) : user.permissions || []
     }
 
     // Calculate TTL (time to live) in seconds
@@ -83,7 +87,7 @@ export class SessionCacheManager {
         `${this.userSessionsKey(session.userId)}:${sessionToken}`,
         { sessionToken, createdAt: new Date() },
         { ttl }
-      )
+      ),
     ])
 
     // Also store in database for persistence
@@ -91,14 +95,14 @@ export class SessionCacheManager {
       data: {
         sessionToken,
         userId: session.userId,
-        expires: session.expires
-      }
+        expires: session.expires,
+      },
     })
 
     return {
       sessionToken: dbSession.sessionToken,
       userId: dbSession.userId,
-      expires: dbSession.expires
+      expires: dbSession.expires,
     }
   }
 
@@ -106,19 +110,19 @@ export class SessionCacheManager {
   async getSession(sessionToken: string): Promise<(AdapterSession & CachedSession) | null> {
     // Try Redis first
     const cached = await redis.get<CachedSession>(this.sessionKey(sessionToken))
-    
+
     if (cached) {
       // Update last activity
       cached.lastActivity = new Date()
-      await redis.set(this.sessionKey(sessionToken), cached, { 
-        ttl: Math.floor((cached.expires.getTime() - Date.now()) / 1000) 
+      await redis.set(this.sessionKey(sessionToken), cached, {
+        ttl: Math.floor((cached.expires.getTime() - Date.now()) / 1000),
       })
-      
+
       return {
         sessionToken,
         userId: cached.userId,
         expires: cached.expires,
-        ...cached
+        ...cached,
       }
     }
 
@@ -130,10 +134,10 @@ export class SessionCacheManager {
           select: {
             role: true,
             permissions: true,
-            tenantId: true
-          }
-        }
-      }
+            tenantId: true,
+          },
+        },
+      },
     })
 
     if (!dbSession) {
@@ -147,10 +151,11 @@ export class SessionCacheManager {
       expires: dbSession.expires,
       tenantId: dbSession.user.tenantId || '',
       userRole: dbSession.user.role,
-      permissions: typeof dbSession.user.permissions === 'string'
-        ? JSON.parse(dbSession.user.permissions)
-        : dbSession.user.permissions || [],
-      lastActivity: new Date()
+      permissions:
+        typeof dbSession.user.permissions === 'string'
+          ? JSON.parse(dbSession.user.permissions)
+          : dbSession.user.permissions || [],
+      lastActivity: new Date(),
     }
 
     // Cache it
@@ -163,16 +168,19 @@ export class SessionCacheManager {
       sessionToken: dbSession.sessionToken,
       userId: dbSession.userId,
       expires: dbSession.expires,
-      ...sessionData
+      ...sessionData,
     }
   }
 
   // Update session
-  async updateSession(sessionToken: string, updates: Partial<AdapterSession>): Promise<AdapterSession | null> {
+  async updateSession(
+    sessionToken: string,
+    updates: Partial<AdapterSession>
+  ): Promise<AdapterSession | null> {
     // Update in database
     const updated = await this.prisma.session.update({
       where: { sessionToken },
-      data: updates
+      data: updates,
     })
 
     // Update cache
@@ -181,7 +189,7 @@ export class SessionCacheManager {
       const updatedCache: CachedSession = {
         ...cached,
         expires: updates.expires || cached.expires,
-        lastActivity: new Date()
+        lastActivity: new Date(),
       }
 
       const ttl = Math.floor((updatedCache.expires.getTime() - Date.now()) / 1000)
@@ -193,7 +201,7 @@ export class SessionCacheManager {
     return {
       sessionToken: updated.sessionToken,
       userId: updated.userId,
-      expires: updated.expires
+      expires: updated.expires,
     }
   }
 
@@ -201,47 +209,49 @@ export class SessionCacheManager {
   async deleteSession(sessionToken: string): Promise<void> {
     // Get session to find userId for cleanup
     const cached = await redis.get<CachedSession>(this.sessionKey(sessionToken))
-    
+
     await Promise.all([
       // Remove from Redis
       redis.del(this.sessionKey(sessionToken)),
       // Remove from user sessions list
-      cached ? redis.del(`${this.userSessionsKey(cached.userId)}:${sessionToken}`) : Promise.resolve(),
+      cached
+        ? redis.del(`${this.userSessionsKey(cached.userId)}:${sessionToken}`)
+        : Promise.resolve(),
       // Remove from database
-      this.prisma.session.delete({ 
-        where: { sessionToken } 
-      }).catch(() => {}) // Ignore if already deleted
+      this.prisma.session
+        .delete({
+          where: { sessionToken },
+        })
+        .catch(() => {}), // Ignore if already deleted
     ])
   }
 
   // Get all sessions for a user
   async getUserSessions(userId: string): Promise<CachedSession[]> {
     const pattern = `${this.userSessionsKey(userId)}:*`
-    const sessionKeys = await redis.client?.keys(pattern) || []
-    
+    const sessionKeys = (await redis.client?.keys(pattern)) || []
+
     if (sessionKeys.length === 0) {
       return []
     }
 
-    const sessionTokens = sessionKeys.map(key => key.split(':').pop()!)
-    const sessions = await Promise.all(
-      sessionTokens.map(token => this.getSession(token))
-    )
+    const sessionTokens = sessionKeys.map((key) => key.split(':').pop()!)
+    const sessions = await Promise.all(sessionTokens.map((token) => this.getSession(token)))
 
-    return sessions.filter((s): s is (AdapterSession & CachedSession) => s !== null)
+    return sessions.filter((s): s is AdapterSession & CachedSession => s !== null)
   }
 
   // Cleanup expired sessions
   async cleanupExpiredSessions(): Promise<number> {
     const cutoff = new Date()
-    
+
     // Clean from database
     const result = await this.prisma.session.deleteMany({
       where: {
         expires: {
-          lte: cutoff
-        }
-      }
+          lte: cutoff,
+        },
+      },
     })
 
     // Redis will handle TTL expiry automatically
@@ -251,10 +261,8 @@ export class SessionCacheManager {
   // Invalidate all sessions for a user
   async invalidateUserSessions(userId: string): Promise<void> {
     const sessions = await this.getUserSessions(userId)
-    
-    await Promise.all(
-      sessions.map(session => this.deleteSession(session.sessionToken))
-    )
+
+    await Promise.all(sessions.map((session) => this.deleteSession(session.sessionToken)))
   }
 
   // Get session statistics
@@ -265,31 +273,33 @@ export class SessionCacheManager {
     tenantSessions?: number
   }> {
     const now = new Date()
-    
-    const whereClause = tenantId ? {
-      user: { tenantId }
-    } : {}
+
+    const whereClause = tenantId
+      ? {
+          user: { tenantId },
+        }
+      : {}
 
     const [total, active, expired] = await Promise.all([
       this.prisma.session.count({ where: whereClause }),
       this.prisma.session.count({
         where: {
           ...whereClause,
-          expires: { gte: now }
-        }
+          expires: { gte: now },
+        },
       }),
       this.prisma.session.count({
         where: {
           ...whereClause,
-          expires: { lt: now }
-        }
-      })
+          expires: { lt: now },
+        },
+      }),
     ])
 
     const stats = {
       totalSessions: total,
       activeSessions: active,
-      expiredSessions: expired
+      expiredSessions: expired,
     }
 
     if (tenantId) {
@@ -307,18 +317,20 @@ export function createCachedAdapter(prisma: PrismaClient): Adapter {
 
   return {
     ...baseAdapter,
-    
+
     createSession: async (session) => {
       return await sessionManager.createSession(session)
     },
 
     getSession: async (sessionToken) => {
       const session = await sessionManager.getSession(sessionToken)
-      return session ? {
-        sessionToken: session.sessionToken,
-        userId: session.userId,
-        expires: session.expires
-      } : null
+      return session
+        ? {
+            sessionToken: session.sessionToken,
+            userId: session.userId,
+            expires: session.expires,
+          }
+        : null
     },
 
     updateSession: async (session) => {
@@ -327,7 +339,7 @@ export function createCachedAdapter(prisma: PrismaClient): Adapter {
 
     deleteSession: async (sessionToken) => {
       await sessionManager.deleteSession(sessionToken)
-    }
+    },
   }
 }
 

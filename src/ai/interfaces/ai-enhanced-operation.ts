@@ -1,14 +1,17 @@
 /**
  * CoreFlow360 - AI-Enhanced Operations Interface
  * MATHEMATICALLY PERFECT, ALGORITHMICALLY OPTIMAL, PROVABLY CORRECT
- * 
+ *
  * Central nervous system for AI-powered business operations
  */
 
 import { AIModelType } from '@prisma/client'
-import { executeSecureOperation, SecureOperationContext } from '@/services/security/secure-operations'
-import { withPerformanceTracking } from '@/utils/performance/performance-tracking'
-import { AuditLogger } from '@/services/security/audit-logging'
+import {
+  executeSecureOperation,
+  SecureOperationContext,
+} from '@/lib/services/security/secure-operations'
+import { withPerformanceTracking } from '@/lib/utils/performance/performance-tracking'
+import { AuditLogger } from '@/lib/services/security/audit-logging'
 
 // AI Configuration Types
 export interface AIConfiguration {
@@ -146,7 +149,7 @@ export async function withAIEnhancement<T = unknown>(
   const aiStartTime = performance.now()
   let totalCost = 0
   let aiAnalysis: AIAnalysisResult | undefined
-  
+
   // Wrap with security and performance tracking
   const secureContext: SecureOperationContext = {
     tenantId: context.tenantId,
@@ -157,68 +160,64 @@ export async function withAIEnhancement<T = unknown>(
     metadata: {
       department: context.department,
       aiModel: config.model,
-      ...context.metadata
-    }
+      ...context.metadata,
+    },
   }
 
   const result = await executeSecureOperation(secureContext, async () => {
-    return withPerformanceTracking(
-      `ai_operation_${context.operation}`,
-      async () => {
-        // 1. Execute the core operation
-        const operationResult = await operation()
+    return withPerformanceTracking(`ai_operation_${context.operation}`, async () => {
+      // 1. Execute the core operation
+      const operationResult = await operation()
 
-        // 2. Perform AI analysis if enabled
-        if (shouldPerformAIAnalysis(context, governance)) {
-          try {
-            aiAnalysis = await performAIAnalysis(context, operationResult, config)
-            totalCost += aiAnalysis.cost
+      // 2. Perform AI analysis if enabled
+      if (shouldPerformAIAnalysis(context, governance)) {
+        try {
+          aiAnalysis = await performAIAnalysis(context, operationResult, config)
+          totalCost += aiAnalysis.cost
 
-            // 3. Log AI activity for audit
-            await AuditLogger.log({
-              action: 'CREATE',
-              entityType: 'ai_activity',
-              entityId: `ai_${Date.now()}`,
-              tenantId: context.tenantId,
-              userId: context.userId,
-              newValues: {
-                operation: context.operation,
-                model: config.model,
-                cost: aiAnalysis.cost,
-                confidence: aiAnalysis.confidence,
-                processingTime: aiAnalysis.processingTime
-              },
-              metadata: {
-                department: context.department,
-                entityType: context.entityType,
-                entityId: context.entityId
-              }
-            })
+          // 3. Log AI activity for audit
+          await AuditLogger.log({
+            action: 'CREATE',
+            entityType: 'ai_activity',
+            entityId: `ai_${Date.now()}`,
+            tenantId: context.tenantId,
+            userId: context.userId,
+            newValues: {
+              operation: context.operation,
+              model: config.model,
+              cost: aiAnalysis.cost,
+              confidence: aiAnalysis.confidence,
+              processingTime: aiAnalysis.processingTime,
+            },
+            metadata: {
+              department: context.department,
+              entityType: context.entityType,
+              entityId: context.entityId,
+            },
+          })
 
-            // 4. Store AI insights
-            await storeAIInsights(context, aiAnalysis)
-            
-          } catch (aiError) {
-            console.warn('AI analysis failed, continuing with operation:', aiError)
-            // AI failure doesn't break the core operation
-          }
+          // 4. Store AI insights
+          await storeAIInsights(context, aiAnalysis)
+        } catch (aiError) {
+          console.warn('AI analysis failed, continuing with operation:', aiError)
+          // AI failure doesn't break the core operation
         }
-
-        return operationResult
       }
-    )()
+
+      return operationResult
+    })()
   })
 
   const aiEndTime = performance.now()
   const aiProcessingTime = aiAnalysis?.processingTime || 0
-  
+
   if (!result.success) {
     throw new Error(result.error || 'Operation failed')
   }
 
   // Calculate quality metrics
   const quality = calculateQualityMetrics(result.data, aiAnalysis, context)
-  
+
   // Calculate governance metrics
   const governanceMetrics = calculateGovernanceMetrics(aiAnalysis, config, governance)
 
@@ -228,10 +227,10 @@ export async function withAIEnhancement<T = unknown>(
     performance: {
       duration: result.performance.duration,
       aiProcessingTime,
-      totalCost
+      totalCost,
     },
     quality,
-    governance: governanceMetrics
+    governance: governanceMetrics,
   }
 }
 
@@ -244,21 +243,21 @@ async function performAIAnalysis(
   config: AIConfiguration
 ): Promise<AIAnalysisResult> {
   const startTime = performance.now()
-  
+
   // This would integrate with actual AI services (OpenAI, Anthropic, etc.)
   // For now, providing the interface and mock analysis
-  
+
   const insights = await generateInsights(context, operationResult, config)
   const predictions = await generatePredictions(context, operationResult, config)
   const recommendations = await generateRecommendations(context, operationResult, config)
   const anomalies = await detectAnomalies(context, operationResult, config)
-  
+
   const endTime = performance.now()
   const processingTime = endTime - startTime
-  
+
   // Calculate overall confidence as weighted average
   const confidence = calculateOverallConfidence(insights, predictions, recommendations)
-  
+
   return {
     insights,
     predictions,
@@ -272,8 +271,8 @@ async function performAIAnalysis(
       timestamp: new Date().toISOString(),
       context: context.operation,
       dataSize: JSON.stringify(operationResult).length,
-      temperature: config.temperature || 0.7
-    }
+      temperature: config.temperature || 0.7,
+    },
   }
 }
 
@@ -287,9 +286,9 @@ async function generateInsights(
 ): Promise<AIInsight[]> {
   // This would call actual AI models
   // For now, returning smart defaults based on context
-  
+
   const insights: AIInsight[] = []
-  
+
   // Business logic insights based on entity type
   switch (context.entityType) {
     case 'customer':
@@ -302,7 +301,7 @@ async function generateInsights(
         category: 'behavior',
         evidence: { engagement_score: 0.85, content_preference: 'technical' },
         actionable: true,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       })
       break
     case 'deal':
@@ -314,7 +313,7 @@ async function generateInsights(
         impact: 'high',
         category: 'sales',
         evidence: { similar_deals: 15, avg_acceleration: 0.3 },
-        actionable: true
+        actionable: true,
       })
       break
     default:
@@ -326,10 +325,10 @@ async function generateInsights(
         impact: 'medium',
         category: 'quality',
         evidence: { completeness_improvement: 0.15 },
-        actionable: false
+        actionable: false,
       })
   }
-  
+
   return insights
 }
 
@@ -342,7 +341,7 @@ async function generatePredictions(
   config: AIConfiguration
 ): Promise<AIPrediction[]> {
   const predictions: AIPrediction[] = []
-  
+
   switch (context.entityType) {
     case 'customer':
       predictions.push({
@@ -355,9 +354,9 @@ async function generatePredictions(
         factors: [
           { name: 'engagement_decline', weight: 0.4, impact: 'negative' },
           { name: 'support_tickets', weight: 0.3, impact: 'negative' },
-          { name: 'contract_value', weight: 0.3, impact: 'positive' }
+          { name: 'contract_value', weight: 0.3, impact: 'positive' },
         ],
-        methodology: 'gradient_boosting'
+        methodology: 'gradient_boosting',
       })
       break
     case 'deal':
@@ -370,13 +369,13 @@ async function generatePredictions(
         factors: [
           { name: 'stakeholder_engagement', weight: 0.35, impact: 'positive' },
           { name: 'technical_fit', weight: 0.25, impact: 'positive' },
-          { name: 'budget_confirmed', weight: 0.4, impact: 'positive' }
+          { name: 'budget_confirmed', weight: 0.4, impact: 'positive' },
         ],
-        methodology: 'neural_network'
+        methodology: 'neural_network',
       })
       break
   }
-  
+
   return predictions
 }
 
@@ -389,7 +388,7 @@ async function generateRecommendations(
   config: AIConfiguration
 ): Promise<AIRecommendation[]> {
   const recommendations: AIRecommendation[] = []
-  
+
   switch (context.entityType) {
     case 'customer':
       recommendations.push({
@@ -402,14 +401,18 @@ async function generateRecommendations(
         implementationComplexity: 'simple',
         estimatedROI: 2.3,
         steps: [
-          { order: 1, action: 'Review customer technical usage patterns', estimated_time: '15 min' },
+          {
+            order: 1,
+            action: 'Review customer technical usage patterns',
+            estimated_time: '15 min',
+          },
           { order: 2, action: 'Schedule call with technical stakeholder', estimated_time: '5 min' },
-          { order: 3, action: 'Conduct technical alignment discussion', estimated_time: '45 min' }
-        ]
+          { order: 3, action: 'Conduct technical alignment discussion', estimated_time: '45 min' },
+        ],
       })
       break
   }
-  
+
   return recommendations
 }
 
@@ -422,24 +425,30 @@ async function detectAnomalies(
   config: AIConfiguration
 ): Promise<AIAnomaly[]> {
   const anomalies: AIAnomaly[] = []
-  
+
   // Statistical anomaly detection would happen here
   // For now, returning smart defaults
-  
+
   return anomalies
 }
 
 /**
  * UTILITY FUNCTIONS
  */
-function shouldPerformAIAnalysis(context: AIAnalysisContext, governance?: AIGovernancePolicy): boolean {
+function shouldPerformAIAnalysis(
+  context: AIAnalysisContext,
+  governance?: AIGovernancePolicy
+): boolean {
   // Check if AI is enabled for this tenant/department
   // Check budget constraints
   // Check governance policies
   return true // Simplified for now
 }
 
-async function storeAIInsights(context: AIAnalysisContext, analysis: AIAnalysisResult): Promise<void> {
+async function storeAIInsights(
+  context: AIAnalysisContext,
+  analysis: AIAnalysisResult
+): Promise<void> {
   // Store insights in database for future reference
   // This would use the AIInsight, AIActivity models from Prisma
   return Promise.resolve()
@@ -453,7 +462,7 @@ function calculateQualityMetrics(
   return {
     dataQuality: 0.85, // Data completeness, accuracy, etc.
     aiConfidence: aiAnalysis?.confidence || 0,
-    resultReliability: 0.9 // Overall result reliability
+    resultReliability: 0.9, // Overall result reliability
   }
 }
 
@@ -461,7 +470,12 @@ function calculateGovernanceMetrics(
   aiAnalysis?: AIAnalysisResult,
   config?: AIConfiguration,
   governance?: AIGovernancePolicy
-): { complianceScore: number; biasScore: number; explainabilityScore: number; auditTrail: string[] } {
+): {
+  complianceScore: number
+  biasScore: number
+  explainabilityScore: number
+  auditTrail: string[]
+} {
   return {
     complianceScore: 0.95,
     biasScore: 0.02, // Lower is better
@@ -469,8 +483,8 @@ function calculateGovernanceMetrics(
     auditTrail: [
       `AI model: ${config?.model || 'unknown'}`,
       `Processing time: ${aiAnalysis?.processingTime || 0}ms`,
-      `Confidence: ${aiAnalysis?.confidence || 0}`
-    ]
+      `Confidence: ${aiAnalysis?.confidence || 0}`,
+    ],
   }
 }
 
@@ -480,13 +494,13 @@ function calculateOverallConfidence(
   recommendations: AIRecommendation[]
 ): number {
   const allConfidences = [
-    ...insights.map(i => i.confidence),
-    ...predictions.map(p => p.confidence),
-    ...recommendations.map(r => r.confidence)
+    ...insights.map((i) => i.confidence),
+    ...predictions.map((p) => p.confidence),
+    ...recommendations.map((r) => r.confidence),
   ]
-  
+
   if (allConfidences.length === 0) return 0
-  
+
   return allConfidences.reduce((sum, conf) => sum + conf, 0) / allConfidences.length
 }
 
@@ -497,12 +511,12 @@ function calculateAICost(model: AIModelType, processingTime: number): number {
     CLAUDE3: 0.025,
     CUSTOM: 0.01,
     VISION: 0.05,
-    EMBEDDING: 0.001
+    EMBEDDING: 0.001,
   }
-  
+
   const baseCost = costs[model] || 0.02
   const timeFactor = Math.max(1, processingTime / 1000) // Scale with processing time
-  
+
   return baseCost * timeFactor
 }
 
@@ -515,5 +529,5 @@ export type {
   AIInsight,
   AIPrediction,
   AIRecommendation,
-  AIAnomaly
+  AIAnomaly,
 }

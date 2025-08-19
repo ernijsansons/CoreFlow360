@@ -18,7 +18,7 @@ import {
   FireIcon,
   ShieldCheckIcon,
   BeakerIcon,
-  LightBulbIcon
+  LightBulbIcon,
 } from '@heroicons/react/24/outline'
 import {
   LineChart,
@@ -34,7 +34,7 @@ import {
   Bar,
   PieChart,
   Pie,
-  Cell
+  Cell,
 } from 'recharts'
 import { toast } from 'react-hot-toast'
 
@@ -114,31 +114,33 @@ const COLORS = {
   success: '#10b981',
   warning: '#f59e0b',
   error: '#ef4444',
-  info: '#3b82f6'
+  info: '#3b82f6',
 }
 
 const STATUS_COLORS = {
-  'EXCELLENT': 'text-green-600 bg-green-100',
-  'GOOD': 'text-blue-600 bg-blue-100',
-  'FAIR': 'text-yellow-600 bg-yellow-100',
-  'POOR': 'text-red-600 bg-red-100',
-  'HEALTHY': 'text-green-600 bg-green-100',
-  'WARNING': 'text-yellow-600 bg-yellow-100',
-  'CRITICAL': 'text-red-600 bg-red-100'
+  EXCELLENT: 'text-green-600 bg-green-100',
+  GOOD: 'text-blue-600 bg-blue-100',
+  FAIR: 'text-yellow-600 bg-yellow-100',
+  POOR: 'text-red-600 bg-red-100',
+  HEALTHY: 'text-green-600 bg-green-100',
+  WARNING: 'text-yellow-600 bg-yellow-100',
+  CRITICAL: 'text-red-600 bg-red-100',
 }
 
 export default function PerformanceDashboard() {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null)
   const [alerts, setAlerts] = useState<PerformanceAlert[]>([])
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
-  const [selectedView, setSelectedView] = useState<'overview' | 'database' | 'cache' | 'system'>('overview')
+  const [selectedView, setSelectedView] = useState<'overview' | 'database' | 'cache' | 'system'>(
+    'overview'
+  )
   const [loading, setLoading] = useState(true)
   const [optimizing, setOptimizing] = useState(false)
-  const [trends, setTrends] = useState<any>(null)
+  const [trends, setTrends] = useState<unknown>(null)
 
   useEffect(() => {
     loadPerformanceData()
-    
+
     // Auto-refresh every 30 seconds
     const interval = setInterval(loadPerformanceData, 30000)
     return () => clearInterval(interval)
@@ -148,30 +150,28 @@ export default function PerformanceDashboard() {
     try {
       const response = await fetch('/api/performance/analytics?includeTrends=true')
       const data = await response.json()
-      
+
       if (data.success) {
         setMetrics({
           overview: data.overview,
           database: data.database,
           cache: data.cache,
-          system: data.system
+          system: data.system,
         })
-        
+
         if (data.alerts) {
           setAlerts(data.alerts.recent || [])
         }
-        
+
         if (data.recommendations) {
           setRecommendations(data.recommendations.top || [])
         }
-        
+
         if (data.trends) {
           setTrends(data.trends)
         }
       }
-      
     } catch (error) {
-      console.error('Failed to load performance data:', error)
       toast.error('Failed to load performance data')
     } finally {
       setLoading(false)
@@ -180,28 +180,27 @@ export default function PerformanceDashboard() {
 
   const handleOptimize = async () => {
     setOptimizing(true)
-    
+
     try {
       const response = await fetch('/api/performance/analytics', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           action: 'optimize',
-          autoApply: true
-        })
+          autoApply: true,
+        }),
       })
-      
+
       const data = await response.json()
-      
+
       if (data.success) {
         toast.success(`Applied ${data.result.optimizationsApplied} optimizations`)
         await loadPerformanceData() // Refresh data
       } else {
         toast.error('Optimization failed')
       }
-      
     } catch (error) {
       toast.error('Optimization failed')
     } finally {
@@ -214,21 +213,20 @@ export default function PerformanceDashboard() {
       const response = await fetch('/api/performance/analytics', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'warmup'
-        })
+          action: 'warmup',
+        }),
       })
-      
+
       const data = await response.json()
-      
+
       if (data.success) {
         toast.success('Performance systems warmed up')
       } else {
         toast.error('Warmup failed')
       }
-      
     } catch (error) {
       toast.error('Warmup failed')
     }
@@ -239,29 +237,28 @@ export default function PerformanceDashboard() {
       const response = await fetch('/api/performance/analytics', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           action: 'export',
-          format: 'json'
-        })
+          format: 'json',
+        }),
       })
-      
+
       const data = await response.json()
-      
+
       if (data.success) {
         const blob = new Blob([JSON.stringify(data.result.data, null, 2)], {
-          type: 'application/json'
+          type: 'application/json',
         })
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
         a.download = `performance-metrics-${new Date().toISOString().split('T')[0]}.json`
         a.click()
-        
+
         toast.success('Performance metrics exported')
       }
-      
     } catch (error) {
       toast.error('Export failed')
     }
@@ -271,17 +268,17 @@ export default function PerformanceDashboard() {
     switch (status) {
       case 'EXCELLENT':
       case 'HEALTHY':
-        return <CheckCircleIcon className="w-5 h-5 text-green-600" />
+        return <CheckCircleIcon className="h-5 w-5 text-green-600" />
       case 'GOOD':
-        return <CheckCircleIcon className="w-5 h-5 text-blue-600" />
+        return <CheckCircleIcon className="h-5 w-5 text-blue-600" />
       case 'FAIR':
       case 'WARNING':
-        return <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600" />
+        return <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600" />
       case 'POOR':
       case 'CRITICAL':
-        return <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
+        return <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
       default:
-        return <ClockIcon className="w-5 h-5 text-gray-600" />
+        return <ClockIcon className="h-5 w-5 text-gray-600" />
     }
   }
 
@@ -294,9 +291,9 @@ export default function PerformanceDashboard() {
 
   if (loading || !metrics) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4" />
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-indigo-600" />
           <p className="text-gray-600">Loading performance dashboard...</p>
         </div>
       </div>
@@ -305,14 +302,14 @@ export default function PerformanceDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="mx-auto max-w-7xl p-6">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <ChartBarIcon className="w-10 h-10 text-indigo-600 mr-4" />
+              <ChartBarIcon className="mr-4 h-10 w-10 text-indigo-600" />
               <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                <h1 className="mb-2 text-4xl font-bold text-gray-900">
                   Performance Command Center
                 </h1>
                 <p className="text-lg text-gray-600">
@@ -323,28 +320,28 @@ export default function PerformanceDashboard() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleWarmup}
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center"
+                className="flex items-center rounded-lg bg-orange-600 px-4 py-2 text-white transition-colors hover:bg-orange-700"
               >
-                <FireIcon className="w-4 h-4 mr-2" />
+                <FireIcon className="mr-2 h-4 w-4" />
                 Warmup
               </button>
               <button
                 onClick={handleOptimize}
                 disabled={optimizing}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center disabled:opacity-50"
+                className="flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
               >
                 {optimizing ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
                 ) : (
-                  <BoltIcon className="w-4 h-4 mr-2" />
+                  <BoltIcon className="mr-2 h-4 w-4" />
                 )}
                 {optimizing ? 'Optimizing...' : 'Auto-Optimize'}
               </button>
               <button
                 onClick={handleExport}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center"
+                className="flex items-center rounded-lg bg-gray-600 px-4 py-2 text-white transition-colors hover:bg-gray-700"
               >
-                <DocumentArrowDownIcon className="w-4 h-4 mr-2" />
+                <DocumentArrowDownIcon className="mr-2 h-4 w-4" />
                 Export
               </button>
             </div>
@@ -356,12 +353,12 @@ export default function PerformanceDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <div className="p-3 bg-indigo-100 rounded-lg mr-4">
-                  <ShieldCheckIcon className="w-8 h-8 text-indigo-600" />
+                <div className="mr-4 rounded-lg bg-indigo-100 p-3">
+                  <ShieldCheckIcon className="h-8 w-8 text-indigo-600" />
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900">System Health Score</h3>
@@ -369,7 +366,9 @@ export default function PerformanceDashboard() {
                 </div>
               </div>
               <div className="text-right">
-                <div className={`text-4xl font-bold ${getHealthColor(metrics.overview.healthScore)}`}>
+                <div
+                  className={`text-4xl font-bold ${getHealthColor(metrics.overview.healthScore)}`}
+                >
                   {metrics.overview.healthScore}/100
                 </div>
                 <div className="flex items-center">
@@ -382,30 +381,32 @@ export default function PerformanceDashboard() {
         </div>
 
         {/* Key Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <ClockIcon className="w-8 h-8 text-blue-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <ClockIcon className="h-8 w-8 text-blue-600" />
               <span className="text-3xl font-bold text-gray-900">
                 {metrics.overview.averageResponseTime.toFixed(0)}ms
               </span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900">Avg Response Time</h3>
-            <p className="text-sm text-gray-600">P95: {metrics.overview.p95ResponseTime.toFixed(0)}ms</p>
+            <p className="text-sm text-gray-600">
+              P95: {metrics.overview.p95ResponseTime.toFixed(0)}ms
+            </p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <ArrowTrendingUpIcon className="w-8 h-8 text-green-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <ArrowTrendingUpIcon className="h-8 w-8 text-green-600" />
               <span className="text-3xl font-bold text-gray-900">
                 {metrics.overview.throughput.toFixed(0)}
               </span>
@@ -418,10 +419,10 @@ export default function PerformanceDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <ExclamationTriangleIcon className="w-8 h-8 text-red-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
               <span className="text-3xl font-bold text-gray-900">
                 {metrics.overview.errorRate.toFixed(1)}%
               </span>
@@ -434,10 +435,10 @@ export default function PerformanceDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <ServerIcon className="w-8 h-8 text-purple-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <ServerIcon className="h-8 w-8 text-purple-600" />
               <span className="text-3xl font-bold text-gray-900">
                 {metrics.cache.hitRatio.toFixed(1)}%
               </span>
@@ -449,23 +450,23 @@ export default function PerformanceDashboard() {
 
         {/* View Selector */}
         <div className="mb-6">
-          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex space-x-1 rounded-lg bg-gray-100 p-1">
             {[
               { id: 'overview', name: 'Overview', icon: ChartBarIcon },
               { id: 'database', name: 'Database', icon: ServerIcon },
               { id: 'cache', name: 'Cache', icon: CpuChipIcon },
-              { id: 'system', name: 'System', icon: CogIcon }
+              { id: 'system', name: 'System', icon: CogIcon },
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setSelectedView(tab.id as any)}
-                className={`flex items-center px-4 py-2 rounded-md transition-all ${
+                onClick={() => setSelectedView(tab.id as unknown)}
+                className={`flex items-center rounded-md px-4 py-2 transition-all ${
                   selectedView === tab.id
                     ? 'bg-white text-indigo-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <tab.icon className="w-4 h-4 mr-2" />
+                <tab.icon className="mr-2 h-4 w-4" />
                 {tab.name}
               </button>
             ))}
@@ -473,14 +474,14 @@ export default function PerformanceDashboard() {
         </div>
 
         {/* Content Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             {selectedView === 'overview' && (
               <>
                 {/* Response Time Trend */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-xl font-semibold mb-4">Response Time Trend</h3>
+                <div className="rounded-xl bg-white p-6 shadow-lg">
+                  <h3 className="mb-4 text-xl font-semibold">Response Time Trend</h3>
                   {trends && trends.responseTime && (
                     <ResponsiveContainer width="100%" height={300}>
                       <LineChart data={trends.responseTime}>
@@ -488,9 +489,9 @@ export default function PerformanceDashboard() {
                         <XAxis dataKey="timestamp" />
                         <YAxis />
                         <Tooltip />
-                        <Line 
-                          type="monotone" 
-                          dataKey="value" 
+                        <Line
+                          type="monotone"
+                          dataKey="value"
                           stroke={COLORS.primary}
                           strokeWidth={2}
                         />
@@ -500,59 +501,67 @@ export default function PerformanceDashboard() {
                 </div>
 
                 {/* System Overview */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-xl font-semibold mb-4">System Resource Usage</h3>
+                <div className="rounded-xl bg-white p-6 shadow-lg">
+                  <h3 className="mb-4 text-xl font-semibold">System Resource Usage</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-3">
                       <div>
-                        <div className="flex justify-between mb-1">
+                        <div className="mb-1 flex justify-between">
                           <span className="text-sm text-gray-600">CPU Usage</span>
-                          <span className="text-sm font-medium">{metrics.system.cpuUsage.toFixed(1)}%</span>
+                          <span className="text-sm font-medium">
+                            {metrics.system.cpuUsage.toFixed(1)}%
+                          </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-500 h-2 rounded-full transition-all"
+                        <div className="h-2 w-full rounded-full bg-gray-200">
+                          <div
+                            className="h-2 rounded-full bg-blue-500 transition-all"
                             style={{ width: `${metrics.system.cpuUsage}%` }}
                           />
                         </div>
                       </div>
-                      
+
                       <div>
-                        <div className="flex justify-between mb-1">
+                        <div className="mb-1 flex justify-between">
                           <span className="text-sm text-gray-600">Memory Usage</span>
-                          <span className="text-sm font-medium">{metrics.system.memoryUsage.toFixed(1)}%</span>
+                          <span className="text-sm font-medium">
+                            {metrics.system.memoryUsage.toFixed(1)}%
+                          </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-green-500 h-2 rounded-full transition-all"
+                        <div className="h-2 w-full rounded-full bg-gray-200">
+                          <div
+                            className="h-2 rounded-full bg-green-500 transition-all"
                             style={{ width: `${metrics.system.memoryUsage}%` }}
                           />
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-3">
                       <div>
-                        <div className="flex justify-between mb-1">
+                        <div className="mb-1 flex justify-between">
                           <span className="text-sm text-gray-600">Disk Usage</span>
-                          <span className="text-sm font-medium">{metrics.system.diskUsage.toFixed(1)}%</span>
+                          <span className="text-sm font-medium">
+                            {metrics.system.diskUsage.toFixed(1)}%
+                          </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-yellow-500 h-2 rounded-full transition-all"
+                        <div className="h-2 w-full rounded-full bg-gray-200">
+                          <div
+                            className="h-2 rounded-full bg-yellow-500 transition-all"
                             style={{ width: `${metrics.system.diskUsage}%` }}
                           />
                         </div>
                       </div>
-                      
+
                       <div>
-                        <div className="flex justify-between mb-1">
+                        <div className="mb-1 flex justify-between">
                           <span className="text-sm text-gray-600">Network Latency</span>
-                          <span className="text-sm font-medium">{metrics.system.networkLatency.toFixed(1)}ms</span>
+                          <span className="text-sm font-medium">
+                            {metrics.system.networkLatency.toFixed(1)}ms
+                          </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-purple-500 h-2 rounded-full transition-all"
+                        <div className="h-2 w-full rounded-full bg-gray-200">
+                          <div
+                            className="h-2 rounded-full bg-purple-500 transition-all"
                             style={{ width: `${Math.min(metrics.system.networkLatency, 100)}%` }}
                           />
                         </div>
@@ -564,18 +573,20 @@ export default function PerformanceDashboard() {
             )}
 
             {selectedView === 'database' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-4">
+              <div className="rounded-xl bg-white p-6 shadow-lg">
+                <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-xl font-semibold">Database Performance</h3>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[metrics.database.performance.status]}`}>
+                  <span
+                    className={`rounded-full px-3 py-1 text-sm font-medium ${STATUS_COLORS[metrics.database.performance.status]}`}
+                  >
                     {metrics.database.performance.status}
                   </span>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-medium text-gray-900 mb-2">Connection Pool</h4>
+                    <div className="rounded-lg bg-gray-50 p-4">
+                      <h4 className="mb-2 font-medium text-gray-900">Connection Pool</h4>
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Total Connections</span>
@@ -587,17 +598,21 @@ export default function PerformanceDashboard() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Utilization</span>
-                          <span className="font-medium">{metrics.database.poolUtilization.toFixed(1)}%</span>
+                          <span className="font-medium">
+                            {metrics.database.poolUtilization.toFixed(1)}%
+                          </span>
                         </div>
                       </div>
                     </div>
-                    
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-medium text-gray-900 mb-2">Query Performance</h4>
+
+                    <div className="rounded-lg bg-gray-50 p-4">
+                      <h4 className="mb-2 font-medium text-gray-900">Query Performance</h4>
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Avg Query Time</span>
-                          <span className="font-medium">{metrics.database.avgQueryTime.toFixed(0)}ms</span>
+                          <span className="font-medium">
+                            {metrics.database.avgQueryTime.toFixed(0)}ms
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Slow Queries</span>
@@ -606,25 +621,29 @@ export default function PerformanceDashboard() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4">
                     {metrics.database.performance.bottlenecks.length > 0 && (
-                      <div className="p-4 bg-red-50 rounded-lg">
-                        <h4 className="font-medium text-red-900 mb-2">Bottlenecks</h4>
+                      <div className="rounded-lg bg-red-50 p-4">
+                        <h4 className="mb-2 font-medium text-red-900">Bottlenecks</h4>
                         <ul className="space-y-1">
                           {metrics.database.performance.bottlenecks.map((bottleneck, index) => (
-                            <li key={index} className="text-sm text-red-700">• {bottleneck}</li>
+                            <li key={index} className="text-sm text-red-700">
+                              • {bottleneck}
+                            </li>
                           ))}
                         </ul>
                       </div>
                     )}
-                    
+
                     {metrics.database.performance.optimizations.length > 0 && (
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <h4 className="font-medium text-blue-900 mb-2">Optimizations</h4>
+                      <div className="rounded-lg bg-blue-50 p-4">
+                        <h4 className="mb-2 font-medium text-blue-900">Optimizations</h4>
                         <ul className="space-y-1">
                           {metrics.database.performance.optimizations.map((optimization, index) => (
-                            <li key={index} className="text-sm text-blue-700">• {optimization}</li>
+                            <li key={index} className="text-sm text-blue-700">
+                              • {optimization}
+                            </li>
                           ))}
                         </ul>
                       </div>
@@ -635,30 +654,38 @@ export default function PerformanceDashboard() {
             )}
 
             {selectedView === 'cache' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-4">
+              <div className="rounded-xl bg-white p-6 shadow-lg">
+                <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-xl font-semibold">Cache Performance</h3>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[metrics.cache.performance.status]}`}>
+                  <span
+                    className={`rounded-full px-3 py-1 text-sm font-medium ${STATUS_COLORS[metrics.cache.performance.status]}`}
+                  >
                     {metrics.cache.performance.status}
                   </span>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-medium text-gray-900 mb-2">Cache Stats</h4>
+                    <div className="rounded-lg bg-gray-50 p-4">
+                      <h4 className="mb-2 font-medium text-gray-900">Cache Stats</h4>
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Hit Ratio</span>
-                          <span className="font-medium text-green-600">{metrics.cache.hitRatio.toFixed(1)}%</span>
+                          <span className="font-medium text-green-600">
+                            {metrics.cache.hitRatio.toFixed(1)}%
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Total Entries</span>
-                          <span className="font-medium">{metrics.cache.totalEntries.toLocaleString()}</span>
+                          <span className="font-medium">
+                            {metrics.cache.totalEntries.toLocaleString()}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Memory Usage</span>
-                          <span className="font-medium">{(metrics.cache.memoryUsage / 1024 / 1024).toFixed(1)}MB</span>
+                          <span className="font-medium">
+                            {(metrics.cache.memoryUsage / 1024 / 1024).toFixed(1)}MB
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Evictions</span>
@@ -667,14 +694,16 @@ export default function PerformanceDashboard() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4">
                     {metrics.cache.performance.recommendations.length > 0 && (
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <h4 className="font-medium text-blue-900 mb-2">Recommendations</h4>
+                      <div className="rounded-lg bg-blue-50 p-4">
+                        <h4 className="mb-2 font-medium text-blue-900">Recommendations</h4>
                         <ul className="space-y-1">
                           {metrics.cache.performance.recommendations.map((rec, index) => (
-                            <li key={index} className="text-sm text-blue-700">• {rec}</li>
+                            <li key={index} className="text-sm text-blue-700">
+                              • {rec}
+                            </li>
                           ))}
                         </ul>
                       </div>
@@ -685,37 +714,54 @@ export default function PerformanceDashboard() {
             )}
 
             {selectedView === 'system' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-4">
+              <div className="rounded-xl bg-white p-6 shadow-lg">
+                <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-xl font-semibold">System Health</h3>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[metrics.system.health.overall]}`}>
+                  <span
+                    className={`rounded-full px-3 py-1 text-sm font-medium ${STATUS_COLORS[metrics.system.health.overall]}`}
+                  >
                     {metrics.system.health.overall}
                   </span>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-4">
                     {Object.entries(metrics.system.health.resources).map(([resource, status]) => (
-                      <div key={resource} className="p-4 bg-gray-50 rounded-lg">
+                      <div key={resource} className="rounded-lg bg-gray-50 p-4">
                         <div className="flex items-center justify-between">
                           <h4 className="font-medium text-gray-900 capitalize">{resource}</h4>
-                          <span className={`px-2 py-1 rounded text-sm font-medium ${STATUS_COLORS[status as keyof typeof STATUS_COLORS]}`}>
+                          <span
+                            className={`rounded px-2 py-1 text-sm font-medium ${STATUS_COLORS[status as keyof typeof STATUS_COLORS]}`}
+                          >
                             {status}
                           </span>
                         </div>
                         <div className="mt-2">
                           <div className="flex justify-between text-sm">
                             <span>Usage</span>
-                            <span>{metrics.system[`${resource}Usage` as keyof typeof metrics.system]?.toFixed(1)}%</span>
+                            <span>
+                              {metrics.system[
+                                `${resource}Usage` as keyof typeof metrics.system
+                              ]?.toFixed(1)}
+                              %
+                            </span>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                            <div 
+                          <div className="mt-1 h-2 w-full rounded-full bg-gray-200">
+                            <div
                               className={`h-2 rounded-full transition-all ${
-                                (metrics.system[`${resource}Usage` as keyof typeof metrics.system] as number) > 80 ? 'bg-red-500' :
-                                (metrics.system[`${resource}Usage` as keyof typeof metrics.system] as number) > 60 ? 'bg-yellow-500' :
-                                'bg-green-500'
+                                (metrics.system[
+                                  `${resource}Usage` as keyof typeof metrics.system
+                                ] as number) > 80
+                                  ? 'bg-red-500'
+                                  : (metrics.system[
+                                        `${resource}Usage` as keyof typeof metrics.system
+                                      ] as number) > 60
+                                    ? 'bg-yellow-500'
+                                    : 'bg-green-500'
                               }`}
-                              style={{ width: `${metrics.system[`${resource}Usage` as keyof typeof metrics.system]}%` }}
+                              style={{
+                                width: `${metrics.system[`${resource}Usage` as keyof typeof metrics.system]}%`,
+                              }}
                             />
                           </div>
                         </div>
@@ -730,29 +776,32 @@ export default function PerformanceDashboard() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Alerts */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <ExclamationTriangleIcon className="w-5 h-5 mr-2 text-red-600" />
+            <div className="rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 flex items-center text-lg font-semibold">
+                <ExclamationTriangleIcon className="mr-2 h-5 w-5 text-red-600" />
                 Recent Alerts
               </h3>
               <div className="space-y-3">
                 {alerts.length > 0 ? (
                   alerts.map((alert) => (
-                    <div key={alert.id} className="p-3 bg-gray-50 rounded-lg">
+                    <div key={alert.id} className="rounded-lg bg-gray-50 p-3">
                       <div className="flex items-start justify-between">
                         <div>
-                          <div className={`inline-flex px-2 py-1 rounded text-xs font-medium ${
-                            alert.severity === 'CRITICAL' ? 'bg-red-100 text-red-700' :
-                            alert.severity === 'HIGH' ? 'bg-orange-100 text-orange-700' :
-                            alert.severity === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-blue-100 text-blue-700'
-                          }`}>
+                          <div
+                            className={`inline-flex rounded px-2 py-1 text-xs font-medium ${
+                              alert.severity === 'CRITICAL'
+                                ? 'bg-red-100 text-red-700'
+                                : alert.severity === 'HIGH'
+                                  ? 'bg-orange-100 text-orange-700'
+                                  : alert.severity === 'MEDIUM'
+                                    ? 'bg-yellow-100 text-yellow-700'
+                                    : 'bg-blue-100 text-blue-700'
+                            }`}
+                          >
                             {alert.severity}
                           </div>
-                          <p className="text-sm font-medium text-gray-900 mt-1">
-                            {alert.message}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="mt-1 text-sm font-medium text-gray-900">{alert.message}</p>
+                          <p className="mt-1 text-xs text-gray-500">
                             {new Date(alert.timestamp).toLocaleString()}
                           </p>
                         </div>
@@ -766,36 +815,37 @@ export default function PerformanceDashboard() {
             </div>
 
             {/* Recommendations */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <LightBulbIcon className="w-5 h-5 mr-2 text-yellow-600" />
+            <div className="rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 flex items-center text-lg font-semibold">
+                <LightBulbIcon className="mr-2 h-5 w-5 text-yellow-600" />
                 Optimization Recommendations
               </h3>
               <div className="space-y-3">
                 {recommendations.length > 0 ? (
                   recommendations.map((rec) => (
-                    <div key={rec.id} className="p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className={`inline-flex px-2 py-1 rounded text-xs font-medium ${
-                          rec.priority === 'CRITICAL' ? 'bg-red-100 text-red-700' :
-                          rec.priority === 'HIGH' ? 'bg-orange-100 text-orange-700' :
-                          rec.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-blue-100 text-blue-700'
-                        }`}>
+                    <div key={rec.id} className="rounded-lg bg-gray-50 p-3">
+                      <div className="mb-2 flex items-start justify-between">
+                        <div
+                          className={`inline-flex rounded px-2 py-1 text-xs font-medium ${
+                            rec.priority === 'CRITICAL'
+                              ? 'bg-red-100 text-red-700'
+                              : rec.priority === 'HIGH'
+                                ? 'bg-orange-100 text-orange-700'
+                                : rec.priority === 'MEDIUM'
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-blue-100 text-blue-700'
+                          }`}
+                        >
                           {rec.priority}
                         </div>
                         {rec.automated && (
-                          <div className="inline-flex px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
+                          <div className="inline-flex rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
                             AUTO
                           </div>
                         )}
                       </div>
-                      <p className="text-sm font-medium text-gray-900 mb-1">
-                        {rec.title}
-                      </p>
-                      <p className="text-xs text-gray-600">
-                        Impact: {rec.expectedImpact}
-                      </p>
+                      <p className="mb-1 text-sm font-medium text-gray-900">{rec.title}</p>
+                      <p className="text-xs text-gray-600">Impact: {rec.expectedImpact}</p>
                     </div>
                   ))
                 ) : (
@@ -805,28 +855,28 @@ export default function PerformanceDashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+            <div className="rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 text-lg font-semibold">Quick Actions</h3>
               <div className="space-y-2">
-                <button 
+                <button
                   onClick={handleWarmup}
-                  className="w-full px-4 py-2 text-left text-sm bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition-colors"
+                  className="w-full rounded-lg bg-orange-50 px-4 py-2 text-left text-sm text-orange-700 transition-colors hover:bg-orange-100"
                 >
-                  <FireIcon className="w-4 h-4 mr-2 inline" />
+                  <FireIcon className="mr-2 inline h-4 w-4" />
                   System Warmup
                 </button>
-                <button 
+                <button
                   onClick={() => toast('Feature coming soon!')}
-                  className="w-full px-4 py-2 text-left text-sm bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
+                  className="w-full rounded-lg bg-purple-50 px-4 py-2 text-left text-sm text-purple-700 transition-colors hover:bg-purple-100"
                 >
-                  <BeakerIcon className="w-4 h-4 mr-2 inline" />
+                  <BeakerIcon className="mr-2 inline h-4 w-4" />
                   Run Diagnostics
                 </button>
-                <button 
+                <button
                   onClick={handleExport}
-                  className="w-full px-4 py-2 text-left text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                  className="w-full rounded-lg bg-blue-50 px-4 py-2 text-left text-sm text-blue-700 transition-colors hover:bg-blue-100"
                 >
-                  <DocumentArrowDownIcon className="w-4 h-4 mr-2 inline" />
+                  <DocumentArrowDownIcon className="mr-2 inline h-4 w-4" />
                   Export Report
                 </button>
               </div>

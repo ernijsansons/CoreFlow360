@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
+import {
   Building2,
   Users,
   MapPin,
@@ -21,7 +21,7 @@ import {
   Target,
   BarChart3,
   Lightbulb,
-  Shield
+  Shield,
 } from 'lucide-react'
 import { GlowingButton } from '@/components/ui/GlowingButton'
 import { UserRole } from './WelcomeRoleSelection'
@@ -49,16 +49,16 @@ const companySizes = [
     description: 'Just getting started with rapid growth potential',
     icon: Zap,
     color: 'text-yellow-400',
-    gradient: 'from-yellow-500 to-orange-600'
+    gradient: 'from-yellow-500 to-orange-600',
   },
   {
     id: 'small',
-    label: 'Small Business', 
+    label: 'Small Business',
     range: '11-50 employees',
     description: 'Established with steady growth and local presence',
     icon: Target,
     color: 'text-green-400',
-    gradient: 'from-green-500 to-emerald-600'
+    gradient: 'from-green-500 to-emerald-600',
   },
   {
     id: 'medium',
@@ -67,7 +67,7 @@ const companySizes = [
     description: 'Growing organization with multiple departments',
     icon: BarChart3,
     color: 'text-blue-400',
-    gradient: 'from-blue-500 to-cyan-600'
+    gradient: 'from-blue-500 to-cyan-600',
   },
   {
     id: 'large',
@@ -76,7 +76,7 @@ const companySizes = [
     description: 'Established corporation with complex operations',
     icon: Building2,
     color: 'text-purple-400',
-    gradient: 'from-purple-500 to-violet-600'
+    gradient: 'from-purple-500 to-violet-600',
   },
   {
     id: 'enterprise',
@@ -85,28 +85,78 @@ const companySizes = [
     description: 'Large-scale organization with global operations',
     icon: Shield,
     color: 'text-indigo-400',
-    gradient: 'from-indigo-500 to-purple-600'
-  }
+    gradient: 'from-indigo-500 to-purple-600',
+  },
 ]
 
 const industries = [
-  { id: 'technology', label: 'Technology & Software', icon: '💻', aiModules: ['AI Development', 'Project Management', 'Customer Support'] },
-  { id: 'healthcare', label: 'Healthcare & Medical', icon: '🏥', aiModules: ['Patient Management', 'Compliance', 'Scheduling'] },
-  { id: 'finance', label: 'Finance & Banking', icon: '💰', aiModules: ['Risk Management', 'Compliance', 'Customer Analytics'] },
-  { id: 'manufacturing', label: 'Manufacturing', icon: '🏭', aiModules: ['Supply Chain', 'Quality Control', 'Inventory Management'] },
-  { id: 'retail', label: 'Retail & E-commerce', icon: '🛍️', aiModules: ['Customer Analytics', 'Inventory Management', 'Marketing Automation'] },
-  { id: 'education', label: 'Education', icon: '🎓', aiModules: ['Student Management', 'Curriculum Planning', 'Performance Analytics'] },
-  { id: 'construction', label: 'Construction & Real Estate', icon: '🏗️', aiModules: ['Project Management', 'Resource Planning', 'Safety Compliance'] },
-  { id: 'consulting', label: 'Professional Services', icon: '💼', aiModules: ['Project Management', 'Time Tracking', 'Client Management'] },
-  { id: 'nonprofit', label: 'Non-Profit', icon: '🤝', aiModules: ['Donor Management', 'Event Planning', 'Volunteer Coordination'] },
-  { id: 'other', label: 'Other', icon: '🌟', aiModules: ['General Business', 'Data Analytics', 'Process Automation'] }
+  {
+    id: 'technology',
+    label: 'Technology & Software',
+    icon: '💻',
+    aiModules: ['AI Development', 'Project Management', 'Customer Support'],
+  },
+  {
+    id: 'healthcare',
+    label: 'Healthcare & Medical',
+    icon: '🏥',
+    aiModules: ['Patient Management', 'Compliance', 'Scheduling'],
+  },
+  {
+    id: 'finance',
+    label: 'Finance & Banking',
+    icon: '💰',
+    aiModules: ['Risk Management', 'Compliance', 'Customer Analytics'],
+  },
+  {
+    id: 'manufacturing',
+    label: 'Manufacturing',
+    icon: '🏭',
+    aiModules: ['Supply Chain', 'Quality Control', 'Inventory Management'],
+  },
+  {
+    id: 'retail',
+    label: 'Retail & E-commerce',
+    icon: '🛍️',
+    aiModules: ['Customer Analytics', 'Inventory Management', 'Marketing Automation'],
+  },
+  {
+    id: 'education',
+    label: 'Education',
+    icon: '🎓',
+    aiModules: ['Student Management', 'Curriculum Planning', 'Performance Analytics'],
+  },
+  {
+    id: 'construction',
+    label: 'Construction & Real Estate',
+    icon: '🏗️',
+    aiModules: ['Project Management', 'Resource Planning', 'Safety Compliance'],
+  },
+  {
+    id: 'consulting',
+    label: 'Professional Services',
+    icon: '💼',
+    aiModules: ['Project Management', 'Time Tracking', 'Client Management'],
+  },
+  {
+    id: 'nonprofit',
+    label: 'Non-Profit',
+    icon: '🤝',
+    aiModules: ['Donor Management', 'Event Planning', 'Volunteer Coordination'],
+  },
+  {
+    id: 'other',
+    label: 'Other',
+    icon: '🌟',
+    aiModules: ['General Business', 'Data Analytics', 'Process Automation'],
+  },
 ]
 
 export function CompanySetupWizard({
   onSetupCompleted,
   onBack,
   userRole,
-  userEmail
+  userEmail,
 }: CompanySetupWizardProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -115,7 +165,7 @@ export function CompanySetupWizard({
     size: 'small',
     industry: '',
     location: '',
-    description: ''
+    description: '',
   })
 
   const [aiRecommendations, setAiRecommendations] = useState<string[]>([])
@@ -123,7 +173,7 @@ export function CompanySetupWizard({
   // Generate AI recommendations based on company profile
   useEffect(() => {
     if (companyInfo.industry && companyInfo.size) {
-      const selectedIndustry = industries.find(i => i.id === companyInfo.industry)
+      const selectedIndustry = industries.find((i) => i.id === companyInfo.industry)
       if (selectedIndustry) {
         setAiRecommendations(selectedIndustry.aiModules)
       }
@@ -146,10 +196,10 @@ export function CompanySetupWizard({
     if (!companyInfo.name || !companyInfo.industry) return
 
     setIsSubmitting(true)
-    
+
     // Simulate API call to save company information
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
     onSetupCompleted(companyInfo)
     setIsSubmitting(false)
   }
@@ -168,33 +218,37 @@ export function CompanySetupWizard({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl mx-auto">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-black p-4">
+      <div className="mx-auto w-full max-w-4xl">
         {/* Progress Indicator */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-12"
         >
-          <div className="flex items-center justify-center mb-8">
+          <div className="mb-8 flex items-center justify-center">
             <div className="flex items-center space-x-4">
               {[1, 2, 3].map((step) => (
                 <div key={step} className="flex items-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                    currentStep >= step 
-                      ? 'border-violet-500 bg-violet-500 text-white' 
-                      : 'border-gray-600 text-gray-400'
-                  }`}>
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300 ${
+                      currentStep >= step
+                        ? 'border-violet-500 bg-violet-500 text-white'
+                        : 'border-gray-600 text-gray-400'
+                    }`}
+                  >
                     {currentStep > step ? (
-                      <CheckCircle className="w-5 h-5" />
+                      <CheckCircle className="h-5 w-5" />
                     ) : (
                       <span className="text-sm font-semibold">{step}</span>
                     )}
                   </div>
                   {step < 3 && (
-                    <div className={`w-16 h-0.5 mx-2 transition-colors duration-300 ${
-                      currentStep > step ? 'bg-violet-500' : 'bg-gray-600'
-                    }`} />
+                    <div
+                      className={`mx-2 h-0.5 w-16 transition-colors duration-300 ${
+                        currentStep > step ? 'bg-violet-500' : 'bg-gray-600'
+                      }`}
+                    />
                   )}
                 </div>
               ))}
@@ -202,21 +256,20 @@ export function CompanySetupWizard({
           </div>
 
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">
-              Let's Set Up Your Company
-            </h1>
+            <h1 className="mb-4 text-4xl font-bold text-white">Let's Set Up Your Company</h1>
             <p className="text-xl text-gray-300">
-              Step {currentStep} of 3 - {
-                currentStep === 1 ? 'Basic Information' :
-                currentStep === 2 ? 'Business Profile' :
-                'AI Recommendations'
-              }
+              Step {currentStep} of 3 -{' '}
+              {currentStep === 1
+                ? 'Basic Information'
+                : currentStep === 2
+                  ? 'Business Profile'
+                  : 'AI Recommendations'}
             </p>
           </div>
         </motion.div>
 
         {/* Step Content */}
-        <div className="bg-gray-900/60 backdrop-blur-sm border border-gray-800/50 rounded-3xl p-8 mb-8">
+        <div className="mb-8 rounded-3xl border border-gray-800/50 bg-gray-900/60 p-8 backdrop-blur-sm">
           <AnimatePresence mode="wait">
             {currentStep === 1 && (
               <motion.div
@@ -226,51 +279,57 @@ export function CompanySetupWizard({
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-6"
               >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-gradient-to-r from-violet-500/20 to-cyan-500/20 rounded-xl">
-                    <Building2 className="w-6 h-6 text-violet-400" />
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="rounded-xl bg-gradient-to-r from-violet-500/20 to-cyan-500/20 p-3">
+                    <Building2 className="h-6 w-6 text-violet-400" />
                   </div>
                   <h2 className="text-2xl font-bold text-white">Company Information</h2>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-3">
+                    <label className="mb-3 block text-sm font-medium text-gray-300">
                       Company Name *
                     </label>
                     <input
                       type="text"
                       value={companyInfo.name}
-                      onChange={(e) => setCompanyInfo(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={(e) =>
+                        setCompanyInfo((prev) => ({ ...prev, name: e.target.value }))
+                      }
                       placeholder="Enter your company name"
-                      className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-violet-500 transition-colors"
+                      className="w-full rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-3 text-white placeholder-gray-400 transition-colors focus:border-violet-500 focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-3">
+                    <label className="mb-3 block text-sm font-medium text-gray-300">
                       Location *
                     </label>
                     <input
                       type="text"
                       value={companyInfo.location}
-                      onChange={(e) => setCompanyInfo(prev => ({ ...prev, location: e.target.value }))}
+                      onChange={(e) =>
+                        setCompanyInfo((prev) => ({ ...prev, location: e.target.value }))
+                      }
                       placeholder="City, Country"
-                      className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-violet-500 transition-colors"
+                      className="w-full rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-3 text-white placeholder-gray-400 transition-colors focus:border-violet-500 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                  <label className="mb-3 block text-sm font-medium text-gray-300">
                     Company Description (Optional)
                   </label>
                   <textarea
                     value={companyInfo.description}
-                    onChange={(e) => setCompanyInfo(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setCompanyInfo((prev) => ({ ...prev, description: e.target.value }))
+                    }
                     placeholder="Brief description of what your company does..."
                     rows={3}
-                    className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-violet-500 transition-colors resize-none"
+                    className="w-full resize-none rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-3 text-white placeholder-gray-400 transition-colors focus:border-violet-500 focus:outline-none"
                   />
                 </div>
               </motion.div>
@@ -284,32 +343,34 @@ export function CompanySetupWizard({
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-8"
               >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl">
-                    <Briefcase className="w-6 h-6 text-emerald-400" />
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 p-3">
+                    <Briefcase className="h-6 w-6 text-emerald-400" />
                   </div>
                   <h2 className="text-2xl font-bold text-white">Business Profile</h2>
                 </div>
 
                 {/* Company Size Selection */}
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-4">Company Size</h3>
-                  <div className="grid md:grid-cols-3 gap-4">
+                  <h3 className="mb-4 text-lg font-semibold text-white">Company Size</h3>
+                  <div className="grid gap-4 md:grid-cols-3">
                     {companySizes.map((size) => (
                       <button
                         key={size.id}
-                        onClick={() => setCompanyInfo(prev => ({ ...prev, size: size.id as any }))}
-                        className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                        onClick={() =>
+                          setCompanyInfo((prev) => ({ ...prev, size: size.id as unknown }))
+                        }
+                        className={`rounded-xl border-2 p-4 text-left transition-all duration-200 ${
                           companyInfo.size === size.id
                             ? 'border-violet-500 bg-violet-500/10'
                             : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
                         }`}
                       >
-                        <div className="flex items-center gap-3 mb-2">
-                          <size.icon className={`w-5 h-5 ${size.color}`} />
+                        <div className="mb-2 flex items-center gap-3">
+                          <size.icon className={`h-5 w-5 ${size.color}`} />
                           <span className="font-semibold text-white">{size.label}</span>
                         </div>
-                        <p className="text-sm text-gray-300 mb-1">{size.range}</p>
+                        <p className="mb-1 text-sm text-gray-300">{size.range}</p>
                         <p className="text-xs text-gray-400">{size.description}</p>
                       </button>
                     ))}
@@ -318,13 +379,15 @@ export function CompanySetupWizard({
 
                 {/* Industry Selection */}
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-4">Industry</h3>
-                  <div className="grid md:grid-cols-2 gap-3">
+                  <h3 className="mb-4 text-lg font-semibold text-white">Industry</h3>
+                  <div className="grid gap-3 md:grid-cols-2">
                     {industries.map((industry) => (
                       <button
                         key={industry.id}
-                        onClick={() => setCompanyInfo(prev => ({ ...prev, industry: industry.id }))}
-                        className={`p-4 rounded-lg border transition-all duration-200 text-left flex items-center gap-3 ${
+                        onClick={() =>
+                          setCompanyInfo((prev) => ({ ...prev, industry: industry.id }))
+                        }
+                        className={`flex items-center gap-3 rounded-lg border p-4 text-left transition-all duration-200 ${
                           companyInfo.industry === industry.id
                             ? 'border-violet-500 bg-violet-500/10'
                             : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
@@ -347,51 +410,56 @@ export function CompanySetupWizard({
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-6"
               >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl">
-                    <Lightbulb className="w-6 h-6 text-cyan-400" />
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="rounded-xl bg-gradient-to-r from-cyan-500/20 to-blue-500/20 p-3">
+                    <Lightbulb className="h-6 w-6 text-cyan-400" />
                   </div>
                   <h2 className="text-2xl font-bold text-white">AI-Powered Recommendations</h2>
                 </div>
 
-                <div className="bg-gradient-to-r from-violet-900/20 to-cyan-900/20 border border-violet-500/20 rounded-2xl p-6">
+                <div className="rounded-2xl border border-violet-500/20 bg-gradient-to-r from-violet-900/20 to-cyan-900/20 p-6">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 bg-gradient-to-r from-violet-500 to-cyan-500 rounded-full">
-                      <Sparkles className="w-6 h-6 text-white" />
+                    <div className="rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 p-3">
+                      <Sparkles className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-3">
+                      <h3 className="mb-3 text-xl font-bold text-white">
                         Perfect Match for {companyInfo.name}
                       </h3>
-                      <p className="text-gray-300 mb-6">
-                        Based on your {industries.find(i => i.id === companyInfo.industry)?.label} industry 
-                        and {companySizes.find(s => s.id === companyInfo.size)?.label.toLowerCase()} size, 
-                        our AI recommends these modules to get you started:
+                      <p className="mb-6 text-gray-300">
+                        Based on your {industries.find((i) => i.id === companyInfo.industry)?.label}{' '}
+                        industry and{' '}
+                        {companySizes.find((s) => s.id === companyInfo.size)?.label.toLowerCase()}{' '}
+                        size, our AI recommends these modules to get you started:
                       </p>
-                      
-                      <div className="grid gap-3 mb-6">
+
+                      <div className="mb-6 grid gap-3">
                         {aiRecommendations.map((module, index) => (
                           <motion.div
                             key={module}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="flex items-center gap-3 bg-gray-800/50 rounded-lg p-3"
+                            className="flex items-center gap-3 rounded-lg bg-gray-800/50 p-3"
                           >
-                            <CheckCircle className="w-5 h-5 text-emerald-400" />
-                            <span className="text-white font-medium">{module}</span>
+                            <CheckCircle className="h-5 w-5 text-emerald-400" />
+                            <span className="font-medium text-white">{module}</span>
                           </motion.div>
                         ))}
                       </div>
 
-                      <div className="bg-gray-800/50 rounded-lg p-4">
-                        <p className="text-sm text-gray-400 mb-2">
+                      <div className="rounded-lg bg-gray-800/50 p-4">
+                        <p className="mb-2 text-sm text-gray-400">
                           <strong className="text-violet-400">Why these modules?</strong>
                         </p>
                         <p className="text-sm text-gray-300">
-                          As a {userRole} in the {industries.find(i => i.id === companyInfo.industry)?.label.toLowerCase()} 
-                          industry, you'll benefit from specialized AI agents that understand your workflow patterns 
-                          and can automate routine tasks while providing intelligent insights.
+                          As a {userRole} in the{' '}
+                          {industries
+                            .find((i) => i.id === companyInfo.industry)
+                            ?.label.toLowerCase()}
+                          industry, you'll benefit from specialized AI agents that understand your
+                          workflow patterns and can automate routine tasks while providing
+                          intelligent insights.
                         </p>
                       </div>
                     </div>
@@ -403,40 +471,32 @@ export function CompanySetupWizard({
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <GlowingButton
             onClick={currentStep === 1 ? onBack : handlePrevious}
             variant="outline"
             className="px-6 py-3"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             {currentStep === 1 ? 'Back to Role Selection' : 'Previous'}
           </GlowingButton>
 
           {currentStep < 3 ? (
-            <GlowingButton
-              onClick={handleNext}
-              disabled={!isStepValid()}
-              className="px-6 py-3"
-            >
+            <GlowingButton onClick={handleNext} disabled={!isStepValid()} className="px-6 py-3">
               Next Step
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowRight className="ml-2 h-4 w-4" />
             </GlowingButton>
           ) : (
-            <GlowingButton
-              onClick={handleComplete}
-              disabled={isSubmitting}
-              className="px-8 py-3"
-            >
+            <GlowingButton onClick={handleComplete} disabled={isSubmitting} className="px-8 py-3">
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border border-white border-t-transparent mr-2"></div>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border border-white border-t-transparent"></div>
                   Setting Up...
                 </>
               ) : (
                 <>
                   Complete Setup
-                  <CheckCircle className="w-4 h-4 ml-2" />
+                  <CheckCircle className="ml-2 h-4 w-4" />
                 </>
               )}
             </GlowingButton>

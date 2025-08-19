@@ -2,7 +2,7 @@
 
 /**
  * Consciousness Marketing Framework
- * 
+ *
  * Revolutionary marketing framework that guides prospects through
  * consciousness awakening stages rather than traditional sales funnels.
  */
@@ -55,23 +55,23 @@ const CONSCIOUSNESS_STAGES: ConsciousnessStage[] = [
       'Thought-provoking questions about business automation',
       'Subtle hints at hidden inefficiencies',
       'Curiosity-generating statistics',
-      'Peer success stories that create gentle FOMO'
+      'Peer success stories that create gentle FOMO',
     ],
     triggers: [
       'Competitor advancement',
       'Operational breakdown',
       'Growth plateau',
-      'Team frustration signals'
+      'Team frustration signals',
     ],
     barriers: [
       'Status quo bias',
       'Change resistance',
       'Investment hesitation',
-      'Learning curve fear'
+      'Learning curve fear',
     ],
     nextStage: 'aware',
     color: '#6B7280',
-    icon: '😴'
+    icon: '😴',
   },
   {
     id: 'aware',
@@ -84,23 +84,23 @@ const CONSCIOUSNESS_STAGES: ConsciousnessStage[] = [
       'Problem identification frameworks',
       'Cost of inaction calculators',
       'Inefficiency assessment tools',
-      'Competitive disadvantage analysis'
+      'Competitive disadvantage analysis',
     ],
     triggers: [
       'Problem becomes painful',
       'Competition pressure increases',
       'Team productivity questions',
-      'Growth ambition emerges'
+      'Growth ambition emerges',
     ],
     barriers: [
       'Problem seems too complex',
       'Overwhelm paralysis',
       'Resource constraints',
-      'Uncertainty about solutions'
+      'Uncertainty about solutions',
     ],
     nextStage: 'seeking',
     color: '#F59E0B',
-    icon: '👁️'
+    icon: '👁️',
   },
   {
     id: 'seeking',
@@ -113,23 +113,23 @@ const CONSCIOUSNESS_STAGES: ConsciousnessStage[] = [
       'Solution comparison guides',
       'Technology education content',
       'Vendor evaluation frameworks',
-      'ROI calculation tools'
+      'ROI calculation tools',
     ],
     triggers: [
       'Research validation',
       'Peer recommendations',
       'Clear value propositions',
-      'Risk mitigation assurance'
+      'Risk mitigation assurance',
     ],
     barriers: [
       'Information overload',
       'Analysis paralysis',
       'Budget concerns',
-      'Implementation fears'
+      'Implementation fears',
     ],
     nextStage: 'understanding',
     color: '#10B981',
-    icon: '🔍'
+    icon: '🔍',
   },
   {
     id: 'understanding',
@@ -142,23 +142,23 @@ const CONSCIOUSNESS_STAGES: ConsciousnessStage[] = [
       'Transformation case studies',
       'Future state visualization',
       'Intelligence multiplication demos',
-      'Success story immersion'
+      'Success story immersion',
     ],
     triggers: [
       'Vision clarity achieved',
       'Benefits quantified',
       'Success path visible',
-      'Confidence building'
+      'Confidence building',
     ],
     barriers: [
       'Implementation complexity',
       'Change management concerns',
       'Team resistance fears',
-      'Investment justification'
+      'Investment justification',
     ],
     nextStage: 'committed',
     color: '#3B82F6',
-    icon: '💡'
+    icon: '💡',
   },
   {
     id: 'committed',
@@ -171,23 +171,23 @@ const CONSCIOUSNESS_STAGES: ConsciousnessStage[] = [
       'Implementation roadmaps',
       'Change management guides',
       'Success guarantee frameworks',
-      'Onboarding experience previews'
+      'Onboarding experience previews',
     ],
     triggers: [
       'Budget allocation',
       'Team alignment',
       'Timeline establishment',
-      'Success metrics definition'
+      'Success metrics definition',
     ],
     barriers: [
       'Final investment hesitation',
       'Vendor selection uncertainty',
       'Timing concerns',
-      'Success guarantee needs'
+      'Success guarantee needs',
     ],
     nextStage: 'transforming',
     color: '#8B5CF6',
-    icon: '🎯'
+    icon: '🎯',
   },
   {
     id: 'transforming',
@@ -200,23 +200,23 @@ const CONSCIOUSNESS_STAGES: ConsciousnessStage[] = [
       'Implementation best practices',
       'Optimization strategies',
       'Advanced feature education',
-      'Expansion opportunity identification'
+      'Expansion opportunity identification',
     ],
     triggers: [
       'Early wins achieved',
       'Team adoption success',
       'Efficiency improvements',
-      'Expansion readiness'
+      'Expansion readiness',
     ],
     barriers: [
       'Implementation challenges',
       'Adoption resistance',
       'Integration complexities',
-      'ROI timeline concerns'
+      'ROI timeline concerns',
     ],
     nextStage: 'conscious',
     color: '#06B6D4',
-    icon: '🚀'
+    icon: '🚀',
   },
   {
     id: 'conscious',
@@ -229,24 +229,24 @@ const CONSCIOUSNESS_STAGES: ConsciousnessStage[] = [
       'Thought leadership platforms',
       'Success story amplification',
       'Community building initiatives',
-      'Advocacy program invitations'
+      'Advocacy program invitations',
     ],
     triggers: [
       'Transformation success',
       'Competitive advantage',
       'Team empowerment',
-      'Growth acceleration'
+      'Growth acceleration',
     ],
     barriers: [
       'Complacency risk',
       'Expansion hesitation',
       'Leadership transition',
-      'Market evolution'
+      'Market evolution',
     ],
     nextStage: 'conscious',
     color: '#EC4899',
-    icon: '✨'
-  }
+    icon: '✨',
+  },
 ]
 
 const FRAMEWORK_PRINCIPLES = [
@@ -254,36 +254,36 @@ const FRAMEWORK_PRINCIPLES = [
     id: 'consciousness-first',
     title: 'Consciousness Over Conversion',
     description: 'Focus on raising awareness rather than pushing for immediate sales',
-    example: 'Ask "Is your business unconscious?" instead of "Buy our software"'
+    example: 'Ask "Is your business unconscious?" instead of "Buy our software"',
   },
   {
     id: 'education-over-promotion',
     title: 'Education Over Promotion',
     description: 'Teach prospects about intelligence multiplication before selling',
-    example: 'Explain 1×2×3×4×5=120 vs 1+1+1+1+1=5 concept'
+    example: 'Explain 1×2×3×4×5=120 vs 1+1+1+1+1=5 concept',
   },
   {
     id: 'journey-respect',
     title: 'Respect the Journey',
-    description: 'Meet prospects where they are, don\'t force advancement',
-    example: 'Provide stage-appropriate content, not one-size-fits-all'
+    description: "Meet prospects where they are, don't force advancement",
+    example: 'Provide stage-appropriate content, not one-size-fits-all',
   },
   {
     id: 'transformation-focus',
     title: 'Transformation Over Transaction',
     description: 'Emphasize business evolution rather than feature benefits',
-    example: 'Promise "conscious business organism" not "better software"'
-  }
+    example: 'Promise "conscious business organism" not "better software"',
+  },
 ]
 
 const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkProps> = ({
   showAnalytics = true,
   interactiveDemo = false,
   onStageChange,
-  className = ''
+  className = '',
 }) => {
   const [selectedStage, setSelectedStage] = useState<ConsciousnessStage>(CONSCIOUSNESS_STAGES[0])
-  const [journeyVisualization, setJourneyVisualization] = useState<any[]>([])
+  const [journeyVisualization, setJourneyVisualization] = useState<unknown[]>([])
   const [showPrinciples, setShowPrinciples] = useState(false)
 
   // Handle stage selection
@@ -299,7 +299,7 @@ const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkP
         stage: stage.name,
         prospects: Math.floor(Math.random() * 1000) + 100,
         conversionRate: Math.random() * 0.3 + 0.1,
-        avgTimeInStage: Math.floor(Math.random() * 30) + 7
+        avgTimeInStage: Math.floor(Math.random() * 30) + 7,
       }))
       setJourneyVisualization(mockJourneyData)
     }
@@ -308,21 +308,19 @@ const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkP
   return (
     <div className={`space-y-8 ${className}`}>
       {/* Framework Header */}
-      <div className="text-center space-y-4">
-        <h2 className="text-4xl font-thin text-white">
-          🧠 Consciousness Marketing Framework
-        </h2>
-        <p className="text-xl text-gray-300 max-w-4xl mx-auto">
-          Revolutionary approach that guides prospects through consciousness awakening 
-          rather than traditional sales pressure
+      <div className="space-y-4 text-center">
+        <h2 className="text-4xl font-thin text-white">🧠 Consciousness Marketing Framework</h2>
+        <p className="mx-auto max-w-4xl text-xl text-gray-300">
+          Revolutionary approach that guides prospects through consciousness awakening rather than
+          traditional sales pressure
         </p>
       </div>
 
       {/* Core Principles */}
-      <div className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border border-purple-700 rounded-2xl p-6">
+      <div className="rounded-2xl border border-purple-700 bg-gradient-to-r from-purple-900/30 to-indigo-900/30 p-6">
         <button
           onClick={() => setShowPrinciples(!showPrinciples)}
-          className="flex items-center justify-between w-full text-left"
+          className="flex w-full items-center justify-between text-left"
         >
           <h3 className="text-xl font-bold text-white">📚 Framework Principles</h3>
           <motion.div
@@ -333,7 +331,7 @@ const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkP
             ▼
           </motion.div>
         </button>
-        
+
         <AnimatePresence>
           {showPrinciples && (
             <motion.div
@@ -341,17 +339,13 @@ const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkP
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="mt-6 grid md:grid-cols-2 gap-4"
+              className="mt-6 grid gap-4 md:grid-cols-2"
             >
               {FRAMEWORK_PRINCIPLES.map((principle) => (
-                <div key={principle.id} className="bg-black/30 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-cyan-400 mb-2">
-                    {principle.title}
-                  </h4>
-                  <p className="text-gray-300 text-sm mb-3">
-                    {principle.description}
-                  </p>
-                  <div className="bg-gray-800 rounded p-2 text-xs text-gray-400">
+                <div key={principle.id} className="rounded-lg bg-black/30 p-4">
+                  <h4 className="mb-2 text-lg font-semibold text-cyan-400">{principle.title}</h4>
+                  <p className="mb-3 text-sm text-gray-300">{principle.description}</p>
+                  <div className="rounded bg-gray-800 p-2 text-xs text-gray-400">
                     <strong>Example:</strong> {principle.example}
                   </div>
                 </div>
@@ -362,18 +356,18 @@ const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkP
       </div>
 
       {/* Consciousness Stages Journey */}
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6">
-        <h3 className="text-2xl font-bold text-white mb-6">
+      <div className="rounded-2xl border border-gray-700 bg-gray-900 p-6">
+        <h3 className="mb-6 text-2xl font-bold text-white">
           🛤️ The 7 Stages of Business Consciousness Awakening
         </h3>
-        
+
         {/* Stage Navigation */}
-        <div className="flex space-x-2 mb-8 overflow-x-auto pb-2">
+        <div className="mb-8 flex space-x-2 overflow-x-auto pb-2">
           {CONSCIOUSNESS_STAGES.map((stage) => (
             <button
               key={stage.id}
               onClick={() => handleStageSelect(stage)}
-              className={`flex-shrink-0 px-4 py-2 rounded-lg border transition-all ${
+              className={`flex-shrink-0 rounded-lg border px-4 py-2 transition-all ${
                 selectedStage.id === stage.id
                   ? 'border-cyan-400 bg-cyan-400/10 text-cyan-400'
                   : 'border-gray-600 bg-gray-800 text-gray-300 hover:border-gray-500'
@@ -394,20 +388,22 @@ const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkP
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="grid md:grid-cols-2 gap-8"
+          className="grid gap-8 md:grid-cols-2"
         >
           {/* Stage Overview */}
           <div className="space-y-6">
-            <div className="bg-black/30 rounded-lg p-6">
-              <div className="flex items-center space-x-4 mb-4">
+            <div className="rounded-lg bg-black/30 p-6">
+              <div className="mb-4 flex items-center space-x-4">
                 <div className="text-4xl">{selectedStage.icon}</div>
                 <div>
                   <h4 className="text-xl font-bold text-white">{selectedStage.name}</h4>
-                  <div className="text-sm text-gray-400">Consciousness Level {selectedStage.level}</div>
+                  <div className="text-sm text-gray-400">
+                    Consciousness Level {selectedStage.level}
+                  </div>
                 </div>
               </div>
-              <p className="text-gray-300 mb-4">{selectedStage.description}</p>
-              <div className="bg-purple-900/30 border border-purple-700 rounded p-3">
+              <p className="mb-4 text-gray-300">{selectedStage.description}</p>
+              <div className="rounded border border-purple-700 bg-purple-900/30 p-3">
                 <div className="text-sm text-purple-300">
                   <strong>Psychological State:</strong> {selectedStage.psychologicalState}
                 </div>
@@ -415,8 +411,8 @@ const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkP
             </div>
 
             {/* Marketing Approach */}
-            <div className="bg-black/30 rounded-lg p-6">
-              <h5 className="text-lg font-semibold text-cyan-400 mb-3">🎯 Marketing Approach</h5>
+            <div className="rounded-lg bg-black/30 p-6">
+              <h5 className="mb-3 text-lg font-semibold text-cyan-400">🎯 Marketing Approach</h5>
               <p className="text-gray-300">{selectedStage.marketingApproach}</p>
             </div>
           </div>
@@ -424,13 +420,13 @@ const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkP
           {/* Stage Tactics */}
           <div className="space-y-6">
             {/* Content Types */}
-            <div className="bg-black/30 rounded-lg p-6">
-              <h5 className="text-lg font-semibold text-green-400 mb-3">📝 Content Types</h5>
+            <div className="rounded-lg bg-black/30 p-6">
+              <h5 className="mb-3 text-lg font-semibold text-green-400">📝 Content Types</h5>
               <div className="space-y-2">
                 {selectedStage.contentTypes.map((content, index) => (
                   <div key={index} className="flex items-start space-x-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />
-                    <span className="text-gray-300 text-sm">{content}</span>
+                    <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-green-400" />
+                    <span className="text-sm text-gray-300">{content}</span>
                   </div>
                 ))}
               </div>
@@ -438,19 +434,23 @@ const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkP
 
             {/* Triggers & Barriers */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-black/30 rounded-lg p-4">
-                <h6 className="text-md font-semibold text-blue-400 mb-2">⚡ Triggers</h6>
+              <div className="rounded-lg bg-black/30 p-4">
+                <h6 className="text-md mb-2 font-semibold text-blue-400">⚡ Triggers</h6>
                 <div className="space-y-1">
                   {selectedStage.triggers.map((trigger, index) => (
-                    <div key={index} className="text-xs text-gray-400">• {trigger}</div>
+                    <div key={index} className="text-xs text-gray-400">
+                      • {trigger}
+                    </div>
                   ))}
                 </div>
               </div>
-              <div className="bg-black/30 rounded-lg p-4">
-                <h6 className="text-md font-semibold text-red-400 mb-2">🚧 Barriers</h6>
+              <div className="rounded-lg bg-black/30 p-4">
+                <h6 className="text-md mb-2 font-semibold text-red-400">🚧 Barriers</h6>
                 <div className="space-y-1">
                   {selectedStage.barriers.map((barrier, index) => (
-                    <div key={index} className="text-xs text-gray-400">• {barrier}</div>
+                    <div key={index} className="text-xs text-gray-400">
+                      • {barrier}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -461,20 +461,18 @@ const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkP
 
       {/* Journey Visualization */}
       {showAnalytics && journeyVisualization.length > 0 && (
-        <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6">
-          <h3 className="text-xl font-bold text-white mb-6">📊 Consciousness Journey Analytics</h3>
-          <div className="grid md:grid-cols-3 lg:grid-cols-7 gap-4">
+        <div className="rounded-2xl border border-gray-700 bg-gray-900 p-6">
+          <h3 className="mb-6 text-xl font-bold text-white">📊 Consciousness Journey Analytics</h3>
+          <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-7">
             {journeyVisualization.map((data, index) => (
-              <div key={index} className="bg-black/30 rounded-lg p-4 text-center">
-                <div className="text-2xl mb-2">{CONSCIOUSNESS_STAGES[index].icon}</div>
+              <div key={index} className="rounded-lg bg-black/30 p-4 text-center">
+                <div className="mb-2 text-2xl">{CONSCIOUSNESS_STAGES[index].icon}</div>
                 <div className="text-lg font-bold text-white">{data.prospects}</div>
-                <div className="text-xs text-gray-400 mb-2">{data.stage}</div>
+                <div className="mb-2 text-xs text-gray-400">{data.stage}</div>
                 <div className="text-xs text-cyan-400">
                   {(data.conversionRate * 100).toFixed(1)}% convert
                 </div>
-                <div className="text-xs text-purple-400">
-                  {data.avgTimeInStage} days avg
-                </div>
+                <div className="text-xs text-purple-400">{data.avgTimeInStage} days avg</div>
               </div>
             ))}
           </div>
@@ -482,35 +480,47 @@ const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkP
       )}
 
       {/* Consciousness-Based Messaging Examples */}
-      <div className="bg-gradient-to-br from-gray-900 to-black border border-gray-700 rounded-2xl p-6">
-        <h3 className="text-xl font-bold text-white mb-6">💬 Consciousness-Based Messaging Examples</h3>
-        <div className="grid md:grid-cols-2 gap-6">
+      <div className="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-900 to-black p-6">
+        <h3 className="mb-6 text-xl font-bold text-white">
+          💬 Consciousness-Based Messaging Examples
+        </h3>
+        <div className="grid gap-6 md:grid-cols-2">
           <div>
-            <h4 className="text-lg font-semibold text-red-400 mb-4">❌ Traditional Sales Approach</h4>
+            <h4 className="mb-4 text-lg font-semibold text-red-400">
+              ❌ Traditional Sales Approach
+            </h4>
             <div className="space-y-3">
-              <div className="bg-red-900/20 border border-red-700 rounded p-3">
+              <div className="rounded border border-red-700 bg-red-900/20 p-3">
                 <div className="text-sm text-red-300">"Buy our business management software"</div>
               </div>
-              <div className="bg-red-900/20 border border-red-700 rounded p-3">
-                <div className="text-sm text-red-300">"Feature-rich platform with advanced capabilities"</div>
+              <div className="rounded border border-red-700 bg-red-900/20 p-3">
+                <div className="text-sm text-red-300">
+                  "Feature-rich platform with advanced capabilities"
+                </div>
               </div>
-              <div className="bg-red-900/20 border border-red-700 rounded p-3">
+              <div className="rounded border border-red-700 bg-red-900/20 p-3">
                 <div className="text-sm text-red-300">"Book a demo today and get 20% off"</div>
               </div>
             </div>
           </div>
-          
+
           <div>
-            <h4 className="text-lg font-semibold text-green-400 mb-4">✅ Consciousness Marketing Approach</h4>
+            <h4 className="mb-4 text-lg font-semibold text-green-400">
+              ✅ Consciousness Marketing Approach
+            </h4>
             <div className="space-y-3">
-              <div className="bg-green-900/20 border border-green-700 rounded p-3">
+              <div className="rounded border border-green-700 bg-green-900/20 p-3">
                 <div className="text-sm text-green-300">"Is your business unconscious?"</div>
               </div>
-              <div className="bg-green-900/20 border border-green-700 rounded p-3">
-                <div className="text-sm text-green-300">"Transform your business into a conscious organism"</div>
+              <div className="rounded border border-green-700 bg-green-900/20 p-3">
+                <div className="text-sm text-green-300">
+                  "Transform your business into a conscious organism"
+                </div>
               </div>
-              <div className="bg-green-900/20 border border-green-700 rounded p-3">
-                <div className="text-sm text-green-300">"Discover your intelligence multiplication potential"</div>
+              <div className="rounded border border-green-700 bg-green-900/20 p-3">
+                <div className="text-sm text-green-300">
+                  "Discover your intelligence multiplication potential"
+                </div>
               </div>
             </div>
           </div>
@@ -518,38 +528,38 @@ const ConsciousnessMarketingFramework: React.FC<ConsciousnessMarketingFrameworkP
       </div>
 
       {/* Implementation Checklist */}
-      <div className="bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border border-indigo-700 rounded-2xl p-6">
-        <h3 className="text-xl font-bold text-white mb-6">✅ Framework Implementation Checklist</h3>
-        <div className="grid md:grid-cols-2 gap-6">
+      <div className="rounded-2xl border border-indigo-700 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 p-6">
+        <h3 className="mb-6 text-xl font-bold text-white">✅ Framework Implementation Checklist</h3>
+        <div className="grid gap-6 md:grid-cols-2">
           <div>
-            <h4 className="text-lg font-semibold text-cyan-400 mb-4">Content Strategy</h4>
+            <h4 className="mb-4 text-lg font-semibold text-cyan-400">Content Strategy</h4>
             <div className="space-y-2">
               {[
                 'Map content to consciousness stages',
                 'Create stage-specific nurture sequences',
                 'Develop consciousness assessment tools',
-                'Build transformation case studies'
+                'Build transformation case studies',
               ].map((item, index) => (
                 <div key={index} className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border border-cyan-400 rounded"></div>
-                  <span className="text-gray-300 text-sm">{item}</span>
+                  <div className="h-4 w-4 rounded border border-cyan-400"></div>
+                  <span className="text-sm text-gray-300">{item}</span>
                 </div>
               ))}
             </div>
           </div>
-          
+
           <div>
-            <h4 className="text-lg font-semibold text-purple-400 mb-4">Analytics Setup</h4>
+            <h4 className="mb-4 text-lg font-semibold text-purple-400">Analytics Setup</h4>
             <div className="space-y-2">
               {[
                 'Track consciousness stage progression',
                 'Measure content engagement by stage',
                 'Monitor conversion rates between stages',
-                'Analyze stage-specific drop-off points'
+                'Analyze stage-specific drop-off points',
               ].map((item, index) => (
                 <div key={index} className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border border-purple-400 rounded"></div>
-                  <span className="text-gray-300 text-sm">{item}</span>
+                  <div className="h-4 w-4 rounded border border-purple-400"></div>
+                  <span className="text-sm text-gray-300">{item}</span>
                 </div>
               ))}
             </div>

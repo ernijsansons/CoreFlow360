@@ -70,7 +70,7 @@ export class BlueGreenDeployment {
         status: 'inactive',
         healthScore: 0,
         lastDeployment: new Date().toISOString(),
-        traffic: 0
+        traffic: 0,
       },
       green: {
         name: 'green',
@@ -78,8 +78,8 @@ export class BlueGreenDeployment {
         status: 'inactive',
         healthScore: 0,
         lastDeployment: new Date().toISOString(),
-        traffic: 0
-      }
+        traffic: 0,
+      },
     }
     this.loadDeploymentState()
   }
@@ -90,12 +90,12 @@ export class BlueGreenDeployment {
   async deploy(version: string): Promise<DeploymentResult> {
     const deploymentId = this.generateDeploymentId()
     const startTime = new Date().toISOString()
-    
+
     logger.info('Starting blue-green deployment', {
       deploymentId,
       version,
       environment: this.config.environment,
-      component: 'deployment'
+      component: 'deployment',
     })
 
     const result: DeploymentResult = {
@@ -111,32 +111,32 @@ export class BlueGreenDeployment {
       rollbackPerformed: false,
       healthChecks: [],
       metrics: { errorRate: 0, responseTime: 0, throughput: 0 },
-      logs: []
+      logs: [],
     }
 
     try {
       // 1. Pre-deployment checks
       await this.runPreDeploymentChecks(result)
-      
+
       // 2. Determine target slot (inactive slot)
       const targetSlot = this.getInactiveSlot()
       const activeSlot = this.getActiveSlot()
-      
+
       result.previousSlot = activeSlot.name
       result.logs.push(`Target slot: ${targetSlot.name}`)
-      
+
       // 3. Deploy to inactive slot
       await this.deployToSlot(targetSlot, version, result)
-      
+
       // 4. Health check new deployment
       await this.performHealthChecks(targetSlot, result)
-      
+
       // 5. Gradual traffic switch (canary deployment)
       await this.performTrafficSwitch(activeSlot, targetSlot, result)
-      
+
       // 6. Monitor for issues
       const monitoringResult = await this.monitorDeployment(targetSlot, result)
-      
+
       if (!monitoringResult.success) {
         // 7. Rollback if issues detected
         await this.rollback(activeSlot, targetSlot, result)
@@ -150,16 +150,15 @@ export class BlueGreenDeployment {
 
       // 9. Post-deployment checks
       await this.runPostDeploymentChecks(result)
-
     } catch (error) {
       logger.error('Blue-green deployment failed', error as Error, {
         component: 'deployment',
-        metadata: { deploymentId, version }
+        metadata: { deploymentId, version },
       })
-      
+
       result.logs.push(`Deployment failed: ${(error as Error).message}`)
       result.success = false
-      
+
       // Attempt rollback on critical failure
       try {
         const activeSlot = this.getActiveSlot()
@@ -169,7 +168,7 @@ export class BlueGreenDeployment {
       } catch (rollbackError) {
         logger.error('Rollback failed', rollbackError as Error, {
           component: 'deployment',
-          metadata: { deploymentId }
+          metadata: { deploymentId },
         })
       }
     }
@@ -182,7 +181,7 @@ export class BlueGreenDeployment {
     // Save deployment result
     this.deploymentHistory.push(result)
     this.saveDeploymentState()
-    
+
     // Send notifications
     await this.sendNotifications(result)
 
@@ -191,7 +190,7 @@ export class BlueGreenDeployment {
       success: result.success,
       duration: result.duration,
       rollbackPerformed: result.rollbackPerformed,
-      component: 'deployment'
+      component: 'deployment',
     })
 
     return result
@@ -203,12 +202,12 @@ export class BlueGreenDeployment {
   async rollbackToPrevious(): Promise<DeploymentResult> {
     const activeSlot = this.getActiveSlot()
     const inactiveSlot = this.getInactiveSlot()
-    
+
     // Find previous deployment
     const previousDeployment = this.deploymentHistory
-      .filter(d => d.success && !d.rollbackPerformed)
+      .filter((d) => d.success && !d.rollbackPerformed)
       .slice(-2)[0] // Get second-to-last successful deployment
-    
+
     if (!previousDeployment) {
       throw new Error('No previous deployment found for rollback')
     }
@@ -227,7 +226,7 @@ export class BlueGreenDeployment {
       rollbackPerformed: true,
       healthChecks: [],
       metrics: { errorRate: 0, responseTime: 0, throughput: 0 },
-      logs: [`Manual rollback to version ${previousDeployment.version}`]
+      logs: [`Manual rollback to version ${previousDeployment.version}`],
     }
 
     try {
@@ -240,7 +239,7 @@ export class BlueGreenDeployment {
 
     result.endTime = new Date().toISOString()
     result.duration = new Date(result.endTime).getTime() - new Date(result.startTime).getTime()
-    
+
     this.deploymentHistory.push(result)
     this.saveDeploymentState()
 
@@ -252,20 +251,20 @@ export class BlueGreenDeployment {
    */
   private async runPreDeploymentChecks(result: DeploymentResult): Promise<void> {
     result.logs.push('Running pre-deployment checks...')
-    
+
     for (const check of this.config.preDeploymentChecks) {
       try {
         const checkResult = await this.executeCheck(check)
         result.healthChecks.push({
           check,
           passed: checkResult.success,
-          details: checkResult.output
+          details: checkResult.output,
         })
-        
+
         if (!checkResult.success) {
           throw new Error(`Pre-deployment check failed: ${check}`)
         }
-        
+
         result.logs.push(`✓ ${check}`)
       } catch (error) {
         result.logs.push(`✗ ${check}: ${(error as Error).message}`)
@@ -277,36 +276,38 @@ export class BlueGreenDeployment {
   /**
    * Deploy to specific slot
    */
-  private async deployToSlot(slot: DeploymentSlot, version: string, result: DeploymentResult): Promise<void> {
+  private async deployToSlot(
+    slot: DeploymentSlot,
+    version: string,
+    result: DeploymentResult
+  ): Promise<void> {
     result.logs.push(`Deploying version ${version} to ${slot.name} slot...`)
-    
+
     slot.status = 'deploying'
     slot.version = version
-    
+
     try {
       // Build and deploy
       const deployCommand = this.config.buildCommand
         .replace('${VERSION}', version)
         .replace('${SLOT}', slot.name)
         .replace('${ENVIRONMENT}', this.config.environment)
-      
+
       result.logs.push(`Executing: ${deployCommand}`)
-      
+
       const deployResult = await this.executeCommand(deployCommand, this.config.deploymentTimeout)
-      
+
       if (deployResult.success) {
         slot.status = 'warming'
         result.logs.push(`✓ Deployment to ${slot.name} completed`)
-        
+
         // Wait for application warmup
         await this.waitForWarmup(slot)
         slot.status = 'inactive' // Ready but not receiving traffic yet
-        
       } else {
         slot.status = 'failed'
         throw new Error(`Deployment failed: ${deployResult.output}`)
       }
-      
     } catch (error) {
       slot.status = 'failed'
       result.logs.push(`Deployment to ${slot.name} failed: ${(error as Error).message}`)
@@ -319,28 +320,29 @@ export class BlueGreenDeployment {
    */
   private async performHealthChecks(slot: DeploymentSlot, result: DeploymentResult): Promise<void> {
     result.logs.push(`Performing health checks on ${slot.name} slot...`)
-    
+
     const maxAttempts = 10
     const delayMs = 5000
-    
+
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         const healthUrl = `${slot.url}/api/health/detailed`
         const response = await fetch(healthUrl, {
           method: 'GET',
-          timeout: this.config.healthCheckTimeout
+          timeout: this.config.healthCheckTimeout,
         })
-        
+
         if (response.ok) {
           const healthData = await response.json()
           slot.healthScore = this.calculateHealthScore(healthData)
-          
-          if (slot.healthScore >= 80) { // 80% health threshold
+
+          if (slot.healthScore >= 80) {
+            // 80% health threshold
             result.logs.push(`✓ Health check passed (${slot.healthScore}%)`)
             result.healthChecks.push({
               check: 'application_health',
               passed: true,
-              details: `Health score: ${slot.healthScore}%`
+              details: `Health score: ${slot.healthScore}%`,
             })
             return
           } else {
@@ -349,23 +351,24 @@ export class BlueGreenDeployment {
         } else {
           result.logs.push(`Health check failed: HTTP ${response.status}`)
         }
-        
       } catch (error) {
-        result.logs.push(`Health check attempt ${attempt}/${maxAttempts} failed: ${(error as Error).message}`)
+        result.logs.push(
+          `Health check attempt ${attempt}/${maxAttempts} failed: ${(error as Error).message}`
+        )
       }
-      
+
       if (attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, delayMs))
+        await new Promise((resolve) => setTimeout(resolve, delayMs))
       }
     }
-    
+
     // All attempts failed
     result.healthChecks.push({
       check: 'application_health',
       passed: false,
-      details: 'Health checks failed after multiple attempts'
+      details: 'Health checks failed after multiple attempts',
     })
-    
+
     throw new Error('Health checks failed')
   }
 
@@ -373,40 +376,42 @@ export class BlueGreenDeployment {
    * Gradual traffic switching (canary deployment)
    */
   private async performTrafficSwitch(
-    fromSlot: DeploymentSlot, 
-    toSlot: DeploymentSlot, 
+    fromSlot: DeploymentSlot,
+    toSlot: DeploymentSlot,
     result: DeploymentResult
   ): Promise<void> {
     result.logs.push('Starting gradual traffic switch...')
-    
+
     // Traffic switch stages: 10% -> 25% -> 50% -> 75% -> 100%
     const trafficStages = [10, 25, 50, 75, 100]
-    
+
     for (const targetTraffic of trafficStages) {
       result.logs.push(`Switching ${targetTraffic}% traffic to ${toSlot.name}`)
-      
+
       // Update traffic distribution
       toSlot.traffic = targetTraffic
       fromSlot.traffic = 100 - targetTraffic
-      
+
       // Apply traffic routing (this would integrate with your load balancer/ingress)
       await this.updateTrafficRouting(fromSlot, toSlot)
-      
+
       // Monitor for issues during this stage
-      await new Promise(resolve => setTimeout(resolve, 30000)) // Wait 30 seconds
-      
+      await new Promise((resolve) => setTimeout(resolve, 30000)) // Wait 30 seconds
+
       const metrics = await this.collectMetrics(toSlot)
       result.metrics = metrics
-      
+
       // Check error rate threshold
       if (metrics.errorRate > this.config.rollbackThreshold) {
         result.logs.push(`⚠ Error rate too high: ${metrics.errorRate}%`)
-        throw new Error(`Error rate exceeded threshold: ${metrics.errorRate}% > ${this.config.rollbackThreshold}%`)
+        throw new Error(
+          `Error rate exceeded threshold: ${metrics.errorRate}% > ${this.config.rollbackThreshold}%`
+        )
       }
-      
+
       result.logs.push(`✓ ${targetTraffic}% traffic switch successful`)
     }
-    
+
     // Mark new slot as active
     toSlot.status = 'active'
     fromSlot.status = 'inactive'
@@ -415,34 +420,38 @@ export class BlueGreenDeployment {
   /**
    * Monitor deployment for issues
    */
-  private async monitorDeployment(slot: DeploymentSlot, result: DeploymentResult): Promise<{ success: boolean; reason?: string }> {
+  private async monitorDeployment(
+    slot: DeploymentSlot,
+    result: DeploymentResult
+  ): Promise<{ success: boolean; reason?: string }> {
     result.logs.push('Monitoring deployment stability...')
-    
+
     const monitoringDuration = 5 * 60 * 1000 // 5 minutes
     const checkInterval = 30 * 1000 // 30 seconds
     const startTime = Date.now()
-    
+
     while (Date.now() - startTime < monitoringDuration) {
       const metrics = await this.collectMetrics(slot)
-      
+
       // Check various health indicators
       if (metrics.errorRate > this.config.rollbackThreshold) {
-        return { 
-          success: false, 
-          reason: `Error rate too high: ${metrics.errorRate}%` 
+        return {
+          success: false,
+          reason: `Error rate too high: ${metrics.errorRate}%`,
         }
       }
-      
-      if (metrics.responseTime > 5000) { // 5 second threshold
-        return { 
-          success: false, 
-          reason: `Response time too high: ${metrics.responseTime}ms` 
+
+      if (metrics.responseTime > 5000) {
+        // 5 second threshold
+        return {
+          success: false,
+          reason: `Response time too high: ${metrics.responseTime}ms`,
         }
       }
-      
-      await new Promise(resolve => setTimeout(resolve, checkInterval))
+
+      await new Promise((resolve) => setTimeout(resolve, checkInterval))
     }
-    
+
     result.logs.push('✓ Monitoring completed - deployment is stable')
     return { success: true }
   }
@@ -451,31 +460,30 @@ export class BlueGreenDeployment {
    * Rollback deployment
    */
   private async rollback(
-    rollbackToSlot: DeploymentSlot, 
-    rollbackFromSlot: DeploymentSlot, 
+    rollbackToSlot: DeploymentSlot,
+    rollbackFromSlot: DeploymentSlot,
     result: DeploymentResult
   ): Promise<void> {
     result.logs.push(`Rolling back from ${rollbackFromSlot.name} to ${rollbackToSlot.name}...`)
-    
+
     try {
       // Immediately switch all traffic back
       rollbackToSlot.traffic = 100
       rollbackFromSlot.traffic = 0
       rollbackToSlot.status = 'active'
       rollbackFromSlot.status = 'failed'
-      
+
       await this.updateTrafficRouting(rollbackFromSlot, rollbackToSlot)
-      
+
       result.logs.push('✓ Traffic switched back to stable version')
-      
+
       // Verify rollback success
       const healthCheck = await this.performQuickHealthCheck(rollbackToSlot)
       if (!healthCheck.success) {
         throw new Error('Rollback health check failed')
       }
-      
+
       result.logs.push('✓ Rollback completed successfully')
-      
     } catch (error) {
       result.logs.push(`Rollback failed: ${(error as Error).message}`)
       throw error
@@ -486,26 +494,26 @@ export class BlueGreenDeployment {
    * Complete deployment process
    */
   private async completeDeployment(
-    oldSlot: DeploymentSlot, 
-    newSlot: DeploymentSlot, 
+    oldSlot: DeploymentSlot,
+    newSlot: DeploymentSlot,
     result: DeploymentResult
   ): Promise<void> {
     result.logs.push('Completing deployment...')
-    
+
     // Final health check
     const finalHealthCheck = await this.performQuickHealthCheck(newSlot)
     if (!finalHealthCheck.success) {
       throw new Error('Final health check failed')
     }
-    
+
     // Update slot statuses
     newSlot.status = 'active'
     newSlot.traffic = 100
     newSlot.lastDeployment = new Date().toISOString()
-    
+
     oldSlot.status = 'inactive'
     oldSlot.traffic = 0
-    
+
     result.logs.push('✓ Deployment completed successfully')
   }
 
@@ -514,16 +522,16 @@ export class BlueGreenDeployment {
    */
   private async runPostDeploymentChecks(result: DeploymentResult): Promise<void> {
     result.logs.push('Running post-deployment checks...')
-    
+
     for (const check of this.config.postDeploymentChecks) {
       try {
         const checkResult = await this.executeCheck(check)
         result.healthChecks.push({
           check: `post_${check}`,
           passed: checkResult.success,
-          details: checkResult.output
+          details: checkResult.output,
         })
-        
+
         result.logs.push(`✓ ${check}`)
       } catch (error) {
         result.logs.push(`⚠ ${check}: ${(error as Error).message}`)
@@ -553,32 +561,35 @@ export class BlueGreenDeployment {
     return `deploy_${Date.now()}_${Math.random().toString(36).substring(7)}`
   }
 
-  private async executeCommand(command: string, timeoutSeconds: number): Promise<{ success: boolean; output: string }> {
+  private async executeCommand(
+    command: string,
+    timeoutSeconds: number
+  ): Promise<{ success: boolean; output: string }> {
     return new Promise((resolve) => {
       const process = spawn('bash', ['-c', command], {
-        stdio: ['pipe', 'pipe', 'pipe']
+        stdio: ['pipe', 'pipe', 'pipe'],
       })
-      
+
       let output = ''
-      
+
       process.stdout.on('data', (data) => {
         output += data.toString()
       })
-      
+
       process.stderr.on('data', (data) => {
         output += data.toString()
       })
-      
+
       const timeout = setTimeout(() => {
         process.kill('SIGTERM')
         resolve({ success: false, output: 'Command timed out' })
       }, timeoutSeconds * 1000)
-      
+
       process.on('close', (code) => {
         clearTimeout(timeout)
         resolve({
           success: code === 0,
-          output: output.trim()
+          output: output.trim(),
         })
       })
     })
@@ -588,34 +599,37 @@ export class BlueGreenDeployment {
     return this.executeCommand(check, 30) // 30 second timeout for checks
   }
 
-  private async waitForWarmup(slot: DeploymentSlot): Promise<void> {
+  private async waitForWarmup(_slot: DeploymentSlot): Promise<void> {
     // Wait for application to warm up (JIT compilation, cache population, etc.)
-    await new Promise(resolve => setTimeout(resolve, 30000)) // 30 seconds
+    await new Promise((resolve) => setTimeout(resolve, 30000)) // 30 seconds
   }
 
-  private calculateHealthScore(healthData: any): number {
+  private calculateHealthScore(healthData: unknown): number {
     // Simple health score calculation (customize based on your health check data)
     let score = 100
-    
+
     if (healthData.database?.status !== 'healthy') score -= 30
     if (healthData.redis?.status !== 'healthy') score -= 20
     if (healthData.memory?.usage > 0.85) score -= 15
-    if (healthData.cpu?.usage > 0.80) score -= 15
-    if (healthData.disk?.usage > 0.90) score -= 20
-    
+    if (healthData.cpu?.usage > 0.8) score -= 15
+    if (healthData.disk?.usage > 0.9) score -= 20
+
     return Math.max(0, score)
   }
 
-  private async updateTrafficRouting(fromSlot: DeploymentSlot, toSlot: DeploymentSlot): Promise<void> {
+  private async updateTrafficRouting(
+    fromSlot: DeploymentSlot,
+    toSlot: DeploymentSlot
+  ): Promise<void> {
     // This would integrate with your actual load balancer/ingress controller
     // For example: Nginx, HAProxy, AWS ALB, Kubernetes Ingress, etc.
-    
+
     logger.info('Updating traffic routing', {
       from: { slot: fromSlot.name, traffic: fromSlot.traffic },
       to: { slot: toSlot.name, traffic: toSlot.traffic },
-      component: 'deployment'
+      component: 'deployment',
     })
-    
+
     // Example: Update Kubernetes ingress weights
     /*
     const ingressConfig = {
@@ -640,21 +654,23 @@ export class BlueGreenDeployment {
     */
   }
 
-  private async collectMetrics(slot: DeploymentSlot): Promise<{ errorRate: number; responseTime: number; throughput: number }> {
+  private async collectMetrics(
+    slot: DeploymentSlot
+  ): Promise<{ errorRate: number; responseTime: number; throughput: number }> {
     try {
       const metricsUrl = `${slot.url}/api/metrics`
       const response = await fetch(metricsUrl)
       const metrics = await response.text()
-      
+
       // Parse Prometheus metrics (simplified)
       const errorRate = this.extractMetric(metrics, 'http_req_failed_rate') || 0
       const responseTime = this.extractMetric(metrics, 'http_req_duration_p95') || 0
       const throughput = this.extractMetric(metrics, 'http_reqs_rate') || 0
-      
+
       return {
         errorRate: errorRate * 100, // Convert to percentage
         responseTime,
-        throughput
+        throughput,
       }
     } catch (error) {
       logger.warn('Failed to collect metrics', { error: (error as Error).message })
@@ -668,17 +684,19 @@ export class BlueGreenDeployment {
     return match ? parseFloat(match[1]) : null
   }
 
-  private async performQuickHealthCheck(slot: DeploymentSlot): Promise<{ success: boolean; details?: string }> {
+  private async performQuickHealthCheck(
+    slot: DeploymentSlot
+  ): Promise<{ success: boolean; details?: string }> {
     try {
       const response = await fetch(`${slot.url}/api/health`, { timeout: 5000 })
-      return { 
+      return {
         success: response.ok,
-        details: response.ok ? 'Health check passed' : `HTTP ${response.status}`
+        details: response.ok ? 'Health check passed' : `HTTP ${response.status}`,
       }
     } catch (error) {
-      return { 
-        success: false, 
-        details: (error as Error).message 
+      return {
+        success: false,
+        details: (error as Error).message,
       }
     }
   }
@@ -691,42 +709,44 @@ export class BlueGreenDeployment {
       success: result.success,
       duration: result.duration,
       rollback_performed: result.rollbackPerformed,
-      timestamp: result.endTime
+      timestamp: result.endTime,
     }
-    
+
     // Send to monitoring webhook
     if (this.config.notificationWebhook) {
       try {
         await fetch(this.config.notificationWebhook, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(notification)
+          body: JSON.stringify(notification),
         })
       } catch (error) {
         logger.warn('Failed to send notification webhook', { error: (error as Error).message })
       }
     }
-    
+
     // Send to Slack
     if (this.config.slackWebhook) {
       const slackMessage = {
         text: `🚀 Deployment ${result.success ? 'Completed' : 'Failed'}`,
-        attachments: [{
-          color: result.success ? 'good' : 'danger',
-          fields: [
-            { title: 'Version', value: result.version, short: true },
-            { title: 'Environment', value: result.environment, short: true },
-            { title: 'Duration', value: `${Math.round(result.duration / 1000)}s`, short: true },
-            { title: 'Rollback', value: result.rollbackPerformed ? 'Yes' : 'No', short: true }
-          ]
-        }]
+        attachments: [
+          {
+            color: result.success ? 'good' : 'danger',
+            fields: [
+              { title: 'Version', value: result.version, short: true },
+              { title: 'Environment', value: result.environment, short: true },
+              { title: 'Duration', value: `${Math.round(result.duration / 1000)}s`, short: true },
+              { title: 'Rollback', value: result.rollbackPerformed ? 'Yes' : 'No', short: true },
+            ],
+          },
+        ],
       }
-      
+
       try {
         await fetch(this.config.slackWebhook, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(slackMessage)
+          body: JSON.stringify(slackMessage),
         })
       } catch (error) {
         logger.warn('Failed to send Slack notification', { error: (error as Error).message })
@@ -737,14 +757,14 @@ export class BlueGreenDeployment {
   private saveDeploymentState(): void {
     const state = {
       slots: this.slots,
-      deploymentHistory: this.deploymentHistory.slice(-10) // Keep last 10 deployments
+      deploymentHistory: this.deploymentHistory.slice(-10), // Keep last 10 deployments
     }
-    
+
     const stateDir = join(process.cwd(), 'deployment-state')
     if (!existsSync(stateDir)) {
       mkdirSync(stateDir, { recursive: true })
     }
-    
+
     writeFileSync(
       join(stateDir, `${this.config.environment}-state.json`),
       JSON.stringify(state, null, 2)
@@ -753,7 +773,11 @@ export class BlueGreenDeployment {
 
   private loadDeploymentState(): void {
     try {
-      const stateFile = join(process.cwd(), 'deployment-state', `${this.config.environment}-state.json`)
+      const stateFile = join(
+        process.cwd(),
+        'deployment-state',
+        `${this.config.environment}-state.json`
+      )
       if (existsSync(stateFile)) {
         const state = JSON.parse(readFileSync(stateFile, 'utf8'))
         this.slots = { ...this.slots, ...state.slots }
@@ -771,7 +795,7 @@ export class BlueGreenDeployment {
   getDeploymentStatus(): { slots: typeof this.slots; history: DeploymentResult[] } {
     return {
       slots: this.slots,
-      history: this.deploymentHistory.slice(-5) // Last 5 deployments
+      history: this.deploymentHistory.slice(-5), // Last 5 deployments
     }
   }
 
@@ -796,15 +820,8 @@ export function createBlueGreenDeployment(config: Partial<DeploymentConfig>): Bl
     healthCheckTimeout: 30000,
     rollbackThreshold: 5, // 5% error rate triggers rollback
     deploymentTimeout: 600, // 10 minutes
-    preDeploymentChecks: [
-      'npm run test',
-      'npm run lint',
-      'npm run build'
-    ],
-    postDeploymentChecks: [
-      'curl -f ${HEALTH_URL}',
-      'npm run test:e2e:smoke'
-    ]
+    preDeploymentChecks: ['npm run test', 'npm run lint', 'npm run build'],
+    postDeploymentChecks: ['curl -f ${HEALTH_URL}', 'npm run test:e2e:smoke'],
   }
 
   return new BlueGreenDeployment({ ...defaultConfig, ...config })
@@ -815,10 +832,7 @@ export const STAGING_CONFIG: Partial<DeploymentConfig> = {
   environment: 'staging',
   rollbackThreshold: 3,
   deploymentTimeout: 300,
-  preDeploymentChecks: [
-    'npm run test',
-    'npm run lint'
-  ]
+  preDeploymentChecks: ['npm run test', 'npm run lint'],
 }
 
 export const PRODUCTION_CONFIG: Partial<DeploymentConfig> = {
@@ -829,11 +843,11 @@ export const PRODUCTION_CONFIG: Partial<DeploymentConfig> = {
     'npm run test',
     'npm run lint',
     'npm run test:e2e',
-    'npm run security:scan'
+    'npm run security:scan',
   ],
   postDeploymentChecks: [
     'curl -f ${HEALTH_URL}',
     'npm run test:e2e:smoke',
-    'npm run test:load:quick'
-  ]
+    'npm run test:load:quick',
+  ],
 }

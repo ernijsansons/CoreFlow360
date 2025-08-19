@@ -12,7 +12,7 @@ export enum ConsentType {
   CALL_RECORDING = 'call_recording',
   DATA_PROCESSING = 'data_processing',
   MARKETING_COMMUNICATIONS = 'marketing_communications',
-  THIRD_PARTY_SHARING = 'third_party_sharing'
+  THIRD_PARTY_SHARING = 'third_party_sharing',
 }
 
 export enum ConsentMethod {
@@ -21,7 +21,7 @@ export enum ConsentMethod {
   DIGITAL_CHECKBOX = 'digital_checkbox',
   SMS_OPTIN = 'sms_optin',
   EMAIL_CONFIRMATION = 'email_confirmation',
-  API_PROVIDED = 'api_provided'
+  API_PROVIDED = 'api_provided',
 }
 
 export enum ConsentStatus {
@@ -29,7 +29,7 @@ export enum ConsentStatus {
   DENIED = 'denied',
   REVOKED = 'revoked',
   EXPIRED = 'expired',
-  PENDING = 'pending'
+  PENDING = 'pending',
 }
 
 export interface ConsentRecord {
@@ -60,7 +60,7 @@ export interface ConsentRecord {
   revokedBy?: string
   revokedReason?: string
   parentConsentId?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   signature?: string
   witnessName?: string
   witnessSignature?: string
@@ -89,7 +89,7 @@ export class ConsentManagementSystem {
     CALL_RECORDING: '1.5',
     DATA_PROCESSING: '3.0',
     MARKETING_COMMUNICATIONS: '1.2',
-    THIRD_PARTY_SHARING: '1.0'
+    THIRD_PARTY_SHARING: '1.0',
   }
 
   private readonly CONSENT_EXPIRY_DAYS = {
@@ -98,7 +98,7 @@ export class ConsentManagementSystem {
     CALL_RECORDING: 365, // 1 year
     DATA_PROCESSING: 1095, // 3 years
     MARKETING_COMMUNICATIONS: 365, // 1 year
-    THIRD_PARTY_SHARING: 365 // 1 year
+    THIRD_PARTY_SHARING: 365, // 1 year
   }
 
   /**
@@ -115,7 +115,7 @@ export class ConsentManagementSystem {
     consentText?: string
     ipAddress: string
     userAgent: string
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
     recordingUrl?: string
     formUrl?: string
     verificationToken?: string
@@ -123,7 +123,7 @@ export class ConsentManagementSystem {
     try {
       // Validate phone number format
       const normalizedPhone = this.normalizePhoneNumber(params.phoneNumber)
-      
+
       // Check for existing active consent
       const existingConsent = await this.getActiveConsent(
         params.tenantId,
@@ -169,7 +169,7 @@ export class ConsentManagementSystem {
         formUrl: params.formUrl,
         checksum: '',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       }
 
       // Generate checksum for integrity
@@ -177,7 +177,7 @@ export class ConsentManagementSystem {
 
       // Store in database
       const consent = await db.consentRecord.create({
-        data: consentData
+        data: consentData,
       })
 
       // Log audit trail
@@ -191,14 +191,12 @@ export class ConsentManagementSystem {
         userAgent: params.userAgent,
         metadata: {
           method: params.consentMethod,
-          version: this.CONSENT_VERSIONS[params.consentType]
-        }
+          version: this.CONSENT_VERSIONS[params.consentType],
+        },
       })
 
       return consent as ConsentRecord
-
     } catch (error) {
-      console.error('Error creating consent:', error)
       throw error
     }
   }
@@ -226,7 +224,7 @@ export class ConsentManagementSystem {
         return {
           isValid: false,
           status: ConsentStatus.DENIED,
-          reason: 'No active consent found'
+          reason: 'No active consent found',
         }
       }
 
@@ -236,13 +234,13 @@ export class ConsentManagementSystem {
           type: 'CONSENT_TAMPERING',
           consentId: consent.id,
           tenantId,
-          severity: 'HIGH'
+          severity: 'HIGH',
         })
 
         return {
           isValid: false,
           status: ConsentStatus.DENIED,
-          reason: 'Consent record integrity check failed'
+          reason: 'Consent record integrity check failed',
         }
       }
 
@@ -252,7 +250,7 @@ export class ConsentManagementSystem {
           isValid: false,
           status: ConsentStatus.EXPIRED,
           reason: 'Consent has expired',
-          expiresAt: consent.expiresAt
+          expiresAt: consent.expiresAt,
         }
       }
 
@@ -261,7 +259,7 @@ export class ConsentManagementSystem {
         return {
           isValid: false,
           status: ConsentStatus.REVOKED,
-          reason: consent.revokedReason || 'Consent was revoked'
+          reason: consent.revokedReason || 'Consent was revoked',
         }
       }
 
@@ -277,7 +275,7 @@ export class ConsentManagementSystem {
           return {
             isValid: false,
             status: ConsentStatus.DENIED,
-            reason: 'Call recording consent required but not found'
+            reason: 'Call recording consent required but not found',
           }
         }
       }
@@ -289,7 +287,7 @@ export class ConsentManagementSystem {
           return {
             isValid: false,
             status: ConsentStatus.DENIED,
-            reason: 'Number is on Do Not Call list'
+            reason: 'Number is on Do Not Call list',
           }
         }
       }
@@ -297,10 +295,7 @@ export class ConsentManagementSystem {
       // State-specific compliance check
       const restrictions: string[] = []
       if (options.checkState) {
-        const stateRestrictions = await this.checkStateCompliance(
-          options.checkState,
-          consentType
-        )
+        const stateRestrictions = await this.checkStateCompliance(options.checkState, consentType)
         restrictions.push(...stateRestrictions)
       }
 
@@ -313,24 +308,21 @@ export class ConsentManagementSystem {
         consentType,
         metadata: {
           verified: true,
-          restrictions
-        }
+          restrictions,
+        },
       })
 
       return {
         isValid: true,
         status: consent.consentStatus,
         expiresAt: consent.expiresAt,
-        restrictions
+        restrictions,
       }
-
     } catch (error) {
-      console.error('Error verifying consent:', error)
-      
       return {
         isValid: false,
         status: ConsentStatus.DENIED,
-        reason: 'Consent verification error'
+        reason: 'Consent verification error',
       }
     }
   }
@@ -358,15 +350,15 @@ export class ConsentManagementSystem {
           where: {
             tenantId,
             phoneNumber: normalizedPhone,
-            consentStatus: ConsentStatus.GRANTED
+            consentStatus: ConsentStatus.GRANTED,
           },
           data: {
             consentStatus: ConsentStatus.REVOKED,
             revokedAt: new Date(),
             revokedBy,
             revokedReason: reason,
-            updatedAt: new Date()
-          }
+            updatedAt: new Date(),
+          },
         })
       } else {
         // Revoke specific consent type
@@ -375,15 +367,15 @@ export class ConsentManagementSystem {
             tenantId,
             phoneNumber: normalizedPhone,
             consentType,
-            consentStatus: ConsentStatus.GRANTED
+            consentStatus: ConsentStatus.GRANTED,
           },
           data: {
             consentStatus: ConsentStatus.REVOKED,
             revokedAt: new Date(),
             revokedBy,
             revokedReason: reason,
-            updatedAt: new Date()
-          }
+            updatedAt: new Date(),
+          },
         })
       }
 
@@ -396,8 +388,8 @@ export class ConsentManagementSystem {
           phoneNumber: normalizedPhone,
           revokedBy,
           reason,
-          revokeAll: options.revokeAll
-        }
+          revokeAll: options.revokeAll,
+        },
       })
 
       // Notify customer if requested
@@ -406,9 +398,7 @@ export class ConsentManagementSystem {
       }
 
       return true
-
     } catch (error) {
-      console.error('Error revoking consent:', error)
       return false
     }
   }
@@ -427,7 +417,7 @@ export class ConsentManagementSystem {
     } = {}
   ): Promise<ConsentRecord[]> {
     try {
-      const where: any = { tenantId }
+      const where: unknown = { tenantId }
 
       if (phoneNumber) {
         where.phoneNumber = this.normalizePhoneNumber(phoneNumber)
@@ -442,22 +432,17 @@ export class ConsentManagementSystem {
       }
 
       if (!options.includeExpired) {
-        where.OR = [
-          { expiresAt: null },
-          { expiresAt: { gt: new Date() } }
-        ]
+        where.OR = [{ expiresAt: null }, { expiresAt: { gt: new Date() } }]
       }
 
       const consents = await db.consentRecord.findMany({
         where,
         orderBy: { createdAt: 'desc' },
-        take: options.limit || 100
+        take: options.limit || 100,
       })
 
       return consents as ConsentRecord[]
-
     } catch (error) {
-      console.error('Error getting consent history:', error)
       return []
     }
   }
@@ -489,7 +474,7 @@ I agree to receive marketing communications from CoreFlow360 about products, ser
 
       [ConsentType.THIRD_PARTY_SHARING]: `
 I consent to CoreFlow360 sharing my information with trusted third-party service providers as described in the Privacy Policy. This sharing is limited to providing requested services and improving user experience.
-      `.trim()
+      `.trim(),
     }
 
     return templates[consentType] || 'Consent text not available'
@@ -509,12 +494,9 @@ I consent to CoreFlow360 sharing my information with trusted third-party service
         phoneNumber,
         consentType,
         consentStatus: ConsentStatus.GRANTED,
-        OR: [
-          { expiresAt: null },
-          { expiresAt: { gt: new Date() } }
-        ]
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       },
-      orderBy: { grantedAt: 'desc' }
+      orderBy: { grantedAt: 'desc' },
     })
 
     return consent as ConsentRecord | null
@@ -526,14 +508,14 @@ I consent to CoreFlow360 sharing my information with trusted third-party service
   private normalizePhoneNumber(phone: string): string {
     // Remove all non-numeric characters
     const cleaned = phone.replace(/\D/g, '')
-    
+
     // Add country code if not present (assuming US)
     if (cleaned.length === 10) {
       return `+1${cleaned}`
     } else if (cleaned.length === 11 && cleaned.startsWith('1')) {
       return `+${cleaned}`
     }
-    
+
     return phone
   }
 
@@ -547,13 +529,13 @@ I consent to CoreFlow360 sharing my information with trusted third-party service
   /**
    * Generate checksum for consent integrity
    */
-  private generateChecksum(data: any): string {
+  private generateChecksum(data: unknown): string {
     const content = JSON.stringify({
       phoneNumber: data.phoneNumber,
       consentType: data.consentType,
       consentText: data.consentText,
       grantedAt: data.grantedAt,
-      expiresAt: data.expiresAt
+      expiresAt: data.expiresAt,
     })
 
     return crypto
@@ -573,13 +555,13 @@ I consent to CoreFlow360 sharing my information with trusted third-party service
   /**
    * Get geolocation from IP address
    */
-  private async getGeolocation(ipAddress: string): Promise<any> {
+  private async getGeolocation(_ipAddress: string): Promise<unknown> {
     // Implementation would use IP geolocation service
     // Mock implementation for now
     return {
       country: 'US',
       state: 'CA',
-      city: 'San Francisco'
+      city: 'San Francisco',
     }
   }
 
@@ -591,13 +573,13 @@ I consent to CoreFlow360 sharing my information with trusted third-party service
     // 1. National DNC Registry
     // 2. Internal DNC list
     // 3. State-specific DNC lists
-    
+
     // Check internal DNC list
     const isDNC = await db.dncList.findFirst({
       where: {
         phoneNumber,
-        active: true
-      }
+        active: true,
+      },
     })
 
     return !!isDNC
@@ -606,25 +588,22 @@ I consent to CoreFlow360 sharing my information with trusted third-party service
   /**
    * Check state-specific compliance
    */
-  private async checkStateCompliance(
-    state: string,
-    consentType: ConsentType
-  ): Promise<string[]> {
+  private async checkStateCompliance(state: string, consentType: ConsentType): Promise<string[]> {
     const restrictions: string[] = []
 
     // State-specific rules
     const stateRules = {
-      'CA': {
+      CA: {
         [ConsentType.CALL_RECORDING]: ['All parties must consent to recording'],
-        [ConsentType.DATA_PROCESSING]: ['CCPA rights must be provided']
+        [ConsentType.DATA_PROCESSING]: ['CCPA rights must be provided'],
       },
-      'FL': {
-        [ConsentType.CALL_RECORDING]: ['All parties must consent to recording']
-      },
-      'IL': {
+      FL: {
         [ConsentType.CALL_RECORDING]: ['All parties must consent to recording'],
-        [ConsentType.DATA_PROCESSING]: ['Biometric data requires written consent']
-      }
+      },
+      IL: {
+        [ConsentType.CALL_RECORDING]: ['All parties must consent to recording'],
+        [ConsentType.DATA_PROCESSING]: ['Biometric data requires written consent'],
+      },
       // Add more states as needed
     }
 
@@ -645,7 +624,7 @@ I consent to CoreFlow360 sharing my information with trusted third-party service
     consentType?: ConsentType
     ipAddress?: string
     userAgent?: string
-    metadata?: any
+    metadata?: unknown
   }): Promise<void> {
     await db.auditLog.create({
       data: {
@@ -657,8 +636,8 @@ I consent to CoreFlow360 sharing my information with trusted third-party service
         ipAddress: params.ipAddress,
         userAgent: params.userAgent,
         metadata: params.metadata,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     })
   }
 
@@ -670,7 +649,7 @@ I consent to CoreFlow360 sharing my information with trusted third-party service
     consentId: string
     tenantId: string
     severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
-    metadata?: any
+    metadata?: unknown
   }): Promise<void> {
     await db.securityAlert.create({
       data: {
@@ -680,14 +659,13 @@ I consent to CoreFlow360 sharing my information with trusted third-party service
         entityId: params.consentId,
         tenantId: params.tenantId,
         metadata: params.metadata,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     })
 
     // Notify security team for HIGH/CRITICAL alerts
     if (['HIGH', 'CRITICAL'].includes(params.severity)) {
       // Implementation would send alerts
-      console.error(`SECURITY ALERT: ${params.type} for consent ${params.consentId}`)
     }
   }
 
@@ -695,11 +673,10 @@ I consent to CoreFlow360 sharing my information with trusted third-party service
    * Send revocation notification
    */
   private async sendRevocationNotification(
-    phoneNumber: string,
+    _phoneNumber: string,
     consentType: ConsentType
   ): Promise<void> {
     // Implementation would send SMS/Email notification
-    console.log(`Revocation notification sent to ${phoneNumber} for ${consentType}`)
   }
 }
 

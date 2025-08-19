@@ -18,23 +18,23 @@ describe('TwilioVoiceClient', () => {
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks()
-    
+
     // Mock Twilio instance
     mockTwilioInstance = {
       calls: {
         create: jest.fn(),
         get: jest.fn(),
-        list: jest.fn()
+        list: jest.fn(),
       },
       conferences: {
-        list: jest.fn()
+        list: jest.fn(),
       },
       incomingPhoneNumbers: {
-        list: jest.fn()
+        list: jest.fn(),
       },
       messages: {
-        create: jest.fn()
-      }
+        create: jest.fn(),
+      },
     }
 
     mockTwilio.mockReturnValue(mockTwilioInstance)
@@ -53,9 +53,9 @@ describe('TwilioVoiceClient', () => {
     it('should throw error if credentials missing', () => {
       const originalSid = process.env.TWILIO_ACCOUNT_SID
       delete process.env.TWILIO_ACCOUNT_SID
-      
+
       expect(() => new TwilioVoiceClient()).toThrow('Twilio credentials not configured')
-      
+
       process.env.TWILIO_ACCOUNT_SID = originalSid
     })
   })
@@ -69,8 +69,8 @@ describe('TwilioVoiceClient', () => {
       script: {
         id: 'script-789',
         greeting: 'Hello, this is CoreFlow360',
-        questions: ['How can I help you today?']
-      }
+        questions: ['How can I help you today?'],
+      },
     }
 
     it('should initiate call successfully', async () => {
@@ -80,7 +80,7 @@ describe('TwilioVoiceClient', () => {
         status: 'queued',
         to: callParams.to,
         from: callParams.from,
-        dateCreated: new Date()
+        dateCreated: new Date(),
       })
 
       const result = await twilioClient.initiateCall(callParams)
@@ -88,7 +88,7 @@ describe('TwilioVoiceClient', () => {
       expect(result.success).toBe(true)
       expect(result.callSid).toBe(mockCallSid)
       expect(result.status).toBe('queued')
-      
+
       // Verify TwiML URL includes required parameters
       const createCall = mockTwilioInstance.calls.create.mock.calls[0][0]
       expect(createCall.url).toContain('leadId=lead-123')
@@ -98,7 +98,7 @@ describe('TwilioVoiceClient', () => {
 
     it('should handle invalid phone numbers', async () => {
       const invalidParams = { ...callParams, to: 'invalid-number' }
-      
+
       await expect(twilioClient.initiateCall(invalidParams)).rejects.toThrow(
         'Invalid phone number format'
       )
@@ -110,7 +110,7 @@ describe('TwilioVoiceClient', () => {
       )
 
       const result = await twilioClient.initiateCall(callParams)
-      
+
       expect(result.success).toBe(false)
       expect(result.error).toContain('Twilio API Error')
     })
@@ -123,7 +123,7 @@ describe('TwilioVoiceClient', () => {
       }
 
       await Promise.all(promises)
-      
+
       // Should queue calls to respect rate limits
       expect(mockTwilioInstance.calls.create).toHaveBeenCalledTimes(5)
     })
@@ -140,11 +140,11 @@ describe('TwilioVoiceClient', () => {
         startTime: new Date(Date.now() - 45000),
         endTime: null,
         to: '+11234567890',
-        from: '+10987654321'
+        from: '+10987654321',
       }
 
       mockTwilioInstance.calls.get.mockReturnValue({
-        fetch: jest.fn().mockResolvedValue(mockCall)
+        fetch: jest.fn().mockResolvedValue(mockCall),
       })
 
       const status = await twilioClient.getCallStatus(callSid)
@@ -156,7 +156,7 @@ describe('TwilioVoiceClient', () => {
 
     it('should handle non-existent calls', async () => {
       mockTwilioInstance.calls.get.mockReturnValue({
-        fetch: jest.fn().mockRejectedValue(new Error('Call not found'))
+        fetch: jest.fn().mockRejectedValue(new Error('Call not found')),
       })
 
       await expect(twilioClient.getCallStatus(callSid)).rejects.toThrow('Call not found')
@@ -170,8 +170,8 @@ describe('TwilioVoiceClient', () => {
       const mockCall = {
         update: jest.fn().mockResolvedValue({
           sid: callSid,
-          status: 'completed'
-        })
+          status: 'completed',
+        }),
       }
 
       mockTwilioInstance.calls.get.mockReturnValue(mockCall)
@@ -185,7 +185,7 @@ describe('TwilioVoiceClient', () => {
     it('should handle already completed calls', async () => {
       const mockCall = {
         fetch: jest.fn().mockResolvedValue({ status: 'completed' }),
-        update: jest.fn()
+        update: jest.fn(),
       }
 
       mockTwilioInstance.calls.get.mockReturnValue(mockCall)
@@ -198,29 +198,25 @@ describe('TwilioVoiceClient', () => {
   })
 
   describe('bulkCall', () => {
-    const phoneNumbers = [
-      '+11234567890',
-      '+10987654321',
-      '+15555555555'
-    ]
+    const phoneNumbers = ['+11234567890', '+10987654321', '+15555555555']
 
     it('should initiate bulk calls with rate limiting', async () => {
       mockTwilioInstance.calls.create.mockResolvedValue({
         sid: 'CA' + Math.random().toString(36).substr(2, 14),
-        status: 'queued'
+        status: 'queued',
       })
 
       const results = await twilioClient.bulkCall({
         phoneNumbers,
         from: '+10987654321',
         tenantId: 'tenant-123',
-        script: { id: 'script-123', greeting: 'Hello' }
+        script: { id: 'script-123', greeting: 'Hello' },
       })
 
       expect(results).toHaveLength(3)
-      expect(results.every(r => r.success)).toBe(true)
+      expect(results.every((r) => r.success)).toBe(true)
       expect(mockTwilioInstance.calls.create).toHaveBeenCalledTimes(3)
-    });
+    })
 
     it('should handle partial failures in bulk calls', async () => {
       mockTwilioInstance.calls.create
@@ -232,7 +228,7 @@ describe('TwilioVoiceClient', () => {
         phoneNumbers,
         from: '+10987654321',
         tenantId: 'tenant-123',
-        script: { id: 'script-123', greeting: 'Hello' }
+        script: { id: 'script-123', greeting: 'Hello' },
       })
 
       expect(results[0].success).toBe(true)
@@ -243,18 +239,18 @@ describe('TwilioVoiceClient', () => {
 
     it('should respect concurrent call limits', async () => {
       jest.useFakeTimers()
-      
+
       const largeBatch = Array(100).fill('+11234567890')
       mockTwilioInstance.calls.create.mockResolvedValue({
         sid: 'CA123',
-        status: 'queued'
+        status: 'queued',
       })
 
       const bulkPromise = twilioClient.bulkCall({
         phoneNumbers: largeBatch,
         from: '+10987654321',
         tenantId: 'tenant-123',
-        script: { id: 'script-123', greeting: 'Hello' }
+        script: { id: 'script-123', greeting: 'Hello' },
       })
 
       // Fast forward through rate limiting
@@ -263,7 +259,7 @@ describe('TwilioVoiceClient', () => {
 
       // Should batch calls to respect limits
       expect(mockTwilioInstance.calls.create.mock.calls.length).toBeLessThanOrEqual(100)
-      
+
       jest.useRealTimers()
     })
   })
@@ -275,10 +271,10 @@ describe('TwilioVoiceClient', () => {
         '1234567890',
         '(123) 456-7890',
         '123-456-7890',
-        '123.456.7890'
+        '123.456.7890',
       ]
 
-      validNumbers.forEach(number => {
+      validNumbers.forEach((number) => {
         expect(twilioClient.validatePhoneNumber(number)).toBe(true)
       })
     })
@@ -289,10 +285,10 @@ describe('TwilioVoiceClient', () => {
         'abc-def-ghij',
         '+1123456789', // Too short
         '+112345678901', // Too long
-        ''
+        '',
       ]
 
-      invalidNumbers.forEach(number => {
+      invalidNumbers.forEach((number) => {
         expect(twilioClient.validatePhoneNumber(number)).toBe(false)
       })
     })
@@ -302,7 +298,7 @@ describe('TwilioVoiceClient', () => {
     it('should return list of available phone numbers', async () => {
       const mockNumbers = [
         { phoneNumber: '+11234567890', friendlyName: 'Sales Line' },
-        { phoneNumber: '+10987654321', friendlyName: 'Support Line' }
+        { phoneNumber: '+10987654321', friendlyName: 'Support Line' },
       ]
 
       mockTwilioInstance.incomingPhoneNumbers.list.mockResolvedValue(mockNumbers)
@@ -313,7 +309,7 @@ describe('TwilioVoiceClient', () => {
       expect(numbers[0]).toEqual({
         number: '+11234567890',
         name: 'Sales Line',
-        capabilities: ['voice', 'sms']
+        capabilities: ['voice', 'sms'],
       })
     })
   })
@@ -322,7 +318,7 @@ describe('TwilioVoiceClient', () => {
     it('should initiate call within 1 second', async () => {
       mockTwilioInstance.calls.create.mockResolvedValue({
         sid: 'CA123',
-        status: 'queued'
+        status: 'queued',
       })
 
       const startTime = Date.now()
@@ -330,7 +326,7 @@ describe('TwilioVoiceClient', () => {
         to: '+11234567890',
         from: '+10987654321',
         leadId: 'lead-123',
-        tenantId: 'tenant-456'
+        tenantId: 'tenant-456',
       })
       const endTime = Date.now()
 
@@ -342,15 +338,15 @@ describe('TwilioVoiceClient', () => {
         fetch: jest.fn().mockResolvedValue({
           sid: 'CA123',
           status: 'completed',
-          duration: '60'
-        })
+          duration: '60',
+        }),
       })
 
       const startTime = Date.now()
-      const promises = Array(100).fill(null).map((_, i) => 
-        twilioClient.getCallStatus(`CA${i}`)
-      )
-      
+      const promises = Array(100)
+        .fill(null)
+        .map((_, i) => twilioClient.getCallStatus(`CA${i}`))
+
       await Promise.all(promises)
       const endTime = Date.now()
 

@@ -27,7 +27,7 @@ process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_mock'
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -56,11 +56,8 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
 // Suppress console errors in tests
 const originalError = console.error
 beforeAll(() => {
-  console.error = (...args: any[]) => {
-    if (
-      typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render')
-    ) {
+  console.error = (...args: unknown[]) => {
+    if (typeof args[0] === 'string' && args[0].includes('Warning: ReactDOM.render')) {
       return
     }
     originalError.call(console, ...args)

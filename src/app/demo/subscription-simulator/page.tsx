@@ -31,27 +31,29 @@ const SubscriptionSimulatorPage: React.FC = () => {
     {
       id: 'welcome',
       title: 'Welcome to CoreFlow360 Demo',
-      description: 'Experience our modular ERP system with AI-powered features. This demo simulates the subscription and module activation process.',
-      action: () => setCurrentView('pricing')
+      description:
+        'Experience our modular ERP system with AI-powered features. This demo simulates the subscription and module activation process.',
+      action: () => setCurrentView('pricing'),
     },
     {
       id: 'select-modules',
       title: 'Choose Your Modules',
-      description: 'Select from individual modules or choose a bundle. Each module unlocks specific features and AI capabilities.',
-      highlight: ['module-selection']
+      description:
+        'Select from individual modules or choose a bundle. Each module unlocks specific features and AI capabilities.',
+      highlight: ['module-selection'],
     },
     {
       id: 'activate-crm',
       title: 'Activate CRM Module',
       description: 'Click on the CRM module to see how it transforms your dashboard.',
-      action: () => updateActiveModules(['crm'])
+      action: () => updateActiveModules(['crm']),
     },
     {
       id: 'view-dashboard',
       title: 'Dynamic Dashboard',
       description: 'Notice how the dashboard adapts to show only CRM-related widgets and features.',
       action: () => setCurrentView('dashboard'),
-      highlight: ['dashboard']
+      highlight: ['dashboard'],
     },
     {
       id: 'add-accounting',
@@ -60,37 +62,40 @@ const SubscriptionSimulatorPage: React.FC = () => {
       action: () => {
         updateActiveModules(['crm', 'accounting'])
         setCurrentView('pricing')
-      }
+      },
     },
     {
       id: 'cross-module-ai',
       title: 'Cross-Module AI Features',
-      description: 'With multiple modules active, AI can provide insights across your business operations.',
+      description:
+        'With multiple modules active, AI can provide insights across your business operations.',
       action: () => setCurrentView('ai-demo'),
-      highlight: ['ai-insights']
+      highlight: ['ai-insights'],
     },
     {
       id: 'try-bundle',
       title: 'Try a Bundle',
-      description: 'Select the "Professional Bundle" to see how bundles provide better value with pre-selected modules.',
+      description:
+        'Select the "Professional Bundle" to see how bundles provide better value with pre-selected modules.',
       action: () => {
         updateActiveModules(['crm', 'accounting', 'hr', 'projects'])
         setCurrentView('pricing')
-      }
+      },
     },
     {
       id: 'explore',
       title: 'Explore the Platform',
-      description: 'You can now freely explore the platform. Try different module combinations to see how the UI adapts!',
-      action: () => setShowTour(false)
-    }
+      description:
+        'You can now freely explore the platform. Try different module combinations to see how the UI adapts!',
+      action: () => setShowTour(false),
+    },
   ]
 
-  const handleModuleSelection = (selection: any) => {
+  const handleModuleSelection = (selection: unknown) => {
     if (demoMode) {
       // Simulate module activation
       updateActiveModules(selection.modules)
-      
+
       // Show success message
       setTimeout(() => {
         setCurrentView('dashboard')
@@ -115,22 +120,20 @@ const SubscriptionSimulatorPage: React.FC = () => {
   }
 
   const renderAIDemo = () => (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       <h2 className="text-2xl font-bold text-gray-900">AI-Powered Insights Demo</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Single Module AI */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-lg p-6"
+          className="rounded-xl bg-white p-6 shadow-lg"
         >
-          <h3 className="text-lg font-bold text-gray-900 mb-4">
-            Single Module AI (CRM Only)
-          </h3>
+          <h3 className="mb-4 text-lg font-bold text-gray-900">Single Module AI (CRM Only)</h3>
           <div className="space-y-3">
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <div className="flex items-center space-x-2 mb-1">
+            <div className="rounded-lg bg-blue-50 p-3">
+              <div className="mb-1 flex items-center space-x-2">
                 <span className="text-blue-500">🎯</span>
                 <span className="font-medium text-blue-900">Lead Scoring</span>
               </div>
@@ -138,8 +141,8 @@ const SubscriptionSimulatorPage: React.FC = () => {
                 AI analyzes lead behavior and assigns scores based on conversion probability
               </p>
             </div>
-            <div className="p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center space-x-2 mb-1">
+            <div className="rounded-lg bg-green-50 p-3">
+              <div className="mb-1 flex items-center space-x-2">
                 <span className="text-green-500">📈</span>
                 <span className="font-medium text-green-900">Sales Forecasting</span>
               </div>
@@ -155,14 +158,14 @@ const SubscriptionSimulatorPage: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-lg p-6 border border-purple-200"
+          className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-lg"
         >
-          <h3 className="text-lg font-bold text-gray-900 mb-4">
+          <h3 className="mb-4 text-lg font-bold text-gray-900">
             Cross-Module AI (CRM + Accounting)
           </h3>
           <div className="space-y-3">
-            <div className="p-3 bg-white rounded-lg">
-              <div className="flex items-center space-x-2 mb-1">
+            <div className="rounded-lg bg-white p-3">
+              <div className="mb-1 flex items-center space-x-2">
                 <span className="text-purple-500">💡</span>
                 <span className="font-medium text-purple-900">Revenue Intelligence</span>
               </div>
@@ -170,8 +173,8 @@ const SubscriptionSimulatorPage: React.FC = () => {
                 Correlates sales pipeline with cash flow to predict revenue timing
               </p>
             </div>
-            <div className="p-3 bg-white rounded-lg">
-              <div className="flex items-center space-x-2 mb-1">
+            <div className="rounded-lg bg-white p-3">
+              <div className="mb-1 flex items-center space-x-2">
                 <span className="text-pink-500">🔄</span>
                 <span className="font-medium text-pink-900">Customer Lifetime Value</span>
               </div>
@@ -179,8 +182,8 @@ const SubscriptionSimulatorPage: React.FC = () => {
                 Combines CRM interactions with payment history for accurate CLV
               </p>
             </div>
-            <div className="p-3 bg-white rounded-lg">
-              <div className="flex items-center space-x-2 mb-1">
+            <div className="rounded-lg bg-white p-3">
+              <div className="mb-1 flex items-center space-x-2">
                 <span className="text-indigo-500">⚡</span>
                 <span className="font-medium text-indigo-900">Automated Workflows</span>
               </div>
@@ -197,70 +200,68 @@ const SubscriptionSimulatorPage: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-white rounded-xl shadow-lg overflow-hidden"
+        className="overflow-hidden rounded-xl bg-white shadow-lg"
       >
         <div className="p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">
+          <h3 className="mb-4 text-lg font-bold text-gray-900">
             AI Capabilities by Module Combination
           </h3>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-y">
+            <thead className="border-y bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                   Module Combination
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                   AI Features Unlocked
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                   Business Impact
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 bg-white">
               <tr className={hasModule('crm') && !hasModule('accounting') ? 'bg-blue-50' : ''}>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
                     CRM Only
                   </span>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-600">
                   Lead scoring, sales forecasting, customer segmentation
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  +15% conversion rate
-                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">+15% conversion rate</td>
               </tr>
-              
+
               <tr className={hasModule('crm') && hasModule('accounting') ? 'bg-purple-50' : ''}>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                  <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">
                     CRM + Accounting
                   </span>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-600">
                   Revenue forecasting, CLV analysis, payment predictions
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  +25% cash flow accuracy
-                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">+25% cash flow accuracy</td>
               </tr>
-              
-              <tr className={activeModules.length >= 4 ? 'bg-gradient-to-r from-blue-50 to-purple-50' : ''}>
+
+              <tr
+                className={
+                  activeModules.length >= 4 ? 'bg-gradient-to-r from-blue-50 to-purple-50' : ''
+                }
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-blue-100 to-purple-100 text-purple-800">
+                  <span className="inline-flex items-center rounded-full bg-gradient-to-r from-blue-100 to-purple-100 px-3 py-1 text-sm font-medium text-purple-800">
                     Professional Bundle
                   </span>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-600">
                   Full AI orchestration, predictive analytics, automated workflows
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  +40% operational efficiency
-                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">+40% operational efficiency</td>
               </tr>
             </tbody>
           </table>
@@ -272,18 +273,19 @@ const SubscriptionSimulatorPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Demo Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="border-b border-gray-200 bg-white px-6 py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center space-x-4">
             <h1 className="text-xl font-bold text-gray-900">CoreFlow360 Demo</h1>
-            <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+            <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">
               Simulation Mode
             </span>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <div className="text-sm text-gray-600">
-              Active Modules: <span className="font-medium">{activeModules.join(', ') || 'None'}</span>
+              Active Modules:{' '}
+              <span className="font-medium">{activeModules.join(', ') || 'None'}</span>
             </div>
             <button
               onClick={() => updateActiveModules([])}
@@ -302,36 +304,34 @@ const SubscriptionSimulatorPage: React.FC = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="bg-blue-600 text-white px-6 py-4"
+            className="bg-blue-600 px-6 py-4 text-white"
           >
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="mx-auto flex max-w-7xl items-center justify-between">
               <div className="flex-1">
-                <h3 className="font-medium mb-1">
+                <h3 className="mb-1 font-medium">
                   Step {currentStep + 1} of {demoSteps.length}: {demoSteps[currentStep].title}
                 </h3>
-                <p className="text-blue-100 text-sm">
-                  {demoSteps[currentStep].description}
-                </p>
+                <p className="text-sm text-blue-100">{demoSteps[currentStep].description}</p>
               </div>
-              
-              <div className="flex items-center space-x-3 ml-6">
+
+              <div className="ml-6 flex items-center space-x-3">
                 <button
                   onClick={handlePrevStep}
                   disabled={currentStep === 0}
-                  className="px-3 py-1 bg-blue-700 rounded hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="rounded bg-blue-700 px-3 py-1 hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Previous
                 </button>
                 <button
                   onClick={handleNextStep}
                   disabled={currentStep === demoSteps.length - 1}
-                  className="px-3 py-1 bg-blue-700 rounded hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="rounded bg-blue-700 px-3 py-1 hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Next
                 </button>
                 <button
                   onClick={() => setShowTour(false)}
-                  className="px-3 py-1 bg-blue-700 rounded hover:bg-blue-800"
+                  className="rounded bg-blue-700 px-3 py-1 hover:bg-blue-800"
                 >
                   Skip Tour
                 </button>
@@ -349,11 +349,11 @@ const SubscriptionSimulatorPage: React.FC = () => {
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           {/* View Tabs */}
-          <div className="bg-white border-b border-gray-200 px-6 py-3">
+          <div className="border-b border-gray-200 bg-white px-6 py-3">
             <div className="flex space-x-6">
               <button
                 onClick={() => setCurrentView('pricing')}
-                className={`pb-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`border-b-2 px-1 pb-2 text-sm font-medium transition-colors ${
                   currentView === 'pricing'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -363,7 +363,7 @@ const SubscriptionSimulatorPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setCurrentView('dashboard')}
-                className={`pb-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`border-b-2 px-1 pb-2 text-sm font-medium transition-colors ${
                   currentView === 'dashboard'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -373,7 +373,7 @@ const SubscriptionSimulatorPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setCurrentView('ai-demo')}
-                className={`pb-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`border-b-2 px-1 pb-2 text-sm font-medium transition-colors ${
                   currentView === 'ai-demo'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -430,10 +430,15 @@ const SubscriptionSimulatorPage: React.FC = () => {
       {/* Floating Help Button */}
       <button
         onClick={() => setShowTour(true)}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+        className="fixed right-6 bottom-6 rounded-full bg-blue-600 p-3 text-white shadow-lg transition-colors hover:bg-blue-700"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
       </button>
     </div>

@@ -1,6 +1,6 @@
 /**
  * CoreFlow360 Marketplace Revenue Sharing System
- * 
+ *
  * Handles billing, revenue distribution, and developer payouts
  * for the AI Agent marketplace ecosystem
  */
@@ -62,7 +62,7 @@ export class RevenueShareManager {
       // Get agent and developer info
       const agent = await db.marketplaceAgent.findUnique({
         where: { id: agentId },
-        include: { developer: true }
+        include: { developer: true },
       })
 
       if (!agent) {
@@ -71,7 +71,7 @@ export class RevenueShareManager {
 
       // Get revenue share config
       const revenueConfig = await db.revenueShareConfig.findFirst({
-        where: { agentId, developerId: agent.developerId }
+        where: { agentId, developerId: agent.developerId },
       })
 
       if (!revenueConfig) {
@@ -89,13 +89,13 @@ export class RevenueShareManager {
         customer: customerId,
         application_fee_amount: platformShare,
         transfer_data: {
-          destination: agent.developer.stripeConnectAccountId
+          destination: agent.developer.stripeConnectAccountId,
         },
         metadata: {
           agentId,
           developerId: agent.developerId,
-          type: 'marketplace_purchase'
-        }
+          type: 'marketplace_purchase',
+        },
       })
 
       // Create transaction record
@@ -110,12 +110,12 @@ export class RevenueShareManager {
         currency,
         stripePaymentIntentId: paymentIntent.id,
         status: 'pending',
-        createdAt: new Date()
+        createdAt: new Date(),
       }
 
       // Save to database
       await db.marketplaceTransaction.create({
-        data: transaction
+        data: transaction,
       })
 
       // Track analytics
@@ -123,7 +123,6 @@ export class RevenueShareManager {
 
       return transaction
     } catch (error) {
-      console.error('Error processing marketplace purchase:', error)
       throw error
     }
   }
@@ -134,7 +133,7 @@ export class RevenueShareManager {
   static async completeTransaction(stripePaymentIntentId: string): Promise<void> {
     try {
       const transaction = await db.marketplaceTransaction.findFirst({
-        where: { stripePaymentIntentId }
+        where: { stripePaymentIntentId },
       })
 
       if (!transaction) {
@@ -146,8 +145,8 @@ export class RevenueShareManager {
         where: { id: transaction.id },
         data: {
           status: 'completed',
-          processedAt: new Date()
-        }
+          processedAt: new Date(),
+        },
       })
 
       // Add to developer's pending payout
@@ -163,13 +162,10 @@ export class RevenueShareManager {
         where: { id: transaction.agentId },
         data: {
           totalSales: { increment: 1 },
-          totalRevenue: { increment: transaction.amount }
-        }
+          totalRevenue: { increment: transaction.amount },
+        },
       })
-
-      console.log(`Transaction ${transaction.id} completed successfully`)
     } catch (error) {
-      console.error('Error completing transaction:', error)
       throw error
     }
   }
@@ -188,8 +184,8 @@ export class RevenueShareManager {
       where: {
         developerId,
         status: 'pending',
-        currency
-      }
+        currency,
+      },
     })
 
     if (existingPayout) {
@@ -198,8 +194,8 @@ export class RevenueShareManager {
         where: { id: existingPayout.id },
         data: {
           amount: { increment: amount },
-          transactions: { push: transactionId }
-        }
+          transactions: { push: transactionId },
+        },
       })
     } else {
       // Create new payout
@@ -211,12 +207,12 @@ export class RevenueShareManager {
           currency,
           period: {
             start: new Date(),
-            end: new Date() // Will be updated when payout is processed
+            end: new Date(), // Will be updated when payout is processed
           },
           transactions: [transactionId],
           status: 'pending',
-          createdAt: new Date()
-        }
+          createdAt: new Date(),
+        },
       })
     }
   }
@@ -226,21 +222,19 @@ export class RevenueShareManager {
    */
   static async processScheduledPayouts(): Promise<void> {
     try {
-      console.log('Processing scheduled developer payouts...')
-
       // Get all developers with revenue share configs
       const developers = await db.developer.findMany({
         where: {
           revenueShareConfigs: {
-            some: {}
-          }
+            some: {},
+          },
         },
         include: {
           revenueShareConfigs: true,
           pendingPayouts: {
-            where: { status: 'pending' }
-          }
-        }
+            where: { status: 'pending' },
+          },
+        },
       })
 
       for (const developer of developers) {
@@ -248,10 +242,7 @@ export class RevenueShareManager {
           await this.processDeveloperPayout(developer, config)
         }
       }
-
-      console.log('Scheduled payouts processed successfully')
     } catch (error) {
-      console.error('Error processing scheduled payouts:', error)
       throw error
     }
   }
@@ -260,15 +251,15 @@ export class RevenueShareManager {
    * Process payout for a specific developer
    */
   private static async processDeveloperPayout(
-    developer: any,
+    developer: unknown,
     config: RevenueShareConfig
   ): Promise<void> {
     const pendingPayouts = await db.developerPayout.findMany({
       where: {
         developerId: developer.id,
         status: 'pending',
-        amount: { gte: config.minimumPayout }
-      }
+        amount: { gte: config.minimumPayout },
+      },
     })
 
     for (const payout of pendingPayouts) {
@@ -281,8 +272,8 @@ export class RevenueShareManager {
           metadata: {
             payoutId: payout.id,
             developerId: developer.id,
-            period: `${payout.period.start.toISOString()}-${payout.period.end.toISOString()}`
-          }
+            period: `${payout.period.start.toISOString()}-${payout.period.end.toISOString()}`,
+          },
         })
 
         // Update payout record
@@ -291,21 +282,17 @@ export class RevenueShareManager {
           data: {
             status: 'completed',
             stripeTransferId: transfer.id,
-            completedAt: new Date()
-          }
+            completedAt: new Date(),
+          },
         })
 
         // Send notification to developer
         await this.notifyDeveloperOfPayout(developer, payout, transfer.id)
-
-        console.log(`Payout ${payout.id} completed for developer ${developer.id}`)
       } catch (error) {
-        console.error(`Error processing payout ${payout.id}:`, error)
-        
         // Mark payout as failed
         await db.developerPayout.update({
           where: { id: payout.id },
-          data: { status: 'failed' }
+          data: { status: 'failed' },
         })
       }
     }
@@ -314,10 +301,13 @@ export class RevenueShareManager {
   /**
    * Get revenue analytics for a developer
    */
-  static async getDeveloperAnalytics(developerId: string, period: {
-    start: Date
-    end: Date
-  }): Promise<{
+  static async getDeveloperAnalytics(
+    developerId: string,
+    period: {
+      start: Date
+      end: Date
+    }
+  ): Promise<{
     totalRevenue: number
     totalTransactions: number
     averageTransactionValue: number
@@ -336,12 +326,12 @@ export class RevenueShareManager {
           status: 'completed',
           createdAt: {
             gte: period.start,
-            lte: period.end
-          }
+            lte: period.end,
+          },
         },
         include: {
-          agent: true
-        }
+          agent: true,
+        },
       })
 
       const totalRevenue = transactions.reduce((sum, t) => sum + t.developerShare, 0)
@@ -349,33 +339,35 @@ export class RevenueShareManager {
       const averageTransactionValue = totalTransactions > 0 ? totalRevenue / totalTransactions : 0
 
       // Calculate top performing agents
-      const agentStats = transactions.reduce((stats, transaction) => {
-        const agentId = transaction.agentId
-        if (!stats[agentId]) {
-          stats[agentId] = {
-            agentId,
-            agentName: transaction.agent.name,
-            revenue: 0,
-            transactions: 0
+      const agentStats = transactions.reduce(
+        (stats, transaction) => {
+          const agentId = transaction.agentId
+          if (!stats[agentId]) {
+            stats[agentId] = {
+              agentId,
+              agentName: transaction.agent.name,
+              revenue: 0,
+              transactions: 0,
+            }
           }
-        }
-        stats[agentId].revenue += transaction.developerShare
-        stats[agentId].transactions += 1
-        return stats
-      }, {} as Record<string, any>)
+          stats[agentId].revenue += transaction.developerShare
+          stats[agentId].transactions += 1
+          return stats
+        },
+        {} as Record<string, unknown>
+      )
 
       const topPerformingAgents = Object.values(agentStats)
-        .sort((a: any, b: any) => b.revenue - a.revenue)
+        .sort((a: unknown, b: unknown) => b.revenue - a.revenue)
         .slice(0, 5)
 
       return {
         totalRevenue,
         totalTransactions,
         averageTransactionValue,
-        topPerformingAgents
+        topPerformingAgents,
       }
     } catch (error) {
-      console.error('Error getting developer analytics:', error)
       throw error
     }
   }
@@ -386,7 +378,7 @@ export class RevenueShareManager {
   static async processRefund(transactionId: string): Promise<void> {
     try {
       const transaction = await db.marketplaceTransaction.findUnique({
-        where: { id: transactionId }
+        where: { id: transactionId },
       })
 
       if (!transaction) {
@@ -397,13 +389,13 @@ export class RevenueShareManager {
       const refund = await stripe.refunds.create({
         payment_intent: transaction.stripePaymentIntentId,
         reverse_transfer: true, // Also reverse the transfer to the developer
-        refund_application_fee: true
+        refund_application_fee: true,
       })
 
       // Update transaction status
       await db.marketplaceTransaction.update({
         where: { id: transactionId },
-        data: { status: 'refunded' }
+        data: { status: 'refunded' },
       })
 
       // Adjust developer's pending payout if not yet paid out
@@ -413,10 +405,7 @@ export class RevenueShareManager {
         transaction.currency,
         transactionId
       )
-
-      console.log(`Refund processed for transaction ${transactionId}`)
     } catch (error) {
-      console.error('Error processing refund:', error)
       throw error
     }
   }
@@ -433,8 +422,8 @@ export class RevenueShareManager {
         developerId,
         status: 'pending',
         currency,
-        transactions: { has: transactionId }
-      }
+        transactions: { has: transactionId },
+      },
     })
 
     if (payout) {
@@ -442,33 +431,35 @@ export class RevenueShareManager {
         where: { id: payout.id },
         data: {
           amount: { increment: adjustmentAmount },
-          transactions: payout.transactions.filter(t => t !== transactionId)
-        }
+          transactions: payout.transactions.filter((t) => t !== transactionId),
+        },
       })
     }
   }
 
   private static async trackRevenueAnalytics(transaction: MarketplaceTransaction): Promise<void> {
     // Send analytics event
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'marketplace_revenue', {
+    if (typeof window !== 'undefined' && (window as unknown).gtag) {
+      ;(window as unknown).gtag('event', 'marketplace_revenue', {
         agent_id: transaction.agentId,
         developer_id: transaction.developerId,
         amount: transaction.amount / 100, // Convert to dollars
         currency: transaction.currency,
         developer_share: transaction.developerShare / 100,
-        platform_share: transaction.platformShare / 100
+        platform_share: transaction.platformShare / 100,
       })
     }
   }
 
   private static async notifyDeveloperOfPayout(
-    developer: any,
+    developer: unknown,
     payout: DeveloperPayout,
     transferId: string
   ): Promise<void> {
     // In production, send email notification
-    console.log(`Payout notification: Developer ${developer.id} received $${payout.amount / 100} (Transfer: ${transferId})`)
+    console.log(
+      `Payout notification: Developer ${developer.id} received $${payout.amount / 100} (Transfer: ${transferId})`
+    )
   }
 }
 

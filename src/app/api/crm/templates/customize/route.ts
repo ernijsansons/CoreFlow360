@@ -6,23 +6,29 @@ import { z } from 'zod'
 const customizeTemplateSchema = z.object({
   templateId: z.string(),
   customizations: z.object({
-    colors: z.object({
-      primary: z.string().optional(),
-      secondary: z.string().optional(),
-      accent: z.string().optional()
-    }).optional(),
-    fonts: z.object({
-      heading: z.string().optional(),
-      body: z.string().optional()
-    }).optional(),
+    colors: z
+      .object({
+        primary: z.string().optional(),
+        secondary: z.string().optional(),
+        accent: z.string().optional(),
+      })
+      .optional(),
+    fonts: z
+      .object({
+        heading: z.string().optional(),
+        body: z.string().optional(),
+      })
+      .optional(),
     content: z.record(z.string()).optional(),
-    branding: z.object({
-      logo: z.string().optional(),
-      companyName: z.string().optional(),
-      tagline: z.string().optional()
-    }).optional()
+    branding: z
+      .object({
+        logo: z.string().optional(),
+        companyName: z.string().optional(),
+        tagline: z.string().optional(),
+      })
+      .optional(),
   }),
-  aiEnhancements: z.array(z.string()).optional()
+  aiEnhancements: z.array(z.string()).optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -43,8 +49,8 @@ export async function POST(request: NextRequest) {
         baseTemplateId: validatedData.templateId,
         customizations: JSON.stringify(validatedData.customizations),
         aiEnhancements: validatedData.aiEnhancements || [],
-        status: 'PROCESSING'
-      }
+        status: 'PROCESSING',
+      },
     })
 
     // Apply AI enhancements if requested
@@ -66,8 +72,8 @@ export async function POST(request: NextRequest) {
       data: {
         enhancedContent: JSON.stringify(enhancedContent),
         status: 'READY',
-        editorUrl
-      }
+        editorUrl,
+      },
     })
 
     return NextResponse.json({
@@ -77,35 +83,38 @@ export async function POST(request: NextRequest) {
       enhancements: validatedData.aiEnhancements,
       preview: {
         thumbnailUrl: `/api/crm/templates/preview/${customizedTemplate.id}`,
-        customizations: validatedData.customizations
-      }
+        customizations: validatedData.customizations,
+      },
     })
   } catch (error) {
-    console.error('Error customizing template:', error)
-    return NextResponse.json(
-      { error: 'Failed to customize template' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to customize template' }, { status: 500 })
   }
 }
 
-async function applyAIEnhancements(templateId: string, customizations: any, enhancements: string[]) {
-  const enhancedContent: any = {}
+async function applyAIEnhancements(
+  templateId: string,
+  customizations: unknown,
+  enhancements: string[]
+) {
+  const enhancedContent: unknown = {}
 
   for (const enhancement of enhancements) {
     switch (enhancement) {
       case 'personalize':
-        enhancedContent.personalizedElements = await generatePersonalizedContent(templateId, customizations)
+        enhancedContent.personalizedElements = await generatePersonalizedContent(
+          templateId,
+          customizations
+        )
         break
-      
+
       case 'optimize':
         enhancedContent.optimizations = await optimizeForConversion(templateId, customizations)
         break
-      
+
       case 'translate':
         enhancedContent.translations = await generateTranslations(customizations)
         break
-      
+
       case 'accessibility':
         enhancedContent.accessibilityEnhancements = await enhanceAccessibility(templateId)
         break
@@ -115,49 +124,45 @@ async function applyAIEnhancements(templateId: string, customizations: any, enha
   return enhancedContent
 }
 
-async function generatePersonalizedContent(templateId: string, customizations: any) {
+async function generatePersonalizedContent(templateId: string, customizations: unknown) {
   // Simulate AI-powered personalization
   return {
     headlines: [
       `Transform ${customizations.branding?.companyName || 'Your Business'} Today`,
       `The Solution ${customizations.branding?.companyName || 'You'} Have Been Waiting For`,
-      `Unlock New Growth for ${customizations.branding?.companyName || 'Your Company'}`
+      `Unlock New Growth for ${customizations.branding?.companyName || 'Your Company'}`,
     ],
     dynamicSections: [
       {
         type: 'value-prop',
-        content: 'Tailored specifically for your industry and use case'
+        content: 'Tailored specifically for your industry and use case',
       },
       {
         type: 'social-proof',
-        content: 'Join 500+ companies already transforming their operations'
-      }
-    ]
+        content: 'Join 500+ companies already transforming their operations',
+      },
+    ],
   }
 }
 
-async function optimizeForConversion(templateId: string, customizations: any) {
+async function optimizeForConversion(templateId: string, customizations: unknown) {
   // Simulate conversion optimization
   return {
-    ctaVariations: [
-      'Start Your Free Trial',
-      'Get Instant Access',
-      'See It In Action'
-    ],
+    ctaVariations: ['Start Your Free Trial', 'Get Instant Access', 'See It In Action'],
     layoutOptimizations: {
       heroSection: 'above-fold-focused',
       socialProof: 'prominent-placement',
-      formPlacement: 'multiple-touchpoints'
+      formPlacement: 'multiple-touchpoints',
     },
     colorPsychology: {
       primary: customizations.colors?.primary || '#2563EB',
       urgency: '#EF4444',
-      trust: '#10B981'
-    }
+      trust: '#10B981',
+    },
   }
 }
 
-async function generateTranslations(customizations: any) {
+async function generateTranslations(_customizations: unknown) {
   // Simulate multi-language support
   return {
     languages: ['es', 'fr', 'de', 'ja'],
@@ -165,18 +170,18 @@ async function generateTranslations(customizations: any) {
       es: { greeting: 'Bienvenido', cta: 'Comenzar Ahora' },
       fr: { greeting: 'Bienvenue', cta: 'Commencer Maintenant' },
       de: { greeting: 'Willkommen', cta: 'Jetzt Starten' },
-      ja: { greeting: 'ようこそ', cta: '今すぐ開始' }
-    }
+      ja: { greeting: 'ようこそ', cta: '今すぐ開始' },
+    },
   }
 }
 
-async function enhanceAccessibility(templateId: string) {
+async function enhanceAccessibility(_templateId: string) {
   // Simulate accessibility enhancements
   return {
     altTexts: 'AI-generated descriptive alt texts for all images',
     ariaLabels: 'Comprehensive ARIA labeling for screen readers',
     colorContrast: 'WCAG AAA compliant color combinations',
     keyboardNavigation: 'Full keyboard navigation support',
-    readingOrder: 'Optimized semantic HTML structure'
+    readingOrder: 'Optimized semantic HTML structure',
   }
 }

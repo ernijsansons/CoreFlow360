@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
+import {
   Play,
   Pause,
   SkipForward,
@@ -28,7 +28,7 @@ import {
   MessageSquare,
   FileText,
   Calendar,
-  Bell
+  Bell,
 } from 'lucide-react'
 import { GlowingButton } from '@/components/ui/GlowingButton'
 import { CompanyInfo } from './CompanySetupWizard'
@@ -45,7 +45,7 @@ export interface TourStep {
   actionText?: string
   roleSpecific?: UserRole[]
   category: 'navigation' | 'feature' | 'ai' | 'customization'
-  icon: any
+  icon: unknown
   interactive?: boolean
   mockElement?: React.ReactNode
 }
@@ -63,62 +63,66 @@ const tourSteps: TourStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to CoreFlow360!',
-    description: 'Let\'s take a quick tour to get you familiar with your new AI-powered ERP system. This tour is customized for your role and selected modules.',
+    description:
+      "Let's take a quick tour to get you familiar with your new AI-powered ERP system. This tour is customized for your role and selected modules.",
     target: 'center',
     position: 'center',
     category: 'navigation',
-    icon: Crown
+    icon: Crown,
   },
   {
     id: 'sidebar',
     title: 'Navigation Sidebar',
-    description: 'Your main navigation hub. The sidebar adapts based on your role and active modules, showing only what\'s relevant to you.',
+    description:
+      "Your main navigation hub. The sidebar adapts based on your role and active modules, showing only what's relevant to you.",
     target: '.sidebar-nav',
     position: 'right',
     category: 'navigation',
     icon: Target,
     mockElement: (
-      <div className="w-64 bg-gray-900 border border-gray-800 rounded-lg p-4 space-y-2">
-        <div className="flex items-center gap-3 p-2 bg-violet-500/20 rounded-lg">
-          <BarChart3 className="w-5 h-5 text-violet-400" />
+      <div className="w-64 space-y-2 rounded-lg border border-gray-800 bg-gray-900 p-4">
+        <div className="flex items-center gap-3 rounded-lg bg-violet-500/20 p-2">
+          <BarChart3 className="h-5 w-5 text-violet-400" />
           <span className="text-white">Dashboard</span>
         </div>
-        <div className="flex items-center gap-3 p-2 hover:bg-gray-800 rounded-lg">
-          <Users className="w-5 h-5 text-gray-400" />
+        <div className="flex items-center gap-3 rounded-lg p-2 hover:bg-gray-800">
+          <Users className="h-5 w-5 text-gray-400" />
           <span className="text-gray-300">CRM</span>
         </div>
-        <div className="flex items-center gap-3 p-2 hover:bg-gray-800 rounded-lg">
-          <FileText className="w-5 h-5 text-gray-400" />
+        <div className="flex items-center gap-3 rounded-lg p-2 hover:bg-gray-800">
+          <FileText className="h-5 w-5 text-gray-400" />
           <span className="text-gray-300">Projects</span>
         </div>
       </div>
-    )
+    ),
   },
   {
     id: 'dashboard',
     title: 'Smart Dashboard',
-    description: 'Your personalized command center with AI-powered insights. Widgets automatically adjust based on your role and most-used features.',
+    description:
+      'Your personalized command center with AI-powered insights. Widgets automatically adjust based on your role and most-used features.',
     target: '.dashboard-widgets',
     position: 'top',
     category: 'feature',
     icon: BarChart3,
     mockElement: (
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <h3 className="text-white font-semibold mb-2">Revenue Trends</h3>
-          <div className="h-16 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 rounded"></div>
+        <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
+          <h3 className="mb-2 font-semibold text-white">Revenue Trends</h3>
+          <div className="h-16 rounded bg-gradient-to-r from-emerald-500/20 to-blue-500/20"></div>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <h3 className="text-white font-semibold mb-2">AI Insights</h3>
+        <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
+          <h3 className="mb-2 font-semibold text-white">AI Insights</h3>
           <p className="text-sm text-gray-400">3 new opportunities detected</p>
         </div>
       </div>
-    )
+    ),
   },
   {
     id: 'ai-assistant',
     title: 'AI Assistant',
-    description: 'Your intelligent companion that learns from your workflow patterns and provides contextual suggestions and automations.',
+    description:
+      'Your intelligent companion that learns from your workflow patterns and provides contextual suggestions and automations.',
     target: '.ai-assistant',
     position: 'left',
     category: 'ai',
@@ -126,27 +130,35 @@ const tourSteps: TourStep[] = [
     interactive: true,
     actionText: 'Try asking: "Show me this week\'s sales performance"',
     mockElement: (
-      <div className="w-80 bg-gray-900 border border-gray-800 rounded-lg p-4">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 bg-gradient-to-r from-violet-500 to-cyan-500 rounded-full flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
+      <div className="w-80 rounded-lg border border-gray-800 bg-gray-900 p-4">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-cyan-500">
+            <Zap className="h-4 w-4 text-white" />
           </div>
-          <span className="text-white font-semibold">AI Assistant</span>
+          <span className="font-semibold text-white">AI Assistant</span>
         </div>
-        <div className="bg-gray-800 rounded-lg p-3 mb-3">
-          <p className="text-gray-300 text-sm">Hello! I noticed you're setting up your CRM. Would you like me to help you import your contacts?</p>
+        <div className="mb-3 rounded-lg bg-gray-800 p-3">
+          <p className="text-sm text-gray-300">
+            Hello! I noticed you're setting up your CRM. Would you like me to help you import your
+            contacts?
+          </p>
         </div>
         <div className="flex gap-2">
-          <button className="bg-violet-500 hover:bg-violet-600 text-white px-3 py-1 rounded text-sm">Yes, help me</button>
-          <button className="bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded text-sm">Not now</button>
+          <button className="rounded bg-violet-500 px-3 py-1 text-sm text-white hover:bg-violet-600">
+            Yes, help me
+          </button>
+          <button className="rounded bg-gray-700 px-3 py-1 text-sm text-gray-300 hover:bg-gray-600">
+            Not now
+          </button>
         </div>
       </div>
-    )
+    ),
   },
   {
     id: 'search',
     title: 'Global Search',
-    description: 'Powerful search across all your data with AI-enhanced results. Find customers, projects, documents, and more instantly.',
+    description:
+      'Powerful search across all your data with AI-enhanced results. Find customers, projects, documents, and more instantly.',
     target: '.global-search',
     position: 'bottom',
     action: 'type',
@@ -155,36 +167,37 @@ const tourSteps: TourStep[] = [
     icon: Target,
     mockElement: (
       <div className="relative">
-        <input 
-          type="text" 
-          placeholder="Search everything..." 
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white"
+        <input
+          type="text"
+          placeholder="Search everything..."
+          className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-white"
         />
-        <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-gray-800 rounded-lg shadow-2xl">
-          <div className="p-2 space-y-1">
-            <div className="flex items-center gap-3 p-2 hover:bg-gray-800 rounded">
-              <Users className="w-4 h-4 text-blue-400" />
+        <div className="absolute top-full right-0 left-0 mt-2 rounded-lg border border-gray-800 bg-gray-900 shadow-2xl">
+          <div className="space-y-1 p-2">
+            <div className="flex items-center gap-3 rounded p-2 hover:bg-gray-800">
+              <Users className="h-4 w-4 text-blue-400" />
               <div>
-                <p className="text-white text-sm">John Smith</p>
-                <p className="text-gray-400 text-xs">Customer • john@company.com</p>
+                <p className="text-sm text-white">John Smith</p>
+                <p className="text-xs text-gray-400">Customer • john@company.com</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-2 hover:bg-gray-800 rounded">
-              <FileText className="w-4 h-4 text-green-400" />
+            <div className="flex items-center gap-3 rounded p-2 hover:bg-gray-800">
+              <FileText className="h-4 w-4 text-green-400" />
               <div>
-                <p className="text-white text-sm">Project Alpha</p>
-                <p className="text-gray-400 text-xs">Active project • Due next week</p>
+                <p className="text-sm text-white">Project Alpha</p>
+                <p className="text-xs text-gray-400">Active project • Due next week</p>
               </div>
             </div>
           </div>
         </div>
       </div>
-    )
+    ),
   },
   {
     id: 'notifications',
     title: 'Smart Notifications',
-    description: 'AI-filtered notifications that surface only what matters to your role. Never miss important updates while staying focused.',
+    description:
+      'AI-filtered notifications that surface only what matters to your role. Never miss important updates while staying focused.',
     target: '.notifications-bell',
     position: 'left',
     category: 'feature',
@@ -192,38 +205,39 @@ const tourSteps: TourStep[] = [
     roleSpecific: ['admin', 'manager'],
     mockElement: (
       <div className="relative">
-        <button className="relative p-2 bg-gray-800 border border-gray-700 rounded-lg">
-          <Bell className="w-5 h-5 text-gray-300" />
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+        <button className="relative rounded-lg border border-gray-700 bg-gray-800 p-2">
+          <Bell className="h-5 w-5 text-gray-300" />
+          <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500"></div>
         </button>
-        <div className="absolute top-full right-0 mt-2 w-80 bg-gray-900 border border-gray-800 rounded-lg shadow-2xl">
+        <div className="absolute top-full right-0 mt-2 w-80 rounded-lg border border-gray-800 bg-gray-900 shadow-2xl">
           <div className="p-4">
-            <h3 className="text-white font-semibold mb-3">Recent Updates</h3>
+            <h3 className="mb-3 font-semibold text-white">Recent Updates</h3>
             <div className="space-y-3">
-              <div className="flex items-start gap-3 p-2 bg-violet-500/10 rounded-lg">
-                <Zap className="w-4 h-4 text-violet-400 mt-0.5" />
+              <div className="flex items-start gap-3 rounded-lg bg-violet-500/10 p-2">
+                <Zap className="mt-0.5 h-4 w-4 text-violet-400" />
                 <div>
-                  <p className="text-white text-sm">AI detected a new sales opportunity</p>
-                  <p className="text-gray-400 text-xs">2 minutes ago</p>
+                  <p className="text-sm text-white">AI detected a new sales opportunity</p>
+                  <p className="text-xs text-gray-400">2 minutes ago</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-2">
-                <Calendar className="w-4 h-4 text-blue-400 mt-0.5" />
+                <Calendar className="mt-0.5 h-4 w-4 text-blue-400" />
                 <div>
-                  <p className="text-white text-sm">Team meeting in 30 minutes</p>
-                  <p className="text-gray-400 text-xs">Scheduled</p>
+                  <p className="text-sm text-white">Team meeting in 30 minutes</p>
+                  <p className="text-xs text-gray-400">Scheduled</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    )
+    ),
   },
   {
     id: 'customization',
     title: 'Workspace Customization',
-    description: 'Tailor your workspace to your preferences. Drag widgets, change layouts, and create custom views that work best for you.',
+    description:
+      'Tailor your workspace to your preferences. Drag widgets, change layouts, and create custom views that work best for you.',
     target: '.customization-panel',
     position: 'right',
     category: 'customization',
@@ -232,35 +246,36 @@ const tourSteps: TourStep[] = [
     actionText: 'Try dragging a widget to rearrange your dashboard',
     roleSpecific: ['admin'],
     mockElement: (
-      <div className="w-64 bg-gray-900 border border-gray-800 rounded-lg p-4">
-        <h3 className="text-white font-semibold mb-4">Customize Dashboard</h3>
+      <div className="w-64 rounded-lg border border-gray-800 bg-gray-900 p-4">
+        <h3 className="mb-4 font-semibold text-white">Customize Dashboard</h3>
         <div className="space-y-3">
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 cursor-move">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              <span className="text-white text-sm">Sales Overview</span>
+          <div className="cursor-move rounded-lg border border-gray-700 bg-gray-800 p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-blue-400"></div>
+              <span className="text-sm text-white">Sales Overview</span>
             </div>
             <div className="text-xs text-gray-400">Click and drag to reorder</div>
           </div>
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 cursor-move">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span className="text-white text-sm">Recent Activity</span>
+          <div className="cursor-move rounded-lg border border-gray-700 bg-gray-800 p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-green-400"></div>
+              <span className="text-sm text-white">Recent Activity</span>
             </div>
           </div>
         </div>
       </div>
-    )
+    ),
   },
   {
     id: 'completion',
-    title: 'You\'re All Set!',
-    description: 'Congratulations! You\'ve completed the tour. Your CoreFlow360 workspace is now ready for maximum productivity. Remember, the AI assistant is always here to help.',
+    title: "You're All Set!",
+    description:
+      "Congratulations! You've completed the tour. Your CoreFlow360 workspace is now ready for maximum productivity. Remember, the AI assistant is always here to help.",
     target: 'center',
     position: 'center',
     category: 'navigation',
-    icon: CheckCircle
-  }
+    icon: CheckCircle,
+  },
 ]
 
 export function InteractiveProductTour({
@@ -269,7 +284,7 @@ export function InteractiveProductTour({
   userRole,
   companyInfo,
   selectedModules,
-  userEmail
+  userEmail,
 }: InteractiveProductTourProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -279,8 +294,8 @@ export function InteractiveProductTour({
   const autoPlayInterval = useRef<NodeJS.Timeout>()
 
   // Filter steps based on user role
-  const filteredSteps = tourSteps.filter(step => 
-    !step.roleSpecific || step.roleSpecific.includes(userRole)
+  const filteredSteps = tourSteps.filter(
+    (step) => !step.roleSpecific || step.roleSpecific.includes(userRole)
   )
 
   const currentStep = filteredSteps[currentStepIndex]
@@ -314,11 +329,11 @@ export function InteractiveProductTour({
 
   const handleNext = () => {
     if (currentStepIndex < filteredSteps.length - 1) {
-      setCompletedSteps(prev => [...prev, currentStep.id])
+      setCompletedSteps((prev) => [...prev, currentStep.id])
       setCurrentStepIndex(currentStepIndex + 1)
-      trackEvent('product_tour_step_completed', { 
-        step: currentStep.id, 
-        step_index: currentStepIndex 
+      trackEvent('product_tour_step_completed', {
+        step: currentStep.id,
+        step_index: currentStepIndex,
       })
     }
   }
@@ -330,19 +345,19 @@ export function InteractiveProductTour({
   }
 
   const handleSkip = () => {
-    trackEvent('product_tour_skipped', { 
+    trackEvent('product_tour_skipped', {
       completed_steps: completedSteps.length,
-      total_steps: filteredSteps.length
+      total_steps: filteredSteps.length,
     })
     onSkipTour()
   }
 
   const handleComplete = () => {
-    setCompletedSteps(prev => [...prev, currentStep.id])
+    setCompletedSteps((prev) => [...prev, currentStep.id])
     trackEvent('product_tour_completed', {
       total_steps: filteredSteps.length,
       user_role: userRole,
-      company_industry: companyInfo.industry
+      company_industry: companyInfo.industry,
     })
     onTourCompleted()
   }
@@ -359,8 +374,8 @@ export function InteractiveProductTour({
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm">
       {/* Tour Progress */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gray-800">
-        <motion.div 
+      <div className="absolute top-0 right-0 left-0 h-1 bg-gray-800">
+        <motion.div
           className="h-full bg-gradient-to-r from-violet-500 to-cyan-500"
           initial={{ width: 0 }}
           animate={{ width: `${tourProgress}%` }}
@@ -371,25 +386,25 @@ export function InteractiveProductTour({
       {/* Skip Button */}
       <button
         onClick={handleSkip}
-        className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-60"
+        className="absolute top-4 right-4 z-60 text-gray-400 transition-colors hover:text-white"
       >
-        <X className="w-6 h-6" />
+        <X className="h-6 w-6" />
       </button>
 
       {/* Tour Controls */}
-      <div className="absolute top-4 left-4 flex items-center gap-3 z-60">
-        <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-800 rounded-lg px-4 py-2 flex items-center gap-3">
+      <div className="absolute top-4 left-4 z-60 flex items-center gap-3">
+        <div className="flex items-center gap-3 rounded-lg border border-gray-800 bg-gray-900/80 px-4 py-2 backdrop-blur-sm">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className="text-violet-400 hover:text-violet-300 transition-colors"
+            className="text-violet-400 transition-colors hover:text-violet-300"
           >
-            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </button>
           <button
             onClick={handleRestart}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 transition-colors hover:text-white"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="h-4 w-4" />
           </button>
           <span className="text-sm text-gray-300">
             {currentStepIndex + 1} of {filteredSteps.length}
@@ -405,46 +420,61 @@ export function InteractiveProductTour({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           className={`absolute ${
-            currentStep.position === 'center' 
-              ? 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2'
+            currentStep.position === 'center'
+              ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform'
               : currentStep.position === 'top'
-              ? 'top-20 left-1/2 transform -translate-x-1/2'
-              : currentStep.position === 'bottom'
-              ? 'bottom-20 left-1/2 transform -translate-x-1/2'
-              : currentStep.position === 'left'
-              ? 'top-1/2 left-20 transform -translate-y-1/2'
-              : 'top-1/2 right-20 transform -translate-y-1/2'
+                ? 'top-20 left-1/2 -translate-x-1/2 transform'
+                : currentStep.position === 'bottom'
+                  ? 'bottom-20 left-1/2 -translate-x-1/2 transform'
+                  : currentStep.position === 'left'
+                    ? 'top-1/2 left-20 -translate-y-1/2 transform'
+                    : 'top-1/2 right-20 -translate-y-1/2 transform'
           }`}
         >
-          <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 max-w-lg">
+          <div className="max-w-lg rounded-2xl border border-gray-800 bg-gray-900/95 p-6 backdrop-blur-sm">
             {/* Step Header */}
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`p-3 rounded-xl bg-gradient-to-r ${
-                currentStep.category === 'navigation' ? 'from-blue-500/20 to-cyan-500/20' :
-                currentStep.category === 'feature' ? 'from-green-500/20 to-emerald-500/20' :
-                currentStep.category === 'ai' ? 'from-violet-500/20 to-purple-500/20' :
-                'from-orange-500/20 to-red-500/20'
-              }`}>
-                <currentStep.icon className={`w-6 h-6 ${
-                  currentStep.category === 'navigation' ? 'text-cyan-400' :
-                  currentStep.category === 'feature' ? 'text-emerald-400' :
-                  currentStep.category === 'ai' ? 'text-violet-400' :
-                  'text-orange-400'
-                }`} />
+            <div className="mb-4 flex items-center gap-3">
+              <div
+                className={`rounded-xl bg-gradient-to-r p-3 ${
+                  currentStep.category === 'navigation'
+                    ? 'from-blue-500/20 to-cyan-500/20'
+                    : currentStep.category === 'feature'
+                      ? 'from-green-500/20 to-emerald-500/20'
+                      : currentStep.category === 'ai'
+                        ? 'from-violet-500/20 to-purple-500/20'
+                        : 'from-orange-500/20 to-red-500/20'
+                }`}
+              >
+                <currentStep.icon
+                  className={`h-6 w-6 ${
+                    currentStep.category === 'navigation'
+                      ? 'text-cyan-400'
+                      : currentStep.category === 'feature'
+                        ? 'text-emerald-400'
+                        : currentStep.category === 'ai'
+                          ? 'text-violet-400'
+                          : 'text-orange-400'
+                  }`}
+                />
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">{currentStep.title}</h2>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    currentStep.category === 'navigation' ? 'bg-cyan-500/20 text-cyan-300' :
-                    currentStep.category === 'feature' ? 'bg-emerald-500/20 text-emerald-300' :
-                    currentStep.category === 'ai' ? 'bg-violet-500/20 text-violet-300' :
-                    'bg-orange-500/20 text-orange-300'
-                  }`}>
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs ${
+                      currentStep.category === 'navigation'
+                        ? 'bg-cyan-500/20 text-cyan-300'
+                        : currentStep.category === 'feature'
+                          ? 'bg-emerald-500/20 text-emerald-300'
+                          : currentStep.category === 'ai'
+                            ? 'bg-violet-500/20 text-violet-300'
+                            : 'bg-orange-500/20 text-orange-300'
+                    }`}
+                  >
                     {currentStep.category.charAt(0).toUpperCase() + currentStep.category.slice(1)}
                   </span>
                   {currentStep.roleSpecific?.includes(userRole) && (
-                    <span className="text-xs px-2 py-1 rounded-full bg-violet-500/20 text-violet-300">
+                    <span className="rounded-full bg-violet-500/20 px-2 py-1 text-xs text-violet-300">
                       {userRole} feature
                     </span>
                   )}
@@ -453,15 +483,13 @@ export function InteractiveProductTour({
             </div>
 
             {/* Step Description */}
-            <p className="text-gray-300 mb-6 leading-relaxed">
-              {currentStep.description}
-            </p>
+            <p className="mb-6 leading-relaxed text-gray-300">{currentStep.description}</p>
 
             {/* Interactive Element */}
             {currentStep.mockElement && (
-              <div className="mb-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-                <div className="flex items-center gap-2 mb-3">
-                  <Eye className="w-4 h-4 text-violet-400" />
+              <div className="mb-6 rounded-lg border border-gray-700 bg-gray-800/50 p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <Eye className="h-4 w-4 text-violet-400" />
                   <span className="text-sm text-violet-300">Preview</span>
                 </div>
                 {currentStep.mockElement}
@@ -470,37 +498,37 @@ export function InteractiveProductTour({
 
             {/* Action Prompt */}
             {currentStep.interactive && currentStep.actionText && (
-              <div className="mb-6 p-4 bg-violet-900/20 border border-violet-500/30 rounded-lg">
+              <div className="mb-6 rounded-lg border border-violet-500/30 bg-violet-900/20 p-4">
                 <div className="flex items-start gap-3">
-                  <Lightbulb className="w-5 h-5 text-violet-400 mt-0.5" />
+                  <Lightbulb className="mt-0.5 h-5 w-5 text-violet-400" />
                   <div>
-                    <h4 className="text-violet-300 font-semibold mb-1">Try it out:</h4>
-                    <p className="text-gray-300 text-sm">{currentStep.actionText}</p>
+                    <h4 className="mb-1 font-semibold text-violet-300">Try it out:</h4>
+                    <p className="text-sm text-gray-300">{currentStep.actionText}</p>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Navigation */}
-            <div className="flex justify-between items-center pt-4 border-t border-gray-800">
+            <div className="flex items-center justify-between border-t border-gray-800 pt-4">
               <button
                 onClick={handlePrevious}
                 disabled={currentStepIndex === 0}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 text-gray-400 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="h-4 w-4" />
                 Previous
               </button>
 
               {isLastStep ? (
                 <GlowingButton onClick={handleComplete}>
                   Complete Tour
-                  <CheckCircle className="w-4 h-4 ml-2" />
+                  <CheckCircle className="ml-2 h-4 w-4" />
                 </GlowingButton>
               ) : (
                 <GlowingButton onClick={handleNext}>
                   Next
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </GlowingButton>
               )}
             </div>
@@ -508,16 +536,18 @@ export function InteractiveProductTour({
 
           {/* Pointer Arrow */}
           {currentStep.position !== 'center' && (
-            <div className={`absolute ${
-              currentStep.position === 'top'
-                ? 'top-full left-1/2 transform -translate-x-1/2'
-                : currentStep.position === 'bottom'
-                ? 'bottom-full left-1/2 transform -translate-x-1/2'
-                : currentStep.position === 'left'
-                ? 'left-full top-1/2 transform -translate-y-1/2'
-                : 'right-full top-1/2 transform -translate-y-1/2'
-            }`}>
-              <MousePointer className="w-6 h-6 text-violet-400" />
+            <div
+              className={`absolute ${
+                currentStep.position === 'top'
+                  ? 'top-full left-1/2 -translate-x-1/2 transform'
+                  : currentStep.position === 'bottom'
+                    ? 'bottom-full left-1/2 -translate-x-1/2 transform'
+                    : currentStep.position === 'left'
+                      ? 'top-1/2 left-full -translate-y-1/2 transform'
+                      : 'top-1/2 right-full -translate-y-1/2 transform'
+              }`}
+            >
+              <MousePointer className="h-6 w-6 text-violet-400" />
             </div>
           )}
         </motion.div>
@@ -525,15 +555,19 @@ export function InteractiveProductTour({
 
       {/* Background Spotlight Effect */}
       <motion.div
-        className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/60"
+        className="bg-gradient-radial absolute inset-0 from-transparent via-transparent to-black/60"
         animate={{
           background: `radial-gradient(600px circle at ${
-            currentStep.position === 'center' ? '50% 50%' :
-            currentStep.position === 'top' ? '50% 20%' :
-            currentStep.position === 'bottom' ? '50% 80%' :
-            currentStep.position === 'left' ? '20% 50%' :
-            '80% 50%'
-          }, transparent 0%, rgba(0,0,0,0.8) 100%)`
+            currentStep.position === 'center'
+              ? '50% 50%'
+              : currentStep.position === 'top'
+                ? '50% 20%'
+                : currentStep.position === 'bottom'
+                  ? '50% 80%'
+                  : currentStep.position === 'left'
+                    ? '20% 50%'
+                    : '80% 50%'
+          }, transparent 0%, rgba(0,0,0,0.8) 100%)`,
         }}
         transition={{ duration: 0.6 }}
       />

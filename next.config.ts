@@ -32,12 +32,12 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
-  // EMERGENCY: Disable all build-time checks
+  // TypeScript and ESLint configuration
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true, // Temporarily ignore for deployment
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true, // Temporarily ignore for deployment
   },
   
   // EMERGENCY: Build-time environment variables
@@ -71,7 +71,18 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
+    // Handle problematic modules during build
+    if (!dev) {
+      config.externals = config.externals || []
+      config.externals.push({
+        '@prisma/instrumentation': 'commonjs @prisma/instrumentation',
+        '@opentelemetry/instrumentation-http': 'commonjs @opentelemetry/instrumentation-http',
+        '@opentelemetry/instrumentation-express': 'commonjs @opentelemetry/instrumentation-express',
+        'bullmq': 'commonjs bullmq',
+      })
+    }
+    
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,

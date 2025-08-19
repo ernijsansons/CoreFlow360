@@ -91,26 +91,23 @@ const getRedocHTML = (specUrl: string) => `
 export async function GET(request: NextRequest) {
   // Check if docs are enabled
   const docsEnabled = process.env.ENABLE_API_DOCS !== 'false'
-  
+
   if (!docsEnabled && process.env.NODE_ENV === 'production') {
-    return NextResponse.json(
-      { error: 'API documentation is disabled' },
-      { status: 404 }
-    )
+    return NextResponse.json({ error: 'API documentation is disabled' }, { status: 404 })
   }
-  
+
   // Get the host URL
   const host = request.headers.get('host') || 'localhost:3000'
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
   const baseUrl = `${protocol}://${host}`
-  
+
   // Return Redoc HTML
   const html = getRedocHTML(`${baseUrl}/api/docs?format=json`)
-  
+
   return new NextResponse(html, {
     headers: {
       'Content-Type': 'text/html',
-      'Cache-Control': 'public, max-age=3600'
-    }
+      'Cache-Control': 'public, max-age=3600',
+    },
   })
 }

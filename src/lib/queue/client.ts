@@ -24,7 +24,7 @@ export const QUEUE_NAMES = {
   NOTIFICATIONS: 'notifications',
   REPORTS: 'reports',
   WEBHOOKS: 'webhooks',
-  CLEANUP: 'cleanup'
+  CLEANUP: 'cleanup',
 } as const
 
 // Queue instances
@@ -35,38 +35,41 @@ const queues: Map<string, Queue> = new Map()
  */
 export function getQueue(name: keyof typeof QUEUE_NAMES): Queue {
   const queueName = QUEUE_NAMES[name]
-  
+
   // Skip queue creation during build time
-  const isBuildTime = process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview'
+  const isBuildTime =
+    process.env.VERCEL ||
+    process.env.CI ||
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.VERCEL_ENV === 'preview'
   if (isBuildTime) {
-    console.log(`Skipping queue creation for ${queueName} during build`)
     // Return a mock queue during build
     return {} as Queue
   }
-  
+
   if (!queues.has(queueName)) {
     const queue = new Queue(queueName, {
       connection,
       defaultJobOptions: {
         removeOnComplete: {
           age: 3600, // 1 hour
-          count: 100
+          count: 100,
         },
         removeOnFail: {
           age: 24 * 3600, // 24 hours
-          count: 1000
+          count: 1000,
         },
         attempts: 3,
         backoff: {
           type: 'exponential',
-          delay: 2000
-        }
-      }
+          delay: 2000,
+        },
+      },
     })
-    
+
     queues.set(queueName, queue)
   }
-  
+
   return queues.get(queueName)!
 }
 
@@ -79,45 +82,45 @@ export const JOB_OPTIONS = {
     attempts: 5,
     backoff: {
       type: 'exponential' as const,
-      delay: 5000
-    }
+      delay: 5000,
+    },
   },
   analytics: {
     priority: 10,
     attempts: 3,
-    delay: 1000 // Process after 1 second
+    delay: 1000, // Process after 1 second
   },
   export: {
     priority: 5,
     attempts: 2,
-    timeout: 300000 // 5 minutes
+    timeout: 300000, // 5 minutes
   },
   aiProcessing: {
     priority: 3,
     attempts: 2,
-    timeout: 120000 // 2 minutes
+    timeout: 120000, // 2 minutes
   },
   notifications: {
     priority: 1,
-    attempts: 3
+    attempts: 3,
   },
   reports: {
     priority: 5,
     attempts: 2,
-    timeout: 600000 // 10 minutes
+    timeout: 600000, // 10 minutes
   },
   webhooks: {
     priority: 1,
     attempts: 5,
     backoff: {
       type: 'exponential' as const,
-      delay: 10000
-    }
+      delay: 10000,
+    },
   },
   cleanup: {
     priority: 100, // Lowest priority
-    attempts: 1
-  }
+    attempts: 1,
+  },
 }
 
 /**
@@ -127,48 +130,48 @@ const queueEvents: Map<string, QueueEvents> = new Map()
 
 export function getQueueEvents(name: keyof typeof QUEUE_NAMES): QueueEvents {
   const queueName = QUEUE_NAMES[name]
-  
+
   if (!queueEvents.has(queueName)) {
     const events = new QueueEvents(queueName, { connection })
     queueEvents.set(queueName, events)
   }
-  
+
   return queueEvents.get(queueName)!
 }
 
 /**
  * Add job to queue
  */
-export async function addJob<T = any>(
+export async function addJob<T = unknown>(
   queueName: keyof typeof QUEUE_NAMES,
   jobName: string,
   data: T,
-  options?: any
+  options?: unknown
 ): Promise<Job<T>> {
   const queue = getQueue(queueName)
   const jobOptions = JOB_OPTIONS[queueName] || {}
-  
+
   return await queue.add(jobName, data, {
     ...jobOptions,
-    ...options
+    ...options,
   })
 }
 
 /**
  * Bulk add jobs
  */
-export async function addBulkJobs<T = any>(
+export async function addBulkJobs<T = unknown>(
   queueName: keyof typeof QUEUE_NAMES,
-  jobs: Array<{ name: string; data: T; opts?: any }>
+  jobs: Array<{ name: string; data: T; opts?: unknown }>
 ): Promise<Job<T>[]> {
   const queue = getQueue(queueName)
   const jobOptions = JOB_OPTIONS[queueName] || {}
-  
-  const jobsWithOptions = jobs.map(job => ({
+
+  const jobsWithOptions = jobs.map((job) => ({
     ...job,
-    opts: { ...jobOptions, ...job.opts }
+    opts: { ...jobOptions, ...job.opts },
   }))
-  
+
   return await queue.addBulk(jobsWithOptions)
 }
 
@@ -228,56 +231,56 @@ export const queueMonitor = {
    * Get all queue statistics
    */
   async getAllStats() {
-    const stats: Record<string, any> = {}
-    
+    const stats: Record<string, unknown> = {}
+
     for (const [name, queueName] of Object.entries(QUEUE_NAMES)) {
       const counts = await getJobCounts(name as keyof typeof QUEUE_NAMES)
       stats[queueName] = counts
     }
-    
+
     return stats
   },
-  
+
   /**
    * Monitor queue events
    */
   monitorQueue(
     queueName: keyof typeof QUEUE_NAMES,
     handlers: {
-      onCompleted?: (jobId: string, result: any) => void
+      onCompleted?: (jobId: string, result: unknown) => void
       onFailed?: (jobId: string, error: Error) => void
       onProgress?: (jobId: string, progress: number) => void
       onStalled?: (jobId: string) => void
     }
   ) {
     const events = getQueueEvents(queueName)
-    
+
     if (handlers.onCompleted) {
       events.on('completed', ({ jobId, returnvalue }) => {
         handlers.onCompleted!(jobId, returnvalue)
       })
     }
-    
+
     if (handlers.onFailed) {
       events.on('failed', ({ jobId, failedReason }) => {
         handlers.onFailed!(jobId, new Error(failedReason))
       })
     }
-    
+
     if (handlers.onProgress) {
       events.on('progress', ({ jobId, data }) => {
         handlers.onProgress!(jobId, data)
       })
     }
-    
+
     if (handlers.onStalled) {
       events.on('stalled', ({ jobId }) => {
         handlers.onStalled!(jobId)
       })
     }
-    
+
     return () => {
       events.removeAllListeners()
     }
-  }
+  },
 }

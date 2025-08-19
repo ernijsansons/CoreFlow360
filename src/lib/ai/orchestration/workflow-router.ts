@@ -21,7 +21,7 @@ export class WorkflowRouter {
   async route(request: AIFlowRequest): Promise<AIResult> {
     const startTime = Date.now()
     const securityContext = createSecurityContext(request.context)
-    
+
     // Check cache first
     const cacheKey = this.generateCacheKey(request)
     const cachedResult = await this.cache.get(cacheKey)
@@ -29,23 +29,23 @@ export class WorkflowRouter {
       return {
         ...cachedResult,
         cacheHit: true,
-        executionTime: Date.now() - startTime
+        executionTime: Date.now() - startTime,
       }
     }
 
     try {
       // Route based on workflow type
       const result = await this.routeToService(request, securityContext)
-      
+
       // Cache successful results
       if (result.success) {
         await this.cache.set(cacheKey, result, this.getCacheTTL(request.workflow))
       }
-      
+
       return {
         ...result,
         cacheHit: false,
-        executionTime: Date.now() - startTime
+        executionTime: Date.now() - startTime,
       }
     } catch (error) {
       return this.handleError(error, request, startTime)
@@ -53,11 +53,11 @@ export class WorkflowRouter {
   }
 
   private async routeToService(
-    request: AIFlowRequest, 
+    request: AIFlowRequest,
     context: SecurityContext
   ): Promise<AIResult> {
     const [service, method] = request.workflow.split('.')
-    
+
     switch (service) {
       case 'fingpt':
         return this.routeToFinGPT(method, request, context)
@@ -81,10 +81,7 @@ export class WorkflowRouter {
   ): Promise<AIResult> {
     switch (method) {
       case 'sentiment':
-        const sentiment = await this.aiServices.fingpt.sentimentAnalysis(
-          request.data.text,
-          context
-        )
+        const sentiment = await this.aiServices.fingpt.sentimentAnalysis(request.data.text, context)
         return {
           success: true,
           data: sentiment,
@@ -93,9 +90,9 @@ export class WorkflowRouter {
           tokensUsed: 100, // Estimate
           cacheHit: false,
           fallbackUsed: false,
-          executionTime: 0
+          executionTime: 0,
         }
-      
+
       case 'anomaly':
         const anomalies = await this.aiServices.fingpt.anomalyDetection(
           request.data.dataset,
@@ -106,15 +103,15 @@ export class WorkflowRouter {
           data: anomalies,
           confidence: 0.9,
           insights: anomalies.patterns,
-          warnings: anomalies.anomalies.map(a => 
-            `${a.type} anomaly detected with ${a.severity} severity`
+          warnings: anomalies.anomalies.map(
+            (a) => `${a.type} anomaly detected with ${a.severity} severity`
           ),
           tokensUsed: 200,
           cacheHit: false,
           fallbackUsed: false,
-          executionTime: 0
+          executionTime: 0,
         }
-      
+
       default:
         throw new Error(`Unknown FinGPT method: ${method}`)
     }
@@ -137,7 +134,7 @@ export class WorkflowRouter {
           confidence: 0.95,
           insights: [
             `Optimized portfolio with Sharpe ratio: ${portfolio.sharpeRatio}`,
-            `Expected return: ${portfolio.expectedReturn}%`
+            `Expected return: ${portfolio.expectedReturn}%`,
           ],
           recommendations: Object.entries(portfolio.optimalWeights).map(
             ([asset, weight]) => `Allocate ${(weight * 100).toFixed(1)}% to ${asset}`
@@ -145,9 +142,9 @@ export class WorkflowRouter {
           tokensUsed: 150,
           cacheHit: false,
           fallbackUsed: false,
-          executionTime: 0
+          executionTime: 0,
         }
-      
+
       default:
         throw new Error(`Unknown FinRobot method: ${method}`)
     }
@@ -160,24 +157,22 @@ export class WorkflowRouter {
   ): Promise<AIResult> {
     switch (method) {
       case 'customer':
-        const customer = await this.aiServices.idurar.customerIntelligence(
-          request.data.customerId
-        )
+        const customer = await this.aiServices.idurar.customerIntelligence(request.data.customerId)
         return {
           success: true,
           data: customer,
           confidence: 0.85,
           insights: [
             `Customer segment: ${customer.profile.segment}`,
-            `Churn risk: ${(customer.profile.churn_risk * 100).toFixed(1)}%`
+            `Churn risk: ${(customer.profile.churn_risk * 100).toFixed(1)}%`,
           ],
           recommendations: customer.recommendations,
           tokensUsed: 120,
           cacheHit: false,
           fallbackUsed: false,
-          executionTime: 0
+          executionTime: 0,
         }
-      
+
       default:
         throw new Error(`Unknown IDURAR method: ${method}`)
     }
@@ -200,14 +195,14 @@ export class WorkflowRouter {
           confidence: automation.confidence,
           insights: [
             `${automation.automatedSteps.length} steps automated`,
-            `Estimated time saved: ${automation.estimatedTimeSaved} hours`
+            `Estimated time saved: ${automation.estimatedTimeSaved} hours`,
           ],
           tokensUsed: 180,
           cacheHit: false,
           fallbackUsed: false,
-          executionTime: 0
+          executionTime: 0,
         }
-      
+
       default:
         throw new Error(`Unknown ERPNext method: ${method}`)
     }
@@ -227,23 +222,21 @@ export class WorkflowRouter {
           confidence: lead.conversionProbability,
           insights: [
             `Lead score: ${lead.score}/100`,
-            `Estimated value: $${lead.estimatedValue.toLocaleString()}`
+            `Estimated value: $${lead.estimatedValue.toLocaleString()}`,
           ],
           recommendations: lead.recommendedActions,
           tokensUsed: 90,
           cacheHit: false,
           fallbackUsed: false,
-          executionTime: 0
+          executionTime: 0,
         }
-      
+
       default:
         throw new Error(`Unknown Dolibarr method: ${method}`)
     }
   }
 
-  private handleError(error: any, request: AIFlowRequest, startTime: number): AIResult {
-    console.error(`AI workflow error for ${request.workflow}:`, error)
-    
+  private handleError(error: unknown, request: AIFlowRequest, startTime: number): AIResult {
     return {
       success: false,
       data: null,
@@ -253,7 +246,7 @@ export class WorkflowRouter {
       executionTime: Date.now() - startTime,
       tokensUsed: 0,
       cacheHit: false,
-      fallbackUsed: false
+      fallbackUsed: false,
     }
   }
 
@@ -269,9 +262,9 @@ export class WorkflowRouter {
       'finrobot.portfolio': 7200, // 2 hours
       'idurar.customer': 3600, // 1 hour
       'erpnext.automation': 86400, // 24 hours
-      'dolibarr.lead': 1800 // 30 minutes
+      'dolibarr.lead': 1800, // 30 minutes
     }
-    
+
     return ttlMap[workflow] || 3600 // Default 1 hour
   }
 }

@@ -1,20 +1,20 @@
 /**
  * CoreFlow360 Enhanced Voice Processing Workflows
- * 
+ *
  * Durable, fault-tolerant Temporal workflows for voice call processing
  * Ensures zero data loss and consistent lead processing regardless of failures
  */
 
-import { 
-  proxyActivities, 
-  defineSignal, 
-  defineQuery, 
-  setHandler, 
-  condition, 
+import {
+  proxyActivities,
+  defineSignal,
+  defineQuery,
+  setHandler,
+  condition,
   uuid4,
   log,
   sleep,
-  continueAsNew
+  continueAsNew,
 } from '@temporalio/workflow'
 
 // Import activity definitions
@@ -40,7 +40,7 @@ const {
   scheduleAppointment,
   sendSMS,
   updateCRM,
-  triggerAutomations
+  triggerAutomations,
 } = proxyActivities<typeof activities>({
   startToCloseTimeout: '5 minutes',
   heartbeatTimeout: '30 seconds',
@@ -49,8 +49,8 @@ const {
     backoffCoefficient: 2,
     maximumInterval: '30 seconds',
     maximumAttempts: 5,
-    nonRetryableErrorTypes: ['ValidationError', 'AuthenticationError']
-  }
+    nonRetryableErrorTypes: ['ValidationError', 'AuthenticationError'],
+  },
 })
 
 // Workflow signals and queries
@@ -70,7 +70,7 @@ export interface CallWorkflowInput {
   phoneNumber: string
   provider: 'vapi' | 'twilio'
   startTime: Date
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
 }
 
 export interface PostCallWorkflowInput {
@@ -86,7 +86,7 @@ export interface VoiceLeadWorkflowInput {
   industry?: string
   goal: 'qualification' | 'appointment' | 'follow_up'
   priority: 'low' | 'medium' | 'high'
-  customerData?: any
+  customerData?: unknown
   startTime: number
 }
 
@@ -101,7 +101,7 @@ export interface TranscriptEvent {
 
 export interface FunctionCallEvent {
   functionName: string
-  parameters: Record<string, any>
+  parameters: Record<string, unknown>
   timestamp: Date
   confidence?: number
 }
@@ -162,11 +162,13 @@ export interface EmotionData {
  * Enhanced Voice Call Workflow
  * Orchestrates the entire call lifecycle with real-time processing
  */
-export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promise<CallWorkflowStatus> {
+export async function enhancedVoiceCallWorkflow(
+  input: CallWorkflowInput
+): Promise<CallWorkflowStatus> {
   const { callId, tenantId, phoneNumber, provider, startTime, metadata } = input
-  
+
   // Initialize workflow state
-  let status: CallWorkflowStatus = {
+  const status: CallWorkflowStatus = {
     stage: 'starting',
     progress: 0,
     leadScore: 0,
@@ -177,14 +179,14 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
       need: 0,
       timeline: 0,
       budget: 0,
-      fit: 0
+      fit: 0,
     },
     nextActions: [],
-    errorCount: 0
+    errorCount: 0,
   }
 
-  let transcripts: TranscriptEvent[] = []
-  let functionCalls: FunctionCallEvent[] = []
+  const transcripts: TranscriptEvent[] = []
+  const functionCalls: FunctionCallEvent[] = []
   let callEnded = false
   let transferRequested = false
 
@@ -192,7 +194,7 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
   setHandler(transcriptSignal, async (event: TranscriptEvent) => {
     log.info('Processing transcript signal', { callId, speaker: event.speaker, text: event.text })
     transcripts.push(event)
-    
+
     try {
       // Process transcript in real-time
       const analysis = await processCallTranscript({
@@ -204,14 +206,14 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
         context: {
           previousTranscripts: transcripts.slice(-5), // Last 5 for context
           currentScore: status.leadScore,
-          callMetadata: metadata
-        }
+          callMetadata: metadata,
+        },
       })
 
       // Update qualification status
       status.qualificationStatus = {
         ...status.qualificationStatus,
-        ...analysis.qualification
+        ...analysis.qualification,
       }
       status.leadScore = analysis.leadScore
       status.progress = Math.min(95, status.progress + 2)
@@ -222,7 +224,6 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
           await executeUrgentAction(callId, tenantId, action)
         }
       }
-
     } catch (error) {
       log.error('Transcript processing failed', { callId, error })
       status.errorCount++
@@ -232,11 +233,11 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
   setHandler(functionCallSignal, async (event: FunctionCallEvent) => {
     log.info('Processing function call', { callId, function: event.functionName })
     functionCalls.push(event)
-    
+
     try {
       // Execute function call with validation
       const result = await executeFunctionCall(callId, tenantId, event)
-      
+
       // Update workflow state based on function result
       if (event.functionName === 'update_qualification_score') {
         status.leadScore = Math.max(status.leadScore, event.parameters.score || 0)
@@ -245,7 +246,6 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
       } else if (event.functionName === 'transfer_to_human') {
         transferRequested = true
       }
-
     } catch (error) {
       log.error('Function call execution failed', { callId, function: event.functionName, error })
       status.errorCount++
@@ -262,7 +262,7 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
   setHandler(transferSignal, async (request: TransferRequest) => {
     log.info('Transfer request received', { callId, reason: request.reason })
     transferRequested = true
-    
+
     try {
       await handleCallTransfer({
         callId,
@@ -274,12 +274,11 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
         currentContext: {
           leadScore: status.leadScore,
           qualification: status.qualificationStatus,
-          transcripts: transcripts.slice(-10)
-        }
+          transcripts: transcripts.slice(-10),
+        },
       })
-      
+
       status.nextActions.push('transferred_to_human')
-      
     } catch (error) {
       log.error('Transfer handling failed', { callId, error })
       status.errorCount++
@@ -288,30 +287,33 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
 
   // Set up query handlers
   setHandler(getCallStatusQuery, (): CallWorkflowStatus => status)
-  setHandler(getCallMetricsQuery, (): CallMetrics => ({
-    duration: Math.floor((Date.now() - new Date(startTime).getTime()) / 1000),
-    transcriptLength: transcripts.reduce((sum, t) => sum + t.text.length, 0),
-    averageResponse: calculateAverageResponse(transcripts),
-    sentimentScore: calculateSentimentScore(transcripts),
-    engagementLevel: calculateEngagementLevel(transcripts, functionCalls),
-    qualificationScore: status.leadScore,
-    functionCalls: functionCalls.length,
-    transfers: transferRequested ? 1 : 0
-  }))
+  setHandler(
+    getCallMetricsQuery,
+    (): CallMetrics => ({
+      duration: Math.floor((Date.now() - new Date(startTime).getTime()) / 1000),
+      transcriptLength: transcripts.reduce((sum, t) => sum + t.text.length, 0),
+      averageResponse: calculateAverageResponse(transcripts),
+      sentimentScore: calculateSentimentScore(transcripts),
+      engagementLevel: calculateEngagementLevel(transcripts, functionCalls),
+      qualificationScore: status.leadScore,
+      functionCalls: functionCalls.length,
+      transfers: transferRequested ? 1 : 0,
+    })
+  )
   setHandler(getLeadScoreQuery, (): number => status.leadScore)
 
   try {
     // Initialize call record
     status.stage = 'starting'
     status.currentActivity = 'creating_call_record'
-    
+
     await createCallRecord({
       callId,
       tenantId,
       phoneNumber,
       provider,
       startTime,
-      metadata
+      metadata,
     })
 
     status.stage = 'active'
@@ -320,9 +322,9 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
 
     // Wait for call to complete or timeout after 1 hour
     const callTimeout = 60 * 60 * 1000 // 1 hour
-    
+
     await condition(() => callEnded || transferRequested, callTimeout)
-    
+
     // Final processing
     status.stage = 'processing'
     status.currentActivity = 'final_processing'
@@ -336,7 +338,7 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
       functionCalls,
       qualification: status.qualificationStatus,
       leadScore: status.leadScore,
-      duration: Math.floor((Date.now() - new Date(startTime).getTime()) / 1000)
+      duration: Math.floor((Date.now() - new Date(startTime).getTime()) / 1000),
     })
 
     // Update final call record
@@ -349,7 +351,7 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
       leadScore: status.leadScore,
       qualification: status.qualificationStatus,
       transcriptCount: transcripts.length,
-      functionCallCount: functionCalls.length
+      functionCallCount: functionCalls.length,
     })
 
     // Store analytics for improvement
@@ -363,8 +365,8 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
         leadScore: status.leadScore,
         qualificationData: status.qualificationStatus,
         functionCalls: functionCalls.length,
-        errorCount: status.errorCount
-      }
+        errorCount: status.errorCount,
+      },
     })
 
     // Trigger integrations and automations
@@ -372,25 +374,24 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
       callId,
       tenantId,
       leadScore: status.leadScore,
-      nextActions: status.nextActions
+      nextActions: status.nextActions,
     })
 
     status.stage = 'completed'
     status.progress = 100
     status.currentActivity = 'completed'
 
-    log.info('Call workflow completed successfully', { 
-      callId, 
-      finalScore: status.leadScore, 
-      transcripts: transcripts.length 
+    log.info('Call workflow completed successfully', {
+      callId,
+      finalScore: status.leadScore,
+      transcripts: transcripts.length,
     })
-
   } catch (error) {
     status.stage = 'failed'
     status.errorCount++
-    
+
     log.error('Call workflow failed', { callId, error })
-    
+
     // Store error for analysis
     await storeAnalytics({
       callId,
@@ -401,8 +402,8 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
         duration: Math.floor((Date.now() - new Date(startTime).getTime()) / 1000),
         transcriptLength: transcripts.reduce((sum, t) => sum + t.text.length, 0),
         leadScore: status.leadScore,
-        errorCount: status.errorCount
-      }
+        errorCount: status.errorCount,
+      },
     })
 
     throw error
@@ -417,7 +418,7 @@ export async function enhancedVoiceCallWorkflow(input: CallWorkflowInput): Promi
  */
 export async function postCallProcessingWorkflow(input: PostCallWorkflowInput): Promise<void> {
   const { callId, leadId, tenantId } = input
-  
+
   try {
     log.info('Starting post-call processing', { callId, leadId })
 
@@ -425,7 +426,7 @@ export async function postCallProcessingWorkflow(input: PostCallWorkflowInput): 
     const qualityResult = await performQualityCheck({
       callId,
       tenantId,
-      leadId
+      leadId,
     })
 
     // Update lead scoring based on quality analysis
@@ -434,7 +435,7 @@ export async function postCallProcessingWorkflow(input: PostCallWorkflowInput): 
         leadId,
         tenantId,
         adjustment: qualityResult.scoreAdjustment,
-        reason: 'post_call_quality_analysis'
+        reason: 'post_call_quality_analysis',
       })
     }
 
@@ -445,7 +446,7 @@ export async function postCallProcessingWorkflow(input: PostCallWorkflowInput): 
         tenantId,
         type: qualityResult.recommendedFollowUp.type,
         scheduledFor: qualityResult.recommendedFollowUp.scheduledFor,
-        message: qualityResult.recommendedFollowUp.message
+        message: qualityResult.recommendedFollowUp.message,
       })
     }
 
@@ -458,7 +459,7 @@ export async function postCallProcessingWorkflow(input: PostCallWorkflowInput): 
           type: notification.type,
           message: notification.message,
           callId,
-          leadId
+          leadId,
         })
       }
     }
@@ -468,7 +469,7 @@ export async function postCallProcessingWorkflow(input: PostCallWorkflowInput): 
       leadId,
       tenantId,
       callId,
-      qualityData: qualityResult
+      qualityData: qualityResult,
     })
 
     // Trigger marketing automations if qualified
@@ -476,15 +477,14 @@ export async function postCallProcessingWorkflow(input: PostCallWorkflowInput): 
       await triggerAutomations({
         leadId,
         tenantId,
-        triggers: qualityResult.marketingTriggers
+        triggers: qualityResult.marketingTriggers,
       })
     }
 
     log.info('Post-call processing completed', { callId, leadId })
-
   } catch (error) {
     log.error('Post-call processing failed', { callId, leadId, error })
-    
+
     // Schedule retry after delay
     await sleep('5 minutes')
     await continueAsNew<typeof postCallProcessingWorkflow>(input)
@@ -497,7 +497,7 @@ export async function postCallProcessingWorkflow(input: PostCallWorkflowInput): 
  */
 export async function enhancedVoiceLeadWorkflow(input: VoiceLeadWorkflowInput): Promise<string> {
   const { callId, phoneNumber, tenantId, industry, goal, priority, customerData, startTime } = input
-  
+
   try {
     log.info('Starting enhanced voice lead workflow', { callId, industry, goal })
 
@@ -506,7 +506,7 @@ export async function enhancedVoiceLeadWorkflow(input: VoiceLeadWorkflowInput): 
       phoneNumber,
       tenantId,
       industry,
-      existingData: customerData
+      existingData: customerData,
     })
 
     // Analyze call with industry-specific context
@@ -515,7 +515,7 @@ export async function enhancedVoiceLeadWorkflow(input: VoiceLeadWorkflowInput): 
       tenantId,
       industry,
       goal,
-      customerContext: enrichedCustomer
+      customerContext: enrichedCustomer,
     })
 
     // Calculate comprehensive lead score
@@ -526,12 +526,12 @@ export async function enhancedVoiceLeadWorkflow(input: VoiceLeadWorkflowInput): 
       analysis,
       industry,
       goal,
-      priority
+      priority,
     })
 
     // Determine and execute next actions
     const nextActions = determineNextActions(analysis, leadScore, goal)
-    
+
     for (const action of nextActions) {
       switch (action.type) {
         case 'schedule_appointment':
@@ -540,7 +540,7 @@ export async function enhancedVoiceLeadWorkflow(input: VoiceLeadWorkflowInput): 
             tenantId,
             serviceType: action.serviceType,
             urgency: action.urgency,
-            preferredTime: action.preferredTime
+            preferredTime: action.preferredTime,
           })
           break
 
@@ -549,7 +549,7 @@ export async function enhancedVoiceLeadWorkflow(input: VoiceLeadWorkflowInput): 
             phoneNumber,
             tenantId,
             message: action.message,
-            scheduleFor: action.scheduleFor
+            scheduleFor: action.scheduleFor,
           })
           break
 
@@ -559,7 +559,7 @@ export async function enhancedVoiceLeadWorkflow(input: VoiceLeadWorkflowInput): 
               leadId: `${callId}_lead`,
               tenantId,
               amount: action.paymentData.amount,
-              paymentMethod: action.paymentData.method
+              paymentMethod: action.paymentData.method,
             })
           }
           break
@@ -574,17 +574,16 @@ export async function enhancedVoiceLeadWorkflow(input: VoiceLeadWorkflowInput): 
       goal,
       leadScore,
       actions: nextActions.length,
-      processingTime: Date.now() - startTime
+      processingTime: Date.now() - startTime,
     })
 
-    log.info('Enhanced voice lead workflow completed', { 
-      callId, 
-      leadScore, 
-      actionsExecuted: nextActions.length 
+    log.info('Enhanced voice lead workflow completed', {
+      callId,
+      leadScore,
+      actionsExecuted: nextActions.length,
     })
 
     return `${callId}_lead`
-
   } catch (error) {
     log.error('Enhanced voice lead workflow failed', { callId, error })
     throw error
@@ -592,7 +591,11 @@ export async function enhancedVoiceLeadWorkflow(input: VoiceLeadWorkflowInput): 
 }
 
 // Helper functions
-async function executeUrgentAction(callId: string, tenantId: string, action: any): Promise<void> {
+async function executeUrgentAction(
+  callId: string,
+  tenantId: string,
+  action: unknown
+): Promise<void> {
   switch (action.type) {
     case 'alert_manager':
       await sendNotification({
@@ -600,32 +603,36 @@ async function executeUrgentAction(callId: string, tenantId: string, action: any
         userId: action.managerId,
         type: 'urgent_call_alert',
         message: `Urgent attention needed on call ${callId}: ${action.reason}`,
-        callId
+        callId,
       })
       break
-      
+
     case 'escalate_pricing':
       // Handle pricing escalation
       break
-      
+
     case 'offer_discount':
       // Handle automatic discount offering
       break
   }
 }
 
-async function executeFunctionCall(callId: string, tenantId: string, event: FunctionCallEvent): Promise<any> {
+async function executeFunctionCall(
+  callId: string,
+  tenantId: string,
+  event: FunctionCallEvent
+): Promise<unknown> {
   const { functionName, parameters } = event
-  
+
   switch (functionName) {
     case 'update_qualification_score':
       return await updateLeadScore({
         leadId: `${callId}_lead`,
         tenantId,
         adjustment: parameters.score,
-        reason: parameters.reasoning || 'real_time_qualification'
+        reason: parameters.reasoning || 'real_time_qualification',
       })
-      
+
     case 'schedule_appointment':
       return await scheduleAppointment({
         leadId: `${callId}_lead`,
@@ -633,9 +640,9 @@ async function executeFunctionCall(callId: string, tenantId: string, event: Func
         serviceType: parameters.serviceType,
         preferredDate: parameters.preferredDate,
         preferredTime: parameters.preferredTime,
-        urgency: parameters.urgency
+        urgency: parameters.urgency,
       })
-      
+
     default:
       throw new Error(`Unknown function: ${functionName}`)
   }
@@ -643,70 +650,74 @@ async function executeFunctionCall(callId: string, tenantId: string, event: Func
 
 function calculateAverageResponse(transcripts: TranscriptEvent[]): number {
   if (transcripts.length < 2) return 0
-  
+
   const responseTimes: number[] = []
   for (let i = 1; i < transcripts.length; i++) {
-    if (transcripts[i-1].speaker !== transcripts[i].speaker) {
-      responseTimes.push(transcripts[i].timestamp.getTime() - transcripts[i-1].timestamp.getTime())
+    if (transcripts[i - 1].speaker !== transcripts[i].speaker) {
+      responseTimes.push(
+        transcripts[i].timestamp.getTime() - transcripts[i - 1].timestamp.getTime()
+      )
     }
   }
-  
+
   return responseTimes.length > 0 ? responseTimes.reduce((a, b) => a + b) / responseTimes.length : 0
 }
 
 function calculateSentimentScore(transcripts: TranscriptEvent[]): number {
   if (!transcripts.length) return 0
-  
+
   // Simplified sentiment calculation based on emotions
-  const emotionScores = transcripts.flatMap(t => t.emotions || [])
+  const emotionScores = transcripts.flatMap((t) => t.emotions || [])
   if (!emotionScores.length) return 0.5
-  
+
   const positiveEmotions = ['happy', 'excited', 'satisfied', 'confident']
   const positiveScore = emotionScores
-    .filter(e => positiveEmotions.includes(e.emotion))
+    .filter((e) => positiveEmotions.includes(e.emotion))
     .reduce((sum, e) => sum + e.intensity * e.confidence, 0)
-    
+
   return Math.min(1, positiveScore / emotionScores.length)
 }
 
-function calculateEngagementLevel(transcripts: TranscriptEvent[], functionCalls: FunctionCallEvent[]): number {
+function calculateEngagementLevel(
+  transcripts: TranscriptEvent[],
+  functionCalls: FunctionCallEvent[]
+): number {
   const transcriptEngagement = transcripts.length * 0.1
   const functionEngagement = functionCalls.length * 0.3
-  const conversationFlow = transcripts.filter((t, i) => 
-    i > 0 && transcripts[i-1].speaker !== t.speaker
-  ).length * 0.2
-  
+  const conversationFlow =
+    transcripts.filter((t, i) => i > 0 && transcripts[i - 1].speaker !== t.speaker).length * 0.2
+
   return Math.min(1, transcriptEngagement + functionEngagement + conversationFlow)
 }
 
-function determineNextActions(analysis: any, leadScore: number, goal: string): any[] {
-  const actions: any[] = []
-  
+function determineNextActions(analysis: unknown, leadScore: number, goal: string): unknown[] {
+  const actions: unknown[] = []
+
   if (leadScore >= 8 && goal === 'appointment') {
     actions.push({
       type: 'schedule_appointment',
       urgency: 'high',
-      serviceType: analysis.serviceNeeded || 'consultation'
+      serviceType: analysis.serviceNeeded || 'consultation',
     })
   }
-  
+
   if (leadScore >= 6 && leadScore < 8) {
     actions.push({
       type: 'send_followup_sms',
-      message: 'Thanks for your time today! I\'ll send you the information we discussed.',
-      scheduleFor: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+      message: "Thanks for your time today! I'll send you the information we discussed.",
+      scheduleFor: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
     })
   }
-  
+
   if (analysis.paymentInterest && leadScore >= 7) {
     actions.push({
       type: 'process_payment',
       paymentData: {
         amount: analysis.proposedAmount,
-        method: 'card'
-      }
+        method: 'card',
+      },
     })
   }
-  
+
   return actions
 }

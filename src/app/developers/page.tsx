@@ -19,7 +19,8 @@ import {
   Package,
   GitBranch,
   Award,
-  TrendingUp
+  TrendingUp,
+  Bot,
 } from 'lucide-react'
 
 interface DeveloperStats {
@@ -72,7 +73,7 @@ class MyCustomAgent extends AIAgent {
     // Your AI logic here
     return this.analyze(data)
   }
-}`
+}`,
     },
     {
       title: 'Revenue APIs',
@@ -89,7 +90,7 @@ const billing = new RevenueAPI({
     freeTier: true
   },
   revenueShare: 0.70 // You keep 70%
-})`
+})`,
     },
     {
       title: 'Integration Hub',
@@ -102,7 +103,7 @@ const salesforce = await IntegrationHub.connect('salesforce', {
 })
 
 const leads = await salesforce.getLeads()
-const enriched = await this.enrichLeadData(leads)`
+const enriched = await this.enrichLeadData(leads)`,
     },
     {
       title: 'Real-time Analytics',
@@ -116,8 +117,8 @@ Analytics.track('agent_execution', {
   userId: user.id,
   duration: executionTime,
   success: true
-})`
-    }
+})`,
+    },
   ]
 
   const successStories: SuccessStory[] = [
@@ -128,7 +129,8 @@ Analytics.track('agent_execution', {
       revenue: '$23,000/month',
       timeToMarket: '6 weeks',
       rating: 4.8,
-      quote: 'The SDK made it incredibly easy to build and monetize our AI agent. We went from idea to $20K MRR in just 6 weeks.'
+      quote:
+        'The SDK made it incredibly easy to build and monetize our AI agent. We went from idea to $20K MRR in just 6 weeks.',
     },
     {
       developer: 'Marcus Rodriguez',
@@ -137,7 +139,8 @@ Analytics.track('agent_execution', {
       revenue: '$45,000/month',
       timeToMarket: '8 weeks',
       rating: 4.9,
-      quote: 'CoreFlow360\'s marketplace gave us instant access to thousands of potential customers. The revenue sharing is generous too.'
+      quote:
+        "CoreFlow360's marketplace gave us instant access to thousands of potential customers. The revenue sharing is generous too.",
     },
     {
       developer: 'Emily Johnson',
@@ -146,8 +149,9 @@ Analytics.track('agent_execution', {
       revenue: '$18,500/month',
       timeToMarket: '4 weeks',
       rating: 4.6,
-      quote: 'I love how the platform handles billing, support, and distribution. I can focus on building great AI instead of business operations.'
-    }
+      quote:
+        'I love how the platform handles billing, support, and distribution. I can focus on building great AI instead of business operations.',
+    },
   ]
 
   useEffect(() => {
@@ -158,7 +162,7 @@ Analytics.track('agent_execution', {
         totalAgents: 47,
         totalRevenue: 1247000,
         averageRating: 4.7,
-        monthlyDownloads: 15680
+        monthlyDownloads: 15680,
       })
       setLoading(false)
     }, 1000)
@@ -166,22 +170,22 @@ Analytics.track('agent_execution', {
 
   const handleGetStarted = () => {
     // Track developer interest
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'developer_signup_interest', {
+    if (typeof window !== 'undefined' && (window as unknown).gtag) {
+      ;(window as unknown).gtag('event', 'developer_signup_interest', {
         source: 'developer_portal',
-        page: 'overview'
+        page: 'overview',
       })
     }
-    
+
     // In production, this would redirect to developer registration
-    alert('Developer registration opening soon! We\'ll notify you when it\'s ready.')
+    alert("Developer registration opening soon! We'll notify you when it's ready.")
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-violet-500 border-t-transparent"></div>
           <p className="text-gray-400">Loading Developer Portal...</p>
         </div>
       </div>
@@ -193,53 +197,58 @@ Analytics.track('agent_execution', {
       {/* Hero Section */}
       <div className="border-b border-gray-800/50 bg-gray-900/50 backdrop-blur-xl">
         <div className="container mx-auto px-6 py-16">
-          <div className="text-center mb-12">
+          <div className="mb-12 text-center">
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-5xl font-bold mb-6"
+              className="mb-6 text-5xl font-bold"
             >
               Build AI Agents That <span className="gradient-text-ai">Make Money</span>
             </motion.h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              Join the fastest-growing AI marketplace. Create intelligent agents, reach thousands of customers, and earn revenue while they work.
+            <p className="mx-auto mb-8 max-w-3xl text-xl text-gray-300">
+              Join the fastest-growing AI marketplace. Create intelligent agents, reach thousands of
+              customers, and earn revenue while they work.
             </p>
 
             {/* Stats */}
             {stats && (
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-6 max-w-4xl mx-auto mb-8">
+              <div className="mx-auto mb-8 grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-5">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-white">{stats.totalDevelopers}</div>
-                  <div className="text-gray-400 text-sm">Developers</div>
+                  <div className="text-sm text-gray-400">Developers</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-emerald-400">${(stats.totalRevenue / 1000).toFixed(0)}K</div>
-                  <div className="text-gray-400 text-sm">Developer Revenue</div>
+                  <div className="text-3xl font-bold text-emerald-400">
+                    ${(stats.totalRevenue / 1000).toFixed(0)}K
+                  </div>
+                  <div className="text-sm text-gray-400">Developer Revenue</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-400">{stats.totalAgents}</div>
-                  <div className="text-gray-400 text-sm">Live Agents</div>
+                  <div className="text-sm text-gray-400">Live Agents</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-violet-400">{stats.averageRating}★</div>
-                  <div className="text-gray-400 text-sm">Avg Rating</div>
+                  <div className="text-sm text-gray-400">Avg Rating</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-orange-400">{(stats.monthlyDownloads / 1000).toFixed(0)}K</div>
-                  <div className="text-gray-400 text-sm">Downloads/Month</div>
+                  <div className="text-3xl font-bold text-orange-400">
+                    {(stats.monthlyDownloads / 1000).toFixed(0)}K
+                  </div>
+                  <div className="text-sm text-gray-400">Downloads/Month</div>
                 </div>
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <button
                 onClick={handleGetStarted}
-                className="bg-gradient-to-r from-violet-600 to-cyan-600 hover:opacity-90 text-white px-8 py-4 rounded-xl font-semibold text-lg flex items-center justify-center"
+                className="flex items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white hover:opacity-90"
               >
                 Get Started Free
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="ml-2 h-5 w-5" />
               </button>
-              <button className="border border-gray-600 text-gray-300 px-8 py-4 rounded-xl hover:border-gray-500 transition-all">
+              <button className="rounded-xl border border-gray-600 px-8 py-4 text-gray-300 transition-all hover:border-gray-500">
                 Download SDK
               </button>
             </div>
@@ -255,18 +264,18 @@ Analytics.track('agent_execution', {
               { id: 'overview', label: 'Overview', icon: Rocket },
               { id: 'sdk', label: 'SDK & Tools', icon: Code },
               { id: 'docs', label: 'Documentation', icon: Book },
-              { id: 'submit', label: 'Submit Agent', icon: Package }
+              { id: 'submit', label: 'Submit Agent', icon: Package },
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
-                onClick={() => setActiveTab(id as any)}
-                className={`flex items-center px-4 py-4 border-b-2 transition-all ${
+                onClick={() => setActiveTab(id as unknown)}
+                className={`flex items-center border-b-2 px-4 py-4 transition-all ${
                   activeTab === id
                     ? 'border-violet-500 text-violet-300'
                     : 'border-transparent text-gray-400 hover:text-gray-300'
                 }`}
               >
-                <Icon className="w-5 h-5 mr-2" />
+                <Icon className="mr-2 h-5 w-5" />
                 {label}
               </button>
             ))}
@@ -284,64 +293,74 @@ Analytics.track('agent_execution', {
               exit={{ opacity: 0, y: -20 }}
             >
               {/* Value Proposition */}
-              <div className="grid md:grid-cols-3 gap-8 mb-16">
+              <div className="mb-16 grid gap-8 md:grid-cols-3">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <DollarSign className="w-8 h-8 text-white" />
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600">
+                    <DollarSign className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-2">Earn 70% Revenue Share</h3>
-                  <p className="text-gray-400">Keep majority of revenue while we handle billing, support, and distribution</p>
+                  <h3 className="mb-2 text-xl font-semibold text-white">Earn 70% Revenue Share</h3>
+                  <p className="text-gray-400">
+                    Keep majority of revenue while we handle billing, support, and distribution
+                  </p>
                 </div>
-                
+
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-8 h-8 text-white" />
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-600">
+                    <Users className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-2">Instant Customer Base</h3>
-                  <p className="text-gray-400">Access 1,200+ companies actively looking for AI solutions</p>
+                  <h3 className="mb-2 text-xl font-semibold text-white">Instant Customer Base</h3>
+                  <p className="text-gray-400">
+                    Access 1,200+ companies actively looking for AI solutions
+                  </p>
                 </div>
-                
+
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Rocket className="w-8 h-8 text-white" />
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600">
+                    <Rocket className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-2">Rapid Development</h3>
-                  <p className="text-gray-400">Ship AI agents 5x faster with our comprehensive SDK and templates</p>
+                  <h3 className="mb-2 text-xl font-semibold text-white">Rapid Development</h3>
+                  <p className="text-gray-400">
+                    Ship AI agents 5x faster with our comprehensive SDK and templates
+                  </p>
                 </div>
               </div>
 
               {/* Success Stories */}
               <div className="mb-16">
-                <h2 className="text-3xl font-bold text-center text-white mb-8">Developer Success Stories</h2>
-                <div className="grid md:grid-cols-3 gap-8">
+                <h2 className="mb-8 text-center text-3xl font-bold text-white">
+                  Developer Success Stories
+                </h2>
+                <div className="grid gap-8 md:grid-cols-3">
                   {successStories.map((story, index) => (
                     <motion.div
                       key={story.developer}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6"
+                      className="rounded-2xl border border-gray-700/50 bg-gray-800/40 p-6 backdrop-blur-sm"
                     >
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="mb-4 flex items-center justify-between">
                         <div>
                           <h4 className="font-semibold text-white">{story.developer}</h4>
-                          <p className="text-gray-400 text-sm">{story.company}</p>
+                          <p className="text-sm text-gray-400">{story.company}</p>
                         </div>
                         <div className="flex items-center">
-                          <Star className="w-4 h-4 text-yellow-500 mr-1" />
+                          <Star className="mr-1 h-4 w-4 text-yellow-500" />
                           <span className="text-white">{story.rating}</span>
                         </div>
                       </div>
-                      
+
                       <div className="mb-4">
-                        <div className="text-lg font-bold text-emerald-400 mb-1">{story.revenue}</div>
-                        <div className="text-gray-400 text-sm">Agent: {story.agent}</div>
+                        <div className="mb-1 text-lg font-bold text-emerald-400">
+                          {story.revenue}
+                        </div>
+                        <div className="text-sm text-gray-400">Agent: {story.agent}</div>
                       </div>
-                      
-                      <blockquote className="text-gray-300 text-sm italic mb-4">
+
+                      <blockquote className="mb-4 text-sm text-gray-300 italic">
                         "{story.quote}"
                       </blockquote>
-                      
+
                       <div className="text-xs text-gray-500">
                         Time to market: {story.timeToMarket}
                       </div>
@@ -359,34 +378,34 @@ Analytics.track('agent_execution', {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-white mb-4">CoreFlow360 Developer SDK</h2>
-                <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              <div className="mb-12 text-center">
+                <h2 className="mb-4 text-3xl font-bold text-white">CoreFlow360 Developer SDK</h2>
+                <p className="mx-auto max-w-3xl text-xl text-gray-300">
                   Everything you need to build, test, and deploy AI agents at scale
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8 mb-12">
+              <div className="mb-12 grid gap-8 md:grid-cols-2">
                 {sdkFeatures.map((feature, index) => (
                   <motion.div
                     key={feature.title}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8"
+                    className="rounded-2xl border border-gray-700/50 bg-gray-800/40 p-8 backdrop-blur-sm"
                   >
-                    <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-violet-500 to-cyan-500 rounded-xl flex items-center justify-center mr-4">
-                        <feature.icon className="w-6 h-6 text-white" />
+                    <div className="mb-4 flex items-center">
+                      <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500">
+                        <feature.icon className="h-6 w-6 text-white" />
                       </div>
                       <h3 className="text-xl font-semibold text-white">{feature.title}</h3>
                     </div>
-                    
-                    <p className="text-gray-300 mb-6">{feature.description}</p>
-                    
+
+                    <p className="mb-6 text-gray-300">{feature.description}</p>
+
                     {feature.codeExample && (
-                      <div className="bg-gray-900/60 rounded-xl p-4">
-                        <pre className="text-sm text-gray-300 overflow-x-auto">
+                      <div className="rounded-xl bg-gray-900/60 p-4">
+                        <pre className="overflow-x-auto text-sm text-gray-300">
                           <code>{feature.codeExample}</code>
                         </pre>
                       </div>
@@ -396,14 +415,16 @@ Analytics.track('agent_execution', {
               </div>
 
               {/* Getting Started */}
-              <div className="bg-gradient-to-r from-violet-600/20 to-cyan-600/20 border border-violet-500/30 rounded-2xl p-8 text-center">
-                <h3 className="text-2xl font-bold text-white mb-4">Ready to Start Building?</h3>
-                <p className="text-gray-300 mb-6">Join our developer community and start earning from your AI innovations</p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button className="bg-gradient-to-r from-violet-600 to-cyan-600 hover:opacity-90 text-white px-6 py-3 rounded-xl font-semibold">
+              <div className="rounded-2xl border border-violet-500/30 bg-gradient-to-r from-violet-600/20 to-cyan-600/20 p-8 text-center">
+                <h3 className="mb-4 text-2xl font-bold text-white">Ready to Start Building?</h3>
+                <p className="mb-6 text-gray-300">
+                  Join our developer community and start earning from your AI innovations
+                </p>
+                <div className="flex flex-col justify-center gap-4 sm:flex-row">
+                  <button className="rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 px-6 py-3 font-semibold text-white hover:opacity-90">
                     Download SDK
                   </button>
-                  <button className="border border-gray-600 text-gray-300 px-6 py-3 rounded-xl hover:border-gray-500 transition-all">
+                  <button className="rounded-xl border border-gray-600 px-6 py-3 text-gray-300 transition-all hover:border-gray-500">
                     View Examples
                   </button>
                 </div>
@@ -418,35 +439,65 @@ Analytics.track('agent_execution', {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-white mb-4">Developer Documentation</h2>
+              <div className="mb-12 text-center">
+                <h2 className="mb-4 text-3xl font-bold text-white">Developer Documentation</h2>
                 <p className="text-xl text-gray-300">Comprehensive guides and API references</p>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {[
-                  { title: 'Quick Start Guide', description: 'Get your first AI agent running in 15 minutes', icon: Rocket, time: '15 min read' },
-                  { title: 'API Reference', description: 'Complete documentation of all available APIs', icon: Terminal, time: 'Reference' },
-                  { title: 'Agent Architecture', description: 'Understanding the AI agent lifecycle and patterns', icon: GitBranch, time: '30 min read' },
-                  { title: 'Integration Hub', description: 'Connect to external services and applications', icon: Globe, time: '20 min read' },
-                  { title: 'Revenue & Billing', description: 'Monetization strategies and billing integration', icon: DollarSign, time: '10 min read' },
-                  { title: 'Best Practices', description: 'Performance optimization and security guidelines', icon: Shield, time: '25 min read' }
+                  {
+                    title: 'Quick Start Guide',
+                    description: 'Get your first AI agent running in 15 minutes',
+                    icon: Rocket,
+                    time: '15 min read',
+                  },
+                  {
+                    title: 'API Reference',
+                    description: 'Complete documentation of all available APIs',
+                    icon: Terminal,
+                    time: 'Reference',
+                  },
+                  {
+                    title: 'Agent Architecture',
+                    description: 'Understanding the AI agent lifecycle and patterns',
+                    icon: GitBranch,
+                    time: '30 min read',
+                  },
+                  {
+                    title: 'Integration Hub',
+                    description: 'Connect to external services and applications',
+                    icon: Globe,
+                    time: '20 min read',
+                  },
+                  {
+                    title: 'Revenue & Billing',
+                    description: 'Monetization strategies and billing integration',
+                    icon: DollarSign,
+                    time: '10 min read',
+                  },
+                  {
+                    title: 'Best Practices',
+                    description: 'Performance optimization and security guidelines',
+                    icon: Shield,
+                    time: '25 min read',
+                  },
                 ].map((doc, index) => (
                   <motion.div
                     key={doc.title}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 hover:border-gray-600/50 transition-all cursor-pointer group"
+                    className="group cursor-pointer rounded-2xl border border-gray-700/50 bg-gray-800/40 p-6 backdrop-blur-sm transition-all hover:border-gray-600/50"
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <doc.icon className="w-8 h-8 text-violet-400" />
+                    <div className="mb-4 flex items-center justify-between">
+                      <doc.icon className="h-8 w-8 text-violet-400" />
                       <span className="text-xs text-gray-500">{doc.time}</span>
                     </div>
-                    <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-violet-300 transition-colors">
+                    <h3 className="mb-2 text-lg font-semibold text-white transition-colors group-hover:text-violet-300">
                       {doc.title}
                     </h3>
-                    <p className="text-gray-300 text-sm">{doc.description}</p>
+                    <p className="text-sm text-gray-300">{doc.description}</p>
                   </motion.div>
                 ))}
               </div>
@@ -460,70 +511,76 @@ Analytics.track('agent_execution', {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="max-w-2xl mx-auto text-center">
-                <h2 className="text-3xl font-bold text-white mb-6">Submit Your AI Agent</h2>
-                <p className="text-xl text-gray-300 mb-8">
+              <div className="mx-auto max-w-2xl text-center">
+                <h2 className="mb-6 text-3xl font-bold text-white">Submit Your AI Agent</h2>
+                <p className="mb-8 text-xl text-gray-300">
                   Ready to share your AI agent with thousands of businesses?
                 </p>
 
-                <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 mb-8">
-                  <div className="grid md:grid-cols-3 gap-6 mb-8">
+                <div className="mb-8 rounded-2xl border border-gray-700/50 bg-gray-800/40 p-8 backdrop-blur-sm">
+                  <div className="mb-8 grid gap-6 md:grid-cols-3">
                     <div className="text-center">
-                      <div className="w-12 h-12 bg-gradient-to-r from-violet-500 to-cyan-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        <CheckCircle className="w-6 h-6 text-white" />
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500">
+                        <CheckCircle className="h-6 w-6 text-white" />
                       </div>
-                      <h4 className="font-semibold text-white mb-2">Quality Review</h4>
-                      <p className="text-gray-400 text-sm">Our team reviews every submission for quality and security</p>
+                      <h4 className="mb-2 font-semibold text-white">Quality Review</h4>
+                      <p className="text-sm text-gray-400">
+                        Our team reviews every submission for quality and security
+                      </p>
                     </div>
-                    
+
                     <div className="text-center">
-                      <div className="w-12 h-12 bg-gradient-to-r from-violet-500 to-cyan-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        <TrendingUp className="w-6 h-6 text-white" />
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500">
+                        <TrendingUp className="h-6 w-6 text-white" />
                       </div>
-                      <h4 className="font-semibold text-white mb-2">Marketing Support</h4>
-                      <p className="text-gray-400 text-sm">Featured placement and promotional opportunities</p>
+                      <h4 className="mb-2 font-semibold text-white">Marketing Support</h4>
+                      <p className="text-sm text-gray-400">
+                        Featured placement and promotional opportunities
+                      </p>
                     </div>
-                    
+
                     <div className="text-center">
-                      <div className="w-12 h-12 bg-gradient-to-r from-violet-500 to-cyan-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        <Award className="w-6 h-6 text-white" />
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500">
+                        <Award className="h-6 w-6 text-white" />
                       </div>
-                      <h4 className="font-semibold text-white mb-2">Success Metrics</h4>
-                      <p className="text-gray-400 text-sm">Detailed analytics and performance insights</p>
+                      <h4 className="mb-2 font-semibold text-white">Success Metrics</h4>
+                      <p className="text-sm text-gray-400">
+                        Detailed analytics and performance insights
+                      </p>
                     </div>
                   </div>
 
                   <div className="text-center">
-                    <button className="bg-gradient-to-r from-violet-600 to-cyan-600 hover:opacity-90 text-white px-8 py-4 rounded-xl font-semibold text-lg mb-4">
+                    <button className="mb-4 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white hover:opacity-90">
                       Submit AI Agent
                     </button>
-                    <p className="text-gray-400 text-sm">
+                    <p className="text-sm text-gray-400">
                       Review process typically takes 3-5 business days
                     </p>
                   </div>
                 </div>
 
-                <div className="text-left bg-gray-900/40 rounded-2xl p-6">
-                  <h4 className="font-semibold text-white mb-4">Submission Requirements:</h4>
+                <div className="rounded-2xl bg-gray-900/40 p-6 text-left">
+                  <h4 className="mb-4 font-semibold text-white">Submission Requirements:</h4>
                   <ul className="space-y-2 text-gray-300">
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                       Built using CoreFlow360 SDK v2.0+
                     </li>
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                       Comprehensive documentation and examples
                     </li>
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                       Security audit and code review
                     </li>
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                       Clear pricing and license terms
                     </li>
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                       Support and maintenance commitment
                     </li>
                   </ul>

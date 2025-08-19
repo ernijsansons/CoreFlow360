@@ -3,17 +3,17 @@
  * Professional-grade audit execution with enhanced prompts
  */
 
-import { 
-  SACREDAuditEngine, 
-  SACREDAuditRequest, 
+import {
+  SACREDAuditEngine,
+  SACREDAuditRequest,
   SACREDAuditResponse,
-  EnhancedAuditFinding 
+  EnhancedAuditFinding,
 } from './sacred-audit-engine'
-import { 
+import {
   EnhancedAuditPrompts,
   SecurityAuditPrompts,
   PerformanceAuditPrompts,
-  ArchitectureAuditPrompts 
+  ArchitectureAuditPrompts,
 } from './enhanced-audit-prompts'
 import { PromptExecutionEngine } from './prompt-engineering'
 import { logger } from '@/lib/logging/logger'
@@ -90,7 +90,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
       performDependencyAudit: true,
       includeComplianceAssessment: true,
       outputDetailLevel: 'comprehensive',
-      ...config
+      ...config,
     }
     this.promptEngine = new PromptExecutionEngine()
   }
@@ -104,16 +104,16 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
     logger.info('Starting enhanced security audit', {
       scope: request.scope,
       useAdvancedPrompts: this.config.useAdvancedPrompts,
-      component: 'enhanced_audit_engine'
+      component: 'enhanced_audit_engine',
     })
 
     // Use enhanced security prompt
     const enhancedRequest: SACREDAuditRequest = {
       ...request,
       auditType: 'security',
-      customPrompt: this.config.useAdvancedPrompts 
+      customPrompt: this.config.useAdvancedPrompts
         ? SecurityAuditPrompts.createCriticalSecurityAudit()
-        : undefined
+        : undefined,
     }
 
     // Perform static code analysis if enabled
@@ -126,10 +126,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
     const baseResult = await super.executeAudit(enhancedRequest)
 
     // Enhance findings with additional analysis
-    const enhancedFindings = await this.enhanceSecurityFindings(
-      baseResult.findings,
-      codeAnalysis
-    )
+    const enhancedFindings = await this.enhanceSecurityFindings(baseResult.findings, codeAnalysis)
 
     // Generate compliance assessment
     const complianceAssessment = this.config.includeComplianceAssessment
@@ -142,8 +139,8 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
       synthesis: {
         ...baseResult.synthesis,
         complianceAssessment,
-        codeAnalysisResults: codeAnalysis
-      }
+        codeAnalysisResults: codeAnalysis,
+      },
     }
   }
 
@@ -155,16 +152,16 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
   ): Promise<SACREDAuditResponse> {
     logger.info('Starting enhanced performance audit', {
       scope: request.scope,
-      component: 'enhanced_audit_engine'
+      component: 'enhanced_audit_engine',
     })
 
     // Use enhanced performance prompt
     const enhancedRequest: SACREDAuditRequest = {
       ...request,
       auditType: 'performance',
-      customPrompt: this.config.useAdvancedPrompts 
+      customPrompt: this.config.useAdvancedPrompts
         ? PerformanceAuditPrompts.createPerformanceOptimizationAudit()
-        : undefined
+        : undefined,
     }
 
     // Gather performance metrics
@@ -185,8 +182,8 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
       synthesis: {
         ...baseResult.synthesis,
         performanceMetrics,
-        webVitalsAnalysis: this.analyzeWebVitals(performanceMetrics)
-      }
+        webVitalsAnalysis: this.analyzeWebVitals(performanceMetrics),
+      },
     }
   }
 
@@ -223,7 +220,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
       } catch (error) {
         logger.error(`Failed to execute ${auditType} audit`, error as Error, {
           auditType,
-          component: 'enhanced_audit_engine'
+          component: 'enhanced_audit_engine',
         })
       }
     }
@@ -239,7 +236,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
   ): Promise<SACREDAuditResponse> {
     const enhancedRequest: SACREDAuditRequest = {
       ...request,
-      auditType: 'architecture'
+      auditType: 'architecture',
     }
 
     // Analyze architecture metrics
@@ -251,8 +248,8 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
       ...baseResult,
       synthesis: {
         ...baseResult.synthesis,
-        architectureMetrics
-      }
+        architectureMetrics,
+      },
     }
   }
 
@@ -270,13 +267,13 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
     try {
       // Analyze codebase structure
       const codeMetrics = await this.analyzeCodeMetrics()
-      
+
       // Analyze dependencies
       const dependencies = await this.analyzeDependencies()
-      
+
       // Find security hotspots
       const securityHotspots = await this.findSecurityHotspots()
-      
+
       // Find performance issues
       const performanceIssues = await this.findPerformanceIssues()
 
@@ -284,7 +281,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
         ...codeMetrics,
         dependencies,
         securityHotspots,
-        performanceIssues
+        performanceIssues,
       }
 
       this.codeAnalysisCache.set(cacheKey, result)
@@ -304,7 +301,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
       const files = this.getSourceFiles()
       const totalFiles = files.length
       let totalLines = 0
-      let duplicateLines = 0
+      const duplicateLines = 0
 
       for (const file of files) {
         const content = readFileSync(file, 'utf-8')
@@ -322,7 +319,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
         totalLines,
         complexity,
         duplicateCode: duplicateLines,
-        testCoverage
+        testCoverage,
       }
     } catch (error) {
       logger.warn('Failed to analyze code metrics', { error })
@@ -331,7 +328,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
         totalLines: 0,
         complexity: 'unknown' as const,
         duplicateCode: 0,
-        testCoverage: 0
+        testCoverage: 0,
       }
     }
   }
@@ -344,7 +341,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
       const packageJson = JSON.parse(readFileSync('package.json', 'utf-8'))
       const dependencies = {
         ...packageJson.dependencies,
-        ...packageJson.devDependencies
+        ...packageJson.devDependencies,
       }
 
       const depInfo: DependencyInfo[] = []
@@ -358,7 +355,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
           version: version as string,
           vulnerabilities,
           license: packageInfo.license || 'unknown',
-          size: packageInfo.size || 0
+          size: packageInfo.size || 0,
         })
       }
 
@@ -390,7 +387,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
               line: index + 1,
               rule: 'dangerous-eval',
               message: 'Use of eval() or Function() constructor',
-              severity: 'high'
+              severity: 'high',
             })
           }
 
@@ -400,7 +397,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
               line: index + 1,
               rule: 'xss-risk',
               message: 'Potential XSS risk with innerHTML',
-              severity: 'medium'
+              severity: 'medium',
             })
           }
 
@@ -410,7 +407,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
               line: index + 1,
               rule: 'sql-injection',
               message: 'Potential SQL injection with string concatenation',
-              severity: 'critical'
+              severity: 'critical',
             })
           }
         })
@@ -443,7 +440,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
               line: index + 1,
               type: 'n+1-query',
               description: 'Potential N+1 query pattern detected',
-              impact: 'high'
+              impact: 'high',
             })
           }
 
@@ -454,7 +451,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
               line: index + 1,
               type: 'large-bundle',
               description: 'Large library import may increase bundle size',
-              impact: 'medium'
+              impact: 'medium',
             })
           }
         })
@@ -473,9 +470,9 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
     findings: EnhancedAuditFinding[],
     codeAnalysis?: CodeAnalysisResult
   ): Promise<EnhancedAuditFinding[]> {
-    return findings.map(finding => {
+    return findings.map((finding) => {
       // Generate CVSS score if enabled
-      const cvssScore = this.config.generateCVSSScores 
+      const cvssScore = this.config.generateCVSSScores
         ? this.calculateCVSSScore(finding)
         : undefined
 
@@ -483,14 +480,15 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
       const complianceMapping = this.mapToComplianceFrameworks(finding)
 
       // Enhance with code analysis data
-      const codeContext = codeAnalysis?.securityHotspots
-        .filter(hotspot => finding.location.includes(hotspot.file))
-        .map(hotspot => ({
-          file: hotspot.file,
-          line: hotspot.line,
-          rule: hotspot.rule,
-          message: hotspot.message
-        })) || []
+      const codeContext =
+        codeAnalysis?.securityHotspots
+          .filter((hotspot) => finding.location.includes(hotspot.file))
+          .map((hotspot) => ({
+            file: hotspot.file,
+            line: hotspot.line,
+            rule: hotspot.rule,
+            message: hotspot.message,
+          })) || []
 
       return {
         ...finding,
@@ -499,14 +497,14 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
         codeContext,
         enhancedEvidence: [
           ...finding.evidenceChain,
-          ...codeContext.map(ctx => ({
+          ...codeContext.map((ctx) => ({
             type: 'code' as const,
             source: ctx.file,
             content: ctx.message,
             relevance: 0.9,
-            explanation: `Security hotspot: ${ctx.rule}`
-          }))
-        ]
+            explanation: `Security hotspot: ${ctx.rule}`,
+          })),
+        ],
       }
     })
   }
@@ -516,9 +514,9 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
    */
   private async enhancePerformanceFindings(
     findings: EnhancedAuditFinding[],
-    metrics: any
+    metrics: unknown
   ): Promise<EnhancedAuditFinding[]> {
-    return findings.map(finding => {
+    return findings.map((finding) => {
       // Add Web Vitals impact analysis
       const webVitalsImpact = this.analyzeWebVitalsImpact(finding, metrics)
 
@@ -529,7 +527,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
         ...finding,
         webVitalsImpact,
         performanceROI,
-        benchmarkComparison: this.compareToBenchmarks(finding)
+        benchmarkComparison: this.compareToBenchmarks(finding),
       }
     })
   }
@@ -549,10 +547,10 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
         for (const item of items) {
           const fullPath = join(dir, item)
           const stat = statSync(fullPath)
-          
+
           if (stat.isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
             walkDirectory(fullPath)
-          } else if (stat.isFile() && extensions.some(ext => item.endsWith(ext))) {
+          } else if (stat.isFile() && extensions.some((ext) => item.endsWith(ext))) {
             files.push(fullPath)
           }
         }
@@ -561,7 +559,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
       }
     }
 
-    directories.forEach(dir => {
+    directories.forEach((dir) => {
       try {
         walkDirectory(dir)
       } catch (error) {
@@ -572,9 +570,12 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
     return files
   }
 
-  private calculateComplexity(lines: number, files: number): 'low' | 'medium' | 'high' | 'very-high' {
+  private calculateComplexity(
+    lines: number,
+    files: number
+  ): 'low' | 'medium' | 'high' | 'very-high' {
     const avgLinesPerFile = lines / files
-    
+
     if (avgLinesPerFile < 100) return 'low'
     if (avgLinesPerFile < 200) return 'medium'
     if (avgLinesPerFile < 400) return 'high'
@@ -592,12 +593,15 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
     }
   }
 
-  private async checkVulnerabilities(name: string, version: string): Promise<VulnerabilityInfo[]> {
+  private async checkVulnerabilities(
+    _name: string,
+    _version: string
+  ): Promise<VulnerabilityInfo[]> {
     // Mock implementation - would integrate with actual vulnerability database
     return []
   }
 
-  private async getPackageInfo(name: string) {
+  private async getPackageInfo(_name: string) {
     // Mock implementation - would fetch from npm registry
     return { license: 'MIT', size: 100000 }
   }
@@ -605,10 +609,10 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
   private calculateCVSSScore(finding: EnhancedAuditFinding): number {
     // Simplified CVSS calculation
     const severityMap = {
-      'critical': 9.5,
-      'high': 7.5,
-      'medium': 5.5,
-      'low': 2.5
+      critical: 9.5,
+      high: 7.5,
+      medium: 5.5,
+      low: 2.5,
     }
     return severityMap[finding.severity] || 0
   }
@@ -618,7 +622,7 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
     return {
       soc2: this.mapToSOC2(finding),
       gdpr: this.mapToGDPR(finding),
-      iso27001: this.mapToISO27001(finding)
+      iso27001: this.mapToISO27001(finding),
     }
   }
 
@@ -643,31 +647,31 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
       coreWebVitals: {
         lcp: 3.2,
         fid: 180,
-        cls: 0.25
+        cls: 0.25,
       },
       apiMetrics: {
         p50: 320,
         p95: 1200,
-        p99: 2800
-      }
+        p99: 2800,
+      },
     }
   }
 
-  private analyzeWebVitals(metrics: any) {
+  private analyzeWebVitals(metrics: unknown) {
     // Analyze Web Vitals performance
     return {
       lcpStatus: metrics.coreWebVitals.lcp > 2.5 ? 'poor' : 'good',
       fidStatus: metrics.coreWebVitals.fid > 100 ? 'poor' : 'good',
-      clsStatus: metrics.coreWebVitals.cls > 0.1 ? 'poor' : 'good'
+      clsStatus: metrics.coreWebVitals.cls > 0.1 ? 'poor' : 'good',
     }
   }
 
-  private analyzeWebVitalsImpact(finding: EnhancedAuditFinding, metrics: any) {
+  private analyzeWebVitalsImpact(_finding: EnhancedAuditFinding, _metrics: unknown) {
     // Analyze how finding impacts Web Vitals
     return {
       lcpImpact: finding.category === 'performance' ? 'high' : 'low',
       fidImpact: finding.title.includes('JavaScript') ? 'high' : 'low',
-      clsImpact: finding.title.includes('layout') ? 'high' : 'low'
+      clsImpact: finding.title.includes('layout') ? 'high' : 'low',
     }
   }
 
@@ -676,17 +680,17 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
     return {
       conversionImpact: 0.12, // 12% improvement
       costSavings: 5000, // Monthly savings
-      implementationCost: finding.implementation_cost * 150
+      implementationCost: finding.implementation_cost * 150,
     }
   }
 
-  private compareToBenchmarks(finding: EnhancedAuditFinding) {
+  private compareToBenchmarks(_finding: EnhancedAuditFinding) {
     // Compare to industry benchmarks
     return {
       industry: 'SaaS',
       currentPercentile: 25,
       targetPercentile: 75,
-      gapAnalysis: 'Significant improvement needed'
+      gapAnalysis: 'Significant improvement needed',
     }
   }
 
@@ -696,11 +700,11 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
       couplingScore: 7.2,
       cohesionScore: 6.8,
       technicalDebtRatio: 0.23,
-      maintainabilityIndex: 68
+      maintainabilityIndex: 68,
     }
   }
 
-  private generateComplianceAssessment(findings: EnhancedAuditFinding[]) {
+  private generateComplianceAssessment(_findings: EnhancedAuditFinding[]) {
     // Generate comprehensive compliance assessment
     return {
       soc2Status: 'partial-compliance',
@@ -709,8 +713,8 @@ export class EnhancedAuditEngine extends SACREDAuditEngine {
       recommendations: [
         'Implement comprehensive access controls',
         'Add encryption for all PII data',
-        'Establish continuous monitoring'
-      ]
+        'Establish continuous monitoring',
+      ],
     }
   }
 }

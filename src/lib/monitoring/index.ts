@@ -3,21 +3,19 @@
  * Advanced performance tracking with real-time metrics
  */
 
-export {
-  PerformanceTracker,
-  performanceTracker
-} from './performance-tracking'
+export { PerformanceTracker, performanceTracker } from './performance-tracking'
 
 export type {
   PerformanceMetric,
   PerformanceThreshold,
   PerformanceAlert,
   PerformanceStats,
-  TrackingOptions
+  TrackingOptions,
 } from './performance-tracking'
 
 // Re-export the main withPerformanceTracking function for convenience
-export const withPerformanceTracking = performanceTracker.withPerformanceTracking.bind(performanceTracker)
+export const withPerformanceTracking =
+  performanceTracker.withPerformanceTracking.bind(performanceTracker)
 
 /*
 // Integration Example:

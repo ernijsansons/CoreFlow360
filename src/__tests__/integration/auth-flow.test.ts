@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { PrismaClient } from '@prisma/client'
 import bcryptjs from 'bcryptjs'
-import { testConfig } from '@/test-config'
+import { testConfig } from '@/lib/test-config'
 
 const prisma = new PrismaClient()
 
@@ -37,12 +37,12 @@ describe('Authentication Flow Integration', () => {
   it('should create tenant and user via registration endpoint', async () => {
     // Simulate the registration process
     const hashedPassword = await bcryptjs.hash(testPassword, 12)
-    
+
     // Generate unique slug
     const baseSlug = testCompany.toLowerCase().replace(/[^a-z0-9]/g, '-')
     let slug = baseSlug
     let counter = 1
-    
+
     while (await prisma.tenant.findUnique({ where: { slug } })) {
       slug = `${baseSlug}-${counter}`
       counter++
@@ -58,15 +58,15 @@ describe('Authentication Flow Integration', () => {
           industryType: 'GENERAL',
           subscriptionStatus: 'TRIAL',
           enabledModules: JSON.stringify({ crm: true }),
-        }
+        },
       })
 
       const department = await tx.department.create({
         data: {
           name: 'Administration',
           code: 'ADMIN',
-          tenantId: tenant.id
-        }
+          tenantId: tenant.id,
+        },
       })
 
       const user = await tx.user.create({
@@ -79,12 +79,17 @@ describe('Authentication Flow Integration', () => {
           role: 'ADMIN',
           status: 'ACTIVE',
           permissions: JSON.stringify([
-            'tenant:read', 'tenant:update',
-            'users:read', 'users:create', 'users:update',
-            'customers:*', 'deals:*', 'projects:*',
-            'reports:read'
-          ])
-        }
+            'tenant:read',
+            'tenant:update',
+            'users:read',
+            'users:create',
+            'users:update',
+            'customers:*',
+            'deals:*',
+            'projects:*',
+            'reports:read',
+          ]),
+        },
       })
 
       // Create legacy subscription for compatibility
@@ -98,8 +103,8 @@ describe('Authentication Flow Integration', () => {
           currentPeriodStart: new Date(),
           currentPeriodEnd: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
           nextBillingDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-          billingCycle: 'monthly'
-        }
+          billingCycle: 'monthly',
+        },
       })
 
       return { tenant, user, department }
@@ -117,7 +122,7 @@ describe('Authentication Flow Integration', () => {
     // Find user with tenant
     const user = await prisma.user.findFirst({
       where: { email: testEmail },
-      include: { tenant: true, department: true }
+      include: { tenant: true, department: true },
     })
 
     expect(user).toBeTruthy()
@@ -135,7 +140,7 @@ describe('Authentication Flow Integration', () => {
   it('should have proper subscription setup', async () => {
     // Check legacy subscription exists
     const legacySubscription = await prisma.legacyTenantSubscription.findUnique({
-      where: { tenantId: testTenantId }
+      where: { tenantId: testTenantId },
     })
 
     expect(legacySubscription).toBeTruthy()
@@ -165,7 +170,9 @@ describe('Authentication Flow Integration', () => {
 
   it('should handle subscription-aware orchestration', async () => {
     // Import the orchestrator
-    const { SubscriptionAwareAIOrchestrator } = await import('@/ai/orchestration/subscription-aware-orchestrator')
+    const { SubscriptionAwareAIOrchestrator } = await import(
+      '@/ai/orchestration/subscription-aware-orchestrator'
+    )
 
     const mockLangChain = {}
     const mockAIService = {}
@@ -187,11 +194,11 @@ describe('Authentication Flow Integration', () => {
       input: { customerId: 'test-customer' },
       context: { userId: testUserId },
       requirements: { maxExecutionTime: 30000 },
-      userId: testUserId
+      userId: testUserId,
     }
 
     const result = await orchestrator.orchestrateWithSubscriptionAwareness(request)
-    
+
     expect(result).toBeTruthy()
     expect(result.executionMetadata.subscriptionTier).toBe('trial')
     expect(result.executionMetadata.activeModules).toContain('crm')
@@ -199,7 +206,7 @@ describe('Authentication Flow Integration', () => {
 
   it('should handle user permissions correctly', async () => {
     const user = await prisma.user.findUnique({
-      where: { id: testUserId }
+      where: { id: testUserId },
     })
 
     const permissions = JSON.parse(user!.permissions || '[]')
@@ -207,8 +214,8 @@ describe('Authentication Flow Integration', () => {
     expect(permissions).toContain('customers:*')
 
     // Test permission checking logic (would normally be in auth middleware)
-    const hasCustomerAccess = permissions.some((p: string) => 
-      p === 'customers:*' || p === 'customers:read'
+    const hasCustomerAccess = permissions.some(
+      (p: string) => p === 'customers:*' || p === 'customers:read'
     )
     expect(hasCustomerAccess).toBe(true)
   })
@@ -219,8 +226,8 @@ describe('Authentication Flow Integration', () => {
       where: {
         tenantId: testTenantId,
         userId: testUserId,
-        action: 'CREATE'
-      }
+        action: 'CREATE',
+      },
     })
 
     expect(auditLog).toBeTruthy()
@@ -231,7 +238,7 @@ describe('Authentication Flow Integration', () => {
     // Simulate what the session would contain
     const user = await prisma.user.findUnique({
       where: { id: testUserId },
-      include: { tenant: true }
+      include: { tenant: true },
     })
 
     const sessionUser = {
@@ -241,7 +248,7 @@ describe('Authentication Flow Integration', () => {
       tenantId: user!.tenantId,
       role: user!.role,
       departmentId: user!.departmentId,
-      permissions: JSON.parse(user!.permissions || '[]')
+      permissions: JSON.parse(user!.permissions || '[]'),
     }
 
     expect(sessionUser.id).toBeTruthy()

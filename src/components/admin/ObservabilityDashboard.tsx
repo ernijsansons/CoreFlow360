@@ -20,7 +20,7 @@ import {
   PlayIcon,
   PauseIcon,
   ArrowPathIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
 import {
   LineChart,
@@ -38,7 +38,7 @@ import {
   Pie,
   Cell,
   ScatterChart,
-  Scatter
+  Scatter,
 } from 'recharts'
 import { toast } from 'react-hot-toast'
 
@@ -60,7 +60,7 @@ interface ObservabilityData {
       message: string
       service: string
       source: string
-      metadata: Record<string, any>
+      metadata: Record<string, unknown>
     }>
     traces: Array<{
       id: string
@@ -96,38 +96,41 @@ interface ObservabilityData {
   }
   systemHealth: {
     overall: string
-    services: Record<string, {
-      status: string
-      errorRate: number
-      avgResponseTime: number
-      requestCount: number
-    }>
+    services: Record<
+      string,
+      {
+        status: string
+        errorRate: number
+        avgResponseTime: number
+        requestCount: number
+      }
+    >
     recommendations: string[]
   }
   metrics?: {
-    summary: any
-    recent: any[]
-    trends: any
+    summary: unknown
+    recent: unknown[]
+    trends: unknown
   }
   logs?: {
-    summary: any
-    recent: any[]
-    levelDistribution: any[]
+    summary: unknown
+    recent: unknown[]
+    levelDistribution: unknown[]
   }
   traces?: {
-    summary: any
-    recent: any[]
-    performance: any
+    summary: unknown
+    recent: unknown[]
+    performance: unknown
   }
   alerts?: {
-    summary: any
-    recent: any[]
-    trends: any
+    summary: unknown
+    recent: unknown[]
+    trends: unknown
   }
   businessInsights?: {
-    kpis: any[]
-    trends: any
-    predictions: any[]
+    kpis: unknown[]
+    trends: unknown
+    predictions: unknown[]
   }
 }
 
@@ -138,31 +141,33 @@ const COLORS = {
   error: '#ef4444',
   info: '#3b82f6',
   debug: '#8b5cf6',
-  critical: '#dc2626'
+  critical: '#dc2626',
 }
 
 const STATUS_COLORS = {
-  'EXCELLENT': 'text-green-600 bg-green-100',
-  'GOOD': 'text-blue-600 bg-blue-100',
-  'WARNING': 'text-yellow-600 bg-yellow-100',
-  'CRITICAL': 'text-red-600 bg-red-100',
-  'HEALTHY': 'text-green-600 bg-green-100',
-  'UNHEALTHY': 'text-red-600 bg-red-100',
-  'OPEN': 'text-red-600 bg-red-100',
-  'ACKNOWLEDGED': 'text-yellow-600 bg-yellow-100',
-  'RESOLVED': 'text-green-600 bg-green-100'
+  EXCELLENT: 'text-green-600 bg-green-100',
+  GOOD: 'text-blue-600 bg-blue-100',
+  WARNING: 'text-yellow-600 bg-yellow-100',
+  CRITICAL: 'text-red-600 bg-red-100',
+  HEALTHY: 'text-green-600 bg-green-100',
+  UNHEALTHY: 'text-red-600 bg-red-100',
+  OPEN: 'text-red-600 bg-red-100',
+  ACKNOWLEDGED: 'text-yellow-600 bg-yellow-100',
+  RESOLVED: 'text-green-600 bg-green-100',
 }
 
 const LOG_LEVEL_COLORS = {
   debug: 'text-purple-600 bg-purple-100',
   info: 'text-blue-600 bg-blue-100',
   warn: 'text-yellow-600 bg-yellow-100',
-  error: 'text-red-600 bg-red-100'
+  error: 'text-red-600 bg-red-100',
 }
 
 export default function ObservabilityDashboard() {
   const [data, setData] = useState<ObservabilityData | null>(null)
-  const [selectedView, setSelectedView] = useState<'overview' | 'metrics' | 'logs' | 'traces' | 'alerts' | 'business'>('overview')
+  const [selectedView, setSelectedView] = useState<
+    'overview' | 'metrics' | 'logs' | 'traces' | 'alerts' | 'business'
+  >('overview')
   const [loading, setLoading] = useState(true)
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [refreshInterval, setRefreshInterval] = useState(30) // seconds
@@ -172,13 +177,13 @@ export default function ObservabilityDashboard() {
 
   useEffect(() => {
     loadObservabilityData()
-    
+
     // Auto-refresh setup
     let interval: NodeJS.Timer | null = null
     if (autoRefresh) {
       interval = setInterval(loadObservabilityData, refreshInterval * 1000)
     }
-    
+
     return () => {
       if (interval) clearInterval(interval)
     }
@@ -190,44 +195,42 @@ export default function ObservabilityDashboard() {
         includeTraces: 'true',
         includeMetrics: 'true',
         includeLogs: 'true',
-        includeAlerts: 'true'
+        includeAlerts: 'true',
       })
-      
+
       if (selectedService) params.set('service', selectedService)
       if (logLevel) params.set('logLevel', logLevel)
 
       const response = await fetch(`/api/observability/analytics?${params}`)
       const result = await response.json()
-      
+
       if (result.success) {
         setData(result)
       } else {
         throw new Error(result.error || 'Failed to load data')
       }
-      
     } catch (error) {
-      console.error('Failed to load observability data:', error)
       toast.error('Failed to load observability data')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleAction = async (action: string, actionData?: any) => {
+  const handleAction = async (action: string, actionData?: unknown) => {
     try {
       const response = await fetch('/api/observability/analytics', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           action,
-          data: actionData
-        })
+          data: actionData,
+        }),
       })
-      
+
       const result = await response.json()
-      
+
       if (result.success) {
         toast.success(`Action "${action}" completed successfully`)
         if (action !== 'export') {
@@ -236,9 +239,8 @@ export default function ObservabilityDashboard() {
       } else {
         throw new Error(result.error)
       }
-      
+
       return result
-      
     } catch (error) {
       toast.error(`Action "${action}" failed`)
       throw error
@@ -248,16 +250,15 @@ export default function ObservabilityDashboard() {
   const handleExport = async () => {
     try {
       const result = await handleAction('export', { format: 'json' })
-      
+
       const blob = new Blob([JSON.stringify(result.result.data, null, 2)], {
-        type: 'application/json'
+        type: 'application/json',
       })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       a.download = `observability-data-${new Date().toISOString().split('T')[0]}.json`
       a.click()
-      
     } catch (error) {
       // Error already handled in handleAction
     }
@@ -266,15 +267,14 @@ export default function ObservabilityDashboard() {
   const handleGenerateInsights = async () => {
     try {
       const result = await handleAction('analyze')
-      
+
       // Show insights in a toast or modal
       const insights = result.result.insights.slice(0, 3)
-      insights.forEach((insight: any, index: number) => {
+      insights.forEach((insight: unknown, index: number) => {
         setTimeout(() => {
           toast.success(`Insight: ${insight.insight}`, { duration: 5000 })
         }, index * 1000)
       })
-      
     } catch (error) {
       // Error already handled
     }
@@ -285,18 +285,18 @@ export default function ObservabilityDashboard() {
       case 'EXCELLENT':
       case 'HEALTHY':
       case 'RESOLVED':
-        return <CheckCircleIcon className="w-5 h-5 text-green-600" />
+        return <CheckCircleIcon className="h-5 w-5 text-green-600" />
       case 'GOOD':
-        return <CheckCircleIcon className="w-5 h-5 text-blue-600" />
+        return <CheckCircleIcon className="h-5 w-5 text-blue-600" />
       case 'WARNING':
       case 'ACKNOWLEDGED':
-        return <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600" />
+        return <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600" />
       case 'CRITICAL':
       case 'UNHEALTHY':
       case 'OPEN':
-        return <XCircleIcon className="w-5 h-5 text-red-600" />
+        return <XCircleIcon className="h-5 w-5 text-red-600" />
       default:
-        return <ClockIcon className="w-5 h-5 text-gray-600" />
+        return <ClockIcon className="h-5 w-5 text-gray-600" />
     }
   }
 
@@ -317,21 +317,25 @@ export default function ObservabilityDashboard() {
     }
   }
 
-  const filteredLogs = data?.logs?.recent?.filter(log => 
-    (!searchQuery || log.message.toLowerCase().includes(searchQuery.toLowerCase())) &&
-    (!selectedService || log.service === selectedService)
-  ) || []
+  const filteredLogs =
+    data?.logs?.recent?.filter(
+      (log) =>
+        (!searchQuery || log.message.toLowerCase().includes(searchQuery.toLowerCase())) &&
+        (!selectedService || log.service === selectedService)
+    ) || []
 
-  const filteredTraces = data?.traces?.recent?.filter(trace => 
-    (!searchQuery || trace.operation.toLowerCase().includes(searchQuery.toLowerCase())) &&
-    (!selectedService || trace.service === selectedService)
-  ) || []
+  const filteredTraces =
+    data?.traces?.recent?.filter(
+      (trace) =>
+        (!searchQuery || trace.operation.toLowerCase().includes(searchQuery.toLowerCase())) &&
+        (!selectedService || trace.service === selectedService)
+    ) || []
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4" />
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-indigo-600" />
           <p className="text-gray-600">Loading observability dashboard...</p>
         </div>
       </div>
@@ -340,14 +344,14 @@ export default function ObservabilityDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="mx-auto max-w-7xl p-6">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <EyeIcon className="w-10 h-10 text-indigo-600 mr-4" />
+              <EyeIcon className="mr-4 h-10 w-10 text-indigo-600" />
               <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                <h1 className="mb-2 text-4xl font-bold text-gray-900">
                   Observability Command Center
                 </h1>
                 <p className="text-lg text-gray-600">
@@ -359,18 +363,22 @@ export default function ObservabilityDashboard() {
               <div className="flex items-center">
                 <button
                   onClick={() => setAutoRefresh(!autoRefresh)}
-                  className={`p-2 rounded-lg transition-colors ${
-                    autoRefresh 
-                      ? 'bg-green-100 text-green-600 hover:bg-green-200' 
+                  className={`rounded-lg p-2 transition-colors ${
+                    autoRefresh
+                      ? 'bg-green-100 text-green-600 hover:bg-green-200'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
-                  {autoRefresh ? <PlayIcon className="w-4 h-4" /> : <PauseIcon className="w-4 h-4" />}
+                  {autoRefresh ? (
+                    <PlayIcon className="h-4 w-4" />
+                  ) : (
+                    <PauseIcon className="h-4 w-4" />
+                  )}
                 </button>
                 <select
                   value={refreshInterval}
                   onChange={(e) => setRefreshInterval(parseInt(e.target.value))}
-                  className="ml-2 px-3 py-1 border rounded-md text-sm"
+                  className="ml-2 rounded-md border px-3 py-1 text-sm"
                   disabled={!autoRefresh}
                 >
                   <option value="10">10s</option>
@@ -381,23 +389,23 @@ export default function ObservabilityDashboard() {
               </div>
               <button
                 onClick={handleGenerateInsights}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center"
+                className="flex items-center rounded-lg bg-purple-600 px-4 py-2 text-white transition-colors hover:bg-purple-700"
               >
-                <LightBulbIcon className="w-4 h-4 mr-2" />
+                <LightBulbIcon className="mr-2 h-4 w-4" />
                 AI Insights
               </button>
               <button
                 onClick={() => loadObservabilityData()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                className="flex items-center rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
               >
-                <ArrowPathIcon className="w-4 h-4 mr-2" />
+                <ArrowPathIcon className="mr-2 h-4 w-4" />
                 Refresh
               </button>
               <button
                 onClick={handleExport}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center"
+                className="flex items-center rounded-lg bg-gray-600 px-4 py-2 text-white transition-colors hover:bg-gray-700"
               >
-                <DocumentArrowDownIcon className="w-4 h-4 mr-2" />
+                <DocumentArrowDownIcon className="mr-2 h-4 w-4" />
                 Export
               </button>
             </div>
@@ -409,12 +417,12 @@ export default function ObservabilityDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center">
-                <div className="p-3 bg-indigo-100 rounded-lg mr-4">
-                  <CpuChipIcon className="w-8 h-8 text-indigo-600" />
+                <div className="mr-4 rounded-lg bg-indigo-100 p-3">
+                  <CpuChipIcon className="h-8 w-8 text-indigo-600" />
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900">System Health</h3>
@@ -433,16 +441,16 @@ export default function ObservabilityDashboard() {
                 </div>
               </div>
             </div>
-            
+
             {/* Service Health Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
+            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
               {Object.entries(data.systemHealth.services).map(([service, health]) => (
-                <div key={service} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-gray-900 truncate">{service}</span>
+                <div key={service} className="rounded-lg bg-gray-50 p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="truncate font-medium text-gray-900">{service}</span>
                     {getStatusIcon(health.status)}
                   </div>
-                  <div className="text-sm text-gray-600 space-y-1">
+                  <div className="space-y-1 text-sm text-gray-600">
                     <div>Error Rate: {health.errorRate.toFixed(1)}%</div>
                     <div>Avg Response: {health.avgResponseTime.toFixed(0)}ms</div>
                     <div>Requests: {health.requestCount}</div>
@@ -454,14 +462,14 @@ export default function ObservabilityDashboard() {
         </div>
 
         {/* Key Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <ChartBarIcon className="w-8 h-8 text-blue-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <ChartBarIcon className="h-8 w-8 text-blue-600" />
               <span className="text-3xl font-bold text-gray-900">
                 {data.metrics?.summary?.totalMetrics || 0}
               </span>
@@ -476,10 +484,10 @@ export default function ObservabilityDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <DocumentTextIcon className="w-8 h-8 text-green-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <DocumentTextIcon className="h-8 w-8 text-green-600" />
               <span className="text-3xl font-bold text-gray-900">
                 {data.logs?.summary?.totalLogs || 0}
               </span>
@@ -494,10 +502,10 @@ export default function ObservabilityDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <MapIcon className="w-8 h-8 text-purple-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <MapIcon className="h-8 w-8 text-purple-600" />
               <span className="text-3xl font-bold text-gray-900">
                 {data.traces?.summary?.totalTraces || 0}
               </span>
@@ -512,42 +520,40 @@ export default function ObservabilityDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <ExclamationTriangleIcon className="w-8 h-8 text-red-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
               <span className="text-3xl font-bold text-gray-900">
                 {data.alerts?.summary?.open || 0}
               </span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900">Open Alerts</h3>
-            <p className="text-sm text-gray-600">
-              {data.alerts?.summary?.critical || 0} critical
-            </p>
+            <p className="text-sm text-gray-600">{data.alerts?.summary?.critical || 0} critical</p>
           </motion.div>
         </div>
 
         {/* View Selector */}
         <div className="mb-6">
-          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex space-x-1 rounded-lg bg-gray-100 p-1">
             {[
               { id: 'overview', name: 'Overview', icon: EyeIcon },
               { id: 'metrics', name: 'Metrics', icon: ChartBarIcon },
               { id: 'logs', name: 'Logs', icon: DocumentTextIcon },
               { id: 'traces', name: 'Traces', icon: MapIcon },
               { id: 'alerts', name: 'Alerts', icon: ExclamationTriangleIcon },
-              { id: 'business', name: 'Business', icon: LightBulbIcon }
+              { id: 'business', name: 'Business', icon: LightBulbIcon },
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setSelectedView(tab.id as any)}
-                className={`flex items-center px-4 py-2 rounded-md transition-all ${
+                onClick={() => setSelectedView(tab.id as unknown)}
+                className={`flex items-center rounded-md px-4 py-2 transition-all ${
                   selectedView === tab.id
                     ? 'bg-white text-indigo-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <tab.icon className="w-4 h-4 mr-2" />
+                <tab.icon className="mr-2 h-4 w-4" />
                 {tab.name}
               </button>
             ))}
@@ -556,35 +562,37 @@ export default function ObservabilityDashboard() {
 
         {/* Search and Filters */}
         {(selectedView === 'logs' || selectedView === 'traces') && (
-          <div className="mb-6 bg-white rounded-xl shadow-lg p-4">
+          <div className="mb-6 rounded-xl bg-white p-4 shadow-lg">
             <div className="flex items-center gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <MagnifyingGlassIcon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                   <input
                     type="text"
                     placeholder={`Search ${selectedView}...`}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4 py-2 border rounded-lg w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full rounded-lg border py-2 pr-4 pl-10 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
               <select
                 value={selectedService}
                 onChange={(e) => setSelectedService(e.target.value)}
-                className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="rounded-lg border px-3 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="">All Services</option>
-                {Object.keys(data.systemHealth.services).map(service => (
-                  <option key={service} value={service}>{service}</option>
+                {Object.keys(data.systemHealth.services).map((service) => (
+                  <option key={service} value={service}>
+                    {service}
+                  </option>
                 ))}
               </select>
               {selectedView === 'logs' && (
                 <select
                   value={logLevel}
                   onChange={(e) => setLogLevel(e.target.value)}
-                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="rounded-lg border px-3 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="">All Levels</option>
                   <option value="error">Error</option>
@@ -598,14 +606,14 @@ export default function ObservabilityDashboard() {
         )}
 
         {/* Main Content Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             {selectedView === 'overview' && (
               <>
                 {/* System Trends */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-xl font-semibold mb-4">System Trends</h3>
+                <div className="rounded-xl bg-white p-6 shadow-lg">
+                  <h3 className="mb-4 text-xl font-semibold">System Trends</h3>
                   {data.metrics?.trends && (
                     <ResponsiveContainer width="100%" height={300}>
                       <LineChart data={data.metrics.trends.hourly}>
@@ -613,9 +621,9 @@ export default function ObservabilityDashboard() {
                         <XAxis dataKey="hour" />
                         <YAxis />
                         <Tooltip />
-                        <Line 
-                          type="monotone" 
-                          dataKey="count" 
+                        <Line
+                          type="monotone"
+                          dataKey="count"
                           stroke={COLORS.primary}
                           strokeWidth={2}
                         />
@@ -625,8 +633,8 @@ export default function ObservabilityDashboard() {
                 </div>
 
                 {/* Log Level Distribution */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-xl font-semibold mb-4">Log Level Distribution</h3>
+                <div className="rounded-xl bg-white p-6 shadow-lg">
+                  <h3 className="mb-4 text-xl font-semibold">Log Level Distribution</h3>
                   {data.logs?.levelDistribution && (
                     <ResponsiveContainer width="100%" height={300}>
                       <PieChart>
@@ -639,8 +647,11 @@ export default function ObservabilityDashboard() {
                           dataKey="count"
                           label={({ level, percentage }) => `${level}: ${percentage.toFixed(1)}%`}
                         >
-                          {data.logs.levelDistribution.map((entry: any, index: number) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[entry.level as keyof typeof COLORS] || COLORS.info} />
+                          {data.logs.levelDistribution.map((entry: unknown, index: number) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={COLORS[entry.level as keyof typeof COLORS] || COLORS.info}
+                            />
                           ))}
                         </Pie>
                         <Tooltip />
@@ -652,11 +663,14 @@ export default function ObservabilityDashboard() {
             )}
 
             {selectedView === 'metrics' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-xl font-semibold mb-4">Recent Metrics</h3>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {data.metrics?.recent?.map((metric: any) => (
-                    <div key={metric.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="rounded-xl bg-white p-6 shadow-lg">
+                <h3 className="mb-4 text-xl font-semibold">Recent Metrics</h3>
+                <div className="max-h-96 space-y-3 overflow-y-auto">
+                  {data.metrics?.recent?.map((metric: unknown) => (
+                    <div
+                      key={metric.id}
+                      className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+                    >
                       <div>
                         <div className="font-medium text-gray-900">{metric.name}</div>
                         <div className="text-sm text-gray-600">
@@ -670,7 +684,10 @@ export default function ObservabilityDashboard() {
                         {metric.tags && Object.keys(metric.tags).length > 0 && (
                           <div className="text-xs text-gray-500">
                             {Object.entries(metric.tags).map(([key, value]) => (
-                              <span key={key} className="inline-block bg-gray-200 rounded px-2 py-1 mr-1">
+                              <span
+                                key={key}
+                                className="mr-1 inline-block rounded bg-gray-200 px-2 py-1"
+                              >
                                 {key}: {value as string}
                               </span>
                             ))}
@@ -684,25 +701,32 @@ export default function ObservabilityDashboard() {
             )}
 
             {selectedView === 'logs' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-xl font-semibold mb-4">
-                  Log Entries 
-                  {searchQuery && <span className="text-sm text-gray-500"> (filtered: {filteredLogs.length})</span>}
+              <div className="rounded-xl bg-white p-6 shadow-lg">
+                <h3 className="mb-4 text-xl font-semibold">
+                  Log Entries
+                  {searchQuery && (
+                    <span className="text-sm text-gray-500">
+                      {' '}
+                      (filtered: {filteredLogs.length})
+                    </span>
+                  )}
                 </h3>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {filteredLogs.map((log: any) => (
-                    <div key={log.id} className="p-3 bg-gray-50 rounded-lg">
+                <div className="max-h-96 space-y-3 overflow-y-auto">
+                  {filteredLogs.map((log: unknown) => (
+                    <div key={log.id} className="rounded-lg bg-gray-50 p-3">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center mb-1">
-                            <span className={`inline-flex px-2 py-1 rounded text-xs font-medium mr-2 ${
-                              LOG_LEVEL_COLORS[log.level as keyof typeof LOG_LEVEL_COLORS]
-                            }`}>
+                          <div className="mb-1 flex items-center">
+                            <span
+                              className={`mr-2 inline-flex rounded px-2 py-1 text-xs font-medium ${
+                                LOG_LEVEL_COLORS[log.level as keyof typeof LOG_LEVEL_COLORS]
+                              }`}
+                            >
                               {log.level.toUpperCase()}
                             </span>
                             <span className="text-sm font-medium text-gray-900">{log.service}</span>
                           </div>
-                          <p className="text-sm text-gray-700 mb-1">{log.message}</p>
+                          <p className="mb-1 text-sm text-gray-700">{log.message}</p>
                           <p className="text-xs text-gray-500">
                             {new Date(log.timestamp).toLocaleString()}
                           </p>
@@ -715,21 +739,30 @@ export default function ObservabilityDashboard() {
             )}
 
             {selectedView === 'traces' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-xl font-semibold mb-4">
+              <div className="rounded-xl bg-white p-6 shadow-lg">
+                <h3 className="mb-4 text-xl font-semibold">
                   Recent Traces
-                  {searchQuery && <span className="text-sm text-gray-500"> (filtered: {filteredTraces.length})</span>}
+                  {searchQuery && (
+                    <span className="text-sm text-gray-500">
+                      {' '}
+                      (filtered: {filteredTraces.length})
+                    </span>
+                  )}
                 </h3>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {filteredTraces.map((trace: any) => (
-                    <div key={trace.id} className="p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
+                <div className="max-h-96 space-y-3 overflow-y-auto">
+                  {filteredTraces.map((trace: unknown) => (
+                    <div key={trace.id} className="rounded-lg bg-gray-50 p-3">
+                      <div className="mb-2 flex items-center justify-between">
                         <div className="flex items-center">
-                          <span className={`inline-flex px-2 py-1 rounded text-xs font-medium mr-2 ${
-                            trace.status === 'success' ? 'bg-green-100 text-green-700' :
-                            trace.status === 'error' ? 'bg-red-100 text-red-700' :
-                            'bg-yellow-100 text-yellow-700'
-                          }`}>
+                          <span
+                            className={`mr-2 inline-flex rounded px-2 py-1 text-xs font-medium ${
+                              trace.status === 'success'
+                                ? 'bg-green-100 text-green-700'
+                                : trace.status === 'error'
+                                  ? 'bg-red-100 text-red-700'
+                                  : 'bg-yellow-100 text-yellow-700'
+                            }`}
+                          >
                             {trace.status.toUpperCase()}
                           </span>
                           <span className="font-medium text-gray-900">{trace.operation}</span>
@@ -751,30 +784,37 @@ export default function ObservabilityDashboard() {
             )}
 
             {selectedView === 'alerts' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-xl font-semibold mb-4">Active Alerts</h3>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {data.alerts?.recent?.map((alert: any) => (
-                    <div key={alert.id} className="p-3 bg-gray-50 rounded-lg">
+              <div className="rounded-xl bg-white p-6 shadow-lg">
+                <h3 className="mb-4 text-xl font-semibold">Active Alerts</h3>
+                <div className="max-h-96 space-y-3 overflow-y-auto">
+                  {data.alerts?.recent?.map((alert: unknown) => (
+                    <div key={alert.id} className="rounded-lg bg-gray-50 p-3">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center mb-2">
-                            <span className={`inline-flex px-2 py-1 rounded text-xs font-medium mr-2 ${
-                              alert.severity === 'CRITICAL' ? 'bg-red-100 text-red-700' :
-                              alert.severity === 'HIGH' ? 'bg-orange-100 text-orange-700' :
-                              alert.severity === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-blue-100 text-blue-700'
-                            }`}>
+                          <div className="mb-2 flex items-center">
+                            <span
+                              className={`mr-2 inline-flex rounded px-2 py-1 text-xs font-medium ${
+                                alert.severity === 'CRITICAL'
+                                  ? 'bg-red-100 text-red-700'
+                                  : alert.severity === 'HIGH'
+                                    ? 'bg-orange-100 text-orange-700'
+                                    : alert.severity === 'MEDIUM'
+                                      ? 'bg-yellow-100 text-yellow-700'
+                                      : 'bg-blue-100 text-blue-700'
+                              }`}
+                            >
                               {alert.severity}
                             </span>
-                            <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${
-                              STATUS_COLORS[alert.status as keyof typeof STATUS_COLORS]
-                            }`}>
+                            <span
+                              className={`inline-flex rounded px-2 py-1 text-xs font-medium ${
+                                STATUS_COLORS[alert.status as keyof typeof STATUS_COLORS]
+                              }`}
+                            >
                               {alert.status}
                             </span>
                           </div>
-                          <h4 className="font-medium text-gray-900 mb-1">{alert.title}</h4>
-                          <p className="text-sm text-gray-600 mb-1">{alert.description}</p>
+                          <h4 className="mb-1 font-medium text-gray-900">{alert.title}</h4>
+                          <p className="mb-1 text-sm text-gray-600">{alert.description}</p>
                           <p className="text-xs text-gray-500">
                             Source: {alert.source} | {new Date(alert.timestamp).toLocaleString()}
                           </p>
@@ -788,11 +828,11 @@ export default function ObservabilityDashboard() {
 
             {selectedView === 'business' && data.businessInsights && (
               <>
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-xl font-semibold mb-4">Business KPIs</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {data.businessInsights.kpis?.map((kpi: any, index: number) => (
-                      <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                <div className="rounded-xl bg-white p-6 shadow-lg">
+                  <h3 className="mb-4 text-xl font-semibold">Business KPIs</h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {data.businessInsights.kpis?.map((kpi: unknown, index: number) => (
+                      <div key={index} className="rounded-lg bg-gray-50 p-4">
                         <div className="flex items-center justify-between">
                           <div>
                             <h4 className="font-medium text-gray-900">{kpi.name}</h4>
@@ -810,25 +850,30 @@ export default function ObservabilityDashboard() {
                   </div>
                 </div>
 
-                {data.businessInsights.predictions && data.businessInsights.predictions.length > 0 && (
-                  <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h3 className="text-xl font-semibold mb-4">AI Predictions</h3>
-                    <div className="space-y-3">
-                      {data.businessInsights.predictions.map((prediction: any, index: number) => (
-                        <div key={index} className="p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium text-gray-900">{prediction.type}</span>
-                            <span className="text-sm text-gray-600">
-                              {(prediction.confidence * 100).toFixed(0)}% confidence
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-700">{prediction.prediction}</p>
-                          <p className="text-xs text-gray-500 mt-1">Timeframe: {prediction.timeframe}</p>
-                        </div>
-                      ))}
+                {data.businessInsights.predictions &&
+                  data.businessInsights.predictions.length > 0 && (
+                    <div className="rounded-xl bg-white p-6 shadow-lg">
+                      <h3 className="mb-4 text-xl font-semibold">AI Predictions</h3>
+                      <div className="space-y-3">
+                        {data.businessInsights.predictions.map(
+                          (prediction: unknown, index: number) => (
+                            <div key={index} className="rounded-lg bg-gray-50 p-3">
+                              <div className="mb-2 flex items-center justify-between">
+                                <span className="font-medium text-gray-900">{prediction.type}</span>
+                                <span className="text-sm text-gray-600">
+                                  {(prediction.confidence * 100).toFixed(0)}% confidence
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-700">{prediction.prediction}</p>
+                              <p className="mt-1 text-xs text-gray-500">
+                                Timeframe: {prediction.timeframe}
+                              </p>
+                            </div>
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </>
             )}
           </div>
@@ -836,15 +881,15 @@ export default function ObservabilityDashboard() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* System Recommendations */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <LightBulbIcon className="w-5 h-5 mr-2 text-yellow-600" />
+            <div className="rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 flex items-center text-lg font-semibold">
+                <LightBulbIcon className="mr-2 h-5 w-5 text-yellow-600" />
                 Recommendations
               </h3>
               <div className="space-y-3">
                 {data.systemHealth.recommendations.length > 0 ? (
                   data.systemHealth.recommendations.map((rec, index) => (
-                    <div key={index} className="p-3 bg-blue-50 rounded-lg">
+                    <div key={index} className="rounded-lg bg-blue-50 p-3">
                       <p className="text-sm text-blue-800">{rec}</p>
                     </div>
                   ))
@@ -855,56 +900,62 @@ export default function ObservabilityDashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+            <div className="rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 text-lg font-semibold">Quick Actions</h3>
               <div className="space-y-2">
-                <button 
+                <button
                   onClick={handleGenerateInsights}
-                  className="w-full px-4 py-2 text-left text-sm bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
+                  className="w-full rounded-lg bg-purple-50 px-4 py-2 text-left text-sm text-purple-700 transition-colors hover:bg-purple-100"
                 >
-                  <LightBulbIcon className="w-4 h-4 mr-2 inline" />
+                  <LightBulbIcon className="mr-2 inline h-4 w-4" />
                   Generate AI Insights
                 </button>
-                <button 
-                  onClick={() => handleAction('trace', { 
-                    operation: 'health_check',
-                    service: 'observability_dashboard',
-                    tags: { source: 'manual' }
-                  })}
-                  className="w-full px-4 py-2 text-left text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                <button
+                  onClick={() =>
+                    handleAction('trace', {
+                      operation: 'health_check',
+                      service: 'observability_dashboard',
+                      tags: { source: 'manual' },
+                    })
+                  }
+                  className="w-full rounded-lg bg-blue-50 px-4 py-2 text-left text-sm text-blue-700 transition-colors hover:bg-blue-100"
                 >
-                  <MapIcon className="w-4 h-4 mr-2 inline" />
+                  <MapIcon className="mr-2 inline h-4 w-4" />
                   Create Test Trace
                 </button>
-                <button 
-                  onClick={() => handleAction('alert', {
-                    severity: 'LOW',
-                    title: 'Test Alert',
-                    description: 'This is a test alert from the dashboard',
-                    source: 'dashboard'
-                  })}
-                  className="w-full px-4 py-2 text-left text-sm bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-colors"
+                <button
+                  onClick={() =>
+                    handleAction('alert', {
+                      severity: 'LOW',
+                      title: 'Test Alert',
+                      description: 'This is a test alert from the dashboard',
+                      source: 'dashboard',
+                    })
+                  }
+                  className="w-full rounded-lg bg-yellow-50 px-4 py-2 text-left text-sm text-yellow-700 transition-colors hover:bg-yellow-100"
                 >
-                  <ExclamationTriangleIcon className="w-4 h-4 mr-2 inline" />
+                  <ExclamationTriangleIcon className="mr-2 inline h-4 w-4" />
                   Test Alert System
                 </button>
-                <button 
+                <button
                   onClick={handleExport}
-                  className="w-full px-4 py-2 text-left text-sm bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"
+                  className="w-full rounded-lg bg-green-50 px-4 py-2 text-left text-sm text-green-700 transition-colors hover:bg-green-100"
                 >
-                  <DocumentArrowDownIcon className="w-4 h-4 mr-2 inline" />
+                  <DocumentArrowDownIcon className="mr-2 inline h-4 w-4" />
                   Export Data
                 </button>
               </div>
             </div>
 
             {/* Real-time Status */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Real-time Status</h3>
+            <div className="rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 text-lg font-semibold">Real-time Status</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Auto Refresh</span>
-                  <div className={`w-3 h-3 rounded-full ${autoRefresh ? 'bg-green-400' : 'bg-gray-400'}`} />
+                  <div
+                    className={`h-3 w-3 rounded-full ${autoRefresh ? 'bg-green-400' : 'bg-gray-400'}`}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Refresh Interval</span>
@@ -919,9 +970,9 @@ export default function ObservabilityDashboard() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Data Points</span>
                   <span className="text-sm font-medium text-gray-900">
-                    {(data.metrics?.summary?.totalMetrics || 0) + 
-                     (data.logs?.summary?.totalLogs || 0) + 
-                     (data.traces?.summary?.totalTraces || 0)}
+                    {(data.metrics?.summary?.totalMetrics || 0) +
+                      (data.logs?.summary?.totalLogs || 0) +
+                      (data.traces?.summary?.totalTraces || 0)}
                   </span>
                 </div>
               </div>

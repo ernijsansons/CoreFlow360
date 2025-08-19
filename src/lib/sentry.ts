@@ -12,34 +12,33 @@ export const SENTRY_CONFIG = {
   integrations: [
     // Add Sentry integrations here when Sentry is installed
   ],
-  beforeSend(event: any) {
+  beforeSend(event: unknown) {
     // Filter out non-critical errors in production
     if (process.env.NODE_ENV === 'production') {
       // Don't send network errors
       if (event.exception?.values?.[0]?.type === 'NetworkError') {
         return null
       }
-      
+
       // Don't send development-only errors
       if (event.tags?.environment === 'development') {
         return null
       }
     }
-    
+
     return event
   },
-  beforeSendTransaction(event: any) {
+  beforeSendTransaction(event: unknown) {
     // Sample transactions to stay within free tier limits
     return event
-  }
+  },
 }
 
 // Error boundary helper
 export class ErrorBoundaryLogger {
-  static logError(error: Error, errorInfo?: any) {
+  static logError(error: Error, errorInfo?: unknown) {
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.error('[Error Boundary]', error, errorInfo)
     }
 
     // Send to analytics
@@ -48,7 +47,7 @@ export class ErrorBoundaryLogger {
         window.gtag('event', 'exception', {
           description: error.message,
           fatal: false,
-          error_boundary: true
+          error_boundary: true,
         })
       }
 
@@ -56,7 +55,7 @@ export class ErrorBoundaryLogger {
         window.va('track', 'error_boundary', {
           error_message: error.message,
           error_stack: error.stack,
-          component_stack: errorInfo?.componentStack
+          component_stack: errorInfo?.componentStack,
         })
       }
     }
@@ -73,7 +72,7 @@ export class PerformanceLogger {
           event_category: 'Web Vitals',
           value: Math.round(name === 'CLS' ? value * 1000 : value),
           event_label: id,
-          non_interaction: true
+          non_interaction: true,
         })
       }
 
@@ -81,7 +80,7 @@ export class PerformanceLogger {
         window.va('track', 'web-vital', {
           name,
           value,
-          id
+          id,
         })
       }
     }
@@ -100,8 +99,8 @@ export class PerformanceLogger {
           custom_parameters: {
             status,
             method,
-            url
-          }
+            url,
+          },
         })
       }
 
@@ -110,14 +109,13 @@ export class PerformanceLogger {
           url,
           method,
           duration,
-          status
+          status,
         })
       }
     }
 
     // Log slow API calls
     if (duration > 1000) {
-      console.warn(`[Slow API] ${method} ${url} took ${duration}ms`)
     }
   }
 }
@@ -135,7 +133,7 @@ export class FeedbackCollector {
       if (window.gtag) {
         window.gtag('event', 'feedback_submitted', {
           event_category: 'User Feedback',
-          event_label: feedback.type
+          event_label: feedback.type,
         })
       }
 
@@ -143,7 +141,7 @@ export class FeedbackCollector {
         window.va('track', 'feedback_submitted', {
           type: feedback.type,
           has_email: !!feedback.email,
-          url: feedback.url
+          url: feedback.url,
         })
       }
     }
@@ -155,17 +153,17 @@ export class FeedbackCollector {
 
 // Uptime monitoring (for external services like UptimeRobot)
 export class UptimeMonitor {
-  static async ping(): Promise<{ status: 'ok' | 'error', timestamp: number }> {
+  static async ping(): Promise<{ status: 'ok' | 'error'; timestamp: number }> {
     try {
       const response = await fetch('/api/health')
       return {
         status: response.ok ? 'ok' : 'error',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       }
     } catch (error) {
       return {
         status: 'error',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       }
     }
   }
@@ -173,7 +171,7 @@ export class UptimeMonitor {
 
 // Feature flag tracking
 export class FeatureTracker {
-  static trackFeatureUsage(feature: string, enabled: boolean, context?: Record<string, any>) {
+  static trackFeatureUsage(feature: string, enabled: boolean, context?: Record<string, unknown>) {
     if (typeof window !== 'undefined') {
       if (window.gtag) {
         window.gtag('event', 'feature_flag', {
@@ -181,8 +179,8 @@ export class FeatureTracker {
           event_label: feature,
           custom_parameters: {
             enabled,
-            ...context
-          }
+            ...context,
+          },
         })
       }
 
@@ -190,7 +188,7 @@ export class FeatureTracker {
         window.va('track', 'feature_usage', {
           feature,
           enabled,
-          ...context
+          ...context,
         })
       }
     }
@@ -203,7 +201,7 @@ export const monitoring = {
   PerformanceLogger,
   FeedbackCollector,
   UptimeMonitor,
-  FeatureTracker
+  FeatureTracker,
 }
 
 // Environment-specific configuration
@@ -213,5 +211,5 @@ export const getMonitoringConfig = () => ({
   sentryEnabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
   analyticsEnabled: !!process.env.NEXT_PUBLIC_GA_TRACKING_ID,
   debugMode: process.env.NODE_ENV === 'development',
-  errorReportingEnabled: process.env.NODE_ENV === 'production'
+  errorReportingEnabled: process.env.NODE_ENV === 'production',
 })

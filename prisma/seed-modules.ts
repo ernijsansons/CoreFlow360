@@ -358,7 +358,7 @@ async function seedModules() {
 
   // Seed module definitions
   for (const moduleData of moduleDefinitions) {
-    await prisma.moduleDefinition.upsert({
+    await prisma.$extends({ model: { moduleDefinition: {} } }).moduleDefinition.upsert({
       where: { moduleKey: moduleData.moduleKey },
       update: moduleData,
       create: moduleData
@@ -465,7 +465,7 @@ async function seedModules() {
 
   // Seed bundle definitions
   for (const bundleData of bundleDefinitions) {
-    await prisma.bundleDefinition.upsert({
+    await prisma.$extends({ model: { bundleDefinition: {} } }).bundleDefinition.upsert({
       where: { bundleKey: bundleData.bundleKey },
       update: bundleData,
       create: bundleData

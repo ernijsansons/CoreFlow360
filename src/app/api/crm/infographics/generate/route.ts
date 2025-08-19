@@ -44,13 +44,16 @@ export async function POST(request: NextRequest) {
       valuePropIds,
       brandElementsId,
       materialTypes = ['INFOGRAPHIC'],
-      customizations = {}
+      customizations = {},
     } = body
 
     // Validation
     if (!tenantId || !templateId || (!customerId && !linkedinProfileId)) {
       return NextResponse.json(
-        { error: 'Missing required fields: tenantId, templateId, and customerId or linkedinProfileId' },
+        {
+          error:
+            'Missing required fields: tenantId, templateId, and customerId or linkedinProfileId',
+        },
         { status: 400 }
       )
     }
@@ -63,37 +66,45 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch required data
-    const [template, problems, valueProps, brandElements, customer, linkedinProfile] = await Promise.all([
-      prisma.infographicTemplate.findUnique({ where: { id: templateId } }),
-      prisma.customerProblem.findMany({
-        where: { 
-          id: { in: problemIds },
-          tenantId 
-        },
-        include: {
-          customer: true,
-          linkedinProfile: true
-        }
-      }),
-      prisma.valueProposition.findMany({
-        where: { 
-          id: { in: valuePropIds },
-          tenantId 
-        }
-      }),
-      brandElementsId ? prisma.companyBrandElements.findUnique({
-        where: { id: brandElementsId }
-      }) : null,
-      customerId ? prisma.customer.findUnique({ where: { id: customerId } }) : null,
-      linkedinProfileId ? prisma.linkedinProfile.findUnique({ where: { id: linkedinProfileId } }) : null
-    ])
+    const [template, problems, valueProps, brandElements, customer, linkedinProfile] =
+      await Promise.all([
+        prisma.infographicTemplate.findUnique({ where: { id: templateId } }),
+        prisma.customerProblem.findMany({
+          where: {
+            id: { in: problemIds },
+            tenantId,
+          },
+          include: {
+            customer: true,
+            linkedinProfile: true,
+          },
+        }),
+        prisma.valueProposition.findMany({
+          where: {
+            id: { in: valuePropIds },
+            tenantId,
+          },
+        }),
+        brandElementsId
+          ? prisma.companyBrandElements.findUnique({
+              where: { id: brandElementsId },
+            })
+          : null,
+        customerId ? prisma.customer.findUnique({ where: { id: customerId } }) : null,
+        linkedinProfileId
+          ? prisma.linkedinProfile.findUnique({ where: { id: linkedinProfileId } })
+          : null,
+      ])
 
     if (!template) {
       return NextResponse.json({ error: 'Template not found' }, { status: 404 })
     }
 
     if (problems.length === 0 || valueProps.length === 0) {
-      return NextResponse.json({ error: 'Problems or value propositions not found' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Problems or value propositions not found' },
+        { status: 404 }
+      )
     }
 
     // Prepare customer profile
@@ -102,72 +113,74 @@ export async function POST(request: NextRequest) {
       industry: linkedinProfile?.industry || 'General',
       size: '50-200', // Would be determined from customer data
       role: linkedinProfile?.currentTitle || 'Decision Maker',
-      painPoints: problems.map(p => p.problemTitle)
+      painPoints: problems.map((p) => p.problemTitle),
     }
 
     // Prepare brand elements
-    const brandData = brandElements ? {
-      companyName: brandElements.companyName,
-      logoUrl: brandElements.logoUrl,
-      primaryColor: brandElements.primaryColor || '#2563EB',
-      secondaryColor: brandElements.secondaryColor || '#64748B',
-      visualStyle: brandElements.visualStyle || 'MODERN',
-      tagline: brandElements.tagline
-    } : {
-      companyName: 'Your Company',
-      primaryColor: '#2563EB',
-      secondaryColor: '#64748B',
-      visualStyle: 'MODERN'
-    }
+    const brandData = brandElements
+      ? {
+          companyName: brandElements.companyName,
+          logoUrl: brandElements.logoUrl,
+          primaryColor: brandElements.primaryColor || '#2563EB',
+          secondaryColor: brandElements.secondaryColor || '#64748B',
+          visualStyle: brandElements.visualStyle || 'MODERN',
+          tagline: brandElements.tagline,
+        }
+      : {
+          companyName: 'Your Company',
+          primaryColor: '#2563EB',
+          secondaryColor: '#64748B',
+          visualStyle: 'MODERN',
+        }
 
     // Initialize the Value Proposition Engine
     const engine = new ValuePropositionEngine()
 
     // Transform data for the engine
-    const engineProblems = problems.map(p => ({
+    const engineProblems = problems.map((p) => ({
       id: p.id,
       customerId: p.customerId,
       linkedinProfileId: p.linkedinProfileId,
       problemTitle: p.problemTitle,
       problemDescription: p.problemDescription,
-      problemCategory: p.problemCategory as any,
-      severity: p.severity as any,
-      urgency: p.urgency as any,
+      problemCategory: p.problemCategory as unknown,
+      severity: p.severity as unknown,
+      urgency: p.urgency as unknown,
       businessImpact: p.businessImpact || '',
       financialImpact: p.financialImpact,
       matchedValueProps: p.matchedValueProps,
       confidenceScore: Number(p.confidenceScore),
-      identifiedFrom: p.identifiedFrom as any,
+      identifiedFrom: p.identifiedFrom as unknown,
       createdAt: p.createdAt,
-      updatedAt: p.updatedAt
+      updatedAt: p.updatedAt,
     }))
 
-    const engineValueProps = valueProps.map(vp => ({
+    const engineValueProps = valueProps.map((vp) => ({
       id: vp.id,
       tenantId: vp.tenantId,
       userId: vp.userId,
       title: vp.title,
       description: vp.description,
-      category: vp.category as any,
+      category: vp.category as unknown,
       problemStatement: vp.problemStatement,
       targetPainPoints: vp.targetPainPoints,
       solutionDescription: vp.solutionDescription,
       keyBenefits: vp.keyBenefits,
-      quantifiableBenefits: vp.quantifiableBenefits as any,
+      quantifiableBenefits: vp.quantifiableBenefits as unknown,
       useCase: vp.useCase || '',
       targetPersona: vp.targetPersona,
       industry: vp.targetIndustry,
-      testimonials: vp.testimonials as any,
+      testimonials: vp.testimonials as unknown,
       caseStudies: vp.caseStudies,
-      metrics: vp.metrics as any,
+      metrics: vp.metrics as unknown,
       iconUrl: vp.iconUrl,
       colorScheme: vp.colorScheme,
-      visualStyle: vp.visualStyle as any,
+      visualStyle: vp.visualStyle as unknown,
       aiOptimizationScore: Number(vp.aiOptimizationScore),
       aiSuggestions: vp.aiSuggestions,
       isActive: vp.isActive,
       createdAt: vp.createdAt,
-      updatedAt: vp.updatedAt
+      updatedAt: vp.updatedAt,
     }))
 
     // Generate materials for each requested type
@@ -184,7 +197,7 @@ export async function POST(request: NextRequest) {
             engineProblems,
             engineValueProps,
             templateId,
-            brandData as any
+            brandData as unknown
           )
 
           // Store in database
@@ -209,27 +222,26 @@ export async function POST(request: NextRequest) {
               generationModel: generatedContent.generationModel,
               generationTimeMs: generatedContent.generationTime,
               qualityScore: generatedContent.qualityScore,
-              status: 'GENERATED'
-            }
+              status: 'GENERATED',
+            },
           })
 
           generatedMaterials.push({
             type: 'INFOGRAPHIC',
             id: storedInfographic.id,
-            data: generatedContent
+            data: generatedContent,
           })
-
         } else {
           // Generate other material types
           const materials = await engine.generateMarketingMaterialsSuite(
             customerId || linkedinProfileId!,
             engineProblems,
             engineValueProps,
-            brandData as any
+            brandData as unknown
           )
 
-          const relevantMaterial = materials.find(m => m.materialType === materialType)
-          
+          const relevantMaterial = materials.find((m) => m.materialType === materialType)
+
           if (relevantMaterial) {
             const storedMaterial = await prisma.personalizedMarketingMaterial.create({
               data: {
@@ -243,32 +255,32 @@ export async function POST(request: NextRequest) {
                 assets: relevantMaterial.assets,
                 title: customizations.title || `${materialType} for ${customerProfile.company}`,
                 description: `Personalized ${materialType.toLowerCase()} addressing key challenges`,
-                generationPrompt: `Generate ${materialType} for ${customerProfile.company} addressing: ${problems.map(p => p.problemTitle).join(', ')}`
-              }
+                generationPrompt: `Generate ${materialType} for ${customerProfile.company} addressing: ${problems.map((p) => p.problemTitle).join(', ')}`,
+              },
             })
 
             generatedMaterials.push({
               type: materialType,
               id: storedMaterial.id,
-              data: relevantMaterial
+              data: relevantMaterial,
             })
           }
         }
 
         // Update usage analytics for value propositions
         await Promise.all(
-          valuePropIds.map(vpId =>
+          valuePropIds.map((vpId) =>
             prisma.valuePropositionAnalytics.upsert({
               where: {
                 valuePropId_datePeriod_periodType: {
                   valuePropId: vpId,
                   datePeriod: new Date(),
-                  periodType: 'DAILY'
-                }
+                  periodType: 'DAILY',
+                },
               },
               update: {
                 timesUsed: { increment: 1 },
-                materialsGenerated: { increment: 1 }
+                materialsGenerated: { increment: 1 },
               },
               create: {
                 valuePropId: vpId,
@@ -284,46 +296,44 @@ export async function POST(request: NextRequest) {
                 dealsInfluenced: 0,
                 revenueInfluenced: 0,
                 engagementRate: 0,
-                conversionRate: 0
-              }
+                conversionRate: 0,
+              },
             })
           )
         )
 
         // Update value proposition usage count
         await Promise.all(
-          valuePropIds.map(vpId =>
+          valuePropIds.map((vpId) =>
             prisma.valueProposition.update({
               where: { id: vpId },
-              data: { usageCount: { increment: 1 } }
+              data: { usageCount: { increment: 1 } },
             })
           )
         )
-
       } catch (materialError) {
-        console.error(`Error generating ${materialType}:`, materialError)
         // Continue with other material types
       }
     }
 
     // Generate sharing URLs for easy access
-    const sharingUrls = generatedMaterials.map(material => ({
+    const sharingUrls = generatedMaterials.map((material) => ({
       type: material.type,
       id: material.id,
       shareUrl: `/api/crm/materials/share/${material.id}`,
-      previewUrl: `/crm/materials/preview/${material.id}`
+      previewUrl: `/crm/materials/preview/${material.id}`,
     }))
 
     return NextResponse.json({
       success: true,
-      generatedMaterials: generatedMaterials.map(material => ({
+      generatedMaterials: generatedMaterials.map((material) => ({
         type: material.type,
         id: material.id,
         title: material.data.title || `${material.type} for ${customerProfile.company}`,
         previewUrl: material.data.previewUrl || `/crm/materials/preview/${material.id}`,
         assets: material.data.finalAssets || material.data.assets || [],
         qualityScore: material.data.qualityScore || 0.85,
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
       })),
       sharingUrls,
       customerProfile,
@@ -332,16 +342,16 @@ export async function POST(request: NextRequest) {
         problemsAddressed: problems.length,
         valuePropsUsed: valueProps.length,
         materialsGenerated: generatedMaterials.length,
-        averageQualityScore: generatedMaterials.reduce((sum, m) => sum + (m.data.qualityScore || 0.85), 0) / generatedMaterials.length
-      }
+        averageQualityScore:
+          generatedMaterials.reduce((sum, m) => sum + (m.data.qualityScore || 0.85), 0) /
+          generatedMaterials.length,
+      },
     })
-
   } catch (error) {
-    console.error('Error generating marketing materials:', error)
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to generate marketing materials',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )
@@ -367,7 +377,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build query
-    const where: any = { tenantId }
+    const where: unknown = { tenantId }
     if (customerId) where.customerId = customerId
     if (status) where.status = status
 
@@ -376,23 +386,23 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           template: { select: { name: true, category: true } },
-          customer: { select: { name: true } }
+          customer: { select: { name: true } },
         },
         orderBy: { generatedAt: 'desc' },
-        take: limit
+        take: limit,
       }),
       prisma.personalizedMarketingMaterial.findMany({
         where: { tenantId, ...(customerId && { customerId }) },
         include: {
-          customer: { select: { name: true } }
+          customer: { select: { name: true } },
         },
         orderBy: { createdAt: 'desc' },
-        take: limit
-      })
+        take: limit,
+      }),
     ])
 
     const allMaterials = [
-      ...infographics.map(ig => ({
+      ...infographics.map((ig) => ({
         id: ig.id,
         type: 'INFOGRAPHIC',
         title: ig.title,
@@ -407,9 +417,9 @@ export async function GET(request: NextRequest) {
         status: ig.status,
         generatedAt: ig.generatedAt.toISOString(),
         isShared: ig.isShared,
-        sharedUrl: ig.sharedUrl
+        sharedUrl: ig.sharedUrl,
       })),
-      ...materials.map(mat => ({
+      ...materials.map((mat) => ({
         id: mat.id,
         type: mat.materialType,
         title: mat.title,
@@ -428,9 +438,9 @@ export async function GET(request: NextRequest) {
           sent: mat.sent,
           opened: mat.opened,
           clicked: mat.clicked,
-          converted: mat.converted
-        }
-      }))
+          converted: mat.converted,
+        },
+      })),
     ].sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())
 
     return NextResponse.json({
@@ -438,21 +448,20 @@ export async function GET(request: NextRequest) {
       total: allMaterials.length,
       summary: {
         totalGenerated: allMaterials.length,
-        byType: allMaterials.reduce((acc, material) => {
-          acc[material.type] = (acc[material.type] || 0) + 1
-          return acc
-        }, {} as Record<string, number>),
-        averageQualityScore: allMaterials.reduce((sum, mat) => sum + mat.qualityScore, 0) / allMaterials.length,
+        byType: allMaterials.reduce(
+          (acc, material) => {
+            acc[material.type] = (acc[material.type] || 0) + 1
+            return acc
+          },
+          {} as Record<string, number>
+        ),
+        averageQualityScore:
+          allMaterials.reduce((sum, mat) => sum + mat.qualityScore, 0) / allMaterials.length,
         totalViews: allMaterials.reduce((sum, mat) => sum + mat.viewCount, 0),
-        totalDownloads: allMaterials.reduce((sum, mat) => sum + mat.downloadCount, 0)
-      }
+        totalDownloads: allMaterials.reduce((sum, mat) => sum + mat.downloadCount, 0),
+      },
     })
-
   } catch (error) {
-    console.error('Error fetching generated materials:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch generated materials' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch generated materials' }, { status: 500 })
   }
 }

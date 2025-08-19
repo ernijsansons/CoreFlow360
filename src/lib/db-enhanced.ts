@@ -79,27 +79,27 @@ const buildConnectionUrl = (baseUrl: string): string => {
 // Enhanced Prisma client configuration
 const prismaConfig: Prisma.PrismaClientOptions = {
   // Comprehensive logging configuration
-  log: isDevelopment 
+  log: isDevelopment
     ? [
         { emit: 'event', level: 'query' },
         { emit: 'event', level: 'error' },
         { emit: 'event', level: 'warn' },
-        { emit: 'event', level: 'info' }
+        { emit: 'event', level: 'info' },
       ]
     : [
         { emit: 'event', level: 'error' },
-        { emit: 'event', level: 'warn' }
+        { emit: 'event', level: 'warn' },
       ],
-  
+
   // Error formatting
   errorFormat: isDevelopment ? 'pretty' : 'minimal',
-  
+
   // Datasource configuration
   datasources: {
     db: {
-      url: buildConnectionUrl(database.url)
-    }
-  }
+      url: buildConnectionUrl(database.url),
+    },
+  },
 }
 
 // Query performance monitoring
@@ -116,54 +116,54 @@ interface QueryMetrics {
 const queryMetrics: QueryMetrics = {
   count: 0,
   totalDuration: 0,
-  slowQueries: []
+  slowQueries: [],
 }
 
 // Create enhanced Prisma client
 function createEnhancedPrismaClient(): PrismaClient {
   const client = new PrismaClient(prismaConfig)
-  
+
   // Query performance monitoring
-  client.$on('query', async (e) => {
+  (client as any).$on('query', async (e: any) => {
     queryMetrics.count++
     queryMetrics.totalDuration += e.duration
-    
+
     // Track slow queries (> 1 second)
     if (e.duration > 1000) {
       queryMetrics.slowQueries.push({
         query: e.query,
         duration: e.duration,
-        timestamp: new Date()
+        timestamp: new Date(),
       })
-      
+
       // Keep only last 100 slow queries
       if (queryMetrics.slowQueries.length > 100) {
         queryMetrics.slowQueries.shift()
       }
-      
+
       if (isDevelopment) {
-        console.warn(`⚠️ Slow query detected (${e.duration}ms):`, e.query)
+        console.warn(`WARNING Slow query (${e.duration}ms):`, e.query)
       }
     }
   })
-  
+
   // Error tracking
-  client.$on('error', (e) => {
-    console.error('❌ Database Error:', {
+  (client as any).$on('error', (e: any) => {
+    console.error('ERROR Database Error:', {
       message: e.message,
       target: e.target,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
   })
-  
+
   // Warning tracking
-  client.$on('warn', (e) => {
-    console.warn('⚠️ Database Warning:', {
+  (client as any).$on('warn', (e: any) => {
+    console.warn('WARNING Database Warning:', {
       message: e.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
   })
-  
+
   return client
 }
 
@@ -181,7 +181,7 @@ if (!globalForPrisma.connectionStartTime) {
 }
 
 // Prevent multiple instances in development
-if (process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
 }
 
@@ -189,29 +189,31 @@ if (process.env.NODE_ENV !== "production") {
 export async function getConnectionPoolMetrics() {
   try {
     // Get pool statistics using raw query
-    const poolStats = await prisma.$queryRaw<Array<{
-      state: string
-      count: bigint
-    }>>`
+    const poolStats = await prisma.$queryRaw<
+      Array<{
+        state: string
+        count: bigint
+      }>
+    >`
       SELECT state, count(*) 
       FROM pg_stat_activity 
       WHERE datname = current_database() 
       AND application_name LIKE 'coreflow360-%'
       GROUP BY state
     `
-    
+
     const stats = {
       active: 0,
       idle: 0,
       idleInTransaction: 0,
       total: 0,
-      uptime: Date.now() - globalForPrisma.connectionStartTime
+      uptime: Date.now() - globalForPrisma.connectionStartTime,
     }
-    
-    poolStats.forEach(row => {
+
+    poolStats.forEach((row) => {
       const count = Number(row.count)
       stats.total += count
-      
+
       switch (row.state) {
         case 'active':
           stats.active = count
@@ -224,7 +226,7 @@ export async function getConnectionPoolMetrics() {
           break
       }
     })
-    
+
     return stats
   } catch (error) {
     // Return empty stats if query fails (e.g., not PostgreSQL)
@@ -233,22 +235,20 @@ export async function getConnectionPoolMetrics() {
       idle: 0,
       idleInTransaction: 0,
       total: 0,
-      uptime: Date.now() - globalForPrisma.connectionStartTime
+      uptime: Date.now() - globalForPrisma.connectionStartTime,
     }
   }
 }
 
 // Get query performance metrics
 export function getQueryMetrics() {
-  const avgDuration = queryMetrics.count > 0 
-    ? queryMetrics.totalDuration / queryMetrics.count 
-    : 0
-    
+  const avgDuration = queryMetrics.count > 0 ? queryMetrics.totalDuration / queryMetrics.count : 0
+
   return {
     totalQueries: queryMetrics.count,
     avgDuration: Math.round(avgDuration),
     slowQueriesCount: queryMetrics.slowQueries.length,
-    slowQueries: queryMetrics.slowQueries.slice(-10) // Last 10 slow queries
+    slowQueries: queryMetrics.slowQueries.slice(-10), // Last 10 slow queries
   }
 }
 
@@ -257,27 +257,27 @@ export async function checkDatabaseHealth(): Promise<{
   status: 'healthy' | 'degraded' | 'unhealthy'
   message: string
   responseTime?: number
-  poolMetrics?: any
-  queryMetrics?: any
+  poolMetrics?: unknown
+  queryMetrics?: unknown
 }> {
   const startTime = Date.now()
-  
+
   try {
     // Test connection with timeout
     await prisma.$queryRaw`SELECT 1`
-    
+
     const responseTime = Date.now() - startTime
-    
+
     // Get pool and query metrics
     const [poolMetrics, queryMetrics] = await Promise.all([
       getConnectionPoolMetrics(),
-      Promise.resolve(getQueryMetrics())
+      Promise.resolve(getQueryMetrics()),
     ])
-    
+
     // Determine health status based on metrics
     let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
     let message = 'Database connection successful'
-    
+
     // Check for degraded conditions
     if (responseTime > 1000) {
       status = 'degraded'
@@ -289,21 +289,21 @@ export async function checkDatabaseHealth(): Promise<{
       status = 'degraded'
       message = 'Average query duration is high'
     }
-    
+
     return {
       status,
       message,
       responseTime,
       poolMetrics,
-      queryMetrics
+      queryMetrics,
     }
   } catch (error) {
     const responseTime = Date.now() - startTime
-    
+
     return {
       status: 'unhealthy',
       message: error instanceof Error ? error.message : 'Database connection failed',
-      responseTime
+      responseTime,
     }
   }
 }
@@ -317,14 +317,14 @@ export async function withRetry<T>(
     isolationLevel?: Prisma.TransactionIsolationLevel
   } = {}
 ): Promise<T> {
-  const { 
-    maxRetries = 3, 
+  const {
+    maxRetries = 3,
     retryDelay = 100,
-    isolationLevel = Prisma.TransactionIsolationLevel.ReadCommitted
+    isolationLevel = Prisma.TransactionIsolationLevel.ReadCommitted,
   } = options
-  
+
   let lastError: Error | null = null
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await prisma.$transaction(operation, {
@@ -334,23 +334,21 @@ export async function withRetry<T>(
       })
     } catch (error) {
       lastError = error as Error
-      
+
       // Don't retry on certain errors
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002' || error.code === 'P2025') {
           throw error // Unique constraint or record not found
         }
       }
-      
+
       // Wait before retry with exponential backoff
       if (attempt < maxRetries) {
-        await new Promise(resolve => 
-          setTimeout(resolve, retryDelay * Math.pow(2, attempt - 1))
-        )
+        await new Promise((resolve) => setTimeout(resolve, retryDelay * Math.pow(2, attempt - 1)))
       }
     }
   }
-  
+
   throw lastError || new Error('Transaction failed after retries')
 }
 
@@ -360,36 +358,36 @@ export async function disconnectDatabase(): Promise<void> {
     // Log final metrics before shutdown
     console.log('📊 Final database metrics:', {
       pool: await getConnectionPoolMetrics(),
-      queries: getQueryMetrics()
+      queries: getQueryMetrics(),
     })
-    
+
     await prisma.$disconnect()
   } catch (error) {
-    console.error('Error closing database connection:', error)
+    console.error('ERROR Error disconnecting database:', error)
   }
 }
 
 // Handle process termination
-const isEdgeRuntime = typeof (globalThis as any).EdgeRuntime !== 'undefined'
+const isEdgeRuntime = typeof (globalThis as unknown).EdgeRuntime !== 'undefined'
 if (typeof process !== 'undefined' && typeof process.on === 'function' && !isEdgeRuntime) {
   let isShuttingDown = false
-  
+
   const gracefulShutdown = async (signal: string) => {
     if (isShuttingDown) return
     isShuttingDown = true
-    
-    console.log(`\n📋 Received ${signal}, starting graceful shutdown...`)
-    
+
+    console.log(`END Graceful shutdown initiated (${signal})...`)
+
     // Give ongoing queries 10 seconds to complete
     setTimeout(() => {
-      console.log('⏱️ Shutdown timeout reached, forcing exit')
+      console.error('ERROR Forced shutdown after timeout')
       process.exit(1)
     }, 10000)
-    
+
     await disconnectDatabase()
     process.exit(0)
   }
-  
+
   process.on('SIGINT', () => gracefulShutdown('SIGINT'))
   process.on('SIGTERM', () => gracefulShutdown('SIGTERM'))
 }

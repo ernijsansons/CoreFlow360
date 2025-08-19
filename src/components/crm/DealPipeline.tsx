@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 // Removed drag-and-drop for now - can be added later
 // import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
-import { 
+import {
   PlusIcon,
   EyeIcon,
   CalendarIcon,
@@ -22,7 +22,7 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
   ClockIcon,
-  FunnelIcon
+  FunnelIcon,
 } from '@heroicons/react/24/outline'
 import { MetricCard } from '@/components/ui/MetricCard'
 
@@ -36,7 +36,7 @@ interface Deal {
   actualCloseDate?: string
   createdAt: string
   updatedAt: string
-  
+
   // Customer info
   customer: {
     id: string
@@ -44,21 +44,21 @@ interface Deal {
     email?: string
     company?: string
   }
-  
+
   // Assignment
   assignee?: {
     id: string
     name: string
     avatar?: string
   }
-  
+
   // AI predictions
   aiPredictedValue: number
   aiWinProbability: number
   aiRecommendedActions: string[]
   aiRiskFactors: string[]
   aiLastAnalysisAt?: string
-  
+
   // Stage tracking
   stageId: string
   stageHistory: Array<{
@@ -66,7 +66,7 @@ interface Deal {
     enteredAt: string
     exitedAt?: string
   }>
-  
+
   // Activities
   lastActivity?: {
     type: string
@@ -116,7 +116,7 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
   const loadPipelineData = async () => {
     try {
       setLoading(true)
-      
+
       // Mock data for demonstration
       const mockStages: PipelineStage[] = [
         {
@@ -140,39 +140,36 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
                 id: '1',
                 name: 'Sarah Johnson',
                 email: 'sarah@techstart.io',
-                company: 'TechStart'
+                company: 'TechStart',
               },
               assignee: {
                 id: '1',
                 name: 'Alex Morgan',
-                avatar: '/avatars/alex.jpg'
+                avatar: '/avatars/alex.jpg',
               },
               aiPredictedValue: 28000,
               aiWinProbability: 25,
               aiRecommendedActions: [
                 'Schedule discovery call within 48 hours',
                 'Send case study examples',
-                'Request technical requirements document'
+                'Request technical requirements document',
               ],
-              aiRiskFactors: [
-                'No budget confirmed yet',
-                'Multiple decision makers involved'
-              ],
+              aiRiskFactors: ['No budget confirmed yet', 'Multiple decision makers involved'],
               aiLastAnalysisAt: '2024-08-09T12:00:00Z',
               stageId: 'lead',
               stageHistory: [
                 {
                   stageId: 'lead',
-                  enteredAt: '2024-08-01T10:00:00Z'
-                }
+                  enteredAt: '2024-08-01T10:00:00Z',
+                },
               ],
               lastActivity: {
                 type: 'EMAIL',
                 date: '2024-08-08T15:30:00Z',
-                description: 'Sent initial proposal outline'
-              }
-            }
-          ]
+                description: 'Sent initial proposal outline',
+              },
+            },
+          ],
         },
         {
           id: 'qualified',
@@ -195,44 +192,41 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
                 id: '2',
                 name: 'Michael Chen',
                 email: 'mchen@innovateplus.com',
-                company: 'InnovatePlus'
+                company: 'InnovatePlus',
               },
               assignee: {
                 id: '2',
                 name: 'Jordan Lee',
-                avatar: '/avatars/jordan.jpg'
+                avatar: '/avatars/jordan.jpg',
               },
               aiPredictedValue: 52000,
               aiWinProbability: 45,
               aiRecommendedActions: [
                 'Present detailed technical proposal',
                 'Arrange stakeholder demo',
-                'Discuss timeline and milestones'
+                'Discuss timeline and milestones',
               ],
-              aiRiskFactors: [
-                'Competitor actively pursuing',
-                'Timeline pressure from client'
-              ],
+              aiRiskFactors: ['Competitor actively pursuing', 'Timeline pressure from client'],
               aiLastAnalysisAt: '2024-08-09T12:00:00Z',
               stageId: 'qualified',
               stageHistory: [
                 {
                   stageId: 'lead',
                   enteredAt: '2024-07-15T14:20:00Z',
-                  exitedAt: '2024-07-20T09:30:00Z'
+                  exitedAt: '2024-07-20T09:30:00Z',
                 },
                 {
                   stageId: 'qualified',
-                  enteredAt: '2024-07-20T09:30:00Z'
-                }
+                  enteredAt: '2024-07-20T09:30:00Z',
+                },
               ],
               lastActivity: {
                 type: 'CALL',
                 date: '2024-08-07T16:00:00Z',
-                description: 'Qualification call with decision maker'
-              }
-            }
-          ]
+                description: 'Qualification call with decision maker',
+              },
+            },
+          ],
         },
         {
           id: 'proposal',
@@ -255,49 +249,46 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
                 id: '3',
                 name: 'Emily Rodriguez',
                 email: 'emily.r@futuretech.com',
-                company: 'FutureTech'
+                company: 'FutureTech',
               },
               assignee: {
                 id: '3',
                 name: 'Sam Wilson',
-                avatar: '/avatars/sam.jpg'
+                avatar: '/avatars/sam.jpg',
               },
               aiPredictedValue: 78000,
               aiWinProbability: 75,
               aiRecommendedActions: [
                 'Follow up on proposal within 2 days',
                 'Address pricing concerns',
-                'Schedule final presentation'
+                'Schedule final presentation',
               ],
-              aiRiskFactors: [
-                'Budget approval pending',
-                'Q4 freeze possible'
-              ],
+              aiRiskFactors: ['Budget approval pending', 'Q4 freeze possible'],
               aiLastAnalysisAt: '2024-08-09T12:00:00Z',
               stageId: 'proposal',
               stageHistory: [
                 {
                   stageId: 'lead',
                   enteredAt: '2024-06-10T11:30:00Z',
-                  exitedAt: '2024-06-15T14:00:00Z'
+                  exitedAt: '2024-06-15T14:00:00Z',
                 },
                 {
                   stageId: 'qualified',
                   enteredAt: '2024-06-15T14:00:00Z',
-                  exitedAt: '2024-07-01T10:15:00Z'
+                  exitedAt: '2024-07-01T10:15:00Z',
                 },
                 {
                   stageId: 'proposal',
-                  enteredAt: '2024-07-01T10:15:00Z'
-                }
+                  enteredAt: '2024-07-01T10:15:00Z',
+                },
               ],
               lastActivity: {
                 type: 'MEETING',
                 date: '2024-08-06T14:00:00Z',
-                description: 'Proposal presentation to board'
-              }
-            }
-          ]
+                description: 'Proposal presentation to board',
+              },
+            },
+          ],
         },
         {
           id: 'negotiation',
@@ -320,53 +311,51 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
                 id: '4',
                 name: 'David Park',
                 email: 'dpark@globalcorp.com',
-                company: 'Global Corp'
+                company: 'Global Corp',
               },
               assignee: {
                 id: '1',
                 name: 'Alex Morgan',
-                avatar: '/avatars/alex.jpg'
+                avatar: '/avatars/alex.jpg',
               },
               aiPredictedValue: 92000,
               aiWinProbability: 85,
               aiRecommendedActions: [
                 'Finalize contract terms',
                 'Schedule implementation kickoff',
-                'Prepare onboarding materials'
+                'Prepare onboarding materials',
               ],
-              aiRiskFactors: [
-                'Minor pricing negotiation ongoing'
-              ],
+              aiRiskFactors: ['Minor pricing negotiation ongoing'],
               aiLastAnalysisAt: '2024-08-09T12:00:00Z',
               stageId: 'negotiation',
               stageHistory: [
                 {
                   stageId: 'lead',
                   enteredAt: '2024-05-01T09:15:00Z',
-                  exitedAt: '2024-05-10T11:30:00Z'
+                  exitedAt: '2024-05-10T11:30:00Z',
                 },
                 {
                   stageId: 'qualified',
                   enteredAt: '2024-05-10T11:30:00Z',
-                  exitedAt: '2024-06-01T14:45:00Z'
+                  exitedAt: '2024-06-01T14:45:00Z',
                 },
                 {
                   stageId: 'proposal',
                   enteredAt: '2024-06-01T14:45:00Z',
-                  exitedAt: '2024-07-15T16:20:00Z'
+                  exitedAt: '2024-07-15T16:20:00Z',
                 },
                 {
                   stageId: 'negotiation',
-                  enteredAt: '2024-07-15T16:20:00Z'
-                }
+                  enteredAt: '2024-07-15T16:20:00Z',
+                },
               ],
               lastActivity: {
                 type: 'EMAIL',
                 date: '2024-08-09T10:30:00Z',
-                description: 'Contract revision sent for approval'
-              }
-            }
-          ]
+                description: 'Contract revision sent for approval',
+              },
+            },
+          ],
         },
         {
           id: 'closed-won',
@@ -390,19 +379,19 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
                 id: '5',
                 name: 'Lisa Wang',
                 email: 'lwang@techsolutions.com',
-                company: 'TechSolutions'
+                company: 'TechSolutions',
               },
               assignee: {
                 id: '2',
                 name: 'Jordan Lee',
-                avatar: '/avatars/jordan.jpg'
+                avatar: '/avatars/jordan.jpg',
               },
               aiPredictedValue: 63000,
               aiWinProbability: 100,
               aiRecommendedActions: [
                 'Begin project implementation',
                 'Schedule regular check-ins',
-                'Identify upsell opportunities'
+                'Identify upsell opportunities',
               ],
               aiRiskFactors: [],
               aiLastAnalysisAt: '2024-07-28T12:00:00Z',
@@ -411,36 +400,36 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
                 {
                   stageId: 'lead',
                   enteredAt: '2024-04-01T10:00:00Z',
-                  exitedAt: '2024-04-08T12:00:00Z'
+                  exitedAt: '2024-04-08T12:00:00Z',
                 },
                 {
                   stageId: 'qualified',
                   enteredAt: '2024-04-08T12:00:00Z',
-                  exitedAt: '2024-05-01T14:00:00Z'
+                  exitedAt: '2024-05-01T14:00:00Z',
                 },
                 {
                   stageId: 'proposal',
                   enteredAt: '2024-05-01T14:00:00Z',
-                  exitedAt: '2024-06-15T10:30:00Z'
+                  exitedAt: '2024-06-15T10:30:00Z',
                 },
                 {
                   stageId: 'negotiation',
                   enteredAt: '2024-06-15T10:30:00Z',
-                  exitedAt: '2024-07-28T15:30:00Z'
+                  exitedAt: '2024-07-28T15:30:00Z',
                 },
                 {
                   stageId: 'closed-won',
-                  enteredAt: '2024-07-28T15:30:00Z'
-                }
+                  enteredAt: '2024-07-28T15:30:00Z',
+                },
               ],
               lastActivity: {
                 type: 'CONTRACT',
                 date: '2024-07-28T15:30:00Z',
-                description: 'Contract signed and project initiated'
-              }
-            }
-          ]
-        }
+                description: 'Contract signed and project initiated',
+              },
+            },
+          ],
+        },
       ]
 
       const mockMetrics: PipelineMetrics = {
@@ -451,44 +440,42 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
         avgSalesCycle: 45,
         dealsWon: 8,
         dealsLost: 3,
-        forecastAccuracy: 85.2
+        forecastAccuracy: 85.2,
       }
 
       setStages(mockStages)
       setMetrics(mockMetrics)
     } catch (error) {
-      console.error('Failed to load pipeline data:', error)
     } finally {
       setLoading(false)
     }
   }
 
   // Simplified move deal function (without drag-and-drop for now)
-  const moveDeal = (dealId: string, newStageId: string) => {
-    const newStages = stages.map(stage => {
+  const moveDeal = (_dealId: string, _newStageId: string) => {
+    const newStages = stages.map((stage) => {
       // Remove deal from current stage
-      const updatedDeals = stage.deals.filter(d => d.id !== dealId)
-      
+      const updatedDeals = stage.deals.filter((d) => d.id !== dealId)
+
       // Add deal to new stage
       if (stage.id === newStageId) {
-        const deal = stages.flatMap(s => s.deals).find(d => d.id === dealId)
+        const deal = stages.flatMap((s) => s.deals).find((d) => d.id === dealId)
         if (deal) {
           updatedDeals.push({
             ...deal,
             stageId: newStageId,
-            probability: stage.probability
+            probability: stage.probability,
           })
         }
       }
-      
+
       return {
         ...stage,
-        deals: updatedDeals
+        deals: updatedDeals,
       }
     })
 
     setStages(newStages)
-    console.log(`Moved deal ${dealId} to ${newStageId}`)
   }
 
   const formatCurrency = (amount: number) => {
@@ -503,7 +490,7 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     })
   }
 
@@ -512,13 +499,13 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
   }
 
   const getStageWeightedTotal = (deals: Deal[]) => {
-    return deals.reduce((sum, deal) => sum + (deal.value * deal.probability / 100), 0)
+    return deals.reduce((sum, deal) => sum + (deal.value * deal.probability) / 100, 0)
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -526,16 +513,18 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Sales Pipeline</h1>
-          <p className="text-gray-600 mt-1">Manage deals and track sales progress with AI insights</p>
+          <p className="mt-1 text-gray-600">
+            Manage deals and track sales progress with AI insights
+          </p>
         </div>
         <div className="flex items-center space-x-3">
           <select
             value={selectedTimeframe}
             onChange={(e) => setSelectedTimeframe(e.target.value as 'week' | 'month' | 'quarter')}
-            className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
+            className="block w-full rounded-md border-gray-300 py-2 pr-10 pl-3 text-base focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
           >
             <option value="week">This Week</option>
             <option value="month">This Month</option>
@@ -543,13 +532,13 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
           </select>
           <button
             onClick={() => setShowAIInsights(!showAIInsights)}
-            className={`inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium ${
+            className={`inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium ${
               showAIInsights
                 ? 'border-purple-300 bg-purple-50 text-purple-700'
                 : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <SparklesIcon className="h-4 w-4 mr-2" />
+            <SparklesIcon className="mr-2 h-4 w-4" />
             AI Insights
           </button>
         </div>
@@ -590,16 +579,22 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
       )}
 
       {/* Pipeline Board */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="overflow-hidden rounded-lg bg-white shadow">
         <div className="flex overflow-x-auto">
           {stages.map((stage) => (
-            <div key={stage.id} className="flex-shrink-0 w-80 border-r border-gray-200 last:border-r-0">
+            <div
+              key={stage.id}
+              className="w-80 flex-shrink-0 border-r border-gray-200 last:border-r-0"
+            >
               {/* Stage Header */}
-              <div className="p-4 border-b border-gray-200" style={{ backgroundColor: `${stage.color}10` }}>
+              <div
+                className="border-b border-gray-200 p-4"
+                style={{ backgroundColor: `${stage.color}10` }}
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <div
-                      className="w-3 h-3 rounded-full"
+                      className="h-3 w-3 rounded-full"
                       style={{ backgroundColor: stage.color }}
                     />
                     <h3 className="font-medium text-gray-900">{stage.name}</h3>
@@ -619,7 +614,7 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
               </div>
 
               {/* Deals */}
-              <div className="min-h-96 p-4 space-y-3">
+              <div className="min-h-96 space-y-3 p-4">
                 <AnimatePresence>
                   {stage.deals.map((deal, index) => (
                     <motion.div
@@ -628,96 +623,92 @@ export default function DealPipeline({ onDealClick, onAddDeal, onEditDeal }: Dea
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
-                      className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                      className="cursor-pointer rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
                       onClick={() => onDealClick?.(deal)}
                     >
-                                {/* Deal Header */}
-                                <div className="flex items-start justify-between">
-                                  <h4 className="font-medium text-gray-900 text-sm leading-tight">
-                                    {deal.title}
-                                  </h4>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      onEditDeal?.(deal)
-                                    }}
-                                    className="text-gray-400 hover:text-gray-600"
-                                  >
-                                    <EyeIcon className="h-4 w-4" />
-                                  </button>
-                                </div>
+                      {/* Deal Header */}
+                      <div className="flex items-start justify-between">
+                        <h4 className="text-sm leading-tight font-medium text-gray-900">
+                          {deal.title}
+                        </h4>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onEditDeal?.(deal)
+                          }}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                        </button>
+                      </div>
 
-                                {/* Customer Info */}
-                                <div className="mt-2">
-                                  <p className="text-sm text-gray-600">{deal.customer.company}</p>
-                                  <p className="text-xs text-gray-500">{deal.customer.name}</p>
-                                </div>
+                      {/* Customer Info */}
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-600">{deal.customer.company}</p>
+                        <p className="text-xs text-gray-500">{deal.customer.name}</p>
+                      </div>
 
-                                {/* Deal Value */}
-                                <div className="mt-3 flex items-center justify-between">
-                                  <span className="text-lg font-semibold text-gray-900">
-                                    {formatCurrency(deal.value)}
-                                  </span>
-                                  <span className="text-sm text-gray-500">
-                                    {deal.probability}%
-                                  </span>
-                                </div>
+                      {/* Deal Value */}
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="text-lg font-semibold text-gray-900">
+                          {formatCurrency(deal.value)}
+                        </span>
+                        <span className="text-sm text-gray-500">{deal.probability}%</span>
+                      </div>
 
-                                {/* AI Insights */}
-                                {showAIInsights && (
-                                  <div className="mt-3 space-y-2">
-                                    <div className="flex items-center space-x-2">
-                                      <SparklesIcon className="h-4 w-4 text-purple-500" />
-                                      <span className="text-xs text-gray-600">
-                                        AI Win: {deal.aiWinProbability}%
-                                      </span>
-                                    </div>
-                                    
-                                    {deal.aiRiskFactors.length > 0 && (
-                                      <div className="flex items-start space-x-2">
-                                        <ExclamationTriangleIcon className="h-4 w-4 text-yellow-500 mt-0.5" />
-                                        <div className="text-xs text-gray-600">
-                                          {deal.aiRiskFactors[0]}
-                                        </div>
-                                      </div>
-                                    )}
-                                    
-                                    {deal.aiRecommendedActions.length > 0 && (
-                                      <div className="flex items-start space-x-2">
-                                        <CheckCircleIcon className="h-4 w-4 text-blue-500 mt-0.5" />
-                                        <div className="text-xs text-gray-600">
-                                          {deal.aiRecommendedActions[0]}
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
+                      {/* AI Insights */}
+                      {showAIInsights && (
+                        <div className="mt-3 space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <SparklesIcon className="h-4 w-4 text-purple-500" />
+                            <span className="text-xs text-gray-600">
+                              AI Win: {deal.aiWinProbability}%
+                            </span>
+                          </div>
 
-                                {/* Timeline */}
-                                <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-                                  <div className="flex items-center space-x-1">
-                                    <CalendarIcon className="h-3 w-3" />
-                                    <span>
-                                      {deal.expectedCloseDate 
-                                        ? formatDate(deal.expectedCloseDate)
-                                        : 'No date set'
-                                      }
-                                    </span>
-                                  </div>
-                                  {deal.assignee && (
-                                    <div className="flex items-center space-x-1">
-                                      <UserIcon className="h-3 w-3" />
-                                      <span>{deal.assignee.name.split(' ')[0]}</span>
-                                    </div>
-                                  )}
-                                </div>
+                          {deal.aiRiskFactors.length > 0 && (
+                            <div className="flex items-start space-x-2">
+                              <ExclamationTriangleIcon className="mt-0.5 h-4 w-4 text-yellow-500" />
+                              <div className="text-xs text-gray-600">{deal.aiRiskFactors[0]}</div>
+                            </div>
+                          )}
 
-                                {/* Last Activity */}
-                                {deal.lastActivity && (
-                                  <div className="mt-2 text-xs text-gray-500 border-t pt-2">
-                                    <span className="font-medium">{deal.lastActivity.type}</span>: {deal.lastActivity.description}
-                                  </div>
-                                )}
+                          {deal.aiRecommendedActions.length > 0 && (
+                            <div className="flex items-start space-x-2">
+                              <CheckCircleIcon className="mt-0.5 h-4 w-4 text-blue-500" />
+                              <div className="text-xs text-gray-600">
+                                {deal.aiRecommendedActions[0]}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Timeline */}
+                      <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+                        <div className="flex items-center space-x-1">
+                          <CalendarIcon className="h-3 w-3" />
+                          <span>
+                            {deal.expectedCloseDate
+                              ? formatDate(deal.expectedCloseDate)
+                              : 'No date set'}
+                          </span>
+                        </div>
+                        {deal.assignee && (
+                          <div className="flex items-center space-x-1">
+                            <UserIcon className="h-3 w-3" />
+                            <span>{deal.assignee.name.split(' ')[0]}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Last Activity */}
+                      {deal.lastActivity && (
+                        <div className="mt-2 border-t pt-2 text-xs text-gray-500">
+                          <span className="font-medium">{deal.lastActivity.type}</span>:{' '}
+                          {deal.lastActivity.description}
+                        </div>
+                      )}
                     </motion.div>
                   ))}
                 </AnimatePresence>

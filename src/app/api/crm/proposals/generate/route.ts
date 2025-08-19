@@ -11,9 +11,9 @@ const generateProposalSchema = z.object({
     businessChallenge: z.string(),
     desiredOutcome: z.string(),
     budgetRange: z.string().optional(),
-    timeline: z.string().optional()
+    timeline: z.string().optional(),
   }),
-  visualPreferences: z.string().optional()
+  visualPreferences: z.string().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
         decisionMakerName: validatedData.clientData.decisionMakerName,
         content: personalizedContent,
         metadata: JSON.stringify(validatedData),
-        status: 'DRAFT'
-      }
+        status: 'DRAFT',
+      },
     })
 
     return NextResponse.json({
@@ -52,20 +52,16 @@ export async function POST(request: NextRequest) {
           name: validatedData.clientData.decisionMakerName,
           company: validatedData.clientData.companyName,
           challenge: validatedData.clientData.businessChallenge,
-          outcome: validatedData.clientData.desiredOutcome
-        }
-      }
+          outcome: validatedData.clientData.desiredOutcome,
+        },
+      },
     })
   } catch (error) {
-    console.error('Error generating proposal:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate proposal' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to generate proposal' }, { status: 500 })
   }
 }
 
-async function generateAIContent(data: any) {
+async function generateAIContent(data: unknown) {
   // Simulate AI content generation
   // In production, this would call OpenAI or Claude API
   return {
@@ -73,46 +69,46 @@ async function generateAIContent(data: any) {
 
 We understand that ${data.clientData.companyName} is facing ${data.clientData.businessChallenge}. 
 Our solution is specifically designed to help you achieve ${data.clientData.desiredOutcome}.`,
-    
+
     valueProposition: [
       {
         title: 'Immediate ROI',
         description: 'See returns within 30 days of implementation',
-        metric: '250% ROI in Year 1'
+        metric: '250% ROI in Year 1',
       },
       {
         title: 'Seamless Integration',
         description: 'Works with your existing systems',
-        metric: '2-week implementation'
+        metric: '2-week implementation',
       },
       {
         title: 'Proven Results',
         description: 'Trusted by industry leaders',
-        metric: '98% customer satisfaction'
-      }
+        metric: '98% customer satisfaction',
+      },
     ],
-    
+
     sections: [
       {
         type: 'problem',
         title: 'The Challenge',
-        content: `${data.clientData.companyName} needs to ${data.clientData.businessChallenge}`
+        content: `${data.clientData.companyName} needs to ${data.clientData.businessChallenge}`,
       },
       {
         type: 'solution',
         title: 'Our Solution',
-        content: 'AI-powered platform that transforms your operations'
+        content: 'AI-powered platform that transforms your operations',
       },
       {
         type: 'benefits',
         title: 'Expected Outcomes',
-        content: data.clientData.desiredOutcome
-      }
-    ]
+        content: data.clientData.desiredOutcome,
+      },
+    ],
   }
 }
 
-function generateVisualsForProposal(data: any) {
+function generateVisualsForProposal(_data: unknown) {
   return [
     {
       type: 'infographic',
@@ -120,16 +116,16 @@ function generateVisualsForProposal(data: any) {
       data: {
         currentState: 100,
         futureState: 250,
-        improvement: 150
-      }
+        improvement: 150,
+      },
     },
     {
       type: 'chart',
       id: 'growth-projection',
       data: {
         labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-        values: [100, 150, 200, 250]
-      }
-    }
+        values: [100, 150, 200, 250],
+      },
+    },
   ]
 }

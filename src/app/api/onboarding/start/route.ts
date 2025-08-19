@@ -6,29 +6,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
-
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { 
-      selectedRole, 
-      roleTitle, 
-      totalSteps, 
+    const {
+      selectedRole,
+      roleTitle,
+      totalSteps,
       estimatedTotalTime,
       userId = 'demo-user-1',
-      tenantId = 'demo-tenant'
+      tenantId = 'demo-tenant',
     } = body
-
-    console.log(`🚀 Starting onboarding for user: ${userId}, role: ${selectedRole}`)
 
     // Create or update onboarding record
     const onboarding = await prisma.userOnboarding.upsert({
       where: {
         userId_tenantId: {
           userId,
-          tenantId
-        }
+          tenantId,
+        },
       },
       create: {
         userId,
@@ -40,7 +36,7 @@ export async function POST(request: NextRequest) {
         completedSteps: JSON.stringify([]),
         isCompleted: false,
         estimatedTotalTime,
-        startedAt: new Date()
+        startedAt: new Date(),
       },
       update: {
         selectedRole,
@@ -51,8 +47,8 @@ export async function POST(request: NextRequest) {
         isCompleted: false,
         estimatedTotalTime,
         startedAt: new Date(),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     })
 
     // Track conversion event for onboarding start
@@ -70,13 +66,11 @@ export async function POST(request: NextRequest) {
             selectedRole,
             roleTitle,
             totalSteps,
-            estimatedTotalTime
-          })
-        }
+            estimatedTotalTime,
+          }),
+        },
       })
-    } catch (conversionError) {
-      console.warn('Failed to track conversion event:', conversionError)
-    }
+    } catch (conversionError) {}
 
     const response = {
       success: true,
@@ -88,17 +82,12 @@ export async function POST(request: NextRequest) {
         totalSteps: onboarding.totalSteps,
         currentStep: onboarding.currentStep,
         estimatedTotalTime: onboarding.estimatedTotalTime,
-        startedAt: onboarding.startedAt
-      }
+        startedAt: onboarding.startedAt,
+      },
     }
 
     return NextResponse.json(response)
-
   } catch (error) {
-    console.error('❌ Failed to start onboarding:', error)
-    return NextResponse.json(
-      { error: 'Failed to start onboarding' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to start onboarding' }, { status: 500 })
   }
 }

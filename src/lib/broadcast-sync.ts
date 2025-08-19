@@ -9,7 +9,7 @@ interface BroadcastMessage {
   type: MessageType
   entity: string
   id?: string
-  data?: any
+  data?: unknown
   timestamp: number
 }
 
@@ -26,7 +26,6 @@ class BroadcastSync {
         this.channel = new BroadcastChannel('coreflow360-sync')
         this.setupMessageHandler()
       } catch (error) {
-        console.warn('BroadcastChannel initialization failed:', error)
         this.isSupported = false
       }
     }
@@ -40,7 +39,6 @@ class BroadcastSync {
 
       // Validate message structure
       if (!message || typeof message !== 'object' || !message.type || !message.entity) {
-        console.warn('Invalid broadcast message received:', message)
         return
       }
 
@@ -52,24 +50,20 @@ class BroadcastSync {
       // Notify all listeners for this entity
       const entityListeners = this.listeners.get(message.entity)
       if (entityListeners) {
-        entityListeners.forEach(listener => {
+        entityListeners.forEach((listener) => {
           try {
             listener(message)
-          } catch (error) {
-            console.error('Broadcast listener error:', error)
-          }
+          } catch (error) {}
         })
       }
 
       // Notify global listeners (listening to '*')
       const globalListeners = this.listeners.get('*')
       if (globalListeners) {
-        globalListeners.forEach(listener => {
+        globalListeners.forEach((listener) => {
           try {
             listener(message)
-          } catch (error) {
-            console.error('Global broadcast listener error:', error)
-          }
+          } catch (error) {}
         })
       }
     }
@@ -78,7 +72,7 @@ class BroadcastSync {
   /**
    * Send a message to all other tabs/windows
    */
-  send(type: MessageType, entity: string, id?: string, data?: any) {
+  send(type: MessageType, entity: string, id?: string, data?: unknown) {
     if (!this.isSupported || !this.channel) {
       return
     }
@@ -88,14 +82,12 @@ class BroadcastSync {
       entity,
       id,
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }
 
     try {
       this.channel.postMessage(message)
-    } catch (error) {
-      console.error('Failed to send broadcast message:', error)
-    }
+    } catch (error) {}
   }
 
   /**
@@ -141,7 +133,7 @@ class BroadcastSync {
   /**
    * Notify other tabs of an entity update
    */
-  notifyUpdate(entity: string, id: string, data: any) {
+  notifyUpdate(entity: string, id: string, data: unknown) {
     this.send('update', entity, id, data)
   }
 

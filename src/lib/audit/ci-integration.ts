@@ -49,7 +49,7 @@ export interface CIAuditResult {
 export class CIAuditIntegration {
   private config: CIAuditConfig
   private orchestrator: AuditOrchestrationSystem
-  private baseline: Map<string, any> = new Map()
+  private baseline: Map<string, unknown> = new Map()
 
   constructor(config: CIAuditConfig) {
     this.config = config
@@ -63,11 +63,11 @@ export class CIAuditIntegration {
   async runCIAudit(): Promise<CIAuditResult> {
     logger.info('Starting CI/CD audit', {
       scopes: this.config.scopes,
-      component: 'ci_audit_integration'
+      component: 'ci_audit_integration',
     })
 
     const startTime = Date.now()
-    const findings = new Map<string, any>()
+    const findings = new Map<string, unknown>()
     let totalFindings = 0
     let criticalCount = 0
     let highCount = 0
@@ -78,21 +78,21 @@ export class CIAuditIntegration {
         if (scopes.length === 0) continue
 
         const request: SACREDAuditRequest = {
-          auditType: auditType as any,
+          auditType: auditType as unknown,
           scope: scopes,
           context: this.buildCIContext(),
           options: {
             includeRecommendations: true,
             generateReport: true,
-            outputFormat: 'json'
-          }
+            outputFormat: 'json',
+          },
         }
 
         const result = await sacredAuditEngine.executeAudit(request)
         findings.set(auditType, result)
 
         // Count findings by severity
-        result.findings.forEach(finding => {
+        result.findings.forEach((finding) => {
           totalFindings++
           if (finding.severity === 'critical') criticalCount++
           if (finding.severity === 'high') highCount++
@@ -109,8 +109,9 @@ export class CIAuditIntegration {
       const reportUrl = await this.generateCIReport(findings, comparison)
 
       // Create PR comment if in PR context
-      const prComment = this.isInPRContext() ? 
-        this.generatePRComment(findings, comparison, passed) : undefined
+      const prComment = this.isInPRContext()
+        ? this.generatePRComment(findings, comparison, passed)
+        : undefined
 
       // Post to Slack if configured
       if (this.config.slackWebhook) {
@@ -130,20 +131,19 @@ export class CIAuditIntegration {
         newFindings: comparison.newFindings.length,
         fixedFindings: comparison.fixedFindings.length,
         reportUrl,
-        prComment
+        prComment,
       }
 
       logger.info('CI/CD audit completed', {
         ...result,
         executionTime: Date.now() - startTime,
-        component: 'ci_audit_integration'
+        component: 'ci_audit_integration',
       })
 
       return result
-
     } catch (error) {
       logger.error('CI/CD audit failed', error as Error, {
-        component: 'ci_audit_integration'
+        component: 'ci_audit_integration',
       })
       throw error
     }
@@ -162,21 +162,21 @@ export class CIAuditIntegration {
         frameworks: this.detectFrameworks(),
         architecture: 'CI/CD automated analysis',
         dependencies: this.getTopDependencies(),
-        codeMetrics: this.getCodeMetrics()
+        codeMetrics: this.getCodeMetrics(),
       },
       environment: {
         deployment: 'cloud',
         scale: 'enterprise',
         industry: 'SaaS',
-        compliance: ['SOC2', 'GDPR']
+        compliance: ['SOC2', 'GDPR'],
       },
       metadata: {
         branch: gitInfo.branch,
         commit: gitInfo.commit,
         author: gitInfo.author,
         prNumber: prInfo?.number,
-        prTitle: prInfo?.title
-      }
+        prTitle: prInfo?.title,
+      },
     }
   }
 
@@ -189,14 +189,14 @@ export class CIAuditIntegration {
     try {
       const baselineData = readFileSync(this.config.baselinePath, 'utf-8')
       const baseline = JSON.parse(baselineData)
-      
+
       Object.entries(baseline).forEach(([key, value]) => {
         this.baseline.set(key, value)
       })
     } catch (error) {
       logger.warn('Failed to load baseline', {
         error: error as Error,
-        path: this.config.baselinePath
+        path: this.config.baselinePath,
       })
     }
   }
@@ -204,18 +204,18 @@ export class CIAuditIntegration {
   /**
    * Compare current findings with baseline
    */
-  private compareWithBaseline(currentFindings: Map<string, any>) {
-    const newFindings: any[] = []
-    const fixedFindings: any[] = []
-    const unchangedFindings: any[] = []
+  private compareWithBaseline(currentFindings: Map<string, unknown>) {
+    const newFindings: unknown[] = []
+    const fixedFindings: unknown[] = []
+    const unchangedFindings: unknown[] = []
 
     // Create maps for efficient lookup
-    const baselineFindingsMap = new Map<string, any>()
-    const currentFindingsMap = new Map<string, any>()
+    const baselineFindingsMap = new Map<string, unknown>()
+    const currentFindingsMap = new Map<string, unknown>()
 
     // Populate baseline map
     this.baseline.forEach((audit, type) => {
-      audit.findings?.forEach((finding: any) => {
+      audit.findings?.forEach((finding: unknown) => {
         const key = `${type}:${finding.location}:${finding.title}`
         baselineFindingsMap.set(key, finding)
       })
@@ -223,7 +223,7 @@ export class CIAuditIntegration {
 
     // Populate current map and identify new findings
     currentFindings.forEach((audit, type) => {
-      audit.findings.forEach((finding: any) => {
+      audit.findings.forEach((finding: unknown) => {
         const key = `${type}:${finding.location}:${finding.title}`
         currentFindingsMap.set(key, finding)
 
@@ -249,15 +249,15 @@ export class CIAuditIntegration {
       summary: {
         new: newFindings.length,
         fixed: fixedFindings.length,
-        unchanged: unchangedFindings.length
-      }
+        unchanged: unchangedFindings.length,
+      },
     }
   }
 
   /**
    * Evaluate if audit passes CI requirements
    */
-  private evaluateResults(critical: number, high: number, total: number): boolean {
+  private evaluateResults(_critical: number, _high: number, _total: number): boolean {
     if (this.config.failOnCritical && critical > 0) {
       return false
     }
@@ -281,27 +281,29 @@ export class CIAuditIntegration {
    * Generate CI report
    */
   private async generateCIReport(
-    findings: Map<string, any>, 
-    comparison: any
+    findings: Map<string, unknown>,
+    comparison: unknown
   ): Promise<string> {
     const report = {
       timestamp: new Date().toISOString(),
       ci: {
         ...this.getGitInfo(),
-        ...this.getPRInfo()
+        ...this.getPRInfo(),
       },
       summary: {
-        totalFindings: Array.from(findings.values())
-          .reduce((sum, audit) => sum + audit.findings.length, 0),
+        totalFindings: Array.from(findings.values()).reduce(
+          (sum, audit) => sum + audit.findings.length,
+          0
+        ),
         bySeverity: this.countBySeverity(findings),
-        byCategory: this.countByCategory(findings)
+        byCategory: this.countByCategory(findings),
       },
       comparison,
       findings: Object.fromEntries(findings),
       config: {
         scopes: this.config.scopes,
-        thresholds: this.config.maxAllowedFindings
-      }
+        thresholds: this.config.maxAllowedFindings,
+      },
     }
 
     const reportPath = join(this.config.reportPath, `audit-${Date.now()}.json`)
@@ -311,7 +313,6 @@ export class CIAuditIntegration {
     if (process.env.CI) {
       // GitHub Actions
       if (process.env.GITHUB_ACTIONS) {
-        console.log(`::set-output name=audit-report::${reportPath}`)
       }
       // Add other CI providers as needed
     }
@@ -323,17 +324,19 @@ export class CIAuditIntegration {
    * Generate PR comment
    */
   private generatePRComment(
-    findings: Map<string, any>,
-    comparison: any,
+    findings: Map<string, unknown>,
+    comparison: unknown,
     passed: boolean
   ): string {
     const emoji = passed ? '✅' : '❌'
     const status = passed ? 'PASSED' : 'FAILED'
-    const totalFindings = Array.from(findings.values())
-      .reduce((sum, audit) => sum + audit.findings.length, 0)
+    const totalFindings = Array.from(findings.values()).reduce(
+      (sum, audit) => sum + audit.findings.length,
+      0
+    )
 
     let comment = `## ${emoji} CoreFlow360 Audit: ${status}\n\n`
-    
+
     // Summary table
     comment += `### Summary\n\n`
     comment += `| Metric | Count |\n`
@@ -347,12 +350,12 @@ export class CIAuditIntegration {
     comment += `| Low | 🟢 ${this.countBySeverity(findings).low} |\n\n`
 
     // New critical/high findings
-    const criticalNew = comparison.newFindings.filter((f: any) => f.severity === 'critical')
-    const highNew = comparison.newFindings.filter((f: any) => f.severity === 'high')
+    const criticalNew = comparison.newFindings.filter((f: unknown) => f.severity === 'critical')
+    const highNew = comparison.newFindings.filter((f: unknown) => f.severity === 'high')
 
     if (criticalNew.length > 0) {
       comment += `### 🚨 New Critical Issues\n\n`
-      criticalNew.forEach((finding: any) => {
+      criticalNew.forEach((finding: unknown) => {
         comment += `- **${finding.title}**\n`
         comment += `  - 📍 Location: \`${finding.location}\`\n`
         comment += `  - 💥 Impact: ${finding.impact}\n`
@@ -362,7 +365,7 @@ export class CIAuditIntegration {
 
     if (highNew.length > 0) {
       comment += `### ⚠️ New High Priority Issues\n\n`
-      highNew.slice(0, 5).forEach((finding: any) => {
+      highNew.slice(0, 5).forEach((finding: unknown) => {
         comment += `- **${finding.title}** (\`${finding.location}\`)\n`
       })
       if (highNew.length > 5) {
@@ -374,7 +377,7 @@ export class CIAuditIntegration {
     // Fixed issues
     if (comparison.fixedFindings.length > 0) {
       comment += `### ✅ Fixed Issues\n\n`
-      comparison.fixedFindings.slice(0, 5).forEach((finding: any) => {
+      comparison.fixedFindings.slice(0, 5).forEach((finding: unknown) => {
         comment += `- ~${finding.title}~\n`
       })
       if (comparison.fixedFindings.length > 5) {
@@ -387,7 +390,7 @@ export class CIAuditIntegration {
     if (!passed) {
       comment += `### 🔧 Actions Required\n\n`
       comment += `This PR cannot be merged until the following issues are resolved:\n\n`
-      
+
       if (criticalNew.length > 0) {
         comment += `- Fix all ${criticalNew.length} critical security issues\n`
       }
@@ -406,11 +409,13 @@ export class CIAuditIntegration {
   /**
    * Post results to Slack
    */
-  private async postToSlack(findings: Map<string, any>, passed: boolean) {
+  private async postToSlack(findings: Map<string, unknown>, passed: boolean) {
     if (!this.config.slackWebhook) return
 
-    const totalFindings = Array.from(findings.values())
-      .reduce((sum, audit) => sum + audit.findings.length, 0)
+    const totalFindings = Array.from(findings.values()).reduce(
+      (sum, audit) => sum + audit.findings.length,
+      0
+    )
     const severity = this.countBySeverity(findings)
 
     const payload = {
@@ -420,38 +425,38 @@ export class CIAuditIntegration {
           type: 'header',
           text: {
             type: 'plain_text',
-            text: `${passed ? '✅' : '❌'} CoreFlow360 Audit ${passed ? 'Passed' : 'Failed'}`
-          }
+            text: `${passed ? '✅' : '❌'} CoreFlow360 Audit ${passed ? 'Passed' : 'Failed'}`,
+          },
         },
         {
           type: 'section',
           fields: [
             {
               type: 'mrkdwn',
-              text: `*Total Findings:* ${totalFindings}`
+              text: `*Total Findings:* ${totalFindings}`,
             },
             {
               type: 'mrkdwn',
-              text: `*Critical:* ${severity.critical}`
+              text: `*Critical:* ${severity.critical}`,
             },
             {
               type: 'mrkdwn',
-              text: `*Branch:* ${this.getGitInfo().branch}`
+              text: `*Branch:* ${this.getGitInfo().branch}`,
             },
             {
               type: 'mrkdwn',
-              text: `*Commit:* ${this.getGitInfo().commit.substring(0, 7)}`
-            }
-          ]
-        }
-      ]
+              text: `*Commit:* ${this.getGitInfo().commit.substring(0, 7)}`,
+            },
+          ],
+        },
+      ],
     }
 
     try {
       await fetch(this.config.slackWebhook, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       })
     } catch (error) {
       logger.error('Failed to post to Slack', error as Error)
@@ -461,16 +466,18 @@ export class CIAuditIntegration {
   /**
    * Update baseline with current findings
    */
-  private updateBaseline(findings: Map<string, any>) {
+  private updateBaseline(findings: Map<string, unknown>) {
     if (!this.config.baselinePath) return
 
     const baseline = Object.fromEntries(findings)
     writeFileSync(this.config.baselinePath, JSON.stringify(baseline, null, 2))
-    
+
     logger.info('Updated audit baseline', {
       path: this.config.baselinePath,
-      findingsCount: Array.from(findings.values())
-        .reduce((sum, audit) => sum + audit.findings.length, 0)
+      findingsCount: Array.from(findings.values()).reduce(
+        (sum, audit) => sum + audit.findings.length,
+        0
+      ),
     })
   }
 
@@ -484,14 +491,14 @@ export class CIAuditIntegration {
         branch: execSync('git rev-parse --abbrev-ref HEAD').toString().trim(),
         commit: execSync('git rev-parse HEAD').toString().trim(),
         author: execSync('git log -1 --pretty=format:"%an"').toString().trim(),
-        message: execSync('git log -1 --pretty=format:"%s"').toString().trim()
+        message: execSync('git log -1 --pretty=format:"%s"').toString().trim(),
       }
     } catch {
       return {
         branch: 'unknown',
         commit: 'unknown',
         author: 'unknown',
-        message: 'unknown'
+        message: 'unknown',
       }
     }
   }
@@ -502,16 +509,18 @@ export class CIAuditIntegration {
       return {
         number: process.env.GITHUB_PR_NUMBER,
         title: process.env.GITHUB_PR_TITLE,
-        author: process.env.GITHUB_ACTOR
+        author: process.env.GITHUB_ACTOR,
       }
     }
     return null
   }
 
   private isInPRContext(): boolean {
-    return process.env.GITHUB_EVENT_NAME === 'pull_request' ||
-           process.env.CI_MERGE_REQUEST_ID !== undefined || // GitLab
-           process.env.CHANGE_ID !== undefined // Jenkins
+    return (
+      process.env.GITHUB_EVENT_NAME === 'pull_request' ||
+      process.env.CI_MERGE_REQUEST_ID !== undefined || // GitLab
+      process.env.CHANGE_ID !== undefined
+    ) // Jenkins
   }
 
   private isMainBranch(): boolean {
@@ -522,15 +531,19 @@ export class CIAuditIntegration {
   private detectLanguages(): string[] {
     // Simple detection based on file extensions
     try {
-      const files = execSync('find . -type f -name "*.ts" -o -name "*.js" -o -name "*.tsx" | head -20')
-        .toString().trim().split('\n')
-      
+      const files = execSync(
+        'find . -type f -name "*.ts" -o -name "*.js" -o -name "*.tsx" | head -20'
+      )
+        .toString()
+        .trim()
+        .split('\n')
+
       const languages = new Set<string>()
-      files.forEach(file => {
+      files.forEach((file) => {
         if (file.endsWith('.ts') || file.endsWith('.tsx')) languages.add('TypeScript')
         if (file.endsWith('.js') || file.endsWith('.jsx')) languages.add('JavaScript')
       })
-      
+
       return Array.from(languages)
     } catch {
       return ['TypeScript', 'JavaScript']
@@ -541,13 +554,13 @@ export class CIAuditIntegration {
     try {
       const packageJson = JSON.parse(readFileSync('package.json', 'utf-8'))
       const deps = { ...packageJson.dependencies, ...packageJson.devDependencies }
-      
+
       const frameworks: string[] = []
       if (deps.next) frameworks.push('Next.js')
       if (deps.react) frameworks.push('React')
       if (deps.express) frameworks.push('Express')
       if (deps.prisma || deps['@prisma/client']) frameworks.push('Prisma')
-      
+
       return frameworks
     } catch {
       return ['Next.js', 'React']
@@ -566,34 +579,41 @@ export class CIAuditIntegration {
   private getCodeMetrics() {
     try {
       const fileCount = parseInt(
-        execSync('find . -type f \\( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \\) | wc -l')
-          .toString().trim()
+        execSync(
+          'find . -type f \\( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \\) | wc -l'
+        )
+          .toString()
+          .trim()
       )
-      
-      const lineCount = parseInt(
-        execSync('find . -type f \\( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \\) -exec wc -l {} + | tail -1 | awk \'{print $1}\'')
-          .toString().trim()
-      ) || 0
+
+      const lineCount =
+        parseInt(
+          execSync(
+            'find . -type f \\( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \\) -exec wc -l {} + | tail -1 | awk \'{print $1}\''
+          )
+            .toString()
+            .trim()
+        ) || 0
 
       return {
         totalFiles: fileCount,
         totalLines: lineCount,
-        complexity: lineCount > 50000 ? 'high' : lineCount > 10000 ? 'medium' : 'low'
+        complexity: lineCount > 50000 ? 'high' : lineCount > 10000 ? 'medium' : 'low',
       }
     } catch {
       return {
         totalFiles: 0,
         totalLines: 0,
-        complexity: 'unknown'
+        complexity: 'unknown',
       }
     }
   }
 
-  private countBySeverity(findings: Map<string, any>) {
+  private countBySeverity(findings: Map<string, unknown>) {
     const counts = { critical: 0, high: 0, medium: 0, low: 0 }
-    
-    findings.forEach(audit => {
-      audit.findings.forEach((finding: any) => {
+
+    findings.forEach((audit) => {
+      audit.findings.forEach((finding: unknown) => {
         counts[finding.severity as keyof typeof counts]++
       })
     })
@@ -601,11 +621,11 @@ export class CIAuditIntegration {
     return counts
   }
 
-  private countByCategory(findings: Map<string, any>) {
+  private countByCategory(findings: Map<string, unknown>) {
     const counts: Record<string, number> = {}
-    
-    findings.forEach(audit => {
-      audit.findings.forEach((finding: any) => {
+
+    findings.forEach((audit) => {
+      audit.findings.forEach((finding: unknown) => {
         counts[finding.category] = (counts[finding.category] || 0) + 1
       })
     })
@@ -624,16 +644,16 @@ export function createCIAudit(config?: Partial<CIAuditConfig>): CIAuditIntegrati
       critical: 0,
       high: 5,
       medium: 20,
-      low: 50
+      low: 50,
     },
     scopes: {
       security: ['authentication', 'authorization', 'input_validation'],
       performance: ['database_queries', 'api_optimization'],
       architecture: ['patterns', 'dependencies'],
-      business_logic: []
+      business_logic: [],
     },
     reportPath: './audit-reports',
-    ...config
+    ...config,
   }
 
   return new CIAuditIntegration(defaultConfig)

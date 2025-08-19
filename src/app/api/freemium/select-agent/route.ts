@@ -8,42 +8,35 @@ import { prisma } from '@/lib/db'
 import { parseValidatedData } from '@/middleware/validation'
 import { z } from 'zod'
 
-
-
 // Updated schema with proper naming
 const selectAgentBodySchema = z.object({
   userId: z.string().optional(), // Optional as we might get from auth
   tenantId: z.string().optional(), // Optional as we might get from auth
   selectedAgent: z.enum(['sales', 'finance', 'crm', 'operations', 'analytics', 'hr']),
-  fromOnboarding: z.boolean().default(false)
+  fromOnboarding: z.boolean().default(false),
 })
 
 export async function POST(request: NextRequest) {
   try {
     // Validate request body
     const { data, error } = await parseValidatedData(request, selectAgentBodySchema)
-    
+
     if (error) {
       return error
     }
-    
+
     if (!data) {
-      return NextResponse.json(
-        { error: 'Invalid request data' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid request data' }, { status: 400 })
     }
-    
+
     // Use demo values if not provided
     const userId = data.userId || 'demo-user-1'
     const tenantId = data.tenantId || 'demo-tenant'
     const { selectedAgent, fromOnboarding } = data
 
-    console.log(`🆓 User ${userId} selecting free AI agent: ${selectedAgent}`)
-
     // Check if freemium user already exists
     const existingFreemiumUser = await prisma.freemiumUser.findUnique({
-      where: { userId }
+      where: { userId },
     })
 
     if (existingFreemiumUser) {
@@ -53,8 +46,8 @@ export async function POST(request: NextRequest) {
         data: {
           selectedAgent,
           lastActiveAt: new Date(),
-          updatedAt: new Date()
-        }
+          updatedAt: new Date(),
+        },
       })
 
       // Log the agent change as a conversion event
@@ -67,13 +60,13 @@ export async function POST(request: NextRequest) {
           triggerContext: JSON.stringify({
             previousAgent: existingFreemiumUser.selectedAgent,
             newAgent: selectedAgent,
-            fromOnboarding
+            fromOnboarding,
           }),
           userPlan: 'free',
           currentModule: selectedAgent,
           actionTaken: 'selected',
-          sessionId: request.headers.get('x-session-id') || undefined
-        }
+          sessionId: request.headers.get('x-session-id') || undefined,
+        },
       })
 
       return NextResponse.json({
@@ -84,8 +77,8 @@ export async function POST(request: NextRequest) {
           selectedAgent: updatedUser.selectedAgent,
           dailyUsageCount: updatedUser.dailyUsageCount,
           dailyLimit: updatedUser.dailyLimit,
-          daysActive: updatedUser.daysActive
-        }
+          daysActive: updatedUser.daysActive,
+        },
       })
     }
 
@@ -99,8 +92,8 @@ export async function POST(request: NextRequest) {
         dailyLimit: 10,
         daysActive: 1,
         firstLoginAt: new Date(),
-        lastActiveAt: new Date()
-      }
+        lastActiveAt: new Date(),
+      },
     })
 
     // Log the initial agent selection
@@ -113,13 +106,13 @@ export async function POST(request: NextRequest) {
         triggerContext: JSON.stringify({
           selectedAgent,
           fromOnboarding,
-          isInitialSelection: true
+          isInitialSelection: true,
         }),
         userPlan: 'free',
         currentModule: selectedAgent,
         actionTaken: 'selected',
-        sessionId: request.headers.get('x-session-id') || undefined
-      }
+        sessionId: request.headers.get('x-session-id') || undefined,
+      },
     })
 
     return NextResponse.json({
@@ -131,13 +124,10 @@ export async function POST(request: NextRequest) {
         dailyUsageCount: newFreemiumUser.dailyUsageCount,
         dailyLimit: newFreemiumUser.dailyLimit,
         daysActive: newFreemiumUser.daysActive,
-        welcomeMessage: `Welcome! Your ${getAgentName(selectedAgent)} is ready to help you succeed.`
-      }
+        welcomeMessage: `Welcome! Your ${getAgentName(selectedAgent)} is ready to help you succeed.`,
+      },
     })
-
   } catch (error) {
-    console.error('❌ Failed to select AI agent:', error)
-    
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid request data', details: error.errors },
@@ -145,10 +135,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(
-      { error: 'Failed to select AI agent' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to select AI agent' }, { status: 500 })
   }
 }
 
@@ -158,10 +145,7 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('userId')
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'userId parameter is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'userId parameter is required' }, { status: 400 })
     }
 
     const freemiumUser = await prisma.freemiumUser.findUnique({
@@ -170,17 +154,17 @@ export async function GET(request: NextRequest) {
         user: {
           select: {
             name: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     })
 
     if (!freemiumUser) {
       return NextResponse.json({
         success: true,
         hasSelection: false,
-        message: 'No AI agent selected yet'
+        message: 'No AI agent selected yet',
       })
     }
 
@@ -197,28 +181,23 @@ export async function GET(request: NextRequest) {
         daysActive: freemiumUser.daysActive,
         upgradePromptedCount: freemiumUser.upgradePromptedCount,
         lastActiveAt: freemiumUser.lastActiveAt,
-        memberSince: freemiumUser.createdAt
-      }
+        memberSince: freemiumUser.createdAt,
+      },
     })
-
   } catch (error) {
-    console.error('❌ Failed to get agent selection:', error)
-    return NextResponse.json(
-      { error: 'Failed to get agent selection' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to get agent selection' }, { status: 500 })
   }
 }
 
 // Helper function to get human-friendly agent names
 function getAgentName(agentKey: string): string {
   const names: Record<string, string> = {
-    'sales': 'AI Sales Expert',
-    'finance': 'AI Money Detective',
-    'crm': 'AI Customer Expert',
-    'operations': 'AI Operations Expert',
-    'analytics': 'AI Crystal Ball',
-    'hr': 'AI People Person'
+    sales: 'AI Sales Expert',
+    finance: 'AI Money Detective',
+    crm: 'AI Customer Expert',
+    operations: 'AI Operations Expert',
+    analytics: 'AI Crystal Ball',
+    hr: 'AI People Person',
   }
   return names[agentKey] || agentKey.toUpperCase()
 }

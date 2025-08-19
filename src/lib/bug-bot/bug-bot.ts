@@ -94,30 +94,30 @@ export interface BugResolution {
   rollbackPlan?: string
 }
 
-export type BugCategory = 
-  | 'UI_UX' 
-  | 'API' 
-  | 'DATABASE' 
-  | 'PERFORMANCE' 
-  | 'SECURITY' 
-  | 'INTEGRATION' 
-  | 'AUTHENTICATION' 
-  | 'PAYMENT' 
-  | 'AI_ML' 
-  | 'CONSCIOUSNESS' 
-  | 'BUSINESS_LOGIC' 
+export type BugCategory =
+  | 'UI_UX'
+  | 'API'
+  | 'DATABASE'
+  | 'PERFORMANCE'
+  | 'SECURITY'
+  | 'INTEGRATION'
+  | 'AUTHENTICATION'
+  | 'PAYMENT'
+  | 'AI_ML'
+  | 'CONSCIOUSNESS'
+  | 'BUSINESS_LOGIC'
   | 'INFRASTRUCTURE'
 
-export type BugStatus = 
-  | 'NEW' 
-  | 'TRIAGED' 
-  | 'IN_PROGRESS' 
-  | 'REVIEW' 
-  | 'TESTING' 
-  | 'RESOLVED' 
-  | 'VERIFIED' 
-  | 'CLOSED' 
-  | 'DUPLICATE' 
+export type BugStatus =
+  | 'NEW'
+  | 'TRIAGED'
+  | 'IN_PROGRESS'
+  | 'REVIEW'
+  | 'TESTING'
+  | 'RESOLVED'
+  | 'VERIFIED'
+  | 'CLOSED'
+  | 'DUPLICATE'
   | 'WONT_FIX'
 
 // ============================================================================
@@ -125,19 +125,13 @@ export type BugStatus =
 // ============================================================================
 
 class SimpleLogger {
-  info(message: string, data?: any) {
-    console.log(`[INFO] ${message}`, data || '')
-  }
+  info(_message: string, data?: unknown) {}
 
-  warn(message: string, data?: any) {
-    console.warn(`[WARN] ${message}`, data || '')
-  }
+  warn(_message: string, data?: unknown) {}
 
-  error(message: string, data?: any) {
-    console.error(`[ERROR] ${message}`, data || '')
-  }
+  error(_message: string, data?: unknown) {}
 
-  debug(message: string, data?: any) {
+  debug(message: string, data?: unknown) {
     console.debug(`[DEBUG] ${message}`, data || '')
   }
 }
@@ -171,9 +165,12 @@ export class BugBot extends EventEmitter {
     this.isRunning = true
 
     // Start periodic scans
-    this.scanInterval = setInterval(() => {
-      this.performPeriodicScan()
-    }, 5 * 60 * 1000) // Every 5 minutes
+    this.scanInterval = setInterval(
+      () => {
+        this.performPeriodicScan()
+      },
+      5 * 60 * 1000
+    ) // Every 5 minutes
 
     // Initial scan
     await this.performPeriodicScan()
@@ -228,7 +225,7 @@ export class BugBot extends EventEmitter {
         metadata: {
           ...validatedData.metadata,
           timestamp: new Date(),
-          environment: validatedData.metadata?.environment || 'production'
+          environment: validatedData.metadata?.environment || 'production',
         },
         technicalDetails: validatedData.technicalDetails || {},
         businessImpact: validatedData.businessImpact || {},
@@ -237,7 +234,7 @@ export class BugBot extends EventEmitter {
         actualBehavior: validatedData.actualBehavior || '',
         attachments: validatedData.attachments || [],
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       }
 
       // Analyze bug with AI
@@ -265,14 +262,13 @@ export class BugBot extends EventEmitter {
         await this.autoTriage(bugReport)
       }
 
-      logger.info(`Bug reported: ${bugId}`, { 
-        severity: bugReport.severity, 
+      logger.info(`Bug reported: ${bugId}`, {
+        severity: bugReport.severity,
         category: bugReport.category,
-        confidence: aiAnalysis.confidence 
+        confidence: aiAnalysis.confidence,
       })
 
       return bugReport
-
     } catch (error) {
       logger.error('Failed to report bug:', error)
       throw error
@@ -287,10 +283,9 @@ export class BugBot extends EventEmitter {
       // Simple AI analysis based on keywords and patterns
       const analysis = this.performSimpleAIAnalysis(bugReport)
       return analysis
-
     } catch (error) {
       logger.error('AI analysis failed:', error)
-      
+
       // Return default analysis
       return {
         confidence: 0.5,
@@ -302,7 +297,7 @@ export class BugBot extends EventEmitter {
         estimatedResolutionTime: 240,
         complexity: 'MODERATE',
         requiresManualReview: true,
-        tags: ['manual-review']
+        tags: ['manual-review'],
       }
     }
   }
@@ -312,30 +307,42 @@ export class BugBot extends EventEmitter {
    */
   private performSimpleAIAnalysis(bugReport: BugReport): AIAnalysis {
     const text = `${bugReport.title} ${bugReport.description}`.toLowerCase()
-    
+
     // Determine category based on keywords
     let suggestedCategory: BugCategory = 'BUSINESS_LOGIC'
     if (text.includes('api') || text.includes('endpoint')) suggestedCategory = 'API'
-    else if (text.includes('database') || text.includes('db') || text.includes('query')) suggestedCategory = 'DATABASE'
-    else if (text.includes('ui') || text.includes('ux') || text.includes('interface')) suggestedCategory = 'UI_UX'
-    else if (text.includes('performance') || text.includes('slow') || text.includes('timeout')) suggestedCategory = 'PERFORMANCE'
-    else if (text.includes('security') || text.includes('auth') || text.includes('permission')) suggestedCategory = 'SECURITY'
-    else if (text.includes('ai') || text.includes('ml') || text.includes('model')) suggestedCategory = 'AI_ML'
+    else if (text.includes('database') || text.includes('db') || text.includes('query'))
+      suggestedCategory = 'DATABASE'
+    else if (text.includes('ui') || text.includes('ux') || text.includes('interface'))
+      suggestedCategory = 'UI_UX'
+    else if (text.includes('performance') || text.includes('slow') || text.includes('timeout'))
+      suggestedCategory = 'PERFORMANCE'
+    else if (text.includes('security') || text.includes('auth') || text.includes('permission'))
+      suggestedCategory = 'SECURITY'
+    else if (text.includes('ai') || text.includes('ml') || text.includes('model'))
+      suggestedCategory = 'AI_ML'
     else if (text.includes('consciousness')) suggestedCategory = 'CONSCIOUSNESS'
 
     // Determine severity based on keywords and business impact
     let suggestedSeverity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'MEDIUM'
-    if (text.includes('critical') || text.includes('crash') || text.includes('outage')) suggestedSeverity = 'CRITICAL'
-    else if (text.includes('high') || text.includes('urgent') || text.includes('blocking')) suggestedSeverity = 'HIGH'
-    else if (text.includes('low') || text.includes('minor') || text.includes('cosmetic')) suggestedSeverity = 'LOW'
+    if (text.includes('critical') || text.includes('crash') || text.includes('outage'))
+      suggestedSeverity = 'CRITICAL'
+    else if (text.includes('high') || text.includes('urgent') || text.includes('blocking'))
+      suggestedSeverity = 'HIGH'
+    else if (text.includes('low') || text.includes('minor') || text.includes('cosmetic'))
+      suggestedSeverity = 'LOW'
 
     // Calculate confidence based on keyword matches
     const keywordMatches = [
-      text.includes('error'), text.includes('bug'), text.includes('issue'),
-      text.includes('fail'), text.includes('broken'), text.includes('not working')
+      text.includes('error'),
+      text.includes('bug'),
+      text.includes('issue'),
+      text.includes('fail'),
+      text.includes('broken'),
+      text.includes('not working'),
     ].filter(Boolean).length
 
-    const confidence = Math.min(0.9, 0.3 + (keywordMatches * 0.1))
+    const confidence = Math.min(0.9, 0.3 + keywordMatches * 0.1)
 
     // Generate tags
     const tags = []
@@ -351,13 +358,23 @@ export class BugBot extends EventEmitter {
       confidence,
       suggestedCategory,
       suggestedSeverity,
-      rootCause: 'Keyword analysis suggests this is a ' + suggestedCategory.toLowerCase() + ' issue',
-      suggestedFix: 'Review the ' + suggestedCategory.toLowerCase() + ' implementation and check for common issues',
+      rootCause:
+        'Keyword analysis suggests this is a ' + suggestedCategory.toLowerCase() + ' issue',
+      suggestedFix:
+        'Review the ' +
+        suggestedCategory.toLowerCase() +
+        ' implementation and check for common issues',
       similarBugs: [],
-      estimatedResolutionTime: suggestedSeverity === 'CRITICAL' ? 60 : suggestedSeverity === 'HIGH' ? 120 : 240,
-      complexity: suggestedSeverity === 'CRITICAL' ? 'COMPLEX' : suggestedSeverity === 'HIGH' ? 'MODERATE' : 'SIMPLE',
+      estimatedResolutionTime:
+        suggestedSeverity === 'CRITICAL' ? 60 : suggestedSeverity === 'HIGH' ? 120 : 240,
+      complexity:
+        suggestedSeverity === 'CRITICAL'
+          ? 'COMPLEX'
+          : suggestedSeverity === 'HIGH'
+            ? 'MODERATE'
+            : 'SIMPLE',
       requiresManualReview: confidence < 0.7,
-      tags: [...tags, 'ai-analyzed']
+      tags: [...tags, 'ai-analyzed'],
     }
   }
 
@@ -380,11 +397,10 @@ export class BugBot extends EventEmitter {
       // Emit event
       this.emit('bugTriaged', bugReport)
 
-      logger.info(`Bug auto-triaged: ${bugReport.id}`, { 
-        priority, 
-        status: bugReport.status 
+      logger.info(`Bug auto-triaged: ${bugReport.id}`, {
+        priority,
+        status: bugReport.status,
       })
-
     } catch (error) {
       logger.error('Auto-triage failed:', error)
     }
@@ -410,7 +426,6 @@ export class BugBot extends EventEmitter {
       await this.scanBusinessAnomalies()
 
       logger.debug('Periodic bug scan completed')
-
     } catch (error) {
       logger.error('Periodic scan failed:', error)
     }
@@ -460,36 +475,36 @@ export class BugBot extends EventEmitter {
       category: 'BUSINESS_LOGIC',
       technicalDetails: {
         errorMessage: error.message,
-        stackTrace: error.stack
+        stackTrace: error.stack,
       },
       metadata: {
-        environment: process.env.NODE_ENV as any || 'production'
-      }
+        environment: (process.env.NODE_ENV as unknown) || 'production',
+      },
     })
   }
 
   /**
    * Handle unhandled rejections
    */
-  private async handleUnhandledRejection(reason: any): Promise<void> {
+  private async handleUnhandledRejection(reason: unknown): Promise<void> {
     await this.reportBug({
       title: 'Unhandled Promise Rejection',
       description: String(reason),
       severity: 'HIGH',
       category: 'BUSINESS_LOGIC',
       technicalDetails: {
-        errorMessage: String(reason)
+        errorMessage: String(reason),
       },
       metadata: {
-        environment: process.env.NODE_ENV as any || 'production'
-      }
+        environment: (process.env.NODE_ENV as unknown) || 'production',
+      },
     })
   }
 
   /**
    * Handle API errors
    */
-  private async handleAPIError(error: any): Promise<void> {
+  private async handleAPIError(error: unknown): Promise<void> {
     await this.reportBug({
       title: 'API Error',
       description: error.message || 'API request failed',
@@ -497,18 +512,18 @@ export class BugBot extends EventEmitter {
       category: 'API',
       technicalDetails: {
         errorMessage: error.message,
-        apiEndpoint: error.endpoint
+        apiEndpoint: error.endpoint,
       },
       metadata: {
-        environment: process.env.NODE_ENV as any || 'production'
-      }
+        environment: (process.env.NODE_ENV as unknown) || 'production',
+      },
     })
   }
 
   /**
    * Handle performance issues
    */
-  private async handlePerformanceIssue(issue: any): Promise<void> {
+  private async handlePerformanceIssue(issue: unknown): Promise<void> {
     await this.reportBug({
       title: 'Performance Issue',
       description: issue.description || 'Performance degradation detected',
@@ -518,12 +533,12 @@ export class BugBot extends EventEmitter {
         performanceMetrics: {
           responseTime: issue.responseTime,
           memoryUsage: issue.memoryUsage,
-          cpuUsage: issue.cpuUsage
-        }
+          cpuUsage: issue.cpuUsage,
+        },
       },
       metadata: {
-        environment: process.env.NODE_ENV as any || 'production'
-      }
+        environment: (process.env.NODE_ENV as unknown) || 'production',
+      },
     })
   }
 
@@ -571,20 +586,21 @@ export class BugBot extends EventEmitter {
    */
   private calculatePriority(bug: BugReport): 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' {
     const severityScore = {
-      'LOW': 1,
-      'MEDIUM': 2,
-      'HIGH': 3,
-      'CRITICAL': 4
+      LOW: 1,
+      MEDIUM: 2,
+      HIGH: 3,
+      CRITICAL: 4,
     }
 
     const impactScore = {
-      'LOW': 1,
-      'MEDIUM': 2,
-      'HIGH': 3,
-      'CRITICAL': 4
+      LOW: 1,
+      MEDIUM: 2,
+      HIGH: 3,
+      CRITICAL: 4,
     }
 
-    const totalScore = severityScore[bug.severity] + impactScore[bug.businessImpact.revenueImpact || 'LOW']
+    const totalScore =
+      severityScore[bug.severity] + impactScore[bug.businessImpact.revenueImpact || 'LOW']
 
     if (totalScore >= 7) return 'URGENT'
     if (totalScore >= 5) return 'HIGH'
@@ -636,24 +652,23 @@ export class BugBot extends EventEmitter {
   }> {
     try {
       const bugs = Array.from(this.activeBugs.values())
-      
+
       const stats = {
         total: bugs.length,
         byStatus: {} as Record<BugStatus, number>,
         bySeverity: {} as Record<string, number>,
         byCategory: {} as Record<BugCategory, number>,
-        averageResolutionTime: 120 // Default 2 hours
+        averageResolutionTime: 120, // Default 2 hours
       }
 
       // Calculate statistics
-      bugs.forEach(bug => {
+      bugs.forEach((bug) => {
         stats.byStatus[bug.status] = (stats.byStatus[bug.status] || 0) + 1
         stats.bySeverity[bug.severity] = (stats.bySeverity[bug.severity] || 0) + 1
         stats.byCategory[bug.category] = (stats.byCategory[bug.category] || 0) + 1
       })
 
       return stats
-
     } catch (error) {
       logger.error('Failed to get bug statistics:', error)
       throw error

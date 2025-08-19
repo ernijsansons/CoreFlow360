@@ -46,14 +46,17 @@ export class PerformanceMonitor {
     errorRate: 5, // 5%
     throughput: 1000, // 1000 req/s
     memoryUsage: 512, // 512 MB
-    cpuUsage: 80 // 80%
+    cpuUsage: 80, // 80%
   }
   private listeners = new Set<(alert: PerformanceAlert) => void>()
   private cleanupInterval: NodeJS.Timeout | null = null
 
   private constructor() {
     // Only start periodic cleanup in runtime environment
-    if (typeof window !== 'undefined' || (typeof process !== 'undefined' && process.versions?.node)) {
+    if (
+      typeof window !== 'undefined' ||
+      (typeof process !== 'undefined' && process.versions?.node)
+    ) {
       this.startPeriodicCleanup()
     }
   }
@@ -71,7 +74,7 @@ export class PerformanceMonitor {
   recordMetrics(metrics: PerformanceMetrics): void {
     this.metrics.push(metrics)
     this.checkThresholds(metrics)
-    
+
     // Keep only last 1000 metrics to prevent memory leaks
     if (this.metrics.length > 1000) {
       this.metrics = this.metrics.slice(-1000)
@@ -92,7 +95,7 @@ export class PerformanceMonitor {
         message: `Response time ${metrics.responseTime}ms exceeds threshold ${this.thresholds.responseTime}ms`,
         metrics,
         threshold: this.thresholds,
-        timestamp: new Date()
+        timestamp: new Date(),
       })
     }
 
@@ -106,7 +109,7 @@ export class PerformanceMonitor {
           message: `Error rate ${errorRate.toFixed(2)}% exceeds threshold ${this.thresholds.errorRate}%`,
           metrics,
           threshold: this.thresholds,
-          timestamp: new Date()
+          timestamp: new Date(),
         })
       }
     }
@@ -120,7 +123,7 @@ export class PerformanceMonitor {
         message: `Throughput ${throughput.toFixed(2)} req/s exceeds threshold ${this.thresholds.throughput} req/s`,
         metrics,
         threshold: this.thresholds,
-        timestamp: new Date()
+        timestamp: new Date(),
       })
     }
 
@@ -132,7 +135,7 @@ export class PerformanceMonitor {
         message: `Memory usage ${metrics.memoryUsage}MB exceeds threshold ${this.thresholds.memoryUsage}MB`,
         metrics,
         threshold: this.thresholds,
-        timestamp: new Date()
+        timestamp: new Date(),
       })
     }
 
@@ -144,12 +147,12 @@ export class PerformanceMonitor {
         message: `CPU usage ${metrics.cpuUsage}% exceeds threshold ${this.thresholds.cpuUsage}%`,
         metrics,
         threshold: this.thresholds,
-        timestamp: new Date()
+        timestamp: new Date(),
       })
     }
 
     // Trigger alerts
-    alerts.forEach(alert => {
+    alerts.forEach((alert) => {
       this.alerts.push(alert)
       this.notifyListeners(alert)
     })
@@ -159,14 +162,13 @@ export class PerformanceMonitor {
    * Calculate error rate for an endpoint
    */
   private calculateErrorRate(endpoint: string): number {
-    const recentMetrics = this.metrics.filter(m => 
-      m.endpoint === endpoint && 
-      m.timestamp > new Date(Date.now() - 5 * 60 * 1000) // Last 5 minutes
+    const recentMetrics = this.metrics.filter(
+      (m) => m.endpoint === endpoint && m.timestamp > new Date(Date.now() - 5 * 60 * 1000) // Last 5 minutes
     )
-    
+
     if (recentMetrics.length === 0) return 0
-    
-    const errorCount = recentMetrics.filter(m => m.statusCode >= 400).length
+
+    const errorCount = recentMetrics.filter((m) => m.statusCode >= 400).length
     return (errorCount / recentMetrics.length) * 100
   }
 
@@ -174,11 +176,10 @@ export class PerformanceMonitor {
    * Calculate throughput for an endpoint
    */
   private calculateThroughput(endpoint: string): number {
-    const recentMetrics = this.metrics.filter(m => 
-      m.endpoint === endpoint && 
-      m.timestamp > new Date(Date.now() - 60 * 1000) // Last minute
+    const recentMetrics = this.metrics.filter(
+      (m) => m.endpoint === endpoint && m.timestamp > new Date(Date.now() - 60 * 1000) // Last minute
     )
-    
+
     return recentMetrics.length / 60 // requests per second
   }
 
@@ -187,7 +188,7 @@ export class PerformanceMonitor {
    */
   private getSeverity(value: number, threshold: number): 'low' | 'medium' | 'high' | 'critical' {
     const ratio = value / threshold
-    
+
     if (ratio >= 3) return 'critical'
     if (ratio >= 2) return 'high'
     if (ratio >= 1.5) return 'medium'
@@ -206,19 +207,20 @@ export class PerformanceMonitor {
    * Notify all listeners of an alert
    */
   private notifyListeners(alert: PerformanceAlert): void {
-    this.listeners.forEach(listener => {
+    this.listeners.forEach((listener) => {
       try {
         listener(alert)
-      } catch (error) {
-        console.error('Performance alert listener error:', error)
-      }
+      } catch (error) {}
     })
   }
 
   /**
    * Get performance summary for an endpoint
    */
-  getEndpointSummary(endpoint: string, timeWindow: number = 5 * 60 * 1000): {
+  getEndpointSummary(
+    endpoint: string,
+    timeWindow: number = 5 * 60 * 1000
+  ): {
     totalRequests: number
     averageResponseTime: number
     errorRate: number
@@ -226,11 +228,10 @@ export class PerformanceMonitor {
     p95ResponseTime: number
     p99ResponseTime: number
   } {
-    const recentMetrics = this.metrics.filter(m => 
-      m.endpoint === endpoint && 
-      m.timestamp > new Date(Date.now() - timeWindow)
+    const recentMetrics = this.metrics.filter(
+      (m) => m.endpoint === endpoint && m.timestamp > new Date(Date.now() - timeWindow)
     )
-    
+
     if (recentMetrics.length === 0) {
       return {
         totalRequests: 0,
@@ -238,20 +239,20 @@ export class PerformanceMonitor {
         errorRate: 0,
         throughput: 0,
         p95ResponseTime: 0,
-        p99ResponseTime: 0
+        p99ResponseTime: 0,
       }
     }
 
-    const responseTimes = recentMetrics.map(m => m.responseTime).sort((a, b) => a - b)
-    const errorCount = recentMetrics.filter(m => m.statusCode >= 400).length
-    
+    const responseTimes = recentMetrics.map((m) => m.responseTime).sort((a, b) => a - b)
+    const errorCount = recentMetrics.filter((m) => m.statusCode >= 400).length
+
     return {
       totalRequests: recentMetrics.length,
       averageResponseTime: responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length,
       errorRate: (errorCount / recentMetrics.length) * 100,
       throughput: recentMetrics.length / (timeWindow / 1000),
       p95ResponseTime: responseTimes[Math.floor(responseTimes.length * 0.95)],
-      p99ResponseTime: responseTimes[Math.floor(responseTimes.length * 0.99)]
+      p99ResponseTime: responseTimes[Math.floor(responseTimes.length * 0.99)],
     }
   }
 
@@ -260,7 +261,7 @@ export class PerformanceMonitor {
    */
   getAlerts(severity?: 'low' | 'medium' | 'high' | 'critical'): PerformanceAlert[] {
     if (severity) {
-      return this.alerts.filter(alert => alert.severity === severity)
+      return this.alerts.filter((alert) => alert.severity === severity)
     }
     return this.alerts
   }
@@ -270,7 +271,7 @@ export class PerformanceMonitor {
    */
   clearOldAlerts(maxAge: number = 24 * 60 * 60 * 1000): void {
     const cutoff = new Date(Date.now() - maxAge)
-    this.alerts = this.alerts.filter(alert => alert.timestamp > cutoff)
+    this.alerts = this.alerts.filter((alert) => alert.timestamp > cutoff)
   }
 
   /**
@@ -285,12 +286,15 @@ export class PerformanceMonitor {
    */
   private startPeriodicCleanup(): void {
     if (typeof setInterval !== 'undefined') {
-      this.cleanupInterval = setInterval(() => {
-        this.clearOldAlerts()
-      }, 60 * 60 * 1000) // Clean up every hour
+      this.cleanupInterval = setInterval(
+        () => {
+          this.clearOldAlerts()
+        },
+        60 * 60 * 1000
+      ) // Clean up every hour
     }
   }
-  
+
   /**
    * Stop periodic cleanup
    */
@@ -305,19 +309,19 @@ export class PerformanceMonitor {
 /**
  * Performance monitoring middleware
  */
-export function withPerformanceMonitoring<T extends any[]>(
+export function withPerformanceMonitoring<T extends unknown[]>(
   handler: (...args: T) => Promise<Response>,
   endpoint: string
 ) {
   return async (...args: T): Promise<Response> => {
     const startTime = Date.now()
     const startMemory = process.memoryUsage()
-    
+
     try {
       const response = await handler(...args)
       const endTime = Date.now()
       const endMemory = process.memoryUsage()
-      
+
       // Record metrics
       const monitor = PerformanceMonitor.getInstance()
       monitor.recordMetrics({
@@ -327,13 +331,13 @@ export function withPerformanceMonitoring<T extends any[]>(
         statusCode: response.status,
         timestamp: new Date(),
         memoryUsage: (endMemory.heapUsed - startMemory.heapUsed) / 1024 / 1024, // MB
-        responseSize: parseInt(response.headers.get('content-length') || '0')
+        responseSize: parseInt(response.headers.get('content-length') || '0'),
       })
-      
+
       return response
     } catch (error) {
       const endTime = Date.now()
-      
+
       // Record error metrics
       const monitor = PerformanceMonitor.getInstance()
       monitor.recordMetrics({
@@ -342,9 +346,9 @@ export function withPerformanceMonitoring<T extends any[]>(
         responseTime: endTime - startTime,
         statusCode: 500,
         timestamp: new Date(),
-        memoryUsage: 0
+        memoryUsage: 0,
       })
-      
+
       throw error
     }
   }
@@ -355,31 +359,11 @@ export function withPerformanceMonitoring<T extends any[]>(
  */
 export function usePerformanceMonitoring() {
   const monitor = PerformanceMonitor.getInstance()
-  
+
   return {
     subscribe: monitor.subscribe.bind(monitor),
     getEndpointSummary: monitor.getEndpointSummary.bind(monitor),
     getAlerts: monitor.getAlerts.bind(monitor),
-    updateThresholds: monitor.updateThresholds.bind(monitor)
+    updateThresholds: monitor.updateThresholds.bind(monitor),
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

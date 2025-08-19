@@ -6,37 +6,51 @@ import { z } from 'zod'
 const predictionSchema = z.object({
   modelId: z.string(),
   input: z.record(z.any()),
-  options: z.object({
-    confidence: z.boolean().default(true),
-    explanation: z.boolean().default(false),
-    alternatives: z.number().min(0).max(5).default(0),
-    realtime: z.boolean().default(false)
-  }).optional()
+  options: z
+    .object({
+      confidence: z.boolean().default(true),
+      explanation: z.boolean().default(false),
+      alternatives: z.number().min(0).max(5).default(0),
+      realtime: z.boolean().default(false),
+    })
+    .optional(),
 })
 
 const analysisSchema = z.object({
-  type: z.enum(['trend_analysis', 'anomaly_detection', 'pattern_recognition', 'forecasting', 'classification']),
+  type: z.enum([
+    'trend_analysis',
+    'anomaly_detection',
+    'pattern_recognition',
+    'forecasting',
+    'classification',
+  ]),
   data: z.array(z.any()),
-  parameters: z.record(z.any()).default({})
+  parameters: z.record(z.any()).default({}),
 })
 
 const trainingSchema = z.object({
   name: z.string(),
-  architecture: z.enum(['neural_network', 'random_forest', 'gradient_boosting', 'transformer', 'lstm']),
+  architecture: z.enum([
+    'neural_network',
+    'random_forest',
+    'gradient_boosting',
+    'transformer',
+    'lstm',
+  ]),
   hyperparameters: z.record(z.any()).default({}),
   trainingConfig: z.object({
     batchSize: z.number().default(32),
     epochs: z.number().default(100),
     learningRate: z.number().default(0.001),
     validationSplit: z.number().default(0.2),
-    earlyStopping: z.boolean().default(true)
+    earlyStopping: z.boolean().default(true),
   }),
-  datasetId: z.string().optional()
+  datasetId: z.string().optional(),
 })
 
 const actionSchema = z.object({
   action: z.enum(['predict', 'analyze', 'train', 'optimize', 'export', 'models']),
-  data: z.any().optional()
+  data: z.any().optional(),
 })
 
 // Global AI orchestrator
@@ -51,35 +65,35 @@ function getOrchestrator(): AIOrchestrator {
         reasoning: 'gpt-4',
         analysis: 'gpt-4',
         prediction: 'gpt-4',
-        classification: 'gpt-4'
+        classification: 'gpt-4',
       },
       providers: {
         openai: {
           apiKey: process.env.OPENAI_API_KEY || '',
-          organization: process.env.OPENAI_ORGANIZATION
-        }
+          organization: process.env.OPENAI_ORGANIZATION,
+        },
       },
       capabilities: {
         enablePredictiveAnalytics: true,
         enableCustomModels: true,
         enableMultiModalProcessing: true,
         enableRealtimeInference: true,
-        enableModelFinetuning: true
+        enableModelFinetuning: true,
       },
       performance: {
         maxConcurrentRequests: 10,
         requestTimeout: 30000,
         cacheEnabled: true,
         cacheTTL: 3600,
-        enableGPUAcceleration: false
+        enableGPUAcceleration: false,
       },
       redis: {
         host: process.env.REDIS_HOST || 'localhost',
         port: parseInt(process.env.REDIS_PORT || '6379'),
-        password: process.env.REDIS_PASSWORD
-      }
+        password: process.env.REDIS_PASSWORD,
+      },
     })
-    
+
     orchestrator = new AIOrchestrator(getConfig())
   }
   return orchestrator
@@ -96,58 +110,51 @@ export async function GET(request: NextRequest) {
     const action = searchParams.get('action') || 'analytics'
     const tenantId = searchParams.get('tenantId') || session.user.tenantId
 
-    console.log('🧠 Fetching AI intelligence data:', action)
-
     const orchestrator = getOrchestrator()
 
     switch (action) {
       case 'analytics':
         const analytics = await orchestrator.getAIAnalytics(tenantId)
-        
+
         return NextResponse.json({
           success: true,
           tenantId,
           timestamp: new Date().toISOString(),
-          ...analytics
+          ...analytics,
         })
 
       case 'models':
         const analytics_models = await orchestrator.getAIAnalytics(tenantId)
-        
+
         return NextResponse.json({
           success: true,
           models: analytics_models.models,
           customModels: analytics_models.customModels,
           totalModels: analytics_models.models.length + analytics_models.customModels.length,
-          readyModels: analytics_models.models.filter(m => m.status === 'ready').length,
-          timestamp: new Date().toISOString()
+          readyModels: analytics_models.models.filter((m) => m.status === 'ready').length,
+          timestamp: new Date().toISOString(),
         })
 
       case 'health':
         const healthData = await orchestrator.getAIAnalytics(tenantId)
-        
+
         return NextResponse.json({
           success: true,
           systemHealth: healthData.systemHealth,
           modelPerformance: healthData.modelPerformance,
           insights: healthData.insights,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         })
 
       default:
-        return NextResponse.json(
-          { error: 'Invalid action parameter' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'Invalid action parameter' }, { status: 400 })
     }
-
   } catch (error) {
-    console.error('❌ Failed to fetch AI intelligence data:', error)
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to fetch AI intelligence data',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )
@@ -169,21 +176,17 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'predict':
-        console.log('🔮 Processing AI prediction request')
-        
         const predictionRequest = predictionSchema.parse(data)
         const prediction = await orchestrator.predict(predictionRequest)
-        
+
         return NextResponse.json({
           success: true,
           action: 'predict',
           result: prediction,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         })
 
       case 'analyze':
-        console.log('📊 Processing AI analysis request')
-        
         const analysisRequest = analysisSchema.parse(data)
         const analysisTask = await orchestrator.analyze(
           analysisRequest.type,
@@ -191,7 +194,7 @@ export async function POST(request: NextRequest) {
           analysisRequest.parameters,
           tenantId
         )
-        
+
         return NextResponse.json({
           success: true,
           action: 'analyze',
@@ -199,17 +202,15 @@ export async function POST(request: NextRequest) {
             taskId: analysisTask.id,
             status: analysisTask.status,
             type: analysisTask.type,
-            message: `Analysis task created: ${analysisTask.id}`
+            message: `Analysis task created: ${analysisTask.id}`,
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         })
 
       case 'train':
-        console.log('🚀 Starting model training')
-        
         const trainingRequest = trainingSchema.parse(data)
         const customModel = await orchestrator.trainCustomModel(trainingRequest)
-        
+
         return NextResponse.json({
           success: true,
           action: 'train',
@@ -218,16 +219,14 @@ export async function POST(request: NextRequest) {
             name: customModel.name,
             status: customModel.status,
             architecture: customModel.architecture,
-            message: `Custom model training started: ${customModel.id}`
+            message: `Custom model training started: ${customModel.id}`,
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         })
 
       case 'optimize':
-        console.log('⚡ Starting AI optimization')
-        
         const optimizationResult = await orchestrator.optimizeModels()
-        
+
         return NextResponse.json({
           success: true,
           action: 'optimize',
@@ -235,24 +234,24 @@ export async function POST(request: NextRequest) {
             optimizationsApplied: optimizationResult.optimizationsApplied,
             improvements: optimizationResult.improvements,
             summary: `Applied ${optimizationResult.optimizationsApplied} AI optimizations`,
-            averageImprovement: optimizationResult.improvements.reduce((sum, imp) => sum + imp.impactScore, 0) / optimizationResult.improvements.length
+            averageImprovement:
+              optimizationResult.improvements.reduce((sum, imp) => sum + imp.impactScore, 0) /
+              optimizationResult.improvements.length,
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         })
 
       case 'export':
-        console.log('📤 Exporting AI data')
-        
         const analytics = await orchestrator.getAIAnalytics(tenantId)
         const exportFormat = data?.format || 'json'
-        
+
         let exportData: string
         if (exportFormat === 'csv') {
           exportData = convertAnalyticsToCSV(analytics)
         } else {
           exportData = JSON.stringify(analytics, null, 2)
         }
-        
+
         return NextResponse.json({
           success: true,
           action: 'export',
@@ -260,25 +259,20 @@ export async function POST(request: NextRequest) {
             format: exportFormat,
             data: exportFormat === 'json' ? analytics : exportData,
             size: exportData.length,
-            generatedAt: new Date().toISOString()
+            generatedAt: new Date().toISOString(),
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         })
 
       default:
-        return NextResponse.json(
-          { error: 'Unknown action' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
     }
-
   } catch (error) {
-    console.error('❌ Failed to process AI intelligence action:', error)
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to process AI intelligence action',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )
@@ -286,19 +280,19 @@ export async function POST(request: NextRequest) {
 }
 
 // Helper functions
-function convertAnalyticsToCSV(analytics: any): string {
+function convertAnalyticsToCSV(analytics: unknown): string {
   let csv = 'timestamp,type,name,status,accuracy,inference_time\n'
-  
+
   // Add models
-  analytics.models.forEach((model: any) => {
+  analytics.models.forEach((model: unknown) => {
     csv += `${model.lastTrained},model,${model.name},${model.status},${model.accuracy || 0},${model.performance.inferenceTime}\n`
   })
-  
+
   // Add custom models
-  analytics.customModels.forEach((model: any) => {
+  analytics.customModels.forEach((model: unknown) => {
     csv += `${new Date().toISOString()},custom_model,${model.name},${model.status},${model.metrics.accuracy},0\n`
   })
-  
+
   return csv
 }
 
@@ -312,19 +306,19 @@ export const PREDICTION_EXAMPLES = {
       economic_indicators: {
         gdp_growth: 2.3,
         inflation: 3.1,
-        unemployment: 3.8
+        unemployment: 3.8,
       },
       marketing_spend: 50000,
       external_factors: {
         competition_activity: 'moderate',
-        market_sentiment: 'positive'
-      }
+        market_sentiment: 'positive',
+      },
     },
     options: {
       confidence: true,
       explanation: true,
-      alternatives: 2
-    }
+      alternatives: 2,
+    },
   },
   customer_analysis: {
     modelId: 'customer_analyzer',
@@ -333,24 +327,24 @@ export const PREDICTION_EXAMPLES = {
         email_open_rate: 0.24,
         click_through_rate: 0.03,
         session_duration: 180,
-        page_views: 8
+        page_views: 8,
       },
       purchase_history: {
         total_orders: 12,
-        avg_order_value: 85.50,
+        avg_order_value: 85.5,
         last_purchase_days: 45,
-        preferred_category: 'electronics'
+        preferred_category: 'electronics',
       },
       demographics: {
         age_group: '25-34',
         location: 'urban',
-        income_bracket: 'medium'
-      }
+        income_bracket: 'medium',
+      },
     },
     options: {
       confidence: true,
-      explanation: true
-    }
+      explanation: true,
+    },
   },
   risk_assessment: {
     modelId: 'risk_assessor',
@@ -359,30 +353,30 @@ export const PREDICTION_EXAMPLES = {
         current_ratio: 1.8,
         debt_to_equity: 0.4,
         return_on_equity: 0.15,
-        gross_margin: 0.35
+        gross_margin: 0.35,
       },
       cash_flow: {
         operating_cf: 250000,
         free_cf: 180000,
-        cf_ratio: 1.2
+        cf_ratio: 1.2,
       },
       debt_levels: {
         total_debt: 500000,
         debt_service_coverage: 2.1,
-        interest_coverage: 5.8
+        interest_coverage: 5.8,
       },
       market_volatility: 0.18,
       industry_factors: {
         growth_rate: 0.08,
         competition_level: 'moderate',
-        regulatory_risk: 'low'
-      }
+        regulatory_risk: 'low',
+      },
     },
     options: {
       confidence: true,
       explanation: true,
-      alternatives: 1
-    }
+      alternatives: 1,
+    },
   },
   content_generation: {
     modelId: 'content_generator',
@@ -393,21 +387,21 @@ export const PREDICTION_EXAMPLES = {
         industry: 'SaaS',
         objective: 'CRM Implementation',
         budget_range: '$50k-100k',
-        timeline: '6 months'
+        timeline: '6 months',
       },
       tone: 'professional',
       audience: 'C-level executives',
       constraints: {
         word_limit: 1500,
         include_pricing: true,
-        include_timeline: true
-      }
+        include_timeline: true,
+      },
     },
     options: {
       confidence: true,
-      explanation: false
-    }
-  }
+      explanation: false,
+    },
+  },
 }
 
 // Analysis Examples
@@ -419,13 +413,13 @@ export const ANALYSIS_EXAMPLES = {
       { date: '2024-01-02', value: 1100, category: 'sales' },
       { date: '2024-01-03', value: 1050, category: 'sales' },
       { date: '2024-01-04', value: 1200, category: 'sales' },
-      { date: '2024-01-05', value: 1300, category: 'sales' }
+      { date: '2024-01-05', value: 1300, category: 'sales' },
     ],
     parameters: {
       trend_period: 30,
       confidence_level: 0.95,
-      include_seasonality: true
-    }
+      include_seasonality: true,
+    },
   },
   anomaly_detection: {
     type: 'anomaly_detection' as const,
@@ -433,13 +427,13 @@ export const ANALYSIS_EXAMPLES = {
       { timestamp: '2024-01-01T10:00:00Z', metric: 'cpu_usage', value: 45 },
       { timestamp: '2024-01-01T10:05:00Z', metric: 'cpu_usage', value: 48 },
       { timestamp: '2024-01-01T10:10:00Z', metric: 'cpu_usage', value: 92 }, // Anomaly
-      { timestamp: '2024-01-01T10:15:00Z', metric: 'cpu_usage', value: 46 }
+      { timestamp: '2024-01-01T10:15:00Z', metric: 'cpu_usage', value: 46 },
     ],
     parameters: {
       sensitivity: 0.8,
       window_size: 24,
-      method: 'statistical'
-    }
+      method: 'statistical',
+    },
   },
   pattern_recognition: {
     type: 'pattern_recognition' as const,
@@ -449,12 +443,12 @@ export const ANALYSIS_EXAMPLES = {
       { user_id: '1', action: 'purchase', timestamp: '2024-01-01T09:20:00Z' },
       { user_id: '2', action: 'login', timestamp: '2024-01-01T10:00:00Z' },
       { user_id: '2', action: 'browse', timestamp: '2024-01-01T10:03:00Z' },
-      { user_id: '2', action: 'purchase', timestamp: '2024-01-01T10:25:00Z' }
+      { user_id: '2', action: 'purchase', timestamp: '2024-01-01T10:25:00Z' },
     ],
     parameters: {
       pattern_length: 3,
       min_support: 0.6,
-      algorithm: 'sequence_mining'
-    }
-  }
+      algorithm: 'sequence_mining',
+    },
+  },
 }

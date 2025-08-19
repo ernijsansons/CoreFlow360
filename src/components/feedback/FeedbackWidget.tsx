@@ -7,16 +7,16 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  MessageSquare, 
-  X, 
-  Star, 
+import {
+  MessageSquare,
+  X,
+  Star,
   Send,
   Lightbulb,
   AlertTriangle,
   Heart,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
 } from 'lucide-react'
 import { useTrackEvent } from '@/components/analytics/AnalyticsProvider'
 import { api, ApiError } from '@/lib/api-client'
@@ -35,29 +35,29 @@ const feedbackTypes = [
     label: 'General Feedback',
     icon: MessageSquare,
     color: 'text-blue-400',
-    placeholder: 'Share your thoughts about CoreFlow360...'
+    placeholder: 'Share your thoughts about CoreFlow360...',
   },
   {
-    id: 'feature_request', 
+    id: 'feature_request',
     label: 'Feature Request',
     icon: Lightbulb,
     color: 'text-yellow-400',
-    placeholder: 'Describe the feature you\'d like to see...'
+    placeholder: "Describe the feature you'd like to see...",
   },
   {
     id: 'bug_report',
     label: 'Report Bug',
     icon: AlertTriangle,
     color: 'text-red-400',
-    placeholder: 'Describe the issue you encountered...'
+    placeholder: 'Describe the issue you encountered...',
   },
   {
     id: 'testimonial',
     label: 'Success Story',
     icon: Heart,
     color: 'text-pink-400',
-    placeholder: 'Tell us about your success with CoreFlow360...'
-  }
+    placeholder: 'Tell us about your success with CoreFlow360...',
+  },
 ]
 
 export function FeedbackWidget() {
@@ -67,11 +67,11 @@ export function FeedbackWidget() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const { trackEvent } = useTrackEvent()
-  
+
   const [feedback, setFeedback] = useState<FeedbackData>({
     type: 'general_feedback',
     message: '',
-    email: ''
+    email: '',
   })
 
   // Auto-open widget after 30 seconds (only once per session)
@@ -83,7 +83,7 @@ export function FeedbackWidget() {
         sessionStorage.setItem('feedback_widget_shown', 'true')
         trackEvent('feedback_widget_auto_opened')
       }, 30000)
-      
+
       return () => clearTimeout(timer)
     }
   }, [trackEvent])
@@ -101,7 +101,7 @@ export function FeedbackWidget() {
     setFeedback({
       type: 'general_feedback',
       message: '',
-      email: ''
+      email: '',
     })
   }
 
@@ -113,7 +113,7 @@ export function FeedbackWidget() {
       type: feedback.type,
       has_rating: !!feedback.rating,
       has_email: !!feedback.email,
-      message_length: feedback.message.length
+      message_length: feedback.message.length,
     })
 
     try {
@@ -122,21 +122,27 @@ export function FeedbackWidget() {
         type: feedback.type,
         title: `${getFeedbackTypeLabel(feedback.type)} from Widget`,
         description: feedback.message,
-        priority: feedback.rating ? (feedback.rating >= 4 ? 'high' : feedback.rating <= 2 ? 'low' : 'medium') : 'medium',
+        priority: feedback.rating
+          ? feedback.rating >= 4
+            ? 'high'
+            : feedback.rating <= 2
+              ? 'low'
+              : 'medium'
+          : 'medium',
         category: feedback.category || 'general',
         userEmail: feedback.email || undefined,
         metadata: {
           source: 'widget',
           rating: feedback.rating,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
 
       const response = await api.post('/api/feedback/submit', {
         action: 'submit_feedback',
-        ...feedbackData
+        ...feedbackData,
       })
-      
+
       if (response.success) {
         setIsSubmitted(true)
         setTimeout(() => {
@@ -144,28 +150,26 @@ export function FeedbackWidget() {
         }, 3000) // Auto-close after 3 seconds
       }
     } catch (error) {
-      console.error('Feedback submission failed:', error)
       // Could show error state to user here
       if (error instanceof ApiError) {
-        console.error('API Error details:', error.details)
       }
     }
-    
+
     setIsSubmitting(false)
   }
-  
+
   // Helper function to get readable feedback type label
   const getFeedbackTypeLabel = (type: string): string => {
     const typeMap = {
-      'general_feedback': 'General Feedback',
-      'feature_request': 'Feature Request',
-      'bug_report': 'Bug Report',
-      'testimonial': 'Success Story'
+      general_feedback: 'General Feedback',
+      feature_request: 'Feature Request',
+      bug_report: 'Bug Report',
+      testimonial: 'Success Story',
     }
     return typeMap[type as keyof typeof typeMap] || 'Feedback'
   }
 
-  const selectedType = feedbackTypes.find(t => t.id === feedback.type)
+  const selectedType = feedbackTypes.find((t) => t.id === feedback.type)
 
   return (
     <>
@@ -179,9 +183,9 @@ export function FeedbackWidget() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleOpen}
-            className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-violet-500 to-cyan-500 text-white p-4 rounded-full shadow-2xl hover:shadow-violet-500/25 transition-all duration-300"
+            className="fixed right-6 bottom-6 z-50 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 p-4 text-white shadow-2xl transition-all duration-300 hover:shadow-violet-500/25"
           >
-            <MessageSquare className="w-6 h-6" />
+            <MessageSquare className="h-6 w-6" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -191,21 +195,21 @@ export function FeedbackWidget() {
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 100, scale: 0.9 }}
-            animate={{ 
-              opacity: 1, 
-              y: 0, 
+            animate={{
+              opacity: 1,
+              y: 0,
               scale: 1,
-              height: isMinimized ? 60 : 'auto'
+              height: isMinimized ? 60 : 'auto',
             }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            className="fixed bottom-6 right-6 z-50 bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl w-96 max-w-[calc(100vw-3rem)] overflow-hidden"
+            className="fixed right-6 bottom-6 z-50 w-96 max-w-[calc(100vw-3rem)] overflow-hidden rounded-2xl border border-gray-800 bg-gray-900 shadow-2xl"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-violet-900/50 to-cyan-900/50 p-4 border-b border-gray-800">
+            <div className="border-b border-gray-800 bg-gradient-to-r from-violet-900/50 to-cyan-900/50 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="bg-gradient-to-r from-violet-500 to-cyan-500 p-2 rounded-lg">
-                    <MessageSquare className="w-4 h-4 text-white" />
+                  <div className="rounded-lg bg-gradient-to-r from-violet-500 to-cyan-500 p-2">
+                    <MessageSquare className="h-4 w-4 text-white" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-white">Quick Feedback</h3>
@@ -215,15 +219,19 @@ export function FeedbackWidget() {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setIsMinimized(!isMinimized)}
-                    className="text-gray-400 hover:text-white transition-colors"
+                    className="text-gray-400 transition-colors hover:text-white"
                   >
-                    {isMinimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    {isMinimized ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
                   </button>
                   <button
                     onClick={handleClose}
-                    className="text-gray-400 hover:text-white transition-colors"
+                    className="text-gray-400 transition-colors hover:text-white"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -247,23 +255,25 @@ export function FeedbackWidget() {
                           animate={{ opacity: 1, x: 0 }}
                           className="space-y-3"
                         >
-                          <p className="text-gray-300 text-sm mb-4">What would you like to share?</p>
-                          
+                          <p className="mb-4 text-sm text-gray-300">
+                            What would you like to share?
+                          </p>
+
                           <div className="grid grid-cols-2 gap-2">
                             {feedbackTypes.map((type) => (
                               <button
                                 key={type.id}
                                 onClick={() => {
-                                  setFeedback(prev => ({ ...prev, type: type.id as any }))
+                                  setFeedback((prev) => ({ ...prev, type: type.id as unknown }))
                                   setCurrentStep(2)
                                 }}
-                                className={`p-3 rounded-lg border transition-all duration-200 text-left ${
+                                className={`rounded-lg border p-3 text-left transition-all duration-200 ${
                                   feedback.type === type.id
                                     ? 'border-violet-500 bg-violet-500/10'
                                     : 'border-gray-700 bg-gray-800 hover:border-gray-600'
                                 }`}
                               >
-                                <type.icon className={`w-4 h-4 ${type.color} mb-1`} />
+                                <type.icon className={`h-4 w-4 ${type.color} mb-1`} />
                                 <div className="text-xs font-medium text-white">{type.label}</div>
                               </button>
                             ))}
@@ -278,30 +288,31 @@ export function FeedbackWidget() {
                           animate={{ opacity: 1, x: 0 }}
                           className="space-y-4"
                         >
-                          <div className="flex items-center space-x-2 mb-4">
-                            <selectedType.icon className={`w-4 h-4 ${selectedType.color}`} />
-                            <span className="text-white font-medium">{selectedType.label}</span>
+                          <div className="mb-4 flex items-center space-x-2">
+                            <selectedType.icon className={`h-4 w-4 ${selectedType.color}`} />
+                            <span className="font-medium text-white">{selectedType.label}</span>
                           </div>
 
                           {/* Rating (for general feedback and testimonials) */}
-                          {(feedback.type === 'general_feedback' || feedback.type === 'testimonial') && (
+                          {(feedback.type === 'general_feedback' ||
+                            feedback.type === 'testimonial') && (
                             <div>
-                              <label className="block text-sm text-gray-300 mb-2">
+                              <label className="mb-2 block text-sm text-gray-300">
                                 How would you rate your experience?
                               </label>
                               <div className="flex space-x-1">
                                 {[1, 2, 3, 4, 5].map((rating) => (
                                   <button
                                     key={rating}
-                                    onClick={() => setFeedback(prev => ({ ...prev, rating }))}
+                                    onClick={() => setFeedback((prev) => ({ ...prev, rating }))}
                                     className="transition-colors"
                                   >
-                                    <Star 
-                                      className={`w-6 h-6 ${
+                                    <Star
+                                      className={`h-6 w-6 ${
                                         (feedback.rating || 0) >= rating
-                                          ? 'text-yellow-400 fill-current'
+                                          ? 'fill-current text-yellow-400'
                                           : 'text-gray-600'
-                                      }`} 
+                                      }`}
                                     />
                                   </button>
                                 ))}
@@ -311,31 +322,35 @@ export function FeedbackWidget() {
 
                           {/* Message */}
                           <div>
-                            <label className="block text-sm text-gray-300 mb-2">
+                            <label className="mb-2 block text-sm text-gray-300">
                               Your message *
                             </label>
                             <textarea
                               value={feedback.message}
-                              onChange={(e) => setFeedback(prev => ({ ...prev, message: e.target.value }))}
+                              onChange={(e) =>
+                                setFeedback((prev) => ({ ...prev, message: e.target.value }))
+                              }
                               placeholder={selectedType.placeholder}
                               rows={4}
-                              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-400 text-sm focus:outline-none focus:border-violet-500 transition-colors resize-none"
+                              className="w-full resize-none rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-400 transition-colors focus:border-violet-500 focus:outline-none"
                             />
                           </div>
 
                           {/* Email (optional) */}
                           <div>
-                            <label className="block text-sm text-gray-300 mb-2">
+                            <label className="mb-2 block text-sm text-gray-300">
                               Email (optional)
                             </label>
                             <input
                               type="email"
                               value={feedback.email}
-                              onChange={(e) => setFeedback(prev => ({ ...prev, email: e.target.value }))}
+                              onChange={(e) =>
+                                setFeedback((prev) => ({ ...prev, email: e.target.value }))
+                              }
                               placeholder="your.email@company.com"
-                              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-400 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-400 transition-colors focus:border-violet-500 focus:outline-none"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="mt-1 text-xs text-gray-500">
                               We'll only use this to follow up if needed
                             </p>
                           </div>
@@ -344,24 +359,24 @@ export function FeedbackWidget() {
                           <div className="flex justify-between pt-2">
                             <button
                               onClick={() => setCurrentStep(1)}
-                              className="text-gray-400 hover:text-white transition-colors text-sm"
+                              className="text-sm text-gray-400 transition-colors hover:text-white"
                             >
                               ← Back
                             </button>
-                            
+
                             <button
                               onClick={handleSubmit}
                               disabled={!feedback.message.trim() || isSubmitting}
-                              className="bg-gradient-to-r from-violet-500 to-cyan-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-violet-600 hover:to-cyan-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                              className="flex items-center rounded-lg bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:from-violet-600 hover:to-cyan-600 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               {isSubmitting ? (
                                 <>
-                                  <div className="animate-spin rounded-full h-3 w-3 border border-white border-t-transparent mr-2"></div>
+                                  <div className="mr-2 h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
                                   Sending...
                                 </>
                               ) : (
                                 <>
-                                  Send <Send className="w-3 h-3 ml-2" />
+                                  Send <Send className="ml-2 h-3 w-3" />
                                 </>
                               )}
                             </button>
@@ -374,14 +389,15 @@ export function FeedbackWidget() {
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="text-center py-6"
+                      className="py-6 text-center"
                     >
-                      <div className="bg-green-500 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                        <MessageSquare className="w-6 h-6 text-white" />
+                      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-500">
+                        <MessageSquare className="h-6 w-6 text-white" />
                       </div>
-                      <h3 className="font-semibold text-white mb-2">Thank You!</h3>
-                      <p className="text-gray-400 text-sm">
-                        Your feedback has been received. We appreciate you taking the time to help us improve.
+                      <h3 className="mb-2 font-semibold text-white">Thank You!</h3>
+                      <p className="text-sm text-gray-400">
+                        Your feedback has been received. We appreciate you taking the time to help
+                        us improve.
                       </p>
                     </motion.div>
                   )}

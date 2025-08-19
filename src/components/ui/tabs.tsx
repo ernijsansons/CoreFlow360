@@ -39,18 +39,11 @@ const TabsContext = React.createContext<{
 
 const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
   ({ className, value, onValueChange, children, ...props }, ref) => {
-    const contextValue = React.useMemo(
-      () => ({ value, onValueChange }),
-      [value, onValueChange]
-    )
+    const contextValue = React.useMemo(() => ({ value, onValueChange }), [value, onValueChange])
 
     return (
       <TabsContext.Provider value={contextValue}>
-        <div
-          ref={ref}
-          className={cn('w-full', className)}
-          {...props}
-        >
+        <div ref={ref} className={cn('w-full', className)} {...props}>
           {children}
         </div>
       </TabsContext.Provider>
@@ -90,10 +83,8 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
       <button
         ref={ref}
         className={cn(
-          'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-          isActive
-            ? 'bg-white text-gray-950 shadow-sm'
-            : 'hover:bg-white/50 hover:text-gray-700',
+          'inline-flex items-center justify-center rounded-sm px-3 py-1.5 text-sm font-medium whitespace-nowrap ring-offset-white transition-all focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
+          isActive ? 'bg-white text-gray-950 shadow-sm' : 'hover:bg-white/50 hover:text-gray-700',
           className
         )}
         onClick={() => context.onValueChange(value)}
@@ -123,7 +114,7 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
       <div
         ref={ref}
         className={cn(
-          'ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+          'ring-offset-white focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none',
           className
         )}
         {...props}

@@ -20,8 +20,8 @@ interface Span {
   operationName: string
   startTime: number
   endTime?: number
-  tags: Record<string, any>
-  logs: Array<{ timestamp: number; fields: Record<string, any> }>
+  tags: Record<string, unknown>
+  logs: Array<{ timestamp: number; fields: Record<string, unknown> }>
   status: 'ok' | 'error' | 'timeout'
 }
 
@@ -50,7 +50,7 @@ export class OpenTelemetryManager {
   constructor() {
     this.isEnabled = this.config.MONITORING_ENABLED
     this.samplingRate = this.config.PERFORMANCE_SAMPLING_RATE
-    
+
     if (this.isEnabled) {
       this.initializeInstrumentation()
     }
@@ -66,13 +66,13 @@ export class OpenTelemetryManager {
   private initializeInstrumentation() {
     // Initialize lightweight telemetry collection
     console.info('✅ OpenTelemetry instrumentation initialized')
-    
+
     // Start metric collection interval
     setInterval(() => {
       this.collectSystemMetrics()
       this.exportMetrics()
     }, 30000) // Every 30 seconds
-    
+
     // Cleanup old spans
     setInterval(() => {
       this.cleanupSpans()
@@ -85,7 +85,7 @@ export class OpenTelemetryManager {
   startSpan(
     operationName: string,
     parentContext?: TraceContext,
-    tags: Record<string, any> = {}
+    tags: Record<string, unknown> = {}
   ): Span {
     if (!this.isEnabled || !this.shouldSample()) {
       return this.createNoOpSpan(operationName)
@@ -93,7 +93,7 @@ export class OpenTelemetryManager {
 
     const traceId = parentContext?.traceId || this.generateTraceId()
     const spanId = this.generateSpanId()
-    
+
     const span: Span = {
       spanId,
       traceId,
@@ -102,10 +102,10 @@ export class OpenTelemetryManager {
       tags: {
         ...tags,
         service: 'coreflow360',
-        version: '2.0.0'
+        version: '2.0.0',
       },
       logs: [],
-      status: 'ok'
+      status: 'ok',
     }
 
     this.spans.set(spanId, span)
@@ -115,12 +115,12 @@ export class OpenTelemetryManager {
   /**
    * Finish a span
    */
-  finishSpan(span: Span, tags: Record<string, any> = {}) {
+  finishSpan(span: Span, tags: Record<string, unknown> = {}) {
     if (!this.isEnabled || !span.spanId) return
 
     span.endTime = performance.now()
     span.tags = { ...span.tags, ...tags }
-    
+
     // Calculate duration
     const duration = span.endTime - span.startTime
     span.tags.duration_ms = Math.round(duration * 100) / 100
@@ -132,12 +132,12 @@ export class OpenTelemetryManager {
   /**
    * Add log to span
    */
-  logToSpan(span: Span, fields: Record<string, any>) {
+  logToSpan(span: Span, fields: Record<string, unknown>) {
     if (!this.isEnabled || !span.spanId) return
 
     span.logs.push({
       timestamp: performance.now(),
-      fields
+      fields,
     })
   }
 
@@ -171,9 +171,9 @@ export class OpenTelemetryManager {
       labels: {
         service: 'coreflow360',
         environment: this.config.NODE_ENV,
-        ...labels
+        ...labels,
       },
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
 
     // Prevent memory overflow
@@ -185,11 +185,11 @@ export class OpenTelemetryManager {
   /**
    * Instrument HTTP requests
    */
-  instrumentHttpRequest(method: string, url: string, statusCode?: number) {
+  instrumentHttpRequest(_method: string, _url: string, statusCode?: number) {
     const span = this.startSpan('http_request', undefined, {
       'http.method': method,
       'http.url': url,
-      'component': 'http'
+      component: 'http',
     })
 
     return {
@@ -197,29 +197,33 @@ export class OpenTelemetryManager {
       finish: (responseCode: number, error?: Error) => {
         this.setSpanStatus(
           span,
-          error ? 'error' : (responseCode >= 400 ? 'error' : 'ok'),
+          error ? 'error' : responseCode >= 400 ? 'error' : 'ok',
           error?.message
         )
-        
+
         this.finishSpan(span, {
-          'http.status_code': responseCode
+          'http.status_code': responseCode,
         })
 
         // Record HTTP metrics
         this.recordMetric('http_requests_total', 'counter', 1, {
           method,
           status: responseCode.toString(),
-          endpoint: this.sanitizeEndpoint(url)
+          endpoint: this.sanitizeEndpoint(url),
         })
 
         if (span.endTime && span.startTime) {
-          this.recordMetric('http_request_duration_ms', 'histogram', 
-            span.endTime - span.startTime, {
-            method,
-            endpoint: this.sanitizeEndpoint(url)
-          })
+          this.recordMetric(
+            'http_request_duration_ms',
+            'histogram',
+            span.endTime - span.startTime,
+            {
+              method,
+              endpoint: this.sanitizeEndpoint(url),
+            }
+          )
         }
-      }
+      },
     }
   }
 
@@ -230,29 +234,30 @@ export class OpenTelemetryManager {
     const span = this.startSpan('db_query', undefined, {
       'db.type': 'postgresql',
       'db.operation': operation,
-      'component': 'database'
+      component: 'database',
     })
 
     return {
       span,
       finish: (rowCount?: number, error?: Error) => {
         this.setSpanStatus(span, error ? 'error' : 'ok', error?.message)
-        
+
         this.finishSpan(span, {
-          'db.rows_affected': rowCount
+          'db.rows_affected': rowCount,
         })
 
         // Record database metrics
         this.recordMetric('db_queries_total', 'counter', 1, {
           operation,
-          status: error ? 'error' : 'success'
+          status: error ? 'error' : 'success',
         })
 
         if (span.endTime && span.startTime) {
-          this.recordMetric('db_query_duration_ms', 'histogram', 
-            span.endTime - span.startTime, { operation })
+          this.recordMetric('db_query_duration_ms', 'histogram', span.endTime - span.startTime, {
+            operation,
+          })
         }
-      }
+      },
     }
   }
 
@@ -263,37 +268,41 @@ export class OpenTelemetryManager {
     const span = this.startSpan('ai_operation', undefined, {
       'ai.operation': operation,
       'ai.model': model,
-      'component': 'ai'
+      component: 'ai',
     })
 
     return {
       span,
       finish: (tokenCount?: number, error?: Error) => {
         this.setSpanStatus(span, error ? 'error' : 'ok', error?.message)
-        
+
         this.finishSpan(span, {
-          'ai.tokens': tokenCount
+          'ai.tokens': tokenCount,
         })
 
         // Record AI metrics
         this.recordMetric('ai_operations_total', 'counter', 1, {
           operation,
           model,
-          status: error ? 'error' : 'success'
+          status: error ? 'error' : 'success',
         })
 
         if (tokenCount) {
           this.recordMetric('ai_tokens_total', 'counter', tokenCount, {
             operation,
-            model
+            model,
           })
         }
 
         if (span.endTime && span.startTime) {
-          this.recordMetric('ai_operation_duration_ms', 'histogram', 
-            span.endTime - span.startTime, { operation, model })
+          this.recordMetric(
+            'ai_operation_duration_ms',
+            'histogram',
+            span.endTime - span.startTime,
+            { operation, model }
+          )
         }
-      }
+      },
     }
   }
 
@@ -303,7 +312,7 @@ export class OpenTelemetryManager {
   getTraceContext(span: Span): TraceContext {
     return {
       traceId: span.traceId,
-      spanId: span.spanId
+      spanId: span.spanId,
     }
   }
 
@@ -313,25 +322,27 @@ export class OpenTelemetryManager {
   private collectSystemMetrics() {
     if (typeof process !== 'undefined') {
       const memUsage = process.memoryUsage()
-      
+
       this.recordMetric('process_memory_bytes', 'gauge', memUsage.heapUsed, {
-        type: 'heap_used'
+        type: 'heap_used',
       })
-      
+
       this.recordMetric('process_memory_bytes', 'gauge', memUsage.heapTotal, {
-        type: 'heap_total'
+        type: 'heap_total',
       })
-      
+
       this.recordMetric('process_memory_bytes', 'gauge', memUsage.rss, {
-        type: 'rss'
+        type: 'rss',
       })
 
       // CPU usage (simplified)
       const cpuUsage = process.cpuUsage()
-      this.recordMetric('process_cpu_seconds_total', 'counter', 
-        cpuUsage.user / 1000000, { type: 'user' })
-      this.recordMetric('process_cpu_seconds_total', 'counter', 
-        cpuUsage.system / 1000000, { type: 'system' })
+      this.recordMetric('process_cpu_seconds_total', 'counter', cpuUsage.user / 1000000, {
+        type: 'user',
+      })
+      this.recordMetric('process_cpu_seconds_total', 'counter', cpuUsage.system / 1000000, {
+        type: 'system',
+      })
     }
 
     // Active spans count
@@ -350,10 +361,10 @@ export class OpenTelemetryManager {
         operation: span.operationName,
         duration: span.endTime ? span.endTime - span.startTime : 0,
         status: span.status,
-        tags: span.tags
+        tags: span.tags,
       })
     }
-    
+
     // In production, export to OTLP collector or Jaeger
     // this.otlpExporter.export([span])
   }
@@ -370,7 +381,7 @@ export class OpenTelemetryManager {
 
     // In production, export to Prometheus or OTLP collector
     // this.prometheusExporter.export(this.metrics)
-    
+
     // Clear exported metrics
     this.metrics = []
   }
@@ -398,7 +409,7 @@ export class OpenTelemetryManager {
       startTime: 0,
       tags: {},
       logs: [],
-      status: 'ok'
+      status: 'ok',
     }
   }
 
@@ -411,8 +422,8 @@ export class OpenTelemetryManager {
   }
 
   private cleanupSpans() {
-    const cutoff = performance.now() - (5 * 60 * 1000) // 5 minutes ago
-    
+    const cutoff = performance.now() - 5 * 60 * 1000 // 5 minutes ago
+
     for (const [spanId, span] of this.spans.entries()) {
       if (span.startTime < cutoff) {
         this.spans.delete(spanId)
@@ -431,25 +442,20 @@ export class OpenTelemetryManager {
     systemHealth: 'healthy' | 'degraded' | 'unhealthy'
   } {
     const recentMetrics = this.metrics.filter(
-      m => Date.now() - m.timestamp < 60000 // Last minute
+      (m) => Date.now() - m.timestamp < 60000 // Last minute
     )
 
-    const httpRequests = recentMetrics.filter(m => m.name === 'http_requests_total')
-    const errors = httpRequests.filter(m => 
-      m.labels.status && parseInt(m.labels.status) >= 400
-    )
+    const httpRequests = recentMetrics.filter((m) => m.name === 'http_requests_total')
+    const errors = httpRequests.filter((m) => m.labels.status && parseInt(m.labels.status) >= 400)
 
-    const responseTimes = recentMetrics.filter(m => 
-      m.name === 'http_request_duration_ms'
-    )
-    
-    const avgResponseTime = responseTimes.length > 0
-      ? responseTimes.reduce((sum, m) => sum + m.value, 0) / responseTimes.length
-      : 0
+    const responseTimes = recentMetrics.filter((m) => m.name === 'http_request_duration_ms')
 
-    const errorRate = httpRequests.length > 0 
-      ? (errors.length / httpRequests.length) * 100 
-      : 0
+    const avgResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((sum, m) => sum + m.value, 0) / responseTimes.length
+        : 0
+
+    const errorRate = httpRequests.length > 0 ? (errors.length / httpRequests.length) * 100 : 0
 
     let systemHealth: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
     if (errorRate > 10 || avgResponseTime > 1000) {
@@ -460,10 +466,10 @@ export class OpenTelemetryManager {
 
     return {
       activeSpans: this.spans.size,
-      tracesPerMinute: recentMetrics.filter(m => m.name === 'http_requests_total').length,
+      tracesPerMinute: recentMetrics.filter((m) => m.name === 'http_requests_total').length,
       errorRate: Math.round(errorRate * 100) / 100,
       avgResponseTime: Math.round(avgResponseTime * 100) / 100,
-      systemHealth
+      systemHealth,
     }
   }
 }
@@ -475,16 +481,16 @@ export const telemetry = OpenTelemetryManager.getInstance()
 export function trace<T>(
   operationName: string,
   fn: (span: Span) => Promise<T>,
-  tags: Record<string, any> = {}
+  tags: Record<string, unknown> = {}
 ): Promise<T> {
   const span = telemetry.startSpan(operationName, undefined, tags)
-  
+
   return fn(span)
-    .then(result => {
+    .then((result) => {
       telemetry.finishSpan(span)
       return result
     })
-    .catch(error => {
+    .catch((error) => {
       telemetry.setSpanStatus(span, 'error', error.message)
       telemetry.finishSpan(span)
       throw error
@@ -492,26 +498,18 @@ export function trace<T>(
 }
 
 export function recordCounter(
-  name: string, 
-  value: number = 1, 
+  name: string,
+  value: number = 1,
   labels: Record<string, string> = {}
 ) {
   telemetry.recordMetric(name, 'counter', value, labels)
 }
 
-export function recordHistogram(
-  name: string, 
-  value: number, 
-  labels: Record<string, string> = {}
-) {
+export function recordHistogram(name: string, value: number, labels: Record<string, string> = {}) {
   telemetry.recordMetric(name, 'histogram', value, labels)
 }
 
-export function recordGauge(
-  name: string, 
-  value: number, 
-  labels: Record<string, string> = {}
-) {
+export function recordGauge(name: string, value: number, labels: Record<string, string> = {}) {
   telemetry.recordMetric(name, 'gauge', value, labels)
 }
 

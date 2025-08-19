@@ -6,7 +6,13 @@
 import { z } from 'zod'
 
 // Build-time detection function - comprehensive check for all build environments
-const getIsBuildTime = () => process.env.VERCEL_ENV || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.BUILDING_FOR_VERCEL === '1' || process.env.VERCEL || process.env.NOW_BUILDER
+const getIsBuildTime = () =>
+  process.env.VERCEL_ENV ||
+  process.env.CI ||
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.BUILDING_FOR_VERCEL === '1' ||
+  process.env.VERCEL ||
+  process.env.NOW_BUILDER
 
 // Environment variable schemas
 // Accept standard URLs (postgres, mysql, etc.) and SQLite file URLs used in tests/development
@@ -19,7 +25,7 @@ const DatabaseConfigSchema = z.object({
         try {
           // Will throw for invalid URLs
           // Allow http(s), postgres, mysql, etc.
-          // eslint-disable-next-line no-new
+
           new URL(val)
           return true
         } catch {
@@ -70,11 +76,14 @@ const RedisConfigSchema = z.object({
 })
 
 const SecurityConfigSchema = z.object({
-  API_KEY_SECRET: getIsBuildTime() 
+  API_KEY_SECRET: getIsBuildTime()
     ? z.string().optional().default('build-time-placeholder-secret-32-chars')
     : z.string().min(32, 'API_KEY_SECRET must be at least 32 characters'),
   ENCRYPTION_KEY: getIsBuildTime()
-    ? z.string().optional().default('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+    ? z
+        .string()
+        .optional()
+        .default('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
     : z.string().min(32, 'ENCRYPTION_KEY must be at least 32 characters'),
 })
 
@@ -82,64 +91,107 @@ const SecurityConfigSchema = z.object({
 const ConfigSchema = z.object({
   // Environment
   NODE_ENV: z.enum(['development', 'production', 'test']),
-  
+
   // Database
   ...DatabaseConfigSchema.shape,
-  
+
   // Authentication
   ...AuthConfigSchema.shape,
-  
+
   // Payment processing
   ...StripeConfigSchema.shape,
-  
+
   // AI services
   ...AIConfigSchema.shape,
-  
+
   // Email services
   ...EmailConfigSchema.shape,
-  
+
   // Caching
   ...RedisConfigSchema.shape,
-  
+
   // Security
   ...SecurityConfigSchema.shape,
-  
+
   // Optional configurations
   SENTRY_DSN: z.string().url('Invalid Sentry DSN format').optional(),
   VERCEL_URL: z.string().optional(),
   CUSTOM_DOMAIN: z.string().optional(),
-  
+
   // Feature flags
-  ENABLE_AI_FEATURES: z.string().transform(val => val === 'true').default('true'),
-  ENABLE_ANALYTICS: z.string().transform(val => val === 'true').default('true'),
-  ENABLE_AUDIT_LOGGING: z.string().transform(val => val === 'true').default('true'),
-  
-  // Performance settings  
-  MAX_FILE_SIZE: z.string().transform(val => parseInt(val || '10485760', 10)).default('10485760'), // 10MB
-  RATE_LIMIT_WINDOW: z.string().transform(val => {
-    const parsed = parseInt(val || '60000', 10)
-    if (parsed > 3600000) throw new Error('RATE_LIMIT_WINDOW must be less than or equal to 3600000 milliseconds')
-    return parsed
-  }).default('60000'), // 1 minute  
-  RATE_LIMIT_MAX_REQUESTS: z.string().transform(val => parseInt(val || '100', 10)).default('100'),
-  
+  ENABLE_AI_FEATURES: z
+    .string()
+    .transform((val) => val === 'true')
+    .default('true'),
+  ENABLE_ANALYTICS: z
+    .string()
+    .transform((val) => val === 'true')
+    .default('true'),
+  ENABLE_AUDIT_LOGGING: z
+    .string()
+    .transform((val) => val === 'true')
+    .default('true'),
+
+  // Performance settings
+  MAX_FILE_SIZE: z
+    .string()
+    .transform((val) => parseInt(val || '10485760', 10))
+    .default('10485760'), // 10MB
+  RATE_LIMIT_WINDOW: z
+    .string()
+    .transform((val) => {
+      const parsed = parseInt(val || '60000', 10)
+      if (parsed > 3600000)
+        throw new Error('RATE_LIMIT_WINDOW must be less than or equal to 3600000 milliseconds')
+      return parsed
+    })
+    .default('60000'), // 1 minute
+  RATE_LIMIT_MAX_REQUESTS: z
+    .string()
+    .transform((val) => parseInt(val || '100', 10))
+    .default('100'),
+
   // Server configuration
-  PORT: z.string().transform(val => parseInt(val || '3000', 10)).default('3000'),
+  PORT: z
+    .string()
+    .transform((val) => parseInt(val || '3000', 10))
+    .default('3000'),
   HOST: z.string().default('localhost'),
-  
+
   // Monitoring configuration
-  MONITORING_ENABLED: z.string().transform(val => val === 'true').default('true'),
-  HEALTH_CHECK_INTERVAL: z.string().transform(val => parseInt(val || '30000', 10)).default('30000'), // 30 seconds
-  PERFORMANCE_SAMPLING_RATE: z.string().transform(val => parseFloat(val || '0.1')).default('0.1'), // 10%
-  
-  // Cache configuration  
-  CACHE_TTL_DEFAULT: z.string().transform(val => parseInt(val || '3600', 10)).default('3600'), // 1 hour
-  CACHE_MAX_SIZE: z.string().transform(val => parseInt(val || '104857600', 10)).default('104857600'), // 100MB
-  
+  MONITORING_ENABLED: z
+    .string()
+    .transform((val) => val === 'true')
+    .default('true'),
+  HEALTH_CHECK_INTERVAL: z
+    .string()
+    .transform((val) => parseInt(val || '30000', 10))
+    .default('30000'), // 30 seconds
+  PERFORMANCE_SAMPLING_RATE: z
+    .string()
+    .transform((val) => parseFloat(val || '0.1'))
+    .default('0.1'), // 10%
+
+  // Cache configuration
+  CACHE_TTL_DEFAULT: z
+    .string()
+    .transform((val) => parseInt(val || '3600', 10))
+    .default('3600'), // 1 hour
+  CACHE_MAX_SIZE: z
+    .string()
+    .transform((val) => parseInt(val || '104857600', 10))
+    .default('104857600'), // 100MB
+
   // Security settings
-  CORS_ORIGINS: z.string().transform(val => val ? val.split(',').map(s => s.trim()) : ['*']).default('*'),
+  CORS_ORIGINS: z
+    .string()
+    .transform((val) => (val ? val.split(',').map((s) => s.trim()) : ['*']))
+    .default('*'),
   JWT_EXPIRY: z.string().default('7d'),
-  SESSION_TIMEOUT: z.string().transform(val => parseInt(val || '1800000', 10)).default('1800000'), // 30 minutes
+  SESSION_TIMEOUT: z
+    .string()
+    .transform((val) => parseInt(val || '1800000', 10))
+    .default('1800000'), // 30 minutes
 })
 
 // Minimal configuration schema for test environment
@@ -213,24 +265,21 @@ export class ConfigValidator {
       }
 
       // Validate configuration (use minimal schema in test env)
-      const result = (envConfig.NODE_ENV === 'test'
-        ? TestConfigSchema
-        : ConfigSchema
-      ).safeParse(envConfig)
-      
+      const result = (envConfig.NODE_ENV === 'test' ? TestConfigSchema : ConfigSchema).safeParse(
+        envConfig
+      )
+
       if (!result.success) {
-        this.validationErrors = result.error.errors.map(err => 
-          `${err.path.join('.')}: ${err.message}`
+        this.validationErrors = result.error.errors.map(
+          (err) => `${err.path.join('.')}: ${err.message}`
         )
-        
+
         throw new Error(`Configuration validation failed:\n${this.validationErrors.join('\n')}`)
       }
 
       this.config = result.data
       return this.config
-
     } catch (error) {
-      console.error('Configuration validation error:', error)
       throw error
     }
   }
@@ -266,7 +315,7 @@ export class ConfigValidator {
    */
   getEnvironmentConfig() {
     const config = this.getConfig()
-    
+
     return {
       isDevelopment: config.NODE_ENV === 'development',
       isProduction: config.NODE_ENV === 'production',
@@ -298,7 +347,7 @@ export class ConfigValidator {
         corsOrigins: config.CORS_ORIGINS,
         jwtExpiry: config.JWT_EXPIRY,
         sessionTimeout: config.SESSION_TIMEOUT,
-      }
+      },
     }
   }
 

@@ -1,6 +1,6 @@
 /**
  * CoreFlow360 - Edge Runtime Compatible Tenant Validation
- * 
+ *
  * Simplified tenant validation for Edge Runtime (middleware)
  * Database operations should be done in API routes instead
  */
@@ -33,12 +33,14 @@ export class TenantValidator {
    * Basic tenant validation for Edge Runtime
    * Complex validation should be done in API routes
    */
-  static async validateTenantAccess(context: TenantValidationContext): Promise<TenantValidationResult> {
+  static async validateTenantAccess(
+    context: TenantValidationContext
+  ): Promise<TenantValidationResult> {
     // If no tenant ID, user doesn't have access
     if (!context.userTenantId) {
       return {
         isValid: false,
-        reason: 'No tenant association'
+        reason: 'No tenant association',
       }
     }
 
@@ -51,8 +53,8 @@ export class TenantValidator {
         isValid: true,
         tenant: {
           id: context.userTenantId,
-          slug: context.requestedTenantSlug
-        }
+          slug: context.requestedTenantSlug,
+        },
       }
     }
 
@@ -62,8 +64,8 @@ export class TenantValidator {
         isValid: true,
         tenant: {
           id: context.userTenantId,
-          slug: 'admin'
-        }
+          slug: 'admin',
+        },
       }
     }
 
@@ -72,8 +74,8 @@ export class TenantValidator {
       isValid: true,
       tenant: {
         id: context.userTenantId,
-        slug: 'default'
-      }
+        slug: 'default',
+      },
     }
   }
 
@@ -84,7 +86,7 @@ export class TenantValidator {
   static async logSecurityViolation(
     reason: string,
     context: TenantValidationContext,
-    additionalData?: any
+    additionalData?: unknown
   ): Promise<void> {
     // In Edge Runtime, we can't directly access the database
     // Log to console and let API routes handle persistent logging
@@ -94,7 +96,7 @@ export class TenantValidator {
       tenantId: context.userTenantId,
       requestedSlug: context.requestedTenantSlug,
       path: context.pathname,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
   }
 }

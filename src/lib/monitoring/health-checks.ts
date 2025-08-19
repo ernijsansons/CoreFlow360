@@ -21,7 +21,7 @@ export interface HealthCheckResult {
   status: 'healthy' | 'degraded' | 'unhealthy'
   responseTime: number
   message: string
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   lastChecked: string
 }
 
@@ -39,7 +39,7 @@ export class HealthCheckManager {
   private checkInterval: NodeJS.Timeout | null = null
   private lastResults: Map<string, HealthCheckResult> = new Map()
   private startTime = Date.now()
-  
+
   constructor() {
     this.startPeriodicChecks()
   }
@@ -61,9 +61,7 @@ export class HealthCheckManager {
     this.checkInterval = setInterval(async () => {
       try {
         await this.runAllChecks()
-      } catch (error) {
-        console.error('Health check error:', error)
-      }
+      } catch (error) {}
     }, interval)
 
     console.info(`✅ Health checks started (interval: ${interval}ms)`)
@@ -90,7 +88,7 @@ export class HealthCheckManager {
         this.checkCDN(),
         this.checkExternalServices(),
         this.checkSystemResources(),
-        this.checkApplicationHealth()
+        this.checkApplicationHealth(),
       ]
 
       const results = await Promise.allSettled(checkPromises)
@@ -107,7 +105,7 @@ export class HealthCheckManager {
             status: 'unhealthy',
             responseTime: 0,
             message: `Health check failed: ${result.reason}`,
-            lastChecked: new Date().toISOString()
+            lastChecked: new Date().toISOString(),
           }
           checks.push(failedCheck)
         }
@@ -115,12 +113,12 @@ export class HealthCheckManager {
 
       // Calculate overall health
       const summary = this.calculateOverallHealth(checks)
-      
+
       // Record metrics
       telemetry.recordGauge('system_health_score', summary.score)
       telemetry.recordCounter('health_checks_total', checks.length)
-      
-      const unhealthyCount = checks.filter(c => c.status === 'unhealthy').length
+
+      const unhealthyCount = checks.filter((c) => c.status === 'unhealthy').length
       telemetry.recordGauge('unhealthy_services', unhealthyCount)
 
       return summary
@@ -133,29 +131,29 @@ export class HealthCheckManager {
   private async checkDatabase(): Promise<HealthCheckResult> {
     return trace('health_check_database', async (span) => {
       const start = Date.now()
-      
+
       try {
         // Test basic connectivity
         await prisma.$queryRaw`SELECT 1`
-        
+
         // Test write performance
         const writeStart = Date.now()
         await prisma.$queryRaw`SELECT pg_database_size(current_database())`
         const writeTime = Date.now() - writeStart
-        
+
         // Test connection pool
-        const poolStatus = await prisma.$queryRaw`
+        const poolStatus = (await prisma.$queryRaw`
           SELECT 
             count(*) as total_connections,
             count(*) FILTER (WHERE state = 'active') as active_connections,
             count(*) FILTER (WHERE state = 'idle') as idle_connections
           FROM pg_stat_activity 
           WHERE datname = current_database()
-        ` as any[]
+        `) as unknown[]
 
         const responseTime = Date.now() - start
         const poolInfo = poolStatus[0]
-        
+
         let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
         let message = 'Database is healthy'
 
@@ -179,11 +177,10 @@ export class HealthCheckManager {
           message,
           details: {
             connections: poolInfo,
-            write_performance_ms: writeTime
+            write_performance_ms: writeTime,
           },
-          lastChecked: new Date().toISOString()
+          lastChecked: new Date().toISOString(),
         }
-        
       } catch (error) {
         const responseTime = Date.now() - start
         return {
@@ -191,7 +188,7 @@ export class HealthCheckManager {
           status: 'unhealthy',
           responseTime,
           message: `Database error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          lastChecked: new Date().toISOString()
+          lastChecked: new Date().toISOString(),
         }
       }
     })
@@ -203,25 +200,25 @@ export class HealthCheckManager {
   private async checkCache(): Promise<HealthCheckResult> {
     return trace('health_check_cache', async (span) => {
       const start = Date.now()
-      
+
       try {
         const testKey = `health_check_${Date.now()}`
         const testValue = 'test_data'
 
         // Test cache write
         await cacheManager.set(testKey, testValue, { ttl: 60 })
-        
+
         // Test cache read
         const retrieved = await cacheManager.get(testKey)
-        
+
         // Test cache delete
         await cacheManager.delete(testKey)
-        
+
         // Get cache statistics
         const stats = await cacheManager.getStats()
-        
+
         const responseTime = Date.now() - start
-        
+
         let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
         let message = 'Cache is healthy'
 
@@ -236,7 +233,7 @@ export class HealthCheckManager {
         // Check hit rate
         const totalRequests = stats.redis.hits + stats.redis.misses
         const hitRate = totalRequests > 0 ? stats.redis.hits / totalRequests : 1
-        
+
         if (hitRate < 0.7) {
           status = status === 'healthy' ? 'degraded' : status
           message += ' - Low cache hit rate'
@@ -249,11 +246,10 @@ export class HealthCheckManager {
           message,
           details: {
             hit_rate: Math.round(hitRate * 100) / 100,
-            stats: stats
+            stats: stats,
           },
-          lastChecked: new Date().toISOString()
+          lastChecked: new Date().toISOString(),
         }
-        
       } catch (error) {
         const responseTime = Date.now() - start
         return {
@@ -261,7 +257,7 @@ export class HealthCheckManager {
           status: 'unhealthy',
           responseTime,
           message: `Cache error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          lastChecked: new Date().toISOString()
+          lastChecked: new Date().toISOString(),
         }
       }
     })
@@ -273,7 +269,7 @@ export class HealthCheckManager {
   private async checkCDN(): Promise<HealthCheckResult> {
     return trace('health_check_cdn', async () => {
       const start = Date.now()
-      
+
       try {
         const cdnHealth = await cdnManager.healthCheck()
         const responseTime = Date.now() - start
@@ -282,16 +278,13 @@ export class HealthCheckManager {
           name: 'cdn',
           status: cdnHealth.status,
           responseTime,
-          message: cdnHealth.errors.length > 0 
-            ? cdnHealth.errors.join(', ') 
-            : 'CDN is healthy',
+          message: cdnHealth.errors.length > 0 ? cdnHealth.errors.join(', ') : 'CDN is healthy',
           details: {
             hit_rate: cdnHealth.hitRate,
-            edge_latency: cdnHealth.latency
+            edge_latency: cdnHealth.latency,
           },
-          lastChecked: new Date().toISOString()
+          lastChecked: new Date().toISOString(),
         }
-        
       } catch (error) {
         const responseTime = Date.now() - start
         return {
@@ -299,7 +292,7 @@ export class HealthCheckManager {
           status: 'unhealthy',
           responseTime,
           message: `CDN error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          lastChecked: new Date().toISOString()
+          lastChecked: new Date().toISOString(),
         }
       }
     })
@@ -311,28 +304,28 @@ export class HealthCheckManager {
   private async checkExternalServices(): Promise<HealthCheckResult> {
     return trace('health_check_external', async () => {
       const start = Date.now()
-      
+
       try {
         const checks = await Promise.allSettled([
           // Stripe API
           this.checkExternalService('https://api.stripe.com/v1/account', {
-            headers: { 'Authorization': `Bearer ${this.config.STRIPE_SECRET_KEY}` }
+            headers: { Authorization: `Bearer ${this.config.STRIPE_SECRET_KEY}` },
           }),
           // OpenAI API (if AI features enabled)
-          this.config.ENABLE_AI_FEATURES 
+          this.config.ENABLE_AI_FEATURES
             ? this.checkExternalService('https://api.openai.com/v1/models', {
-                headers: { 'Authorization': `Bearer ${this.config.OPENAI_API_KEY}` }
+                headers: { Authorization: `Bearer ${this.config.OPENAI_API_KEY}` },
               })
             : Promise.resolve({ ok: true, status: 200 }),
         ])
 
-        const failures = checks.filter(result => 
-          result.status === 'rejected' || 
-          (result.status === 'fulfilled' && !result.value.ok)
+        const failures = checks.filter(
+          (result) =>
+            result.status === 'rejected' || (result.status === 'fulfilled' && !result.value.ok)
         )
 
         const responseTime = Date.now() - start
-        
+
         let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
         let message = 'External services are healthy'
 
@@ -351,11 +344,10 @@ export class HealthCheckManager {
           message,
           details: {
             total_services: checks.length,
-            failed_services: failures.length
+            failed_services: failures.length,
           },
-          lastChecked: new Date().toISOString()
+          lastChecked: new Date().toISOString(),
         }
-        
       } catch (error) {
         const responseTime = Date.now() - start
         return {
@@ -363,7 +355,7 @@ export class HealthCheckManager {
           status: 'unhealthy',
           responseTime,
           message: `External services error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          lastChecked: new Date().toISOString()
+          lastChecked: new Date().toISOString(),
         }
       }
     })
@@ -375,18 +367,18 @@ export class HealthCheckManager {
   private async checkSystemResources(): Promise<HealthCheckResult> {
     return trace('health_check_resources', async () => {
       const start = Date.now()
-      
+
       try {
         const memUsage = process.memoryUsage()
         const cpuUsage = process.cpuUsage()
-        
+
         // Convert to percentages and MB
         const heapUsedMB = memUsage.heapUsed / 1024 / 1024
         const heapTotalMB = memUsage.heapTotal / 1024 / 1024
         const memoryUsagePercent = (heapUsedMB / heapTotalMB) * 100
-        
+
         const responseTime = Date.now() - start
-        
+
         let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
         let message = 'System resources are healthy'
 
@@ -407,11 +399,10 @@ export class HealthCheckManager {
             memory_usage_percent: Math.round(memoryUsagePercent * 100) / 100,
             heap_used_mb: Math.round(heapUsedMB * 100) / 100,
             heap_total_mb: Math.round(heapTotalMB * 100) / 100,
-            rss_mb: Math.round(memUsage.rss / 1024 / 1024 * 100) / 100
+            rss_mb: Math.round((memUsage.rss / 1024 / 1024) * 100) / 100,
           },
-          lastChecked: new Date().toISOString()
+          lastChecked: new Date().toISOString(),
         }
-        
       } catch (error) {
         const responseTime = Date.now() - start
         return {
@@ -419,7 +410,7 @@ export class HealthCheckManager {
           status: 'unhealthy',
           responseTime,
           message: `System resources error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          lastChecked: new Date().toISOString()
+          lastChecked: new Date().toISOString(),
         }
       }
     })
@@ -431,13 +422,13 @@ export class HealthCheckManager {
   private async checkApplicationHealth(): Promise<HealthCheckResult> {
     return trace('health_check_application', async () => {
       const start = Date.now()
-      
+
       try {
         // Get telemetry dashboard metrics
         const metrics = telemetry.getDashboardMetrics()
-        
+
         const responseTime = Date.now() - start
-        
+
         let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
         let message = 'Application is healthy'
 
@@ -458,11 +449,10 @@ export class HealthCheckManager {
             error_rate: metrics.errorRate,
             avg_response_time: metrics.avgResponseTime,
             active_spans: metrics.activeSpans,
-            traces_per_minute: metrics.tracesPerMinute
+            traces_per_minute: metrics.tracesPerMinute,
           },
-          lastChecked: new Date().toISOString()
+          lastChecked: new Date().toISOString(),
         }
-        
       } catch (error) {
         const responseTime = Date.now() - start
         return {
@@ -470,7 +460,7 @@ export class HealthCheckManager {
           status: 'unhealthy',
           responseTime,
           message: `Application health error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          lastChecked: new Date().toISOString()
+          lastChecked: new Date().toISOString(),
         }
       }
     })
@@ -480,19 +470,19 @@ export class HealthCheckManager {
    * Helper to check external service
    */
   private async checkExternalService(
-    url: string, 
+    url: string,
     options: { headers?: Record<string, string>; timeout?: number } = {}
   ): Promise<{ ok: boolean; status: number }> {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), options.timeout || 5000)
-    
+
     try {
       const response = await fetch(url, {
         method: 'HEAD',
         headers: options.headers,
-        signal: controller.signal
+        signal: controller.signal,
       })
-      
+
       clearTimeout(timeout)
       return { ok: response.ok, status: response.status }
     } catch (error) {
@@ -511,7 +501,7 @@ export class HealthCheckManager {
       external_services: 15,
       application: 15,
       system_resources: 10,
-      cdn: 10
+      cdn: 10,
     }
 
     let totalScore = 0
@@ -538,7 +528,7 @@ export class HealthCheckManager {
     }
 
     const score = totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0
-    
+
     let overall: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
     if (score < 50) {
       overall = 'unhealthy'
@@ -551,7 +541,7 @@ export class HealthCheckManager {
       score,
       checks,
       uptime: Date.now() - this.startTime,
-      lastUpdate: new Date().toISOString()
+      lastUpdate: new Date().toISOString(),
     }
   }
 
@@ -572,7 +562,7 @@ export class HealthCheckManager {
       cdn: () => this.checkCDN(),
       external_services: () => this.checkExternalServices(),
       system_resources: () => this.checkSystemResources(),
-      application: () => this.checkApplicationHealth()
+      application: () => this.checkApplicationHealth(),
     }
 
     const method = methods[serviceName as keyof typeof methods]

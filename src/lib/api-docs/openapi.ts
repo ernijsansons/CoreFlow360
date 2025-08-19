@@ -14,60 +14,60 @@ export const openAPISpec = {
     contact: {
       name: 'CoreFlow360 Support',
       email: 'support@coreflow360.com',
-      url: 'https://coreflow360.com'
+      url: 'https://coreflow360.com',
     },
     license: {
       name: 'Proprietary',
-      url: 'https://coreflow360.com/license'
-    }
+      url: 'https://coreflow360.com/license',
+    },
   },
   servers: [
     {
       url: 'https://api.coreflow360.com',
-      description: 'Production server'
+      description: 'Production server',
     },
     {
       url: 'https://staging-api.coreflow360.com',
-      description: 'Staging server'
+      description: 'Staging server',
     },
     {
       url: 'http://localhost:3000',
-      description: 'Development server'
-    }
+      description: 'Development server',
+    },
   ],
   tags: [
     {
       name: 'Authentication',
-      description: 'User authentication and authorization'
+      description: 'User authentication and authorization',
     },
     {
       name: 'Freemium',
-      description: 'Free tier and subscription management'
+      description: 'Free tier and subscription management',
     },
     {
       name: 'Onboarding',
-      description: 'User onboarding and role selection'
+      description: 'User onboarding and role selection',
     },
     {
       name: 'Dashboard',
-      description: 'Dashboard and analytics endpoints'
+      description: 'Dashboard and analytics endpoints',
     },
     {
       name: 'Metrics',
-      description: 'Performance and business metrics'
+      description: 'Performance and business metrics',
     },
     {
       name: 'Conversion',
-      description: 'Conversion tracking and analytics'
+      description: 'Conversion tracking and analytics',
     },
     {
       name: 'Customers',
-      description: 'Customer management'
+      description: 'Customer management',
     },
     {
       name: 'WebSocket',
-      description: 'Real-time WebSocket endpoints'
-    }
+      description: 'Real-time WebSocket endpoints',
+    },
   ],
   components: {
     securitySchemes: {
@@ -75,14 +75,14 @@ export const openAPISpec = {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        description: 'JWT authentication token'
+        description: 'JWT authentication token',
       },
       apiKey: {
         type: 'apiKey',
         in: 'header',
         name: 'X-API-Key',
-        description: 'API key for service-to-service communication'
-      }
+        description: 'API key for service-to-service communication',
+      },
     },
     schemas: {
       Error: {
@@ -91,19 +91,19 @@ export const openAPISpec = {
         properties: {
           error: {
             type: 'string',
-            description: 'Error type'
+            description: 'Error type',
           },
           message: {
             type: 'string',
-            description: 'Human-readable error message'
+            description: 'Human-readable error message',
           },
           code: {
             type: 'string',
-            description: 'Error code for programmatic handling'
+            description: 'Error code for programmatic handling',
           },
           statusCode: {
             type: 'integer',
-            description: 'HTTP status code'
+            description: 'HTTP status code',
           },
           details: {
             type: 'array',
@@ -111,76 +111,94 @@ export const openAPISpec = {
               type: 'object',
               properties: {
                 field: {
-                  type: 'string'
+                  type: 'string',
                 },
                 message: {
-                  type: 'string'
-                }
-              }
-            }
-          }
-        }
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
       },
       SuccessResponse: {
         type: 'object',
         required: ['success'],
         properties: {
           success: {
-            type: 'boolean'
+            type: 'boolean',
           },
           message: {
-            type: 'string'
+            type: 'string',
           },
           data: {
-            type: 'object'
-          }
-        }
+            type: 'object',
+          },
+        },
       },
       PaginationMeta: {
         type: 'object',
         properties: {
           page: {
             type: 'integer',
-            minimum: 1
+            minimum: 1,
           },
           limit: {
             type: 'integer',
             minimum: 1,
-            maximum: 100
+            maximum: 100,
           },
           total: {
-            type: 'integer'
+            type: 'integer',
           },
           totalPages: {
-            type: 'integer'
+            type: 'integer',
           },
           hasNext: {
-            type: 'boolean'
+            type: 'boolean',
           },
           hasPrev: {
-            type: 'boolean'
-          }
-        }
+            type: 'boolean',
+          },
+        },
       },
       UserRole: {
         type: 'string',
-        enum: ['super_admin', 'org_admin', 'department_manager', 'team_lead', 'user']
+        enum: ['super_admin', 'org_admin', 'department_manager', 'team_lead', 'user'],
       },
       SubscriptionStatus: {
         type: 'string',
-        enum: ['FREE', 'TRIAL', 'STARTER', 'BUSINESS', 'ENTERPRISE', 'CANCELLED', 'SUSPENDED']
+        enum: ['FREE', 'TRIAL', 'STARTER', 'BUSINESS', 'ENTERPRISE', 'CANCELLED', 'SUSPENDED'],
       },
       ModuleName: {
         type: 'string',
-        enum: ['crm', 'sales', 'finance', 'operations', 'analytics', 'hr', 'accounting', 'projects', 'inventory']
+        enum: [
+          'crm',
+          'sales',
+          'finance',
+          'operations',
+          'analytics',
+          'hr',
+          'accounting',
+          'projects',
+          'inventory',
+        ],
       },
       AgentType: {
         type: 'string',
-        enum: ['crm', 'sales', 'finance', 'operations', 'analytics', 'hr']
+        enum: ['crm', 'sales', 'finance', 'operations', 'analytics', 'hr'],
       },
       ConversionEventType: {
         type: 'string',
-        enum: ['upgrade_prompt', 'feature_usage', 'agent_selected', 'role_selected', 'onboarding_started', 'onboarding_completed', 'upgrade_completed']
+        enum: [
+          'upgrade_prompt',
+          'feature_usage',
+          'agent_selected',
+          'role_selected',
+          'onboarding_started',
+          'onboarding_completed',
+          'upgrade_completed',
+        ],
       },
       ...customerSchemas,
       User: {
@@ -188,89 +206,89 @@ export const openAPISpec = {
         properties: {
           id: {
             type: 'string',
-            format: 'uuid'
+            format: 'uuid',
           },
           email: {
             type: 'string',
-            format: 'email'
+            format: 'email',
           },
           name: {
-            type: 'string'
+            type: 'string',
           },
           role: {
-            $ref: '#/components/schemas/UserRole'
+            $ref: '#/components/schemas/UserRole',
           },
           tenantId: {
-            type: 'string'
+            type: 'string',
           },
           createdAt: {
             type: 'string',
-            format: 'date-time'
-          }
-        }
+            format: 'date-time',
+          },
+        },
       },
       FreemiumStatus: {
         type: 'object',
         properties: {
           subscriptionStatus: {
-            $ref: '#/components/schemas/SubscriptionStatus'
+            $ref: '#/components/schemas/SubscriptionStatus',
           },
           selectedAgent: {
             $ref: '#/components/schemas/AgentType',
-            nullable: true
+            nullable: true,
           },
           dailyUsageCount: {
-            type: 'integer'
+            type: 'integer',
           },
           dailyLimit: {
-            type: 'integer'
+            type: 'integer',
           },
           canUseFeature: {
-            type: 'boolean'
+            type: 'boolean',
           },
           needsAgentSelection: {
-            type: 'boolean'
+            type: 'boolean',
           },
           activeModules: {
             type: 'array',
             items: {
-              $ref: '#/components/schemas/ModuleName'
-            }
+              $ref: '#/components/schemas/ModuleName',
+            },
           },
           daysActive: {
-            type: 'integer'
-          }
-        }
+            type: 'integer',
+          },
+        },
       },
       MetricsData: {
         type: 'object',
         properties: {
           responseTime: {
             type: 'number',
-            description: 'Response time in milliseconds'
+            description: 'Response time in milliseconds',
           },
           activeUsers: {
             type: 'integer',
-            description: 'Number of active users'
+            description: 'Number of active users',
           },
           successRate: {
             type: 'number',
-            description: 'Success rate percentage'
+            description: 'Success rate percentage',
           },
           uptime: {
             type: 'number',
-            description: 'Uptime percentage'
+            description: 'Uptime percentage',
           },
           aiProcessesPerSecond: {
             type: 'integer',
-            description: 'AI processes per second'
+            description: 'AI processes per second',
           },
           timestamp: {
             type: 'string',
-            format: 'date-time'
-          }
-        }
-      }
+            format: 'date-time',
+          },
+        },
+      },
     },
     parameters: {
       TenantId: {
@@ -279,16 +297,16 @@ export const openAPISpec = {
         description: 'Tenant identifier',
         required: false,
         schema: {
-          type: 'string'
-        }
+          type: 'string',
+        },
       },
       UserId: {
         name: 'userId',
         in: 'query',
         description: 'User identifier',
         schema: {
-          type: 'string'
-        }
+          type: 'string',
+        },
       },
       Timeframe: {
         name: 'timeframe',
@@ -297,8 +315,8 @@ export const openAPISpec = {
         schema: {
           type: 'string',
           enum: ['7d', '30d', '90d', '1y'],
-          default: '30d'
-        }
+          default: '30d',
+        },
       },
       Page: {
         name: 'page',
@@ -307,8 +325,8 @@ export const openAPISpec = {
         schema: {
           type: 'integer',
           minimum: 1,
-          default: 1
-        }
+          default: 1,
+        },
       },
       Limit: {
         name: 'limit',
@@ -318,9 +336,9 @@ export const openAPISpec = {
           type: 'integer',
           minimum: 1,
           maximum: 100,
-          default: 20
-        }
-      }
+          default: 20,
+        },
+      },
     },
     responses: {
       BadRequest: {
@@ -328,82 +346,82 @@ export const openAPISpec = {
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/Error'
-            }
-          }
-        }
+              $ref: '#/components/schemas/Error',
+            },
+          },
+        },
       },
       Unauthorized: {
         description: 'Unauthorized',
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/Error'
-            }
-          }
-        }
+              $ref: '#/components/schemas/Error',
+            },
+          },
+        },
       },
       Forbidden: {
         description: 'Forbidden',
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/Error'
-            }
-          }
-        }
+              $ref: '#/components/schemas/Error',
+            },
+          },
+        },
       },
       NotFound: {
         description: 'Not found',
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/Error'
-            }
-          }
-        }
+              $ref: '#/components/schemas/Error',
+            },
+          },
+        },
       },
       RateLimited: {
         description: 'Rate limit exceeded',
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/Error'
-            }
-          }
+              $ref: '#/components/schemas/Error',
+            },
+          },
         },
         headers: {
           'Retry-After': {
             description: 'Seconds until rate limit resets',
             schema: {
-              type: 'integer'
-            }
+              type: 'integer',
+            },
           },
           'X-RateLimit-Limit': {
             description: 'Rate limit ceiling',
             schema: {
-              type: 'integer'
-            }
+              type: 'integer',
+            },
           },
           'X-RateLimit-Remaining': {
             description: 'Remaining requests',
             schema: {
-              type: 'integer'
-            }
-          }
-        }
+              type: 'integer',
+            },
+          },
+        },
       },
       ServerError: {
         description: 'Internal server error',
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/Error'
-            }
-          }
-        }
-      }
-    }
+              $ref: '#/components/schemas/Error',
+            },
+          },
+        },
+      },
+    },
   },
   paths: {
     '/api/health': {
@@ -422,22 +440,22 @@ export const openAPISpec = {
                   properties: {
                     status: {
                       type: 'string',
-                      example: 'healthy'
+                      example: 'healthy',
                     },
                     timestamp: {
                       type: 'string',
-                      format: 'date-time'
+                      format: 'date-time',
                     },
                     version: {
-                      type: 'string'
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
     '/api/auth/register': {
       post: {
@@ -455,29 +473,29 @@ export const openAPISpec = {
                 properties: {
                   email: {
                     type: 'string',
-                    format: 'email'
+                    format: 'email',
                   },
                   password: {
                     type: 'string',
-                    minLength: 8
+                    minLength: 8,
                   },
                   name: {
                     type: 'string',
-                    minLength: 2
+                    minLength: 2,
                   },
                   companyName: {
-                    type: 'string'
+                    type: 'string',
                   },
                   role: {
-                    $ref: '#/components/schemas/UserRole'
+                    $ref: '#/components/schemas/UserRole',
                   },
                   acceptTerms: {
-                    type: 'boolean'
-                  }
-                }
-              }
-            }
-          }
+                    type: 'boolean',
+                  },
+                },
+              },
+            },
+          },
         },
         responses: {
           201: {
@@ -488,27 +506,27 @@ export const openAPISpec = {
                   type: 'object',
                   properties: {
                     success: {
-                      type: 'boolean'
+                      type: 'boolean',
                     },
                     user: {
-                      $ref: '#/components/schemas/User'
+                      $ref: '#/components/schemas/User',
                     },
                     token: {
-                      type: 'string'
-                    }
-                  }
-                }
-              }
-            }
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
           },
           400: {
-            $ref: '#/components/responses/BadRequest'
+            $ref: '#/components/responses/BadRequest',
           },
           409: {
-            description: 'User already exists'
-          }
-        }
-      }
+            description: 'User already exists',
+          },
+        },
+      },
     },
     '/api/freemium/status': {
       get: {
@@ -519,11 +537,11 @@ export const openAPISpec = {
         security: [{ bearerAuth: [] }],
         parameters: [
           {
-            $ref: '#/components/parameters/UserId'
+            $ref: '#/components/parameters/UserId',
           },
           {
-            $ref: '#/components/parameters/TenantId'
-          }
+            $ref: '#/components/parameters/TenantId',
+          },
         ],
         responses: {
           200: {
@@ -531,16 +549,16 @@ export const openAPISpec = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/FreemiumStatus'
-                }
-              }
-            }
+                  $ref: '#/components/schemas/FreemiumStatus',
+                },
+              },
+            },
           },
           401: {
-            $ref: '#/components/responses/Unauthorized'
-          }
-        }
-      }
+            $ref: '#/components/responses/Unauthorized',
+          },
+        },
+      },
     },
     '/api/freemium/select-agent': {
       post: {
@@ -558,22 +576,22 @@ export const openAPISpec = {
                 required: ['selectedAgent'],
                 properties: {
                   userId: {
-                    type: 'string'
+                    type: 'string',
                   },
                   tenantId: {
-                    type: 'string'
+                    type: 'string',
                   },
                   selectedAgent: {
-                    $ref: '#/components/schemas/AgentType'
+                    $ref: '#/components/schemas/AgentType',
                   },
                   fromOnboarding: {
                     type: 'boolean',
-                    default: false
-                  }
-                }
-              }
-            }
-          }
+                    default: false,
+                  },
+                },
+              },
+            },
+          },
         },
         responses: {
           200: {
@@ -584,27 +602,27 @@ export const openAPISpec = {
                   type: 'object',
                   properties: {
                     success: {
-                      type: 'boolean'
+                      type: 'boolean',
                     },
                     selectedAgent: {
-                      type: 'string'
+                      type: 'string',
                     },
                     isFirstSelection: {
-                      type: 'boolean'
+                      type: 'boolean',
                     },
                     dailyLimit: {
-                      type: 'integer'
-                    }
-                  }
-                }
-              }
-            }
+                      type: 'integer',
+                    },
+                  },
+                },
+              },
+            },
           },
           400: {
-            $ref: '#/components/responses/BadRequest'
-          }
-        }
-      }
+            $ref: '#/components/responses/BadRequest',
+          },
+        },
+      },
     },
     '/api/metrics/live': {
       get: {
@@ -619,16 +637,16 @@ export const openAPISpec = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/MetricsData'
-                }
-              }
-            }
+                  $ref: '#/components/schemas/MetricsData',
+                },
+              },
+            },
           },
           429: {
-            $ref: '#/components/responses/RateLimited'
-          }
-        }
-      }
+            $ref: '#/components/responses/RateLimited',
+          },
+        },
+      },
     },
     '/api/conversion/track': {
       post: {
@@ -646,31 +664,31 @@ export const openAPISpec = {
                 required: ['eventType', 'triggerType', 'actionTaken'],
                 properties: {
                   eventType: {
-                    $ref: '#/components/schemas/ConversionEventType'
+                    $ref: '#/components/schemas/ConversionEventType',
                   },
                   triggerType: {
-                    type: 'string'
+                    type: 'string',
                   },
                   actionTaken: {
                     type: 'string',
-                    enum: ['converted', 'dismissed', 'delayed']
+                    enum: ['converted', 'dismissed', 'delayed'],
                   },
                   currentModule: {
-                    type: 'string'
+                    type: 'string',
                   },
                   userPlan: {
-                    type: 'string'
+                    type: 'string',
                   },
                   conversionValue: {
-                    type: 'number'
+                    type: 'number',
                   },
                   triggerContext: {
-                    type: 'string'
-                  }
-                }
-              }
-            }
-          }
+                    type: 'string',
+                  },
+                },
+              },
+            },
+          },
         },
         responses: {
           200: {
@@ -678,13 +696,13 @@ export const openAPISpec = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/SuccessResponse'
-                }
-              }
-            }
-          }
-        }
-      }
+                  $ref: '#/components/schemas/SuccessResponse',
+                },
+              },
+            },
+          },
+        },
+      },
     },
     '/api/ws': {
       get: {
@@ -694,14 +712,14 @@ export const openAPISpec = {
         operationId: 'websocket',
         responses: {
           101: {
-            description: 'Switching Protocols - WebSocket connection established'
+            description: 'Switching Protocols - WebSocket connection established',
           },
           501: {
-            description: 'WebSocket not implemented in this environment'
-          }
-        }
-      }
+            description: 'WebSocket not implemented in this environment',
+          },
+        },
+      },
     },
-    ...customerEndpoints
-  }
+    ...customerEndpoints,
+  },
 }

@@ -3,23 +3,23 @@
  * Combines circuit breakers, retries, and timeouts for external API calls
  */
 
-import { circuitBreakers, withCircuitBreakerProtection } from '@/lib/resilience/circuit-breaker';
-import { handleError, ErrorContext } from '@/lib/errors/error-handler';
+import { circuitBreakers, withCircuitBreakerProtection } from '@/lib/resilience/circuit-breaker'
+import { handleError, ErrorContext } from '@/lib/errors/error-handler'
 
 export interface ServiceCallOptions {
-  timeout?: number;
-  retries?: number;
-  retryDelay?: number;
-  circuitBreakerName?: string;
-  context?: Partial<ErrorContext>;
+  timeout?: number
+  retries?: number
+  retryDelay?: number
+  circuitBreakerName?: string
+  context?: Partial<ErrorContext>
 }
 
 export interface RetryConfig {
-  maxRetries: number;
-  baseDelay: number;
-  maxDelay: number;
-  backoffFactor: number;
-  retryableErrors: string[];
+  maxRetries: number
+  baseDelay: number
+  maxDelay: number
+  backoffFactor: number
+  retryableErrors: string[]
 }
 
 /**
@@ -31,49 +31,52 @@ class RetryManager {
     config: RetryConfig,
     context?: Partial<ErrorContext>
   ): Promise<T> {
-    let lastError: Error;
-    
+    let lastError: Error
+
     for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
       try {
-        return await operation();
+        return await operation()
       } catch (error) {
-        lastError = error as Error;
-        
+        lastError = error as Error
+
         // Don't retry on last attempt
         if (attempt === config.maxRetries) {
-          break;
+          break
         }
-        
+
         // Check if error is retryable
         if (!this.isRetryableError(lastError, config.retryableErrors)) {
-          break;
+          break
         }
-        
+
         // Calculate delay with exponential backoff and jitter
         const delay = Math.min(
           config.baseDelay * Math.pow(config.backoffFactor, attempt),
           config.maxDelay
-        );
-        
-        const jitteredDelay = delay + Math.random() * delay * 0.1; // Add 10% jitter
-        
-        console.warn(`Retrying operation after ${Math.round(jitteredDelay)}ms (attempt ${attempt + 1}/${config.maxRetries + 1}). Error: ${lastError.message}`);
-        
-        await new Promise(resolve => setTimeout(resolve, jitteredDelay));
+        )
+
+        const jitteredDelay = delay + Math.random() * delay * 0.1 // Add 10% jitter
+
+        console.warn(
+          `Retrying operation after ${Math.round(jitteredDelay)}ms (attempt ${attempt + 1}/${config.maxRetries + 1}). Error: ${lastError.message}`
+        )
+
+        await new Promise((resolve) => setTimeout(resolve, jitteredDelay))
       }
     }
-    
-    throw lastError!;
+
+    throw lastError!
   }
-  
+
   private static isRetryableError(error: Error, retryableErrors: string[]): boolean {
-    const message = error.message.toLowerCase();
-    const name = error.name.toLowerCase();
-    
-    return retryableErrors.some(retryableError =>
-      message.includes(retryableError.toLowerCase()) ||
-      name.includes(retryableError.toLowerCase())
-    );
+    const message = error.message.toLowerCase()
+    const name = error.name.toLowerCase()
+
+    return retryableErrors.some(
+      (retryableError) =>
+        message.includes(retryableError.toLowerCase()) ||
+        name.includes(retryableError.toLowerCase())
+    )
   }
 }
 
@@ -96,9 +99,9 @@ export class ResilientServiceWrapper {
       'overloaded',
       'ECONNRESET',
       'ENOTFOUND',
-      'ECONNREFUSED'
-    ]
-  };
+      'ECONNREFUSED',
+    ],
+  }
 
   /**
    * Stripe API wrapper with circuit breaker and retry logic
@@ -111,8 +114,8 @@ export class ResilientServiceWrapper {
       service: 'stripe',
       endpoint: 'stripe_api',
       method: 'POST',
-      ...options.context
-    };
+      ...options.context,
+    }
 
     return this.executeWithResilience(
       operation,
@@ -123,12 +126,12 @@ export class ResilientServiceWrapper {
           ...this.defaultRetryConfig.retryableErrors,
           'api_connection_error',
           'api_error',
-          'rate_limit_error'
-        ]
+          'rate_limit_error',
+        ],
       },
       context,
       options
-    );
+    )
   }
 
   /**
@@ -142,8 +145,8 @@ export class ResilientServiceWrapper {
       service: 'openai',
       endpoint: 'openai_api',
       method: 'POST',
-      ...options.context
-    };
+      ...options.context,
+    }
 
     return this.executeWithResilience(
       operation,
@@ -157,12 +160,12 @@ export class ResilientServiceWrapper {
           'insufficient_quota',
           'model_overloaded',
           'service_unavailable',
-          'rate_limit_exceeded'
-        ]
+          'rate_limit_exceeded',
+        ],
       },
       context,
       options
-    );
+    )
   }
 
   /**
@@ -176,8 +179,8 @@ export class ResilientServiceWrapper {
       service: 'anthropic',
       endpoint: 'anthropic_api',
       method: 'POST',
-      ...options.context
-    };
+      ...options.context,
+    }
 
     return this.executeWithResilience(
       operation,
@@ -190,12 +193,12 @@ export class ResilientServiceWrapper {
           ...this.defaultRetryConfig.retryableErrors,
           'overloaded_error',
           'rate_limit_error',
-          'service_unavailable'
-        ]
+          'service_unavailable',
+        ],
       },
       context,
       options
-    );
+    )
   }
 
   /**
@@ -209,8 +212,8 @@ export class ResilientServiceWrapper {
       service: 'email',
       endpoint: 'email_api',
       method: 'POST',
-      ...options.context
-    };
+      ...options.context,
+    }
 
     return this.executeWithResilience(
       operation,
@@ -224,12 +227,12 @@ export class ResilientServiceWrapper {
           'quota_exceeded',
           'rate_limit',
           'internal_server_error',
-          'service_unavailable'
-        ]
+          'service_unavailable',
+        ],
       },
       context,
       options
-    );
+    )
   }
 
   /**
@@ -243,8 +246,8 @@ export class ResilientServiceWrapper {
       service: 'database',
       endpoint: 'database_query',
       method: 'QUERY',
-      ...options.context
-    };
+      ...options.context,
+    }
 
     return this.executeWithResilience(
       operation,
@@ -260,12 +263,12 @@ export class ResilientServiceWrapper {
           'pool_timeout',
           'deadlock',
           'lock_timeout',
-          'temporary'
-        ]
+          'temporary',
+        ],
       },
       context,
       options
-    );
+    )
   }
 
   /**
@@ -279,8 +282,8 @@ export class ResilientServiceWrapper {
       service: 'redis',
       endpoint: 'redis_operation',
       method: 'REDIS',
-      ...options.context
-    };
+      ...options.context,
+    }
 
     return this.executeWithResilience(
       operation,
@@ -290,17 +293,11 @@ export class ResilientServiceWrapper {
         maxRetries: 2,
         baseDelay: 200,
         maxDelay: 2000,
-        retryableErrors: [
-          'connection',
-          'timeout',
-          'readonly',
-          'loading',
-          'busy'
-        ]
+        retryableErrors: ['connection', 'timeout', 'readonly', 'loading', 'busy'],
       },
       context,
       options
-    );
+    )
   }
 
   /**
@@ -314,8 +311,8 @@ export class ResilientServiceWrapper {
       service: 'webhook',
       endpoint: 'webhook_call',
       method: 'POST',
-      ...options.context
-    };
+      ...options.context,
+    }
 
     return this.executeWithResilience(
       operation,
@@ -327,12 +324,12 @@ export class ResilientServiceWrapper {
         retryableErrors: [
           ...this.defaultRetryConfig.retryableErrors,
           'signature_verification',
-          'invalid_signature'
-        ]
+          'invalid_signature',
+        ],
       },
       context,
       options
-    );
+    )
   }
 
   /**
@@ -345,140 +342,151 @@ export class ResilientServiceWrapper {
     context: ErrorContext,
     options: ServiceCallOptions
   ): Promise<T> {
-    const startTime = Date.now();
+    const startTime = Date.now()
 
     try {
       // Wrap with timeout if specified
-      const timeoutMs = options.timeout || 30000; // Default 30 seconds
-      const operationWithTimeout = this.withTimeout(operation, timeoutMs);
+      const timeoutMs = options.timeout || 30000 // Default 30 seconds
+      const operationWithTimeout = this.withTimeout(operation, timeoutMs)
 
       // Apply circuit breaker protection
       const circuitBreakerProtectedOp = () =>
-        withCircuitBreakerProtection(circuitBreakerName, operationWithTimeout);
+        withCircuitBreakerProtection(circuitBreakerName, operationWithTimeout)
 
       // Apply retry logic
-      const result = await RetryManager.withRetry(
-        circuitBreakerProtectedOp,
-        retryConfig,
-        context
-      );
+      const result = await RetryManager.withRetry(circuitBreakerProtectedOp, retryConfig, context)
 
       // Log successful operation
-      const duration = Date.now() - startTime;
-      console.log(`✅ ${context.service} operation completed in ${duration}ms`);
+      const duration = Date.now() - startTime
 
-      return result;
+      return result
     } catch (error) {
       // Enhanced error context
       const enhancedContext: ErrorContext = {
         ...context,
         duration: Date.now() - startTime,
         circuitBreakerName,
-        retryAttempts: retryConfig.maxRetries
-      };
+        retryAttempts: retryConfig.maxRetries,
+      }
 
-      console.error(`❌ ${context.service} operation failed:`, error);
-      return handleError(error, enhancedContext);
+      return handleError(error, enhancedContext)
     }
   }
 
   /**
    * Add timeout wrapper to operations
    */
-  private static withTimeout<T>(
-    operation: () => Promise<T>,
-    timeoutMs: number
-  ): () => Promise<T> {
+  private static withTimeout<T>(operation: () => Promise<T>, timeoutMs: number): () => Promise<T> {
     return () => {
       return new Promise<T>((resolve, reject) => {
         const timeoutId = setTimeout(() => {
-          reject(new Error(`Operation timeout after ${timeoutMs}ms`));
-        }, timeoutMs);
+          reject(new Error(`Operation timeout after ${timeoutMs}ms`))
+        }, timeoutMs)
 
         operation()
           .then((result) => {
-            clearTimeout(timeoutId);
-            resolve(result);
+            clearTimeout(timeoutId)
+            resolve(result)
           })
           .catch((error) => {
-            clearTimeout(timeoutId);
-            reject(error);
-          });
-      });
-    };
+            clearTimeout(timeoutId)
+            reject(error)
+          })
+      })
+    }
   }
 
   /**
    * Health check for all external services
    */
   static async healthCheck(): Promise<{
-    status: 'healthy' | 'degraded' | 'unhealthy';
-    services: Record<string, {
-      circuitState: string;
-      errorRate: number;
-      lastSuccess: number;
-      available: boolean;
-    }>;
+    status: 'healthy' | 'degraded' | 'unhealthy'
+    services: Record<
+      string,
+      {
+        circuitState: string
+        errorRate: number
+        lastSuccess: number
+        available: boolean
+      }
+    >
   }> {
-    const serviceNames = ['stripe', 'openai', 'anthropic', 'sendgrid', 'database', 'redis', 'webhook'];
-    const serviceHealth: Record<string, any> = {};
-    let healthyCount = 0;
+    const serviceNames = [
+      'stripe',
+      'openai',
+      'anthropic',
+      'sendgrid',
+      'database',
+      'redis',
+      'webhook',
+    ]
+    const serviceHealth: Record<string, unknown> = {}
+    let healthyCount = 0
 
     for (const serviceName of serviceNames) {
-      const breaker = circuitBreakers[serviceName as keyof typeof circuitBreakers];
+      const breaker = circuitBreakers[serviceName as keyof typeof circuitBreakers]
       if (breaker) {
-        const stats = breaker.getStats();
-        const available = stats.state === 'CLOSED' || stats.state === 'HALF_OPEN';
-        
+        const stats = breaker.getStats()
+        const available = stats.state === 'CLOSED' || stats.state === 'HALF_OPEN'
+
         serviceHealth[serviceName] = {
           circuitState: stats.state,
           errorRate: Math.round(stats.errorRate * 100),
           lastSuccess: stats.lastSuccessTime,
-          available
-        };
+          available,
+        }
 
         if (available && stats.errorRate < 0.5) {
-          healthyCount++;
+          healthyCount++
         }
       }
     }
 
-    const overallStatus = 
-      healthyCount === serviceNames.length ? 'healthy' :
-      healthyCount >= serviceNames.length * 0.7 ? 'degraded' :
-      'unhealthy';
+    const overallStatus =
+      healthyCount === serviceNames.length
+        ? 'healthy'
+        : healthyCount >= serviceNames.length * 0.7
+          ? 'degraded'
+          : 'unhealthy'
 
     return {
       status: overallStatus,
-      services: serviceHealth
-    };
+      services: serviceHealth,
+    }
   }
 
   /**
    * Get comprehensive statistics for all services
    */
   static getServiceStats() {
-    const serviceNames = ['stripe', 'openai', 'anthropic', 'sendgrid', 'database', 'redis', 'webhook'];
-    const stats: Record<string, any> = {};
+    const serviceNames = [
+      'stripe',
+      'openai',
+      'anthropic',
+      'sendgrid',
+      'database',
+      'redis',
+      'webhook',
+    ]
+    const stats: Record<string, unknown> = {}
 
     for (const serviceName of serviceNames) {
-      const breaker = circuitBreakers[serviceName as keyof typeof circuitBreakers];
+      const breaker = circuitBreakers[serviceName as keyof typeof circuitBreakers]
       if (breaker) {
-        stats[serviceName] = breaker.getStats();
+        stats[serviceName] = breaker.getStats()
       }
     }
 
-    return stats;
+    return stats
   }
 
   /**
    * Reset all circuit breakers (for testing/recovery)
    */
   static resetAllCircuitBreakers(): void {
-    Object.values(circuitBreakers).forEach(breaker => {
-      breaker.reset();
-    });
-    console.log('🔄 All circuit breakers have been reset');
+    Object.values(circuitBreakers).forEach((breaker) => {
+      breaker.reset()
+    })
   }
 }
 
@@ -495,8 +503,8 @@ export const {
   webhookOperation,
   healthCheck: serviceHealthCheck,
   getServiceStats,
-  resetAllCircuitBreakers
-} = ResilientServiceWrapper;
+  resetAllCircuitBreakers,
+} = ResilientServiceWrapper
 
 /**
  * Type-safe wrapper functions for common operations
@@ -504,61 +512,70 @@ export const {
 
 // Stripe operations
 export const resilientStripe = {
-  createCustomer: (data: any) => stripeOperation(() => 
-    // Stripe customer creation logic would go here
-    Promise.resolve({ id: 'cus_example', ...data })
-  ),
-  
-  createSubscription: (data: any) => stripeOperation(() =>
-    // Stripe subscription creation logic would go here
-    Promise.resolve({ id: 'sub_example', ...data })
-  ),
-  
-  processPayment: (data: any) => stripeOperation(() =>
-    // Stripe payment processing logic would go here
-    Promise.resolve({ id: 'pi_example', status: 'succeeded', ...data })
-  )
-};
+  createCustomer: (data: unknown) =>
+    stripeOperation(() =>
+      // Stripe customer creation logic would go here
+      Promise.resolve({ id: 'cus_example', ...data })
+    ),
+
+  createSubscription: (data: unknown) =>
+    stripeOperation(() =>
+      // Stripe subscription creation logic would go here
+      Promise.resolve({ id: 'sub_example', ...data })
+    ),
+
+  processPayment: (data: unknown) =>
+    stripeOperation(() =>
+      // Stripe payment processing logic would go here
+      Promise.resolve({ id: 'pi_example', status: 'succeeded', ...data })
+    ),
+}
 
 // AI operations
 export const resilientAI = {
-  openAIChat: (messages: any[]) => openAIOperation(() =>
-    // OpenAI chat completion logic would go here
-    Promise.resolve({ choices: [{ message: { content: 'AI response' } }] })
-  ),
-  
-  anthropicClaude: (prompt: string) => anthropicOperation(() =>
-    // Anthropic Claude API logic would go here
-    Promise.resolve({ completion: 'Claude response' })
-  )
-};
+  _openAIChat: (messages: unknown[]) =>
+    openAIOperation(() =>
+      // OpenAI chat completion logic would go here
+      Promise.resolve({ choices: [{ message: { content: 'AI response' } }] })
+    ),
+
+  _anthropicClaude: (prompt: string) =>
+    anthropicOperation(() =>
+      // Anthropic Claude API logic would go here
+      Promise.resolve({ completion: 'Claude response' })
+    ),
+}
 
 // Database operations
 export const resilientDB = {
-  query: <T>(sql: string, params?: any[]) => databaseOperation<T>(() =>
-    // Database query logic would go here
-    Promise.resolve([] as any)
-  ),
-  
-  transaction: <T>(callback: () => Promise<T>) => databaseOperation(callback)
-};
+  _query: <T>(sql: string, params?: unknown[]) =>
+    databaseOperation<T>(() =>
+      // Database query logic would go here
+      Promise.resolve([] as unknown)
+    ),
+
+  transaction: <T>(callback: () => Promise<T>) => databaseOperation(callback),
+}
 
 // Cache operations
 export const resilientCache = {
-  get: <T>(key: string) => redisOperation<T | null>(() =>
-    // Redis get logic would go here
-    Promise.resolve(null)
-  ),
-  
-  set: (key: string, value: any, ttl?: number) => redisOperation(() =>
-    // Redis set logic would go here
-    Promise.resolve('OK')
-  ),
-  
-  del: (key: string) => redisOperation(() =>
-    // Redis delete logic would go here
-    Promise.resolve(1)
-  )
-};
+  _get: <T>(key: string) =>
+    redisOperation<T | null>(() =>
+      // Redis get logic would go here
+      Promise.resolve(null)
+    ),
 
-export default ResilientServiceWrapper;
+  _set: (key: string, _value: unknown, ttl?: number) =>
+    redisOperation(() =>
+      // Redis set logic would go here
+      Promise.resolve('OK')
+    ),
+
+  _del: (key: string) =>
+    redisOperation(() =>
+      // Redis delete logic would go here
+      Promise.resolve(1)
+    ),
+}
+
+export default ResilientServiceWrapper

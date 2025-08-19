@@ -8,7 +8,7 @@ export interface SEOConfig {
   robots?: string
   ogImage?: string
   twitterCard?: 'summary' | 'summary_large_image'
-  schema?: any
+  schema?: unknown
 }
 
 export class SEOOptimizer {
@@ -29,7 +29,7 @@ export class SEOOptimizer {
       robots = 'index,follow',
       ogImage = '/og-image.jpg',
       twitterCard = 'summary_large_image',
-      schema
+      schema,
     } = config
 
     const fullTitle = `${title} | ${this.siteName}`
@@ -41,7 +41,7 @@ export class SEOOptimizer {
       keywords: keywords.join(', '),
       robots,
       canonical: canonicalUrl,
-      
+
       // Open Graph
       openGraph: {
         title: fullTitle,
@@ -53,11 +53,11 @@ export class SEOOptimizer {
             url: `${this.baseUrl}${ogImage}`,
             width: 1200,
             height: 630,
-            alt: title
-          }
+            alt: title,
+          },
         ],
         locale: 'en_US',
-        type: 'website'
+        type: 'website',
       },
 
       // Twitter
@@ -67,7 +67,7 @@ export class SEOOptimizer {
         creator: '@CoreFlow360',
         title: fullTitle,
         description,
-        images: [`${this.baseUrl}${ogImage}`]
+        images: [`${this.baseUrl}${ogImage}`],
       },
 
       // Additional meta tags
@@ -103,9 +103,9 @@ export class SEOOptimizer {
             'msapplication-TileColor': '#000000',
             'theme-color': '#000000',
           },
-          'script:ld+json': JSON.stringify(schema)
-        }
-      })
+          'script:ld+json': JSON.stringify(schema),
+        },
+      }),
     }
   }
 
@@ -113,7 +113,8 @@ export class SEOOptimizer {
   getHomePageSEO(): SEOConfig {
     return {
       title: 'Business Automation Software - Transform Your Operations',
-      description: 'Turn your business into a revenue machine with CoreFlow360. Automate operations, increase profits by 247%, and save 30+ hours weekly. Start free trial today.',
+      description:
+        'Turn your business into a revenue machine with CoreFlow360. Automate operations, increase profits by 247%, and save 30+ hours weekly. Start free trial today.',
       keywords: [
         'business automation software',
         'ERP system',
@@ -124,31 +125,33 @@ export class SEOOptimizer {
         'accounting software',
         'project management',
         'inventory management',
-        'business process automation'
+        'business process automation',
       ],
-      schema: this.getOrganizationSchema()
+      schema: this.getOrganizationSchema(),
     }
   }
 
   getPricingPageSEO(): SEOConfig {
     return {
       title: 'Pricing Plans - Affordable Business Automation Starting at $45/month',
-      description: 'Transparent pricing for business automation software. Compare plans starting at $45/user/month. No setup fees, 30-day money-back guarantee.',
+      description:
+        'Transparent pricing for business automation software. Compare plans starting at $45/user/month. No setup fees, 30-day money-back guarantee.',
       keywords: [
         'business software pricing',
         'ERP software cost',
         'affordable business automation',
         'business management software price',
-        'small business software pricing'
+        'small business software pricing',
       ],
-      schema: this.getPricingSchema()
+      schema: this.getPricingSchema(),
     }
   }
 
   getHVACPageSEO(): SEOConfig {
     return {
       title: 'HVAC Business Management Software - Field Service Automation',
-      description: 'Complete HVAC business management solution. Smart scheduling, mobile field service, inventory tracking, and customer management. 847+ HVAC companies trust us.',
+      description:
+        'Complete HVAC business management solution. Smart scheduling, mobile field service, inventory tracking, and customer management. 847+ HVAC companies trust us.',
       keywords: [
         'HVAC software',
         'field service management',
@@ -156,16 +159,17 @@ export class SEOOptimizer {
         'HVAC business management',
         'heating cooling software',
         'HVAC inventory management',
-        'HVAC customer management'
+        'HVAC customer management',
       ],
-      schema: this.getHVACSoftwareSchema()
+      schema: this.getHVACSoftwareSchema(),
     }
   }
 
   getCompetitorPageSEO(): SEOConfig {
     return {
       title: 'CoreFlow360 vs Competitors - Why We Win Every Comparison',
-      description: 'See how CoreFlow360 beats legacy ERP systems, point solutions, and manual processes. Better features, faster implementation, lower cost.',
+      description:
+        'See how CoreFlow360 beats legacy ERP systems, point solutions, and manual processes. Better features, faster implementation, lower cost.',
       keywords: [
         'business software comparison',
         'ERP software comparison',
@@ -173,9 +177,9 @@ export class SEOOptimizer {
         'vs QuickBooks',
         'vs Microsoft Dynamics',
         'best business software',
-        'ERP alternatives'
+        'ERP alternatives',
       ],
-      schema: this.getComparisonSchema()
+      schema: this.getComparisonSchema(),
     }
   }
 
@@ -185,25 +189,26 @@ export class SEOOptimizer {
       '@context': 'https://schema.org',
       '@type': 'Organization',
       name: 'CoreFlow360',
-      description: 'Business automation software that transforms operations and increases profitability',
+      description:
+        'Business automation software that transforms operations and increases profitability',
       url: this.baseUrl,
       logo: `${this.baseUrl}/logo.png`,
       foundingDate: '2024',
       address: {
         '@type': 'PostalAddress',
-        addressCountry: 'US'
+        addressCountry: 'US',
       },
       contactPoint: {
         '@type': 'ContactPoint',
         telephone: '+1-555-COREFLOW',
         contactType: 'customer service',
-        availableLanguage: 'English'
+        availableLanguage: 'English',
       },
       sameAs: [
         'https://twitter.com/CoreFlow360',
         'https://linkedin.com/company/coreflow360',
-        'https://facebook.com/CoreFlow360'
-      ]
+        'https://facebook.com/CoreFlow360',
+      ],
     }
   }
 
@@ -215,7 +220,7 @@ export class SEOOptimizer {
       description: 'Complete business automation and ERP solution',
       brand: {
         '@type': 'Brand',
-        name: 'CoreFlow360'
+        name: 'CoreFlow360',
       },
       offers: [
         {
@@ -224,7 +229,7 @@ export class SEOOptimizer {
           price: '45',
           priceCurrency: 'USD',
           billingIncrement: 'Monthly',
-          description: 'Perfect for small businesses getting started with automation'
+          description: 'Perfect for small businesses getting started with automation',
         },
         {
           '@type': 'Offer',
@@ -232,7 +237,7 @@ export class SEOOptimizer {
           price: '65',
           priceCurrency: 'USD',
           billingIncrement: 'Monthly',
-          description: 'Complete business automation for growing companies'
+          description: 'Complete business automation for growing companies',
         },
         {
           '@type': 'Offer',
@@ -240,9 +245,9 @@ export class SEOOptimizer {
           price: '85',
           priceCurrency: 'USD',
           billingIncrement: 'Monthly',
-          description: 'Advanced analytics and AI-powered insights'
-        }
-      ]
+          description: 'Advanced analytics and AI-powered insights',
+        },
+      ],
     }
   }
 
@@ -253,18 +258,19 @@ export class SEOOptimizer {
       name: 'CoreFlow360 HVAC Management Software',
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web-based, iOS, Android',
-      description: 'Complete HVAC business management solution with scheduling, field service, and customer management',
+      description:
+        'Complete HVAC business management solution with scheduling, field service, and customer management',
       offers: {
         '@type': 'Offer',
         price: '65',
         priceCurrency: 'USD',
-        billingIncrement: 'Monthly'
+        billingIncrement: 'Monthly',
       },
       aggregateRating: {
         '@type': 'AggregateRating',
         ratingValue: '4.9',
         reviewCount: '847',
-        bestRating: '5'
+        bestRating: '5',
       },
       featureList: [
         'Smart scheduling and dispatch',
@@ -272,8 +278,8 @@ export class SEOOptimizer {
         'Inventory management',
         'Customer portal',
         'Financial reporting',
-        'Maintenance contracts'
-      ]
+        'Maintenance contracts',
+      ],
     }
   }
 
@@ -282,46 +288,47 @@ export class SEOOptimizer {
       '@context': 'https://schema.org',
       '@type': 'Article',
       headline: 'CoreFlow360 vs Competitors: Complete Business Software Comparison',
-      description: 'Comprehensive comparison of CoreFlow360 against legacy ERP systems, point solutions, and manual processes',
+      description:
+        'Comprehensive comparison of CoreFlow360 against legacy ERP systems, point solutions, and manual processes',
       author: {
         '@type': 'Organization',
-        name: 'CoreFlow360'
+        name: 'CoreFlow360',
       },
       publisher: {
         '@type': 'Organization',
         name: 'CoreFlow360',
         logo: {
           '@type': 'ImageObject',
-          url: `${this.baseUrl}/logo.png`
-        }
+          url: `${this.baseUrl}/logo.png`,
+        },
       },
       datePublished: new Date().toISOString(),
       dateModified: new Date().toISOString(),
       mainEntityOfPage: {
         '@type': 'WebPage',
-        '@id': `${this.baseUrl}/vs-competitors`
-      }
+        '@id': `${this.baseUrl}/vs-competitors`,
+      },
     }
   }
 
   // Generate FAQ schema for rich snippets
-  generateFAQSchema(faqs: Array<{ question: string, answer: string }>) {
+  generateFAQSchema(faqs: Array<{ question: string; answer: string }>) {
     return {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
-      mainEntity: faqs.map(faq => ({
+      mainEntity: faqs.map((faq) => ({
         '@type': 'Question',
         name: faq.question,
         acceptedAnswer: {
           '@type': 'Answer',
-          text: faq.answer
-        }
-      }))
+          text: faq.answer,
+        },
+      })),
     }
   }
 
   // Generate breadcrumb schema
-  generateBreadcrumbSchema(breadcrumbs: Array<{ name: string, url: string }>) {
+  generateBreadcrumbSchema(breadcrumbs: Array<{ name: string; url: string }>) {
     return {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
@@ -329,37 +336,39 @@ export class SEOOptimizer {
         '@type': 'ListItem',
         position: index + 1,
         name: crumb.name,
-        item: crumb.url
-      }))
+        item: crumb.url,
+      })),
     }
   }
 
   // Generate review schema
-  generateReviewSchema(reviews: Array<{
-    author: string,
-    rating: number,
-    text: string,
-    date: string
-  }>) {
-    return reviews.map(review => ({
+  generateReviewSchema(
+    reviews: Array<{
+      author: string
+      rating: number
+      text: string
+      date: string
+    }>
+  ) {
+    return reviews.map((review) => ({
       '@context': 'https://schema.org',
       '@type': 'Review',
       author: {
         '@type': 'Person',
-        name: review.author
+        name: review.author,
       },
       reviewRating: {
         '@type': 'Rating',
         ratingValue: review.rating,
-        bestRating: 5
+        bestRating: 5,
       },
       reviewBody: review.text,
-      datePublished: review.date
+      datePublished: review.date,
     }))
   }
 
   // SEO checklist generator
-  generateSEOChecklist(url: string) {
+  generateSEOChecklist(_url: string) {
     return {
       title: 'Check title length (50-60 characters)',
       description: 'Check meta description length (150-160 characters)',
@@ -375,7 +384,7 @@ export class SEOOptimizer {
       robots: 'Check robots.txt',
       ssl: 'Ensure HTTPS is enabled',
       gsc: 'Monitor Google Search Console',
-      analytics: 'Set up Google Analytics'
+      analytics: 'Set up Google Analytics',
     }
   }
 }

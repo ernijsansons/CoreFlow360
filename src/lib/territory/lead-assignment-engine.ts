@@ -2,7 +2,12 @@
 // Automatically routes new leads to optimal sales reps based on AI analysis
 
 import { TerritoryOptimizer } from './territory-optimizer'
-import { Lead, Territory, TerritoryAssignmentRequest, TerritoryAssignmentResult } from '@/types/territory'
+import {
+  Lead,
+  Territory,
+  TerritoryAssignmentRequest,
+  TerritoryAssignmentResult,
+} from '@/types/territory'
 
 export class LeadAssignmentEngine {
   /**
@@ -11,7 +16,7 @@ export class LeadAssignmentEngine {
    */
   static async assignLead(leadData: Partial<Lead>): Promise<{
     assignedUserId: string
-    assignedUser: any
+    assignedUser: unknown
     territoryId?: string
     assignmentReason: string
     confidence: number
@@ -19,20 +24,22 @@ export class LeadAssignmentEngine {
     priority: 'high' | 'medium' | 'low'
   }> {
     try {
-      console.log(`🎯 Processing lead assignment for: ${leadData.company} - ${leadData.firstName} ${leadData.lastName}`)
-      
+      console.log(
+        `TARGET Processing lead assignment for: ${leadData.company} - ${leadData.firstName} ${leadData.lastName}`
+      )
+
       // 1. Lead Quality Assessment - AI scoring
       const leadScore = await this.assessLeadQuality(leadData)
-      console.log(`📊 Lead quality score: ${leadScore.overall}/100`)
-      
+      console.log(`Lead quality score: ${leadScore.overall}/100`)
+
       // 2. Geographic Territory Identification
       const territories = await this.identifyTerritories(leadData)
-      console.log(`🗺️ Found ${territories.length} potential territories`)
-      
+      console.log(`Identified ${territories.length} potential territories`)
+
       // 3. Rep Availability & Workload Analysis
       const repAnalysis = await this.analyzeRepCapacity()
-      console.log(`👥 Analyzed ${Object.keys(repAnalysis).length} sales reps`)
-      
+      console.log(`Analyzing capacity for ${Object.keys(repAnalysis).length} sales reps`)
+
       // 4. AI-Powered Assignment Algorithm
       const assignmentRequest: TerritoryAssignmentRequest = {
         leadId: leadData.id || 'temp-id',
@@ -46,31 +53,38 @@ export class LeadAssignmentEngine {
             state: leadData.state,
             zipCode: leadData.zipCode,
             latitude: await this.geocodeAddress(leadData.address, leadData.city, leadData.state),
-            longitude: await this.geocodeAddress(leadData.address, leadData.city, leadData.state, true)
-          }
+            longitude: await this.geocodeAddress(
+              leadData.address,
+              leadData.city,
+              leadData.state,
+              true
+            ),
+          },
         },
         urgency: this.calculateUrgency(leadScore),
-        requiredExpertise: this.identifyRequiredExpertise(leadData)
+        requiredExpertise: this.identifyRequiredExpertise(leadData),
       }
-      
+
       const users = await this.getAvailableReps()
       const assignment = await TerritoryOptimizer.assignLeadToTerritory(
         assignmentRequest,
         territories,
         users
       )
-      
+
       // 5. Assignment Validation & Quality Check
       const validatedAssignment = await this.validateAssignment(assignment, leadData)
-      
+
       // 6. Real-time Assignment Execution
       await this.executeAssignment(validatedAssignment, leadData)
-      
+
       // 7. Trigger Follow-up Workflows
       await this.triggerFollowupWorkflows(validatedAssignment, leadData)
-      
-      console.log(`✅ Lead assigned to ${validatedAssignment.assignedUser.name} (confidence: ${validatedAssignment.confidence})`)
-      
+
+      console.log(
+        `SUCCESS Lead assigned to ${validatedAssignment.assignedUser.name} (confidence: ${validatedAssignment.confidence})`
+      )
+
       return {
         assignedUserId: validatedAssignment.assignedUserId,
         assignedUser: validatedAssignment.assignedUser,
@@ -78,12 +92,11 @@ export class LeadAssignmentEngine {
         assignmentReason: validatedAssignment.assignmentReason,
         confidence: validatedAssignment.confidence,
         estimatedResponseTime: validatedAssignment.estimatedResponseTime,
-        priority: assignmentRequest.urgency
+        priority: assignmentRequest.urgency,
       }
-      
     } catch (error) {
-      console.error('❌ Lead assignment failed:', error)
-      
+      console.error('ERROR Lead assignment error:', error)
+
       // Fallback assignment to prevent lead loss
       return await this.fallbackAssignment(leadData)
     }
@@ -92,48 +105,49 @@ export class LeadAssignmentEngine {
   /**
    * Batch process multiple leads for efficiency
    */
-  static async assignLeadsBatch(leads: Partial<Lead>[]): Promise<Array<{
-    leadId: string
-    assignedUserId: string
-    assignmentReason: string
-    confidence: number
-  }>> {
-    console.log(`🔄 Processing batch assignment for ${leads.length} leads`)
-    
+  static async assignLeadsBatch(leads: Partial<Lead>[]): Promise<
+    Array<{
+      leadId: string
+      assignedUserId: string
+      assignmentReason: string
+      confidence: number
+    }>
+  > {
+    console.log(`CHART Starting batch assignment for ${leads.length} leads`)
+
     const results = []
     const batchSize = 10 // Process 10 leads at a time for optimal performance
-    
+
     for (let i = 0; i < leads.length; i += batchSize) {
       const batch = leads.slice(i, i + batchSize)
-      const batchPromises = batch.map(lead => this.assignLead(lead))
-      
+      const batchPromises = batch.map((lead) => this.assignLead(lead))
+
       try {
         const batchResults = await Promise.allSettled(batchPromises)
-        
+
         batchResults.forEach((result, index) => {
           if (result.status === 'fulfilled') {
             results.push({
               leadId: batch[index].id || `temp-${i + index}`,
               assignedUserId: result.value.assignedUserId,
               assignmentReason: result.value.assignmentReason,
-              confidence: result.value.confidence
+              confidence: result.value.confidence,
             })
           } else {
-            console.error(`Failed to assign lead ${batch[index].id}:`, result.reason)
+            console.error(`ERROR Failed to assign lead ${batch[index].id}:`, result.reason)
           }
         })
-        
+
         // Prevent overwhelming the system
         if (i + batchSize < leads.length) {
-          await new Promise(resolve => setTimeout(resolve, 100))
+          await new Promise((resolve) => setTimeout(resolve, 100))
         }
-        
       } catch (error) {
-        console.error('Batch assignment error:', error)
+        console.error('ERROR Batch processing error:', error)
       }
     }
-    
-    console.log(`✅ Batch assignment completed: ${results.length}/${leads.length} successful`)
+
+    console.log(`SUCCESS Batch assignment complete: ${results.length}/${leads.length} assigned`)
     return results
   }
 
@@ -155,30 +169,31 @@ export class LeadAssignmentEngine {
     if (leadData.annualRevenue && leadData.annualRevenue > 1000000) companyFit += 15
     if (leadData.company && leadData.company.length > 3) companyFit += 5
     if (leadData.industry) companyFit += 5
-    
-    // Contact Quality Score (0-25 points)  
+
+    // Contact Quality Score (0-25 points)
     let contactQuality = 0
     if (leadData.email && this.isValidBusinessEmail(leadData.email)) contactQuality += 10
     if (leadData.phone) contactQuality += 5
     if (leadData.title && this.isDecisionMakerTitle(leadData.title)) contactQuality += 10
-    
+
     // Buying Signals Score (0-25 points)
     let buyingSignals = 0
     if (leadData.source === 'website' || leadData.source === 'referral') buyingSignals += 10
     if (leadData.websiteVisits && leadData.websiteVisits > 3) buyingSignals += 10
-    if (leadData.timeline && ['immediate', '1-3_months'].includes(leadData.timeline)) buyingSignals += 5
-    
+    if (leadData.timeline && ['immediate', '1-3_months'].includes(leadData.timeline))
+      buyingSignals += 5
+
     // Demographics Score (0-15 points)
     let demographics = 0
     if (leadData.city && leadData.state) demographics += 5
     if (leadData.zipCode) demographics += 5
     if (leadData.country === 'US') demographics += 5
-    
+
     // Timeliness Score (0-10 points)
-    let timeliness = 10 // New leads get full points, older leads lose points
-    
+    const timeliness = 10 // New leads get full points, older leads lose points
+
     const overall = companyFit + contactQuality + buyingSignals + demographics + timeliness
-    
+
     return {
       overall,
       factors: {
@@ -186,8 +201,8 @@ export class LeadAssignmentEngine {
         contactQuality,
         buyingSignals,
         demographics,
-        timeliness
-      }
+        timeliness,
+      },
     }
   }
 
@@ -202,7 +217,17 @@ export class LeadAssignmentEngine {
         tenantId: 'tenant-1',
         name: 'Northeast Territory',
         description: 'New York, New Jersey, Connecticut',
-        boundaryData: { type: 'Polygon', coordinates: [[[-74, 40], [-73, 41], [-72, 40], [-74, 40]]] },
+        boundaryData: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [-74, 40],
+              [-73, 41],
+              [-72, 40],
+              [-74, 40],
+            ],
+          ],
+        },
         visitFrequency: 'weekly',
         optimalDays: ['monday', 'tuesday', 'wednesday'],
         priority: 8,
@@ -216,20 +241,30 @@ export class LeadAssignmentEngine {
           id: 'user-1',
           name: 'Alex Morgan',
           email: 'alex.morgan@coreflow360.com',
-          avatar: '/avatars/alex.jpg'
+          avatar: '/avatars/alex.jpg',
         },
         isActive: true,
         lastVisitDate: '2024-08-09T10:00:00Z',
         nextVisitDate: '2024-08-16T09:00:00Z',
         createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-08-09T10:00:00Z'
+        updatedAt: '2024-08-09T10:00:00Z',
       },
       {
         id: 'territory-2',
         tenantId: 'tenant-1',
         name: 'West Coast Territory',
         description: 'California, Oregon, Washington',
-        boundaryData: { type: 'Polygon', coordinates: [[[-122, 37], [-121, 38], [-120, 37], [-122, 37]]] },
+        boundaryData: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [-122, 37],
+              [-121, 38],
+              [-120, 37],
+              [-122, 37],
+            ],
+          ],
+        },
         visitFrequency: 'biweekly',
         optimalDays: ['tuesday', 'wednesday', 'thursday'],
         priority: 7,
@@ -243,32 +278,32 @@ export class LeadAssignmentEngine {
           id: 'user-2',
           name: 'Jordan Lee',
           email: 'jordan.lee@coreflow360.com',
-          avatar: '/avatars/jordan.jpg'
+          avatar: '/avatars/jordan.jpg',
         },
         isActive: true,
         lastVisitDate: '2024-08-05T14:00:00Z',
         nextVisitDate: '2024-08-19T10:00:00Z',
         createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-08-05T14:00:00Z'
-      }
+        updatedAt: '2024-08-05T14:00:00Z',
+      },
     ]
-    
+
     // Filter territories based on lead location
-    return mockTerritories.filter(territory => {
+    return mockTerritories.filter((territory) => {
       if (!leadData.state) return false
-      
+
       // Simple state-based matching (in production, use proper geospatial queries)
       const northeastStates = ['NY', 'NJ', 'CT', 'MA', 'PA']
       const westCoastStates = ['CA', 'OR', 'WA']
-      
+
       if (northeastStates.includes(leadData.state) && territory.name.includes('Northeast')) {
         return true
       }
-      
+
       if (westCoastStates.includes(leadData.state) && territory.name.includes('West Coast')) {
         return true
       }
-      
+
       return false
     })
   }
@@ -294,7 +329,7 @@ export class LeadAssignmentEngine {
         capacity: 25,
         utilizationRate: 0.72,
         responseTimeAvg: 45, // minutes
-        performanceScore: 0.85
+        performanceScore: 0.85,
       },
       'user-2': {
         currentLeads: 12,
@@ -302,15 +337,15 @@ export class LeadAssignmentEngine {
         capacity: 25,
         utilizationRate: 0.58,
         responseTimeAvg: 30, // minutes
-        performanceScore: 0.92
-      }
+        performanceScore: 0.92,
+      },
     }
   }
 
   /**
    * Calculate lead urgency based on quality and characteristics
    */
-  private static calculateUrgency(leadScore: any): 'high' | 'medium' | 'low' {
+  private static calculateUrgency(leadScore: unknown): 'high' | 'medium' | 'low' {
     if (leadScore.overall >= 80) return 'high'
     if (leadScore.overall >= 60) return 'medium'
     return 'low'
@@ -321,18 +356,20 @@ export class LeadAssignmentEngine {
    */
   private static identifyRequiredExpertise(leadData: Partial<Lead>): string[] {
     const expertise = []
-    
+
     if (leadData.industry) expertise.push(leadData.industry)
-    if (leadData.annualRevenue && leadData.annualRevenue > 10000000) expertise.push('enterprise_sales')
-    if (leadData.title && this.isDecisionMakerTitle(leadData.title)) expertise.push('c_level_selling')
-    
+    if (leadData.annualRevenue && leadData.annualRevenue > 10000000)
+      expertise.push('enterprise_sales')
+    if (leadData.title && this.isDecisionMakerTitle(leadData.title))
+      expertise.push('c_level_selling')
+
     return expertise
   }
 
   /**
    * Get available sales reps
    */
-  private static async getAvailableReps(): Promise<any[]> {
+  private static async getAvailableReps(): Promise<unknown[]> {
     return [
       {
         id: 'user-1',
@@ -341,13 +378,13 @@ export class LeadAssignmentEngine {
         expertise: {
           industries: ['technology', 'manufacturing'],
           companySizes: ['51-200', '201-500'],
-          specialties: ['enterprise_sales']
+          specialties: ['enterprise_sales'],
         },
         performance: {
           conversionRate: 0.25,
           avgResponseTime: 45,
-          customerSatisfaction: 4.2
-        }
+          customerSatisfaction: 4.2,
+        },
       },
       {
         id: 'user-2',
@@ -356,14 +393,14 @@ export class LeadAssignmentEngine {
         expertise: {
           industries: ['healthcare', 'finance'],
           companySizes: ['11-50', '51-200'],
-          specialties: ['c_level_selling', 'consultative_sales']
+          specialties: ['c_level_selling', 'consultative_sales'],
         },
         performance: {
           conversionRate: 0.28,
           avgResponseTime: 30,
-          customerSatisfaction: 4.5
-        }
-      }
+          customerSatisfaction: 4.5,
+        },
+      },
     ]
   }
 
@@ -376,17 +413,21 @@ export class LeadAssignmentEngine {
   ): Promise<TerritoryAssignmentResult> {
     // Check if assignment confidence is acceptable
     if (assignment.confidence < 0.6) {
-      console.warn(`⚠️ Low confidence assignment (${assignment.confidence}) for lead ${leadData.id}`)
+      console.warn(
+        `WARNING Low confidence assignment (${assignment.confidence}) for lead ${leadData.id}`
+      )
     }
-    
+
     // Validate rep has capacity
     const repCapacity = await this.analyzeRepCapacity()
     const assignedRepCapacity = repCapacity[assignment.assignedUserId]
-    
+
     if (assignedRepCapacity && assignedRepCapacity.utilizationRate > 0.9) {
-      console.warn(`⚠️ Assigned rep ${assignment.assignedUserId} is at high capacity (${assignedRepCapacity.utilizationRate})`)
+      console.warn(
+        `WARNING Assigned rep ${assignment.assignedUserId} is at high capacity (${assignedRepCapacity.utilizationRate})`
+      )
     }
-    
+
     return assignment
   }
 
@@ -399,21 +440,20 @@ export class LeadAssignmentEngine {
   ): Promise<void> {
     try {
       // 1. Update lead record with assignment
-      console.log(`📝 Updating lead ${leadData.id} with assignment to ${assignment.assignedUserId}`)
-      
+      console.log(`NOTE Updating lead ${leadData.id} with assignment`)
+
       // 2. Create assignment audit log
-      console.log(`📋 Creating assignment audit log`)
-      
+      console.log(`CLIPBOARD Creating audit log for assignment`)
+
       // 3. Update territory metrics
-      console.log(`📊 Updating territory metrics`)
-      
+      console.log(`CHART Updating territory metrics`)
+
       // 4. Trigger CRM integration
-      console.log(`🔄 Syncing with CRM system`)
-      
+      console.log(`REFRESH Triggering CRM integration`)
+
       // In production, these would be actual database operations
-      
     } catch (error) {
-      console.error('Failed to execute assignment:', error)
+      console.error('ERROR Assignment execution error:', error)
       throw new Error(`Assignment execution failed: ${error}`)
     }
   }
@@ -427,27 +467,26 @@ export class LeadAssignmentEngine {
   ): Promise<void> {
     try {
       // 1. Send assignment notification to rep
-      console.log(`📧 Sending assignment notification to ${assignment.assignedUser.email}`)
-      
+      console.log(`EMAIL Sending assignment notification to ${assignment.assignedUserId}`)
+
       // 2. Schedule follow-up reminders
       const followupTime = new Date(Date.now() + assignment.estimatedResponseTime * 60 * 1000)
-      console.log(`⏰ Scheduling follow-up reminder for ${followupTime.toISOString()}`)
-      
+      console.log(`CLOCK Scheduling follow-up for ${followupTime.toISOString()}`)
+
       // 3. Create initial tasks for rep
-      console.log(`✅ Creating initial tasks for rep`)
-      
+      console.log(`NOTE Creating initial tasks for rep`)
+
       // 4. Add to territory visit planning
       if (assignment.territoryId) {
-        console.log(`🗺️ Adding to territory ${assignment.territoryId} visit planning`)
+        console.log(`MAP Adding to territory ${assignment.territoryId} visit planning`)
       }
-      
+
       // 5. Trigger lead nurturing sequence if appropriate
       if (assignment.confidence < 0.8) {
-        console.log(`🌱 Triggering lead nurturing sequence`)
+        console.log(`PLANT Low confidence (${assignment.confidence}) - triggering nurturing sequence`)
       }
-      
     } catch (error) {
-      console.error('Failed to trigger follow-up workflows:', error)
+      console.error('WARNING Follow-up workflow error (non-critical):', error)
       // Don't throw here - assignment was successful, workflows are secondary
     }
   }
@@ -455,13 +494,21 @@ export class LeadAssignmentEngine {
   /**
    * Fallback assignment when main algorithm fails
    */
-  private static async fallbackAssignment(leadData: Partial<Lead>): Promise<any> {
-    console.log(`🚨 Using fallback assignment for lead ${leadData.id}`)
-    
+  private static async fallbackAssignment(leadData: Partial<Lead>): Promise<{
+    assignedUserId: string
+    assignedUser: unknown
+    territoryId: string | undefined
+    assignmentReason: string
+    confidence: number
+    estimatedResponseTime: number
+    priority: 'high' | 'medium' | 'low'
+  }> {
+    console.warn('WARNING Using fallback assignment for lead', leadData.id)
+
     // Simple round-robin assignment as fallback
     const availableReps = await this.getAvailableReps()
     const selectedRep = availableReps[Math.floor(Math.random() * availableReps.length)]
-    
+
     return {
       assignedUserId: selectedRep.id,
       assignedUser: selectedRep,
@@ -469,7 +516,7 @@ export class LeadAssignmentEngine {
       assignmentReason: 'Fallback round-robin assignment due to system error',
       confidence: 0.5,
       estimatedResponseTime: 120, // 2 hours default
-      priority: 'medium' as const
+      priority: 'medium' as const,
     }
   }
 
@@ -482,30 +529,40 @@ export class LeadAssignmentEngine {
   }
 
   private static isDecisionMakerTitle(title: string): boolean {
-    const decisionMakerKeywords = ['ceo', 'cto', 'cfo', 'president', 'director', 'vp', 'vice president', 'manager', 'head of']
-    return decisionMakerKeywords.some(keyword => title.toLowerCase().includes(keyword))
+    const decisionMakerKeywords = [
+      'ceo',
+      'cto',
+      'cfo',
+      'president',
+      'director',
+      'vp',
+      'vice president',
+      'manager',
+      'head of',
+    ]
+    return decisionMakerKeywords.some((keyword) => title.toLowerCase().includes(keyword))
   }
 
   private static async geocodeAddress(
-    address?: string, 
-    city?: string, 
-    state?: string, 
+    address?: string,
+    city?: string,
+    state?: string,
     returnLongitude: boolean = false
   ): Promise<number | undefined> {
     // Mock geocoding - in production, use Google Maps or other geocoding service
     if (!city || !state) return undefined
-    
+
     // Mock coordinates for demonstration
     const mockCoordinates: { [key: string]: { lat: number; lng: number } } = {
-      'New York, NY': { lat: 40.7128, lng: -74.0060 },
+      'New York, NY': { lat: 40.7128, lng: -74.006 },
       'San Francisco, CA': { lat: 37.7749, lng: -122.4194 },
       'Los Angeles, CA': { lat: 34.0522, lng: -118.2437 },
-      'Chicago, IL': { lat: 41.8781, lng: -87.6298 }
+      'Chicago, IL': { lat: 41.8781, lng: -87.6298 },
     }
-    
+
     const key = `${city}, ${state}`
     const coords = mockCoordinates[key] || { lat: 39.8283, lng: -98.5795 } // Default to center of US
-    
+
     return returnLongitude ? coords.lng : coords.lat
   }
 }

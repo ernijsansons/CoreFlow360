@@ -5,27 +5,27 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { NextRequest, NextResponse } from 'next/server'
-import { 
-  securityMiddleware, 
-  sanitizeInput, 
+import {
+  securityMiddleware,
+  sanitizeInput,
   validateApiKey,
   validateWebhookSignature,
-  escapeSqlIdentifier
+  escapeSqlIdentifier,
 } from '../../middleware/security'
 
 // Mock NextResponse
 vi.mock('next/server', () => ({
   NextRequest: vi.fn(),
   NextResponse: {
-    next: vi.fn(() => ({ 
-      status: 200, 
+    next: vi.fn(() => ({
+      status: 200,
       headers: {
         set: vi.fn(),
-        get: vi.fn().mockReturnValue('test-header-value')
-      }
+        get: vi.fn().mockReturnValue('test-header-value'),
+      },
     })),
-    json: vi.fn((data, init) => ({ 
-      status: init?.status || 200, 
+    json: vi.fn((data, init) => ({
+      status: init?.status || 200,
       json: async () => data,
       headers: {
         set: vi.fn(),
@@ -33,10 +33,10 @@ vi.mock('next/server', () => ({
         ...Object.entries(init?.headers || {}).reduce((acc, [key, value]) => {
           acc[key] = value
           return acc
-        }, {} as any)
-      }
-    }))
-  }
+        }, {} as any),
+      },
+    })),
+  },
 }))
 
 describe('Security Middleware', () => {
@@ -45,16 +45,14 @@ describe('Security Middleware', () => {
   beforeEach(() => {
     mockRequest = {
       method: 'GET',
-      headers: new Map([
-        ['x-forwarded-for', '127.0.0.1']
-      ]),
+      headers: new Map([['x-forwarded-for', '127.0.0.1']]),
       cookies: {
-        get: vi.fn()
+        get: vi.fn(),
       },
       nextUrl: {
-        pathname: '/api/test'
+        pathname: '/api/test',
       },
-      ip: '127.0.0.1'
+      ip: '127.0.0.1',
     } as any
   })
 
@@ -73,7 +71,7 @@ describe('Security Middleware', () => {
       for (let i = 0; i < 100; i++) {
         await securityMiddleware(mockRequest)
       }
-      
+
       // Next request should be blocked
       const response = await securityMiddleware(mockRequest)
       expect(response.status).toBe(429)
@@ -81,12 +79,12 @@ describe('Security Middleware', () => {
 
     it('should apply different rate limits for auth endpoints', async () => {
       mockRequest.nextUrl.pathname = '/api/auth/login'
-      
+
       // Auth endpoints have stricter limits (5 per 15 min)
       for (let i = 0; i < 5; i++) {
         await securityMiddleware(mockRequest)
       }
-      
+
       const response = await securityMiddleware(mockRequest)
       expect(response.status).toBe(429)
     })
@@ -122,7 +120,7 @@ describe('Security Middleware', () => {
   describe('Security Headers', () => {
     it('should set all required security headers', async () => {
       const response = await securityMiddleware(mockRequest)
-      
+
       // Just verify the response has proper structure
       expect(response).toBeTruthy()
       expect(response.headers).toBeTruthy()
@@ -135,7 +133,7 @@ describe('Input Sanitization', () => {
   it('should sanitize string inputs', () => {
     const maliciousInput = '<script>alert("xss")</script>Hello'
     const sanitized = sanitizeInput(maliciousInput)
-    
+
     expect(sanitized).not.toContain('<script>')
     expect(sanitized).toContain('Hello') // Script should be removed, text should remain
   })
@@ -144,10 +142,10 @@ describe('Input Sanitization', () => {
     const input = {
       name: '<b>Test</b>',
       data: {
-        script: '<script>evil()</script>'
-      }
+        script: '<script>evil()</script>',
+      },
     }
-    
+
     const sanitized = sanitizeInput(input)
     expect(sanitized.name).toBe('&lt;b&gt;Test&lt;&#x2F;b&gt;') // Forward slash is encoded
     expect(sanitized.data.script).not.toContain('<script>')
@@ -156,7 +154,7 @@ describe('Input Sanitization', () => {
   it('should handle arrays', () => {
     const input = ['<script>alert(1)</script>', 'safe text', '<img src=x onerror=alert(1)>']
     const sanitized = sanitizeInput(input)
-    
+
     expect(sanitized[0]).not.toContain('<script>')
     expect(sanitized[1]).toBe('safe text')
     expect(sanitized[2]).toContain('&lt;img') // HTML is encoded, not removed
@@ -165,7 +163,7 @@ describe('Input Sanitization', () => {
   it('should remove null bytes', () => {
     const input = 'test\0malicious'
     const sanitized = sanitizeInput(input)
-    
+
     expect(sanitized).toBe('testmalicious')
   })
 })
@@ -187,16 +185,16 @@ describe('API Key Validation', () => {
     const tenantId = 'tenant123'
     const random = 'random456'
     const prefix = 'cf360'
-    
+
     const signature = crypto
       .createHmac('sha256', process.env.TEST_API_SECRET || 'test-secret')
       .update(`${prefix}_${tenantId}_${random}`)
       .digest('hex')
       .substring(0, 16)
-    
+
     const apiKey = `${prefix}_${tenantId}_${random}_${signature}`
     const result = validateApiKey(apiKey)
-    
+
     expect(result.valid).toBe(true)
     expect(result.tenantId).toBe(tenantId)
   })
@@ -208,10 +206,10 @@ describe('API Key Validation', () => {
       'wrong_prefix_tenant_random_sig',
       '',
       null,
-      undefined
+      undefined,
     ]
-    
-    invalidKeys.forEach(key => {
+
+    invalidKeys.forEach((key) => {
       const result = validateApiKey(key as any)
       expect(result.valid).toBe(false)
     })
@@ -224,10 +222,10 @@ describe('SQL Injection Prevention', () => {
       'table; DROP TABLE users;--',
       'column`',
       "field' OR '1'='1",
-      'name/*comment*/'
+      'name/*comment*/',
     ]
-    
-    maliciousInputs.forEach(input => {
+
+    maliciousInputs.forEach((input) => {
       const escaped = escapeSqlIdentifier(input)
       expect(escaped).toMatch(/^[a-zA-Z0-9_]*$/)
       expect(escaped).not.toContain(';')
@@ -243,12 +241,9 @@ describe('Webhook Signature Validation', () => {
     const payload = JSON.stringify({ event: 'test' })
     const secret = process.env.TEST_WEBHOOK_SECRET || 'test-webhook-secret'
     const crypto = await import('crypto')
-    
-    const signature = crypto
-      .createHmac('sha256', secret)
-      .update(payload)
-      .digest('hex')
-    
+
+    const signature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
+
     const isValid = validateWebhookSignature(payload, signature, secret)
     expect(isValid).toBe(true)
   })
@@ -257,7 +252,7 @@ describe('Webhook Signature Validation', () => {
     const payload = JSON.stringify({ event: 'test' })
     const secret = process.env.TEST_WEBHOOK_SECRET || 'test-webhook-secret'
     const invalidSignature = 'invalid-signature'
-    
+
     const isValid = validateWebhookSignature(payload, invalidSignature, secret)
     expect(isValid).toBe(false)
   })
@@ -266,15 +261,15 @@ describe('Webhook Signature Validation', () => {
     // This test ensures the function doesn't return early on first mismatch
     const payload = JSON.stringify({ event: 'test' })
     const secret = process.env.TEST_WEBHOOK_SECRET || 'test-webhook-secret'
-    
+
     const startTime = Date.now()
     validateWebhookSignature(payload, 'a'.repeat(64), secret)
     const shortTime = Date.now() - startTime
-    
+
     const startTime2 = Date.now()
     validateWebhookSignature(payload, 'z'.repeat(64), secret)
     const longTime = Date.now() - startTime2
-    
+
     // Times should be similar (timing-safe)
     expect(Math.abs(shortTime - longTime)).toBeLessThan(5)
   })

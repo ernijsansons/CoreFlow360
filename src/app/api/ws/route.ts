@@ -8,13 +8,11 @@ import { Server } from 'socket.io'
 import { createServer } from 'http'
 import { prisma } from '@/lib/db'
 
-
-
 // Note: Next.js doesn't support WebSocket in App Router directly
 // This is a placeholder for WebSocket implementation
 // In production, you'd use a separate WebSocket server or service like Pusher/Ably
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // For production WebSocket, consider:
   // 1. Separate WebSocket server (Node.js + Socket.io)
   // 2. Managed services (Pusher, Ably, Supabase Realtime)

@@ -44,18 +44,15 @@ export interface AuthWrapperOptions {
  * @param options - Additional authorization options
  * @returns Protected API route handler
  */
-export function withAuth(
-  handler: AuthenticatedHandler,
-  options: AuthWrapperOptions = {}
-) {
+export function withAuth(handler: AuthenticatedHandler, options: AuthWrapperOptions = {}) {
   return async (request: NextRequest): Promise<NextResponse> => {
     try {
       // Method validation
       if (options.allowedMethods && !options.allowedMethods.includes(request.method)) {
         return NextResponse.json(
-          { 
+          {
             error: 'Method not allowed',
-            allowed: options.allowedMethods 
+            allowed: options.allowedMethods,
           },
           { status: 405 }
         )
@@ -68,9 +65,9 @@ export function withAuth(
 
         if (!csrfToken || !sessionToken || !validateCsrfToken(csrfToken, sessionToken)) {
           return NextResponse.json(
-            { 
+            {
               error: 'Invalid CSRF token',
-              code: 'CSRF_VALIDATION_FAILED' 
+              code: 'CSRF_VALIDATION_FAILED',
             },
             { status: 403 }
           )
@@ -79,13 +76,13 @@ export function withAuth(
 
       // Get session
       const session = await getServerSession()
-      
+
       // Authentication check
       if (!session?.user) {
         return NextResponse.json(
-          { 
+          {
             error: 'Authentication required',
-            code: 'UNAUTHORIZED' 
+            code: 'UNAUTHORIZED',
           },
           { status: 401 }
         )
@@ -94,9 +91,9 @@ export function withAuth(
       // Ensure session has required fields
       if (!session.user.id || !session.user.tenantId) {
         return NextResponse.json(
-          { 
+          {
             error: 'Invalid session data',
-            code: 'INVALID_SESSION' 
+            code: 'INVALID_SESSION',
           },
           { status: 401 }
         )
@@ -105,11 +102,11 @@ export function withAuth(
       // Role-based authorization
       if (options.requireRole && session.user.role !== options.requireRole) {
         return NextResponse.json(
-          { 
+          {
             error: 'Insufficient role permissions',
             required: options.requireRole,
             current: session.user.role,
-            code: 'INSUFFICIENT_ROLE'
+            code: 'INSUFFICIENT_ROLE',
           },
           { status: 403 }
         )
@@ -118,17 +115,17 @@ export function withAuth(
       // Permission-based authorization
       if (options.requirePermissions && options.requirePermissions.length > 0) {
         const userPermissions = session.user.permissions || []
-        const hasRequiredPermissions = options.requirePermissions.every(
-          permission => userPermissions.includes(permission)
+        const hasRequiredPermissions = options.requirePermissions.every((permission) =>
+          userPermissions.includes(permission)
         )
 
         if (!hasRequiredPermissions) {
           return NextResponse.json(
-            { 
+            {
               error: 'Insufficient permissions',
               required: options.requirePermissions,
               current: userPermissions,
-              code: 'INSUFFICIENT_PERMISSIONS'
+              code: 'INSUFFICIENT_PERMISSIONS',
             },
             { status: 403 }
           )
@@ -139,19 +136,16 @@ export function withAuth(
       const enhancedRequest = Object.assign(request, {
         user: session.user,
         tenantId: session.user.tenantId,
-        requestId: request.headers.get('x-request-id') || crypto.randomUUID()
+        requestId: request.headers.get('x-request-id') || crypto.randomUUID(),
       })
 
       // Call the protected handler
       return await handler(enhancedRequest, session as AuthenticatedSession)
-
     } catch (error) {
-      console.error('Authentication wrapper error:', error)
-      
       return NextResponse.json(
-        { 
+        {
           error: 'Authentication service error',
-          code: 'AUTH_SERVICE_ERROR' 
+          code: 'AUTH_SERVICE_ERROR',
         },
         { status: 500 }
       )
@@ -165,7 +159,7 @@ export function withAuth(
 export function withAdminAuth(handler: AuthenticatedHandler) {
   return withAuth(handler, {
     requireRole: 'admin',
-    requirePermissions: ['admin:read', 'admin:write']
+    requirePermissions: ['admin:read', 'admin:write'],
   })
 }
 
@@ -173,8 +167,7 @@ export function withAdminAuth(handler: AuthenticatedHandler) {
  * Wrapper for API routes that require specific permissions
  */
 export function withPermissions(permissions: string[]) {
-  return (handler: AuthenticatedHandler) => 
-    withAuth(handler, { requirePermissions: permissions })
+  return (handler: AuthenticatedHandler) => withAuth(handler, { requirePermissions: permissions })
 }
 
 /**
@@ -182,14 +175,14 @@ export function withPermissions(permissions: string[]) {
  */
 export function withTenantAuth(handler: AuthenticatedHandler) {
   return withAuth(handler, {
-    requirePermissions: ['tenant:read']
+    requirePermissions: ['tenant:read'],
   })
 }
 
 /**
  * Type guard to check if session is properly authenticated
  */
-export function isAuthenticatedSession(session: any): session is AuthenticatedSession {
+export function isAuthenticatedSession(session: unknown): session is AuthenticatedSession {
   return (
     session &&
     session.user &&

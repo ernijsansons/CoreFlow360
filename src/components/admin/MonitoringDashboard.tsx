@@ -6,18 +6,34 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { 
-  ChartBarIcon, 
-  CpuChipIcon, 
+import {
+  ChartBarIcon,
+  CpuChipIcon,
   CircleStackIcon,
   ServerIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
   ClockIcon,
   ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon
+  ArrowTrendingDownIcon,
 } from '@heroicons/react/24/outline'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell } from 'recharts'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts'
 
 interface MetricValue {
   name: string
@@ -62,7 +78,7 @@ export default function MonitoringDashboard() {
     try {
       const [metricsRes, healthRes] = await Promise.all([
         fetch('/api/metrics?format=json'),
-        fetch('/api/health?detailed=true')
+        fetch('/api/health?detailed=true'),
       ])
 
       if (!metricsRes.ok) throw new Error('Failed to fetch metrics')
@@ -77,15 +93,15 @@ export default function MonitoringDashboard() {
         components: {
           database: healthData.services?.database?.status === 'healthy' ? 'online' : 'offline',
           redis: healthData.services?.redis?.status === 'healthy' ? 'online' : 'offline',
-          application: 'running'
+          application: 'running',
         },
         uptime: healthData.uptime,
-        version: healthData.version
+        version: healthData.version,
       })
 
       // Generate mock alerts for demo
       generateMockAlerts()
-      
+
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch data')
@@ -103,7 +119,7 @@ export default function MonitoringDashboard() {
         message: 'High memory usage detected (87%)',
         timestamp: new Date(Date.now() - 300000).toISOString(),
         component: 'system',
-        resolved: false
+        resolved: false,
       },
       {
         id: '2',
@@ -111,7 +127,7 @@ export default function MonitoringDashboard() {
         message: 'Database backup completed successfully',
         timestamp: new Date(Date.now() - 3600000).toISOString(),
         component: 'database',
-        resolved: true
+        resolved: true,
       },
       {
         id: '3',
@@ -119,8 +135,8 @@ export default function MonitoringDashboard() {
         message: 'External API timeout detected',
         timestamp: new Date(Date.now() - 900000).toISOString(),
         component: 'external',
-        resolved: false
-      }
+        resolved: false,
+      },
     ]
     setAlerts(mockAlerts)
   }
@@ -128,7 +144,7 @@ export default function MonitoringDashboard() {
   // Auto-refresh effect
   useEffect(() => {
     fetchMetrics()
-    
+
     if (autoRefresh) {
       const interval = setInterval(fetchMetrics, refreshInterval)
       return () => clearInterval(interval)
@@ -140,17 +156,17 @@ export default function MonitoringDashboard() {
     if (!metrics.length) return null
 
     // Find specific metrics
-    const httpRequests = metrics.find(m => m.name.includes('http_requests_total'))
-    const dbQueries = metrics.find(m => m.name.includes('db_queries_total'))
-    const cacheHits = metrics.find(m => m.name.includes('cache_hits_total'))
-    const errors = metrics.find(m => m.name.includes('errors_total'))
-    const memoryUsage = metrics.find(m => m.name.includes('memory_usage_bytes'))
+    const httpRequests = metrics.find((m) => m.name.includes('http_requests_total'))
+    const dbQueries = metrics.find((m) => m.name.includes('db_queries_total'))
+    const cacheHits = metrics.find((m) => m.name.includes('cache_hits_total'))
+    const errors = metrics.find((m) => m.name.includes('errors_total'))
+    const memoryUsage = metrics.find((m) => m.name.includes('memory_usage_bytes'))
 
     // Generate time series data for charts
     const generateTimeSeriesData = (baseValue: number, points = 24) => {
       return Array.from({ length: points }, (_, i) => ({
         time: new Date(Date.now() - (points - i - 1) * 3600000).toLocaleTimeString(),
-        value: Math.max(0, baseValue + (Math.random() - 0.5) * baseValue * 0.3)
+        value: Math.max(0, baseValue + (Math.random() - 0.5) * baseValue * 0.3),
       }))
     }
 
@@ -160,7 +176,7 @@ export default function MonitoringDashboard() {
       cacheHitRate: generateTimeSeriesData(85 + Math.random() * 10), // 85-95% hit rate
       errorRate: generateTimeSeriesData(Math.random() * 5), // 0-5% error rate
       responseTime: generateTimeSeriesData(150 + Math.random() * 100), // 150-250ms
-      memoryUsage: generateTimeSeriesData(70 + Math.random() * 20) // 70-90% usage
+      memoryUsage: generateTimeSeriesData(70 + Math.random() * 20), // 70-90% usage
     }
   }, [metrics])
 
@@ -202,7 +218,7 @@ export default function MonitoringDashboard() {
     const days = Math.floor(seconds / 86400)
     const hours = Math.floor((seconds % 86400) / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
-    
+
     if (days > 0) return `${days}d ${hours}h ${minutes}m`
     if (hours > 0) return `${hours}h ${minutes}m`
     return `${minutes}m`
@@ -210,23 +226,23 @@ export default function MonitoringDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-indigo-600"></div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-md p-4">
+      <div className="rounded-md border border-red-200 bg-red-50 p-4">
         <div className="flex">
           <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
           <div className="ml-3">
             <h3 className="text-sm font-medium text-red-800">Error loading monitoring data</h3>
-            <p className="text-sm text-red-700 mt-1">{error}</p>
+            <p className="mt-1 text-sm text-red-700">{error}</p>
             <button
               onClick={fetchMetrics}
-              className="mt-2 bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded text-sm"
+              className="mt-2 rounded bg-red-100 px-3 py-1 text-sm text-red-800 hover:bg-red-200"
             >
               Retry
             </button>
@@ -239,12 +255,12 @@ export default function MonitoringDashboard() {
   return (
     <div className="space-y-6">
       {/* Header with controls */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">System Monitoring</h1>
           <p className="text-gray-600">Real-time system metrics and health monitoring</p>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <label className="flex items-center space-x-2">
             <input
@@ -255,21 +271,21 @@ export default function MonitoringDashboard() {
             />
             <span className="text-sm text-gray-700">Auto-refresh</span>
           </label>
-          
+
           <select
             value={refreshInterval}
             onChange={(e) => setRefreshInterval(Number(e.target.value))}
-            className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+            className="rounded-md border border-gray-300 px-3 py-1 text-sm"
           >
             <option value={10000}>10s</option>
             <option value={30000}>30s</option>
             <option value={60000}>1m</option>
             <option value={300000}>5m</option>
           </select>
-          
+
           <button
             onClick={fetchMetrics}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm"
+            className="rounded-md bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
           >
             Refresh Now
           </button>
@@ -278,8 +294,8 @@ export default function MonitoringDashboard() {
 
       {/* System Health Overview */}
       {health && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-lg bg-white p-6 shadow">
             <div className="flex items-center">
               <ServerIcon className="h-8 w-8 text-indigo-600" />
               <div className="ml-4">
@@ -292,33 +308,41 @@ export default function MonitoringDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="rounded-lg bg-white p-6 shadow">
             <div className="flex items-center">
               <CircleStackIcon className="h-8 w-8 text-indigo-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Database</p>
-                <div className={`flex items-center space-x-2 ${getStatusColor(health.components.database)}`}>
+                <div
+                  className={`flex items-center space-x-2 ${getStatusColor(health.components.database)}`}
+                >
                   {getStatusIcon(health.components.database)}
-                  <span className="text-lg font-semibold capitalize">{health.components.database}</span>
+                  <span className="text-lg font-semibold capitalize">
+                    {health.components.database}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="rounded-lg bg-white p-6 shadow">
             <div className="flex items-center">
               <CpuChipIcon className="h-8 w-8 text-indigo-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Application</p>
-                <div className={`flex items-center space-x-2 ${getStatusColor(health.components.application)}`}>
+                <div
+                  className={`flex items-center space-x-2 ${getStatusColor(health.components.application)}`}
+                >
                   {getStatusIcon(health.components.application)}
-                  <span className="text-lg font-semibold capitalize">{health.components.application}</span>
+                  <span className="text-lg font-semibold capitalize">
+                    {health.components.application}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="rounded-lg bg-white p-6 shadow">
             <div className="flex items-center">
               <ClockIcon className="h-8 w-8 text-indigo-600" />
               <div className="ml-4">
@@ -333,24 +357,30 @@ export default function MonitoringDashboard() {
 
       {/* Metrics Charts */}
       {processedMetrics && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* HTTP Requests */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">HTTP Requests per Hour</h3>
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h3 className="mb-4 text-lg font-medium text-gray-900">HTTP Requests per Hour</h3>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={processedMetrics.httpRequests}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="time" />
                 <YAxis />
                 <Tooltip />
-                <Area type="monotone" dataKey="value" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.6} />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#4f46e5"
+                  fill="#4f46e5"
+                  fillOpacity={0.6}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
 
           {/* Response Time */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Average Response Time (ms)</h3>
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h3 className="mb-4 text-lg font-medium text-gray-900">Average Response Time (ms)</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={processedMetrics.responseTime}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -363,8 +393,8 @@ export default function MonitoringDashboard() {
           </div>
 
           {/* Database Queries */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Database Queries per Hour</h3>
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h3 className="mb-4 text-lg font-medium text-gray-900">Database Queries per Hour</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={processedMetrics.dbQueries}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -377,8 +407,8 @@ export default function MonitoringDashboard() {
           </div>
 
           {/* Cache Hit Rate */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Cache Hit Rate (%)</h3>
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h3 className="mb-4 text-lg font-medium text-gray-900">Cache Hit Rate (%)</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={processedMetrics.cacheHitRate}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -393,8 +423,8 @@ export default function MonitoringDashboard() {
       )}
 
       {/* Recent Alerts */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="rounded-lg bg-white shadow">
+        <div className="border-b border-gray-200 px-6 py-4">
           <h3 className="text-lg font-medium text-gray-900">Recent Alerts</h3>
         </div>
         <div className="divide-y divide-gray-200">
@@ -402,15 +432,21 @@ export default function MonitoringDashboard() {
             <div key={alert.id} className="px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className={`
-                    w-2 h-2 rounded-full
-                    ${alert.severity === 'critical' ? 'bg-red-500' :
-                      alert.severity === 'error' ? 'bg-red-400' :
-                      alert.severity === 'warning' ? 'bg-yellow-400' : 'bg-blue-400'}
-                    ${alert.resolved ? 'opacity-50' : ''}
-                  `} />
+                  <div
+                    className={`h-2 w-2 rounded-full ${
+                      alert.severity === 'critical'
+                        ? 'bg-red-500'
+                        : alert.severity === 'error'
+                          ? 'bg-red-400'
+                          : alert.severity === 'warning'
+                            ? 'bg-yellow-400'
+                            : 'bg-blue-400'
+                    } ${alert.resolved ? 'opacity-50' : ''} `}
+                  />
                   <div>
-                    <p className={`text-sm font-medium ${alert.resolved ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
+                    <p
+                      className={`text-sm font-medium ${alert.resolved ? 'text-gray-500 line-through' : 'text-gray-900'}`}
+                    >
                       {alert.message}
                     </p>
                     <p className="text-xs text-gray-500">
@@ -419,16 +455,21 @@ export default function MonitoringDashboard() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className={`
-                    px-2 py-1 text-xs rounded-full
-                    ${alert.severity === 'critical' ? 'bg-red-100 text-red-800' :
-                      alert.severity === 'error' ? 'bg-red-100 text-red-700' :
-                      alert.severity === 'warning' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}
-                  `}>
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs ${
+                      alert.severity === 'critical'
+                        ? 'bg-red-100 text-red-800'
+                        : alert.severity === 'error'
+                          ? 'bg-red-100 text-red-700'
+                          : alert.severity === 'warning'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-blue-100 text-blue-800'
+                    } `}
+                  >
                     {alert.severity}
                   </span>
                   {alert.resolved && (
-                    <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                    <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">
                       Resolved
                     </span>
                   )}

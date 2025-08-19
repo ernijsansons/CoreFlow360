@@ -12,19 +12,15 @@ const getWsServer = async () => {
     const { wsServer } = await import('@/server/websocket-server')
     return wsServer
   } catch (error) {
-    console.warn('WebSocket server not available:', error.message)
     return null
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await auth()
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Get WebSocket server status
@@ -34,7 +30,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
       metrics: wsServer ? wsServer.getMetrics() : null,
       connectedClients: wsServer ? wsServer.getConnectedClients().length : 0,
-      version: '1.0.0'
+      version: '1.0.0',
     }
 
     // If user is admin, include detailed client information
@@ -43,24 +39,19 @@ export async function GET(request: NextRequest) {
       const clients = wsServer.getConnectedClients()
       return NextResponse.json({
         ...status,
-        clients: clients.map(client => ({
+        clients: clients.map((client) => ({
           id: client.id,
           tenantId: client.tenantId,
           subscriptions: client.subscriptions,
           lastActivity: client.lastActivity,
-          connectionDuration: Date.now() - new Date(client.lastActivity).getTime()
-        }))
+          connectionDuration: Date.now() - new Date(client.lastActivity).getTime(),
+        })),
       })
     }
 
     return NextResponse.json(status)
-
   } catch (error) {
-    console.error('WebSocket status API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -68,19 +59,13 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth()
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Only admins can perform WebSocket operations
     const isAdmin = session.user.role === 'admin' || session.user.email?.includes('admin')
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: 'Forbidden - Admin access required' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
     }
 
     const body = await request.json()
@@ -88,10 +73,7 @@ export async function POST(request: NextRequest) {
 
     const wsServer = await getWsServer()
     if (!wsServer) {
-      return NextResponse.json(
-        { error: 'WebSocket server not available' },
-        { status: 503 }
-      )
+      return NextResponse.json({ error: 'WebSocket server not available' }, { status: 503 })
     }
 
     let result
@@ -104,7 +86,7 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           )
         }
-        
+
         await wsServer.broadcastToTenant(data.tenantId, data.channel, data.message)
         result = { success: true, action: 'broadcast', tenantId: data.tenantId }
         break
@@ -118,24 +100,16 @@ export async function POST(request: NextRequest) {
         break
 
       default:
-        return NextResponse.json(
-          { error: 'Invalid action' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
 
     return NextResponse.json({
       success: true,
       action,
       result,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
-
   } catch (error) {
-    console.error('WebSocket action API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -4,23 +4,23 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { executeSecureOperation } from '@/services/security/secure-operations'
-import { withPerformanceTracking } from '@/utils/performance/performance-tracking'
-import { AuditLogger } from '@/services/security/audit-logging'
-import { cacheManager } from '@/services/cache/cache-manager'
-import { aiServiceManager } from '@/services/ai/ai-service-manager'
+import { executeSecureOperation } from '@/lib/services/security/secure-operations'
+import { withPerformanceTracking } from '@/lib/utils/performance/performance-tracking'
+import { AuditLogger } from '@/lib/services/security/audit-logging'
+import { cacheManager } from '@/lib/services/cache/cache-manager'
+import { aiServiceManager } from '@/lib/services/ai/ai-service-manager'
 
 describe('CoreFlow360 Infrastructure Validation', () => {
   const testTenantId = 'test-tenant-12345'
   const testUserId = 'test-user-12345'
 
   beforeAll(async () => {
-    console.log('🚀 Starting CoreFlow360 Infrastructure Validation...')
-    
+    // // // // // // // // // // // // // // // // // // // // // console.log('🚀 Starting CoreFlow360 Infrastructure Validation...')
+
     // Create test tenant for security operations
     const { PrismaClient } = await import('@prisma/client')
     const prisma = new PrismaClient()
-    
+
     try {
       await prisma.tenant.create({
         data: {
@@ -32,7 +32,7 @@ describe('CoreFlow360 Infrastructure Validation', () => {
           isActive: true,
         },
       })
-      
+
       // Create test user
       await prisma.user.create({
         data: {
@@ -52,21 +52,21 @@ describe('CoreFlow360 Infrastructure Validation', () => {
   })
 
   afterAll(async () => {
-    console.log('✅ Infrastructure Validation Complete')
-    
+    // // // // // // // // // // // // // // // // // // // // // console.log('✅ Infrastructure Validation Complete')
+
     // Cleanup test tenant
     const { PrismaClient } = await import('@prisma/client')
     const prisma = new PrismaClient()
-    
+
     try {
       // Delete test user first (due to foreign key constraint)
       await prisma.user.delete({
-        where: { id: testUserId }
+        where: { id: testUserId },
       })
-      
+
       // Then delete test tenant
       await prisma.tenant.delete({
-        where: { id: testTenantId }
+        where: { id: testTenantId },
       })
     } catch (error) {
       // Ignore cleanup errors
@@ -82,7 +82,7 @@ describe('CoreFlow360 Infrastructure Validation', () => {
         userId: testUserId,
         operation: 'test_secure_operation',
         entityType: 'test',
-        entityId: 'test-123'
+        entityId: 'test-123',
       }
 
       const result = await executeSecureOperation(context, async () => {
@@ -100,7 +100,7 @@ describe('CoreFlow360 Infrastructure Validation', () => {
         tenantId: '', // Invalid tenant ID
         operation: 'test_security_violation',
         entityType: 'test',
-        entityId: 'test-456'
+        entityId: 'test-456',
       }
 
       const result = await executeSecureOperation(context, async () => {
@@ -114,25 +114,19 @@ describe('CoreFlow360 Infrastructure Validation', () => {
 
   describe('Performance Tracking', () => {
     it('should track performance metrics accurately', async () => {
-      const trackedFunction = withPerformanceTracking(
-        'test_performance_operation',
-        async () => {
-          await new Promise(resolve => setTimeout(resolve, 100)) // 100ms delay
-          return { result: 'performance test' }
-        }
-      )
+      const trackedFunction = withPerformanceTracking('test_performance_operation', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 100)) // 100ms delay
+        return { result: 'performance test' }
+      })
 
       const result = await trackedFunction()
       expect(result).toEqual({ result: 'performance test' })
     })
 
     it('should handle performance tracking failures gracefully', async () => {
-      const trackedFunction = withPerformanceTracking(
-        'test_performance_failure',
-        async () => {
-          throw new Error('Test error')
-        }
-      )
+      const trackedFunction = withPerformanceTracking('test_performance_failure', async () => {
+        throw new Error('Test error')
+      })
 
       await expect(trackedFunction()).rejects.toThrow('Test error')
     })
@@ -167,7 +161,7 @@ describe('CoreFlow360 Infrastructure Validation', () => {
     it('should handle audit log queries', async () => {
       const result = await AuditLogger.query({
         tenantId: testTenantId,
-        limit: 10
+        limit: 10,
       })
 
       expect(result).toHaveProperty('logs')
@@ -218,7 +212,7 @@ describe('CoreFlow360 Infrastructure Validation', () => {
 
     it('should provide health check information', async () => {
       const health = await cacheManager.healthCheck()
-      
+
       expect(health).toHaveProperty('status')
       expect(health).toHaveProperty('tiers')
       expect(health).toHaveProperty('recommendations')
@@ -229,7 +223,7 @@ describe('CoreFlow360 Infrastructure Validation', () => {
   describe('AI Service Manager', () => {
     it('should provide service health information', async () => {
       const health = await aiServiceManager.getServiceHealth()
-      
+
       expect(health).toHaveProperty('openai')
       expect(health).toHaveProperty('anthropic')
       expect(health.openai).toHaveProperty('status')
@@ -238,7 +232,7 @@ describe('CoreFlow360 Infrastructure Validation', () => {
 
     it('should provide cost summaries', async () => {
       const costSummary = await aiServiceManager.getCostSummary(testTenantId, 'day')
-      
+
       expect(costSummary).toHaveProperty('totalCost')
       expect(costSummary).toHaveProperty('breakdown')
       expect(costSummary).toHaveProperty('usage')
@@ -253,14 +247,14 @@ describe('CoreFlow360 Infrastructure Validation', () => {
         userId: testUserId,
         operation: 'integration_test',
         entityType: 'integration',
-        entityId: 'integration-123'
+        entityId: 'integration-123',
       }
 
       const result = await executeSecureOperation(context, async () => {
         return withPerformanceTracking('integration_inner_operation', async () => {
           // Simulate some work
-          await new Promise(resolve => setTimeout(resolve, 50))
-          
+          await new Promise((resolve) => setTimeout(resolve, 50))
+
           // Log an audit event
           await AuditLogger.logCreate(
             testTenantId,
@@ -269,16 +263,16 @@ describe('CoreFlow360 Infrastructure Validation', () => {
             { integrated: true, timestamp: Date.now() },
             testUserId
           )
-          
+
           // Use cache
           await cacheManager.set('integration_cache', { success: true })
           const cached = await cacheManager.get('integration_cache')
-          
+
           return {
             security: 'passed',
             performance: 'tracked',
             audit: 'logged',
-            cache: cached
+            cache: cached,
           }
         })()
       })

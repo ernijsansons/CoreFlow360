@@ -5,7 +5,7 @@
 
 interface WebSocketMessage {
   type: string
-  data: any
+  data: unknown
   timestamp: string
   clientId?: string
 }
@@ -22,7 +22,7 @@ export class CoreFlowWebSocket {
   private url: string
   private options: Required<WebSocketOptions>
   private reconnectAttempts = 0
-  private listeners: Map<string, Set<(data: any) => void>> = new Map()
+  private listeners: Map<string, Set<(data: unknown) => void>> = new Map()
   private pingTimer?: NodeJS.Timeout
   private isConnecting = false
   private connectionState: 'disconnected' | 'connecting' | 'connected' | 'error' = 'disconnected'
@@ -34,7 +34,7 @@ export class CoreFlowWebSocket {
       maxReconnectAttempts: 5,
       pingInterval: 30000,
       debug: false,
-      ...options
+      ...options,
     }
   }
 
@@ -76,7 +76,7 @@ export class CoreFlowWebSocket {
           this.isConnecting = false
           this.connectionState = 'disconnected'
           this.stopPing()
-          
+
           if (!event.wasClean && this.reconnectAttempts < this.options.maxReconnectAttempts) {
             this.scheduleReconnect()
           }
@@ -88,7 +88,6 @@ export class CoreFlowWebSocket {
           this.connectionState = 'error'
           reject(error)
         }
-
       } catch (error) {
         this.isConnecting = false
         this.connectionState = 'error'
@@ -106,11 +105,11 @@ export class CoreFlowWebSocket {
     this.connectionState = 'disconnected'
   }
 
-  subscribe(eventType: string, callback: (data: any) => void): () => void {
+  subscribe(eventType: string, callback: (data: unknown) => void): () => void {
     if (!this.listeners.has(eventType)) {
       this.listeners.set(eventType, new Set())
     }
-    
+
     this.listeners.get(eventType)!.add(callback)
     this.log(`Subscribed to ${eventType}`)
 
@@ -127,7 +126,7 @@ export class CoreFlowWebSocket {
     }
   }
 
-  send(type: string, data: any): void {
+  send(type: string, data: unknown): void {
     if (this.connectionState !== 'connected' || !this.ws) {
       this.log('Cannot send message - not connected')
       return
@@ -136,7 +135,7 @@ export class CoreFlowWebSocket {
     const message: WebSocketMessage = {
       type,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     }
 
     try {
@@ -172,7 +171,7 @@ export class CoreFlowWebSocket {
     // Dispatch to listeners
     const listeners = this.listeners.get(message.type)
     if (listeners) {
-      listeners.forEach(callback => {
+      listeners.forEach((callback) => {
         try {
           callback(message.data)
         } catch (error) {
@@ -204,11 +203,11 @@ export class CoreFlowWebSocket {
   private scheduleReconnect(): void {
     this.reconnectAttempts++
     const delay = this.options.reconnectInterval * Math.pow(1.5, this.reconnectAttempts - 1)
-    
+
     this.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`)
-    
+
     setTimeout(() => {
-      this.connect().catch(error => {
+      this.connect().catch((error) => {
         this.log('Reconnect failed:', error)
         if (this.reconnectAttempts < this.options.maxReconnectAttempts) {
           this.scheduleReconnect()
@@ -217,9 +216,8 @@ export class CoreFlowWebSocket {
     }, delay)
   }
 
-  private log(...args: any[]): void {
+  private log(..._args: unknown[]): void {
     if (this.options.debug) {
-      console.log('[WebSocket]', ...args)
     }
   }
 }
@@ -230,64 +228,65 @@ let globalWebSocket: CoreFlowWebSocket | null = null
 export function getWebSocketClient(): CoreFlowWebSocket {
   if (!globalWebSocket) {
     // Determine WebSocket URL based on current location
-    const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const protocol =
+      typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const host = typeof window !== 'undefined' ? window.location.host : 'localhost:3000'
     const wsUrl = `${protocol}//${host}/api/ws`
-    
+
     globalWebSocket = new CoreFlowWebSocket(wsUrl, {
       debug: process.env.NODE_ENV === 'development',
       reconnectInterval: 2000,
-      maxReconnectAttempts: 10
+      maxReconnectAttempts: 10,
     })
   }
-  
+
   return globalWebSocket
 }
 
 // React hook for WebSocket functionality
 export function useWebSocket() {
   const client = getWebSocketClient()
-  
+
   return {
     client,
-    subscribe: (eventType: string, callback: (data: any) => void) => 
+    subscribe: (eventType: string, callback: (data: unknown) => void) =>
       client.subscribe(eventType, callback),
-    send: (type: string, data: any) => client.send(type, data),
+    send: (type: string, data: unknown) => client.send(type, data),
     connect: () => client.connect(),
     disconnect: () => client.disconnect(),
     isConnected: () => client.isConnected(),
-    connectionState: client.getConnectionState()
+    connectionState: client.getConnectionState(),
   }
 }
 
 // Specific hooks for common real-time data
 export function useLiveMetrics() {
   const { subscribe, connect, isConnected } = useWebSocket()
-  
+
   return {
-    subscribe: (callback: (metrics: any) => void) => subscribe('live_metrics', callback),
+    subscribe: (callback: (metrics: unknown) => void) => subscribe('live_metrics', callback),
     connect,
-    isConnected
+    isConnected,
   }
 }
 
 export function useConversionEvents() {
   const { subscribe, send, connect, isConnected } = useWebSocket()
-  
+
   return {
-    subscribe: (callback: (event: any) => void) => subscribe('conversion_event', callback),
-    trackEvent: (event: any) => send('track_conversion', event),
+    subscribe: (callback: (event: unknown) => void) => subscribe('conversion_event', callback),
+    trackEvent: (event: unknown) => send('track_conversion', event),
     connect,
-    isConnected
+    isConnected,
   }
 }
 
 export function useModuleUpdates() {
   const { subscribe, connect, isConnected } = useWebSocket()
-  
+
   return {
-    subscribe: (callback: (moduleUpdate: any) => void) => subscribe('module_update', callback),
+    subscribe: (callback: (moduleUpdate: unknown) => void) => subscribe('module_update', callback),
     connect,
-    isConnected
+    isConnected,
   }
 }

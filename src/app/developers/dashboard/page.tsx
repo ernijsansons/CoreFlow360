@@ -16,7 +16,7 @@ import {
   Eye,
   CheckCircle,
   AlertCircle,
-  Package
+  Package,
 } from 'lucide-react'
 
 interface DeveloperMetrics {
@@ -78,7 +78,7 @@ export default function DeveloperDashboard() {
     pendingPayout: 16380,
     nextPayoutDate: '2024-02-15',
     revenueGrowth: 34.5,
-    downloadGrowth: 28.2
+    downloadGrowth: 28.2,
   }
 
   const mockAgentPerformance: AgentPerformance[] = [
@@ -91,7 +91,7 @@ export default function DeveloperDashboard() {
       reviews: 247,
       category: 'Sales & CRM',
       monthlyGrowth: 45.2,
-      status: 'published'
+      status: 'published',
     },
     {
       id: 'customer-sentiment-radar',
@@ -102,7 +102,7 @@ export default function DeveloperDashboard() {
       reviews: 156,
       category: 'Sales & CRM',
       monthlyGrowth: 23.8,
-      status: 'published'
+      status: 'published',
     },
     {
       id: 'process-optimizer-beta',
@@ -113,8 +113,8 @@ export default function DeveloperDashboard() {
       reviews: 28,
       category: 'Operations',
       monthlyGrowth: 156.7,
-      status: 'pending'
-    }
+      status: 'pending',
+    },
   ]
 
   const mockRevenueData: RevenueChartData[] = [
@@ -122,7 +122,7 @@ export default function DeveloperDashboard() {
     { date: '2024-01-08', revenue: 21200, downloads: 167 },
     { date: '2024-01-15', revenue: 19800, downloads: 156 },
     { date: '2024-01-22', revenue: 24600, downloads: 189 },
-    { date: '2024-01-29', revenue: 27300, downloads: 203 }
+    { date: '2024-01-29', revenue: 27300, downloads: 203 },
   ]
 
   const mockPayouts: Payout[] = [
@@ -132,7 +132,7 @@ export default function DeveloperDashboard() {
       status: 'pending',
       date: '2024-02-15',
       period: 'Jan 2024',
-      transactionCount: 89
+      transactionCount: 89,
     },
     {
       id: 'payout_002',
@@ -140,7 +140,7 @@ export default function DeveloperDashboard() {
       status: 'completed',
       date: '2024-01-15',
       period: 'Dec 2023',
-      transactionCount: 76
+      transactionCount: 76,
     },
     {
       id: 'payout_003',
@@ -148,8 +148,8 @@ export default function DeveloperDashboard() {
       status: 'completed',
       date: '2023-12-15',
       period: 'Nov 2023',
-      transactionCount: 63
-    }
+      transactionCount: 63,
+    },
   ]
 
   useEffect(() => {
@@ -177,9 +177,9 @@ export default function DeveloperDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-violet-500 border-t-transparent"></div>
           <p className="text-gray-400">Loading your dashboard...</p>
         </div>
       </div>
@@ -193,15 +193,15 @@ export default function DeveloperDashboard() {
         <div className="container mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Developer Dashboard</h1>
+              <h1 className="mb-2 text-3xl font-bold text-white">Developer Dashboard</h1>
               <p className="text-gray-400">Track your AI agent performance and earnings</p>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <select
                 value={selectedPeriod}
-                onChange={(e) => setSelectedPeriod(e.target.value as any)}
-                className="px-4 py-2 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white focus:border-violet-500 focus:outline-none"
+                onChange={(e) => setSelectedPeriod(e.target.value as unknown)}
+                className="rounded-xl border border-gray-700/50 bg-gray-800/50 px-4 py-2 text-white focus:border-violet-500 focus:outline-none"
               >
                 <option value="7d">Last 7 days</option>
                 <option value="30d">Last 30 days</option>
@@ -215,18 +215,20 @@ export default function DeveloperDashboard() {
 
       <div className="container mx-auto px-6 py-8">
         {/* Key Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div className="mb-12 grid grid-cols-2 gap-6 md:grid-cols-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6"
+            className="rounded-2xl border border-gray-700/50 bg-gray-800/40 p-6 backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between mb-2">
-              <DollarSign className="w-8 h-8 text-emerald-500" />
+            <div className="mb-2 flex items-center justify-between">
+              <DollarSign className="h-8 w-8 text-emerald-500" />
               <div className="flex items-center text-sm">
                 {metrics && (
                   <>
-                    {getGrowthIcon(metrics.revenueGrowth)({ className: `w-4 h-4 mr-1 ${getGrowthColor(metrics.revenueGrowth)}` })}
+                    {getGrowthIcon(metrics.revenueGrowth)({
+                      className: `w-4 h-4 mr-1 ${getGrowthColor(metrics.revenueGrowth)}`,
+                    })}
                     <span className={getGrowthColor(metrics.revenueGrowth)}>
                       {Math.abs(metrics.revenueGrowth).toFixed(1)}%
                     </span>
@@ -234,24 +236,26 @@ export default function DeveloperDashboard() {
                 )}
               </div>
             </div>
-            <div className="text-2xl font-bold text-white mb-1">
+            <div className="mb-1 text-2xl font-bold text-white">
               {metrics && formatCurrency(metrics.totalRevenue)}
             </div>
-            <div className="text-gray-400 text-sm">Total Revenue</div>
+            <div className="text-sm text-gray-400">Total Revenue</div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6"
+            className="rounded-2xl border border-gray-700/50 bg-gray-800/40 p-6 backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between mb-2">
-              <Download className="w-8 h-8 text-blue-500" />
+            <div className="mb-2 flex items-center justify-between">
+              <Download className="h-8 w-8 text-blue-500" />
               <div className="flex items-center text-sm">
                 {metrics && (
                   <>
-                    {getGrowthIcon(metrics.downloadGrowth)({ className: `w-4 h-4 mr-1 ${getGrowthColor(metrics.downloadGrowth)}` })}
+                    {getGrowthIcon(metrics.downloadGrowth)({
+                      className: `w-4 h-4 mr-1 ${getGrowthColor(metrics.downloadGrowth)}`,
+                    })}
                     <span className={getGrowthColor(metrics.downloadGrowth)}>
                       {Math.abs(metrics.downloadGrowth).toFixed(1)}%
                     </span>
@@ -259,64 +263,65 @@ export default function DeveloperDashboard() {
                 )}
               </div>
             </div>
-            <div className="text-2xl font-bold text-white mb-1">
+            <div className="mb-1 text-2xl font-bold text-white">
               {metrics?.totalDownloads.toLocaleString()}
             </div>
-            <div className="text-gray-400 text-sm">Total Downloads</div>
+            <div className="text-sm text-gray-400">Total Downloads</div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6"
+            className="rounded-2xl border border-gray-700/50 bg-gray-800/40 p-6 backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between mb-2">
-              <Star className="w-8 h-8 text-yellow-500" />
+            <div className="mb-2 flex items-center justify-between">
+              <Star className="h-8 w-8 text-yellow-500" />
             </div>
-            <div className="text-2xl font-bold text-white mb-1">
+            <div className="mb-1 text-2xl font-bold text-white">
               {metrics?.averageRating.toFixed(1)}
             </div>
-            <div className="text-gray-400 text-sm">Average Rating</div>
+            <div className="text-sm text-gray-400">Average Rating</div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6"
+            className="rounded-2xl border border-gray-700/50 bg-gray-800/40 p-6 backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between mb-2">
-              <Package className="w-8 h-8 text-violet-500" />
+            <div className="mb-2 flex items-center justify-between">
+              <Package className="h-8 w-8 text-violet-500" />
             </div>
-            <div className="text-2xl font-bold text-white mb-1">
-              {metrics?.totalAgents}
-            </div>
-            <div className="text-gray-400 text-sm">Published Agents</div>
+            <div className="mb-1 text-2xl font-bold text-white">{metrics?.totalAgents}</div>
+            <div className="text-sm text-gray-400">Published Agents</div>
           </motion.div>
         </div>
 
         {/* Revenue Chart */}
-        <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 mb-12">
-          <h3 className="text-xl font-semibold text-white mb-6">Revenue Trend</h3>
-          <div className="h-64 flex items-end justify-between space-x-2">
+        <div className="mb-12 rounded-2xl border border-gray-700/50 bg-gray-800/40 p-8 backdrop-blur-sm">
+          <h3 className="mb-6 text-xl font-semibold text-white">Revenue Trend</h3>
+          <div className="flex h-64 items-end justify-between space-x-2">
             {revenueData.map((data, index) => {
-              const maxRevenue = Math.max(...revenueData.map(d => d.revenue))
+              const maxRevenue = Math.max(...revenueData.map((d) => d.revenue))
               const height = (data.revenue / maxRevenue) * 100
-              
+
               return (
                 <motion.div
                   key={data.date}
                   initial={{ height: 0 }}
                   animate={{ height: `${height}%` }}
                   transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="flex-1 bg-gradient-to-t from-violet-600 to-cyan-500 rounded-t-lg min-h-[20px] relative group"
+                  className="group relative min-h-[20px] flex-1 rounded-t-lg bg-gradient-to-t from-violet-600 to-cyan-500"
                 >
-                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 transform rounded bg-gray-900 px-2 py-1 text-xs opacity-0 transition-opacity group-hover:opacity-100">
                     ${(data.revenue / 100).toLocaleString()}
                   </div>
-                  <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">
-                    {new Date(data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 transform text-xs text-gray-400">
+                    {new Date(data.date).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
                   </div>
                 </motion.div>
               )
@@ -324,10 +329,10 @@ export default function DeveloperDashboard() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+        <div className="mb-12 grid gap-8 lg:grid-cols-2">
           {/* Agent Performance */}
-          <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8">
-            <h3 className="text-xl font-semibold text-white mb-6">Agent Performance</h3>
+          <div className="rounded-2xl border border-gray-700/50 bg-gray-800/40 p-8 backdrop-blur-sm">
+            <h3 className="mb-6 text-xl font-semibold text-white">Agent Performance</h3>
             <div className="space-y-4">
               {agentPerformance.map((agent, index) => (
                 <motion.div
@@ -335,24 +340,26 @@ export default function DeveloperDashboard() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex items-center justify-between p-4 bg-gray-900/40 rounded-xl"
+                  className="flex items-center justify-between rounded-xl bg-gray-900/40 p-4"
                 >
                   <div className="flex-1">
-                    <div className="flex items-center mb-2">
-                      <h4 className="font-semibold text-white mr-2">{agent.name}</h4>
+                    <div className="mb-2 flex items-center">
+                      <h4 className="mr-2 font-semibold text-white">{agent.name}</h4>
                       {agent.status === 'published' ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <CheckCircle className="h-4 w-4 text-green-500" />
                       ) : (
-                        <Clock className="w-4 h-4 text-yellow-500" />
+                        <Clock className="h-4 w-4 text-yellow-500" />
                       )}
                     </div>
                     <div className="flex items-center space-x-4 text-sm text-gray-400">
                       <span>{agent.downloads.toLocaleString()} downloads</span>
-                      <span>★ {agent.rating} ({agent.reviews})</span>
+                      <span>
+                        ★ {agent.rating} ({agent.reviews})
+                      </span>
                       <span className="text-emerald-400">{formatCurrency(agent.revenue)}</span>
                     </div>
                   </div>
-                  
+
                   <div className="text-right">
                     <div className={`text-sm font-medium ${getGrowthColor(agent.monthlyGrowth)}`}>
                       +{agent.monthlyGrowth.toFixed(1)}%
@@ -365,8 +372,8 @@ export default function DeveloperDashboard() {
           </div>
 
           {/* Payouts */}
-          <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8">
-            <div className="flex items-center justify-between mb-6">
+          <div className="rounded-2xl border border-gray-700/50 bg-gray-800/40 p-8 backdrop-blur-sm">
+            <div className="mb-6 flex items-center justify-between">
               <h3 className="text-xl font-semibold text-white">Payouts</h3>
               <div className="text-right">
                 <div className="text-lg font-bold text-emerald-400">
@@ -375,7 +382,7 @@ export default function DeveloperDashboard() {
                 <div className="text-xs text-gray-400">Pending payout</div>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               {payouts.map((payout, index) => (
                 <motion.div
@@ -383,26 +390,26 @@ export default function DeveloperDashboard() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex items-center justify-between p-4 bg-gray-900/40 rounded-xl"
+                  className="flex items-center justify-between rounded-xl bg-gray-900/40 p-4"
                 >
                   <div>
-                    <div className="font-semibold text-white mb-1">{payout.period}</div>
+                    <div className="mb-1 font-semibold text-white">{payout.period}</div>
                     <div className="text-sm text-gray-400">
                       {payout.transactionCount} transactions
                     </div>
                   </div>
-                  
+
                   <div className="text-right">
-                    <div className="font-bold text-white mb-1">
-                      {formatCurrency(payout.amount)}
-                    </div>
-                    <div className={`text-xs px-2 py-1 rounded-full ${
-                      payout.status === 'completed' 
-                        ? 'bg-green-600/20 text-green-400'
-                        : payout.status === 'processing'
-                        ? 'bg-yellow-600/20 text-yellow-400'
-                        : 'bg-gray-600/20 text-gray-400'
-                    }`}>
+                    <div className="mb-1 font-bold text-white">{formatCurrency(payout.amount)}</div>
+                    <div
+                      className={`rounded-full px-2 py-1 text-xs ${
+                        payout.status === 'completed'
+                          ? 'bg-green-600/20 text-green-400'
+                          : payout.status === 'processing'
+                            ? 'bg-yellow-600/20 text-yellow-400'
+                            : 'bg-gray-600/20 text-gray-400'
+                      }`}
+                    >
                       {payout.status}
                     </div>
                   </div>
@@ -411,7 +418,7 @@ export default function DeveloperDashboard() {
             </div>
 
             {metrics && (
-              <div className="mt-6 pt-4 border-t border-gray-700/50">
+              <div className="mt-6 border-t border-gray-700/50 pt-4">
                 <div className="text-center text-sm text-gray-400">
                   Next payout: {new Date(metrics.nextPayoutDate).toLocaleDateString()}
                 </div>
@@ -421,30 +428,36 @@ export default function DeveloperDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-gradient-to-br from-violet-600/20 to-violet-800/20 border border-violet-500/30 rounded-2xl p-6 text-center">
-            <Package className="w-12 h-12 text-violet-400 mx-auto mb-4" />
-            <h4 className="text-lg font-semibold text-white mb-2">Submit New Agent</h4>
-            <p className="text-gray-300 text-sm mb-4">Upload your latest AI agent to the marketplace</p>
-            <button className="bg-gradient-to-r from-violet-600 to-purple-600 text-white px-6 py-2 rounded-xl font-medium">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-600/20 to-violet-800/20 p-6 text-center">
+            <Package className="mx-auto mb-4 h-12 w-12 text-violet-400" />
+            <h4 className="mb-2 text-lg font-semibold text-white">Submit New Agent</h4>
+            <p className="mb-4 text-sm text-gray-300">
+              Upload your latest AI agent to the marketplace
+            </p>
+            <button className="rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-2 font-medium text-white">
               Submit Agent
             </button>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 border border-blue-500/30 rounded-2xl p-6 text-center">
-            <BarChart3 className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-            <h4 className="text-lg font-semibold text-white mb-2">View Analytics</h4>
-            <p className="text-gray-300 text-sm mb-4">Detailed insights into user behavior and engagement</p>
-            <button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-2 rounded-xl font-medium">
+          <div className="rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-600/20 to-blue-800/20 p-6 text-center">
+            <BarChart3 className="mx-auto mb-4 h-12 w-12 text-blue-400" />
+            <h4 className="mb-2 text-lg font-semibold text-white">View Analytics</h4>
+            <p className="mb-4 text-sm text-gray-300">
+              Detailed insights into user behavior and engagement
+            </p>
+            <button className="rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-2 font-medium text-white">
               View Analytics
             </button>
           </div>
 
-          <div className="bg-gradient-to-br from-emerald-600/20 to-emerald-800/20 border border-emerald-500/30 rounded-2xl p-6 text-center">
-            <Users className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-            <h4 className="text-lg font-semibold text-white mb-2">Developer Community</h4>
-            <p className="text-gray-300 text-sm mb-4">Connect with other developers and share insights</p>
-            <button className="bg-gradient-to-r from-emerald-600 to-green-600 text-white px-6 py-2 rounded-xl font-medium">
+          <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-600/20 to-emerald-800/20 p-6 text-center">
+            <Users className="mx-auto mb-4 h-12 w-12 text-emerald-400" />
+            <h4 className="mb-2 text-lg font-semibold text-white">Developer Community</h4>
+            <p className="mb-4 text-sm text-gray-300">
+              Connect with other developers and share insights
+            </p>
+            <button className="rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 px-6 py-2 font-medium text-white">
               Join Community
             </button>
           </div>

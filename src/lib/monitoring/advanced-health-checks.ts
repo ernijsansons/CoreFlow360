@@ -7,14 +7,20 @@ import { prisma } from '@/lib/db'
 import { circuitBreakerRegistry } from '@/lib/resilience/circuit-breaker'
 
 export type HealthStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unknown'
-export type ComponentType = 'database' | 'redis' | 'external_api' | 'filesystem' | 'memory' | 'custom'
+export type ComponentType =
+  | 'database'
+  | 'redis'
+  | 'external_api'
+  | 'filesystem'
+  | 'memory'
+  | 'custom'
 
 export interface HealthCheckResult {
   name: string
   status: HealthStatus
   responseTime: number
   message?: string
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   timestamp: number
   lastHealthy?: number
   lastUnhealthy?: number
@@ -57,7 +63,7 @@ export abstract class HealthCheck {
     status: HealthStatus,
     responseTime: number,
     message?: string,
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   ): HealthCheckResult {
     return {
       name: this.config.name,
@@ -65,7 +71,7 @@ export abstract class HealthCheck {
       responseTime,
       message,
       details,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }
   }
 
@@ -74,7 +80,7 @@ export abstract class HealthCheck {
       operation(),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Health check timeout')), this.config.timeout)
-      )
+      ),
     ])
   }
 }
@@ -90,7 +96,7 @@ export class DatabaseHealthCheck extends HealthCheck {
       await this.withTimeout(async () => {
         // Test basic connectivity
         await prisma.$queryRaw`SELECT 1 as test`
-        
+
         // Test write capability
         const testRecord = await prisma.$queryRaw`
           SELECT COUNT(*) as count FROM information_schema.tables 
@@ -105,12 +111,12 @@ export class DatabaseHealthCheck extends HealthCheck {
 
       return this.createResult(status, responseTime, 'Database connection successful', {
         connectionPool: 'active',
-        queryPerformance: `${responseTime}ms`
+        queryPerformance: `${responseTime}ms`,
       })
     } catch (error) {
       const responseTime = Date.now() - startTime
       return this.createResult('unhealthy', responseTime, `Database error: ${error}`, {
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       })
     }
   }
@@ -120,7 +126,7 @@ export class DatabaseHealthCheck extends HealthCheck {
  * Redis Health Check
  */
 export class RedisHealthCheck extends HealthCheck {
-  private redis: any // Would import actual Redis client
+  private redis: unknown // Would import actual Redis client
 
   async check(): Promise<HealthCheckResult> {
     const startTime = Date.now()
@@ -128,7 +134,7 @@ export class RedisHealthCheck extends HealthCheck {
     try {
       // Simulate Redis check (would use actual Redis client)
       await this.withTimeout(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10)) // Simulate Redis ping
+        await new Promise((resolve) => setTimeout(resolve, 10)) // Simulate Redis ping
         return 'PONG'
       })
 
@@ -137,12 +143,12 @@ export class RedisHealthCheck extends HealthCheck {
 
       return this.createResult(status, responseTime, 'Redis connection successful', {
         ping: 'PONG',
-        memory: 'within_limits'
+        memory: 'within_limits',
       })
     } catch (error) {
       const responseTime = Date.now() - startTime
       return this.createResult('unhealthy', responseTime, `Redis error: ${error}`, {
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       })
     }
   }
@@ -167,28 +173,33 @@ export class ExternalAPIHealthCheck extends HealthCheck {
       const response = await this.withTimeout(async () => {
         return fetch(this.endpoint, {
           method: 'GET',
-          headers: { 'User-Agent': 'CoreFlow360-HealthCheck/1.0' }
+          headers: { 'User-Agent': 'CoreFlow360-HealthCheck/1.0' },
         })
       })
 
       const responseTime = Date.now() - startTime
-      
+
       if (response.status === this.expectedStatus) {
         const status = responseTime > this.config.criticalThreshold ? 'degraded' : 'healthy'
         return this.createResult(status, responseTime, 'External API responsive', {
           status: response.status,
-          headers: Object.fromEntries(response.headers.entries())
+          headers: Object.fromEntries(response.headers.entries()),
         })
       } else {
-        return this.createResult('degraded', responseTime, `Unexpected status: ${response.status}`, {
-          status: response.status,
-          statusText: response.statusText
-        })
+        return this.createResult(
+          'degraded',
+          responseTime,
+          `Unexpected status: ${response.status}`,
+          {
+            status: response.status,
+            statusText: response.statusText,
+          }
+        )
       }
     } catch (error) {
       const responseTime = Date.now() - startTime
       return this.createResult('unhealthy', responseTime, `API error: ${error}`, {
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       })
     }
   }
@@ -221,7 +232,7 @@ export class MemoryHealthCheck extends HealthCheck {
         heapTotal: `${heapTotalMB}MB`,
         usagePercent: `${usagePercent.toFixed(1)}%`,
         rss: `${Math.round(memoryUsage.rss / 1024 / 1024)}MB`,
-        external: `${Math.round(memoryUsage.external / 1024 / 1024)}MB`
+        external: `${Math.round(memoryUsage.external / 1024 / 1024)}MB`,
       })
     } catch (error) {
       const responseTime = Date.now() - startTime
@@ -240,10 +251,10 @@ export class CircuitBreakerHealthCheck extends HealthCheck {
     try {
       const allStats = circuitBreakerRegistry.getAllStats()
       const breakerStates = Object.entries(allStats)
-      
+
       const openBreakers = breakerStates.filter(([_, stats]) => stats.state === 'OPEN')
       const halfOpenBreakers = breakerStates.filter(([_, stats]) => stats.state === 'HALF_OPEN')
-      
+
       let status: HealthStatus = 'healthy'
       let message = 'All circuit breakers operational'
 
@@ -259,15 +270,20 @@ export class CircuitBreakerHealthCheck extends HealthCheck {
 
       return this.createResult(status, responseTime, message, {
         totalBreakers: breakerStates.length,
-        closedBreakers: breakerStates.filter(([_, stats]) => stats.state === 'CLOSED').length,
+        _closedBreakers: breakerStates.filter(([_, stats]) => stats.state === 'CLOSED').length,
         openBreakers: openBreakers.length,
         halfOpenBreakers: halfOpenBreakers.length,
-        breakerDetails: Object.fromEntries(breakerStates.map(([name, stats]) => [name, {
-          state: stats.state,
-          failures: stats.failures,
-          successes: stats.successes,
-          errorRate: stats.errorRate
-        }]))
+        breakerDetails: Object.fromEntries(
+          breakerStates.map(([name, stats]) => [
+            name,
+            {
+              state: stats.state,
+              failures: stats.failures,
+              successes: stats.successes,
+              errorRate: stats.errorRate,
+            },
+          ])
+        ),
       })
     } catch (error) {
       const responseTime = Date.now() - startTime
@@ -288,11 +304,11 @@ export class DiskSpaceHealthCheck extends HealthCheck {
       const diskInfo = {
         used: 45000000000, // 45GB
         total: 100000000000, // 100GB
-        available: 55000000000 // 55GB
+        available: 55000000000, // 55GB
       }
 
       const usagePercent = (diskInfo.used / diskInfo.total) * 100
-      
+
       let status: HealthStatus = 'healthy'
       if (usagePercent > 95) {
         status = 'unhealthy'
@@ -306,7 +322,7 @@ export class DiskSpaceHealthCheck extends HealthCheck {
         usedGB: Math.round(diskInfo.used / 1024 / 1024 / 1024),
         totalGB: Math.round(diskInfo.total / 1024 / 1024 / 1024),
         availableGB: Math.round(diskInfo.available / 1024 / 1024 / 1024),
-        usagePercent: `${usagePercent.toFixed(1)}%`
+        usagePercent: `${usagePercent.toFixed(1)}%`,
       })
     } catch (error) {
       const responseTime = Date.now() - startTime
@@ -326,18 +342,16 @@ export class HealthCheckManager {
 
   registerCheck(check: HealthCheck): void {
     this.checks.set(check.config.name, check)
-    
+
     // Start interval checking if enabled
     if (check.config.enabled && check.config.interval > 0) {
       const interval = setInterval(async () => {
         try {
           const result = await check.check()
           this.lastResults.set(check.config.name, result)
-        } catch (error) {
-          console.error(`Health check ${check.config.name} failed:`, error)
-        }
+        } catch (error) {}
       }, check.config.interval)
-      
+
       this.intervals.set(check.config.name, interval)
     }
   }
@@ -348,7 +362,7 @@ export class HealthCheckManager {
       clearInterval(interval)
       this.intervals.delete(name)
     }
-    
+
     this.checks.delete(name)
     this.lastResults.delete(name)
   }
@@ -366,7 +380,7 @@ export class HealthCheckManager {
 
   async runAllChecks(): Promise<HealthCheckResult[]> {
     const results: HealthCheckResult[] = []
-    
+
     for (const [name, check] of this.checks) {
       if (check.config.enabled) {
         try {
@@ -378,7 +392,7 @@ export class HealthCheckManager {
             status: 'unhealthy',
             responseTime: 0,
             message: `Check failed: ${error}`,
-            timestamp: Date.now()
+            timestamp: Date.now(),
           })
         }
       }
@@ -389,12 +403,12 @@ export class HealthCheckManager {
 
   async getSystemHealth(): Promise<SystemHealthSummary> {
     const results = await this.runAllChecks()
-    
+
     const summary = {
-      healthy: results.filter(r => r.status === 'healthy').length,
-      degraded: results.filter(r => r.status === 'degraded').length,
-      unhealthy: results.filter(r => r.status === 'unhealthy').length,
-      total: results.length
+      healthy: results.filter((r) => r.status === 'healthy').length,
+      degraded: results.filter((r) => r.status === 'degraded').length,
+      unhealthy: results.filter((r) => r.status === 'unhealthy').length,
+      total: results.length,
     }
 
     let overall: HealthStatus = 'healthy'
@@ -409,7 +423,7 @@ export class HealthCheckManager {
       components: results,
       summary,
       uptime: Date.now() - this.startTime,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }
   }
 
@@ -441,7 +455,7 @@ export const defaultHealthChecks = {
     retries: 2,
     interval: 30000, // 30 seconds
     criticalThreshold: 1000,
-    warningThreshold: 500
+    warningThreshold: 500,
   }),
 
   memory: new MemoryHealthCheck({
@@ -452,7 +466,7 @@ export const defaultHealthChecks = {
     retries: 1,
     interval: 60000, // 1 minute
     criticalThreshold: 500,
-    warningThreshold: 200
+    warningThreshold: 200,
   }),
 
   circuitBreakers: new CircuitBreakerHealthCheck({
@@ -463,7 +477,7 @@ export const defaultHealthChecks = {
     retries: 1,
     interval: 45000, // 45 seconds
     criticalThreshold: 1000,
-    warningThreshold: 500
+    warningThreshold: 500,
   }),
 
   diskSpace: new DiskSpaceHealthCheck({
@@ -474,7 +488,7 @@ export const defaultHealthChecks = {
     retries: 1,
     interval: 300000, // 5 minutes
     criticalThreshold: 2000,
-    warningThreshold: 1000
+    warningThreshold: 1000,
   }),
 
   stripeAPI: new ExternalAPIHealthCheck(
@@ -486,11 +500,11 @@ export const defaultHealthChecks = {
       retries: 2,
       interval: 120000, // 2 minutes
       criticalThreshold: 5000,
-      warningThreshold: 2000
+      warningThreshold: 2000,
     },
     'https://api.stripe.com/healthcheck',
     200
-  )
+  ),
 }
 
 /**
@@ -499,7 +513,7 @@ export const defaultHealthChecks = {
 export const healthCheckManager = new HealthCheckManager()
 
 // Register default health checks
-Object.values(defaultHealthChecks).forEach(check => {
+Object.values(defaultHealthChecks).forEach((check) => {
   healthCheckManager.registerCheck(check)
 })
 

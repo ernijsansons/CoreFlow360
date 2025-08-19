@@ -9,7 +9,7 @@ export interface HealthCheckResult {
   status: 'healthy' | 'degraded' | 'unhealthy'
   responseTime: number
   error?: string
-  details?: Record<string, any>
+  details?: Record<string, unknown>
 }
 
 export interface SystemHealthReport {
@@ -28,9 +28,9 @@ export interface SystemHealthReport {
     responseTime: number
     requestsPerSecond?: number
     errorRate?: number
-    [key: string]: any
+    [key: string]: unknown
   }
-  metrics?: Record<string, any>
+  metrics?: Record<string, unknown>
 }
 
 export interface HealthCheckOptions {
@@ -76,22 +76,27 @@ export class UnifiedHealthChecker {
    */
   async runAllChecks(options: HealthCheckOptions = {}): Promise<SystemHealthReport> {
     const startTime = Date.now()
-    const { timeout = 5000, includeSystem = false, includeMetrics = false, includePerformance = false } = options
+    const {
+      timeout = 5000,
+      includeSystem = false,
+      includeMetrics = false,
+      includePerformance = false,
+    } = options
 
     // Run all health checks in parallel with timeout
     const checkPromises = Array.from(this.checkers.entries()).map(async ([name, checker]) => {
       try {
-        const result = await Promise.race([
-          checker(),
-          this.createTimeoutPromise(timeout, name)
-        ])
+        const result = await Promise.race([checker(), this.createTimeoutPromise(timeout, name)])
         return [name, result] as [string, HealthCheckResult]
-      } catch (error: any) {
-        return [name, {
-          status: 'unhealthy' as const,
-          responseTime: Date.now() - startTime,
-          error: error.message || 'Health check failed'
-        }] as [string, HealthCheckResult]
+      } catch (error: unknown) {
+        return [
+          name,
+          {
+            status: 'unhealthy' as const,
+            responseTime: Date.now() - startTime,
+            error: error.message || 'Health check failed',
+          },
+        ] as [string, HealthCheckResult]
       }
     })
 
@@ -109,8 +114,8 @@ export class UnifiedHealthChecker {
       uptime: Math.floor((Date.now() - this.startTime) / 1000),
       services,
       performance: {
-        responseTime: Date.now() - startTime
-      }
+        responseTime: Date.now() - startTime,
+      },
     }
 
     // Add optional system metrics
@@ -122,7 +127,7 @@ export class UnifiedHealthChecker {
     if (includePerformance) {
       report.performance = {
         ...report.performance,
-        ...(await this.getPerformanceMetrics())
+        ...(await this.getPerformanceMetrics()),
       }
     }
 
@@ -145,11 +150,11 @@ export class UnifiedHealthChecker {
 
     try {
       return await checker()
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         status: 'unhealthy',
         responseTime: 0,
-        error: error.message || 'Health check failed'
+        error: error.message || 'Health check failed',
       }
     }
   }
@@ -161,7 +166,7 @@ export class UnifiedHealthChecker {
     const checks = await this.runAllChecks({ timeout: 2000 })
     return {
       status: checks.status,
-      timestamp: checks.timestamp
+      timestamp: checks.timestamp,
     }
   }
 
@@ -170,12 +175,12 @@ export class UnifiedHealthChecker {
    */
   createHealthResponse(report: SystemHealthReport, request?: NextRequest) {
     const statusCode = this.getStatusCode(report.status)
-    
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'X-Health-Status': report.status,
-      'X-Response-Time': String(report.performance?.responseTime || 0)
+      'X-Response-Time': String(report.performance?.responseTime || 0),
     }
 
     // Add CORS headers if needed
@@ -187,7 +192,7 @@ export class UnifiedHealthChecker {
     return {
       statusCode,
       headers,
-      body: report
+      body: report,
     }
   }
 
@@ -197,13 +202,13 @@ export class UnifiedHealthChecker {
   initializeDefaultChecks(): void {
     // Database health check
     this.registerCheck('database', this.createDatabaseCheck())
-    
+
     // Redis health check
     this.registerCheck('redis', this.createRedisCheck())
-    
+
     // Configuration health check
     this.registerCheck('configuration', this.createConfigurationCheck())
-    
+
     // AI services health check
     this.registerCheck('ai', this.createAIServicesCheck())
   }
@@ -214,28 +219,28 @@ export class UnifiedHealthChecker {
   private createDatabaseCheck(): () => Promise<HealthCheckResult> {
     return async () => {
       const startTime = Date.now()
-      
+
       try {
         const { checkDatabaseHealth } = await import('@/lib/db')
         const isHealthy = await checkDatabaseHealth()
-        
+
         return {
           status: isHealthy ? 'healthy' : 'unhealthy',
           responseTime: Date.now() - startTime,
           details: {
             connected: isHealthy,
-            pool: 'active'
-          }
+            pool: 'active',
+          },
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           status: 'unhealthy',
           responseTime: Date.now() - startTime,
           error: 'Database connection failed',
           details: {
             connected: false,
-            error: error.message
-          }
+            error: error.message,
+          },
         }
       }
     }
@@ -247,28 +252,28 @@ export class UnifiedHealthChecker {
   private createRedisCheck(): () => Promise<HealthCheckResult> {
     return async () => {
       const startTime = Date.now()
-      
+
       try {
         const { redis } = await import('@/lib/redis')
         const response = await redis.ping()
-        
+
         return {
           status: response === 'PONG' ? 'healthy' : 'unhealthy',
           responseTime: Date.now() - startTime,
           details: {
             response,
-            connected: true
-          }
+            connected: true,
+          },
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           status: 'unhealthy',
           responseTime: Date.now() - startTime,
           error: 'Redis connection failed',
           details: {
             connected: false,
-            error: error.message
-          }
+            error: error.message,
+          },
         }
       }
     }
@@ -280,25 +285,25 @@ export class UnifiedHealthChecker {
   private createConfigurationCheck(): () => Promise<HealthCheckResult> {
     return async () => {
       const startTime = Date.now()
-      
+
       try {
         const { isConfigValid, getConfigErrors } = await import('@/lib/config')
         const isValid = isConfigValid()
         const errors = isValid ? [] : getConfigErrors()
-        
+
         return {
           status: isValid ? 'healthy' : 'unhealthy',
           responseTime: Date.now() - startTime,
           details: {
             valid: isValid,
-            errors: errors.length > 0 ? errors : undefined
-          }
+            errors: errors.length > 0 ? errors : undefined,
+          },
         }
-      } catch (error: any) {
+      } catch (_error: unknown) {
         return {
           status: 'unhealthy',
           responseTime: Date.now() - startTime,
-          error: 'Configuration validation failed'
+          error: 'Configuration validation failed',
         }
       }
     }
@@ -310,28 +315,28 @@ export class UnifiedHealthChecker {
   private createAIServicesCheck(): () => Promise<HealthCheckResult> {
     return async () => {
       const startTime = Date.now()
-      
+
       try {
         // Simple AI service connectivity check
         const hasOpenAI = !!process.env.OPENAI_API_KEY
         const hasAnthropic = !!process.env.ANTHROPIC_API_KEY
-        
+
         const status = hasOpenAI || hasAnthropic ? 'healthy' : 'degraded'
-        
+
         return {
           status,
           responseTime: Date.now() - startTime,
           details: {
             openai: hasOpenAI,
             anthropic: hasAnthropic,
-            available: hasOpenAI || hasAnthropic
-          }
+            available: hasOpenAI || hasAnthropic,
+          },
         }
-      } catch (error: any) {
+      } catch (_error: unknown) {
         return {
           status: 'unhealthy',
           responseTime: Date.now() - startTime,
-          error: 'AI services check failed'
+          error: 'AI services check failed',
         }
       }
     }
@@ -340,18 +345,20 @@ export class UnifiedHealthChecker {
   /**
    * Calculate overall system status
    */
-  private calculateOverallStatus(services: Record<string, HealthCheckResult>): SystemHealthReport['status'] {
-    const statuses = Object.values(services).map(s => s.status)
-    
-    if (statuses.some(s => s === 'unhealthy')) {
-      const unhealthyCount = statuses.filter(s => s === 'unhealthy').length
+  private calculateOverallStatus(
+    services: Record<string, HealthCheckResult>
+  ): SystemHealthReport['status'] {
+    const statuses = Object.values(services).map((s) => s.status)
+
+    if (statuses.some((s) => s === 'unhealthy')) {
+      const unhealthyCount = statuses.filter((s) => s === 'unhealthy').length
       return unhealthyCount > statuses.length / 2 ? 'unhealthy' : 'degraded'
     }
-    
-    if (statuses.some(s => s === 'degraded')) {
+
+    if (statuses.some((s) => s === 'degraded')) {
       return 'degraded'
     }
-    
+
     return 'healthy'
   }
 
@@ -361,27 +368,27 @@ export class UnifiedHealthChecker {
   private async getSystemMetrics() {
     try {
       const os = await import('os')
-      
+
       const totalMemory = os.totalmem()
       const freeMemory = os.freemem()
       const usedMemory = totalMemory - freeMemory
-      
+
       return {
         memory: {
           used: Math.round(usedMemory / 1024 / 1024), // MB
           total: Math.round(totalMemory / 1024 / 1024), // MB
-          percentage: Number((usedMemory / totalMemory).toFixed(2))
+          percentage: Number((usedMemory / totalMemory).toFixed(2)),
         },
         cpu: {
           usage: 0, // Would need additional calculation
           cores: os.cpus().length,
-          loadAverage: os.loadavg()
+          loadAverage: os.loadavg(),
         },
         disk: {
           used: 0, // Would need filesystem stats
           total: 0,
-          percentage: 0
-        }
+          percentage: 0,
+        },
       }
     } catch (error) {
       return undefined
@@ -395,11 +402,11 @@ export class UnifiedHealthChecker {
     try {
       const { PerformanceMonitor } = await import('@/utils/performance')
       const monitor = PerformanceMonitor.getInstance()
-      
+
       return {
         requestsPerSecond: monitor.getRequestsPerSecond(),
         errorRate: monitor.getErrorRate(),
-        averageResponseTime: monitor.getAverageResponseTime()
+        averageResponseTime: monitor.getAverageResponseTime(),
       }
     } catch (error) {
       return {}
@@ -411,19 +418,19 @@ export class UnifiedHealthChecker {
    */
   private async getDetailedMetrics() {
     try {
-      const metrics: Record<string, any> = {}
-      
+      const metrics: Record<string, unknown> = {}
+
       // Add Redis metrics if available
       try {
         const { redis } = await import('@/lib/redis')
         metrics.cache = {
           hitRate: redis.getHitRate?.() || 0,
-          stats: redis.getStats?.() || {}
+          stats: redis.getStats?.() || {},
         }
       } catch (error) {
         // Redis not available
       }
-      
+
       return metrics
     } catch (error) {
       return {}
@@ -446,11 +453,16 @@ export class UnifiedHealthChecker {
    */
   private getStatusCode(status: SystemHealthReport['status']): number {
     switch (status) {
-      case 'healthy': return 200
-      case 'degraded': return 200 // Still operational
-      case 'unhealthy': return 503
-      case 'shutting_down': return 503
-      default: return 500
+      case 'healthy':
+        return 200
+      case 'degraded':
+        return 200 // Still operational
+      case 'unhealthy':
+        return 503
+      case 'shutting_down':
+        return 503
+      default:
+        return 500
     }
   }
 }
@@ -479,10 +491,10 @@ export function createHealthEndpoint(options: HealthCheckOptions = {}) {
     const checker = getHealthChecker()
     const report = await checker.runAllChecks(options)
     const response = checker.createHealthResponse(report, request)
-    
+
     return new Response(JSON.stringify(response.body), {
       status: response.statusCode,
-      headers: response.headers
+      headers: response.headers,
     })
   }
 }
@@ -491,14 +503,14 @@ export function createHealthEndpoint(options: HealthCheckOptions = {}) {
  * Middleware for adding health check headers to all responses
  */
 export function healthCheckMiddleware() {
-  return async (request: NextRequest) => {
+  return async (_request: NextRequest) => {
     const checker = getHealthChecker()
     const simpleHealth = await checker.getSimpleHealth()
-    
+
     // Add health status to response headers
     return {
       'X-Health-Status': simpleHealth.status,
-      'X-Health-Timestamp': simpleHealth.timestamp
+      'X-Health-Timestamp': simpleHealth.timestamp,
     }
   }
 }

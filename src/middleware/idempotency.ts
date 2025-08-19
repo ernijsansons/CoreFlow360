@@ -23,7 +23,7 @@ const DEFAULT_OPTIONS: Required<IdempotencyOptions> = {
   ttlMinutes: 60,
   excludePaths: ['/api/health', '/api/metrics'],
   methods: ['POST', 'PUT', 'PATCH'],
-  skipForUsers: []
+  skipForUsers: [],
 }
 
 /**
@@ -35,39 +35,36 @@ function generateIdempotencyKey(request: NextRequest, body?: string): string {
     url: request.url,
     body: body || '',
     userAgent: request.headers.get('user-agent') || '',
-    userId: request.headers.get('x-user-id') || ''
+    userId: request.headers.get('x-user-id') || '',
   }
-  
-  return createHash('sha256')
-    .update(JSON.stringify(keyData))
-    .digest('hex')
-    .substring(0, 32)
+
+  return createHash('sha256').update(JSON.stringify(keyData)).digest('hex').substring(0, 32)
 }
 
 /**
  * Check if request should be processed with idempotency
  */
 function shouldProcessIdempotency(
-  request: NextRequest, 
+  request: NextRequest,
   options: Required<IdempotencyOptions>
 ): boolean {
   // Check method
   if (!options.methods.includes(request.method)) {
     return false
   }
-  
+
   // Check excluded paths
   const pathname = new URL(request.url).pathname
-  if (options.excludePaths.some(path => pathname.startsWith(path))) {
+  if (options.excludePaths.some((path) => pathname.startsWith(path))) {
     return false
   }
-  
+
   // Check user exclusions
   const userId = request.headers.get('x-user-id')
   if (userId && options.skipForUsers.includes(userId)) {
     return false
   }
-  
+
   return true
 }
 
@@ -83,7 +80,7 @@ async function createIdempotencyRecord(
 ) {
   const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000)
   const pathname = new URL(request.url).pathname
-  
+
   return withCircuitBreakerProtection('database', async () => {
     return prisma.idempotencyKey.create({
       data: {
@@ -94,8 +91,8 @@ async function createIdempotencyRecord(
         userId,
         expiresAt,
         isProcessing: true,
-        attemptCount: 1
-      }
+        attemptCount: 1,
+      },
     })
   })
 }
@@ -106,7 +103,7 @@ async function createIdempotencyRecord(
 async function getIdempotencyRecord(key: string) {
   return withCircuitBreakerProtection('database', async () => {
     return prisma.idempotencyKey.findUnique({
-      where: { key }
+      where: { key },
     })
   })
 }
@@ -128,8 +125,8 @@ async function updateIdempotencyRecord(
         responseBody: body,
         responseHeaders: JSON.stringify(headers),
         isProcessing: false,
-        processedAt: new Date()
-      }
+        processedAt: new Date(),
+      },
     })
   })
 }
@@ -144,8 +141,8 @@ async function incrementAttemptCount(key: string, error?: string) {
       data: {
         attemptCount: { increment: 1 },
         lastError: error,
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     })
   })
 }
@@ -159,15 +156,14 @@ export async function cleanupExpiredKeys(): Promise<number> {
       return prisma.idempotencyKey.deleteMany({
         where: {
           expiresAt: {
-            lt: new Date()
-          }
-        }
+            lt: new Date(),
+          },
+        },
       })
     })
-    
+
     return result.count
   } catch (error) {
-    console.error('Failed to cleanup expired idempotency keys:', error)
     return 0
   }
 }
@@ -180,21 +176,21 @@ export function withIdempotency(
   options: IdempotencyOptions = {}
 ) {
   const config = { ...DEFAULT_OPTIONS, ...options }
-  
+
   return async (request: NextRequest): Promise<NextResponse> => {
     // Skip idempotency if not applicable
     if (!shouldProcessIdempotency(request, config)) {
       return handler(request)
     }
-    
+
     // Extract idempotency key
     let idempotencyKey = request.headers.get(config.keyHeader)
-    
+
     // If no key provided and custom extractor exists, try it
     if (!idempotencyKey && config.keyExtractor) {
       idempotencyKey = config.keyExtractor(request)
     }
-    
+
     // If still no key, generate one from request content
     if (!idempotencyKey) {
       // For requests with body, we need to read it
@@ -202,24 +198,23 @@ export function withIdempotency(
         try {
           const body = await request.text()
           idempotencyKey = generateIdempotencyKey(request, body)
-          
+
           // Create a new request with the body for the handler
           const newRequest = new NextRequest(request.url, {
             method: request.method,
             headers: request.headers,
-            body: body || undefined
+            body: body || undefined,
           })
-          
+
           return processWithIdempotency(newRequest, handler, idempotencyKey, config)
         } catch (error) {
-          console.error('Failed to generate idempotency key:', error)
           return handler(request)
         }
       } else {
         idempotencyKey = generateIdempotencyKey(request)
       }
     }
-    
+
     return processWithIdempotency(request, handler, idempotencyKey, config)
   }
 }
@@ -235,90 +230,90 @@ async function processWithIdempotency(
 ): Promise<NextResponse> {
   const tenantId = request.headers.get('x-tenant-id') || undefined
   const userId = request.headers.get('x-user-id') || undefined
-  
+
   try {
     // Check for existing request
     const existingRecord = await getIdempotencyRecord(key)
-    
+
     if (existingRecord) {
       // If still processing, return 409 Conflict with Retry-After
       if (existingRecord.isProcessing) {
         const processingTime = Date.now() - existingRecord.createdAt.getTime()
         const estimatedRetryAfter = Math.max(1, Math.ceil((60000 - processingTime) / 1000))
-        
+
         return NextResponse.json(
           {
             error: 'Request is being processed',
             message: 'This request is currently being processed. Please retry in a few seconds.',
             processingTime: processingTime,
-            attemptCount: existingRecord.attemptCount
+            attemptCount: existingRecord.attemptCount,
           },
           {
             status: 409,
             headers: {
               'Retry-After': estimatedRetryAfter.toString(),
               'X-Idempotency-Key': key,
-              'X-Processing-Time': processingTime.toString()
-            }
+              'X-Processing-Time': processingTime.toString(),
+            },
           }
         )
       }
-      
+
       // If completed, return cached response
       if (existingRecord.responseStatus && existingRecord.responseBody) {
-        const headers = existingRecord.responseHeaders 
-          ? JSON.parse(existingRecord.responseHeaders) 
+        const headers = existingRecord.responseHeaders
+          ? JSON.parse(existingRecord.responseHeaders)
           : {}
-        
+
         return new NextResponse(existingRecord.responseBody, {
           status: existingRecord.responseStatus,
           headers: {
             ...headers,
             'X-Idempotency-Key': key,
             'X-Cached-Response': 'true',
-            'X-Original-Request-Time': existingRecord.createdAt.toISOString()
-          }
+            'X-Original-Request-Time': existingRecord.createdAt.toISOString(),
+          },
         })
       }
-      
+
       // If exists but no response (error case), increment attempt and continue
       await incrementAttemptCount(key)
     } else {
       // Create new idempotency record
       await createIdempotencyRecord(key, request, config.ttlMinutes, tenantId, userId)
     }
-    
+
     // Process the request
     try {
       const response = await handler(request)
-      
+
       // Cache successful responses (2xx status codes)
       if (response.status >= 200 && response.status < 300) {
         const responseBody = await response.text()
         const responseHeaders: Record<string, string> = {}
-        
+
         response.headers.forEach((value, key) => {
           if (!key.startsWith('x-') && key !== 'set-cookie') {
             responseHeaders[key] = value
           }
         })
-        
+
         // Update idempotency record with response
         await updateIdempotencyRecord(key, response.status, responseBody, responseHeaders)
-        
+
         // Return response with idempotency headers
         return new NextResponse(responseBody, {
           status: response.status,
           headers: {
             ...responseHeaders,
             'X-Idempotency-Key': key,
-            'X-Cached-Response': 'false'
-          }
+            'X-Cached-Response': 'false',
+          },
         })
       } else {
         // For error responses, mark as not processing but don't cache
         await updateIdempotencyRecord(key, response.status, '', {})
-        
+
         // Add idempotency key to error response
         const errorBody = await response.text()
         return new NextResponse(errorBody, {
@@ -326,32 +321,30 @@ async function processWithIdempotency(
           headers: {
             ...Object.fromEntries(response.headers.entries()),
             'X-Idempotency-Key': key,
-            'X-Cached-Response': 'false'
-          }
+            'X-Cached-Response': 'false',
+          },
         })
       }
     } catch (error) {
       // Mark as not processing and record error
       await updateIdempotencyRecord(
-        key, 
-        500, 
+        key,
+        500,
         JSON.stringify({ error: 'Internal server error' }),
         {}
       )
-      
+
       await incrementAttemptCount(key, error instanceof Error ? error.message : 'Unknown error')
-      
+
       throw error
     }
   } catch (error) {
-    console.error('Idempotency middleware error:', error)
-    
     // If idempotency fails, continue with original request
     const response = await handler(request)
-    
+
     // Add warning header
     response.headers.set('X-Idempotency-Warning', 'Idempotency processing failed')
-    
+
     return response
   }
 }
@@ -362,7 +355,7 @@ async function processWithIdempotency(
 export function extractStripeIdempotencyKey(request: NextRequest): string | null {
   const signature = request.headers.get('stripe-signature')
   if (!signature) return null
-  
+
   // Stripe sends signature which can be used as idempotency key
   return createHash('sha256').update(signature).digest('hex').substring(0, 32)
 }
@@ -373,7 +366,7 @@ export function extractStripeIdempotencyKey(request: NextRequest): string | null
 export function extractCustomerIdempotencyKey(request: NextRequest): string | null {
   const contentType = request.headers.get('content-type')
   if (!contentType?.includes('application/json')) return null
-  
+
   try {
     // This would need the request body to be available
     // For now, return null and rely on auto-generation
@@ -388,16 +381,16 @@ export function extractCustomerIdempotencyKey(request: NextRequest): string | nu
  */
 export function setupIdempotencyCleanup(): void {
   // Clean up expired keys every hour
-  setInterval(async () => {
-    try {
-      const cleaned = await cleanupExpiredKeys()
-      if (cleaned > 0) {
-        console.log(`Cleaned up ${cleaned} expired idempotency keys`)
-      }
-    } catch (error) {
-      console.error('Idempotency cleanup failed:', error)
-    }
-  }, 60 * 60 * 1000) // 1 hour
+  setInterval(
+    async () => {
+      try {
+        const cleaned = await cleanupExpiredKeys()
+        if (cleaned > 0) {
+        }
+      } catch (error) {}
+    },
+    60 * 60 * 1000
+  ) // 1 hour
 }
 
 /**
@@ -407,12 +400,11 @@ export async function invalidateIdempotencyKey(key: string): Promise<boolean> {
   try {
     await withCircuitBreakerProtection('database', async () => {
       await prisma.idempotencyKey.delete({
-        where: { key }
+        where: { key },
       })
     })
     return true
   } catch (error) {
-    console.error('Failed to invalidate idempotency key:', error)
     return false
   }
 }
@@ -428,12 +420,14 @@ export async function getIdempotencyStats(): Promise<{
 }> {
   try {
     const [stats] = await withCircuitBreakerProtection('database', async () => {
-      return prisma.$queryRaw<Array<{
-        total_keys: bigint
-        processing_keys: bigint
-        expired_keys: bigint
-        avg_processing_time: number
-      }>>`
+      return prisma.$queryRaw<
+        Array<{
+          total_keys: bigint
+          processing_keys: bigint
+          expired_keys: bigint
+          avg_processing_time: number
+        }>
+      >`
         SELECT 
           COUNT(*) as total_keys,
           COUNT(CASE WHEN is_processing = true THEN 1 END) as processing_keys,
@@ -443,20 +437,19 @@ export async function getIdempotencyStats(): Promise<{
         WHERE created_at > NOW() - INTERVAL '24 hours'
       `
     })
-    
+
     return {
       totalKeys: Number(stats?.total_keys || 0),
       processingKeys: Number(stats?.processing_keys || 0),
       expiredKeys: Number(stats?.expired_keys || 0),
-      averageProcessingTime: stats?.avg_processing_time || 0
+      averageProcessingTime: stats?.avg_processing_time || 0,
     }
   } catch (error) {
-    console.error('Failed to get idempotency stats:', error)
     return {
       totalKeys: 0,
       processingKeys: 0,
       expiredKeys: 0,
-      averageProcessingTime: 0
+      averageProcessingTime: 0,
     }
   }
 }

@@ -12,11 +12,13 @@ const themePreferencesSchema = z.object({
   mode: z.enum(['light', 'dark', 'system']),
   consciousnessTheme: z.enum(['neural', 'synaptic', 'autonomous', 'transcendent']),
   accessibilityMode: z.enum(['standard', 'high-contrast', 'reduced-motion', 'enhanced-focus']),
-  customColors: z.object({
-    primary: z.string().optional(),
-    secondary: z.string().optional(),
-    accent: z.string().optional(),
-  }).optional(),
+  customColors: z
+    .object({
+      primary: z.string().optional(),
+      secondary: z.string().optional(),
+      accent: z.string().optional(),
+    })
+    .optional(),
   animations: z.boolean(),
   autoThemeSwitch: z.boolean(),
   scheduleStart: z.string().optional(),
@@ -58,11 +60,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(user.themePreferences)
   } catch (error) {
-    console.error('[Theme API] GET error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -100,9 +98,8 @@ export async function POST(request: NextRequest) {
           consciousnessTheme: validatedData.preferences.consciousnessTheme,
           accessibilityMode: validatedData.preferences.accessibilityMode,
         },
-        ipAddress: request.headers.get('x-forwarded-for') || 
-                   request.headers.get('x-real-ip') || 
-                   'unknown',
+        ipAddress:
+          request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
         userAgent: request.headers.get('user-agent') || 'unknown',
       },
     })
@@ -116,11 +113,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.error('[Theme API] POST error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -155,19 +148,14 @@ export async function DELETE(request: NextRequest) {
         details: {
           resetToDefaults: true,
         },
-        ipAddress: request.headers.get('x-forwarded-for') || 
-                   request.headers.get('x-real-ip') || 
-                   'unknown',
+        ipAddress:
+          request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
         userAgent: request.headers.get('user-agent') || 'unknown',
       },
     })
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[Theme API] DELETE error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -39,46 +39,47 @@ export class SecurityAuditor {
       severity: 'critical',
       category: 'security',
       description: 'Hardcoded credentials detected',
-      recommendation: 'Move sensitive data to environment variables or secure vault'
+      recommendation: 'Move sensitive data to environment variables or secure vault',
     },
     {
       pattern: /eval\s*\(/gi,
       severity: 'critical',
       category: 'security',
       description: 'Code injection vulnerability via eval()',
-      recommendation: 'Replace eval() with safer alternatives like JSON.parse() or Function constructor'
+      recommendation:
+        'Replace eval() with safer alternatives like JSON.parse() or Function constructor',
     },
     {
       pattern: /innerHTML\s*[=+]/gi,
       severity: 'high',
       category: 'security',
       description: 'XSS vulnerability via innerHTML',
-      recommendation: 'Use textContent or sanitize HTML input with DOMPurify'
+      recommendation: 'Use textContent or sanitize HTML input with DOMPurify',
     },
     {
       pattern: /\$\{[^}]*\}/g,
       severity: 'medium',
       category: 'security',
       description: 'Template literal injection potential',
-      recommendation: 'Validate and sanitize all dynamic template inputs'
+      recommendation: 'Validate and sanitize all dynamic template inputs',
     },
     {
       pattern: /document\.write\s*\(/gi,
       severity: 'medium',
       category: 'security',
       description: 'XSS risk via document.write',
-      recommendation: 'Use modern DOM manipulation methods'
-    }
+      recommendation: 'Use modern DOM manipulation methods',
+    },
   ]
 
   async auditAuthentication(projectRoot: string): Promise<AuditFinding[]> {
     const findings: AuditFinding[] = []
-    
+
     // Check NextAuth configuration
     const authConfigPath = join(projectRoot, 'src/lib/auth.ts')
     if (this.fileExists(authConfigPath)) {
       const authConfig = readFileSync(authConfigPath, 'utf8')
-      
+
       // Check for secure session configuration
       if (!authConfig.includes('jwt') && !authConfig.includes('database')) {
         findings.push({
@@ -97,10 +98,10 @@ export class SecurityAuditor {
           recommendations: [
             'Configure JWT with secure signing key',
             'Or use database sessions for better security',
-            'Enable secure cookie settings'
+            'Enable secure cookie settings',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
 
@@ -122,10 +123,10 @@ export class SecurityAuditor {
           recommendations: [
             'Enable NextAuth CSRF protection',
             'Configure secure cookies with SameSite attribute',
-            'Implement CSRF tokens for sensitive operations'
+            'Implement CSRF tokens for sensitive operations',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
     }
@@ -136,10 +137,10 @@ export class SecurityAuditor {
   async auditInputValidation(projectRoot: string): Promise<AuditFinding[]> {
     const findings: AuditFinding[] = []
     const apiFiles = this.findFiles(join(projectRoot, 'src/app/api'), '.ts')
-    
+
     for (const file of apiFiles) {
       const content = readFileSync(file, 'utf8')
-      
+
       // Check for input validation
       if (!content.includes('zod') && !content.includes('joi') && !content.includes('yup')) {
         const relativePath = file.replace(projectRoot, '')
@@ -159,10 +160,10 @@ export class SecurityAuditor {
           recommendations: [
             'Implement Zod schema validation',
             'Validate all request parameters and body',
-            'Add request rate limiting'
+            'Add request rate limiting',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
 
@@ -184,10 +185,10 @@ export class SecurityAuditor {
           recommendations: [
             'Use parameterized queries with Prisma',
             'Implement input sanitization',
-            'Add database query logging'
+            'Add database query logging',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
     }
@@ -197,7 +198,7 @@ export class SecurityAuditor {
 
   async auditDataProtection(projectRoot: string): Promise<AuditFinding[]> {
     const findings: AuditFinding[] = []
-    
+
     // Check for PII handling
     const allFiles = this.findFiles(join(projectRoot, 'src'), '.ts', '.tsx')
     const piiPatterns = [
@@ -205,12 +206,12 @@ export class SecurityAuditor {
       /phone/gi,
       /ssn|social.security/gi,
       /credit.card|creditcard/gi,
-      /password/gi
+      /password/gi,
     ]
 
     for (const file of allFiles) {
       const content = readFileSync(file, 'utf8')
-      
+
       for (const pattern of piiPatterns) {
         if (pattern.test(content) && !content.includes('encrypt') && !content.includes('hash')) {
           findings.push({
@@ -229,10 +230,10 @@ export class SecurityAuditor {
             recommendations: [
               'Implement encryption for sensitive data',
               'Add data masking for logs',
-              'Review GDPR/CCPA compliance requirements'
+              'Review GDPR/CCPA compliance requirements',
             ],
             dependencies: [],
-            related_findings: []
+            related_findings: [],
           })
           break // Only report once per file
         }
@@ -252,24 +253,24 @@ export class SecurityAuditor {
 
   private findFiles(dir: string, ...extensions: string[]): string[] {
     const files: string[] = []
-    
+
     try {
       const items = readdirSync(dir)
-      
+
       for (const item of items) {
         const fullPath = join(dir, item)
         const stat = statSync(fullPath)
-        
+
         if (stat.isDirectory() && !item.startsWith('.')) {
           files.push(...this.findFiles(fullPath, ...extensions))
-        } else if (stat.isFile() && extensions.some(ext => item.endsWith(ext))) {
+        } else if (stat.isFile() && extensions.some((ext) => item.endsWith(ext))) {
           files.push(fullPath)
         }
       }
     } catch (error) {
       // Directory doesn't exist or permission denied
     }
-    
+
     return files
   }
 }
@@ -278,14 +279,14 @@ export class PerformanceAuditor {
   async auditDatabaseQueries(projectRoot: string): Promise<AuditFinding[]> {
     const findings: AuditFinding[] = []
     const prismaFiles = this.findFiles(join(projectRoot, 'src'), '.ts', '.tsx')
-    
+
     for (const file of prismaFiles) {
       const content = readFileSync(file, 'utf8')
-      
+
       // Check for N+1 query patterns
       const nPlusOnePattern = /\.map\s*\(\s*async.*?prisma\./gs
       const nPlusOneMatches = content.match(nPlusOnePattern)
-      
+
       if (nPlusOneMatches && nPlusOneMatches.length > 0) {
         findings.push({
           id: `n1_${Math.random().toString(36).substring(7)}`,
@@ -303,10 +304,10 @@ export class PerformanceAuditor {
           recommendations: [
             'Use Prisma include/select for eager loading',
             'Batch queries using Promise.all()',
-            'Implement query result caching'
+            'Implement query result caching',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
 
@@ -328,10 +329,10 @@ export class PerformanceAuditor {
           recommendations: [
             'Add pagination with take/skip',
             'Implement cursor-based pagination for large datasets',
-            'Add database query monitoring'
+            'Add database query monitoring',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
     }
@@ -341,9 +342,9 @@ export class PerformanceAuditor {
 
   async auditCachingStrategy(projectRoot: string): Promise<AuditFinding[]> {
     const findings: AuditFinding[] = []
-    
+
     // Check for Redis/caching implementation
-    const hasRedis = this.findFiles(join(projectRoot, 'src'), '.ts').some(file => {
+    const hasRedis = this.findFiles(join(projectRoot, 'src'), '.ts').some((file) => {
       const content = readFileSync(file, 'utf8')
       return content.includes('redis') || content.includes('cache')
     })
@@ -365,10 +366,10 @@ export class PerformanceAuditor {
         recommendations: [
           'Implement Redis for session and query caching',
           'Add Next.js API route caching',
-          'Cache expensive computations and API responses'
+          'Cache expensive computations and API responses',
         ],
         dependencies: [],
-        related_findings: []
+        related_findings: [],
       })
     }
 
@@ -376,7 +377,7 @@ export class PerformanceAuditor {
     const apiFiles = this.findFiles(join(projectRoot, 'src/app/api'), '.ts')
     for (const file of apiFiles) {
       const content = readFileSync(file, 'utf8')
-      
+
       if (!content.includes('revalidate') && !content.includes('cache')) {
         findings.push({
           id: `api_cache_${Math.random().toString(36).substring(7)}`,
@@ -394,10 +395,10 @@ export class PerformanceAuditor {
           recommendations: [
             'Add appropriate cache headers',
             'Implement ISR where applicable',
-            'Use Next.js unstable_cache for expensive operations'
+            'Use Next.js unstable_cache for expensive operations',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
     }
@@ -407,19 +408,17 @@ export class PerformanceAuditor {
 
   async auditBundleSize(projectRoot: string): Promise<AuditFinding[]> {
     const findings: AuditFinding[] = []
-    
+
     // Check package.json for heavy dependencies
     const packageJsonPath = join(projectRoot, 'package.json')
     if (this.fileExists(packageJsonPath)) {
       const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'))
       const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies }
-      
-      const heavyPackages = [
-        'lodash', 'moment', '@mui/material', 'antd', 'jquery'
-      ]
 
-      const foundHeavy = heavyPackages.filter(pkg => dependencies[pkg])
-      
+      const heavyPackages = ['lodash', 'moment', '@mui/material', 'antd', 'jquery']
+
+      const foundHeavy = heavyPackages.filter((pkg) => dependencies[pkg])
+
       if (foundHeavy.length > 0) {
         findings.push({
           id: 'bundle_001',
@@ -433,14 +432,14 @@ export class PerformanceAuditor {
           business_value: 45,
           technical_debt: 30,
           location: 'package.json',
-          evidence: foundHeavy.map(pkg => `${pkg}: ${dependencies[pkg]}`),
+          evidence: foundHeavy.map((pkg) => `${pkg}: ${dependencies[pkg]}`),
           recommendations: [
             'Consider lighter alternatives (date-fns vs moment)',
             'Use tree-shaking and selective imports',
-            'Implement code splitting for heavy components'
+            'Implement code splitting for heavy components',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
     }
@@ -449,7 +448,7 @@ export class PerformanceAuditor {
     const pageFiles = this.findFiles(join(projectRoot, 'src/app'), '.tsx')
     for (const file of pageFiles) {
       const content = readFileSync(file, 'utf8')
-      
+
       if (content.includes('import') && !content.includes('dynamic') && content.length > 5000) {
         findings.push({
           id: `dynamic_${Math.random().toString(36).substring(7)}`,
@@ -467,10 +466,10 @@ export class PerformanceAuditor {
           recommendations: [
             'Use Next.js dynamic imports for heavy components',
             'Implement route-based code splitting',
-            'Lazy load non-critical components'
+            'Lazy load non-critical components',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
     }
@@ -488,24 +487,24 @@ export class PerformanceAuditor {
 
   private findFiles(dir: string, ...extensions: string[]): string[] {
     const files: string[] = []
-    
+
     try {
       const items = readdirSync(dir)
-      
+
       for (const item of items) {
         const fullPath = join(dir, item)
         const stat = statSync(fullPath)
-        
+
         if (stat.isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
           files.push(...this.findFiles(fullPath, ...extensions))
-        } else if (stat.isFile() && extensions.some(ext => item.endsWith(ext))) {
+        } else if (stat.isFile() && extensions.some((ext) => item.endsWith(ext))) {
           files.push(fullPath)
         }
       }
     } catch (error) {
       // Directory doesn't exist or permission denied
     }
-    
+
     return files
   }
 }
@@ -513,13 +512,13 @@ export class PerformanceAuditor {
 export class ArchitectureAuditor {
   async auditLayeredArchitecture(projectRoot: string): Promise<AuditFinding[]> {
     const findings: AuditFinding[] = []
-    
+
     // Check for proper separation of concerns
     const srcStructure = this.analyzeFolderStructure(join(projectRoot, 'src'))
-    
+
     const expectedFolders = ['components', 'lib', 'app', 'types', 'hooks']
-    const missingFolders = expectedFolders.filter(folder => !srcStructure.includes(folder))
-    
+    const missingFolders = expectedFolders.filter((folder) => !srcStructure.includes(folder))
+
     if (missingFolders.length > 0) {
       findings.push({
         id: 'arch_001',
@@ -537,10 +536,10 @@ export class ArchitectureAuditor {
         recommendations: [
           'Create missing standard folders',
           'Organize code by feature or layer',
-          'Add README files for each major directory'
+          'Add README files for each major directory',
         ],
         dependencies: [],
-        related_findings: []
+        related_findings: [],
       })
     }
 
@@ -559,14 +558,14 @@ export class ArchitectureAuditor {
         business_value: 70,
         technical_debt: 60,
         location: 'Multiple files',
-        evidence: circularDeps.map(dep => `${dep.from} ↔ ${dep.to}`),
+        evidence: circularDeps.map((dep) => `${dep.from} ↔ ${dep.to}`),
         recommendations: [
           'Refactor to break circular dependencies',
           'Use dependency injection patterns',
-          'Create clear architectural layers'
+          'Create clear architectural layers',
         ],
         dependencies: [],
-        related_findings: []
+        related_findings: [],
       })
     }
 
@@ -576,10 +575,10 @@ export class ArchitectureAuditor {
   async auditAPIDesign(projectRoot: string): Promise<AuditFinding[]> {
     const findings: AuditFinding[] = []
     const apiFiles = this.findFiles(join(projectRoot, 'src/app/api'), '.ts')
-    
+
     for (const file of apiFiles) {
       const content = readFileSync(file, 'utf8')
-      
+
       // Check for proper error handling
       if (!content.includes('try') && !content.includes('catch')) {
         findings.push({
@@ -598,17 +597,19 @@ export class ArchitectureAuditor {
           recommendations: [
             'Add comprehensive error handling',
             'Implement error logging',
-            'Return consistent error responses'
+            'Return consistent error responses',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
 
       // Check for HTTP method validation
       const httpMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
-      const hasMethodCheck = httpMethods.some(method => content.includes(`request.method === '${method}'`))
-      
+      const hasMethodCheck = httpMethods.some((method) =>
+        content.includes(`request.method === '${method}'`)
+      )
+
       if (!hasMethodCheck && !content.includes('NextRequest')) {
         findings.push({
           id: `method_${Math.random().toString(36).substring(7)}`,
@@ -626,10 +627,10 @@ export class ArchitectureAuditor {
           recommendations: [
             'Add HTTP method validation',
             'Return 405 for unsupported methods',
-            'Use Next.js App Router patterns'
+            'Use Next.js App Router patterns',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
     }
@@ -639,7 +640,7 @@ export class ArchitectureAuditor {
 
   private analyzeFolderStructure(path: string): string[] {
     try {
-      return readdirSync(path).filter(item => {
+      return readdirSync(path).filter((item) => {
         try {
           return statSync(join(path, item)).isDirectory()
         } catch {
@@ -651,41 +652,43 @@ export class ArchitectureAuditor {
     }
   }
 
-  private async detectCircularDependencies(projectRoot: string): Promise<Array<{from: string, to: string}>> {
+  private async detectCircularDependencies(
+    projectRoot: string
+  ): Promise<Array<{ from: string; to: string }>> {
     // Simplified circular dependency detection
-    const dependencies: Array<{from: string, to: string}> = []
+    const dependencies: Array<{ from: string; to: string }> = []
     const files = this.findFiles(join(projectRoot, 'src'), '.ts', '.tsx')
-    
+
     for (const file of files) {
       const content = readFileSync(file, 'utf8')
       const imports = content.match(/import.*from\s+['"]([^'"]+)['"]/g) || []
-      
+
       for (const imp of imports) {
         const match = imp.match(/from\s+['"]([^'"]+)['"]/)
-        if (match && match[1].startsWith('./') || match?.[1].startsWith('../')) {
+        if ((match && match[1].startsWith('./')) || match?.[1].startsWith('../')) {
           // This would need more sophisticated analysis
           // For now, just placeholder data
         }
       }
     }
-    
+
     return dependencies
   }
 
   private findFiles(dir: string, ...extensions: string[]): string[] {
     const files: string[] = []
-    
+
     try {
       const items = readdirSync(dir)
-      
+
       for (const item of items) {
         const fullPath = join(dir, item)
         try {
           const stat = statSync(fullPath)
-          
+
           if (stat.isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
             files.push(...this.findFiles(fullPath, ...extensions))
-          } else if (stat.isFile() && extensions.some(ext => item.endsWith(ext))) {
+          } else if (stat.isFile() && extensions.some((ext) => item.endsWith(ext))) {
             files.push(fullPath)
           }
         } catch {
@@ -695,7 +698,7 @@ export class ArchitectureAuditor {
     } catch (error) {
       // Directory doesn't exist or permission denied
     }
-    
+
     return files
   }
 }
@@ -703,15 +706,15 @@ export class ArchitectureAuditor {
 export class BusinessLogicAuditor {
   async auditDataIntegrity(projectRoot: string): Promise<AuditFinding[]> {
     const findings: AuditFinding[] = []
-    
+
     // Check Prisma schema for proper constraints
     const schemaPath = join(projectRoot, 'prisma/schema.prisma')
     if (this.fileExists(schemaPath)) {
       const schema = readFileSync(schemaPath, 'utf8')
-      
+
       // Check for missing foreign key constraints
       const models = schema.match(/model\s+\w+\s*{[^}]+}/g) || []
-      
+
       for (const model of models) {
         if (model.includes('Id') && !model.includes('@relation')) {
           findings.push({
@@ -730,10 +733,10 @@ export class BusinessLogicAuditor {
             recommendations: [
               'Add proper @relation decorators',
               'Implement cascading deletes where appropriate',
-              'Add database constraints for data integrity'
+              'Add database constraints for data integrity',
             ],
             dependencies: [],
-            related_findings: []
+            related_findings: [],
           })
         }
       }
@@ -745,10 +748,10 @@ export class BusinessLogicAuditor {
   async auditBusinessRules(projectRoot: string): Promise<AuditFinding[]> {
     const findings: AuditFinding[] = []
     const businessLogicFiles = this.findFiles(join(projectRoot, 'src/lib'), '.ts')
-    
+
     for (const file of businessLogicFiles) {
       const content = readFileSync(file, 'utf8')
-      
+
       // Check for hardcoded business values
       const hardcodedValues = content.match(/\b\d+\.\d{2}\b/g) // Decimal values like prices
       if (hardcodedValues && hardcodedValues.length > 2) {
@@ -768,15 +771,19 @@ export class BusinessLogicAuditor {
           recommendations: [
             'Extract business rules to configuration',
             'Create business rules engine',
-            'Use database-driven configuration'
+            'Use database-driven configuration',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
 
       // Check for missing transaction handling
-      if (content.includes('prisma') && content.includes('create') && !content.includes('$transaction')) {
+      if (
+        content.includes('prisma') &&
+        content.includes('create') &&
+        !content.includes('$transaction')
+      ) {
         findings.push({
           id: `tx_${Math.random().toString(36).substring(7)}`,
           category: 'business_logic',
@@ -793,10 +800,10 @@ export class BusinessLogicAuditor {
           recommendations: [
             'Wrap related operations in transactions',
             'Implement proper rollback handling',
-            'Add transaction logging for debugging'
+            'Add transaction logging for debugging',
           ],
           dependencies: [],
-          related_findings: []
+          related_findings: [],
         })
       }
     }
@@ -814,18 +821,18 @@ export class BusinessLogicAuditor {
 
   private findFiles(dir: string, ...extensions: string[]): string[] {
     const files: string[] = []
-    
+
     try {
       const items = readdirSync(dir)
-      
+
       for (const item of items) {
         const fullPath = join(dir, item)
         try {
           const stat = statSync(fullPath)
-          
+
           if (stat.isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
             files.push(...this.findFiles(fullPath, ...extensions))
-          } else if (stat.isFile() && extensions.some(ext => item.endsWith(ext))) {
+          } else if (stat.isFile() && extensions.some((ext) => item.endsWith(ext))) {
             files.push(fullPath)
           }
         } catch {
@@ -835,7 +842,7 @@ export class BusinessLogicAuditor {
     } catch (error) {
       // Directory doesn't exist or permission denied
     }
-    
+
     return files
   }
 }

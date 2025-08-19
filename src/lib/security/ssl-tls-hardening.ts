@@ -19,31 +19,39 @@ export const TLS_CONFIG = {
   // Minimum TLS version
   minVersion: 'TLSv1.2',
   maxVersion: 'TLSv1.3',
-  
+
   // Preferred cipher suites (ordered by security preference)
   cipherSuites: [
     // TLS 1.3 cipher suites (AEAD)
     'TLS_AES_256_GCM_SHA384',
     'TLS_CHACHA20_POLY1305_SHA256',
     'TLS_AES_128_GCM_SHA256',
-    
+
     // TLS 1.2 cipher suites (with PFS)
     'ECDHE-ECDSA-AES256-GCM-SHA384',
     'ECDHE-RSA-AES256-GCM-SHA384',
     'ECDHE-ECDSA-CHACHA20-POLY1305',
     'ECDHE-RSA-CHACHA20-POLY1305',
     'ECDHE-ECDSA-AES128-GCM-SHA256',
-    'ECDHE-RSA-AES128-GCM-SHA256'
+    'ECDHE-RSA-AES128-GCM-SHA256',
   ],
-  
+
   // Disabled cipher suites (known vulnerabilities)
   disabledCiphers: [
-    'RC4', 'MD5', 'aDSS', 'SRP', 'PSK', 'aECDH',
-    'EDH-DSS-DES-CBC3-SHA', 'EDH-RSA-DES-CBC3-SHA',
-    'KRB5-DES-CBC3-SHA', 'DES-CBC3-SHA',
-    'ECDHE-RSA-RC4-SHA', 'ECDHE-ECDSA-RC4-SHA'
+    'RC4',
+    'MD5',
+    'aDSS',
+    'SRP',
+    'PSK',
+    'aECDH',
+    'EDH-DSS-DES-CBC3-SHA',
+    'EDH-RSA-DES-CBC3-SHA',
+    'KRB5-DES-CBC3-SHA',
+    'DES-CBC3-SHA',
+    'ECDHE-RSA-RC4-SHA',
+    'ECDHE-ECDSA-RC4-SHA',
   ],
-  
+
   // Security headers
   securityHeaders: {
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
@@ -51,8 +59,8 @@ export const TLS_CONFIG = {
     'X-Frame-Options': 'DENY',
     'X-XSS-Protection': '1; mode=block',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()'
-  }
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+  },
 }
 
 // Certificate validation patterns
@@ -61,20 +69,20 @@ const CERTIFICATE_VALIDATION = {
   rsa: {
     minKeySize: 2048,
     preferredKeySize: 4096,
-    maxValidityDays: 365
+    maxValidityDays: 365,
   },
-  
-  // ECDSA key requirements  
+
+  // ECDSA key requirements
   ecdsa: {
     allowedCurves: ['prime256v1', 'secp384r1', 'secp521r1'],
-    preferredCurve: 'secp384r1'
+    preferredCurve: 'secp384r1',
   },
-  
+
   // Certificate transparency requirements
   ct: {
     requiredSCTs: 2, // Minimum SCTs required
-    maxAge: 90 * 24 * 60 * 60 * 1000 // 90 days in milliseconds
-  }
+    maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days in milliseconds
+  },
 }
 
 export interface CertificateInfo {
@@ -109,8 +117,8 @@ export class SSLTLSManager {
   private static instance: SSLTLSManager
   private config = getConfig()
   private certificateCache = new Map<string, CertificateInfo>()
-  private securityPolicies = new Map<string, any>()
-  
+  private securityPolicies = new Map<string, unknown>()
+
   constructor() {
     this.initializeSecurityPolicies()
   }
@@ -135,7 +143,7 @@ export class SSLTLSManager {
       minKeySize: 2048,
       requireHsts: true,
       hstsMaxAge: 31536000, // 1 year
-      requireCertPinning: true
+      requireCertPinning: true,
     })
 
     this.securityPolicies.set('standard', {
@@ -149,14 +157,14 @@ export class SSLTLSManager {
       minKeySize: 2048,
       requireHsts: true,
       hstsMaxAge: 31536000,
-      requireCertPinning: false
+      requireCertPinning: false,
     })
   }
 
   /**
    * Generate secure TLS configuration for Node.js
    */
-  generateTLSConfig(profile: 'strict' | 'standard' = 'standard'): any {
+  generateTLSConfig(profile: 'strict' | 'standard' = 'standard'): unknown {
     const policy = this.securityPolicies.get(profile)
     if (!policy) throw new Error(`Unknown TLS profile: ${profile}`)
 
@@ -164,34 +172,34 @@ export class SSLTLSManager {
       // TLS version constraints
       minVersion: policy.minTlsVersion === '1.3' ? 'TLSv1.3' : 'TLSv1.2',
       maxVersion: 'TLSv1.3',
-      
+
       // Cipher suite selection
       ciphers: TLS_CONFIG.cipherSuites.join(':'),
-      
+
       // Security options
       secureProtocol: 'TLSv1_2_method',
       honorCipherOrder: true,
       secureOptions: this.getSecureOptions(policy),
-      
+
       // ECDH curve selection
       ecdhCurve: CERTIFICATE_VALIDATION.ecdsa.allowedCurves.join(':'),
-      
+
       // Session settings
       sessionTimeout: 300, // 5 minutes
       ticketKeys: this.generateTicketKeys(),
-      
+
       // Performance optimizations
       sessionIdContext: this.generateSessionIdContext(),
-      
+
       // Security enhancements
       requestCert: false,
       rejectUnauthorized: true,
-      checkServerIdentity: this.createServerIdentityChecker()
+      checkServerIdentity: this.createServerIdentityChecker(),
     }
   }
 
-  private getSecureOptions(policy: any): number {
-    const crypto = require('crypto')
+  private getSecureOptions(policy: unknown): number {
+    import crypto from 'crypto'
     let options = 0
 
     // Disable SSLv2 and SSLv3
@@ -223,45 +231,52 @@ export class SSLTLSManager {
   }
 
   private generateSessionIdContext(): string {
-    return crypto.createHash('sha256')
+    return crypto
+      .createHash('sha256')
       .update(`coreflow360-${this.config.NODE_ENV}-${Date.now()}`)
       .digest('hex')
       .substring(0, 32)
   }
 
   private createServerIdentityChecker() {
-    return (servername: string, cert: any): Error | undefined => {
+    return (servername: string, cert: unknown): Error | undefined => {
       // Custom server identity verification
       try {
         const certInfo = this.parseCertificate(cert)
-        
+
         // Validate certificate chain
         if (!certInfo.isValidChain) {
           return new Error('Invalid certificate chain')
         }
-        
+
         // Check certificate expiry
         if (certInfo.daysTillExpiry < 30) {
-          console.warn(`Certificate expires in ${certInfo.daysTillExpiry} days`)
           telemetry.recordCounter('certificate_expiry_warning', 1, {
             domain: servername,
-            days_till_expiry: certInfo.daysTillExpiry.toString()
+            days_till_expiry: certInfo.daysTillExpiry.toString(),
           })
         }
-        
+
         // Validate key strength
-        if (certInfo.keyType === 'RSA' && certInfo.keySize < CERTIFICATE_VALIDATION.rsa.minKeySize) {
-          return new Error(`RSA key size ${certInfo.keySize} below minimum ${CERTIFICATE_VALIDATION.rsa.minKeySize}`)
+        if (
+          certInfo.keyType === 'RSA' &&
+          certInfo.keySize < CERTIFICATE_VALIDATION.rsa.minKeySize
+        ) {
+          return new Error(
+            `RSA key size ${certInfo.keySize} below minimum ${CERTIFICATE_VALIDATION.rsa.minKeySize}`
+          )
         }
-        
+
         // Check security grade
         if (certInfo.securityGrade === 'F' || certInfo.securityGrade === 'D') {
           return new Error(`Certificate security grade too low: ${certInfo.securityGrade}`)
         }
-        
+
         return undefined
       } catch (error) {
-        return new Error(`Certificate validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+        return new Error(
+          `Certificate validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        )
       }
     }
   }
@@ -269,35 +284,36 @@ export class SSLTLSManager {
   /**
    * Validate certificate and extract security information
    */
-  parseCertificate(cert: any): CertificateInfo {
+  parseCertificate(cert: unknown): CertificateInfo {
     const subject = cert.subject?.CN || 'Unknown'
     const issuer = cert.issuer?.CN || 'Unknown'
     const validFrom = new Date(cert.valid_from)
     const validTo = new Date(cert.valid_to)
     const now = new Date()
-    
+
     // Calculate days until expiry
     const daysTillExpiry = Math.ceil((validTo.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-    
+
     // Extract key information
     const keySize = cert.bits || 0
     const keyType = this.determineKeyType(cert)
     const signatureAlgorithm = cert.sigalg || 'Unknown'
-    
+
     // Generate certificate fingerprint
-    const fingerprint = crypto.createHash('sha256')
+    const fingerprint = crypto
+      .createHash('sha256')
       .update(cert.raw || Buffer.from(cert.fingerprint, 'hex'))
       .digest('hex')
-    
+
     // Validate certificate chain
     const isValidChain = this.validateCertificateChain(cert)
-    
+
     // Assess vulnerabilities
     const vulnerabilities = this.assessCertificateVulnerabilities(cert, keySize, keyType)
-    
+
     // Calculate security grade
     const securityGrade = this.calculateSecurityGrade(cert, keySize, keyType, vulnerabilities)
-    
+
     const certInfo: CertificateInfo = {
       subject,
       issuer,
@@ -310,27 +326,27 @@ export class SSLTLSManager {
       isValidChain,
       daysTillExpiry,
       securityGrade,
-      vulnerabilities
+      vulnerabilities,
     }
-    
+
     // Cache certificate info
     this.certificateCache.set(fingerprint, certInfo)
-    
+
     return certInfo
   }
 
-  private determineKeyType(cert: any): 'RSA' | 'ECDSA' | 'EdDSA' {
+  private determineKeyType(cert: unknown): 'RSA' | 'ECDSA' | 'EdDSA' {
     const pubkey = cert.pubkey
     if (!pubkey) return 'RSA' // Default assumption
-    
+
     if (pubkey.includes('rsaEncryption')) return 'RSA'
     if (pubkey.includes('id-ecPublicKey')) return 'ECDSA'
     if (pubkey.includes('Ed25519') || pubkey.includes('Ed448')) return 'EdDSA'
-    
+
     return 'RSA' // Default
   }
 
-  private validateCertificateChain(cert: any): boolean {
+  private validateCertificateChain(cert: unknown): boolean {
     // Basic chain validation (in production, use proper certificate validation)
     try {
       return cert.valid_from && cert.valid_to && new Date(cert.valid_to) > new Date()
@@ -339,16 +355,20 @@ export class SSLTLSManager {
     }
   }
 
-  private assessCertificateVulnerabilities(cert: any, keySize: number, keyType: 'RSA' | 'ECDSA' | 'EdDSA'): string[] {
+  private assessCertificateVulnerabilities(
+    cert: unknown,
+    keySize: number,
+    keyType: 'RSA' | 'ECDSA' | 'EdDSA'
+  ): string[] {
     const vulnerabilities: string[] = []
-    
+
     // Check key size vulnerabilities
     if (keyType === 'RSA' && keySize < 2048) {
       vulnerabilities.push('weak_rsa_key')
     } else if (keyType === 'RSA' && keySize < 4096) {
       vulnerabilities.push('suboptimal_rsa_key')
     }
-    
+
     // Check signature algorithm vulnerabilities
     const sigalg = cert.sigalg?.toLowerCase() || ''
     if (sigalg.includes('sha1')) {
@@ -356,32 +376,37 @@ export class SSLTLSManager {
     } else if (sigalg.includes('md5')) {
       vulnerabilities.push('md5_signature')
     }
-    
+
     // Check certificate age
     const validFrom = new Date(cert.valid_from)
     const validTo = new Date(cert.valid_to)
     const certLifetime = validTo.getTime() - validFrom.getTime()
     const maxLifetime = CERTIFICATE_VALIDATION.rsa.maxValidityDays * 24 * 60 * 60 * 1000
-    
+
     if (certLifetime > maxLifetime) {
       vulnerabilities.push('long_validity_period')
     }
-    
+
     // Check for weak ciphers in extensions
     if (cert.ext_key_usage && cert.ext_key_usage.includes('digitalSignature')) {
       // Good - has digital signature
     } else {
       vulnerabilities.push('missing_digital_signature')
     }
-    
+
     return vulnerabilities
   }
 
-  private calculateSecurityGrade(cert: any, keySize: number, keyType: 'RSA' | 'ECDSA' | 'EdDSA', vulnerabilities: string[]): 'A+' | 'A' | 'B' | 'C' | 'D' | 'F' {
+  private calculateSecurityGrade(
+    cert: unknown,
+    keySize: number,
+    keyType: 'RSA' | 'ECDSA' | 'EdDSA',
+    vulnerabilities: string[]
+  ): 'A+' | 'A' | 'B' | 'C' | 'D' | 'F' {
     let score = 100
-    
+
     // Deduct points for vulnerabilities
-    vulnerabilities.forEach(vuln => {
+    vulnerabilities.forEach((vuln) => {
       switch (vuln) {
         case 'weak_rsa_key':
         case 'md5_signature':
@@ -403,16 +428,16 @@ export class SSLTLSManager {
           score -= 5
       }
     })
-    
+
     // Bonus points for strong configuration
     if (keyType === 'ECDSA' || keyType === 'EdDSA') {
       score += 5 // Modern key type
     }
-    
+
     if (keyType === 'RSA' && keySize >= 4096) {
       score += 5 // Strong RSA key
     }
-    
+
     // Convert score to grade
     if (score >= 95) return 'A+'
     if (score >= 90) return 'A'
@@ -425,11 +450,11 @@ export class SSLTLSManager {
   /**
    * Analyze TLS connection security
    */
-  analyzeTLSConnection(socket: any): TLSConnectionInfo {
+  analyzeTLSConnection(socket: unknown): TLSConnectionInfo {
     const cipher = socket.getCipher()
     const protocol = socket.getProtocol()
     const ephemeralKeyInfo = socket.getEphemeralKeyInfo()
-    
+
     return {
       protocol: protocol || 'Unknown',
       cipher: cipher?.name || 'Unknown',
@@ -440,23 +465,25 @@ export class SSLTLSManager {
       compression: false, // Disabled by default in our config
       secureRenegotiation: socket.getSecureRenegotiation?.() || false,
       heartbeatExtension: false, // Disabled to prevent Heartbleed
-      sessionReuse: socket.isSessionReused?.() || false
+      sessionReuse: socket.isSessionReused?.() || false,
     }
   }
 
   /**
    * Generate security headers for HTTPS responses
    */
-  generateSecurityHeaders(options: {
-    includeHSTS?: boolean
-    hstsMaxAge?: number
-    includeHPKP?: boolean
-    pins?: string[]
-    includeCSP?: boolean
-    cspPolicy?: string
-  } = {}): Record<string, string> {
+  generateSecurityHeaders(
+    options: {
+      includeHSTS?: boolean
+      hstsMaxAge?: number
+      includeHPKP?: boolean
+      pins?: string[]
+      includeCSP?: boolean
+      cspPolicy?: string
+    } = {}
+  ): Record<string, string> {
     const headers: Record<string, string> = {
-      ...TLS_CONFIG.securityHeaders
+      ...TLS_CONFIG.securityHeaders,
     }
 
     // HSTS (HTTP Strict Transport Security)
@@ -467,7 +494,7 @@ export class SSLTLSManager {
 
     // HPKP (HTTP Public Key Pinning) - Use with caution
     if (options.includeHPKP && options.pins && options.pins.length >= 2) {
-      const pinDirectives = options.pins.map(pin => `pin-sha256="${pin}"`).join('; ')
+      const pinDirectives = options.pins.map((pin) => `pin-sha256="${pin}"`).join('; ')
       headers['Public-Key-Pins'] = `${pinDirectives}; max-age=5184000; includeSubDomains`
     }
 
@@ -482,13 +509,15 @@ export class SSLTLSManager {
   /**
    * Certificate health monitoring
    */
-  async monitorCertificateHealth(domains: string[]): Promise<{
-    domain: string
-    status: 'healthy' | 'warning' | 'critical'
-    daysUntilExpiry: number
-    securityGrade: string
-    issues: string[]
-  }[]> {
+  async monitorCertificateHealth(domains: string[]): Promise<
+    {
+      domain: string
+      status: 'healthy' | 'warning' | 'critical'
+      daysUntilExpiry: number
+      securityGrade: string
+      issues: string[]
+    }[]
+  > {
     const results = []
 
     for (const domain of domains) {
@@ -496,7 +525,7 @@ export class SSLTLSManager {
         // In production, this would fetch the actual certificate
         const mockCertInfo: CertificateInfo = {
           subject: domain,
-          issuer: 'Let\'s Encrypt Authority X3',
+          issuer: "Let's Encrypt Authority X3",
           validFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
           validTo: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
           keySize: 2048,
@@ -506,7 +535,7 @@ export class SSLTLSManager {
           isValidChain: true,
           daysTillExpiry: 60,
           securityGrade: 'A',
-          vulnerabilities: []
+          vulnerabilities: [],
         }
 
         let status: 'healthy' | 'warning' | 'critical' = 'healthy'
@@ -520,7 +549,11 @@ export class SSLTLSManager {
           issues.push('Certificate expires within 30 days')
         }
 
-        if (mockCertInfo.securityGrade === 'C' || mockCertInfo.securityGrade === 'D' || mockCertInfo.securityGrade === 'F') {
+        if (
+          mockCertInfo.securityGrade === 'C' ||
+          mockCertInfo.securityGrade === 'D' ||
+          mockCertInfo.securityGrade === 'F'
+        ) {
           status = 'critical'
           issues.push(`Low security grade: ${mockCertInfo.securityGrade}`)
         }
@@ -535,22 +568,23 @@ export class SSLTLSManager {
           status,
           daysUntilExpiry: mockCertInfo.daysTillExpiry,
           securityGrade: mockCertInfo.securityGrade,
-          issues
+          issues,
         })
 
         // Record telemetry
         telemetry.recordGauge('certificate_days_until_expiry', mockCertInfo.daysTillExpiry, {
           domain,
-          grade: mockCertInfo.securityGrade
+          grade: mockCertInfo.securityGrade,
         })
-
       } catch (error) {
         results.push({
           domain,
           status: 'critical',
           daysUntilExpiry: 0,
           securityGrade: 'F',
-          issues: [`Certificate check failed: ${error instanceof Error ? error.message : 'Unknown error'}`]
+          issues: [
+            `Certificate check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          ],
         })
       }
     }
@@ -579,16 +613,16 @@ export class SSLTLSManager {
 
     // Analyze current configuration
     const config = this.generateTLSConfig('standard')
-    
+
     // Check strengths
     if (config.minVersion === 'TLSv1.2' || config.minVersion === 'TLSv1.3') {
       strengths.push('Modern TLS version support')
     }
-    
+
     if (config.ciphers.includes('TLS_AES_256_GCM_SHA384')) {
       strengths.push('TLS 1.3 AEAD cipher suites configured')
     }
-    
+
     if (config.honorCipherOrder) {
       strengths.push('Server cipher preference enforced')
     }
@@ -604,7 +638,7 @@ export class SSLTLSManager {
       pciDSS: config.minVersion >= 'TLSv1.2' && !config.ciphers.includes('RC4'),
       hipaa: config.minVersion >= 'TLSv1.2' && config.honorCipherOrder,
       gdpr: config.minVersion >= 'TLSv1.2', // Basic requirement
-      owasp: config.minVersion === 'TLSv1.3' && strengths.length >= 3
+      owasp: config.minVersion === 'TLSv1.3' && strengths.length >= 3,
     }
 
     // Calculate overall grade
@@ -625,7 +659,7 @@ export class SSLTLSManager {
       strengths,
       weaknesses,
       recommendations,
-      compliance
+      compliance,
     }
   }
 }
@@ -634,12 +668,14 @@ export class SSLTLSManager {
 export const sslTlsManager = SSLTLSManager.getInstance()
 
 // Utility functions for middleware integration
-export function createTLSMiddleware(options: {
-  profile?: 'strict' | 'standard'
-  requireHTTPS?: boolean
-  includeSecurityHeaders?: boolean
-} = {}) {
-  return (req: any, res: any, next: any) => {
+export function createTLSMiddleware(
+  options: {
+    profile?: 'strict' | 'standard'
+    requireHTTPS?: boolean
+    includeSecurityHeaders?: boolean
+  } = {}
+) {
+  return (req: unknown, res: unknown, next: unknown) => {
     // Force HTTPS redirect
     if (options.requireHTTPS && req.headers['x-forwarded-proto'] !== 'https') {
       return res.redirect(301, `https://${req.headers.host}${req.url}`)
@@ -650,9 +686,9 @@ export function createTLSMiddleware(options: {
       const headers = sslTlsManager.generateSecurityHeaders({
         includeHSTS: true,
         includeCSP: true,
-        cspPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline'"
+        cspPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline'",
       })
-      
+
       Object.entries(headers).forEach(([key, value]) => {
         res.setHeader(key, value)
       })

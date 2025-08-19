@@ -37,14 +37,16 @@ export function useAuth(): UseAuthReturn {
   const [error, setError] = useState<string | null>(null)
 
   // Derive user from session
-  const user: AuthUser | null = session?.user ? {
-    id: session.user.id!,
-    email: session.user.email!,
-    name: session.user.name!,
-    tenantId: session.user.tenantId!,
-    role: session.user.role || 'USER',
-    permissions: session.user.permissions
-  } : null
+  const user: AuthUser | null = session?.user
+    ? {
+        id: session.user.id!,
+        email: session.user.email!,
+        name: session.user.name!,
+        tenantId: session.user.tenantId!,
+        role: session.user.role || 'USER',
+        permissions: session.user.permissions,
+      }
+    : null
 
   const loading = status === 'loading'
   const isAuthenticated = status === 'authenticated' && !!user
@@ -52,37 +54,38 @@ export function useAuth(): UseAuthReturn {
   /**
    * Login method
    */
-  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    try {
-      setError(null)
-      
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false
-      })
+  const login = useCallback(
+    async (email: string, password: string): Promise<boolean> => {
+      try {
+        setError(null)
 
-      if (result?.error) {
-        setError(result.error === 'CredentialsSignin' 
-          ? 'Invalid email or password' 
-          : result.error
-        )
+        const result = await signIn('credentials', {
+          email,
+          password,
+          redirect: false,
+        })
+
+        if (result?.error) {
+          setError(
+            result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error
+          )
+          return false
+        }
+
+        if (result?.ok) {
+          // Refresh the session to get latest data
+          await update()
+          return true
+        }
+
+        return false
+      } catch (err) {
+        setError('An unexpected error occurred during login')
         return false
       }
-
-      if (result?.ok) {
-        // Refresh the session to get latest data
-        await update()
-        return true
-      }
-
-      return false
-    } catch (err) {
-      console.error('Login error:', err)
-      setError('An unexpected error occurred during login')
-      return false
-    }
-  }, [update])
+    },
+    [update]
+  )
 
   /**
    * Logout method
@@ -90,24 +93,22 @@ export function useAuth(): UseAuthReturn {
   const logout = useCallback(async () => {
     try {
       setError(null)
-      
+
       // Call logout API endpoint if needed
       try {
         await api.post('/api/auth/logout', {})
       } catch (err) {
         // Ignore logout API errors - we'll still sign out locally
-        console.warn('Logout API call failed:', err)
       }
 
       // Sign out from NextAuth
-      await signOut({ 
-        redirect: false 
+      await signOut({
+        redirect: false,
       })
 
       // Redirect to login
       router.push('/login')
     } catch (err) {
-      console.error('Logout error:', err)
       setError('Failed to logout')
     }
   }, [router])
@@ -119,7 +120,6 @@ export function useAuth(): UseAuthReturn {
     try {
       await update()
     } catch (err) {
-      console.error('Session refresh error:', err)
       setError('Failed to refresh session')
     }
   }, [update])
@@ -127,19 +127,18 @@ export function useAuth(): UseAuthReturn {
   /**
    * Check if user has a specific permission
    */
-  const checkPermission = useCallback((permission: string): boolean => {
-    if (!user?.permissions) return false
-    
-    // Check for wildcard permissions
-    const parts = permission.split(':')
-    const resource = parts[0]
-    
-    return user.permissions.some(p => 
-      p === permission || 
-      p === `${resource}:*` || 
-      p === '*'
-    )
-  }, [user])
+  const checkPermission = useCallback(
+    (permission: string): boolean => {
+      if (!user?.permissions) return false
+
+      // Check for wildcard permissions
+      const parts = permission.split(':')
+      const resource = parts[0]
+
+      return user.permissions.some((p) => p === permission || p === `${resource}:*` || p === '*')
+    },
+    [user]
+  )
 
   /**
    * Handle authentication errors globally
@@ -153,9 +152,9 @@ export function useAuth(): UseAuthReturn {
       }
     }
 
-    window.addEventListener('auth:error' as any, handleAuthError)
+    window.addEventListener('auth:error' as unknown, handleAuthError)
     return () => {
-      window.removeEventListener('auth:error' as any, handleAuthError)
+      window.removeEventListener('auth:error' as unknown, handleAuthError)
     }
   }, [router])
 
@@ -167,7 +166,7 @@ export function useAuth(): UseAuthReturn {
     login,
     logout,
     refreshSession,
-    checkPermission
+    checkPermission,
   }
 }
 
@@ -194,11 +193,11 @@ export function useRequireAuth(redirectTo: string = '/login') {
 export function usePermission(permission: string | string[]) {
   const { checkPermission, isAuthenticated } = useAuth()
 
-  const hasPermission = isAuthenticated && (
-    Array.isArray(permission) 
-      ? permission.some(p => checkPermission(p))
-      : checkPermission(permission)
-  )
+  const hasPermission =
+    isAuthenticated &&
+    (Array.isArray(permission)
+      ? permission.some((p) => checkPermission(p))
+      : checkPermission(permission))
 
   return hasPermission
 }

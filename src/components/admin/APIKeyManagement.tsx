@@ -6,34 +6,34 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { 
-  Key, 
-  Eye, 
-  EyeOff, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  RotateCcw, 
-  Shield, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Key,
+  Eye,
+  EyeOff,
+  Plus,
+  Edit,
+  Trash2,
+  RotateCcw,
+  Shield,
+  AlertTriangle,
+  CheckCircle,
   Clock,
   Search,
   Filter,
   Download,
   RefreshCw,
-  Settings
+  Settings,
 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import { 
-  APIKey, 
-  APIKeyListResponse, 
-  CreateAPIKeyRequest, 
+import {
+  APIKey,
+  APIKeyListResponse,
+  CreateAPIKeyRequest,
   UpdateAPIKeyRequest,
   RotateAPIKeyRequest,
   APIKeyFilter,
   APIKeyStatus,
-  SecurityLevel
+  SecurityLevel,
 } from '@/types/api-keys'
 
 interface APIKeyCardProps {
@@ -49,28 +49,40 @@ function APIKeyCard({ apiKey, onUpdate, onRotate, onDelete, onViewDetails }: API
   const [isEditing, setIsEditing] = useState(false)
   const [editData, setEditData] = useState({
     name: apiKey.name,
-    description: apiKey.description || ''
+    description: apiKey.description || '',
   })
 
   const getStatusColor = (status: APIKeyStatus) => {
     switch (status) {
-      case 'ACTIVE': return 'bg-green-100 text-green-800 border-green-200'
-      case 'INACTIVE': return 'bg-gray-100 text-gray-800 border-gray-200'
-      case 'EXPIRED': return 'bg-red-100 text-red-800 border-red-200'
-      case 'ROTATION_REQUIRED': return 'bg-orange-100 text-orange-800 border-orange-200'
-      case 'COMPROMISED': return 'bg-red-100 text-red-800 border-red-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'ACTIVE':
+        return 'bg-green-100 text-green-800 border-green-200'
+      case 'INACTIVE':
+        return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'EXPIRED':
+        return 'bg-red-100 text-red-800 border-red-200'
+      case 'ROTATION_REQUIRED':
+        return 'bg-orange-100 text-orange-800 border-orange-200'
+      case 'COMPROMISED':
+        return 'bg-red-100 text-red-800 border-red-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
   const getSecurityLevelColor = (level: SecurityLevel) => {
     switch (level) {
-      case 'EXCELLENT': return 'text-green-600'
-      case 'HIGH': return 'text-blue-600'
-      case 'MEDIUM': return 'text-yellow-600'
-      case 'LOW': return 'text-orange-600'
-      case 'CRITICAL': return 'text-red-600'
-      default: return 'text-gray-600'
+      case 'EXCELLENT':
+        return 'text-green-600'
+      case 'HIGH':
+        return 'text-blue-600'
+      case 'MEDIUM':
+        return 'text-yellow-600'
+      case 'LOW':
+        return 'text-orange-600'
+      case 'CRITICAL':
+        return 'text-red-600'
+      default:
+        return 'text-gray-600'
     }
   }
 
@@ -78,42 +90,40 @@ function APIKeyCard({ apiKey, onUpdate, onRotate, onDelete, onViewDetails }: API
     try {
       await onUpdate(apiKey.id, editData)
       setIsEditing(false)
-    } catch (error) {
-      console.error('Failed to update API key:', error)
-    }
+    } catch (error) {}
   }
 
   const handleRotateKey = async () => {
     const newKey = prompt('Enter the new API key:')
     if (newKey) {
       try {
-        await onRotate(apiKey.id, { 
+        await onRotate(apiKey.id, {
           newKey,
-          reason: 'Manual rotation from admin panel'
+          reason: 'Manual rotation from admin panel',
         })
-      } catch (error) {
-        console.error('Failed to rotate API key:', error)
-      }
+      } catch (error) {}
     }
   }
 
   const handleDeleteKey = async () => {
-    if (confirm(`Are you sure you want to delete the API key "${apiKey.name || 'Unknown'}"? This action cannot be undone.`)) {
+    if (
+      confirm(
+        `Are you sure you want to delete the API key "${apiKey.name || 'Unknown'}"? This action cannot be undone.`
+      )
+    ) {
       try {
         await onDelete(apiKey.id)
-      } catch (error) {
-        console.error('Failed to delete API key:', error)
-      }
+      } catch (error) {}
     }
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+    <div className="rounded-lg border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="mb-4 flex items-start justify-between">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-            <Key className="w-5 h-5 text-blue-600" />
+          <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/20">
+            <Key className="h-5 w-5 text-blue-600" />
           </div>
           <div>
             {isEditing ? (
@@ -121,26 +131,28 @@ function APIKeyCard({ apiKey, onUpdate, onRotate, onDelete, onViewDetails }: API
                 type="text"
                 value={editData.name}
                 onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                className="text-lg font-semibold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500"
+                className="border-b border-gray-300 bg-transparent text-lg font-semibold focus:border-blue-500 focus:outline-none dark:border-gray-600"
               />
             ) : (
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {apiKey.name}
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{apiKey.name}</h3>
             )}
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {apiKey.service.charAt(0).toUpperCase() + apiKey.service.slice(1)}
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
-          <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(apiKey.status)}`}>
+          <span
+            className={`rounded-full border px-2 py-1 text-xs font-medium ${getStatusColor(apiKey.status)}`}
+          >
             {apiKey.status}
           </span>
           <div className="flex items-center space-x-1">
-            <Shield className={`w-4 h-4 ${getSecurityLevelColor(apiKey.securityScore.level)}`} />
-            <span className={`text-sm font-medium ${getSecurityLevelColor(apiKey.securityScore.level)}`}>
+            <Shield className={`h-4 w-4 ${getSecurityLevelColor(apiKey.securityScore.level)}`} />
+            <span
+              className={`text-sm font-medium ${getSecurityLevelColor(apiKey.securityScore.level)}`}
+            >
               {apiKey.securityScore.score}
             </span>
           </div>
@@ -153,45 +165,41 @@ function APIKeyCard({ apiKey, onUpdate, onRotate, onDelete, onViewDetails }: API
           value={editData.description}
           onChange={(e) => setEditData({ ...editData, description: e.target.value })}
           placeholder="Description (optional)"
-          className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-transparent resize-none"
+          className="w-full resize-none rounded-md border border-gray-300 bg-transparent p-2 text-sm dark:border-gray-600"
           rows={2}
         />
       ) : (
         apiKey.description && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            {apiKey.description}
-          </p>
+          <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">{apiKey.description}</p>
         )
       )}
 
       {/* API Key Display */}
       <div className="mb-4">
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
           API Key
         </label>
         <div className="flex items-center space-x-2">
-          <div className="flex-1 font-mono text-sm bg-gray-50 dark:bg-gray-700 p-2 rounded border">
+          <div className="flex-1 rounded border bg-gray-50 p-2 font-mono text-sm dark:bg-gray-700">
             {isKeyVisible ? (
               <span className="text-gray-900 dark:text-white">
                 {apiKey.keyPreview.replace('...', '••••••••••••••••••••••••••••••••')}
               </span>
             ) : (
-              <span className="text-gray-500">
-                {apiKey.keyPreview}
-              </span>
+              <span className="text-gray-500">{apiKey.keyPreview}</span>
             )}
           </div>
           <button
             onClick={() => setIsKeyVisible(!isKeyVisible)}
             className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
           >
-            {isKeyVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {isKeyVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-3 gap-4 mb-4">
+      <div className="mb-4 grid grid-cols-3 gap-4">
         <div className="text-center">
           <div className="text-lg font-semibold text-gray-900 dark:text-white">
             {apiKey.usage.totalRequests.toLocaleString()}
@@ -200,7 +208,11 @@ function APIKeyCard({ apiKey, onUpdate, onRotate, onDelete, onViewDetails }: API
         </div>
         <div className="text-center">
           <div className="text-lg font-semibold text-gray-900 dark:text-white">
-            {((apiKey.usage.failedRequests / Math.max(apiKey.usage.totalRequests, 1)) * 100).toFixed(1)}%
+            {(
+              (apiKey.usage.failedRequests / Math.max(apiKey.usage.totalRequests, 1)) *
+              100
+            ).toFixed(1)}
+            %
           </div>
           <div className="text-xs text-gray-500">Error Rate</div>
         </div>
@@ -214,14 +226,14 @@ function APIKeyCard({ apiKey, onUpdate, onRotate, onDelete, onViewDetails }: API
 
       {/* Security Recommendations */}
       {apiKey.securityScore.recommendations.length > 0 && (
-        <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-md">
-          <div className="flex items-center space-x-2 mb-2">
-            <AlertTriangle className="w-4 h-4 text-yellow-600" />
+        <div className="mb-4 rounded-md border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-900/10">
+          <div className="mb-2 flex items-center space-x-2">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
             <span className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
               Security Recommendations
             </span>
           </div>
-          <ul className="text-xs text-yellow-700 dark:text-yellow-300 space-y-1">
+          <ul className="space-y-1 text-xs text-yellow-700 dark:text-yellow-300">
             {apiKey.securityScore.recommendations.slice(0, 2).map((rec, index) => (
               <li key={index}>• {rec}</li>
             ))}
@@ -230,19 +242,19 @@ function APIKeyCard({ apiKey, onUpdate, onRotate, onDelete, onViewDetails }: API
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between border-t border-gray-200 pt-4 dark:border-gray-700">
         <div className="flex items-center space-x-2">
           {isEditing ? (
             <>
               <button
                 onClick={handleSaveEdit}
-                className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="rounded bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700"
               >
                 Save
               </button>
               <button
                 onClick={() => setIsEditing(false)}
-                className="px-3 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="rounded border border-gray-300 px-3 py-1 text-xs hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
               >
                 Cancel
               </button>
@@ -254,29 +266,29 @@ function APIKeyCard({ apiKey, onUpdate, onRotate, onDelete, onViewDetails }: API
                 className="p-1 text-gray-500 hover:text-blue-600"
                 title="Edit"
               >
-                <Edit className="w-4 h-4" />
+                <Edit className="h-4 w-4" />
               </button>
               <button
                 onClick={handleRotateKey}
                 className="p-1 text-gray-500 hover:text-green-600"
                 title="Rotate Key"
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="h-4 w-4" />
               </button>
               <button
                 onClick={handleDeleteKey}
                 className="p-1 text-gray-500 hover:text-red-600"
                 title="Delete"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="h-4 w-4" />
               </button>
             </>
           )}
         </div>
-        
+
         <button
           onClick={() => onViewDetails(apiKey.id)}
-          className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+          className="text-xs font-medium text-blue-600 hover:text-blue-800"
         >
           View Details
         </button>
@@ -298,7 +310,7 @@ function CreateAPIKeyModal({ isOpen, onClose, onCreate }: CreateAPIKeyModalProps
     description: '',
     key: '',
     rotationDays: 90,
-    vendorId: 'openai' // Default vendor
+    vendorId: 'openai', // Default vendor
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -307,11 +319,11 @@ function CreateAPIKeyModal({ isOpen, onClose, onCreate }: CreateAPIKeyModalProps
   // Client-side validation
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
-    
+
     if (!formData.service) {
       newErrors.service = 'Service is required'
     }
-    
+
     if (!formData.name) {
       newErrors.name = 'Name is required'
     } else if (formData.name.length > 100) {
@@ -319,11 +331,11 @@ function CreateAPIKeyModal({ isOpen, onClose, onCreate }: CreateAPIKeyModalProps
     } else if (!/^[a-zA-Z0-9\s_-]+$/.test(formData.name)) {
       newErrors.name = 'Name contains invalid characters'
     }
-    
+
     if (formData.description && formData.description.length > 500) {
       newErrors.description = 'Description must be 500 characters or less'
     }
-    
+
     if (!formData.key) {
       newErrors.key = 'API key is required'
     } else if (formData.key.length < 8) {
@@ -331,7 +343,7 @@ function CreateAPIKeyModal({ isOpen, onClose, onCreate }: CreateAPIKeyModalProps
     } else if (formData.key.length > 200) {
       newErrors.key = 'API key is too long'
     }
-    
+
     if (formData.rotationDays < 1 || formData.rotationDays > 365) {
       newErrors.rotationDays = 'Rotation days must be between 1 and 365'
     }
@@ -343,13 +355,13 @@ function CreateAPIKeyModal({ isOpen, onClose, onCreate }: CreateAPIKeyModalProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitError('')
-    
+
     if (!validateForm()) {
       return
     }
-    
+
     setIsSubmitting(true)
-    
+
     try {
       await onCreate(formData)
       onClose()
@@ -359,12 +371,11 @@ function CreateAPIKeyModal({ isOpen, onClose, onCreate }: CreateAPIKeyModalProps
         description: '',
         key: '',
         rotationDays: 90,
-        vendorId: 'openai'
+        vendorId: 'openai',
       })
       setErrors({})
       setSubmitError('')
-    } catch (error: any) {
-      console.error('Failed to create API key:', error)
+    } catch (error: unknown) {
       setSubmitError(error.message || 'Failed to create API key')
     } finally {
       setIsSubmitting(false)
@@ -381,36 +392,36 @@ function CreateAPIKeyModal({ isOpen, onClose, onCreate }: CreateAPIKeyModalProps
       description: '',
       key: '',
       rotationDays: 90,
-      vendorId: 'openai'
+      vendorId: 'openai',
     })
   }
 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+      <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800">
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
           Add New API Key
         </h3>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {submitError && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+            <div className="rounded-md border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
               <p className="text-sm text-red-700 dark:text-red-300">{submitError}</p>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Service
             </label>
             <select
               value={formData.service}
               onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-              className={`w-full border rounded-md px-3 py-2 bg-white dark:bg-gray-700 ${
-                errors.service 
-                  ? 'border-red-300 dark:border-red-600' 
+              className={`w-full rounded-md border bg-white px-3 py-2 dark:bg-gray-700 ${
+                errors.service
+                  ? 'border-red-300 dark:border-red-600'
                   : 'border-gray-300 dark:border-gray-600'
               }`}
               required
@@ -429,55 +440,55 @@ function CreateAPIKeyModal({ isOpen, onClose, onCreate }: CreateAPIKeyModalProps
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Name
             </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-700"
               placeholder="e.g., Production OpenAI Key"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Description (Optional)
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-700"
               placeholder="Description of this API key's purpose"
               rows={2}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               API Key
             </label>
             <input
               type="password"
               value={formData.key}
               onChange={(e) => setFormData({ ...formData, key: e.target.value })}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 font-mono"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 font-mono dark:border-gray-600 dark:bg-gray-700"
               placeholder="Paste your API key here"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Rotation Days
             </label>
             <input
               type="number"
               value={formData.rotationDays}
               onChange={(e) => setFormData({ ...formData, rotationDays: parseInt(e.target.value) })}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-700"
               min="1"
               max="365"
             />
@@ -487,14 +498,14 @@ function CreateAPIKeyModal({ isOpen, onClose, onCreate }: CreateAPIKeyModalProps
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? 'Creating...' : 'Create API Key'}
             </button>
@@ -513,27 +524,26 @@ export function APIKeyManagement() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<APIKeyStatus | 'ALL'>('ALL')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [metrics, setMetrics] = useState<any>(null)
+  const [metrics, setMetrics] = useState<unknown>(null)
 
   // Check if user is super admin
   const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN'
 
   const fetchAPIKeys = useCallback(async () => {
     if (!isSuperAdmin) return
-    
+
     try {
       setLoading(true)
       const response = await fetch('/api/admin/api-keys')
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch API keys')
       }
-      
+
       const data: APIKeyListResponse = await response.json()
       setApiKeys(data.keys)
       setMetrics(data.metrics)
     } catch (error) {
-      console.error('Error fetching API keys:', error)
     } finally {
       setLoading(false)
     }
@@ -543,37 +553,35 @@ export function APIKeyManagement() {
     try {
       const response = await fetch('/api/admin/api-keys', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
+          'X-Requested-With': 'XMLHttpRequest',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       })
 
       if (!response.ok) {
         const error = await response.json()
-        
+
         // Handle specific error types
         if (response.status === 429) {
           throw new Error('Rate limit exceeded. Please wait before trying again.')
         } else if (response.status === 403) {
           throw new Error('Insufficient permissions for this operation.')
         } else if (response.status === 400 && error.details) {
-          const validationErrors = Array.isArray(error.details) 
-            ? error.details.map((e: any) => e.message || e.field).join(', ')
+          const validationErrors = Array.isArray(error.details)
+            ? error.details.map((e: unknown) => e.message || e.field).join(', ')
             : error.details
           throw new Error(`Validation failed: ${validationErrors}`)
         }
-        
+
         throw new Error(error.error || 'Failed to create API key')
       }
 
       await fetchAPIKeys()
-      
+
       // Show success notification
-      console.log('API key created successfully')
-    } catch (error: any) {
-      console.error('Failed to create API key:', error)
+    } catch (error: unknown) {
       throw error
     }
   }
@@ -582,7 +590,7 @@ export function APIKeyManagement() {
     const response = await fetch(`/api/admin/api-keys/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     })
 
     if (!response.ok) {
@@ -597,7 +605,7 @@ export function APIKeyManagement() {
     const response = await fetch(`/api/admin/api-keys/${id}/rotate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     })
 
     if (!response.ok) {
@@ -610,7 +618,7 @@ export function APIKeyManagement() {
 
   const handleDeleteAPIKey = async (id: string) => {
     const response = await fetch(`/api/admin/api-keys/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     })
 
     if (!response.ok) {
@@ -621,9 +629,8 @@ export function APIKeyManagement() {
     await fetchAPIKeys()
   }
 
-  const handleViewDetails = (id: string) => {
+  const handleViewDetails = (_id: string) => {
     // TODO: Open detailed view modal
-    console.log('View details for key:', id)
   }
 
   // Filter keys based on search and status
@@ -631,14 +638,15 @@ export function APIKeyManagement() {
     let filtered = apiKeys
 
     if (searchTerm) {
-      filtered = filtered.filter(key => 
-        key.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        key.service.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (key) =>
+          key.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          key.service.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
 
     if (statusFilter !== 'ALL') {
-      filtered = filtered.filter(key => key.status === statusFilter)
+      filtered = filtered.filter((key) => key.status === statusFilter)
     }
 
     setFilteredKeys(filtered)
@@ -650,9 +658,9 @@ export function APIKeyManagement() {
 
   if (!isSuperAdmin) {
     return (
-      <div className="text-center py-8">
-        <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+      <div className="py-8 text-center">
+        <Shield className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+        <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
           Access Restricted
         </h3>
         <p className="text-gray-600 dark:text-gray-400">
@@ -667,27 +675,25 @@ export function APIKeyManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            API Key Management
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">API Key Management</h2>
           <p className="text-gray-600 dark:text-gray-400">
             Manage third-party vendor API keys securely
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-3">
           <button
             onClick={fetchAPIKeys}
             className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
             title="Refresh"
           >
-            <RefreshCw className="w-5 h-5" />
+            <RefreshCw className="h-5 w-5" />
           </button>
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+            className="flex items-center space-x-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="h-4 w-4" />
             <span>Add API Key</span>
           </button>
         </div>
@@ -695,26 +701,22 @@ export function APIKeyManagement() {
 
       {/* Metrics */}
       {metrics && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {metrics.total}
-            </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{metrics.total}</div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Total Keys</div>
           </div>
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-            <div className="text-2xl font-bold text-green-600">
-              {metrics.byStatus.ACTIVE}
-            </div>
+          <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="text-2xl font-bold text-green-600">{metrics.byStatus.ACTIVE}</div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Active Keys</div>
           </div>
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <div className="text-2xl font-bold text-orange-600">
               {metrics.byStatus.ROTATION_REQUIRED}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Need Rotation</div>
           </div>
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <div className="text-2xl font-bold text-blue-600">
               {metrics.usageMetrics.avgSecurityScore.toFixed(0)}
             </div>
@@ -725,21 +727,21 @@ export function APIKeyManagement() {
 
       {/* Filters */}
       <div className="flex items-center space-x-4">
-        <div className="flex-1 relative">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        <div className="relative flex-1">
+          <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
           <input
             type="text"
             placeholder="Search API keys..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+            className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 dark:border-gray-600 dark:bg-gray-700"
           />
         </div>
-        
+
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as APIKeyStatus | 'ALL')}
-          className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700"
+          className="rounded-lg border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-700"
         >
           <option value="ALL">All Status</option>
           <option value="ACTIVE">Active</option>
@@ -752,33 +754,32 @@ export function APIKeyManagement() {
 
       {/* API Keys Grid */}
       {loading ? (
-        <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="py-8 text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
           <p className="mt-2 text-gray-600 dark:text-gray-400">Loading API keys...</p>
         </div>
       ) : filteredKeys.length === 0 ? (
-        <div className="text-center py-8">
-          <Key className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+        <div className="py-8 text-center">
+          <Key className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+          <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
             No API keys found
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            {searchTerm || statusFilter !== 'ALL' 
+          <p className="mb-4 text-gray-600 dark:text-gray-400">
+            {searchTerm || statusFilter !== 'ALL'
               ? 'Try adjusting your search or filters'
-              : 'Get started by adding your first API key'
-            }
+              : 'Get started by adding your first API key'}
           </p>
           {!searchTerm && statusFilter === 'ALL' && (
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
               Add Your First API Key
             </button>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
           {filteredKeys.map((apiKey) => (
             <APIKeyCard
               key={apiKey.id}

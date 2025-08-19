@@ -1,6 +1,6 @@
 /**
  * CoreFlow360 Achievement Engine
- * 
+ *
  * Consumer-grade gamification system for enterprise users
  * Makes business productivity engaging with achievements, levels, and rewards
  */
@@ -118,7 +118,6 @@ export class AchievementEngine {
 
   constructor() {
     this.initializeAchievements()
-    console.log('🏆 Achievement Engine initialized with', this.achievements.size, 'achievements')
   }
 
   private initializeAchievements(): void {
@@ -132,14 +131,12 @@ export class AchievementEngine {
         category: 'productivity',
         rarity: 'common',
         points: 10,
-        requirements: [
-          { type: 'action', target: 'task_completed', value: 1, operator: 'equals' }
-        ],
+        requirements: [{ type: 'action', target: 'task_completed', value: 1, operator: 'equals' }],
         rewards: [
           { type: 'points', value: 10, description: '10 productivity points' },
-          { type: 'badge', value: 'starter', description: 'Starter badge' }
+          { type: 'badge', value: 'starter', description: 'Starter badge' },
         ],
-        hidden: false
+        hidden: false,
       },
 
       {
@@ -151,14 +148,24 @@ export class AchievementEngine {
         rarity: 'rare',
         points: 500,
         requirements: [
-          { type: 'metric', target: 'tasks_completed', value: 100, operator: 'greater', timeWindow: 2592000000 }
+          {
+            type: 'metric',
+            target: 'tasks_completed',
+            value: 100,
+            operator: 'greater',
+            timeWindow: 2592000000,
+          },
         ],
         rewards: [
           { type: 'points', value: 500, description: '500 productivity points' },
           { type: 'title', value: 'Task Master', description: 'Task Master title' },
-          { type: 'feature', value: 'advanced_automation', description: 'Unlock advanced automation features' }
+          {
+            type: 'feature',
+            value: 'advanced_automation',
+            description: 'Unlock advanced automation features',
+          },
         ],
-        hidden: false
+        hidden: false,
       },
 
       {
@@ -170,13 +177,13 @@ export class AchievementEngine {
         rarity: 'uncommon',
         points: 250,
         requirements: [
-          { type: 'streak', target: 'early_completion', value: 7, operator: 'streak' }
+          { type: 'streak', target: 'early_completion', value: 7, operator: 'streak' },
         ],
         rewards: [
           { type: 'points', value: 250, description: '250 productivity points' },
-          { type: 'badge', value: 'early_bird', description: 'Early Bird badge' }
+          { type: 'badge', value: 'early_bird', description: 'Early Bird badge' },
         ],
-        hidden: false
+        hidden: false,
       },
 
       // Collaboration Achievements
@@ -189,13 +196,13 @@ export class AchievementEngine {
         rarity: 'uncommon',
         points: 300,
         requirements: [
-          { type: 'metric', target: 'collaborations', value: 50, operator: 'greater' }
+          { type: 'metric', target: 'collaborations', value: 50, operator: 'greater' },
         ],
         rewards: [
           { type: 'points', value: 300, description: '300 collaboration points' },
-          { type: 'badge', value: 'team_player', description: 'Team Player badge' }
+          { type: 'badge', value: 'team_player', description: 'Team Player badge' },
         ],
-        hidden: false
+        hidden: false,
       },
 
       {
@@ -207,14 +214,18 @@ export class AchievementEngine {
         rarity: 'epic',
         points: 1000,
         requirements: [
-          { type: 'collaboration', target: 'helped_teammates', value: 25, operator: 'greater' }
+          { type: 'collaboration', target: 'helped_teammates', value: 25, operator: 'greater' },
         ],
         rewards: [
           { type: 'points', value: 1000, description: '1000 leadership points' },
           { type: 'title', value: 'The Mentor', description: 'The Mentor title' },
-          { type: 'recognition', value: 'featured_member', description: 'Featured team member spotlight' }
+          {
+            type: 'recognition',
+            value: 'featured_member',
+            description: 'Featured team member spotlight',
+          },
         ],
-        hidden: false
+        hidden: false,
       },
 
       // Growth Achievements
@@ -227,18 +238,18 @@ export class AchievementEngine {
         rarity: 'legendary',
         points: 5000,
         requirements: [
-          { type: 'metric', target: 'revenue_generated', value: 1000000, operator: 'greater' }
+          { type: 'metric', target: 'revenue_generated', value: 1000000, operator: 'greater' },
         ],
         rewards: [
           { type: 'points', value: 5000, description: '5000 growth points' },
           { type: 'title', value: 'Revenue Hero', description: 'Revenue Hero title' },
           { type: 'discount', value: '50%', description: '50% discount on premium features' },
-          { type: 'recognition', value: 'hall_of_fame', description: 'Hall of Fame induction' }
+          { type: 'recognition', value: 'hall_of_fame', description: 'Hall of Fame induction' },
         ],
-        hidden: false
+        hidden: false,
       },
 
-      // Mastery Achievements  
+      // Mastery Achievements
       {
         id: 'ai_whisperer',
         name: 'AI Whisperer',
@@ -248,14 +259,18 @@ export class AchievementEngine {
         rarity: 'rare',
         points: 750,
         requirements: [
-          { type: 'metric', target: 'ai_interactions', value: 1000, operator: 'greater' }
+          { type: 'metric', target: 'ai_interactions', value: 1000, operator: 'greater' },
         ],
         rewards: [
           { type: 'points', value: 750, description: '750 mastery points' },
           { type: 'badge', value: 'ai_whisperer', description: 'AI Whisperer badge' },
-          { type: 'feature', value: 'custom_ai_agents', description: 'Unlock custom AI agent creation' }
+          {
+            type: 'feature',
+            value: 'custom_ai_agents',
+            description: 'Unlock custom AI agent creation',
+          },
         ],
-        hidden: false
+        hidden: false,
       },
 
       {
@@ -266,15 +281,13 @@ export class AchievementEngine {
         category: 'mastery',
         rarity: 'epic',
         points: 1200,
-        requirements: [
-          { type: 'streak', target: 'high_accuracy', value: 30, operator: 'streak' }
-        ],
+        requirements: [{ type: 'streak', target: 'high_accuracy', value: 30, operator: 'streak' }],
         rewards: [
           { type: 'points', value: 1200, description: '1200 mastery points' },
           { type: 'title', value: 'The Perfectionist', description: 'The Perfectionist title' },
-          { type: 'badge', value: 'perfectionist', description: 'Perfectionist badge' }
+          { type: 'badge', value: 'perfectionist', description: 'Perfectionist badge' },
         ],
-        hidden: false
+        hidden: false,
       },
 
       // Hidden/Special Achievements
@@ -287,13 +300,13 @@ export class AchievementEngine {
         rarity: 'uncommon',
         points: 200,
         requirements: [
-          { type: 'action', target: 'late_night_completion', value: 10, operator: 'greater' }
+          { type: 'action', target: 'late_night_completion', value: 10, operator: 'greater' },
         ],
         rewards: [
           { type: 'points', value: 200, description: '200 productivity points' },
-          { type: 'badge', value: 'night_owl', description: 'Night Owl badge' }
+          { type: 'badge', value: 'night_owl', description: 'Night Owl badge' },
         ],
-        hidden: true
+        hidden: true,
       },
 
       {
@@ -305,18 +318,24 @@ export class AchievementEngine {
         rarity: 'rare',
         points: 600,
         requirements: [
-          { type: 'action', target: 'rapid_completion', value: 10, operator: 'greater', timeWindow: 3600000 }
+          {
+            type: 'action',
+            target: 'rapid_completion',
+            value: 10,
+            operator: 'greater',
+            timeWindow: 3600000,
+          },
         ],
         rewards: [
           { type: 'points', value: 600, description: '600 productivity points' },
           { type: 'badge', value: 'speed_demon', description: 'Speed Demon badge' },
-          { type: 'feature', value: 'turbo_mode', description: 'Unlock turbo mode interface' }
+          { type: 'feature', value: 'turbo_mode', description: 'Unlock turbo mode interface' },
         ],
-        hidden: true
-      }
+        hidden: true,
+      },
     ]
 
-    achievements.forEach(achievement => {
+    achievements.forEach((achievement) => {
       this.achievements.set(achievement.id, achievement)
     })
   }
@@ -324,7 +343,12 @@ export class AchievementEngine {
   /**
    * Track user action and check for achievement progress
    */
-  async trackAction(userId: string, action: string, value: number = 1, metadata?: any): Promise<void> {
+  async trackAction(
+    userId: string,
+    action: string,
+    value: number = 1,
+    metadata?: unknown
+  ): Promise<void> {
     try {
       // Get or create user progress
       let progress = this.userProgress.get(userId)
@@ -351,10 +375,7 @@ export class AchievementEngine {
 
       // Notify listeners
       this.notifyListeners(userId, 'action_tracked', { action, value, progress })
-
-    } catch (error) {
-      console.error('Error tracking action:', error)
-    }
+    } catch (error) {}
   }
 
   /**
@@ -372,24 +393,27 @@ export class AchievementEngine {
     if (!progress) return []
 
     return progress.achievements
-      .map(id => this.achievements.get(id))
-      .filter(achievement => achievement) as Achievement[]
+      .map((id) => this.achievements.get(id))
+      .filter((achievement) => achievement) as Achievement[]
   }
 
   /**
    * Get available achievements for user (with progress)
    */
-  getAvailableAchievements(userId: string): (Achievement & { progress?: number; maxProgress?: number })[] {
+  getAvailableAchievements(
+    userId: string
+  ): (Achievement & { progress?: number; maxProgress?: number })[] {
     const progress = this.userProgress.get(userId)
-    const available = Array.from(this.achievements.values())
-      .filter(achievement => !achievement.hidden || (progress?.achievements.includes(achievement.id)))
+    const available = Array.from(this.achievements.values()).filter(
+      (achievement) => !achievement.hidden || progress?.achievements.includes(achievement.id)
+    )
 
-    return available.map(achievement => {
+    return available.map((achievement) => {
       const achievementProgress = this.calculateAchievementProgress(userId, achievement)
       return {
         ...achievement,
         progress: achievementProgress.current,
-        maxProgress: achievementProgress.max
+        maxProgress: achievementProgress.max,
       }
     })
   }
@@ -413,7 +437,7 @@ export class AchievementEngine {
         current: 0,
         completed: false,
         points: 50,
-        expiresAt: tomorrow
+        expiresAt: tomorrow,
       },
       {
         id: 'daily_collaboration',
@@ -423,7 +447,7 @@ export class AchievementEngine {
         current: 0,
         completed: false,
         points: 30,
-        expiresAt: tomorrow
+        expiresAt: tomorrow,
       },
       {
         id: 'daily_ai',
@@ -433,8 +457,8 @@ export class AchievementEngine {
         current: 0,
         completed: false,
         points: 25,
-        expiresAt: tomorrow
-      }
+        expiresAt: tomorrow,
+      },
     ]
 
     return goals
@@ -463,7 +487,7 @@ export class AchievementEngine {
       level: user.level,
       rank: index + 1,
       achievements: user.achievements.length,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.userId}`
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.userId}`,
     }))
   }
 
@@ -489,7 +513,7 @@ export class AchievementEngine {
 
   private initializeUserProgress(userId: string): UserProgress {
     const dailyGoals = this.generateDailyGoals(userId)
-    
+
     const progress: UserProgress = {
       userId,
       level: 1,
@@ -509,15 +533,20 @@ export class AchievementEngine {
         collaborations: 0,
         aiInteractions: 0,
         timeSpent: 0,
-        efficiencyScore: 85
-      }
+        efficiencyScore: 85,
+      },
     }
 
     this.userProgress.set(userId, progress)
     return progress
   }
 
-  private updateUserStats(progress: UserProgress, action: string, value: number, metadata?: any): void {
+  private updateUserStats(
+    progress: UserProgress,
+    action: string,
+    value: number,
+    metadata?: unknown
+  ): void {
     switch (action) {
       case 'task_completed':
         progress.stats.tasksCompleted += value
@@ -543,7 +572,7 @@ export class AchievementEngine {
     }
 
     // Update efficiency score based on activity
-    progress.stats.efficiencyScore = Math.min(100, progress.stats.efficiencyScore + (value * 0.1))
+    progress.stats.efficiencyScore = Math.min(100, progress.stats.efficiencyScore + value * 0.1)
   }
 
   private async checkAchievements(
@@ -551,14 +580,14 @@ export class AchievementEngine {
     progress: UserProgress,
     action: string,
     value: number,
-    metadata?: any
+    metadata?: unknown
   ): Promise<void> {
     for (const achievement of this.achievements.values()) {
       // Skip if already unlocked
       if (progress.achievements.includes(achievement.id)) continue
 
       // Check if requirements are met
-      const requirementsMet = achievement.requirements.every(req => 
+      const requirementsMet = achievement.requirements.every((req) =>
         this.checkRequirement(progress, req, action, value, metadata)
       )
 
@@ -573,20 +602,20 @@ export class AchievementEngine {
     requirement: AchievementRequirement,
     action: string,
     value: number,
-    metadata?: any
+    metadata?: unknown
   ): boolean {
     switch (requirement.type) {
       case 'action':
         return action === requirement.target && value >= requirement.value
-      
+
       case 'metric':
-        const statValue = (progress.stats as any)[requirement.target] || 0
+        const statValue = (progress.stats as unknown)[requirement.target] || 0
         return this.compareValues(statValue, requirement.value, requirement.operator)
-      
+
       case 'streak':
         const streak = progress.streaks[requirement.target]
         return streak && streak.current >= requirement.value
-      
+
       default:
         return false
     }
@@ -594,10 +623,14 @@ export class AchievementEngine {
 
   private compareValues(actual: number, target: number, operator: string): boolean {
     switch (operator) {
-      case 'equals': return actual === target
-      case 'greater': return actual >= target
-      case 'less': return actual <= target
-      default: return false
+      case 'equals':
+        return actual === target
+      case 'greater':
+        return actual >= target
+      case 'less':
+        return actual <= target
+      default:
+        return false
     }
   }
 
@@ -617,13 +650,11 @@ export class AchievementEngine {
     // Add points and check for level up
     progress.totalPoints += achievement.points
     progress.currentLevelPoints += achievement.points
-    
+
     await this.checkLevelUp(progress)
 
     // Notify achievement unlocked
     this.notifyListeners(userId, 'achievement_unlocked', { achievement, progress })
-
-    console.log(`🏆 Achievement unlocked: ${achievement.name} for user ${userId}`)
   }
 
   private async grantReward(progress: UserProgress, reward: AchievementReward): Promise<void> {
@@ -631,7 +662,7 @@ export class AchievementEngine {
       case 'points':
         // Points already handled in unlockAchievement
         break
-      
+
       case 'badge':
         progress.badges.push({
           id: reward.value as string,
@@ -639,17 +670,17 @@ export class AchievementEngine {
           description: reward.description,
           icon: '🏅',
           earnedAt: new Date(),
-          category: 'achievement'
+          category: 'achievement',
         })
         break
-      
+
       case 'title':
         progress.titles.push(reward.value as string)
         break
-      
+
       case 'feature':
         // Grant feature access (would integrate with feature flags)
-        console.log(`Feature unlocked: ${reward.value}`)
+
         break
     }
   }
@@ -661,12 +692,10 @@ export class AchievementEngine {
       progress.nextLevelPoints = this.calculateNextLevelPoints(progress.level)
 
       // Notify level up
-      this.notifyListeners(progress.userId, 'level_up', { 
-        level: progress.level, 
-        progress 
+      this.notifyListeners(progress.userId, 'level_up', {
+        level: progress.level,
+        progress,
       })
-
-      console.log(`📈 Level up! User ${progress.userId} reached level ${progress.level}`)
     }
   }
 
@@ -675,7 +704,10 @@ export class AchievementEngine {
     return Math.floor(100 * Math.pow(1.5, level - 1))
   }
 
-  private calculateAchievementProgress(userId: string, achievement: Achievement): { current: number; max: number } {
+  private calculateAchievementProgress(
+    userId: string,
+    achievement: Achievement
+  ): { current: number; max: number } {
     const progress = this.userProgress.get(userId)
     if (!progress) return { current: 0, max: 100 }
 
@@ -685,29 +717,33 @@ export class AchievementEngine {
 
     switch (requirement.type) {
       case 'metric':
-        const statValue = (progress.stats as any)[requirement.target] || 0
+        const statValue = (progress.stats as unknown)[requirement.target] || 0
         return { current: Math.min(statValue, requirement.value), max: requirement.value }
-      
+
       default:
         return { current: 0, max: requirement.value }
     }
   }
 
-  private async updateDailyGoals(progress: UserProgress, action: string, value: number): Promise<void> {
+  private async updateDailyGoals(
+    progress: UserProgress,
+    action: string,
+    value: number
+  ): Promise<void> {
     const today = new Date()
-    
+
     for (const goal of progress.dailyGoals) {
       if (goal.completed || goal.expiresAt < today) continue
 
       // Update goal progress based on action
       if (this.goalMatchesAction(goal, action)) {
         goal.current = Math.min(goal.current + value, goal.target)
-        
+
         if (goal.current >= goal.target) {
           goal.completed = true
           progress.totalPoints += goal.points
           progress.currentLevelPoints += goal.points
-          
+
           this.notifyListeners(progress.userId, 'daily_goal_completed', { goal, progress })
         }
       }
@@ -716,28 +752,34 @@ export class AchievementEngine {
 
   private goalMatchesAction(goal: DailyGoal, action: string): boolean {
     switch (goal.id) {
-      case 'daily_tasks': return action === 'task_completed'
-      case 'daily_collaboration': return action === 'collaboration'
-      case 'daily_ai': return action === 'ai_interaction'
-      default: return false
+      case 'daily_tasks':
+        return action === 'task_completed'
+      case 'daily_collaboration':
+        return action === 'collaboration'
+      case 'daily_ai':
+        return action === 'ai_interaction'
+      default:
+        return false
     }
   }
 
-  private async updateWeeklyChallenge(progress: UserProgress, action: string, value: number): Promise<void> {
+  private async updateWeeklyChallenge(
+    _progress: UserProgress,
+    _action: string,
+    value: number
+  ): Promise<void> {
     // Implementation for weekly challenges
     // This would update challenge objectives based on user actions
   }
 
-  private notifyListeners(userId: string, eventType: string, data: any): void {
+  private notifyListeners(userId: string, eventType: string, data: unknown): void {
     const key = `${userId}_${eventType}`
     const listeners = this.listeners.get(key)
     if (listeners) {
-      listeners.forEach(callback => {
+      listeners.forEach((callback) => {
         try {
           callback(data)
-        } catch (error) {
-          console.error('Error calling achievement listener:', error)
-        }
+        } catch (error) {}
       })
     }
   }

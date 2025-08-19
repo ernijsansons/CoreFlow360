@@ -7,10 +7,10 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Plus, 
-  Trash2, 
-  Edit, 
+import {
+  Plus,
+  Trash2,
+  Edit,
   Eye,
   Download,
   Copy,
@@ -22,14 +22,22 @@ import {
   Hash,
   ArrowUp,
   ArrowDown,
-  Save
+  Save,
 } from 'lucide-react'
 import { GlowingButton } from '@/components/ui/GlowingButton'
 import { useTrackEvent } from '@/components/analytics/AnalyticsProvider'
 
 interface SurveyQuestion {
   id: string
-  type: 'text' | 'textarea' | 'multiple_choice' | 'single_choice' | 'rating' | 'scale' | 'date' | 'number'
+  type:
+    | 'text'
+    | 'textarea'
+    | 'multiple_choice'
+    | 'single_choice'
+    | 'rating'
+    | 'scale'
+    | 'date'
+    | 'number'
   title: string
   description?: string
   required: boolean
@@ -56,54 +64,54 @@ interface Survey {
 }
 
 const questionTypes = [
-  { 
-    type: 'text', 
-    label: 'Short Text', 
+  {
+    type: 'text',
+    label: 'Short Text',
     icon: Type,
-    description: 'Single line text input'
+    description: 'Single line text input',
   },
-  { 
-    type: 'textarea', 
-    label: 'Long Text', 
+  {
+    type: 'textarea',
+    label: 'Long Text',
     icon: Edit,
-    description: 'Multi-line text input'
+    description: 'Multi-line text input',
   },
-  { 
-    type: 'single_choice', 
-    label: 'Single Choice', 
+  {
+    type: 'single_choice',
+    label: 'Single Choice',
     icon: Circle,
-    description: 'Radio buttons - select one option'
+    description: 'Radio buttons - select one option',
   },
-  { 
-    type: 'multiple_choice', 
-    label: 'Multiple Choice', 
+  {
+    type: 'multiple_choice',
+    label: 'Multiple Choice',
     icon: CheckSquare,
-    description: 'Checkboxes - select multiple options'
+    description: 'Checkboxes - select multiple options',
   },
-  { 
-    type: 'rating', 
-    label: 'Star Rating', 
+  {
+    type: 'rating',
+    label: 'Star Rating',
     icon: Star,
-    description: '1-5 star rating scale'
+    description: '1-5 star rating scale',
   },
-  { 
-    type: 'scale', 
-    label: 'Scale', 
+  {
+    type: 'scale',
+    label: 'Scale',
     icon: Hash,
-    description: 'Numbered scale (e.g., 1-10)'
+    description: 'Numbered scale (e.g., 1-10)',
   },
-  { 
-    type: 'date', 
-    label: 'Date', 
+  {
+    type: 'date',
+    label: 'Date',
     icon: Calendar,
-    description: 'Date picker input'
+    description: 'Date picker input',
   },
-  { 
-    type: 'number', 
-    label: 'Number', 
+  {
+    type: 'number',
+    label: 'Number',
     icon: Hash,
-    description: 'Numeric input with validation'
-  }
+    description: 'Numeric input with validation',
+  },
 ]
 
 const surveyTemplates = [
@@ -118,15 +126,15 @@ const surveyTemplates = [
         title: 'How likely are you to recommend our product to a friend or colleague?',
         description: '0 = Not at all likely, 10 = Extremely likely',
         required: true,
-        validation: { min: 0, max: 10 }
+        validation: { min: 0, max: 10 },
       },
       {
         id: '2',
         type: 'textarea' as const,
         title: 'What is the primary reason for your score?',
-        required: false
-      }
-    ]
+        required: false,
+      },
+    ],
   },
   {
     id: 'feature_feedback',
@@ -138,21 +146,21 @@ const surveyTemplates = [
         type: 'single_choice' as const,
         title: 'How often do you use this feature?',
         required: true,
-        options: ['Daily', 'Weekly', 'Monthly', 'Rarely', 'Never']
+        options: ['Daily', 'Weekly', 'Monthly', 'Rarely', 'Never'],
       },
       {
         id: '2',
         type: 'rating' as const,
         title: 'How would you rate the usefulness of this feature?',
-        required: true
+        required: true,
       },
       {
         id: '3',
         type: 'textarea' as const,
         title: 'What improvements would you suggest for this feature?',
-        required: false
-      }
-    ]
+        required: false,
+      },
+    ],
   },
   {
     id: 'onboarding',
@@ -163,23 +171,23 @@ const surveyTemplates = [
         id: '1',
         type: 'rating' as const,
         title: 'How would you rate your overall onboarding experience?',
-        required: true
+        required: true,
       },
       {
         id: '2',
         type: 'single_choice' as const,
         title: 'Which part of the onboarding was most helpful?',
         required: true,
-        options: ['Setup wizard', 'Tutorial videos', 'Documentation', 'Support chat', 'None']
+        options: ['Setup wizard', 'Tutorial videos', 'Documentation', 'Support chat', 'None'],
       },
       {
         id: '3',
         type: 'textarea' as const,
         title: 'What was the most confusing part of getting started?',
-        required: false
-      }
-    ]
-  }
+        required: false,
+      },
+    ],
+  },
 ]
 
 export function SurveyBuilder() {
@@ -194,8 +202,8 @@ export function SurveyBuilder() {
       showProgressBar: true,
       randomizeQuestions: false,
       oneResponsePerUser: false,
-      collectEmail: false
-    }
+      collectEmail: false,
+    },
   })
 
   const [activeTab, setActiveTab] = useState<'build' | 'preview' | 'settings'>('build')
@@ -207,61 +215,64 @@ export function SurveyBuilder() {
       type,
       title: '',
       required: false,
-      ...(type === 'single_choice' || type === 'multiple_choice' ? { options: ['Option 1', 'Option 2'] } : {})
+      ...(type === 'single_choice' || type === 'multiple_choice'
+        ? { options: ['Option 1', 'Option 2'] }
+        : {}),
     }
-    
-    setSurvey(prev => ({
+
+    setSurvey((prev) => ({
       ...prev,
-      questions: [...prev.questions, newQuestion]
+      questions: [...prev.questions, newQuestion],
     }))
-    
+
     setSelectedQuestionId(newQuestion.id)
     trackEvent('survey_question_added', { type })
   }
 
   const updateQuestion = (questionId: string, updates: Partial<SurveyQuestion>) => {
-    setSurvey(prev => ({
+    setSurvey((prev) => ({
       ...prev,
-      questions: prev.questions.map(q => 
-        q.id === questionId ? { ...q, ...updates } : q
-      )
+      questions: prev.questions.map((q) => (q.id === questionId ? { ...q, ...updates } : q)),
     }))
   }
 
   const deleteQuestion = (questionId: string) => {
-    setSurvey(prev => ({
+    setSurvey((prev) => ({
       ...prev,
-      questions: prev.questions.filter(q => q.id !== questionId)
+      questions: prev.questions.filter((q) => q.id !== questionId),
     }))
-    
+
     if (selectedQuestionId === questionId) {
       setSelectedQuestionId(null)
     }
   }
 
   const moveQuestion = (questionId: string, direction: 'up' | 'down') => {
-    setSurvey(prev => {
+    setSurvey((prev) => {
       const questions = [...prev.questions]
-      const index = questions.findIndex(q => q.id === questionId)
-      
+      const index = questions.findIndex((q) => q.id === questionId)
+
       if (direction === 'up' && index > 0) {
-        [questions[index - 1], questions[index]] = [questions[index], questions[index - 1]]
+        ;[questions[index - 1], questions[index]] = [questions[index], questions[index - 1]]
       } else if (direction === 'down' && index < questions.length - 1) {
-        [questions[index], questions[index + 1]] = [questions[index + 1], questions[index]]
+        ;[questions[index], questions[index + 1]] = [questions[index + 1], questions[index]]
       }
-      
+
       return { ...prev, questions }
     })
   }
 
   const loadTemplate = (templateId: string) => {
-    const template = surveyTemplates.find(t => t.id === templateId)
+    const template = surveyTemplates.find((t) => t.id === templateId)
     if (template) {
-      setSurvey(prev => ({
+      setSurvey((prev) => ({
         ...prev,
         title: template.title,
         description: template.description,
-        questions: template.questions.map(q => ({ ...q, id: Date.now().toString() + Math.random() }))
+        questions: template.questions.map((q) => ({
+          ...q,
+          id: Date.now().toString() + Math.random(),
+        })),
       }))
       trackEvent('survey_template_loaded', { template: templateId })
     }
@@ -280,27 +291,29 @@ export function SurveyBuilder() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className="mx-auto max-w-7xl space-y-8 p-6">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold gradient-text-ai mb-4">Survey Builder</h1>
-        <p className="text-gray-400">Create professional surveys with our free templates and tools</p>
+        <h1 className="gradient-text-ai mb-4 text-3xl font-bold">Survey Builder</h1>
+        <p className="text-gray-400">
+          Create professional surveys with our free templates and tools
+        </p>
       </div>
 
       {/* Templates */}
-      <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-6">
-        <h2 className="text-xl font-bold text-white mb-4">Quick Start Templates</h2>
-        <div className="grid md:grid-cols-3 gap-4">
+      <div className="rounded-2xl border border-gray-800/50 bg-gray-900/60 p-6">
+        <h2 className="mb-4 text-xl font-bold text-white">Quick Start Templates</h2>
+        <div className="grid gap-4 md:grid-cols-3">
           {surveyTemplates.map((template) => (
             <motion.div
               key={template.id}
               whileHover={{ y: -4 }}
-              className="bg-gray-800 border border-gray-700 rounded-xl p-4 cursor-pointer"
+              className="cursor-pointer rounded-xl border border-gray-700 bg-gray-800 p-4"
               onClick={() => loadTemplate(template.id)}
             >
-              <h3 className="font-semibold text-white mb-2">{template.title}</h3>
-              <p className="text-gray-400 text-sm mb-3">{template.description}</p>
-              <div className="text-violet-400 text-sm">
+              <h3 className="mb-2 font-semibold text-white">{template.title}</h3>
+              <p className="mb-3 text-sm text-gray-400">{template.description}</p>
+              <div className="text-sm text-violet-400">
                 {template.questions.length} questions • Click to load
               </div>
             </motion.div>
@@ -309,23 +322,23 @@ export function SurveyBuilder() {
       </div>
 
       {/* Survey Builder */}
-      <div className="grid lg:grid-cols-4 gap-6">
+      <div className="grid gap-6 lg:grid-cols-4">
         {/* Question Types Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-4 sticky top-6">
-            <h3 className="font-semibold text-white mb-4">Question Types</h3>
+          <div className="sticky top-6 rounded-2xl border border-gray-800/50 bg-gray-900/60 p-4">
+            <h3 className="mb-4 font-semibold text-white">Question Types</h3>
             <div className="space-y-2">
               {questionTypes.map((type) => (
                 <motion.button
                   key={type.type}
                   whileHover={{ x: 4 }}
                   onClick={() => addQuestion(type.type as SurveyQuestion['type'])}
-                  className="w-full text-left p-3 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-gray-600 transition-all duration-200"
+                  className="w-full rounded-lg border border-gray-700 bg-gray-800 p-3 text-left transition-all duration-200 hover:border-gray-600 hover:bg-gray-700"
                 >
                   <div className="flex items-start">
-                    <type.icon className="w-4 h-4 text-violet-400 mt-1 mr-3 flex-shrink-0" />
+                    <type.icon className="mt-1 mr-3 h-4 w-4 flex-shrink-0 text-violet-400" />
                     <div>
-                      <div className="font-medium text-white text-sm">{type.label}</div>
+                      <div className="text-sm font-medium text-white">{type.label}</div>
                       <div className="text-xs text-gray-400">{type.description}</div>
                     </div>
                   </div>
@@ -338,10 +351,10 @@ export function SurveyBuilder() {
         {/* Main Builder Area */}
         <div className="lg:col-span-3">
           {/* Tab Navigation */}
-          <div className="flex space-x-1 bg-gray-900 rounded-lg p-1 mb-6">
+          <div className="mb-6 flex space-x-1 rounded-lg bg-gray-900 p-1">
             <button
               onClick={() => setActiveTab('build')}
-              className={`px-4 py-2 rounded-md transition-all duration-200 ${
+              className={`rounded-md px-4 py-2 transition-all duration-200 ${
                 activeTab === 'build'
                   ? 'bg-violet-600 text-white'
                   : 'text-gray-400 hover:text-white'
@@ -351,7 +364,7 @@ export function SurveyBuilder() {
             </button>
             <button
               onClick={() => setActiveTab('preview')}
-              className={`px-4 py-2 rounded-md transition-all duration-200 ${
+              className={`rounded-md px-4 py-2 transition-all duration-200 ${
                 activeTab === 'preview'
                   ? 'bg-violet-600 text-white'
                   : 'text-gray-400 hover:text-white'
@@ -361,7 +374,7 @@ export function SurveyBuilder() {
             </button>
             <button
               onClick={() => setActiveTab('settings')}
-              className={`px-4 py-2 rounded-md transition-all duration-200 ${
+              className={`rounded-md px-4 py-2 transition-all duration-200 ${
                 activeTab === 'settings'
                   ? 'bg-violet-600 text-white'
                   : 'text-gray-400 hover:text-white'
@@ -372,7 +385,7 @@ export function SurveyBuilder() {
           </div>
 
           {/* Tab Content */}
-          <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-6 min-h-[600px]">
+          <div className="min-h-[600px] rounded-2xl border border-gray-800/50 bg-gray-900/60 p-6">
             {activeTab === 'build' && (
               <BuildTab
                 survey={survey}
@@ -384,40 +397,34 @@ export function SurveyBuilder() {
                 moveQuestion={moveQuestion}
               />
             )}
-            
-            {activeTab === 'preview' && (
-              <PreviewTab survey={survey} />
-            )}
-            
-            {activeTab === 'settings' && (
-              <SettingsTab survey={survey} setSurvey={setSurvey} />
-            )}
+
+            {activeTab === 'preview' && <PreviewTab survey={survey} />}
+
+            {activeTab === 'settings' && <SettingsTab survey={survey} setSurvey={setSurvey} />}
           </div>
 
           {/* Action Bar */}
-          <div className="flex justify-between items-center mt-6">
+          <div className="mt-6 flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <span className="text-gray-400 text-sm">
-                {survey.questions.length} questions
-              </span>
+              <span className="text-sm text-gray-400">{survey.questions.length} questions</span>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <button
                 onClick={exportSurvey}
                 disabled={!survey.title || survey.questions.length === 0}
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:border-gray-500 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-2 rounded-lg border border-gray-600 px-4 py-2 text-gray-300 transition-all duration-200 hover:border-gray-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Download className="w-4 h-4" />
+                <Download className="h-4 w-4" />
                 <span>Export</span>
               </button>
-              
+
               <GlowingButton
                 href="#"
                 disabled={!survey.title || survey.questions.length === 0}
                 onClick={() => trackEvent('survey_published')}
               >
-                <Save className="w-4 h-4 mr-2" />
+                <Save className="mr-2 h-4 w-4" />
                 Save Survey
               </GlowingButton>
             </div>
@@ -428,42 +435,40 @@ export function SurveyBuilder() {
   )
 }
 
-function BuildTab({ 
-  survey, 
-  setSurvey, 
-  selectedQuestionId, 
+function BuildTab({
+  survey,
+  setSurvey,
+  selectedQuestionId,
   setSelectedQuestionId,
   updateQuestion,
   deleteQuestion,
-  moveQuestion
-}: any) {
+  moveQuestion,
+}: unknown) {
   return (
     <div className="space-y-6">
       {/* Survey Header */}
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Survey Title *
-          </label>
+          <label className="mb-2 block text-sm font-medium text-gray-300">Survey Title *</label>
           <input
             type="text"
             value={survey.title}
-            onChange={(e) => setSurvey((prev: any) => ({ ...prev, title: e.target.value }))}
+            onChange={(e) => setSurvey((prev: unknown) => ({ ...prev, title: e.target.value }))}
             placeholder="Enter survey title"
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-violet-500 transition-colors"
+            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 transition-colors focus:border-violet-500 focus:outline-none"
           />
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Description
-          </label>
+          <label className="mb-2 block text-sm font-medium text-gray-300">Description</label>
           <textarea
             value={survey.description}
-            onChange={(e) => setSurvey((prev: any) => ({ ...prev, description: e.target.value }))}
+            onChange={(e) =>
+              setSurvey((prev: unknown) => ({ ...prev, description: e.target.value }))
+            }
             placeholder="Brief description of your survey"
             rows={3}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-violet-500 transition-colors resize-none"
+            className="w-full resize-none rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 transition-colors focus:border-violet-500 focus:outline-none"
           />
         </div>
       </div>
@@ -471,11 +476,13 @@ function BuildTab({
       {/* Questions */}
       <div className="space-y-4">
         <h3 className="font-semibold text-white">Questions</h3>
-        
+
         {survey.questions.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-gray-700 rounded-xl">
-            <Plus className="w-8 h-8 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400">No questions yet. Add your first question from the sidebar.</p>
+          <div className="rounded-xl border-2 border-dashed border-gray-700 py-12 text-center">
+            <Plus className="mx-auto mb-4 h-8 w-8 text-gray-600" />
+            <p className="text-gray-400">
+              No questions yet. Add your first question from the sidebar.
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -500,40 +507,40 @@ function BuildTab({
   )
 }
 
-function QuestionEditor({ 
-  question, 
-  index, 
-  isSelected, 
-  onSelect, 
-  onUpdate, 
-  onDelete, 
+function QuestionEditor({
+  question,
+  index,
+  isSelected,
+  onSelect,
+  onUpdate,
+  onDelete,
   onMove,
   canMoveUp,
-  canMoveDown
-}: any) {
-  const questionType = questionTypes.find(t => t.type === question.type)
+  canMoveDown,
+}: unknown) {
+  const questionType = questionTypes.find((t) => t.type === question.type)
 
   return (
     <motion.div
       layout
-      className={`border rounded-xl p-4 transition-all duration-200 cursor-pointer ${
+      className={`cursor-pointer rounded-xl border p-4 transition-all duration-200 ${
         isSelected
           ? 'border-violet-500 bg-violet-500/10'
           : 'border-gray-700 bg-gray-800 hover:border-gray-600'
       }`}
       onClick={onSelect}
     >
-      <div className="flex items-start justify-between mb-4">
+      <div className="mb-4 flex items-start justify-between">
         <div className="flex items-center space-x-3">
-          <div className="bg-violet-600 text-white rounded-lg px-2 py-1 text-sm font-medium">
+          <div className="rounded-lg bg-violet-600 px-2 py-1 text-sm font-medium text-white">
             {index + 1}
           </div>
           <div className="flex items-center space-x-2">
-            {questionType && <questionType.icon className="w-4 h-4 text-violet-400" />}
-            <span className="text-gray-400 text-sm">{questionType?.label}</span>
+            {questionType && <questionType.icon className="h-4 w-4 text-violet-400" />}
+            <span className="text-sm text-gray-400">{questionType?.label}</span>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <button
             onClick={(e) => {
@@ -541,9 +548,9 @@ function QuestionEditor({
               onMove('up')
             }}
             disabled={!canMoveUp}
-            className="text-gray-400 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="text-gray-400 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
           >
-            <ArrowUp className="w-4 h-4" />
+            <ArrowUp className="h-4 w-4" />
           </button>
           <button
             onClick={(e) => {
@@ -551,18 +558,18 @@ function QuestionEditor({
               onMove('down')
             }}
             disabled={!canMoveDown}
-            className="text-gray-400 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="text-gray-400 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
           >
-            <ArrowDown className="w-4 h-4" />
+            <ArrowDown className="h-4 w-4" />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation()
               onDelete()
             }}
-            className="text-red-400 hover:text-red-300 transition-colors"
+            className="text-red-400 transition-colors hover:text-red-300"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -573,7 +580,7 @@ function QuestionEditor({
           value={question.title}
           onChange={(e) => onUpdate({ title: e.target.value })}
           placeholder="Enter your question"
-          className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-violet-500 transition-colors"
+          className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 transition-colors focus:border-violet-500 focus:outline-none"
           onClick={(e) => e.stopPropagation()}
         />
 
@@ -589,28 +596,33 @@ function QuestionEditor({
                     newOptions[optionIndex] = e.target.value
                     onUpdate({ options: newOptions })
                   }}
-                  className="flex-1 bg-gray-700 border border-gray-600 rounded px-3 py-1 text-white text-sm focus:outline-none focus:border-violet-500"
+                  className="flex-1 rounded border border-gray-600 bg-gray-700 px-3 py-1 text-sm text-white focus:border-violet-500 focus:outline-none"
                   onClick={(e) => e.stopPropagation()}
                 />
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
-                    const newOptions = question.options?.filter((_: any, i: number) => i !== optionIndex)
+                    const newOptions = question.options?.filter(
+                      (_: unknown, i: number) => i !== optionIndex
+                    )
                     onUpdate({ options: newOptions })
                   }}
                   className="text-red-400 hover:text-red-300"
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="h-3 w-3" />
                 </button>
               </div>
             ))}
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                const newOptions = [...(question.options || []), `Option ${(question.options?.length || 0) + 1}`]
+                const newOptions = [
+                  ...(question.options || []),
+                  `Option ${(question.options?.length || 0) + 1}`,
+                ]
                 onUpdate({ options: newOptions })
               }}
-              className="text-violet-400 hover:text-violet-300 text-sm"
+              className="text-sm text-violet-400 hover:text-violet-300"
             >
               + Add option
             </button>
@@ -618,7 +630,7 @@ function QuestionEditor({
         )}
 
         <div className="flex items-center space-x-4 pt-2">
-          <label className="flex items-center space-x-2 cursor-pointer">
+          <label className="flex cursor-pointer items-center space-x-2">
             <input
               type="checkbox"
               checked={question.required}
@@ -626,7 +638,7 @@ function QuestionEditor({
               className="rounded border-gray-600 bg-gray-700 text-violet-600 focus:ring-violet-500"
               onClick={(e) => e.stopPropagation()}
             />
-            <span className="text-gray-300 text-sm">Required</span>
+            <span className="text-sm text-gray-300">Required</span>
           </label>
         </div>
       </div>
@@ -636,28 +648,24 @@ function QuestionEditor({
 
 function PreviewTab({ survey }: { survey: Survey }) {
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white text-black rounded-xl p-8">
+    <div className="mx-auto max-w-2xl">
+      <div className="rounded-xl bg-white p-8 text-black">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold mb-4">{survey.title || 'Untitled Survey'}</h1>
-          {survey.description && (
-            <p className="text-gray-600 mb-4">{survey.description}</p>
-          )}
+          <h1 className="mb-4 text-2xl font-bold">{survey.title || 'Untitled Survey'}</h1>
+          {survey.description && <p className="mb-4 text-gray-600">{survey.description}</p>}
         </div>
 
         <div className="space-y-6">
           {survey.questions.map((question, index) => (
             <div key={question.id} className="space-y-3">
               <div className="flex items-start space-x-2">
-                <span className="text-sm font-medium text-gray-500 mt-1">
-                  {index + 1}.
-                </span>
+                <span className="mt-1 text-sm font-medium text-gray-500">{index + 1}.</span>
                 <div className="flex-1">
-                  <h3 className="font-medium mb-2">
+                  <h3 className="mb-2 font-medium">
                     {question.title || 'Untitled Question'}
-                    {question.required && <span className="text-red-500 ml-1">*</span>}
+                    {question.required && <span className="ml-1 text-red-500">*</span>}
                   </h3>
-                  
+
                   <QuestionPreview question={question} />
                 </div>
               </div>
@@ -665,8 +673,8 @@ function PreviewTab({ survey }: { survey: Survey }) {
           ))}
         </div>
 
-        <div className="mt-8 pt-6 border-t">
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+        <div className="mt-8 border-t pt-6">
+          <button className="rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700">
             Submit Survey
           </button>
         </div>
@@ -678,11 +686,25 @@ function PreviewTab({ survey }: { survey: Survey }) {
 function QuestionPreview({ question }: { question: SurveyQuestion }) {
   switch (question.type) {
     case 'text':
-      return <input type="text" className="w-full border rounded px-3 py-2" placeholder="Your answer" disabled />
-    
+      return (
+        <input
+          type="text"
+          className="w-full rounded border px-3 py-2"
+          placeholder="Your answer"
+          disabled
+        />
+      )
+
     case 'textarea':
-      return <textarea className="w-full border rounded px-3 py-2" rows={3} placeholder="Your answer" disabled />
-    
+      return (
+        <textarea
+          className="w-full rounded border px-3 py-2"
+          rows={3}
+          placeholder="Your answer"
+          disabled
+        />
+      )
+
     case 'single_choice':
       return (
         <div className="space-y-2">
@@ -694,7 +716,7 @@ function QuestionPreview({ question }: { question: SurveyQuestion }) {
           ))}
         </div>
       )
-    
+
     case 'multiple_choice':
       return (
         <div className="space-y-2">
@@ -706,95 +728,108 @@ function QuestionPreview({ question }: { question: SurveyQuestion }) {
           ))}
         </div>
       )
-    
+
     case 'rating':
       return (
         <div className="flex space-x-1">
           {[1, 2, 3, 4, 5].map((rating) => (
-            <Star key={rating} className="w-6 h-6 text-gray-300 hover:text-yellow-400 cursor-pointer" />
+            <Star
+              key={rating}
+              className="h-6 w-6 cursor-pointer text-gray-300 hover:text-yellow-400"
+            />
           ))}
         </div>
       )
-    
+
     case 'scale':
       return <input type="range" min="1" max="10" className="w-full" disabled />
-    
+
     case 'date':
-      return <input type="date" className="border rounded px-3 py-2" disabled />
-    
+      return <input type="date" className="rounded border px-3 py-2" disabled />
+
     case 'number':
-      return <input type="number" className="border rounded px-3 py-2" placeholder="0" disabled />
-    
+      return <input type="number" className="rounded border px-3 py-2" placeholder="0" disabled />
+
     default:
       return <div className="text-gray-500">Preview not available</div>
   }
 }
 
-function SettingsTab({ survey, setSurvey }: { survey: Survey, setSurvey: any }) {
+function SettingsTab({ survey, setSurvey }: { survey: Survey; setSurvey: unknown }) {
   return (
     <div className="space-y-6">
       <h3 className="font-semibold text-white">Survey Settings</h3>
-      
+
       <div className="space-y-4">
         <SettingToggle
           label="Anonymous responses"
           description="Don't collect any identifying information"
           checked={survey.settings.anonymous}
-          onChange={(checked) => setSurvey((prev: any) => ({
-            ...prev,
-            settings: { ...prev.settings, anonymous: checked }
-          }))}
+          onChange={(checked) =>
+            setSurvey((prev: unknown) => ({
+              ...prev,
+              settings: { ...prev.settings, anonymous: checked },
+            }))
+          }
         />
-        
+
         <SettingToggle
           label="Show progress bar"
           description="Display survey completion progress to respondents"
           checked={survey.settings.showProgressBar}
-          onChange={(checked) => setSurvey((prev: any) => ({
-            ...prev,
-            settings: { ...prev.settings, showProgressBar: checked }
-          }))}
+          onChange={(checked) =>
+            setSurvey((prev: unknown) => ({
+              ...prev,
+              settings: { ...prev.settings, showProgressBar: checked },
+            }))
+          }
         />
-        
+
         <SettingToggle
           label="Randomize question order"
           description="Questions will appear in random order for each respondent"
           checked={survey.settings.randomizeQuestions}
-          onChange={(checked) => setSurvey((prev: any) => ({
-            ...prev,
-            settings: { ...prev.settings, randomizeQuestions: checked }
-          }))}
+          onChange={(checked) =>
+            setSurvey((prev: unknown) => ({
+              ...prev,
+              settings: { ...prev.settings, randomizeQuestions: checked },
+            }))
+          }
         />
-        
+
         <SettingToggle
           label="One response per user"
           description="Prevent multiple submissions from the same user"
           checked={survey.settings.oneResponsePerUser}
-          onChange={(checked) => setSurvey((prev: any) => ({
-            ...prev,
-            settings: { ...prev.settings, oneResponsePerUser: checked }
-          }))}
+          onChange={(checked) =>
+            setSurvey((prev: unknown) => ({
+              ...prev,
+              settings: { ...prev.settings, oneResponsePerUser: checked },
+            }))
+          }
         />
-        
+
         <SettingToggle
           label="Collect email addresses"
           description="Ask respondents for their email address"
           checked={survey.settings.collectEmail}
-          onChange={(checked) => setSurvey((prev: any) => ({
-            ...prev,
-            settings: { ...prev.settings, collectEmail: checked }
-          }))}
+          onChange={(checked) =>
+            setSurvey((prev: unknown) => ({
+              ...prev,
+              settings: { ...prev.settings, collectEmail: checked },
+            }))
+          }
         />
       </div>
     </div>
   )
 }
 
-function SettingToggle({ 
-  label, 
-  description, 
-  checked, 
-  onChange 
+function SettingToggle({
+  label,
+  description,
+  checked,
+  onChange,
 }: {
   label: string
   description: string

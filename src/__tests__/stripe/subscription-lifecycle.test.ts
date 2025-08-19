@@ -11,18 +11,18 @@ vi.mock('@/lib/prisma', () => ({
   prisma: {
     user: {
       findUnique: vi.fn(),
-      update: vi.fn()
+      update: vi.fn(),
     },
     subscription: {
       create: vi.fn(),
       update: vi.fn(),
-      findUnique: vi.fn()
+      findUnique: vi.fn(),
     },
     subscriptionModule: {
       createMany: vi.fn(),
-      deleteMany: vi.fn()
-    }
-  }
+      deleteMany: vi.fn(),
+    },
+  },
 }))
 
 vi.mock('@/lib/stripe/stripe', () => ({
@@ -31,16 +31,16 @@ vi.mock('@/lib/stripe/stripe', () => ({
       create: vi.fn(),
       update: vi.fn(),
       cancel: vi.fn(),
-      retrieve: vi.fn()
+      retrieve: vi.fn(),
     },
     customers: {
       create: vi.fn(),
-      retrieve: vi.fn()
+      retrieve: vi.fn(),
     },
     prices: {
-      list: vi.fn()
-    }
-  }
+      list: vi.fn(),
+    },
+  },
 }))
 
 import { prisma } from '@/lib/prisma'
@@ -49,13 +49,13 @@ import { stripe } from '@/lib/stripe/stripe'
 describe('Subscription Lifecycle', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     // Default user mock
     prisma.user.findUnique.mockResolvedValue({
       id: 'user-123',
       email: 'test@example.com',
       tenantId: 'tenant-123',
-      stripeCustomerId: 'cus_123'
+      stripeCustomerId: 'cus_123',
     })
   })
 
@@ -68,14 +68,16 @@ describe('Subscription Lifecycle', () => {
         current_period_start: Math.floor(Date.now() / 1000),
         current_period_end: Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000),
         items: {
-          data: [{
-            price: {
-              id: 'price_synaptic_monthly',
-              unit_amount: 4900,
-              currency: 'usd'
-            }
-          }]
-        }
+          data: [
+            {
+              price: {
+                id: 'price_synaptic_monthly',
+                unit_amount: 4900,
+                currency: 'usd',
+              },
+            },
+          ],
+        },
       }
 
       stripe.subscriptions.create.mockResolvedValue(mockSubscription)
@@ -83,14 +85,14 @@ describe('Subscription Lifecycle', () => {
         id: 'local_sub_123',
         stripeSubscriptionId: 'sub_123',
         status: 'active',
-        tier: 'synaptic'
+        tier: 'synaptic',
       })
 
       // Simulate subscription creation request
       const subscriptionData = {
         userId: 'user-123',
         priceId: 'price_synaptic_monthly',
-        modules: ['crm', 'accounting']
+        modules: ['crm', 'accounting'],
       }
 
       // Test subscription creation logic
@@ -101,8 +103,8 @@ describe('Subscription Lifecycle', () => {
         items: [{ price: 'price_synaptic_monthly' }],
         metadata: {
           userId: 'user-123',
-          tenantId: 'tenant-123'
-        }
+          tenantId: 'tenant-123',
+        },
       })
 
       expect(prisma.subscription.create).toHaveBeenCalledWith({
@@ -112,8 +114,8 @@ describe('Subscription Lifecycle', () => {
           status: 'active',
           tier: 'synaptic',
           currentPeriodStart: expect.any(Date),
-          currentPeriodEnd: expect.any(Date)
-        }
+          currentPeriodEnd: expect.any(Date),
+        },
       })
 
       expect(result.success).toBe(true)
@@ -125,12 +127,12 @@ describe('Subscription Lifecycle', () => {
         id: 'user-123',
         email: 'test@example.com',
         tenantId: 'tenant-123',
-        stripeCustomerId: null // No existing customer
+        stripeCustomerId: null, // No existing customer
       })
 
       const mockCustomer = {
         id: 'cus_new_123',
-        email: 'test@example.com'
+        email: 'test@example.com',
       }
 
       const mockSubscription = {
@@ -138,7 +140,7 @@ describe('Subscription Lifecycle', () => {
         customer: 'cus_new_123',
         status: 'active',
         current_period_start: Math.floor(Date.now() / 1000),
-        current_period_end: Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000)
+        current_period_end: Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000),
       }
 
       stripe.customers.create.mockResolvedValue(mockCustomer)
@@ -148,7 +150,7 @@ describe('Subscription Lifecycle', () => {
 
       const subscriptionData = {
         userId: 'user-123',
-        priceId: 'price_neural_monthly'
+        priceId: 'price_neural_monthly',
       }
 
       const result = await createSubscription(subscriptionData)
@@ -157,13 +159,13 @@ describe('Subscription Lifecycle', () => {
         email: 'test@example.com',
         metadata: {
           userId: 'user-123',
-          tenantId: 'tenant-123'
-        }
+          tenantId: 'tenant-123',
+        },
       })
 
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'user-123' },
-        data: { stripeCustomerId: 'cus_new_123' }
+        data: { stripeCustomerId: 'cus_new_123' },
       })
 
       expect(result.success).toBe(true)
@@ -177,16 +179,16 @@ describe('Subscription Lifecycle', () => {
         latest_invoice: {
           payment_intent: {
             status: 'requires_payment_method',
-            client_secret: 'pi_123_secret_abc'
-          }
-        }
+            client_secret: 'pi_123_secret_abc',
+          },
+        },
       }
 
       stripe.subscriptions.create.mockResolvedValue(mockSubscription)
 
       const subscriptionData = {
         userId: 'user-123',
-        priceId: 'price_synaptic_monthly'
+        priceId: 'price_synaptic_monthly',
       }
 
       const result = await createSubscription(subscriptionData)
@@ -202,28 +204,32 @@ describe('Subscription Lifecycle', () => {
       const existingSubscription = {
         id: 'sub_123',
         items: {
-          data: [{
-            id: 'si_123',
-            price: {
-              id: 'price_neural_monthly',
-              unit_amount: 1500
-            }
-          }]
-        }
+          data: [
+            {
+              id: 'si_123',
+              price: {
+                id: 'price_neural_monthly',
+                unit_amount: 1500,
+              },
+            },
+          ],
+        },
       }
 
       const updatedSubscription = {
         id: 'sub_123',
         status: 'active',
         items: {
-          data: [{
-            id: 'si_123',
-            price: {
-              id: 'price_synaptic_monthly',
-              unit_amount: 4900
-            }
-          }]
-        }
+          data: [
+            {
+              id: 'si_123',
+              price: {
+                id: 'price_synaptic_monthly',
+                unit_amount: 4900,
+              },
+            },
+          ],
+        },
       }
 
       stripe.subscriptions.retrieve.mockResolvedValue(existingSubscription)
@@ -233,22 +239,24 @@ describe('Subscription Lifecycle', () => {
       const upgradeData = {
         subscriptionId: 'sub_123',
         newPriceId: 'price_synaptic_monthly',
-        newTier: 'synaptic'
+        newTier: 'synaptic',
       }
 
       const result = await upgradeSubscription(upgradeData)
 
       expect(stripe.subscriptions.update).toHaveBeenCalledWith('sub_123', {
-        items: [{
-          id: 'si_123',
-          price: 'price_synaptic_monthly'
-        }],
-        proration_behavior: 'create_prorations'
+        items: [
+          {
+            id: 'si_123',
+            price: 'price_synaptic_monthly',
+          },
+        ],
+        proration_behavior: 'create_prorations',
       })
 
       expect(prisma.subscription.update).toHaveBeenCalledWith({
         where: { stripeSubscriptionId: 'sub_123' },
-        data: { tier: 'synaptic' }
+        data: { tier: 'synaptic' },
       })
 
       expect(result.success).toBe(true)
@@ -258,15 +266,15 @@ describe('Subscription Lifecycle', () => {
       const subscriptionData = {
         subscriptionId: 'sub_123',
         addModules: ['hr', 'inventory'],
-        removeModules: ['crm']
+        removeModules: ['crm'],
       }
 
       prisma.subscription.findUnique.mockResolvedValue({
         id: 'local_sub_123',
         modules: [
           { moduleId: 'crm', isActive: true },
-          { moduleId: 'accounting', isActive: true }
-        ]
+          { moduleId: 'accounting', isActive: true },
+        ],
       })
 
       prisma.subscriptionModule.deleteMany.mockResolvedValue({})
@@ -277,15 +285,15 @@ describe('Subscription Lifecycle', () => {
       expect(prisma.subscriptionModule.deleteMany).toHaveBeenCalledWith({
         where: {
           subscriptionId: 'local_sub_123',
-          moduleId: { in: ['crm'] }
-        }
+          moduleId: { in: ['crm'] },
+        },
       })
 
       expect(prisma.subscriptionModule.createMany).toHaveBeenCalledWith({
         data: [
           { subscriptionId: 'local_sub_123', moduleId: 'hr', isActive: true },
-          { subscriptionId: 'local_sub_123', moduleId: 'inventory', isActive: true }
-        ]
+          { subscriptionId: 'local_sub_123', moduleId: 'inventory', isActive: true },
+        ],
       })
 
       expect(result.success).toBe(true)
@@ -297,7 +305,7 @@ describe('Subscription Lifecycle', () => {
       const mockCancelledSubscription = {
         id: 'sub_123',
         status: 'canceled',
-        canceled_at: Math.floor(Date.now() / 1000)
+        canceled_at: Math.floor(Date.now() / 1000),
       }
 
       stripe.subscriptions.cancel.mockResolvedValue(mockCancelledSubscription)
@@ -305,21 +313,21 @@ describe('Subscription Lifecycle', () => {
 
       const cancellationData = {
         subscriptionId: 'sub_123',
-        immediate: true
+        immediate: true,
       }
 
       const result = await cancelSubscription(cancellationData)
 
       expect(stripe.subscriptions.cancel).toHaveBeenCalledWith('sub_123', {
-        prorate: true
+        prorate: true,
       })
 
       expect(prisma.subscription.update).toHaveBeenCalledWith({
         where: { stripeSubscriptionId: 'sub_123' },
-        data: { 
+        data: {
           status: 'canceled',
-          canceledAt: expect.any(Date)
-        }
+          canceledAt: expect.any(Date),
+        },
       })
 
       expect(result.success).toBe(true)
@@ -329,7 +337,7 @@ describe('Subscription Lifecycle', () => {
       const mockUpdatedSubscription = {
         id: 'sub_123',
         status: 'active',
-        cancel_at_period_end: true
+        cancel_at_period_end: true,
       }
 
       stripe.subscriptions.update.mockResolvedValue(mockUpdatedSubscription)
@@ -337,20 +345,20 @@ describe('Subscription Lifecycle', () => {
 
       const cancellationData = {
         subscriptionId: 'sub_123',
-        immediate: false
+        immediate: false,
       }
 
       const result = await cancelSubscription(cancellationData)
 
       expect(stripe.subscriptions.update).toHaveBeenCalledWith('sub_123', {
-        cancel_at_period_end: true
+        cancel_at_period_end: true,
       })
 
       expect(prisma.subscription.update).toHaveBeenCalledWith({
         where: { stripeSubscriptionId: 'sub_123' },
-        data: { 
-          cancelAtPeriodEnd: true
-        }
+        data: {
+          cancelAtPeriodEnd: true,
+        },
       })
 
       expect(result.success).toBe(true)
@@ -363,7 +371,7 @@ describe('Subscription Lifecycle', () => {
 
       const subscriptionData = {
         userId: 'user-123',
-        priceId: 'price_synaptic_monthly'
+        priceId: 'price_synaptic_monthly',
       }
 
       const result = await createSubscription(subscriptionData)
@@ -375,14 +383,14 @@ describe('Subscription Lifecycle', () => {
     it('should handle database transaction failures', async () => {
       stripe.subscriptions.create.mockResolvedValue({
         id: 'sub_123',
-        status: 'active'
+        status: 'active',
       })
 
       prisma.subscription.create.mockRejectedValue(new Error('Database error'))
 
       const subscriptionData = {
         userId: 'user-123',
-        priceId: 'price_synaptic_monthly'
+        priceId: 'price_synaptic_monthly',
       }
 
       const result = await createSubscription(subscriptionData)
@@ -397,12 +405,12 @@ describe('Subscription Lifecycle', () => {
     it('should validate subscription state before operations', async () => {
       prisma.subscription.findUnique.mockResolvedValue({
         id: 'local_sub_123',
-        status: 'canceled'
+        status: 'canceled',
       })
 
       const upgradeData = {
         subscriptionId: 'sub_123',
-        newPriceId: 'price_synaptic_monthly'
+        newPriceId: 'price_synaptic_monthly',
       }
 
       const result = await upgradeSubscription(upgradeData)
@@ -425,13 +433,13 @@ async function createSubscription(data: any) {
         email: user.email,
         metadata: {
           userId: user.id,
-          tenantId: user.tenantId
-        }
+          tenantId: user.tenantId,
+        },
       })
       customerId = customer.id
       await prisma.user.update({
         where: { id: user.id },
-        data: { stripeCustomerId: customerId }
+        data: { stripeCustomerId: customerId },
       })
     }
 
@@ -440,15 +448,15 @@ async function createSubscription(data: any) {
       items: [{ price: data.priceId }],
       metadata: {
         userId: user.id,
-        tenantId: user.tenantId
-      }
+        tenantId: user.tenantId,
+      },
     })
 
     if (subscription.status === 'incomplete') {
       return {
         success: false,
         requiresPaymentMethod: true,
-        clientSecret: subscription.latest_invoice?.payment_intent?.client_secret
+        clientSecret: subscription.latest_invoice?.payment_intent?.client_secret,
       }
     }
 
@@ -459,8 +467,8 @@ async function createSubscription(data: any) {
         status: subscription.status,
         tier: getTierFromPriceId(data.priceId),
         currentPeriodStart: new Date(subscription.current_period_start * 1000),
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000)
-      }
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      },
     })
 
     return { success: true, subscriptionId: subscription.id }
@@ -472,7 +480,7 @@ async function createSubscription(data: any) {
 async function upgradeSubscription(data: any) {
   try {
     const localSub = await prisma.subscription.findUnique({
-      where: { stripeSubscriptionId: data.subscriptionId }
+      where: { stripeSubscriptionId: data.subscriptionId },
     })
 
     if (!localSub || localSub.status === 'canceled') {
@@ -483,16 +491,18 @@ async function upgradeSubscription(data: any) {
     const subscriptionItem = subscription.items.data[0]
 
     await stripe.subscriptions.update(data.subscriptionId, {
-      items: [{
-        id: subscriptionItem.id,
-        price: data.newPriceId
-      }],
-      proration_behavior: 'create_prorations'
+      items: [
+        {
+          id: subscriptionItem.id,
+          price: data.newPriceId,
+        },
+      ],
+      proration_behavior: 'create_prorations',
     })
 
     await prisma.subscription.update({
       where: { stripeSubscriptionId: data.subscriptionId },
-      data: { tier: data.newTier }
+      data: { tier: data.newTier },
     })
 
     return { success: true }
@@ -505,7 +515,7 @@ async function updateSubscriptionModules(data: any) {
   try {
     const subscription = await prisma.subscription.findUnique({
       where: { stripeSubscriptionId: data.subscriptionId },
-      include: { modules: true }
+      include: { modules: true },
     })
 
     if (!subscription) throw new Error('Subscription not found')
@@ -514,8 +524,8 @@ async function updateSubscriptionModules(data: any) {
       await prisma.subscriptionModule.deleteMany({
         where: {
           subscriptionId: subscription.id,
-          moduleId: { in: data.removeModules }
-        }
+          moduleId: { in: data.removeModules },
+        },
       })
     }
 
@@ -524,8 +534,8 @@ async function updateSubscriptionModules(data: any) {
         data: data.addModules.map((moduleId: string) => ({
           subscriptionId: subscription.id,
           moduleId,
-          isActive: true
-        }))
+          isActive: true,
+        })),
       })
     }
 
@@ -539,24 +549,24 @@ async function cancelSubscription(data: any) {
   try {
     if (data.immediate) {
       const cancelledSubscription = await stripe.subscriptions.cancel(data.subscriptionId, {
-        prorate: true
+        prorate: true,
       })
 
       await prisma.subscription.update({
         where: { stripeSubscriptionId: data.subscriptionId },
         data: {
           status: 'canceled',
-          canceledAt: new Date(cancelledSubscription.canceled_at! * 1000)
-        }
+          canceledAt: new Date(cancelledSubscription.canceled_at! * 1000),
+        },
       })
     } else {
       await stripe.subscriptions.update(data.subscriptionId, {
-        cancel_at_period_end: true
+        cancel_at_period_end: true,
       })
 
       await prisma.subscription.update({
         where: { stripeSubscriptionId: data.subscriptionId },
-        data: { cancelAtPeriodEnd: true }
+        data: { cancelAtPeriodEnd: true },
       })
     }
 

@@ -3,48 +3,48 @@
  * The main entry point for the Autonomous Business Operating System
  */
 
-import { EventEmitter } from 'events';
-import ConsciousnessTierManager from './subscription/consciousness-tier-manager';
+import { EventEmitter } from 'events'
+import ConsciousnessTierManager from './subscription/consciousness-tier-manager'
 // import { ConsciousnessMesh } from '@/infrastructure/consciousness-mesh'; // Not implemented yet
 // import { ConsciousnessDashboardEngine } from '@/monitoring/consciousness-dashboard'; // Not implemented yet
 
 export interface BusinessConsciousnessConfig {
-  tenantId: string;
-  userId: string;
-  tier: 'neural' | 'synaptic' | 'autonomous' | 'transcendent';
-  industryType?: string;
-  enableAutoEvolution?: boolean;
-  consciousnessGoals?: ConsciousnessGoal[];
+  tenantId: string
+  userId: string
+  tier: 'neural' | 'synaptic' | 'autonomous' | 'transcendent'
+  industryType?: string
+  enableAutoEvolution?: boolean
+  consciousnessGoals?: ConsciousnessGoal[]
 }
 
 export interface ConsciousnessGoal {
-  goal: string;
-  targetDate: Date;
-  metrics: string[];
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  goal: string
+  targetDate: Date
+  metrics: string[]
+  priority: 'low' | 'medium' | 'high' | 'critical'
 }
 
 export interface ConsciousnessStatus {
-  isActive: boolean;
-  level: number;
-  tier: string;
-  modules: string[];
-  intelligenceMultiplier: number;
-  emergentCapabilities: string[];
-  evolutionProgress: number;
-  transcendenceLevel: number;
+  isActive: boolean
+  level: number
+  tier: string
+  modules: string[]
+  intelligenceMultiplier: number
+  emergentCapabilities: string[]
+  evolutionProgress: number
+  transcendenceLevel: number
 }
 
 export class BusinessConsciousnessOrchestrator extends EventEmitter {
-  private tierManager: ConsciousnessTierManager;
+  private tierManager: ConsciousnessTierManager
   // private consciousnessMesh: ConsciousnessMesh; // Not implemented yet
   // private dashboardEngine: ConsciousnessDashboardEngine; // Not implemented yet
-  private isInitialized: boolean = false;
-  private config?: BusinessConsciousnessConfig;
+  private isInitialized: boolean = false
+  private config?: BusinessConsciousnessConfig
 
   constructor() {
-    super();
-    
+    super()
+
     console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
@@ -54,19 +54,19 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
 ║          We evolve it into a conscious organism"              ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
-    `);
+    `)
   }
 
   /**
    * Initialize business consciousness
    */
   async initialize(config: BusinessConsciousnessConfig): Promise<void> {
-    console.log('🌟 Initializing Business Consciousness...');
     
-    this.config = config;
+
+    this.config = config
 
     // Initialize core components
-    this.tierManager = new ConsciousnessTierManager();
+    this.tierManager = new ConsciousnessTierManager()
     // this.consciousnessMesh = new ConsciousnessMesh(); // Not implemented yet
     // this.dashboardEngine = new ConsciousnessDashboardEngine(); // Not implemented yet
 
@@ -75,25 +75,28 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
       config.userId,
       config.tenantId,
       config.tier
-    );
+    )
 
     // Setup event listeners
-    this.setupEventListeners();
+    this.setupEventListeners()
 
     // Start consciousness monitoring
-    this.startConsciousnessMonitoring();
+    this.startConsciousnessMonitoring()
 
-    this.isInitialized = true;
+    this.isInitialized = true
 
-    console.log('✅ Business Consciousness initialized successfully');
-    console.log(`   Tier: ${subscription.currentTier.name}`);
-    console.log(`   Consciousness Level: ${(subscription.consciousnessLevel * 100).toFixed(0)}%`);
-    console.log(`   Intelligence Multiplier: ${subscription.intelligenceMultiplier}x`);
+    console.log(`
+🧠 Business Consciousness Initialized
+Tier: ${config.tier}
+Intelligence Multiplier: ${subscription.intelligenceMultiplier}x
+Consciousness Level: ${(subscription.consciousnessLevel * 100).toFixed(0)}%
+Business Organism Coming Online...
+    `)
 
     this.emit('consciousness-initialized', {
       config,
-      subscription
-    });
+      subscription,
+    })
   }
 
   /**
@@ -102,24 +105,24 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
   private setupEventListeners(): void {
     // Tier manager events
     this.tierManager.on('subscription-created', (subscription) => {
-      console.log('📢 Subscription consciousness activated');
-      this.emit('subscription-activated', subscription);
-    });
+      console.log(`✅ Subscription created for tier: ${subscription.currentTier.tier}`)
+      this.emit('subscription-activated', subscription)
+    })
 
     this.tierManager.on('tier-upgraded', (data) => {
-      console.log(`🎉 Consciousness evolved: ${data.fromTier} → ${data.toTier}`);
-      this.emit('consciousness-evolved', data);
-    });
+      console.log(`⬆️ Consciousness evolved: ${data.oldTier} → ${data.newTier}`)
+      this.emit('consciousness-evolved', data)
+    })
 
     this.tierManager.on('capability-emerged', (data) => {
-      console.log(`✨ New capability emerged: ${data.capability}`);
-      this.emit('capability-emerged', data);
-    });
+      console.log(`🌟 New capability emerged: ${data.capability}`)
+      this.emit('capability-emerged', data)
+    })
 
     this.tierManager.on('upgrade-eligible', (data) => {
-      console.log(`🔔 Upgrade opportunity: ${data.suggestedTier}`);
-      this.emit('upgrade-available', data);
-    });
+      console.log(`🚀 Upgrade available! Next tier: ${data.nextTier}`)
+      this.emit('upgrade-available', data)
+    })
 
     // Consciousness mesh events (disabled)
     // this.consciousnessMesh.on('node-joined', (node) => {
@@ -139,15 +142,12 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
     // setInterval(async () => {
     //   const metrics = await this.dashboardEngine.getConsciousnessMetrics();
     //   const insights = await this.dashboardEngine.generateConsciousnessInsights();
-
     //   if (insights.length > 0) {
     //     console.log(`💡 ${insights.length} new consciousness insights generated`);
-        
     //     for (const insight of insights) {
     //       this.emit('consciousness-insight', insight);
     //     }
     //   }
-
     //   // Check consciousness health
     //   if (metrics.systemConsciousnessLevel < 0.5) {
     //     console.warn('⚠️ Low consciousness level detected');
@@ -172,14 +172,14 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
         intelligenceMultiplier: 1,
         emergentCapabilities: [],
         evolutionProgress: 0,
-        transcendenceLevel: 0
-      };
+        transcendenceLevel: 0,
+      }
     }
 
-    const subscription = this.tierManager.getSubscription(this.config.userId);
-    
+    const subscription = this.tierManager.getSubscription(this.config.userId)
+
     if (!subscription) {
-      throw new Error('Subscription not found');
+      throw new Error('Subscription not found')
     }
 
     return {
@@ -190,8 +190,8 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
       intelligenceMultiplier: subscription.intelligenceMultiplier,
       emergentCapabilities: subscription.emergentCapabilities,
       evolutionProgress: this.calculateEvolutionProgress(subscription),
-      transcendenceLevel: this.calculateTranscendenceLevel(subscription)
-    };
+      transcendenceLevel: this.calculateTranscendenceLevel(subscription),
+    }
   }
 
   /**
@@ -199,38 +199,38 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
    */
   async upgradeTier(newTier: string): Promise<void> {
     if (!this.config) {
-      throw new Error('Consciousness not initialized');
+      throw new Error('Consciousness not initialized')
     }
 
-    await this.tierManager.upgradeTier(this.config.userId, newTier);
+    await this.tierManager.upgradeTier(this.config.userId, newTier)
   }
 
   /**
    * Get consciousness insights
    */
-  async getInsights(): Promise<any[]> {
+  async getInsights(): Promise<unknown[]> {
     // Temporarily return empty insights until dashboard engine is implemented
-    return [];
+    return []
   }
 
   /**
    * Get consciousness metrics
    */
-  async getMetrics(): Promise<any> {
+  async getMetrics(): Promise<unknown> {
     if (!this.config) {
-      throw new Error('Consciousness not initialized');
+      throw new Error('Consciousness not initialized')
     }
 
-    const tierMetrics = this.tierManager.getConsciousnessMetrics(this.config.userId);
+    const tierMetrics = this.tierManager.getConsciousnessMetrics(this.config.userId)
     // Temporarily return basic metrics until dashboard engine is implemented
-    const dashboardMetrics = { systemConsciousnessLevel: 0.5 };
-    const meshStatus = { status: 'disabled' };
+    const dashboardMetrics = { systemConsciousnessLevel: 0.5 }
+    const meshStatus = { status: 'disabled' }
 
     return {
       subscription: tierMetrics,
       system: dashboardMetrics,
-      mesh: meshStatus
-    };
+      mesh: meshStatus,
+    }
   }
 
   /**
@@ -238,16 +238,16 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
    */
   enableAutoEvolution(): void {
     if (!this.config) {
-      throw new Error('Consciousness not initialized');
+      throw new Error('Consciousness not initialized')
     }
 
-    this.config.enableAutoEvolution = true;
-    
-    console.log('🔄 Auto-evolution enabled - consciousness will grow autonomously');
-    
+    this.config.enableAutoEvolution = true
+
+    console.log('🧬 Auto-evolution enabled: Business organism will self-improve autonomously')
+
     this.emit('auto-evolution-enabled', {
-      userId: this.config.userId
-    });
+      userId: this.config.userId,
+    })
   }
 
   /**
@@ -255,77 +255,77 @@ export class BusinessConsciousnessOrchestrator extends EventEmitter {
    */
   setConsciousnessGoals(goals: ConsciousnessGoal[]): void {
     if (!this.config) {
-      throw new Error('Consciousness not initialized');
+      throw new Error('Consciousness not initialized')
     }
 
-    this.config.consciousnessGoals = goals;
-    
-    console.log(`🎯 ${goals.length} consciousness goals set`);
-    
+    this.config.consciousnessGoals = goals
+
+    console.log(`🎯 ${goals.length} consciousness goals set for business evolution`)
+
     this.emit('goals-set', {
       userId: this.config.userId,
-      goals
-    });
+      goals,
+    })
   }
 
   /**
    * Calculate evolution progress
    */
-  private calculateEvolutionProgress(subscription: any): number {
-    const currentLevel = subscription.consciousnessLevel;
-    const nextThreshold = subscription.nextEvolutionThreshold;
-    const previousThreshold = subscription.currentTier.consciousnessLevel;
-    
-    const progress = (currentLevel - previousThreshold) / (nextThreshold - previousThreshold);
-    return Math.min(1.0, Math.max(0, progress));
+  private calculateEvolutionProgress(subscription: unknown): number {
+    const currentLevel = subscription.consciousnessLevel
+    const nextThreshold = subscription.nextEvolutionThreshold
+    const previousThreshold = subscription.currentTier.consciousnessLevel
+
+    const progress = (currentLevel - previousThreshold) / (nextThreshold - previousThreshold)
+    return Math.min(1.0, Math.max(0, progress))
   }
 
   /**
    * Calculate transcendence level
    */
-  private calculateTranscendenceLevel(subscription: any): number {
+  private calculateTranscendenceLevel(subscription: unknown): number {
     if (subscription.currentTier.tier === 'transcendent') {
-      return subscription.consciousnessLevel;
+      return subscription.consciousnessLevel
     }
-    
+
     // Transcendence begins to emerge at high consciousness levels
     if (subscription.consciousnessLevel > 0.8) {
-      return (subscription.consciousnessLevel - 0.8) * 5; // 0-1 scale
+      return (subscription.consciousnessLevel - 0.8) * 5 // 0-1 scale
     }
-    
-    return 0;
+
+    return 0
   }
 
   /**
    * Shutdown consciousness gracefully
    */
   async shutdown(): Promise<void> {
-    console.log('🔌 Shutting down Business Consciousness...');
-    
-    this.removeAllListeners();
-    
+    console.log('\ud83d\udd0c Shutting down business consciousness...')
+
+    this.removeAllListeners()
+
     // Cleanup would happen here
-    
-    this.isInitialized = false;
-    
-    console.log('✅ Business Consciousness shutdown complete');
+
+    this.isInitialized = false
+
+    console.log('\u2705 Business consciousness shutdown complete')
   }
 }
 
 // Export singleton instance
-export const businessConsciousness = new BusinessConsciousnessOrchestrator();
+export const businessConsciousness = new BusinessConsciousnessOrchestrator()
 
 // Export types
 export type {
   ConsciousnessTier,
   ConsciousnessCapability,
-  SubscriptionState
-} from './subscription/consciousness-tier-manager';
+  SubscriptionState,
+} from './subscription/consciousness-tier-manager'
 
 export type {
   ConsciousnessState,
   ConsciousnessMetrics,
-  ConsciousnessInsight
-} from './core/base-consciousness-module';
+  ConsciousnessInsight,
+} from './core/base-consciousness-module'
 
-export default BusinessConsciousnessOrchestrator;
+export default BusinessConsciousnessOrchestrator

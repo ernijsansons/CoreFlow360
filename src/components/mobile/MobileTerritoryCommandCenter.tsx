@@ -22,7 +22,7 @@ import {
   PlayIcon,
   StopIcon,
   ChevronUpIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline'
 
 interface LocationVisit {
@@ -95,7 +95,7 @@ interface MobileTerritoryCommandCenterProps {
   userId: string
   tenantId: string
   managerId?: string
-  onLocationUpdate: (location: any) => void
+  onLocationUpdate: (location: unknown) => void
   className?: string
 }
 
@@ -104,7 +104,7 @@ export default function MobileTerritoryCommandCenter({
   tenantId,
   managerId,
   onLocationUpdate,
-  className = ''
+  className = '',
 }: MobileTerritoryCommandCenterProps) {
   const [locationEnabled, setLocationEnabled] = useState(false)
   const [currentVisit, setCurrentVisit] = useState<LocationVisit | null>(null)
@@ -112,7 +112,7 @@ export default function MobileTerritoryCommandCenter({
   const [isRecording, setIsRecording] = useState(false)
   const [aiAssistantActive, setAiAssistantActive] = useState(false)
   const [quickNotes, setQuickNotes] = useState('')
-  const [managerCoaching, setManagerCoaching] = useState<any>(null)
+  const [managerCoaching, setManagerCoaching] = useState<unknown>(null)
   const [collapsed, setCollapsed] = useState(false)
   const locationWatchRef = useRef<number | null>(null)
 
@@ -122,7 +122,7 @@ export default function MobileTerritoryCommandCenter({
     } else {
       stopLocationTracking()
     }
-    
+
     return () => stopLocationTracking()
   }, [locationEnabled])
 
@@ -132,7 +132,7 @@ export default function MobileTerritoryCommandCenter({
       const coachingInterval = setInterval(() => {
         generateManagerCoaching()
       }, 30000) // Every 30 seconds
-      
+
       return () => clearInterval(coachingInterval)
     }
   }, [currentVisit, trackingData])
@@ -149,23 +149,22 @@ export default function MobileTerritoryCommandCenter({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
           accuracy: position.coords.accuracy,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }
-        
+
         updateLocationData(newLocation)
         onLocationUpdate(newLocation)
-        
+
         // AI business detection
         detectNearbyBusinesses(newLocation)
       },
       (error) => {
-        console.error('Location error:', error)
         setLocationEnabled(false)
       },
       {
         enableHighAccuracy: true,
         timeout: 5000,
-        maximumAge: 10000
+        maximumAge: 10000,
       }
     )
 
@@ -175,7 +174,7 @@ export default function MobileTerritoryCommandCenter({
         latitude: 40.7589,
         longitude: -73.9851,
         accuracy: 10,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       nearbyCustomers: [
         {
@@ -184,7 +183,7 @@ export default function MobileTerritoryCommandCenter({
           distance: 0.2,
           priority: 9,
           lastVisit: '2024-08-05T10:00:00Z',
-          revenue: 175000
+          revenue: 175000,
         },
         {
           id: 'customer-2',
@@ -192,22 +191,22 @@ export default function MobileTerritoryCommandCenter({
           distance: 0.8,
           priority: 8,
           lastVisit: '2024-08-01T14:00:00Z',
-          revenue: 125000
-        }
+          revenue: 125000,
+        },
       ],
       territoryMetrics: {
         visitEfficiency: 0.78,
         travelTime: 45,
         customerTime: 180,
         idleTime: 15,
-        milesTravel: 12.5
+        milesTravel: 12.5,
       },
       managerVisibility: {
         locationSharing: true,
         performanceTracking: true,
         realTimeCoaching: true,
-        efficiencyReporting: true
-      }
+        efficiencyReporting: true,
+      },
     }
 
     setTrackingData(mockTrackingData)
@@ -220,28 +219,32 @@ export default function MobileTerritoryCommandCenter({
     }
   }
 
-  const updateLocationData = (location: any) => {
-    setTrackingData(prev => prev ? {
-      ...prev,
-      currentLocation: location
-    } : null)
+  const updateLocationData = (location: unknown) => {
+    setTrackingData((prev) =>
+      prev
+        ? {
+            ...prev,
+            currentLocation: location,
+          }
+        : null
+    )
   }
 
-  const detectNearbyBusinesses = async (location: any) => {
+  const detectNearbyBusinesses = async (_location: unknown) => {
     // Simulate AI business detection based on location
     // In production, this would call Google Places API or similar
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
     if (!currentVisit) {
       // Auto-suggest visit start if near known customer
-      const nearbyCustomer = trackingData?.nearbyCustomers.find(c => c.distance < 0.1)
+      const nearbyCustomer = trackingData?.nearbyCustomers.find((c) => c.distance < 0.1)
       if (nearbyCustomer) {
         suggestVisitStart(nearbyCustomer)
       }
     }
   }
 
-  const suggestVisitStart = (customer: any) => {
+  const suggestVisitStart = (_customer: unknown) => {
     // AI suggests starting a visit
     setAiAssistantActive(true)
     // Auto-show coaching suggestions
@@ -256,23 +259,23 @@ export default function MobileTerritoryCommandCenter({
       latitude: trackingData?.currentLocation.latitude || 0,
       longitude: trackingData?.currentLocation.longitude || 0,
       visitStarted: new Date().toISOString(),
-      visitType: visitType as any,
+      visitType: visitType as unknown,
       status: 'active',
       aiSuggestions: [
         'Customer recently received Series C funding - discuss scaling solutions',
         'Decision maker (CTO) hired from Google - emphasize enterprise capabilities',
-        'Competitor (Salesforce) mentioned in last call - prepare differentiation points'
+        'Competitor (Salesforce) mentioned in last call - prepare differentiation points',
       ],
       notes: '',
       voiceNotes: [],
       photos: [],
       activities: [],
-      performanceScore: 0
+      performanceScore: 0,
     }
 
     setCurrentVisit(visit)
     setAiAssistantActive(true)
-    
+
     // Notify manager of visit start
     notifyManagerVisitStart(visit)
   }
@@ -285,15 +288,15 @@ export default function MobileTerritoryCommandCenter({
       visitEnded: new Date().toISOString(),
       visitDuration: Date.now() - new Date(currentVisit.visitStarted).getTime(),
       status: 'completed' as const,
-      performanceScore: calculatePerformanceScore()
+      performanceScore: calculatePerformanceScore(),
     }
 
     setCurrentVisit(null)
     setAiAssistantActive(false)
-    
+
     // Send completion data to manager
     notifyManagerVisitEnd(endedVisit)
-    
+
     // Show efficiency report
     showEfficiencyReport(endedVisit)
   }
@@ -307,17 +310,15 @@ export default function MobileTerritoryCommandCenter({
     return Math.floor(Math.random() * 30) + 70 // 70-100 score
   }
 
-  const notifyManagerVisitStart = (visit: LocationVisit) => {
+  const notifyManagerVisitStart = (_visit: LocationVisit) => {
     if (trackingData?.managerVisibility.performanceTracking) {
       // Real-time notification to manager
-      console.log('Manager notified: Visit started', visit)
     }
   }
 
-  const notifyManagerVisitEnd = (visit: LocationVisit) => {
+  const notifyManagerVisitEnd = (_visit: LocationVisit) => {
     if (trackingData?.managerVisibility.performanceTracking) {
       // Send performance data to manager
-      console.log('Manager notified: Visit completed', visit)
     }
   }
 
@@ -327,12 +328,15 @@ export default function MobileTerritoryCommandCenter({
     const visitDuration = Date.now() - new Date(currentVisit.visitStarted).getTime()
     const suggestions = []
 
-    if (visitDuration > 3600000) { // Over 1 hour
+    if (visitDuration > 3600000) {
+      // Over 1 hour
       suggestions.push('Visit duration exceeding optimal time - consider wrapping up key points')
     }
 
     if (currentVisit.activities.length === 0) {
-      suggestions.push('No activities logged yet - remember to track demos, calls, or presentations')
+      suggestions.push(
+        'No activities logged yet - remember to track demos, calls, or presentations'
+      )
     }
 
     if (currentVisit.notes.length < 50) {
@@ -345,8 +349,8 @@ export default function MobileTerritoryCommandCenter({
       recommendedActions: [
         'Ask for referrals before leaving',
         'Schedule follow-up meeting',
-        'Capture decision timeline'
-      ]
+        'Capture decision timeline',
+      ],
     })
   }
 
@@ -359,11 +363,9 @@ export default function MobileTerritoryCommandCenter({
       improvements: [
         'Consider batching nearby visits',
         'Use voice notes for faster documentation',
-        'Schedule follow-ups immediately'
-      ]
+        'Schedule follow-ups immediately',
+      ],
     }
-    
-    console.log('Efficiency Report:', insights)
   }
 
   const startVoiceRecording = () => {
@@ -384,13 +386,18 @@ export default function MobileTerritoryCommandCenter({
       recording: 'audio-blob-url',
       transcript,
       timestamp: new Date().toISOString(),
-      aiAnalysis: 'Positive sentiment detected. Customer expressed interest in enterprise features. Next step: schedule technical demo.'
+      aiAnalysis:
+        'Positive sentiment detected. Customer expressed interest in enterprise features. Next step: schedule technical demo.',
     }
 
-    setCurrentVisit(prev => prev ? {
-      ...prev,
-      voiceNotes: [...prev.voiceNotes, voiceNote]
-    } : null)
+    setCurrentVisit((prev) =>
+      prev
+        ? {
+            ...prev,
+            voiceNotes: [...prev.voiceNotes, voiceNote],
+          }
+        : null
+    )
   }
 
   const formatDuration = (ms: number) => {
@@ -401,15 +408,17 @@ export default function MobileTerritoryCommandCenter({
 
   if (!locationEnabled) {
     return (
-      <div className={`bg-white rounded-lg shadow-lg p-6 ${className}`}>
+      <div className={`rounded-lg bg-white p-6 shadow-lg ${className}`}>
         <div className="text-center">
-          <MapPinIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Enable Location Services</h3>
-          <p className="text-gray-600 mb-6">Turn on location to activate AI-powered territory assistance and performance tracking.</p>
-          
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h4 className="font-medium text-blue-900 mb-2">Features Enabled:</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
+          <MapPinIcon className="mx-auto mb-4 h-16 w-16 text-gray-400" />
+          <h3 className="mb-2 text-lg font-semibold text-gray-900">Enable Location Services</h3>
+          <p className="mb-6 text-gray-600">
+            Turn on location to activate AI-powered territory assistance and performance tracking.
+          </p>
+
+          <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <h4 className="mb-2 font-medium text-blue-900">Features Enabled:</h4>
+            <ul className="space-y-1 text-sm text-blue-800">
               <li>• Auto-detect customer visits</li>
               <li>• AI-powered visit assistance</li>
               <li>• Real-time manager coaching</li>
@@ -421,9 +430,9 @@ export default function MobileTerritoryCommandCenter({
 
           <button
             onClick={() => setLocationEnabled(true)}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-green-700 transition-all"
+            className="rounded-lg bg-gradient-to-r from-blue-600 to-green-600 px-6 py-3 font-semibold text-white transition-all hover:from-blue-700 hover:to-green-700"
           >
-            <MapPinIcon className="h-5 w-5 mr-2 inline" />
+            <MapPinIcon className="mr-2 inline h-5 w-5" />
             Turn On Location Services
           </button>
         </div>
@@ -432,25 +441,29 @@ export default function MobileTerritoryCommandCenter({
   }
 
   return (
-    <div className={`bg-white rounded-lg shadow-lg overflow-hidden ${className}`}>
+    <div className={`overflow-hidden rounded-lg bg-white shadow-lg ${className}`}>
       {/* Header */}
       <div className="bg-gradient-to-r from-green-600 to-blue-600 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
+              <div className="h-2 w-2 animate-pulse rounded-full bg-green-300"></div>
               <SignalIcon className="h-5 w-5 text-white" />
             </div>
             <div>
               <h2 className="text-lg font-bold text-white">Territory Command</h2>
-              <p className="text-green-100 text-sm">Location tracking active</p>
+              <p className="text-sm text-green-100">Location tracking active</p>
             </div>
           </div>
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="text-white hover:text-green-100"
           >
-            {collapsed ? <ChevronDownIcon className="h-5 w-5" /> : <ChevronUpIcon className="h-5 w-5" />}
+            {collapsed ? (
+              <ChevronDownIcon className="h-5 w-5" />
+            ) : (
+              <ChevronUpIcon className="h-5 w-5" />
+            )}
           </button>
         </div>
       </div>
@@ -463,52 +476,62 @@ export default function MobileTerritoryCommandCenter({
             exit={{ height: 0 }}
             className="overflow-hidden"
           >
-            <div className="p-4 space-y-4">
+            <div className="space-y-4 p-4">
               {/* Current Visit Status */}
               {currentVisit ? (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
+                <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                  <div className="mb-3 flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 bg-green-600 rounded-full animate-pulse"></div>
+                      <div className="h-3 w-3 animate-pulse rounded-full bg-green-600"></div>
                       <h3 className="font-semibold text-green-900">Active Visit</h3>
                     </div>
                     <div className="text-sm text-green-700">
                       {formatDuration(Date.now() - new Date(currentVisit.visitStarted).getTime())}
                     </div>
                   </div>
-                  
+
                   <div className="mb-3">
                     <h4 className="font-medium text-green-900">{currentVisit.customerName}</h4>
                     <p className="text-sm text-green-700">{currentVisit.address}</p>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div className="mb-3 grid grid-cols-3 gap-2">
                     <button
                       onClick={startVoiceRecording}
                       disabled={isRecording}
-                      className={`flex items-center justify-center p-2 rounded text-sm ${
+                      className={`flex items-center justify-center rounded p-2 text-sm ${
                         isRecording
-                          ? 'bg-red-100 text-red-800 border border-red-200'
-                          : 'bg-blue-100 text-blue-800 border border-blue-200 hover:bg-blue-200'
+                          ? 'border border-red-200 bg-red-100 text-red-800'
+                          : 'border border-blue-200 bg-blue-100 text-blue-800 hover:bg-blue-200'
                       }`}
                     >
-                      <MicrophoneIcon className="h-4 w-4 mr-1" />
+                      <MicrophoneIcon className="mr-1 h-4 w-4" />
                       {isRecording ? 'Recording...' : 'Voice Note'}
                     </button>
-                    
-                    <button className="flex items-center justify-center p-2 bg-purple-100 text-purple-800 border border-purple-200 rounded text-sm hover:bg-purple-200">
-                      <CameraIcon className="h-4 w-4 mr-1" />
+
+                    <button className="flex items-center justify-center rounded border border-purple-200 bg-purple-100 p-2 text-sm text-purple-800 hover:bg-purple-200">
+                      <CameraIcon className="mr-1 h-4 w-4" />
                       Photo
                     </button>
-                    
+
                     <button
-                      onClick={() => setCurrentVisit(prev => prev ? {
-                        ...prev,
-                        status: prev.status === 'paused' ? 'active' : 'paused'
-                      } : null)}
-                      className="flex items-center justify-center p-2 bg-orange-100 text-orange-800 border border-orange-200 rounded text-sm hover:bg-orange-200"
+                      onClick={() =>
+                        setCurrentVisit((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                status: prev.status === 'paused' ? 'active' : 'paused',
+                              }
+                            : null
+                        )
+                      }
+                      className="flex items-center justify-center rounded border border-orange-200 bg-orange-100 p-2 text-sm text-orange-800 hover:bg-orange-200"
                     >
-                      {currentVisit.status === 'paused' ? <PlayIcon className="h-4 w-4 mr-1" /> : <PauseIcon className="h-4 w-4 mr-1" />}
+                      {currentVisit.status === 'paused' ? (
+                        <PlayIcon className="mr-1 h-4 w-4" />
+                      ) : (
+                        <PauseIcon className="mr-1 h-4 w-4" />
+                      )}
                       {currentVisit.status === 'paused' ? 'Resume' : 'Pause'}
                     </button>
                   </div>
@@ -516,9 +539,9 @@ export default function MobileTerritoryCommandCenter({
                   <div className="flex items-center justify-between">
                     <button
                       onClick={endVisit}
-                      className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+                      className="rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
                     >
-                      <CheckCircleIcon className="h-4 w-4 mr-1 inline" />
+                      <CheckCircleIcon className="mr-1 inline h-4 w-4" />
                       End Visit
                     </button>
                     <div className="text-sm text-green-700">
@@ -528,26 +551,33 @@ export default function MobileTerritoryCommandCenter({
                 </div>
               ) : (
                 /* Nearby Customers */
-                trackingData && trackingData.nearbyCustomers.length > 0 && (
+                trackingData &&
+                trackingData.nearbyCustomers.length > 0 && (
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                      <UserGroupIcon className="h-5 w-5 mr-2 text-blue-600" />
+                    <h3 className="mb-3 flex items-center font-semibold text-gray-900">
+                      <UserGroupIcon className="mr-2 h-5 w-5 text-blue-600" />
                       Nearby Customers
                     </h3>
                     <div className="space-y-2">
                       {trackingData.nearbyCustomers.map((customer) => (
-                        <div key={customer.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div
+                          key={customer.id}
+                          className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+                        >
                           <div>
                             <h4 className="font-medium text-gray-900">{customer.name}</h4>
                             <div className="flex items-center space-x-3 text-sm text-gray-600">
                               <span>{customer.distance} miles away</span>
                               <span>Priority: {customer.priority}/10</span>
-                              <span>{customer.revenue > 0 && `$${(customer.revenue/1000).toFixed(0)}K`}</span>
+                              <span>
+                                {customer.revenue > 0 &&
+                                  `$${(customer.revenue / 1000).toFixed(0)}K`}
+                              </span>
                             </div>
                           </div>
                           <button
                             onClick={() => startVisit(customer.id, customer.name, 'scheduled')}
-                            className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded hover:bg-blue-200"
+                            className="rounded bg-blue-100 px-3 py-1 text-sm text-blue-800 hover:bg-blue-200"
                           >
                             Start Visit
                           </button>
@@ -563,16 +593,16 @@ export default function MobileTerritoryCommandCenter({
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-purple-50 border border-purple-200 rounded-lg p-4"
+                  className="rounded-lg border border-purple-200 bg-purple-50 p-4"
                 >
-                  <h3 className="font-semibold text-purple-900 mb-3 flex items-center">
-                    <BoltIcon className="h-5 w-5 mr-2" />
+                  <h3 className="mb-3 flex items-center font-semibold text-purple-900">
+                    <BoltIcon className="mr-2 h-5 w-5" />
                     AI Assistant
                   </h3>
                   <div className="space-y-2">
                     {currentVisit.aiSuggestions.map((suggestion, idx) => (
                       <div key={idx} className="flex items-start space-x-2 text-sm">
-                        <div className="w-1.5 h-1.5 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-purple-600"></div>
                         <span className="text-purple-800">{suggestion}</span>
                       </div>
                     ))}
@@ -585,16 +615,16 @@ export default function MobileTerritoryCommandCenter({
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-yellow-50 border border-yellow-200 rounded-lg p-4"
+                  className="rounded-lg border border-yellow-200 bg-yellow-50 p-4"
                 >
-                  <h3 className="font-semibold text-yellow-900 mb-3 flex items-center">
-                    <EyeIcon className="h-5 w-5 mr-2" />
+                  <h3 className="mb-3 flex items-center font-semibold text-yellow-900">
+                    <EyeIcon className="mr-2 h-5 w-5" />
                     Manager Coaching
                   </h3>
                   <div className="space-y-2">
                     {managerCoaching.suggestions.map((suggestion: string, idx: number) => (
                       <div key={idx} className="flex items-start space-x-2 text-sm">
-                        <ExclamationTriangleIcon className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                        <ExclamationTriangleIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-yellow-600" />
                         <span className="text-yellow-800">{suggestion}</span>
                       </div>
                     ))}
@@ -604,22 +634,20 @@ export default function MobileTerritoryCommandCenter({
 
               {/* Quick Notes */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quick Notes
-                </label>
+                <label className="mb-2 block text-sm font-medium text-gray-700">Quick Notes</label>
                 <textarea
                   value={quickNotes}
                   onChange={(e) => setQuickNotes(e.target.value)}
                   placeholder="AI will help complete your notes based on location and context..."
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               {/* Performance Metrics */}
               {trackingData && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-gray-900 mb-3">Today's Metrics</h3>
+                <div className="rounded-lg bg-gray-50 p-4">
+                  <h3 className="mb-3 font-semibold text-gray-900">Today's Metrics</h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="text-center">
                       <div className="text-lg font-bold text-blue-600">
@@ -650,16 +678,24 @@ export default function MobileTerritoryCommandCenter({
               )}
 
               {/* Privacy & Manager Visibility */}
-              <div className="bg-gray-100 rounded-lg p-3 text-xs text-gray-600">
-                <div className="flex items-center justify-between mb-2">
+              <div className="rounded-lg bg-gray-100 p-3 text-xs text-gray-600">
+                <div className="mb-2 flex items-center justify-between">
                   <span className="font-medium">Manager Visibility</span>
                   <EyeIcon className="h-4 w-4" />
                 </div>
                 <div className="space-y-1">
-                  {trackingData?.managerVisibility.locationSharing && <div>✓ Location tracking enabled</div>}
-                  {trackingData?.managerVisibility.performanceTracking && <div>✓ Performance monitoring active</div>}
-                  {trackingData?.managerVisibility.realTimeCoaching && <div>✓ Real-time coaching enabled</div>}
-                  {trackingData?.managerVisibility.efficiencyReporting && <div>✓ Efficiency reporting active</div>}
+                  {trackingData?.managerVisibility.locationSharing && (
+                    <div>✓ Location tracking enabled</div>
+                  )}
+                  {trackingData?.managerVisibility.performanceTracking && (
+                    <div>✓ Performance monitoring active</div>
+                  )}
+                  {trackingData?.managerVisibility.realTimeCoaching && (
+                    <div>✓ Real-time coaching enabled</div>
+                  )}
+                  {trackingData?.managerVisibility.efficiencyReporting && (
+                    <div>✓ Efficiency reporting active</div>
+                  )}
                 </div>
               </div>
             </div>

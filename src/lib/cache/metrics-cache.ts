@@ -8,7 +8,7 @@ import { redis, CACHE_PREFIXES, CACHE_TTL } from '@/lib/redis/client'
 interface MetricData {
   value: number
   timestamp: Date
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 interface TimeSeriesOptions {
@@ -26,38 +26,35 @@ export const metricsCache = {
   async record(
     metricName: string,
     value: number,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     const key = `${CACHE_PREFIXES.METRICS}${metricName}`
     const timestamp = new Date()
-    
+
     const data: MetricData = {
       value,
       timestamp,
-      metadata
+      metadata,
     }
-    
+
     // Add to sorted set with timestamp as score
     await redis.sadd(key, JSON.stringify(data))
-    
+
     // Set expiration
     await redis.expire(key, CACHE_TTL.DAY)
   },
-  
+
   /**
    * Get recent metrics
    */
-  async getRecent(
-    metricName: string,
-    count: number = 100
-  ): Promise<MetricData[]> {
+  async getRecent(metricName: string, count: number = 100): Promise<MetricData[]> {
     const key = `${CACHE_PREFIXES.METRICS}${metricName}`
-    
+
     // Get recent entries
     const entries = await redis.smembers(key)
-    
+
     return entries
-      .map(entry => {
+      .map((entry) => {
         try {
           return JSON.parse(entry) as MetricData
         } catch {
@@ -68,7 +65,7 @@ export const metricsCache = {
       .sort((a, b) => new Date(b!.timestamp).getTime() - new Date(a!.timestamp).getTime())
       .slice(0, count) as MetricData[]
   },
-  
+
   /**
    * Calculate aggregates
    */
@@ -84,26 +81,24 @@ export const metricsCache = {
   }> {
     const metrics = await this.getRecent(metricName, 1000)
     const windowStart = new Date(Date.now() - windowMinutes * 60 * 1000)
-    
-    const windowMetrics = metrics.filter(
-      m => new Date(m.timestamp) >= windowStart
-    )
-    
+
+    const windowMetrics = metrics.filter((m) => new Date(m.timestamp) >= windowStart)
+
     if (windowMetrics.length === 0) {
       return { avg: 0, min: 0, max: 0, count: 0, sum: 0 }
     }
-    
-    const values = windowMetrics.map(m => m.value)
+
+    const values = windowMetrics.map((m) => m.value)
     const sum = values.reduce((a, b) => a + b, 0)
-    
+
     return {
       avg: sum / values.length,
       min: Math.min(...values),
       max: Math.max(...values),
       count: values.length,
-      sum
+      sum,
     }
-  }
+  },
 }
 
 /**
@@ -113,55 +108,29 @@ export const performanceMetrics = {
   /**
    * Track API response time
    */
-  async trackResponseTime(
-    endpoint: string,
-    duration: number,
-    statusCode: number
-  ): Promise<void> {
-    await metricsCache.record(
-      `api:response_time:${endpoint}`,
-      duration,
-      { statusCode }
-    )
-    
+  async trackResponseTime(endpoint: string, duration: number, statusCode: number): Promise<void> {
+    await metricsCache.record(`api:response_time:${endpoint}`, duration, { statusCode })
+
     // Also track by status code
     if (statusCode >= 400) {
-      await metricsCache.record(
-        `api:errors:${endpoint}`,
-        1,
-        { statusCode }
-      )
+      await metricsCache.record(`api:errors:${endpoint}`, 1, { statusCode })
     }
   },
-  
+
   /**
    * Track database query time
    */
-  async trackQueryTime(
-    operation: string,
-    duration: number,
-    success: boolean
-  ): Promise<void> {
-    await metricsCache.record(
-      `db:query_time:${operation}`,
-      duration,
-      { success }
-    )
+  async trackQueryTime(operation: string, duration: number, success: boolean): Promise<void> {
+    await metricsCache.record(`db:query_time:${operation}`, duration, { success })
   },
-  
+
   /**
    * Track cache hit rate
    */
-  async trackCacheHit(
-    cacheType: string,
-    hit: boolean
-  ): Promise<void> {
-    await metricsCache.record(
-      `cache:${cacheType}:${hit ? 'hits' : 'misses'}`,
-      1
-    )
+  async trackCacheHit(cacheType: string, hit: boolean): Promise<void> {
+    await metricsCache.record(`cache:${cacheType}:${hit ? 'hits' : 'misses'}`, 1)
   },
-  
+
   /**
    * Get performance summary
    */
@@ -182,55 +151,36 @@ export const performanceMetrics = {
     }
   }> {
     // Get API metrics
-    const apiResponseTimes = await metricsCache.getAggregates(
-      'api:response_time:*',
-      windowMinutes
-    )
-    const apiErrors = await metricsCache.getAggregates(
-      'api:errors:*',
-      windowMinutes
-    )
-    
+    const apiResponseTimes = await metricsCache.getAggregates('api:response_time:*', windowMinutes)
+    const apiErrors = await metricsCache.getAggregates('api:errors:*', windowMinutes)
+
     // Get cache metrics
-    const cacheHits = await metricsCache.getAggregates(
-      'cache:*:hits',
-      windowMinutes
-    )
-    const cacheMisses = await metricsCache.getAggregates(
-      'cache:*:misses',
-      windowMinutes
-    )
-    
+    const cacheHits = await metricsCache.getAggregates('cache:*:hits', windowMinutes)
+    const cacheMisses = await metricsCache.getAggregates('cache:*:misses', windowMinutes)
+
     // Get database metrics
-    const dbQueryTimes = await metricsCache.getAggregates(
-      'db:query_time:*',
-      windowMinutes
-    )
-    
+    const dbQueryTimes = await metricsCache.getAggregates('db:query_time:*', windowMinutes)
+
     const totalCacheRequests = cacheHits.sum + cacheMisses.sum
-    const hitRate = totalCacheRequests > 0 
-      ? (cacheHits.sum / totalCacheRequests) * 100 
-      : 0
-    
+    const hitRate = totalCacheRequests > 0 ? (cacheHits.sum / totalCacheRequests) * 100 : 0
+
     return {
       api: {
         avgResponseTime: apiResponseTimes.avg,
-        errorRate: apiResponseTimes.count > 0 
-          ? (apiErrors.sum / apiResponseTimes.count) * 100 
-          : 0,
-        requestsPerMinute: apiResponseTimes.count / windowMinutes
+        errorRate: apiResponseTimes.count > 0 ? (apiErrors.sum / apiResponseTimes.count) * 100 : 0,
+        requestsPerMinute: apiResponseTimes.count / windowMinutes,
       },
       cache: {
         hitRate,
         totalHits: cacheHits.sum,
-        totalMisses: cacheMisses.sum
+        totalMisses: cacheMisses.sum,
       },
       database: {
         avgQueryTime: dbQueryTimes.avg,
-        slowQueries: dbQueryTimes.count
-      }
+        slowQueries: dbQueryTimes.count,
+      },
     }
-  }
+  },
 }
 
 /**
@@ -243,46 +193,38 @@ export const businessMetrics = {
   async trackUserActivity(
     userId: string,
     action: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
-    await metricsCache.record(
-      `user:activity:${action}`,
-      1,
-      { userId, ...metadata }
-    )
-    
+    await metricsCache.record(`user:activity:${action}`, 1, { userId, ...metadata })
+
     // Update user last active
     const key = `${CACHE_PREFIXES.USER}last_active:${userId}`
     await redis.set(key, new Date().toISOString(), CACHE_TTL.LONG)
   },
-  
+
   /**
    * Track conversion events
    */
   async trackConversion(
     eventType: string,
     value: number,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
-    await metricsCache.record(
-      `conversion:${eventType}`,
-      value,
-      metadata
-    )
+    await metricsCache.record(`conversion:${eventType}`, value, metadata)
   },
-  
+
   /**
    * Get active users count
    */
   async getActiveUsers(windowMinutes: number = 30): Promise<number> {
     const pattern = `${CACHE_PREFIXES.USER}last_active:*`
     const windowStart = new Date(Date.now() - windowMinutes * 60 * 1000)
-    
+
     // This would need actual implementation with Redis SCAN
     // For now, return a placeholder
     return 0
   },
-  
+
   /**
    * Get conversion funnel metrics
    */
@@ -297,15 +239,12 @@ export const businessMetrics = {
     revenue: number
   }> {
     const windowMinutes = windowDays * 24 * 60
-    
+
     const visitors = await metricsCache.getAggregates(
       `conversion:visitor:${tenantId}`,
       windowMinutes
     )
-    const signups = await metricsCache.getAggregates(
-      `conversion:signup:${tenantId}`,
-      windowMinutes
-    )
+    const signups = await metricsCache.getAggregates(`conversion:signup:${tenantId}`, windowMinutes)
     const activations = await metricsCache.getAggregates(
       `conversion:activation:${tenantId}`,
       windowMinutes
@@ -314,15 +253,15 @@ export const businessMetrics = {
       `conversion:purchase:${tenantId}`,
       windowMinutes
     )
-    
+
     return {
       visitors: visitors.sum,
       signups: signups.sum,
       activations: activations.sum,
       conversions: conversions.sum,
-      revenue: conversions.sum * 49 // Assuming $49/mo average
+      revenue: conversions.sum * 49, // Assuming $49/mo average
     }
-  }
+  },
 }
 
 /**
@@ -342,14 +281,14 @@ export const realtimeMetrics = {
     memoryUsage: number
   }> {
     const oneMinuteAgo = 1
-    
+
     const apiMetrics = await performanceMetrics.getSummary(oneMinuteAgo)
     const activeUsers = await businessMetrics.getActiveUsers(5)
-    
+
     // System metrics would come from actual monitoring
     const cpuUsage = Math.random() * 40 + 20 // Mock 20-60%
     const memoryUsage = Math.random() * 30 + 40 // Mock 40-70%
-    
+
     return {
       timestamp: new Date(),
       activeUsers,
@@ -357,19 +296,16 @@ export const realtimeMetrics = {
       avgResponseTime: apiMetrics.api.avgResponseTime,
       errorRate: apiMetrics.api.errorRate,
       cpuUsage,
-      memoryUsage
+      memoryUsage,
     }
   },
-  
+
   /**
    * Subscribe to metric updates
    */
-  async subscribe(
-    metricName: string,
-    callback: (data: MetricData) => void
-  ): Promise<() => void> {
+  async subscribe(_metricName: string, _callback: (data: MetricData) => void): Promise<() => void> {
     // This would use Redis pub/sub in a real implementation
     // For now, return a no-op unsubscribe function
     return () => {}
-  }
+  },
 }

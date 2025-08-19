@@ -1,83 +1,77 @@
-2/**
- * CoreFlow360 - Health Check & Monitoring API
- * Production readiness and system health monitoring
- */
+import { NextRequest } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
-import { NextRequest, NextResponse } from 'next/server'
-import { getHealthChecker, HealthCheckOptions } from '@/lib/health/unified-health-checker'
-import { createErrorContext } from '@/lib/error-handler/createErrorContext'
-import { handleError } from '@/lib/error-handler'
-
-// Initialize health checker with default checks on first import
-const healthChecker = getHealthChecker()
-healthChecker.initializeDefaultChecks()
-
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(request: NextRequest) {
+  const startTime = Date.now()
+  
   try {
-    // Parse query parameters
-    const detailed = request.nextUrl.searchParams.get('detailed') === 'true'
-    const includeMetrics = request.nextUrl.searchParams.get('metrics') === 'true'
-    const includeSystem = request.nextUrl.searchParams.get('system') === 'true'
+    // Check environment variables
+    const requiredEnvVars = [
+      'DATABASE_URL',
+      'NEXTAUTH_SECRET',
+      'NEXTAUTH_URL'
+    ]
     
-    // Configure health check options
-    const options: HealthCheckOptions = {
-      detailed,
-      includeMetrics,
-      includeSystem: includeSystem || detailed,
-      includePerformance: detailed,
-      timeout: 5000
+    const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
+    
+    if (missingVars.length > 0) {
+      return Response.json({
+        status: 'error',
+        message: `Missing environment variables: ${missingVars.join(', ')}`,
+        timestamp: new Date().toISOString(),
+        responseTime: Date.now() - startTime
+      }, { status: 500 })
     }
-    
-    // Run comprehensive health check
-    const report = await healthChecker.runAllChecks(options)
-    
-    // Create standardized response
-    const response = healthChecker.createHealthResponse(report, request)
-    
-    return new NextResponse(JSON.stringify(response.body), {
-      status: response.statusCode,
-      headers: response.headers
-    })
-    
-  } catch (error: any) {
-    const context = createErrorContext(request, '/api/health')
-    return handleError(error, context)
-  }
-}
 
-// Readiness probe endpoint - checks critical dependencies
-export async function POST(request: NextRequest): Promise<NextResponse> {
-  try {
-    // Run basic health checks for readiness
-    const report = await healthChecker.runAllChecks({ 
-      timeout: 2000,
-      detailed: false 
-    })
-    
-    // Check critical services (database and configuration)
-    const database = report.services.database
-    const configuration = report.services.configuration
-    
-    const isReady = 
-      database?.status === 'healthy' && 
-      configuration?.status === 'healthy'
-    
-    if (isReady) {
-      return NextResponse.json({ 
-        status: 'ready',
-        timestamp: report.timestamp 
-      }, { status: 200 })
-    } else {
-      return NextResponse.json({ 
-        status: 'not ready',
-        database: database?.status || 'unknown',
-        configuration: configuration?.status || 'unknown',
-        timestamp: report.timestamp
-      }, { status: 503 })
+    // Check database connection
+    let dbStatus = 'unknown'
+    try {
+      await prisma.$queryRaw`SELECT 1`
+      dbStatus = 'connected'
+    } catch (dbError) {
+      dbStatus = 'error'
+      console.error('Database health check failed:', dbError)
     }
+
+    // Check build environment
+    const buildInfo = {
+      nodeEnv: process.env.NODE_ENV,
+      vercelEnv: process.env.VERCEL_ENV,
+      buildingForVercel: process.env.BUILDING_FOR_VERCEL,
+      ci: process.env.CI,
+      nextPhase: process.env.NEXT_PHASE
+    }
+
+    // Check if we're in a build context
+    const isBuildTime = typeof window === 'undefined' && 
+                       (process.env.NODE_ENV === 'production' || process.env.CI === 'true')
+
+    const healthStatus = {
+      status: dbStatus === 'connected' ? 'healthy' : 'degraded',
+      timestamp: new Date().toISOString(),
+      responseTime: Date.now() - startTime,
+      services: {
+        database: dbStatus,
+        environment: missingVars.length === 0 ? 'configured' : 'missing_vars'
+      },
+      buildInfo,
+      isBuildTime,
+      version: process.env.npm_package_version || 'unknown',
+      commit: process.env.VERCEL_GIT_COMMIT_SHA || 'unknown'
+    }
+
+    const statusCode = healthStatus.status === 'healthy' ? 200 : 503
     
-  } catch (error: any) {
-    const context = createErrorContext(request, '/api/health', { method: 'POST' })
-    return handleError(error, context)
+    return Response.json(healthStatus, { status: statusCode })
+    
+  } catch (error) {
+    console.error('Health check failed:', error)
+    
+    return Response.json({
+      status: 'error',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString(),
+      responseTime: Date.now() - startTime
+    }, { status: 500 })
   }
 }

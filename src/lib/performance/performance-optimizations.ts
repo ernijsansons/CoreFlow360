@@ -76,7 +76,7 @@ export class PerformanceOptimizer {
   private config = getConfig()
   private metricsHistory: PerformanceMetrics[] = []
   private alertHistory: PerformanceAlert[] = []
-  private optimizationCache = new Map<string, any>()
+  private optimizationCache = new Map<string, unknown>()
   private performanceThresholds: Record<string, number>
   private monitoringInterval: NodeJS.Timeout | null = null
 
@@ -91,9 +91,9 @@ export class PerformanceOptimizer {
       error_rate_warning: 1, // %
       error_rate_critical: 5,
       disk_io_warning: 1000000, // bytes/sec
-      disk_io_critical: 10000000
+      disk_io_critical: 10000000,
     }
-    
+
     this.startPerformanceMonitoring()
   }
 
@@ -109,15 +109,17 @@ export class PerformanceOptimizer {
       try {
         const metrics = await this.collectPerformanceMetrics()
         this.metricsHistory.push(metrics)
-        
+
         // Keep only last 100 entries
         if (this.metricsHistory.length > 100) {
           this.metricsHistory = this.metricsHistory.slice(-100)
         }
-        
+
         await this.analyzePerformance(metrics)
       } catch (error) {
-        logger.error(LogCategory.PERFORMANCE, 'Performance monitoring error', { error: error instanceof Error ? error.message : 'Unknown error' })
+        logger.error(LogCategory.PERFORMANCE, 'Performance monitoring error', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
       }
     }, this.config.HEALTH_CHECK_INTERVAL)
 
@@ -127,13 +129,13 @@ export class PerformanceOptimizer {
   private async collectPerformanceMetrics(): Promise<PerformanceMetrics> {
     const memUsage = process.memoryUsage()
     const cpuUsage = process.cpuUsage()
-    
+
     // Mock system metrics - in production use proper system monitoring
     const metrics: PerformanceMetrics = {
       cpu: {
         usage: Math.random() * 100,
         cores: require('os').cpus().length,
-        loadAverage: require('os').loadavg()
+        loadAverage: require('os').loadavg(),
       },
       memory: {
         used: memUsage.heapUsed,
@@ -142,26 +144,26 @@ export class PerformanceOptimizer {
         heapUsed: memUsage.heapUsed,
         heapTotal: memUsage.heapTotal,
         external: memUsage.external,
-        rss: memUsage.rss
+        rss: memUsage.rss,
       },
       io: {
         readOperations: Math.floor(Math.random() * 1000),
         writeOperations: Math.floor(Math.random() * 500),
         readBytes: Math.floor(Math.random() * 1024 * 1024),
-        writeBytes: Math.floor(Math.random() * 1024 * 512)
+        writeBytes: Math.floor(Math.random() * 1024 * 512),
       },
       network: {
         bytesIn: Math.floor(Math.random() * 1024 * 1024),
         bytesOut: Math.floor(Math.random() * 1024 * 512),
         connections: Math.floor(Math.random() * 100),
-        errors: Math.floor(Math.random() * 10)
+        errors: Math.floor(Math.random() * 10),
       },
       application: {
         requestsPerSecond: Math.floor(Math.random() * 1000),
         averageResponseTime: Math.random() * 2000,
         errorRate: Math.random() * 5,
-        activeConnections: Math.floor(Math.random() * 50)
-      }
+        activeConnections: Math.floor(Math.random() * 50),
+      },
     }
 
     // Record telemetry
@@ -190,8 +192,8 @@ export class PerformanceOptimizer {
         recommendations: [
           'Scale horizontally to distribute load',
           'Optimize CPU-intensive operations',
-          'Enable CPU profiling to identify bottlenecks'
-        ]
+          'Enable CPU profiling to identify bottlenecks',
+        ],
       })
     } else if (metrics.cpu.usage > this.performanceThresholds.cpu_usage_warning) {
       alerts.push({
@@ -205,8 +207,8 @@ export class PerformanceOptimizer {
         recommendations: [
           'Monitor CPU trends',
           'Consider process optimization',
-          'Review resource allocation'
-        ]
+          'Review resource allocation',
+        ],
       })
     }
 
@@ -225,13 +227,15 @@ export class PerformanceOptimizer {
           'Immediate memory cleanup required',
           'Check for memory leaks',
           'Scale memory resources',
-          'Optimize data structures'
-        ]
+          'Optimize data structures',
+        ],
       })
     }
 
     // Response time monitoring
-    if (metrics.application.averageResponseTime > this.performanceThresholds.response_time_critical) {
+    if (
+      metrics.application.averageResponseTime > this.performanceThresholds.response_time_critical
+    ) {
       alerts.push({
         id: `response-critical-${Date.now()}`,
         timestamp: new Date(),
@@ -244,8 +248,8 @@ export class PerformanceOptimizer {
           'Optimize database queries',
           'Enable response caching',
           'Review API performance',
-          'Consider load balancing'
-        ]
+          'Consider load balancing',
+        ],
       })
     }
 
@@ -263,8 +267,8 @@ export class PerformanceOptimizer {
           'Investigate error patterns',
           'Review recent deployments',
           'Check external service dependencies',
-          'Enable circuit breakers'
-        ]
+          'Enable circuit breakers',
+        ],
       })
     }
 
@@ -283,7 +287,7 @@ export class PerformanceOptimizer {
       metric: alert.metric,
       currentValue: alert.currentValue,
       threshold: alert.threshold,
-      recommendations: alert.recommendations
+      recommendations: alert.recommendations,
     })
 
     // Auto-remediation for certain issues
@@ -293,7 +297,7 @@ export class PerformanceOptimizer {
 
     telemetry.recordCounter('performance_alerts_total', 1, {
       severity: alert.severity,
-      metric: alert.metric
+      metric: alert.metric,
     })
   }
 
@@ -319,7 +323,7 @@ export class PerformanceOptimizer {
     try {
       // Clear optimization cache
       this.optimizationCache.clear()
-      
+
       // Force garbage collection if available
       if (global.gc) {
         global.gc()
@@ -330,7 +334,9 @@ export class PerformanceOptimizer {
 
       logger.info(LogCategory.PERFORMANCE, 'Memory cleanup completed')
     } catch (error) {
-      logger.error(LogCategory.PERFORMANCE, 'Memory cleanup failed', { error: error instanceof Error ? error.message : 'Unknown error' })
+      logger.error(LogCategory.PERFORMANCE, 'Memory cleanup failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
     }
   }
 
@@ -348,7 +354,9 @@ export class PerformanceOptimizer {
 
       logger.info(LogCategory.PERFORMANCE, 'CPU optimization applied: reduced monitoring frequency')
     } catch (error) {
-      logger.error(LogCategory.PERFORMANCE, 'CPU optimization failed', { error: error instanceof Error ? error.message : 'Unknown error' })
+      logger.error(LogCategory.PERFORMANCE, 'CPU optimization failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
     }
   }
 
@@ -356,10 +364,15 @@ export class PerformanceOptimizer {
     try {
       // Enable aggressive caching
       this.optimizationCache.set('aggressive_caching', true)
-      
-      logger.info(LogCategory.PERFORMANCE, 'Response time optimization applied: aggressive caching enabled')
+
+      logger.info(
+        LogCategory.PERFORMANCE,
+        'Response time optimization applied: aggressive caching enabled'
+      )
     } catch (error) {
-      logger.error(LogCategory.PERFORMANCE, 'Response time optimization failed', { error: error instanceof Error ? error.message : 'Unknown error' })
+      logger.error(LogCategory.PERFORMANCE, 'Response time optimization failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
     }
   }
 
@@ -367,7 +380,9 @@ export class PerformanceOptimizer {
    * Get current performance metrics
    */
   getCurrentMetrics(): PerformanceMetrics | null {
-    return this.metricsHistory.length > 0 ? this.metricsHistory[this.metricsHistory.length - 1] : null
+    return this.metricsHistory.length > 0
+      ? this.metricsHistory[this.metricsHistory.length - 1]
+      : null
   }
 
   /**
@@ -385,41 +400,45 @@ export class PerformanceOptimizer {
         cpu: { average: 0, trend: 'stable' },
         memory: { average: 0, trend: 'stable' },
         responseTime: { average: 0, trend: 'stable' },
-        errorRate: { average: 0, trend: 'stable' }
+        errorRate: { average: 0, trend: 'stable' },
       }
     }
 
     const calculateTrend = (values: number[]): 'up' | 'down' | 'stable' => {
       if (values.length < 2) return 'stable'
-      const first = values.slice(0, Math.floor(values.length / 2)).reduce((a, b) => a + b) / Math.floor(values.length / 2)
-      const second = values.slice(Math.floor(values.length / 2)).reduce((a, b) => a + b) / Math.ceil(values.length / 2)
+      const first =
+        values.slice(0, Math.floor(values.length / 2)).reduce((a, b) => a + b) /
+        Math.floor(values.length / 2)
+      const second =
+        values.slice(Math.floor(values.length / 2)).reduce((a, b) => a + b) /
+        Math.ceil(values.length / 2)
       const diff = second - first
       if (Math.abs(diff) < 2) return 'stable'
       return diff > 0 ? 'up' : 'down'
     }
 
-    const cpuValues = recent.map(m => m.cpu.usage)
-    const memoryValues = recent.map(m => (m.memory.used / m.memory.total) * 100)
-    const responseTimeValues = recent.map(m => m.application.averageResponseTime)
-    const errorRateValues = recent.map(m => m.application.errorRate)
+    const cpuValues = recent.map((m) => m.cpu.usage)
+    const memoryValues = recent.map((m) => (m.memory.used / m.memory.total) * 100)
+    const responseTimeValues = recent.map((m) => m.application.averageResponseTime)
+    const errorRateValues = recent.map((m) => m.application.errorRate)
 
     return {
       cpu: {
         average: cpuValues.reduce((a, b) => a + b) / cpuValues.length,
-        trend: calculateTrend(cpuValues)
+        trend: calculateTrend(cpuValues),
       },
       memory: {
         average: memoryValues.reduce((a, b) => a + b) / memoryValues.length,
-        trend: calculateTrend(memoryValues)
+        trend: calculateTrend(memoryValues),
       },
       responseTime: {
         average: responseTimeValues.reduce((a, b) => a + b) / responseTimeValues.length,
-        trend: calculateTrend(responseTimeValues)
+        trend: calculateTrend(responseTimeValues),
       },
       errorRate: {
         average: errorRateValues.reduce((a, b) => a + b) / errorRateValues.length,
-        trend: calculateTrend(errorRateValues)
-      }
+        trend: calculateTrend(errorRateValues),
+      },
     }
   }
 
@@ -442,8 +461,9 @@ export class PerformanceOptimizer {
         title: 'High Memory Usage Detected',
         description: `Memory usage is at ${memoryUsage.toFixed(1)}%, which may impact performance`,
         impact: 'Potential application slowdown and increased response times',
-        implementation: 'Implement memory pooling, optimize data structures, and enable garbage collection tuning',
-        estimatedImprovement: '20-40% memory usage reduction'
+        implementation:
+          'Implement memory pooling, optimize data structures, and enable garbage collection tuning',
+        estimatedImprovement: '20-40% memory usage reduction',
       })
     }
 
@@ -456,7 +476,7 @@ export class PerformanceOptimizer {
         description: `CPU usage is at ${currentMetrics.cpu.usage.toFixed(1)}%`,
         impact: 'Reduced throughput and increased response times',
         implementation: 'Optimize algorithms, enable CPU profiling, consider horizontal scaling',
-        estimatedImprovement: '30-50% CPU usage reduction'
+        estimatedImprovement: '30-50% CPU usage reduction',
       })
     }
 
@@ -469,7 +489,7 @@ export class PerformanceOptimizer {
         description: `Average response time is ${currentMetrics.application.averageResponseTime.toFixed(0)}ms`,
         impact: 'Poor user experience and reduced throughput',
         implementation: 'Implement Redis caching, optimize database queries, enable CDN',
-        estimatedImprovement: '60-80% response time reduction'
+        estimatedImprovement: '60-80% response time reduction',
       })
     }
 
@@ -482,7 +502,7 @@ export class PerformanceOptimizer {
         description: 'Database query performance is trending downward',
         impact: 'Increasing response times and potential timeouts',
         implementation: 'Add database indexes, optimize queries, implement query caching',
-        estimatedImprovement: '40-60% query performance improvement'
+        estimatedImprovement: '40-60% query performance improvement',
       })
     }
 
@@ -495,7 +515,7 @@ export class PerformanceOptimizer {
         description: `${currentMetrics.network.errors} network errors in the last monitoring period`,
         impact: 'Failed requests and reduced reliability',
         implementation: 'Implement retry logic, connection pooling, and circuit breakers',
-        estimatedImprovement: '90%+ network error reduction'
+        estimatedImprovement: '90%+ network error reduction',
       })
     }
 
@@ -511,14 +531,18 @@ export class PerformanceOptimizer {
   getRecentAlerts(hours: number = 24): PerformanceAlert[] {
     const cutoff = new Date()
     cutoff.setHours(cutoff.getHours() - hours)
-    
-    return this.alertHistory.filter(alert => alert.timestamp > cutoff)
+
+    return this.alertHistory.filter((alert) => alert.timestamp > cutoff)
   }
 
   /**
    * Performance optimization utility functions
    */
-  optimizeQueryPerformance<T>(query: () => Promise<T>, cacheKey?: string, ttl: number = 300): Promise<T> {
+  optimizeQueryPerformance<T>(
+    query: () => Promise<T>,
+    cacheKey?: string,
+    ttl: number = 300
+  ): Promise<T> {
     if (cacheKey && this.optimizationCache.has(cacheKey)) {
       const cached = this.optimizationCache.get(cacheKey)
       if (cached.expires > Date.now()) {
@@ -528,17 +552,17 @@ export class PerformanceOptimizer {
     }
 
     const startTime = Date.now()
-    return query().then(result => {
+    return query().then((result) => {
       const duration = Date.now() - startTime
-      
+
       // Record performance metrics
       telemetry.recordHistogram('query_duration_ms', duration)
-      
+
       // Cache result if key provided
       if (cacheKey) {
         this.optimizationCache.set(cacheKey, {
           data: result,
-          expires: Date.now() + (ttl * 1000)
+          expires: Date.now() + ttl * 1000,
         })
         telemetry.recordCounter('query_cache_sets', 1)
       }
@@ -548,25 +572,25 @@ export class PerformanceOptimizer {
   }
 
   createPerformanceMiddleware() {
-    return (req: any, res: any, next: any) => {
+    return (req: unknown, res: unknown, next: unknown) => {
       const startTime = Date.now()
-      
+
       res.on('finish', () => {
         const duration = Date.now() - startTime
-        
+
         // Record request metrics
         telemetry.recordHistogram('http_request_duration_ms', duration, {
           method: req.method,
-          status: res.statusCode.toString()
+          status: res.statusCode.toString(),
         })
-        
+
         // Log slow requests
         if (duration > 1000) {
           logger.warning(LogCategory.PERFORMANCE, 'Slow request detected', {
             method: req.method,
             url: req.url,
             duration,
-            statusCode: res.statusCode
+            statusCode: res.statusCode,
           })
         }
       })
@@ -583,20 +607,24 @@ export class PerformanceOptimizer {
     if (!currentMetrics) return
 
     const recommendations = this.generateOptimizationRecommendations()
-    const criticalRecommendations = recommendations.filter(r => r.severity === 'critical')
+    const criticalRecommendations = recommendations.filter((r) => r.severity === 'critical')
 
     if (criticalRecommendations.length > 0) {
-      logger.warning(LogCategory.PERFORMANCE, `Found ${criticalRecommendations.length} critical performance issues`, {
-        issues: criticalRecommendations.map(r => r.title)
-      })
+      logger.warning(
+        LogCategory.PERFORMANCE,
+        `Found ${criticalRecommendations.length} critical performance issues`,
+        {
+          issues: criticalRecommendations.map((r) => r.title),
+        }
+      )
 
       // Apply automatic optimizations
       await this.performMemoryCleanup()
-      
+
       if (currentMetrics.cpu.usage > 90) {
         await this.optimizeCPUUsage()
       }
-      
+
       if (currentMetrics.application.averageResponseTime > 5000) {
         await this.optimizeResponseTime()
       }
@@ -627,7 +655,7 @@ export class PerformanceOptimizer {
       healthScore -= Math.max(0, (current.application.averageResponseTime - 1000) / 100) // Deduct for slow response
       healthScore -= current.application.errorRate * 10 // Deduct for errors
     }
-    
+
     healthScore = Math.max(0, Math.min(100, healthScore))
 
     return {
@@ -635,7 +663,7 @@ export class PerformanceOptimizer {
       trends,
       recommendations,
       alerts,
-      healthScore: Math.round(healthScore)
+      healthScore: Math.round(healthScore),
     }
   }
 
@@ -647,7 +675,7 @@ export class PerformanceOptimizer {
       clearInterval(this.monitoringInterval)
       this.monitoringInterval = null
     }
-    
+
     this.optimizationCache.clear()
     logger.info(LogCategory.PERFORMANCE, 'Performance monitoring shutdown complete')
   }
@@ -662,7 +690,7 @@ process.on('SIGINT', () => {
 })
 
 process.on('SIGTERM', () => {
-  performanceOptimizer.shutdown()  
+  performanceOptimizer.shutdown()
 })
 
 /*

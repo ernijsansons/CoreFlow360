@@ -27,11 +27,11 @@ export interface SecurityContext {
 
 export interface PerformanceBudgets {
   API_RESPONSE_TIME: number // milliseconds, 99th percentile
-  CACHE_HIT_RATIO: number   // 0-1, minimum acceptable
-  MEMORY_USAGE: number      // MB, maximum per operation  
-  CPU_USAGE: number         // %, maximum per operation
-  NETWORK_LATENCY: number   // milliseconds for external calls
-  DATABASE_QUERIES: number  // maximum per request
+  CACHE_HIT_RATIO: number // 0-1, minimum acceptable
+  MEMORY_USAGE: number // MB, maximum per operation
+  CPU_USAGE: number // %, maximum per operation
+  NETWORK_LATENCY: number // milliseconds for external calls
+  DATABASE_QUERIES: number // maximum per request
 }
 
 export const DEFAULT_PERFORMANCE_BUDGETS: PerformanceBudgets = {
@@ -40,7 +40,7 @@ export const DEFAULT_PERFORMANCE_BUDGETS: PerformanceBudgets = {
   MEMORY_USAGE: 256,
   CPU_USAGE: 80,
   NETWORK_LATENCY: 50,
-  DATABASE_QUERIES: 5
+  DATABASE_QUERIES: 5,
 } as const
 
 // ============================================================================
@@ -64,7 +64,7 @@ export interface AIModelGovernance {
   readonly modelId: string
   readonly version: string
   readonly accuracy: number // >0.95 required
-  readonly precision: number // >0.95 required  
+  readonly precision: number // >0.95 required
   readonly recall: number // >0.95 required
   readonly f1Score: number // >0.95 required
   readonly hallucinationRate: number // <0.01 required
@@ -162,7 +162,7 @@ export const AI_CAPABILITIES: Record<string, AICapability> = {
     crossDeptImpact: true,
     requiredPermissions: ['financeAI:sentiment', 'accounting:read'],
     performanceBudget: { API_RESPONSE_TIME: 200, NETWORK_LATENCY: 100 },
-    fallbackStrategy: 'basic_llm'
+    fallbackStrategy: 'basic_llm',
   },
   FINGPT_ANOMALY: {
     id: 'fingpt_anomaly',
@@ -174,7 +174,7 @@ export const AI_CAPABILITIES: Record<string, AICapability> = {
     crossDeptImpact: false,
     requiredPermissions: ['financeAI:anomaly', 'accounting:read'],
     performanceBudget: { API_RESPONSE_TIME: 500, DATABASE_QUERIES: 10 },
-    fallbackStrategy: 'cached_result'
+    fallbackStrategy: 'cached_result',
   },
   FINROBOT_FORECAST: {
     id: 'finrobot_forecast',
@@ -186,7 +186,7 @@ export const AI_CAPABILITIES: Record<string, AICapability> = {
     crossDeptImpact: true,
     requiredPermissions: ['financeAI:forecast', 'accounting:read', 'crm:read'],
     performanceBudget: { API_RESPONSE_TIME: 1000, MEMORY_USAGE: 512 },
-    fallbackStrategy: 'basic_llm'
+    fallbackStrategy: 'basic_llm',
   },
   FINROBOT_STRATEGY: {
     id: 'finrobot_strategy',
@@ -198,7 +198,7 @@ export const AI_CAPABILITIES: Record<string, AICapability> = {
     crossDeptImpact: true,
     requiredPermissions: ['financeAI:strategy', 'admin:read'],
     performanceBudget: { API_RESPONSE_TIME: 2000, CPU_USAGE: 90 },
-    fallbackStrategy: 'user_prompt'
+    fallbackStrategy: 'user_prompt',
   },
   IDURAR_INVOICING: {
     id: 'idurar_invoicing',
@@ -210,7 +210,7 @@ export const AI_CAPABILITIES: Record<string, AICapability> = {
     crossDeptImpact: false,
     requiredPermissions: ['invoicing:manage'],
     performanceBudget: { API_RESPONSE_TIME: 150 },
-    fallbackStrategy: 'cached_result'
+    fallbackStrategy: 'cached_result',
   },
   ERPNEXT_PAYROLL: {
     id: 'erpnext_payroll',
@@ -222,7 +222,7 @@ export const AI_CAPABILITIES: Record<string, AICapability> = {
     crossDeptImpact: true,
     requiredPermissions: ['hr:payroll', 'compliance:manage'],
     performanceBudget: { API_RESPONSE_TIME: 300 },
-    fallbackStrategy: 'user_prompt'
+    fallbackStrategy: 'user_prompt',
   },
   ERPNEXT_BOM: {
     id: 'erpnext_bom',
@@ -234,7 +234,7 @@ export const AI_CAPABILITIES: Record<string, AICapability> = {
     crossDeptImpact: true,
     requiredPermissions: ['manufacturing:bom', 'inventory:read'],
     performanceBudget: { API_RESPONSE_TIME: 400 },
-    fallbackStrategy: 'basic_llm'
+    fallbackStrategy: 'basic_llm',
   },
   DOLIBARR_LEGAL: {
     id: 'dolibarr_legal',
@@ -246,7 +246,7 @@ export const AI_CAPABILITIES: Record<string, AICapability> = {
     crossDeptImpact: false,
     requiredPermissions: ['legal:cases', 'documents:manage'],
     performanceBudget: { API_RESPONSE_TIME: 250 },
-    fallbackStrategy: 'cached_result'
+    fallbackStrategy: 'cached_result',
   },
   DOLIBARR_TIME: {
     id: 'dolibarr_time',
@@ -258,8 +258,8 @@ export const AI_CAPABILITIES: Record<string, AICapability> = {
     crossDeptImpact: true,
     requiredPermissions: ['time:track', 'billing:manage'],
     performanceBudget: { API_RESPONSE_TIME: 100 },
-    fallbackStrategy: 'basic_llm'
-  }
+    fallbackStrategy: 'basic_llm',
+  },
 } as const
 
 export const BUNDLES: readonly BundleDefinition[] = [
@@ -277,7 +277,7 @@ export const BUNDLES: readonly BundleDefinition[] = [
       minimumUsers: 1,
       maximumUsers: undefined,
       setupFee: 50,
-      annualDiscount: 15
+      annualDiscount: 15,
     },
     aiCapabilities: [AI_CAPABILITIES.FINGPT_SENTIMENT, AI_CAPABILITIES.FINGPT_ANOMALY],
     dependencies: [],
@@ -286,7 +286,7 @@ export const BUNDLES: readonly BundleDefinition[] = [
       'financial_sentiment_analysis',
       'anomaly_detection',
       'risk_scoring',
-      'document_analysis'
+      'document_analysis',
     ],
     requiredPermissions: ['financeAI:access', 'accounting:read'],
     external: {
@@ -296,27 +296,27 @@ export const BUNDLES: readonly BundleDefinition[] = [
       apiEndpoints: ['/sentiment', '/anomaly', '/forecast', '/health'],
       authentication: {
         type: 'api_key',
-        config: { headerName: 'X-API-Key' }
+        config: { headerName: 'X-API-Key' },
       },
       rateLimit: {
         requestsPerSecond: 100,
-        burstSize: 200
+        burstSize: 200,
       },
       healthCheck: {
         endpoint: '/health',
         intervalSeconds: 30,
-        timeoutMs: 5000
+        timeoutMs: 5000,
       },
       encryption: {
         algorithm: 'AES-256-GCM',
-        keyRotationDays: 30
-      }
+        keyRotationDays: 30,
+      },
     },
     compliance: {
       standards: ['SOC2', 'GDPR'],
       certifications: ['ISO27001'],
       dataRetention: 2555, // 7 years
-      dataLocation: ['US', 'EU']
+      dataLocation: ['US', 'EU'],
     },
     metadata: {
       createdAt: new Date('2024-01-01'),
@@ -324,11 +324,11 @@ export const BUNDLES: readonly BundleDefinition[] = [
       maintainer: 'AI4Finance-Foundation',
       supportLevel: 'premium',
       documentation: 'https://docs.coreflow360.com/bundles/fingpt',
-      changelog: 'https://github.com/AI4Finance-Foundation/FinGPT/releases'
-    }
+      changelog: 'https://github.com/AI4Finance-Foundation/FinGPT/releases',
+    },
   },
 
-  // FinRobot Bundle  
+  // FinRobot Bundle
   {
     id: 'finance_ai_finrobot',
     name: 'AI Finance Agents (FinRobot)',
@@ -342,7 +342,7 @@ export const BUNDLES: readonly BundleDefinition[] = [
       minimumUsers: 2,
       maximumUsers: undefined,
       setupFee: 100,
-      annualDiscount: 20
+      annualDiscount: 20,
     },
     aiCapabilities: [AI_CAPABILITIES.FINROBOT_FORECAST, AI_CAPABILITIES.FINROBOT_STRATEGY],
     dependencies: ['finance_ai_fingpt'],
@@ -351,7 +351,7 @@ export const BUNDLES: readonly BundleDefinition[] = [
       'autonomous_forecasting',
       'strategic_planning',
       'multi_agent_analysis',
-      'cross_dept_impact'
+      'cross_dept_impact',
     ],
     requiredPermissions: ['financeAI:agents', 'accounting:read', 'crm:read'],
     external: {
@@ -361,27 +361,27 @@ export const BUNDLES: readonly BundleDefinition[] = [
       apiEndpoints: ['/forecast', '/strategy', '/analyze', '/agents', '/health'],
       authentication: {
         type: 'jwt',
-        config: { algorithm: 'RS256', issuer: 'coreflow360.com' }
+        config: { algorithm: 'RS256', issuer: 'coreflow360.com' },
       },
       rateLimit: {
         requestsPerSecond: 50,
-        burstSize: 100
+        burstSize: 100,
       },
       healthCheck: {
         endpoint: '/health',
         intervalSeconds: 60,
-        timeoutMs: 10000
+        timeoutMs: 10000,
       },
       encryption: {
         algorithm: 'ChaCha20-Poly1305',
-        keyRotationDays: 30
-      }
+        keyRotationDays: 30,
+      },
     },
     compliance: {
       standards: ['SOC2', 'GDPR', 'CCPA'],
       certifications: ['ISO27001', 'FedRAMP'],
       dataRetention: 2555,
-      dataLocation: ['US', 'EU', 'APAC']
+      dataLocation: ['US', 'EU', 'APAC'],
     },
     metadata: {
       createdAt: new Date('2024-01-01'),
@@ -389,8 +389,8 @@ export const BUNDLES: readonly BundleDefinition[] = [
       maintainer: 'AI4Finance-Foundation',
       supportLevel: 'premium',
       documentation: 'https://docs.coreflow360.com/bundles/finrobot',
-      changelog: 'https://github.com/AI4Finance-Foundation/FinRobot/releases'
-    }
+      changelog: 'https://github.com/AI4Finance-Foundation/FinRobot/releases',
+    },
   },
 
   // IDURAR Bundle
@@ -407,7 +407,7 @@ export const BUNDLES: readonly BundleDefinition[] = [
       minimumUsers: 1,
       maximumUsers: 500,
       setupFee: 25,
-      annualDiscount: 12
+      annualDiscount: 12,
     },
     aiCapabilities: [AI_CAPABILITIES.IDURAR_INVOICING],
     dependencies: [],
@@ -417,7 +417,7 @@ export const BUNDLES: readonly BundleDefinition[] = [
       'multi_currency',
       'dynamic_reports',
       'quote_management',
-      'dashboard_customization'
+      'dashboard_customization',
     ],
     requiredPermissions: ['invoicing:manage', 'reports:view'],
     external: {
@@ -426,27 +426,27 @@ export const BUNDLES: readonly BundleDefinition[] = [
       apiEndpoints: ['/invoices', '/quotes', '/reports', '/dashboards', '/currencies', '/health'],
       authentication: {
         type: 'oauth2',
-        config: { grantType: 'client_credentials', scope: 'erp:full' }
+        config: { grantType: 'client_credentials', scope: 'erp:full' },
       },
       rateLimit: {
         requestsPerSecond: 200,
-        burstSize: 500
+        burstSize: 500,
       },
       healthCheck: {
         endpoint: '/health',
         intervalSeconds: 30,
-        timeoutMs: 3000
+        timeoutMs: 3000,
       },
       encryption: {
         algorithm: 'AES-256-GCM',
-        keyRotationDays: 30
-      }
+        keyRotationDays: 30,
+      },
     },
     compliance: {
       standards: ['SOC2'],
       certifications: [],
       dataRetention: 2555,
-      dataLocation: ['US', 'EU']
+      dataLocation: ['US', 'EU'],
     },
     metadata: {
       createdAt: new Date('2024-01-01'),
@@ -454,8 +454,8 @@ export const BUNDLES: readonly BundleDefinition[] = [
       maintainer: 'IDURAR',
       supportLevel: 'standard',
       documentation: 'https://docs.coreflow360.com/bundles/idurar',
-      changelog: 'https://github.com/idurar/idurar-erp-crm/releases'
-    }
+      changelog: 'https://github.com/idurar/idurar-erp-crm/releases',
+    },
   },
 
   // ERPNext HR & Manufacturing Bundle
@@ -472,7 +472,7 @@ export const BUNDLES: readonly BundleDefinition[] = [
       minimumUsers: 5,
       maximumUsers: undefined,
       setupFee: 200,
-      annualDiscount: 18
+      annualDiscount: 18,
     },
     aiCapabilities: [AI_CAPABILITIES.ERPNEXT_PAYROLL, AI_CAPABILITIES.ERPNEXT_BOM],
     dependencies: [],
@@ -483,36 +483,42 @@ export const BUNDLES: readonly BundleDefinition[] = [
       'bom_optimization',
       'manufacturing_workflows',
       'skill_gap_analysis',
-      'route_optimization'
+      'route_optimization',
     ],
     requiredPermissions: ['hr:payroll', 'manufacturing:bom', 'compliance:manage'],
     external: {
       service: 'python-rest',
       baseUrl: 'http://erpnext-service:8002',
-      apiEndpoints: ['/hr/payroll', '/hr/employees', '/manufacturing/bom', '/manufacturing/workorders', '/health'],
+      apiEndpoints: [
+        '/hr/payroll',
+        '/hr/employees',
+        '/manufacturing/bom',
+        '/manufacturing/workorders',
+        '/health',
+      ],
       authentication: {
         type: 'api_key',
-        config: { headerName: 'Authorization', prefix: 'token ' }
+        config: { headerName: 'Authorization', prefix: 'token ' },
       },
       rateLimit: {
         requestsPerSecond: 150,
-        burstSize: 300
+        burstSize: 300,
       },
       healthCheck: {
         endpoint: '/health',
         intervalSeconds: 45,
-        timeoutMs: 8000
+        timeoutMs: 8000,
       },
       encryption: {
         algorithm: 'AES-256-GCM',
-        keyRotationDays: 30
-      }
+        keyRotationDays: 30,
+      },
     },
     compliance: {
       standards: ['SOC2', 'GDPR', 'CCPA'],
       certifications: ['ISO27001'],
       dataRetention: 2555,
-      dataLocation: ['US', 'EU', 'IN']
+      dataLocation: ['US', 'EU', 'IN'],
     },
     metadata: {
       createdAt: new Date('2024-01-01'),
@@ -520,8 +526,8 @@ export const BUNDLES: readonly BundleDefinition[] = [
       maintainer: 'Frappe Technologies',
       supportLevel: 'premium',
       documentation: 'https://docs.coreflow360.com/bundles/erpnext',
-      changelog: 'https://github.com/frappe/erpnext/releases'
-    }
+      changelog: 'https://github.com/frappe/erpnext/releases',
+    },
   },
 
   // Dolibarr Legal Bundle
@@ -538,7 +544,7 @@ export const BUNDLES: readonly BundleDefinition[] = [
       minimumUsers: 1,
       maximumUsers: 200,
       setupFee: 75,
-      annualDiscount: 15
+      annualDiscount: 15,
     },
     aiCapabilities: [AI_CAPABILITIES.DOLIBARR_LEGAL, AI_CAPABILITIES.DOLIBARR_TIME],
     dependencies: [],
@@ -549,7 +555,7 @@ export const BUNDLES: readonly BundleDefinition[] = [
       'time_tracking',
       'trust_accounting',
       'document_management',
-      'billing_integration'
+      'billing_integration',
     ],
     requiredPermissions: ['legal:cases', 'time:track', 'documents:manage', 'billing:manage'],
     external: {
@@ -558,27 +564,27 @@ export const BUNDLES: readonly BundleDefinition[] = [
       apiEndpoints: ['/cases', '/time-tracking', '/conflicts', '/documents', '/billing', '/health'],
       authentication: {
         type: 'api_key',
-        config: { headerName: 'DOLAPIKEY' }
+        config: { headerName: 'DOLAPIKEY' },
       },
       rateLimit: {
         requestsPerSecond: 100,
-        burstSize: 200
+        burstSize: 200,
       },
       healthCheck: {
         endpoint: '/health',
         intervalSeconds: 30,
-        timeoutMs: 5000
+        timeoutMs: 5000,
       },
       encryption: {
         algorithm: 'AES-256-GCM',
-        keyRotationDays: 30
-      }
+        keyRotationDays: 30,
+      },
     },
     compliance: {
       standards: ['SOC2', 'GDPR'],
       certifications: [],
       dataRetention: 3650, // 10 years for legal
-      dataLocation: ['US', 'EU']
+      dataLocation: ['US', 'EU'],
     },
     metadata: {
       createdAt: new Date('2024-01-01'),
@@ -586,9 +592,9 @@ export const BUNDLES: readonly BundleDefinition[] = [
       maintainer: 'Dolibarr Foundation',
       supportLevel: 'standard',
       documentation: 'https://docs.coreflow360.com/bundles/dolibarr',
-      changelog: 'https://github.com/Dolibarr/dolibarr/releases'
-    }
-  }
+      changelog: 'https://github.com/Dolibarr/dolibarr/releases',
+    },
+  },
 ] as const
 
 // ============================================================================
@@ -608,13 +614,13 @@ export const BundleDefinitionSchema = z.object({
     minimumUsers: z.number().int().min(1),
     maximumUsers: z.number().int().positive().optional(),
     setupFee: z.number().min(0).optional(),
-    annualDiscount: z.number().min(0).max(50)
+    annualDiscount: z.number().min(0).max(50),
   }),
   aiCapabilities: z.array(z.any()),
   dependencies: z.array(z.string()),
   conflicts: z.array(z.string()),
   enabledFeatures: z.array(z.string()),
-  requiredPermissions: z.array(z.string())
+  requiredPermissions: z.array(z.string()),
 })
 
 export type ValidatedBundleDefinition = z.infer<typeof BundleDefinitionSchema>
@@ -624,25 +630,26 @@ export function validateBundle(bundle: BundleDefinition): bundle is ValidatedBun
     BundleDefinitionSchema.parse(bundle)
     return true
   } catch (error) {
-    console.error(`Bundle validation failed for ${bundle.id}:`, error)
     return false
   }
 }
 
 export function getBundleById(bundleId: string): BundleDefinition | undefined {
-  return BUNDLES.find(bundle => bundle.id === bundleId)
+  return BUNDLES.find((bundle) => bundle.id === bundleId)
 }
 
-export function getBundlesByCategory(category: BundleDefinition['category']): readonly BundleDefinition[] {
-  return BUNDLES.filter(bundle => bundle.category === category)
+export function getBundlesByCategory(
+  category: BundleDefinition['category']
+): readonly BundleDefinition[] {
+  return BUNDLES.filter((bundle) => bundle.category === category)
 }
 
 export function getBundleDependencies(bundleId: string): readonly BundleDefinition[] {
   const bundle = getBundleById(bundleId)
   if (!bundle) return []
-  
+
   return bundle.dependencies
-    .map(depId => getBundleById(depId))
+    .map((depId) => getBundleById(depId))
     .filter((dep): dep is BundleDefinition => dep !== undefined)
 }
 
@@ -654,18 +661,18 @@ export function validateBundleCompatibility(bundleIds: string[]): {
   const conflicts: string[] = []
   const missingDependencies: string[] = []
   const bundleSet = new Set(bundleIds)
-  
+
   for (const bundleId of bundleIds) {
     const bundle = getBundleById(bundleId)
     if (!bundle) continue
-    
+
     // Check conflicts
     for (const conflictId of bundle.conflicts) {
       if (bundleSet.has(conflictId)) {
         conflicts.push(`${bundleId} conflicts with ${conflictId}`)
       }
     }
-    
+
     // Check dependencies
     for (const depId of bundle.dependencies) {
       if (!bundleSet.has(depId)) {
@@ -673,11 +680,11 @@ export function validateBundleCompatibility(bundleIds: string[]): {
       }
     }
   }
-  
+
   return {
     valid: conflicts.length === 0 && missingDependencies.length === 0,
     conflicts,
-    missingDependencies
+    missingDependencies,
   }
 }
 
@@ -685,23 +692,27 @@ export function validateBundleCompatibility(bundleIds: string[]): {
 // TYPE GUARDS & RUNTIME VALIDATION
 // ============================================================================
 
-export function isSecurityContext(obj: any): obj is SecurityContext {
-  return obj &&
+export function isSecurityContext(obj: unknown): obj is SecurityContext {
+  return (
+    obj &&
     typeof obj.tenantId === 'string' &&
     typeof obj.userId === 'string' &&
     Array.isArray(obj.roles) &&
     Array.isArray(obj.permissions) &&
     Array.isArray(obj.bundleAccess)
+  )
 }
 
-export function isPerformanceBudgets(obj: any): obj is PerformanceBudgets {
-  return obj &&
+export function isPerformanceBudgets(obj: unknown): obj is PerformanceBudgets {
+  return (
+    obj &&
     typeof obj.API_RESPONSE_TIME === 'number' &&
     typeof obj.CACHE_HIT_RATIO === 'number' &&
     typeof obj.MEMORY_USAGE === 'number' &&
     typeof obj.CPU_USAGE === 'number' &&
     typeof obj.NETWORK_LATENCY === 'number' &&
     typeof obj.DATABASE_QUERIES === 'number'
+  )
 }
 
 // ============================================================================
@@ -709,22 +720,20 @@ export function isPerformanceBudgets(obj: any): obj is PerformanceBudgets {
 // ============================================================================
 
 // Validate all bundles at compile time
-const BUNDLE_VALIDATION_RESULTS = BUNDLES.map(bundle => ({
+const BUNDLE_VALIDATION_RESULTS = BUNDLES.map((bundle) => ({
   id: bundle.id,
-  valid: validateBundle(bundle)
+  valid: validateBundle(bundle),
 }))
 
-const INVALID_BUNDLES = BUNDLE_VALIDATION_RESULTS.filter(result => !result.valid)
+const INVALID_BUNDLES = BUNDLE_VALIDATION_RESULTS.filter((result) => !result.valid)
 
 if (INVALID_BUNDLES.length > 0) {
-  throw new Error(
-    `Bundle validation failed for: ${INVALID_BUNDLES.map(b => b.id).join(', ')}`
-  )
+  throw new Error(`Bundle validation failed for: ${INVALID_BUNDLES.map((b) => b.id).join(', ')}`)
 }
 
 export { BUNDLE_VALIDATION_RESULTS }
 
 // Compile-time bundle ID validation
-export type BundleId = typeof BUNDLES[number]['id']
-export type BundleCategory = typeof BUNDLES[number]['category']
-export type BundleTier = typeof BUNDLES[number]['tier']
+export type BundleId = (typeof BUNDLES)[number]['id']
+export type BundleCategory = (typeof BUNDLES)[number]['category']
+export type BundleTier = (typeof BUNDLES)[number]['tier']

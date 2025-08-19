@@ -1,18 +1,18 @@
 # CoreFlow360 Code Audit Report
 
-**Generated:** 8/17/2025, 8:24:14 PM
+**Generated:** 8/18/2025, 9:53:10 PM
 
 ## 📊 Executive Summary
 
-- **Total Issues:** 6293
+- **Total Issues:** 6190
 - **Critical Issues:** 0 🔴
-- **High Issues:** 30 🟠
-- **Medium Issues:** 390 🟡
-- **Low Issues:** 5873 🟢
+- **High Issues:** 29 🟠
+- **Medium Issues:** 3973 🟡
+- **Low Issues:** 2188 🟢
 
 ## Security Issues
 
-**Total:** 420
+**Total:** 4002
 
 - **CSRF Vulnerabilities**: No description
   - File: `src/__tests__/auth/session-security.test.ts`
@@ -54,37 +54,11 @@
   - File: `src/__tests__/auth/session-security.test.ts`
   - Severity: medium
 
-*... and 410 more issues*
-
-## Quality Issues
-
-**Total:** 4945
-
-- **typescript**: .next/types/app/api/admin/api-keys/[id]/rotate/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
-
-- **typescript**: .next/types/app/api/admin/api-keys/[id]/rotate/route.ts(166,7): error TS2344: Type '{ __tag__: "POST"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
-
-- **typescript**: .next/types/app/api/admin/api-keys/[id]/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
-
-- **typescript**: .next/types/app/api/admin/api-keys/[id]/route.ts(205,7): error TS2344: Type '{ __tag__: "PUT"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
-
-- **typescript**: .next/types/app/api/admin/api-keys/[id]/route.ts(244,7): error TS2344: Type '{ __tag__: "DELETE"; __param_position__: "second"; __param_type__: RouteParams; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
-
-- **typescript**: .next/types/app/api/ai/intelligence/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/ai/intelligence/route"), "GET" | "POST" | "DELETE" | "PUT" | "config" | "PATCH" | "HEAD" | "revalidate" | ... 7 more ... | "OPTIONS", "">' does not satisfy the constraint '{ [x: string]: never; }'.
-
-- **typescript**: .next/types/app/api/auth/saml/metadata/[tenantId]/[idpName]/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { tenantId: string; idpName: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
-
-- **typescript**: .next/types/app/api/billing/anomalies/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/billing/anomalies/route"), "DELETE" | "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | ... 8 more ... | "maxDuration", "">' does not satisfy the constraint '{ [x: string]: never; }'.
-
-- **typescript**: .next/types/app/api/events/batch/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/events/batch/route"), "DELETE" | "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "config" | ... 7 more ... | "maxDuration", "">' does not satisfy the constraint '{ [x: string]: never; }'.
-
-- **typescript**: .next/types/app/api/intelligence/business/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/ernij/OneDrive/Documents/Cursor/coreflow360/src/app/api/intelligence/business/route"), "GET" | "POST" | "DELETE" | "PUT" | "config" | "PATCH" | "HEAD" | ... 8 more ... | "OPTIONS", "">' does not satisfy the constraint '{ [x: string]: never; }'.
-
-*... and 4935 more issues*
+*... and 3992 more issues*
 
 ## Compliance Issues
 
-**Total:** 913
+**Total:** 976
 
 - **Accessibility**: ARIA attributes
   - File: `src/__tests__/accessibility/wcag-aaa.test.tsx`
@@ -94,9 +68,6 @@
 
 - **Accessibility**: Keyboard navigation
   - File: `src/__tests__/audit/sacred-audit.test.ts`
-
-- **Error Handling**: Error throwing
-  - File: `src/__tests__/auth/session-security.test.ts`
 
 - **Accessibility**: ARIA attributes
   - File: `src/__tests__/components/SubscriptionDashboard.test.tsx`
@@ -116,43 +87,46 @@
 - **Accessibility**: ARIA attributes
   - File: `src/__tests__/e2e/ai-orchestration.spec.ts`
 
-*... and 903 more issues*
+- **Accessibility**: Keyboard navigation
+  - File: `src/__tests__/e2e/ai-orchestration.spec.ts`
+
+*... and 966 more issues*
 
 ## Secrets Issues
 
-**Total:** 15
+**Total:** 1212
+
+- **hardcoded_secret**: No description
+  - File: `src/__tests__/api/api-routes-comprehensive.test.ts`
 
 - **hardcoded_secret**: No description
   - File: `src/__tests__/auth/session-security.test.ts`
 
 - **hardcoded_secret**: No description
-  - File: `src/__tests__/stripe/subscription-lifecycle.test.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
 
 - **hardcoded_secret**: No description
-  - File: `src/__tests__/stripe/webhook-processing.test.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
 
 - **hardcoded_secret**: No description
-  - File: `src/app/login/page.tsx`
+  - File: `src/__tests__/auth/session-security.test.ts`
 
 - **hardcoded_secret**: No description
-  - File: `src/app/login/page.tsx`
+  - File: `src/__tests__/auth/session-security.test.ts`
 
 - **hardcoded_secret**: No description
-  - File: `src/integrations/inventory/inventory-management-plugin.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
 
 - **hardcoded_secret**: No description
-  - File: `src/lib/config/environment-build.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
 
 - **hardcoded_secret**: No description
-  - File: `src/lib/config/environment.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
 
 - **hardcoded_secret**: No description
-  - File: `src/lib/config/environment.ts`
+  - File: `src/__tests__/auth/session-security.test.ts`
 
-- **hardcoded_secret**: No description
-  - File: `src/lib/config/environment.ts`
-
-*... and 5 more issues*
+*... and 1202 more issues*
 
 ## 🚀 Recommendations
 

@@ -11,7 +11,7 @@ export class PerformanceTracker {
 
   logRequest(log: AIRequestLog): void {
     this.logs.push(log)
-    
+
     // Prune old logs if necessary
     if (this.logs.length > this.maxLogs) {
       this.logs = this.logs.slice(-this.maxLogs)
@@ -21,10 +21,8 @@ export class PerformanceTracker {
   getMetrics(timeWindow?: number): AIPerformanceMetrics {
     const now = Date.now()
     const window = timeWindow || 3600000 // Default 1 hour
-    
-    const recentLogs = this.logs.filter(
-      log => now - log.timestamp.getTime() < window
-    )
+
+    const recentLogs = this.logs.filter((log) => now - log.timestamp.getTime() < window)
 
     if (recentLogs.length === 0) {
       return this.getEmptyMetrics()
@@ -32,17 +30,17 @@ export class PerformanceTracker {
 
     // Calculate metrics
     const totalRequests = recentLogs.length
-    const successfulRequests = recentLogs.filter(log => log.success).length
+    const successfulRequests = recentLogs.filter((log) => log.success).length
     const errorRate = (totalRequests - successfulRequests) / totalRequests
 
     // Latency calculations
-    const latencies = recentLogs.map(log => log.executionTime).sort((a, b) => a - b)
+    const latencies = recentLogs.map((log) => log.executionTime).sort((a, b) => a - b)
     const averageLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length
     const p95Latency = latencies[Math.floor(latencies.length * 0.95)] || averageLatency
     const p99Latency = latencies[Math.floor(latencies.length * 0.99)] || p95Latency
 
     // Cache hit rate
-    const cacheHits = recentLogs.filter(log => log.cacheHit).length
+    const cacheHits = recentLogs.filter((log) => log.cacheHit).length
     const cacheHitRate = cacheHits / totalRequests
 
     // Token usage
@@ -61,13 +59,16 @@ export class PerformanceTracker {
       cacheHitRate,
       tokenUsage: {
         total: totalTokens,
-        byModel: tokensByModel
+        byModel: tokensByModel,
       },
-      costEstimate
+      costEstimate,
     }
   }
 
-  getWorkflowMetrics(workflow: string, timeWindow?: number): {
+  getWorkflowMetrics(
+    workflow: string,
+    timeWindow?: number
+  ): {
     requests: number
     averageLatency: number
     errorRate: number
@@ -75,9 +76,9 @@ export class PerformanceTracker {
   } {
     const now = Date.now()
     const window = timeWindow || 3600000
-    
+
     const workflowLogs = this.logs.filter(
-      log => log.workflow === workflow && now - log.timestamp.getTime() < window
+      (log) => log.workflow === workflow && now - log.timestamp.getTime() < window
     )
 
     if (workflowLogs.length === 0) {
@@ -86,27 +87,27 @@ export class PerformanceTracker {
 
     const requests = workflowLogs.length
     const averageLatency = workflowLogs.reduce((sum, log) => sum + log.executionTime, 0) / requests
-    const errors = workflowLogs.filter(log => !log.success).length
+    const errors = workflowLogs.filter((log) => !log.success).length
     const errorRate = errors / requests
-    const cacheHits = workflowLogs.filter(log => log.cacheHit).length
+    const cacheHits = workflowLogs.filter((log) => log.cacheHit).length
     const cacheHitRate = cacheHits / requests
 
     return {
       requests,
       averageLatency,
       errorRate,
-      cacheHitRate
+      cacheHitRate,
     }
   }
 
   private calculateTokensByModel(logs: AIRequestLog[]): Record<string, number> {
     const tokensByModel: Record<string, number> = {}
-    
-    logs.forEach(log => {
+
+    logs.forEach((log) => {
       const model = this.getModelFromWorkflow(log.workflow)
       tokensByModel[model] = (tokensByModel[model] || 0) + log.tokensUsed
     })
-    
+
     return tokensByModel
   }
 
@@ -131,9 +132,9 @@ export class PerformanceTracker {
       cacheHitRate: 0,
       tokenUsage: {
         total: 0,
-        byModel: {}
+        byModel: {},
       },
-      costEstimate: 0
+      costEstimate: 0,
     }
   }
 

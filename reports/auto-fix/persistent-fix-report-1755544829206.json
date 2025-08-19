@@ -1,0 +1,10 @@
+{
+  "summary": {
+    "totalIterations": 1,
+    "totalBugsFixed": 0,
+    "finalBugsRemaining": 0,
+    "success": false
+  },
+  "iterations": [],
+  "timestamp": "2025-08-18T19:20:29.207Z"
+}

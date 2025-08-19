@@ -21,44 +21,45 @@ export class SecurityAuditPrompts {
           'Map complete attack vectors with exploitation paths',
           'Validate SOC2/ISO27001 control implementation',
           'Assess data encryption coverage for PII/PHI compliance',
-          'Generate remediation roadmap with story point estimates'
+          'Generate remediation roadmap with story point estimates',
         ],
         measurableCriteria: [
           {
             metric: 'Critical vulnerabilities (CVSS >= 9.0)',
             target: 0,
             unit: 'count',
-            priority: 'critical'
+            priority: 'critical',
           },
           {
             metric: 'High severity vulnerabilities (CVSS >= 7.0)',
             target: 2,
             unit: 'count',
-            priority: 'high'
+            priority: 'high',
           },
           {
             metric: 'Data encryption coverage',
             target: 100,
             unit: 'percent',
-            priority: 'critical'
+            priority: 'critical',
           },
           {
             metric: 'Authentication bypass vectors',
             target: 0,
             unit: 'count',
-            priority: 'critical'
+            priority: 'critical',
           },
           {
             metric: 'Input validation coverage',
             target: 95,
             unit: 'percent',
-            priority: 'high'
-          }
+            priority: 'high',
+          },
         ],
-        successThreshold: 'Zero critical vulnerabilities with 100% encryption coverage and SOC2 compliance',
+        successThreshold:
+          'Zero critical vulnerabilities with 100% encryption coverage and SOC2 compliance',
         scope: [
           'authentication_mechanisms',
-          'authorization_controls', 
+          'authorization_controls',
           'input_validation',
           'data_protection',
           'session_management',
@@ -66,15 +67,15 @@ export class SecurityAuditPrompts {
           'error_handling',
           'logging_monitoring',
           'dependency_vulnerabilities',
-          'infrastructure_security'
-        ]
+          'infrastructure_security',
+        ],
       },
       actionable: {
         requireImplementationSteps: true,
         stepDetailLevel: 'high',
         includeCodeExamples: true,
         timeEstimates: true,
-        dependencyMapping: true
+        dependencyMapping: true,
       },
       contextual: {
         codebaseContext: {
@@ -82,14 +83,20 @@ export class SecurityAuditPrompts {
           frameworks: ['Next.js', 'React', 'Prisma', 'NextAuth'],
           architecture: 'Microservices with API Gateway and service mesh',
           dependencies: [
-            'next-auth', 'bcryptjs', 'jsonwebtoken', 'prisma',
-            'stripe', 'sendgrid', 'redis', 'helmet'
+            'next-auth',
+            'bcryptjs',
+            'jsonwebtoken',
+            'prisma',
+            'stripe',
+            'sendgrid',
+            'redis',
+            'helmet',
           ],
           codeMetrics: {
             totalFiles: 450,
             totalLines: 75000,
-            complexity: 'enterprise-grade'
-          }
+            complexity: 'enterprise-grade',
+          },
         },
         businessRequirements: [
           {
@@ -100,13 +107,13 @@ export class SecurityAuditPrompts {
               'Pass external security audit',
               'Implement all required security controls',
               'Establish continuous security monitoring',
-              'Document security policies and procedures'
+              'Document security policies and procedures',
             ],
             constraints: [
               'No downtime during implementation',
               'Backward compatibility required',
-              'Budget cap of $100k for security tooling'
-            ]
+              'Budget cap of $100k for security tooling',
+            ],
           },
           {
             id: 'SEC-DATA-001',
@@ -116,46 +123,46 @@ export class SecurityAuditPrompts {
               'AES-256 encryption for all sensitive data',
               'TLS 1.3 for all communications',
               'Field-level encryption for payment data',
-              'Key rotation every 90 days'
+              'Key rotation every 90 days',
             ],
             constraints: [
               'Performance impact < 5%',
-              'Maintain search capabilities on encrypted fields'
-            ]
-          }
+              'Maintain search capabilities on encrypted fields',
+            ],
+          },
         ],
         constraints: [
           {
             type: 'regulatory',
             description: 'GDPR, CCPA, HIPAA compliance required',
             impact: 'high',
-            flexibility: 'fixed'
+            flexibility: 'fixed',
           },
           {
             type: 'time',
             description: 'Critical security fixes within 24 hours',
             impact: 'high',
-            flexibility: 'fixed'
-          }
+            flexibility: 'fixed',
+          },
         ],
         stakeholders: [
           {
             role: 'CISO',
             concerns: ['Regulatory compliance', 'Data breach risk', 'Security posture'],
-            decisionPower: 'high'
+            decisionPower: 'high',
           },
           {
             role: 'DPO',
             concerns: ['Privacy compliance', 'Data handling', 'User consent'],
-            decisionPower: 'high'
-          }
+            decisionPower: 'high',
+          },
         ],
         environment: {
           deployment: 'cloud',
           scale: 'enterprise',
           industry: 'Financial Services',
-          compliance: ['SOC2', 'ISO27001', 'GDPR', 'CCPA', 'HIPAA']
-        }
+          compliance: ['SOC2', 'ISO27001', 'GDPR', 'CCPA', 'HIPAA'],
+        },
       },
       reasoned: {
         steps: [
@@ -165,15 +172,15 @@ export class SecurityAuditPrompts {
             reasoning: 'Identify known vulnerability patterns without execution',
             evidence: ['ESLint security rules', 'Semgrep patterns', 'CodeQL queries'],
             confidence: 0.95,
-            alternatives: ['Manual code review', 'SonarQube analysis']
+            alternatives: ['Manual code review', 'SonarQube analysis'],
           },
           {
             step: 2,
             description: 'Dynamic security testing with simulated attacks',
             reasoning: 'Validate exploitability and measure real-world impact',
             evidence: ['OWASP ZAP scans', 'Burp Suite tests', 'Custom exploit scripts'],
-            confidence: 0.90,
-            alternatives: ['Penetration testing', 'Bug bounty programs']
+            confidence: 0.9,
+            alternatives: ['Penetration testing', 'Bug bounty programs'],
           },
           {
             step: 3,
@@ -181,7 +188,7 @@ export class SecurityAuditPrompts {
             reasoning: 'Third-party components often introduce critical vulnerabilities',
             evidence: ['npm audit', 'Snyk scans', 'CVE database correlation'],
             confidence: 0.98,
-            alternatives: ['Manual dependency review', 'GitHub security alerts']
+            alternatives: ['Manual dependency review', 'GitHub security alerts'],
           },
           {
             step: 4,
@@ -189,20 +196,24 @@ export class SecurityAuditPrompts {
             reasoning: 'Auth bypasses lead to complete system compromise',
             evidence: ['JWT token analysis', 'Session handling review', 'RBAC validation'],
             confidence: 0.92,
-            alternatives: ['Auth0 security assessment', 'Custom auth review']
+            alternatives: ['Auth0 security assessment', 'Custom auth review'],
           },
           {
             step: 5,
             description: 'Data flow and encryption analysis',
             reasoning: 'Unencrypted PII violates compliance and creates liability',
-            evidence: ['Database encryption status', 'API payload analysis', 'File storage security'],
+            evidence: [
+              'Database encryption status',
+              'API payload analysis',
+              'File storage security',
+            ],
             confidence: 0.88,
-            alternatives: ['Data classification audit', 'Encryption key management review']
-          }
+            alternatives: ['Data classification audit', 'Encryption key management review'],
+          },
         ],
         reasoningDepth: 'deep',
         includeAlternatives: true,
-        explainTradeoffs: true
+        explainTradeoffs: true,
       },
       evidenceBased: {
         codeReferences: true,
@@ -210,7 +221,7 @@ export class SecurityAuditPrompts {
         contextLines: 10,
         includeTests: true,
         performanceMetrics: false,
-        securityScans: true
+        securityScans: true,
       },
       deliverable: {
         format: 'structured',
@@ -225,22 +236,22 @@ export class SecurityAuditPrompts {
               high_count: 0,
               risk_score: 0,
               compliance_status: '',
-              overall_posture: ''
+              overall_posture: '',
             },
             vulnerabilities: [],
             compliance_assessment: {
               soc2_controls: [],
               gdpr_compliance: [],
-              hipaa_safeguards: []
+              hipaa_safeguards: [],
             },
             remediation_roadmap: {
               immediate_actions: [],
               short_term_fixes: [],
-              long_term_improvements: []
-            }
-          }
-        }
-      }
+              long_term_improvements: [],
+            },
+          },
+        },
+      },
     }
   }
 
@@ -469,51 +480,51 @@ export class PerformanceAuditPrompts {
           'Optimize API response times to P95 < 200ms',
           'Reduce infrastructure costs by 30% through optimization',
           'Eliminate performance bottlenecks affecting user experience',
-          'Establish performance monitoring and alerting'
+          'Establish performance monitoring and alerting',
         ],
         measurableCriteria: [
           {
             metric: 'Largest Contentful Paint (LCP)',
             target: 2.5,
             unit: 'seconds',
-            priority: 'critical'
+            priority: 'critical',
           },
           {
             metric: 'First Input Delay (FID)',
             target: 100,
             unit: 'milliseconds',
-            priority: 'critical'
+            priority: 'critical',
           },
           {
             metric: 'Cumulative Layout Shift (CLS)',
             target: 0.1,
             unit: 'score',
-            priority: 'critical'
+            priority: 'critical',
           },
           {
             metric: 'API P95 response time',
             target: 200,
             unit: 'milliseconds',
-            priority: 'high'
+            priority: 'high',
           },
           {
             metric: 'Database query P95 latency',
             target: 50,
             unit: 'milliseconds',
-            priority: 'high'
+            priority: 'high',
           },
           {
             metric: 'Bundle size (gzipped)',
             target: 200,
             unit: 'kilobytes',
-            priority: 'medium'
+            priority: 'medium',
           },
           {
             metric: 'Infrastructure cost reduction',
             target: 30,
             unit: 'percent',
-            priority: 'medium'
-          }
+            priority: 'medium',
+          },
         ],
         successThreshold: 'All Core Web Vitals in green, API P95 < 200ms, 30% cost reduction',
         scope: [
@@ -523,15 +534,15 @@ export class PerformanceAuditPrompts {
           'caching_strategies',
           'cdn_optimization',
           'infrastructure_efficiency',
-          'monitoring_alerting'
-        ]
+          'monitoring_alerting',
+        ],
       },
       actionable: {
         requireImplementationSteps: true,
         stepDetailLevel: 'high',
         includeCodeExamples: true,
         timeEstimates: true,
-        dependencyMapping: true
+        dependencyMapping: true,
       },
       contextual: {
         codebaseContext: {
@@ -539,14 +550,19 @@ export class PerformanceAuditPrompts {
           frameworks: ['Next.js 15', 'React 19', 'Prisma', 'TailwindCSS'],
           architecture: 'Serverless with edge computing and global CDN',
           dependencies: [
-            '@vercel/analytics', 'next-bundle-analyzer', 'sharp',
-            'redis', 'prisma', '@sentry/nextjs', 'web-vitals'
+            '@vercel/analytics',
+            'next-bundle-analyzer',
+            'sharp',
+            'redis',
+            'prisma',
+            '@sentry/nextjs',
+            'web-vitals',
           ],
           codeMetrics: {
             totalFiles: 450,
             totalLines: 75000,
-            complexity: 'high-performance-optimized'
-          }
+            complexity: 'high-performance-optimized',
+          },
         },
         businessRequirements: [
           {
@@ -557,13 +573,13 @@ export class PerformanceAuditPrompts {
               'Homepage loads in < 1 second',
               'Dashboard renders in < 2 seconds',
               'All interactions respond in < 100ms',
-              '15% improvement in conversion rate'
+              '15% improvement in conversion rate',
             ],
             constraints: [
               'No degradation in functionality',
               'Maintain SEO performance',
-              'Support all modern browsers'
-            ]
+              'Support all modern browsers',
+            ],
           },
           {
             id: 'PERF-SCALE-001',
@@ -573,46 +589,43 @@ export class PerformanceAuditPrompts {
               'Handle 100,000 concurrent users',
               'Maintain response times under load',
               'Auto-scale efficiently',
-              'Zero downtime during traffic spikes'
+              'Zero downtime during traffic spikes',
             ],
-            constraints: [
-              'Current cloud budget limits',
-              'Regulatory data residency requirements'
-            ]
-          }
+            constraints: ['Current cloud budget limits', 'Regulatory data residency requirements'],
+          },
         ],
         constraints: [
           {
             type: 'budget',
             description: 'Infrastructure costs must not increase',
             impact: 'high',
-            flexibility: 'fixed'
+            flexibility: 'fixed',
           },
           {
             type: 'technology',
             description: 'Must maintain Next.js and Vercel deployment',
             impact: 'medium',
-            flexibility: 'negotiable'
-          }
+            flexibility: 'negotiable',
+          },
         ],
         stakeholders: [
           {
             role: 'Head of Engineering',
             concerns: ['Technical performance', 'Infrastructure costs', 'Developer experience'],
-            decisionPower: 'high'
+            decisionPower: 'high',
           },
           {
             role: 'Product Manager',
             concerns: ['User experience', 'Conversion rates', 'Feature delivery speed'],
-            decisionPower: 'high'
-          }
+            decisionPower: 'high',
+          },
         ],
         environment: {
           deployment: 'cloud',
           scale: 'enterprise',
           industry: 'SaaS',
-          compliance: ['GDPR']
-        }
+          compliance: ['GDPR'],
+        },
       },
       reasoned: {
         steps: [
@@ -622,7 +635,7 @@ export class PerformanceAuditPrompts {
             reasoning: 'User experience directly impacts conversion and retention',
             evidence: ['Lighthouse reports', 'Real User Monitoring', 'Web Vitals API'],
             confidence: 1.0,
-            alternatives: ['WebPageTest analysis', 'GTmetrix reports']
+            alternatives: ['WebPageTest analysis', 'GTmetrix reports'],
           },
           {
             step: 2,
@@ -630,7 +643,7 @@ export class PerformanceAuditPrompts {
             reasoning: 'API latency affects every user interaction',
             evidence: ['APM data', 'Response time histograms', 'Error rate analysis'],
             confidence: 0.95,
-            alternatives: ['Custom performance logging', 'Third-party monitoring']
+            alternatives: ['Custom performance logging', 'Third-party monitoring'],
           },
           {
             step: 3,
@@ -638,15 +651,19 @@ export class PerformanceAuditPrompts {
             reasoning: 'Database is often the primary performance bottleneck',
             evidence: ['Query execution plans', 'Index usage analysis', 'Connection pool metrics'],
             confidence: 0.92,
-            alternatives: ['Database-specific profiling tools', 'Query logging analysis']
+            alternatives: ['Database-specific profiling tools', 'Query logging analysis'],
           },
           {
             step: 4,
             description: 'Bundle size and asset optimization evaluation',
             reasoning: 'Large bundles delay initial page rendering',
-            evidence: ['Bundle analyzer reports', 'Asset size analysis', 'Code splitting effectiveness'],
-            confidence: 0.90,
-            alternatives: ['Manual dependency audit', 'Tree-shaking analysis']
+            evidence: [
+              'Bundle analyzer reports',
+              'Asset size analysis',
+              'Code splitting effectiveness',
+            ],
+            confidence: 0.9,
+            alternatives: ['Manual dependency audit', 'Tree-shaking analysis'],
           },
           {
             step: 5,
@@ -654,12 +671,12 @@ export class PerformanceAuditPrompts {
             reasoning: 'Effective caching provides highest ROI for performance gains',
             evidence: ['Cache hit rates', 'CDN performance', 'Browser caching headers'],
             confidence: 0.88,
-            alternatives: ['Edge computing evaluation', 'Service worker analysis']
-          }
+            alternatives: ['Edge computing evaluation', 'Service worker analysis'],
+          },
         ],
         reasoningDepth: 'deep',
         includeAlternatives: true,
-        explainTradeoffs: true
+        explainTradeoffs: true,
       },
       evidenceBased: {
         codeReferences: true,
@@ -667,7 +684,7 @@ export class PerformanceAuditPrompts {
         contextLines: 5,
         includeTests: false,
         performanceMetrics: true,
-        securityScans: false
+        securityScans: false,
       },
       deliverable: {
         format: 'structured',
@@ -681,29 +698,29 @@ export class PerformanceAuditPrompts {
               core_web_vitals: {
                 lcp: 0,
                 fid: 0,
-                cls: 0
+                cls: 0,
               },
               api_metrics: {
                 p50_latency: 0,
                 p95_latency: 0,
                 p99_latency: 0,
-                error_rate: 0
+                error_rate: 0,
               },
               infrastructure: {
                 monthly_cost: 0,
                 cpu_utilization: 0,
-                memory_utilization: 0
-              }
+                memory_utilization: 0,
+              },
             },
             optimizations: [],
             projected_improvements: {
               performance_gains: [],
               cost_savings: [],
-              user_experience_impact: []
-            }
-          }
-        }
-      }
+              user_experience_impact: [],
+            },
+          },
+        },
+      },
     }
   }
 
@@ -1142,5 +1159,5 @@ export class ArchitectureAuditPrompts {
 export const EnhancedAuditPrompts = {
   Security: SecurityAuditPrompts,
   Performance: PerformanceAuditPrompts,
-  Architecture: ArchitectureAuditPrompts
+  Architecture: ArchitectureAuditPrompts,
 }

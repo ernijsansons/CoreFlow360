@@ -39,13 +39,17 @@ export interface SubscriptionAwareEventBus {
   subscribeToEvents(subscription: Omit<EventSubscription, 'id'>): Promise<string>
   unsubscribeFromEvents(subscriptionId: string): Promise<void>
   filterEventsBySubscription(events: ModuleEvent[], activeModules: string[]): ModuleEvent[]
-  enableCrossModuleEvents(sourceModule: string, targetModule: string, tenantId: string): Promise<boolean>
+  enableCrossModuleEvents(
+    sourceModule: string,
+    targetModule: string,
+    tenantId: string
+  ): Promise<boolean>
 }
 
 export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareEventBus {
   private subscriptions: Map<string, EventSubscription> = new Map()
   private moduleEventMap: Map<string, string[]> = new Map()
-  private tenantSubscriptionCache: Map<string, { modules: string[], timestamp: number }> = new Map()
+  private tenantSubscriptionCache: Map<string, { modules: string[]; timestamp: number }> = new Map()
 
   constructor() {
     super()
@@ -59,14 +63,14 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
   private initializeModuleEventMap(): void {
     this.moduleEventMap.set('crm', [
       'lead.created',
-      'lead.converted', 
+      'lead.converted',
       'customer.created',
       'customer.updated',
       'deal.created',
       'deal.won',
       'deal.lost',
       'interaction.logged',
-      'quote.generated'
+      'quote.generated',
     ])
 
     this.moduleEventMap.set('accounting', [
@@ -75,7 +79,7 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
       'payment.received',
       'expense.recorded',
       'budget.exceeded',
-      'financial.report.generated'
+      'financial.report.generated',
     ])
 
     this.moduleEventMap.set('hr', [
@@ -84,7 +88,7 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
       'performance.reviewed',
       'leave.requested',
       'training.completed',
-      'salary.changed'
+      'salary.changed',
     ])
 
     this.moduleEventMap.set('inventory', [
@@ -93,7 +97,7 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
       'purchase.requested',
       'item.received',
       'inventory.counted',
-      'supplier.updated'
+      'supplier.updated',
     ])
 
     this.moduleEventMap.set('projects', [
@@ -102,7 +106,7 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
       'task.assigned',
       'task.completed',
       'milestone.reached',
-      'budget.updated'
+      'budget.updated',
     ])
 
     this.moduleEventMap.set('marketing', [
@@ -111,7 +115,7 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
       'lead.nurtured',
       'email.opened',
       'conversion.tracked',
-      'audience.segmented'
+      'audience.segmented',
     ])
   }
 
@@ -125,19 +129,27 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
       metadata: {
         timestamp: new Date(),
         priority: this.determineEventPriority(eventData.type),
-        requiresSubscription: this.doesEventRequireSubscription(eventData.type, eventData.sourceModule, eventData.targetModule),
-        crossModule: !!eventData.targetModule && eventData.targetModule !== eventData.sourceModule
-      }
+        requiresSubscription: this.doesEventRequireSubscription(
+          eventData.type,
+          eventData.sourceModule,
+          eventData.targetModule
+        ),
+        crossModule: !!eventData.targetModule && eventData.targetModule !== eventData.sourceModule,
+      },
     }
 
-    console.log(`📡 Publishing event: ${event.type} from ${event.sourceModule}${event.targetModule ? ` to ${event.targetModule}` : ''}`)
+    console.log(
+      `📡 Publishing event: ${event.type} from ${event.sourceModule}${event.targetModule ? ` to ${event.targetModule}` : ''}`
+    )
 
     // Check if tenant has required subscriptions
     const hasRequiredSubscriptions = await this.validateEventSubscriptionRequirements(event)
-    
+
     if (!hasRequiredSubscriptions) {
-      console.log(`⚠️ Event ${event.type} blocked - insufficient subscription for tenant ${event.tenantId}`)
-      
+      console.log(
+        `⚠️ Event ${event.type} blocked - insufficient subscription for tenant ${event.tenantId}`
+      )
+
       // Optionally store blocked events for analytics
       await this.logBlockedEvent(event, 'insufficient_subscription')
       return
@@ -145,13 +157,11 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
 
     // Filter and notify subscribers
     const eligibleSubscriptions = await this.getEligibleSubscriptions(event)
-    
+
     for (const subscription of eligibleSubscriptions) {
       try {
         await subscription.handler(event)
-        console.log(`✅ Event ${event.type} delivered to ${subscription.targetModule}`)
       } catch (error) {
-        console.error(`❌ Event delivery failed for ${subscription.id}:`, error)
         await this.logEventDeliveryError(event, subscription.id, error)
       }
     }
@@ -171,20 +181,24 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
   async subscribeToEvents(subscriptionData: Omit<EventSubscription, 'id'>): Promise<string> {
     const subscription: EventSubscription = {
       ...subscriptionData,
-      id: `sub-${Date.now()}-${Math.random().toString(36).substr(2, 8)}`
+      id: `sub-${Date.now()}-${Math.random().toString(36).substr(2, 8)}`,
     }
 
     // Validate subscription permissions
     const canSubscribe = await this.validateSubscriptionPermissions(subscription)
-    
+
     if (!canSubscribe) {
-      throw new Error(`Subscription not allowed: ${subscription.tenantId} cannot subscribe to ${subscription.sourceModule} -> ${subscription.targetModule} events`)
+      throw new Error(
+        `Subscription not allowed: ${subscription.tenantId} cannot subscribe to ${subscription.sourceModule} -> ${subscription.targetModule} events`
+      )
     }
 
     this.subscriptions.set(subscription.id, subscription)
-    
-    console.log(`📥 Subscription created: ${subscription.id} for ${subscription.sourceModule} -> ${subscription.targetModule}`)
-    
+
+    console.log(
+      `📥 Subscription created: ${subscription.id} for ${subscription.sourceModule} -> ${subscription.targetModule}`
+    )
+
     return subscription.id
   }
 
@@ -193,10 +207,9 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
    */
   async unsubscribeFromEvents(subscriptionId: string): Promise<void> {
     const subscription = this.subscriptions.get(subscriptionId)
-    
+
     if (subscription) {
       this.subscriptions.delete(subscriptionId)
-      console.log(`📤 Subscription removed: ${subscriptionId}`)
     }
   }
 
@@ -204,7 +217,7 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
    * Filter events based on active module subscriptions
    */
   filterEventsBySubscription(events: ModuleEvent[], activeModules: string[]): ModuleEvent[] {
-    return events.filter(event => {
+    return events.filter((event) => {
       // Allow events from active modules
       if (!activeModules.includes(event.sourceModule)) {
         return false
@@ -222,25 +235,29 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
   /**
    * Enable cross-module event flow
    */
-  async enableCrossModuleEvents(sourceModule: string, targetModule: string, tenantId: string): Promise<boolean> {
+  async enableCrossModuleEvents(
+    sourceModule: string,
+    targetModule: string,
+    tenantId: string
+  ): Promise<boolean> {
     const activeModules = await this.getTenantActiveModules(tenantId)
-    
+
     // Check if both modules are active
     if (!activeModules.includes(sourceModule) || !activeModules.includes(targetModule)) {
-      console.log(`❌ Cannot enable ${sourceModule} -> ${targetModule} events: modules not active`)
       return false
     }
 
     // Check if modules support cross-communication
     const sourceEvents = this.moduleEventMap.get(sourceModule) || []
     const crossModuleEvents = this.getCrossModuleEvents(sourceModule, targetModule)
-    
+
     if (crossModuleEvents.length === 0) {
-      console.log(`❌ No cross-module events defined for ${sourceModule} -> ${targetModule}`)
       return false
     }
 
-    console.log(`✅ Cross-module events enabled: ${sourceModule} -> ${targetModule} (${crossModuleEvents.length} event types)`)
+    console.log(
+      `✅ Cross-module events enabled: ${sourceModule} -> ${targetModule} (${crossModuleEvents.length} event types)`
+    )
     return true
   }
 
@@ -253,7 +270,7 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
     }
 
     const activeModules = await this.getTenantActiveModules(event.tenantId)
-    
+
     // Check source module subscription
     if (!activeModules.includes(event.sourceModule)) {
       return false
@@ -273,23 +290,24 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
     for (const subscription of this.subscriptions.values()) {
       // Check tenant match
       if (subscription.tenantId !== event.tenantId) continue
-      
+
       // Check if subscription is active
       if (!subscription.isActive) continue
-      
+
       // Check module match
       if (subscription.sourceModule !== event.sourceModule) continue
-      
+
       // Check event type match
-      if (!subscription.eventTypes.includes(event.type) && !subscription.eventTypes.includes('*')) continue
-      
+      if (!subscription.eventTypes.includes(event.type) && !subscription.eventTypes.includes('*'))
+        continue
+
       // Check target module for cross-module events
       if (event.targetModule && subscription.targetModule !== event.targetModule) continue
-      
+
       // Verify subscription permissions
       const hasPermission = await this.validateSubscriptionPermissions(subscription)
       if (!hasPermission) continue
-      
+
       eligibleSubscriptions.push(subscription)
     }
 
@@ -298,7 +316,7 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
 
   private async validateSubscriptionPermissions(subscription: EventSubscription): Promise<boolean> {
     const activeModules = await this.getTenantActiveModules(subscription.tenantId)
-    
+
     // Both source and target modules must be active for cross-module subscriptions
     if (!activeModules.includes(subscription.sourceModule)) {
       return false
@@ -320,11 +338,11 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
 
     // Fetch from module manager
     const activeModules = await moduleManager.getActiveModules(tenantId)
-    
+
     // Update cache
     this.tenantSubscriptionCache.set(tenantId, {
       modules: activeModules,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
 
     return activeModules
@@ -333,22 +351,26 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
   private determineEventPriority(eventType: string): 'low' | 'medium' | 'high' | 'critical' {
     const highPriorityEvents = ['deal.won', 'payment.received', 'stock.out', 'employee.terminated']
     const criticalEvents = ['budget.exceeded', 'security.breach', 'system.down']
-    
-    if (criticalEvents.some(e => eventType.includes(e))) return 'critical'
-    if (highPriorityEvents.some(e => eventType.includes(e))) return 'high'
+
+    if (criticalEvents.some((e) => eventType.includes(e))) return 'critical'
+    if (highPriorityEvents.some((e) => eventType.includes(e))) return 'high'
     if (eventType.includes('.created') || eventType.includes('.updated')) return 'medium'
-    
+
     return 'low'
   }
 
-  private doesEventRequireSubscription(eventType: string, sourceModule: string, targetModule?: string): boolean {
+  private doesEventRequireSubscription(
+    eventType: string,
+    sourceModule: string,
+    targetModule?: string
+  ): boolean {
     // All cross-module events require subscriptions
     if (targetModule && targetModule !== sourceModule) return true
-    
+
     // Some high-value events require subscription even within module
     const subscriptionRequiredEvents = ['analytics', 'prediction', 'optimization', 'intelligence']
-    
-    return subscriptionRequiredEvents.some(keyword => eventType.toLowerCase().includes(keyword))
+
+    return subscriptionRequiredEvents.some((keyword) => eventType.toLowerCase().includes(keyword))
   }
 
   private getCrossModuleEvents(sourceModule: string, targetModule: string): string[] {
@@ -358,26 +380,27 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
       'accounting->crm': ['invoice.paid', 'payment.failed', 'budget.status'],
       'hr->crm': ['employee.performance', 'sales.quota', 'team.changes'],
       'inventory->crm': ['stock.status', 'product.updates', 'supplier.changes'],
-      'projects->hr': ['resource.needed', 'milestone.reached', 'deadline.missed']
+      'projects->hr': ['resource.needed', 'milestone.reached', 'deadline.missed'],
     }
-    
+
     const key = `${sourceModule}->${targetModule}`
     return crossModuleEventMap[key] || []
   }
 
-  private async storeEvent(event: ModuleEvent, deliveryCount: number): Promise<void> {
+  private async storeEvent(_event: ModuleEvent, _deliveryCount: number): Promise<void> {
     // In production, store events for analytics and debugging
-    console.log(`📊 Event stored: ${event.id} delivered to ${deliveryCount} subscribers`)
   }
 
-  private async logBlockedEvent(event: ModuleEvent, reason: string): Promise<void> {
+  private async logBlockedEvent(_event: ModuleEvent, _reason: string): Promise<void> {
     // Log blocked events for analytics
-    console.log(`🚫 Event blocked: ${event.id} - ${reason}`)
   }
 
-  private async logEventDeliveryError(event: ModuleEvent, subscriptionId: string, error: Error): Promise<void> {
+  private async logEventDeliveryError(
+    _event: ModuleEvent,
+    _subscriptionId: string,
+    error: Error
+  ): Promise<void> {
     // Log delivery errors for monitoring
-    console.error(`💥 Event delivery error: ${event.id} to ${subscriptionId}`, error)
   }
 
   /**
@@ -400,7 +423,7 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
     moduleEventTypes: Record<string, number>
   } {
     const moduleEventTypes: Record<string, number> = {}
-    
+
     for (const [module, events] of this.moduleEventMap.entries()) {
       moduleEventTypes[module] = events.length
     }
@@ -408,7 +431,7 @@ export class CoreFlowEventBus extends EventEmitter implements SubscriptionAwareE
     return {
       activeSubscriptions: this.subscriptions.size,
       totalEvents: this.listenerCount('event'),
-      moduleEventTypes
+      moduleEventTypes,
     }
   }
 }
@@ -431,7 +454,7 @@ export async function publishModuleEvent(
     targetModule,
     tenantId,
     userId,
-    payload
+    payload,
   })
 }
 
@@ -448,7 +471,7 @@ export async function subscribeToModuleEvents(
     targetModule,
     eventTypes,
     isActive: true,
-    handler
+    handler,
   })
 }
 

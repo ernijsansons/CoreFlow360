@@ -43,7 +43,7 @@ interface BookingResult {
  * Google Calendar appointment booking system
  */
 export class AppointmentBooker {
-  private calendar: any
+  private calendar: unknown
   private isInitialized = false
 
   constructor() {
@@ -64,16 +64,12 @@ export class AppointmentBooker {
       // Set credentials (in production, use proper OAuth flow)
       auth.setCredentials({
         refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
-        access_token: process.env.GOOGLE_ACCESS_TOKEN
+        access_token: process.env.GOOGLE_ACCESS_TOKEN,
       })
 
       this.calendar = google.calendar({ version: 'v3', auth })
       this.isInitialized = true
-      
-      console.log('✅ Google Calendar API initialized')
-
     } catch (error) {
-      console.error('❌ Failed to initialize Google Calendar:', error)
       this.isInitialized = false
     }
   }
@@ -93,24 +89,22 @@ export class AppointmentBooker {
     try {
       const duration = this.getServiceDuration(request.serviceType)
       const timeSlots = this.generateTimeSlots(request.urgency, request.preferredTime)
-      
+
       // Check availability for each time slot
       for (const slot of timeSlots) {
         const isAvailable = await this.checkSlotAvailability(slot, duration)
-        
+
         if (isAvailable) {
           return {
             date: slot.date,
             time: slot.time,
-            endTime: this.calculateEndTime(slot.time, duration)
+            endTime: this.calculateEndTime(slot.time, duration),
           }
         }
       }
 
       return null
-
     } catch (error) {
-      console.error('Error finding available slot:', error)
       return null
     }
   }
@@ -126,7 +120,7 @@ export class AppointmentBooker {
     try {
       const duration = this.getServiceDuration(request.serviceType)
       const startDateTime = this.combineDateTime(slot.date, slot.time)
-      const endDateTime = new Date(startDateTime.getTime() + (duration * 60 * 1000))
+      const endDateTime = new Date(startDateTime.getTime() + duration * 60 * 1000)
 
       // Create calendar event
       const event = {
@@ -134,28 +128,26 @@ export class AppointmentBooker {
         description: this.buildEventDescription(request),
         start: {
           dateTime: startDateTime.toISOString(),
-          timeZone: process.env.GOOGLE_CALENDAR_TIMEZONE || 'America/New_York'
+          timeZone: process.env.GOOGLE_CALENDAR_TIMEZONE || 'America/New_York',
         },
         end: {
           dateTime: endDateTime.toISOString(),
-          timeZone: process.env.GOOGLE_CALENDAR_TIMEZONE || 'America/New_York'
+          timeZone: process.env.GOOGLE_CALENDAR_TIMEZONE || 'America/New_York',
         },
-        attendees: request.customerInfo.email ? [
-          { email: request.customerInfo.email }
-        ] : [],
+        attendees: request.customerInfo.email ? [{ email: request.customerInfo.email }] : [],
         reminders: {
           useDefault: false,
           overrides: [
             { method: 'email', minutes: 24 * 60 }, // 1 day
-            { method: 'popup', minutes: 30 }       // 30 minutes
-          ]
-        }
+            { method: 'popup', minutes: 30 }, // 30 minutes
+          ],
+        },
       }
 
       const response = await this.calendar.events.insert({
         calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
         resource: event,
-        sendUpdates: 'all'
+        sendUpdates: 'all',
       })
 
       // Generate confirmation number
@@ -170,7 +162,7 @@ export class AppointmentBooker {
         duration: duration,
         confirmationNumber: confirmationNumber,
         status: 'SCHEDULED',
-        notes: request.notes
+        notes: request.notes,
       })
 
       return {
@@ -180,16 +172,13 @@ export class AppointmentBooker {
           date: slot.date,
           time: slot.time,
           duration: duration,
-          confirmationNumber: confirmationNumber
-        }
+          confirmationNumber: confirmationNumber,
+        },
       }
-
     } catch (error) {
-      console.error('Error booking appointment:', error)
-      
       return {
         success: false,
-        error: 'Failed to book appointment'
+        error: 'Failed to book appointment',
       }
     }
   }
@@ -204,16 +193,16 @@ export class AppointmentBooker {
       'HVAC Repair': 90,
       'HVAC Maintenance': 60,
       'HVAC Installation': 240,
-      
+
       // Auto repair durations
       'Auto Repair Estimate': 30,
       'Auto Body Repair': 480, // 8 hours
       'Auto Insurance Inspection': 45,
-      
+
       // General business
-      'Consultation': 60,
-      'Demo': 45,
-      'Follow-up Call': 30
+      Consultation: 60,
+      Demo: 45,
+      'Follow-up Call': 30,
     }
 
     return durations[serviceType] || 60 // Default 1 hour
@@ -222,23 +211,26 @@ export class AppointmentBooker {
   /**
    * Generate time slots based on urgency and preferences
    */
-  private generateTimeSlots(urgency: string, preferredTime: string): Array<{date: string, time: string}> {
-    const slots: Array<{date: string, time: string}> = []
+  private generateTimeSlots(
+    urgency: string,
+    preferredTime: string
+  ): Array<{ date: string; time: string }> {
+    const slots: Array<{ date: string; time: string }> = []
     const now = new Date()
 
     // Business hours: 8 AM - 6 PM
     const businessHours = {
       start: 8,
-      end: 18
+      end: 18,
     }
 
     // Determine search window based on urgency
     const daysToSearch = this.getSearchWindow(urgency)
-    
+
     for (let day = 0; day < daysToSearch; day++) {
       const date = new Date(now)
       date.setDate(now.getDate() + day)
-      
+
       // Skip weekends for non-emergency services
       if (urgency !== 'emergency' && (date.getDay() === 0 || date.getDay() === 6)) {
         continue
@@ -246,7 +238,7 @@ export class AppointmentBooker {
 
       // Generate hourly slots within business hours
       const hours = this.getPreferredHours(preferredTime, businessHours)
-      
+
       for (const hour of hours) {
         // Skip past times for today
         if (day === 0 && hour <= now.getHours()) {
@@ -255,7 +247,7 @@ export class AppointmentBooker {
 
         slots.push({
           date: date.toISOString().split('T')[0], // YYYY-MM-DD
-          time: `${hour.toString().padStart(2, '0')}:00`
+          time: `${hour.toString().padStart(2, '0')}:00`,
         })
       }
     }
@@ -268,10 +260,10 @@ export class AppointmentBooker {
    */
   private getSearchWindow(urgency: string): number {
     const windows: Record<string, number> = {
-      'emergency': 1,    // Today only
-      'high': 3,         // Next 3 days
-      'medium': 7,       // Next week
-      'low': 14          // Next 2 weeks
+      emergency: 1, // Today only
+      high: 3, // Next 3 days
+      medium: 7, // Next week
+      low: 14, // Next 2 weeks
     }
 
     return windows[urgency] || 7
@@ -280,19 +272,22 @@ export class AppointmentBooker {
   /**
    * Get preferred hours based on customer preference
    */
-  private getPreferredHours(preferredTime: string, businessHours: {start: number, end: number}): number[] {
+  private getPreferredHours(
+    preferredTime: string,
+    businessHours: { start: number; end: number }
+  ): number[] {
     const allHours = Array.from(
-      { length: businessHours.end - businessHours.start }, 
+      { length: businessHours.end - businessHours.start },
       (_, i) => businessHours.start + i
     )
 
     switch (preferredTime.toLowerCase()) {
       case 'morning':
-        return allHours.filter(h => h >= 8 && h < 12)
+        return allHours.filter((h) => h >= 8 && h < 12)
       case 'afternoon':
-        return allHours.filter(h => h >= 12 && h < 17)
+        return allHours.filter((h) => h >= 12 && h < 17)
       case 'evening':
-        return allHours.filter(h => h >= 17 && h < 19)
+        return allHours.filter((h) => h >= 17 && h < 19)
       default:
         return allHours
     }
@@ -301,24 +296,25 @@ export class AppointmentBooker {
   /**
    * Check if time slot is available
    */
-  private async checkSlotAvailability(slot: {date: string, time: string}, duration: number): Promise<boolean> {
+  private async checkSlotAvailability(
+    slot: { date: string; time: string },
+    duration: number
+  ): Promise<boolean> {
     try {
       const startDateTime = this.combineDateTime(slot.date, slot.time)
-      const endDateTime = new Date(startDateTime.getTime() + (duration * 60 * 1000))
+      const endDateTime = new Date(startDateTime.getTime() + duration * 60 * 1000)
 
       // Check for conflicts in calendar
       const response = await this.calendar.events.list({
         calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
         timeMin: startDateTime.toISOString(),
         timeMax: endDateTime.toISOString(),
-        singleEvents: true
+        singleEvents: true,
       })
 
       // If no events found, slot is available
       return response.data.items.length === 0
-
     } catch (error) {
-      console.error('Error checking slot availability:', error)
       return false
     }
   }
@@ -329,7 +325,7 @@ export class AppointmentBooker {
   private combineDateTime(date: string, time: string): Date {
     const [year, month, day] = date.split('-').map(Number)
     const [hour, minute] = time.split(':').map(Number)
-    
+
     return new Date(year, month - 1, day, hour, minute)
   }
 
@@ -340,10 +336,10 @@ export class AppointmentBooker {
     const [hour, minute] = startTime.split(':').map(Number)
     const startMinutes = hour * 60 + minute
     const endMinutes = startMinutes + duration
-    
+
     const endHour = Math.floor(endMinutes / 60)
     const endMin = endMinutes % 60
-    
+
     return `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`
   }
 
@@ -396,11 +392,10 @@ Booked via CoreFlow360 AI Assistant
           confirmationNumber: data.confirmationNumber,
           status: data.status,
           notes: data.notes,
-          createdAt: new Date()
-        }
+          createdAt: new Date(),
+        },
       })
     } catch (error) {
-      console.error('Error storing appointment:', error)
       throw error
     }
   }
@@ -411,7 +406,7 @@ Booked via CoreFlow360 AI Assistant
   async cancelAppointment(appointmentId: string): Promise<boolean> {
     try {
       const appointment = await db.appointment.findUnique({
-        where: { id: appointmentId }
+        where: { id: appointmentId },
       })
 
       if (!appointment) {
@@ -423,23 +418,21 @@ Booked via CoreFlow360 AI Assistant
         await this.calendar.events.delete({
           calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
           eventId: appointment.calendarEventId,
-          sendUpdates: 'all'
+          sendUpdates: 'all',
         })
       }
 
       // Update appointment status
       await db.appointment.update({
         where: { id: appointmentId },
-        data: { 
+        data: {
           status: 'CANCELLED',
-          cancelledAt: new Date()
-        }
+          cancelledAt: new Date(),
+        },
       })
 
       return true
-
     } catch (error) {
-      console.error('Error cancelling appointment:', error)
       return false
     }
   }
@@ -447,11 +440,14 @@ Booked via CoreFlow360 AI Assistant
   /**
    * Reschedule appointment
    */
-  async rescheduleAppointment(appointmentId: string, newSlot: AvailableSlot): Promise<BookingResult> {
+  async rescheduleAppointment(
+    appointmentId: string,
+    newSlot: AvailableSlot
+  ): Promise<BookingResult> {
     try {
       const appointment = await db.appointment.findUnique({
         where: { id: appointmentId },
-        include: { customer: true }
+        include: { customer: true },
       })
 
       if (!appointment) {
@@ -460,7 +456,7 @@ Booked via CoreFlow360 AI Assistant
 
       const duration = appointment.duration
       const startDateTime = this.combineDateTime(newSlot.date, newSlot.time)
-      const endDateTime = new Date(startDateTime.getTime() + (duration * 60 * 1000))
+      const endDateTime = new Date(startDateTime.getTime() + duration * 60 * 1000)
 
       // Update calendar event
       if (appointment.calendarEventId) {
@@ -470,24 +466,24 @@ Booked via CoreFlow360 AI Assistant
           resource: {
             start: {
               dateTime: startDateTime.toISOString(),
-              timeZone: process.env.GOOGLE_CALENDAR_TIMEZONE || 'America/New_York'
+              timeZone: process.env.GOOGLE_CALENDAR_TIMEZONE || 'America/New_York',
             },
             end: {
               dateTime: endDateTime.toISOString(),
-              timeZone: process.env.GOOGLE_CALENDAR_TIMEZONE || 'America/New_York'
-            }
+              timeZone: process.env.GOOGLE_CALENDAR_TIMEZONE || 'America/New_York',
+            },
           },
-          sendUpdates: 'all'
+          sendUpdates: 'all',
         })
       }
 
       // Update appointment in database
       await db.appointment.update({
         where: { id: appointmentId },
-        data: { 
+        data: {
           scheduledAt: startDateTime,
-          updatedAt: new Date()
-        }
+          updatedAt: new Date(),
+        },
       })
 
       return {
@@ -497,12 +493,10 @@ Booked via CoreFlow360 AI Assistant
           date: newSlot.date,
           time: newSlot.time,
           duration: duration,
-          confirmationNumber: appointment.confirmationNumber
-        }
+          confirmationNumber: appointment.confirmationNumber,
+        },
       }
-
     } catch (error) {
-      console.error('Error rescheduling appointment:', error)
       return { success: false, error: 'Failed to reschedule' }
     }
   }

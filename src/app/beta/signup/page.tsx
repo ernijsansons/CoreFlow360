@@ -2,7 +2,7 @@
 
 /**
  * Beta Signup Page
- * 
+ *
  * Revolutionary consciousness-awakening beta signup experience
  * for early adopters of the world's first conscious business platform.
  */
@@ -39,17 +39,17 @@ interface FormField {
   placeholder?: string
   options?: string[]
   required?: boolean
-  validation?: (value: any) => string | null
+  validation?: (value: unknown) => string | null
 }
 
 // CSS-based Consciousness Particle System
 const ConsciousnessField: React.FC<{ intensity: number }> = ({ intensity }) => {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {Array.from({ length: Math.min(intensity * 5, 20) }).map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-2 h-2 bg-blue-400 rounded-full opacity-70"
+          className="absolute h-2 w-2 rounded-full bg-blue-400 opacity-70"
           style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
@@ -86,23 +86,23 @@ const FORM_STEPS: FormStep[] = [
         validation: (value) => {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
           return emailRegex.test(value) ? null : 'Please enter a valid email address'
-        }
+        },
       },
       {
         name: 'firstName',
         type: 'text',
         label: 'First Name',
         placeholder: 'Sarah',
-        required: true
+        required: true,
       },
       {
         name: 'lastName',
         type: 'text',
         label: 'Last Name',
         placeholder: 'Chen',
-        required: true
-      }
-    ]
+        required: true,
+      },
+    ],
   },
   {
     id: 'reality-check',
@@ -114,7 +114,7 @@ const FORM_STEPS: FormStep[] = [
         type: 'text',
         label: 'Company Name',
         placeholder: 'Acme Corp',
-        required: true
+        required: true,
       },
       {
         name: 'role',
@@ -128,9 +128,9 @@ const FORM_STEPS: FormStep[] = [
           'IT Manager',
           'Business Operations Manager',
           'Other Executive',
-          'Other'
+          'Other',
         ],
-        required: true
+        required: true,
       },
       {
         name: 'industry',
@@ -145,9 +145,9 @@ const FORM_STEPS: FormStep[] = [
           'Retail/E-commerce',
           'Education',
           'Non-profit',
-          'Other'
+          'Other',
         ],
-        required: true
+        required: true,
       },
       {
         name: 'companySize',
@@ -158,11 +158,11 @@ const FORM_STEPS: FormStep[] = [
           '11-50 employees',
           '51-200 employees',
           '201-1000 employees',
-          '1000+ employees'
+          '1000+ employees',
         ],
-        required: true
-      }
-    ]
+        required: true,
+      },
+    ],
   },
   {
     id: 'pain-discovery',
@@ -183,9 +183,9 @@ const FORM_STEPS: FormStep[] = [
           'Scaling challenges',
           'Customer data fragmentation',
           'Inventory management issues',
-          'Financial reporting complexity'
+          'Financial reporting complexity',
         ],
-        required: true
+        required: true,
       },
       {
         name: 'consciousnessLevel',
@@ -193,9 +193,9 @@ const FORM_STEPS: FormStep[] = [
         label: 'Current Business Intelligence Level (1-10)',
         validation: (value) => {
           return value >= 1 && value <= 10 ? null : 'Please select a level between 1-10'
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
   {
     id: 'transformation-vision',
@@ -213,11 +213,11 @@ const FORM_STEPS: FormStep[] = [
           'Industry publication',
           'Conference/Event',
           'Partner recommendation',
-          'Other'
-        ]
-      }
-    ]
-  }
+          'Other',
+        ],
+      },
+    ],
+  },
 ]
 
 const BetaSignupPage: React.FC = () => {
@@ -230,7 +230,7 @@ const BetaSignupPage: React.FC = () => {
 
   const consciousnessAudio = useConsciousnessAudio({
     initiallyEnabled: true,
-    initialConsciousnessLevel: 1
+    initialConsciousnessLevel: 1,
   })
 
   useEffect(() => {
@@ -239,17 +239,17 @@ const BetaSignupPage: React.FC = () => {
     consciousnessAudio.setConsciousnessLevel(currentStep + 1)
   }, [currentStep, consciousnessAudio])
 
-  const handleFieldChange = (fieldName: string, value: any) => {
-    setFormData(prev => ({
+  const handleFieldChange = (fieldName: string, value: unknown) => {
+    setFormData((prev) => ({
       ...prev,
-      [fieldName]: value
+      [fieldName]: value,
     }))
-    
+
     // Clear error when user starts typing
     if (errors[fieldName]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [fieldName]: ''
+        [fieldName]: '',
       }))
     }
   }
@@ -257,10 +257,10 @@ const BetaSignupPage: React.FC = () => {
   const validateStep = (stepIndex: number): boolean => {
     const step = FORM_STEPS[stepIndex]
     const stepErrors: Record<string, string> = {}
-    
+
     for (const field of step.fields) {
       const value = formData[field.name as keyof BetaUser]
-      
+
       if (field.required && (!value || (Array.isArray(value) && value.length === 0))) {
         stepErrors[field.name] = `${field.label} is required`
       } else if (field.validation && value) {
@@ -270,7 +270,7 @@ const BetaSignupPage: React.FC = () => {
         }
       }
     }
-    
+
     setErrors(stepErrors)
     return Object.keys(stepErrors).length === 0
   }
@@ -279,7 +279,7 @@ const BetaSignupPage: React.FC = () => {
     if (validateStep(currentStep)) {
       consciousnessAudio.playConnectionSound()
       if (currentStep < FORM_STEPS.length - 1) {
-        setCurrentStep(current => current + 1)
+        setCurrentStep((current) => current + 1)
       } else {
         handleSubmit()
       }
@@ -288,13 +288,13 @@ const BetaSignupPage: React.FC = () => {
 
   const handlePrevious = () => {
     if (currentStep > 0) {
-      setCurrentStep(current => current - 1)
+      setCurrentStep((current) => current - 1)
     }
   }
 
   const calculatePriorityScore = (userData: Partial<BetaUser>): number => {
     let score = 0
-    
+
     // Company size scoring
     if (userData.companySize) {
       const sizeScores = {
@@ -302,11 +302,11 @@ const BetaSignupPage: React.FC = () => {
         '201-1000 employees': 90,
         '11-50 employees': 80,
         '1000+ employees': 70,
-        '1-10 employees': 60
+        '1-10 employees': 60,
       }
       score += sizeScores[userData.companySize as keyof typeof sizeScores] || 50
     }
-    
+
     // Role scoring
     if (userData.role) {
       const roleScores = {
@@ -315,56 +315,56 @@ const BetaSignupPage: React.FC = () => {
         'VP Operations': 85,
         'Director of Technology': 80,
         'IT Manager': 75,
-        'Business Operations Manager': 70
+        'Business Operations Manager': 70,
       }
       score += roleScores[userData.role as keyof typeof roleScores] || 60
     }
-    
+
     // Industry scoring
     if (userData.industry) {
       const industryScores = {
         'Technology/Software': 100,
         'Professional Services': 90,
-        'Manufacturing': 85,
+        Manufacturing: 85,
         'Financial Services': 80,
-        'Healthcare': 75
+        Healthcare: 75,
       }
       score += industryScores[userData.industry as keyof typeof industryScores] || 70
     }
-    
+
     // Challenge complexity scoring
     const challengeCount = userData.currentChallenges?.length || 0
     score += Math.min(challengeCount * 10, 50)
-    
+
     // Consciousness level (inverse - lower levels get higher priority)
     const consciousnessLevel = userData.consciousnessLevel || 5
     score += (10 - consciousnessLevel) * 5
-    
+
     return Math.min(score, 500)
   }
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
-    
+
     try {
       const priorityScore = calculatePriorityScore(formData)
-      
+
       const betaUser: BetaUser = {
         ...formData,
         priorityScore,
         currentChallenges: formData.currentChallenges || [],
-        consciousnessLevel: formData.consciousnessLevel || 5
+        consciousnessLevel: formData.consciousnessLevel || 5,
       } as BetaUser
-      
+
       // Submit to API
       const response = await fetch('/api/beta/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(betaUser)
+        body: JSON.stringify(betaUser),
       })
-      
+
       if (response.ok) {
         consciousnessAudio.playConsciousnessEmergence()
         setIsComplete(true)
@@ -372,7 +372,6 @@ const BetaSignupPage: React.FC = () => {
         throw new Error('Signup failed')
       }
     } catch (error) {
-      console.error('Beta signup error:', error)
       setErrors({ submit: 'Failed to submit. Please try again.' })
     } finally {
       setIsSubmitting(false)
@@ -381,45 +380,46 @@ const BetaSignupPage: React.FC = () => {
 
   if (isComplete) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-black">
         <div className="absolute inset-0">
           <ConsciousnessField intensity={5} />
         </div>
-        
+
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="relative z-10 text-center bg-black/30 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-12 max-w-2xl mx-4"
+          className="relative z-10 mx-4 max-w-2xl rounded-2xl border border-purple-500/30 bg-black/30 p-12 text-center backdrop-blur-xl"
         >
-          <div className="text-6xl mb-6">✨</div>
-          <h1 className="text-4xl font-bold text-white mb-6">
-            Consciousness Awakening Complete
-          </h1>
-          <p className="text-xl text-gray-300 mb-8">
-            Welcome to the consciousness revolution! You're now part of an exclusive group 
+          <div className="mb-6 text-6xl">✨</div>
+          <h1 className="mb-6 text-4xl font-bold text-white">Consciousness Awakening Complete</h1>
+          <p className="mb-8 text-xl text-gray-300">
+            Welcome to the consciousness revolution! You're now part of an exclusive group
             pioneering the future of business intelligence.
           </p>
-          
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-purple-500/20 rounded-lg p-4">
-              <div className="text-2xl mb-2">🎯</div>
-              <div className="text-white font-semibold">Priority Access</div>
+
+          <div className="mb-8 grid gap-6 md:grid-cols-3">
+            <div className="rounded-lg bg-purple-500/20 p-4">
+              <div className="mb-2 text-2xl">🎯</div>
+              <div className="font-semibold text-white">Priority Access</div>
               <div className="text-sm text-gray-400">Beta invitation coming soon</div>
             </div>
-            <div className="bg-cyan-500/20 rounded-lg p-4">
-              <div className="text-2xl mb-2">🧠</div>
-              <div className="text-white font-semibold">AI Consciousness</div>
+            <div className="rounded-lg bg-cyan-500/20 p-4">
+              <div className="mb-2 text-2xl">🧠</div>
+              <div className="font-semibold text-white">AI Consciousness</div>
               <div className="text-sm text-gray-400">Personalized for your business</div>
             </div>
-            <div className="bg-green-500/20 rounded-lg p-4">
-              <div className="text-2xl mb-2">🚀</div>
-              <div className="text-white font-semibold">Transformation</div>
+            <div className="rounded-lg bg-green-500/20 p-4">
+              <div className="mb-2 text-2xl">🚀</div>
+              <div className="font-semibold text-white">Transformation</div>
               <div className="text-sm text-gray-400">Exponential intelligence growth</div>
             </div>
           </div>
-          
-          <p className="text-gray-400 text-sm">
-            Your consciousness journey ID: <span className="text-cyan-400 font-mono">{Math.random().toString(36).substr(2, 9).toUpperCase()}</span>
+
+          <p className="text-sm text-gray-400">
+            Your consciousness journey ID:{' '}
+            <span className="font-mono text-cyan-400">
+              {Math.random().toString(36).substr(2, 9).toUpperCase()}
+            </span>
           </p>
         </motion.div>
       </div>
@@ -435,18 +435,18 @@ const BetaSignupPage: React.FC = () => {
       <div className="absolute inset-0">
         <ConsciousnessField intensity={consciousnessIntensity} />
       </div>
-      
-      <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+
+      <div className="relative z-10 flex min-h-screen items-center justify-center p-4">
         <motion.div
           key={currentStep}
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -50 }}
-          className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-8 max-w-2xl w-full"
+          className="w-full max-w-2xl rounded-2xl border border-white/10 bg-black/30 p-8 backdrop-blur-xl"
         >
           {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">
+          <div className="mb-8 text-center">
+            <h1 className="mb-2 text-3xl font-bold text-white">
               Join the Consciousness Revolution
             </h1>
             <p className="text-gray-400">
@@ -456,13 +456,15 @@ const BetaSignupPage: React.FC = () => {
 
           {/* Progress Bar */}
           <div className="mb-8">
-            <div className="flex justify-between text-sm text-gray-400 mb-2">
-              <span>Step {currentStep + 1} of {FORM_STEPS.length}</span>
+            <div className="mb-2 flex justify-between text-sm text-gray-400">
+              <span>
+                Step {currentStep + 1} of {FORM_STEPS.length}
+              </span>
               <span>{Math.round(progress)}% complete</span>
             </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
+            <div className="h-2 w-full rounded-full bg-gray-700">
               <motion.div
-                className="bg-gradient-to-r from-cyan-500 to-purple-500 h-2 rounded-full"
+                className="h-2 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500"
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.5 }}
@@ -472,34 +474,30 @@ const BetaSignupPage: React.FC = () => {
 
           {/* Step Content */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">
-              {currentStepData.title}
-            </h2>
-            <p className="text-gray-300 mb-6">
-              {currentStepData.description}
-            </p>
+            <h2 className="mb-2 text-2xl font-bold text-white">{currentStepData.title}</h2>
+            <p className="mb-6 text-gray-300">{currentStepData.description}</p>
 
             <div className="space-y-6">
               {currentStepData.fields.map((field) => (
                 <div key={field.name}>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="mb-2 block text-sm font-medium text-gray-300">
                     {field.label}
-                    {field.required && <span className="text-red-400 ml-1">*</span>}
+                    {field.required && <span className="ml-1 text-red-400">*</span>}
                   </label>
-                  
+
                   {field.type === 'text' || field.type === 'email' ? (
                     <input
                       type={field.type}
                       placeholder={field.placeholder}
-                      value={formData[field.name as keyof BetaUser] as string || ''}
+                      value={(formData[field.name as keyof BetaUser] as string) || ''}
                       onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                      className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
+                      className="w-full rounded-lg border border-gray-600 bg-black/50 px-4 py-3 text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
                     />
                   ) : field.type === 'select' ? (
                     <select
-                      value={formData[field.name as keyof BetaUser] as string || ''}
+                      value={(formData[field.name as keyof BetaUser] as string) || ''}
                       onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                      className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:border-cyan-400 focus:outline-none"
+                      className="w-full rounded-lg border border-gray-600 bg-black/50 px-4 py-3 text-white focus:border-cyan-400 focus:outline-none"
                     >
                       <option value="">Select an option</option>
                       {field.options?.map((option) => (
@@ -513,16 +511,19 @@ const BetaSignupPage: React.FC = () => {
                       {field.options?.map((option) => (
                         <label
                           key={option}
-                          className="flex items-center space-x-2 p-3 bg-black/30 rounded-lg cursor-pointer hover:bg-black/50 transition-colors"
+                          className="flex cursor-pointer items-center space-x-2 rounded-lg bg-black/30 p-3 transition-colors hover:bg-black/50"
                         >
                           <input
                             type="checkbox"
-                            checked={(formData[field.name as keyof BetaUser] as string[] || []).includes(option)}
+                            checked={(
+                              (formData[field.name as keyof BetaUser] as string[]) || []
+                            ).includes(option)}
                             onChange={(e) => {
-                              const currentValues = formData[field.name as keyof BetaUser] as string[] || []
+                              const currentValues =
+                                (formData[field.name as keyof BetaUser] as string[]) || []
                               const newValues = e.target.checked
                                 ? [...currentValues, option]
-                                : currentValues.filter(v => v !== option)
+                                : currentValues.filter((v) => v !== option)
                               handleFieldChange(field.name, newValues)
                             }}
                             className="text-cyan-400"
@@ -537,22 +538,22 @@ const BetaSignupPage: React.FC = () => {
                         type="range"
                         min="1"
                         max="10"
-                        value={formData[field.name as keyof BetaUser] as number || 5}
+                        value={(formData[field.name as keyof BetaUser] as number) || 5}
                         onChange={(e) => handleFieldChange(field.name, parseInt(e.target.value))}
-                        className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                        className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-600"
                       />
-                      <div className="flex justify-between text-xs text-gray-400 mt-2">
+                      <div className="mt-2 flex justify-between text-xs text-gray-400">
                         <span>1 - Basic</span>
-                        <span className="text-cyan-400 font-bold">
+                        <span className="font-bold text-cyan-400">
                           {formData[field.name as keyof BetaUser] || 5}
                         </span>
                         <span>10 - Advanced</span>
                       </div>
                     </div>
                   ) : null}
-                  
+
                   {errors[field.name] && (
-                    <p className="text-red-400 text-sm mt-1">{errors[field.name]}</p>
+                    <p className="mt-1 text-sm text-red-400">{errors[field.name]}</p>
                   )}
                 </div>
               ))}
@@ -564,29 +565,25 @@ const BetaSignupPage: React.FC = () => {
             <button
               onClick={handlePrevious}
               disabled={currentStep === 0}
-              className="px-6 py-3 bg-gray-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600 transition-colors"
+              className="rounded-lg bg-gray-700 px-6 py-3 text-white transition-colors hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Previous
             </button>
-            
+
             <button
               onClick={handleNext}
               disabled={isSubmitting}
-              className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-purple-600 text-white rounded-lg hover:from-cyan-500 hover:to-purple-500 transition-all disabled:opacity-50"
+              className="rounded-lg bg-gradient-to-r from-cyan-600 to-purple-600 px-6 py-3 text-white transition-all hover:from-cyan-500 hover:to-purple-500 disabled:opacity-50"
             >
-              {isSubmitting ? (
-                'Submitting...'
-              ) : currentStep === FORM_STEPS.length - 1 ? (
-                'Complete Awakening'
-              ) : (
-                'Next Step'
-              )}
+              {isSubmitting
+                ? 'Submitting...'
+                : currentStep === FORM_STEPS.length - 1
+                  ? 'Complete Awakening'
+                  : 'Next Step'}
             </button>
           </div>
 
-          {errors.submit && (
-            <p className="text-red-400 text-center mt-4">{errors.submit}</p>
-          )}
+          {errors.submit && <p className="mt-4 text-center text-red-400">{errors.submit}</p>}
         </motion.div>
       </div>
     </div>

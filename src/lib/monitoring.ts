@@ -34,7 +34,7 @@ interface ErrorContext {
   tenantId?: string
   feature?: string
   module?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 // Performance monitoring
@@ -51,16 +51,16 @@ export class PerformanceTracker {
 
   init() {
     if (typeof window === 'undefined') return
-    
+
     const config = getMonitoringConfig()
     if (!config.monitoringEnabled) return
 
     // Track Core Web Vitals
     this.trackWebVitals()
-    
+
     // Track API performance
     this.trackApiPerformance()
-    
+
     // Track React component renders
     this.trackComponentPerformance()
   }
@@ -84,15 +84,15 @@ export class PerformanceTracker {
       try {
         const response = await originalFetch(...args)
         const duration = performance.now() - start
-        
+
         this.trackApiCall({
           url: args[0] as string,
           method: (args[1]?.method || 'GET') as string,
           status: response.status,
           duration,
-          success: response.ok
+          success: response.ok,
         })
-        
+
         return response
       } catch (error) {
         const duration = performance.now() - start
@@ -101,7 +101,7 @@ export class PerformanceTracker {
           method: (args[1]?.method || 'GET') as string,
           duration,
           success: false,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         })
         throw error
       }
@@ -117,23 +117,23 @@ export class PerformanceTracker {
             this.sendPerformanceMetric({
               name: entry.name,
               duration: entry.duration,
-              type: 'react_render'
+              type: 'react_render',
             })
           }
         }
       })
-      
+
       this.performanceObserver.observe({ entryTypes: ['measure'] })
     }
   }
 
-  private sendVital(vital: any) {
+  private sendVital(vital: unknown) {
     // Send to multiple analytics platforms
     if (window.gtag) {
       window.gtag('event', vital.name, {
         event_category: 'Web Vitals',
         value: Math.round(vital.name === 'CLS' ? vital.value * 1000 : vital.value),
-        non_interaction: true
+        non_interaction: true,
       })
     }
 
@@ -141,7 +141,7 @@ export class PerformanceTracker {
       window.va('track', 'web-vital', {
         name: vital.name,
         value: vital.value,
-        id: vital.id
+        id: vital.id,
       })
     }
 
@@ -164,8 +164,8 @@ export class PerformanceTracker {
         value: Math.round(metrics.duration),
         custom_parameters: {
           status: metrics.status,
-          success: metrics.success
-        }
+          success: metrics.success,
+        },
       })
     }
 
@@ -176,30 +176,29 @@ export class PerformanceTracker {
         method: metrics.method,
         duration: metrics.duration,
         status: metrics.status,
-        success: metrics.success
+        success: metrics.success,
       })
     }
 
     // Log slow API calls
     if (metrics.duration > 1000) {
-      this.logError(new Error(`Slow API call: ${metrics.method} ${metrics.url} took ${metrics.duration}ms`), {
-        category: 'performance',
-        api_url: metrics.url,
-        duration: metrics.duration
-      })
+      this.logError(
+        new Error(`Slow API call: ${metrics.method} ${metrics.url} took ${metrics.duration}ms`),
+        {
+          category: 'performance',
+          api_url: metrics.url,
+          duration: metrics.duration,
+        }
+      )
     }
   }
 
-  private sendPerformanceMetric(metric: {
-    name: string
-    duration: number
-    type: string
-  }) {
+  private sendPerformanceMetric(metric: { name: string; duration: number; type: string }) {
     if (window.gtag) {
       window.gtag('event', 'performance_metric', {
         event_category: 'Performance',
         event_label: metric.name,
-        value: Math.round(metric.duration)
+        value: Math.round(metric.duration),
       })
     }
   }
@@ -208,7 +207,6 @@ export class PerformanceTracker {
   logError(error: Error, context?: ErrorContext) {
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.error('[Error Tracked]', error, context)
     }
 
     // Send to Google Analytics
@@ -216,7 +214,7 @@ export class PerformanceTracker {
       window.gtag('event', 'exception', {
         description: error.message,
         fatal: false,
-        custom_parameters: context
+        custom_parameters: context,
       })
     }
 
@@ -225,7 +223,7 @@ export class PerformanceTracker {
       window.va('track', 'error', {
         message: error.message,
         stack: error.stack,
-        ...context
+        ...context,
       })
     }
 
@@ -238,13 +236,13 @@ export class PerformanceTracker {
     name: string
     value: number
     category: string
-    properties?: Record<string, any>
+    properties?: Record<string, unknown>
   }) {
     if (window.gtag) {
       window.gtag('event', metric.name, {
         event_category: metric.category,
         value: metric.value,
-        custom_parameters: metric.properties
+        custom_parameters: metric.properties,
       })
     }
 
@@ -252,7 +250,7 @@ export class PerformanceTracker {
       window.va('track', metric.name, {
         value: metric.value,
         category: metric.category,
-        ...metric.properties
+        ...metric.properties,
       })
     }
   }
@@ -273,7 +271,7 @@ export class HealthCheck {
     try {
       const response = await fetch('/api/health', {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       })
       return response.ok
     } catch (error) {
@@ -286,7 +284,7 @@ export class HealthCheck {
     try {
       const response = await fetch('/api/health/database', {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       })
       return response.ok
     } catch (error) {
@@ -300,10 +298,7 @@ export class HealthCheck {
     database: boolean
     overall: boolean
   }> {
-    const [api, database] = await Promise.all([
-      this.checkApiHealth(),
-      this.checkDatabaseHealth()
-    ])
+    const [api, database] = await Promise.all([this.checkApiHealth(), this.checkDatabaseHealth()])
 
     const overall = api && database
 
@@ -312,7 +307,7 @@ export class HealthCheck {
       name: 'health_check',
       value: overall ? 1 : 0,
       category: 'system',
-      properties: { api, database }
+      properties: { api, database },
     })
 
     return { api, database, overall }
@@ -342,7 +337,7 @@ export class SessionTracker {
 
   trackSessionEnd() {
     const sessionDuration = Date.now() - this.sessionStart
-    
+
     getPerformanceTracker().trackBusinessMetric({
       name: 'session_completed',
       value: sessionDuration,
@@ -350,8 +345,8 @@ export class SessionTracker {
       properties: {
         page_views: this.pageViews,
         interactions: this.interactions,
-        duration_minutes: Math.round(sessionDuration / 60000)
-      }
+        duration_minutes: Math.round(sessionDuration / 60000),
+      },
     })
   }
 
@@ -360,7 +355,7 @@ export class SessionTracker {
     getPerformanceTracker().trackBusinessMetric({
       name: 'session_started',
       value: 1,
-      category: 'engagement'
+      category: 'engagement',
     })
 
     // Track session end on page unload
@@ -376,15 +371,15 @@ export class SessionTracker {
 
   private trackSessionMetric() {
     const sessionDuration = Date.now() - this.sessionStart
-    
+
     getPerformanceTracker().trackBusinessMetric({
       name: 'session_active',
       value: sessionDuration,
       category: 'engagement',
       properties: {
         page_views: this.pageViews,
-        interactions: this.interactions
-      }
+        interactions: this.interactions,
+      },
     })
   }
 }
@@ -396,10 +391,10 @@ export class RealUserMonitoring {
 
     // Track user agent and device info
     this.trackDeviceInfo()
-    
+
     // Track connection quality
     this.trackConnection()
-    
+
     // Track feature usage
     this.trackFeatureUsage()
   }
@@ -412,21 +407,21 @@ export class RealUserMonitoring {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       language: navigator.language,
       cookies_enabled: navigator.cookieEnabled,
-      online: navigator.onLine
+      online: navigator.onLine,
     }
 
     getPerformanceTracker().trackBusinessMetric({
       name: 'device_info',
       value: 1,
       category: 'rum',
-      properties: deviceInfo
+      properties: deviceInfo,
     })
   }
 
   private static trackConnection() {
     if ('connection' in navigator) {
-      const connection = (navigator as any).connection
-      
+      const connection = (navigator as unknown).connection
+
       getPerformanceTracker().trackBusinessMetric({
         name: 'connection_info',
         value: 1,
@@ -435,8 +430,8 @@ export class RealUserMonitoring {
           effective_type: connection.effectiveType,
           downlink: connection.downlink,
           rtt: connection.rtt,
-          save_data: connection.saveData
-        }
+          save_data: connection.saveData,
+        },
       })
     }
   }
@@ -449,14 +444,14 @@ export class RealUserMonitoring {
       web_share: 'share' in navigator,
       payment_request: 'PaymentRequest' in window,
       intersection_observer: 'IntersectionObserver' in window,
-      performance_observer: 'PerformanceObserver' in window
+      performance_observer: 'PerformanceObserver' in window,
     }
 
     getPerformanceTracker().trackBusinessMetric({
       name: 'browser_features',
       value: 1,
       category: 'rum',
-      properties: features
+      properties: features,
     })
   }
 }
@@ -483,10 +478,10 @@ if (typeof window !== 'undefined') {
 export async function withPerformanceTracking<T>(
   operation: string,
   fn: () => Promise<T>,
-  options?: { 
+  options?: {
     tenantId?: string
     userId?: string
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   }
 ): Promise<T> {
   const start = performance.now()
@@ -513,14 +508,17 @@ export async function withPerformanceTracking<T>(
       properties: {
         success,
         error: error?.message,
-        memoryDelta: memoryBefore && memoryAfter ? {
-          heapUsed: memoryAfter.heapUsed - memoryBefore.heapUsed,
-          external: memoryAfter.external - memoryBefore.external
-        } : null,
+        memoryDelta:
+          memoryBefore && memoryAfter
+            ? {
+                heapUsed: memoryAfter.heapUsed - memoryBefore.heapUsed,
+                external: memoryAfter.external - memoryBefore.external,
+              }
+            : null,
         ...options?.metadata,
         tenantId: options?.tenantId,
-        userId: options?.userId
-      }
+        userId: options?.userId,
+      },
     })
 
     // Log slow operations
@@ -531,7 +529,7 @@ export async function withPerformanceTracking<T>(
           feature: 'performance',
           operation,
           duration,
-          ...options
+          ...options,
         }
       )
     }

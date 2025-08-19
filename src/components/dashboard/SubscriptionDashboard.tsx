@@ -8,15 +8,15 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import useSWR from 'swr'
 import { motion } from 'framer-motion'
-import { 
-  CreditCardIcon, 
-  SparklesIcon, 
+import {
+  CreditCardIcon,
+  SparklesIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   CalendarIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
 } from '@heroicons/react/24/outline'
 
 /*
@@ -91,24 +91,23 @@ const simulateCheckout = async (calculation: CalculationResult, users: number, a
     currency: 'usd',
     users,
     billingCycle: annual ? 'annual' : 'monthly',
-    bundles: calculation.breakdown.map(b => b.bundle),
+    bundles: calculation.breakdown.map((b) => b.bundle),
     metadata: {
       tenantId: 'mock-tenant',
-      calculatedAt: calculation.metadata.calculatedAt
-    }
+      calculatedAt: calculation.metadata.calculatedAt,
+    },
   }
-  
+
   // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  console.log('Mock Stripe Checkout:', checkoutData)
+  await new Promise((resolve) => setTimeout(resolve, 1000))
+
   alert(`Mock checkout initiated for $${calculation.total.toFixed(2)}`)
   return checkoutData
 }
 
-export default function SubscriptionDashboard({ 
+export default function SubscriptionDashboard({
   tenantId = 'demo-tenant',
-  onSubscriptionChange 
+  onSubscriptionChange,
 }: SubscriptionDashboardProps) {
   const [selectedBundles, setSelectedBundles] = useState<string[]>([])
   const [users, setUsers] = useState<number>(5)
@@ -119,25 +118,28 @@ export default function SubscriptionDashboard({
   const [errors, setErrors] = useState<string[]>([])
 
   // Fetch available bundles
-  const { data: bundlesData, error: bundlesError, isLoading: bundlesLoading } = useSWR(
-    '/api/subscriptions/calculate',
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false
-    }
-  )
+  const {
+    data: bundlesData,
+    error: bundlesError,
+    isLoading: bundlesLoading,
+  } = useSWR('/api/subscriptions/calculate', fetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  })
 
   // Group bundles by category for better UX
   const bundlesByCategory = useMemo(() => {
     if (!bundlesData?.availableBundles) return {}
-    
-    return bundlesData.availableBundles.reduce((acc: Record<string, BundleInfo[]>, bundle: BundleInfo) => {
-      const category = bundle.category || 'other'
-      if (!acc[category]) acc[category] = []
-      acc[category].push(bundle)
-      return acc
-    }, {})
+
+    return bundlesData.availableBundles.reduce(
+      (acc: Record<string, BundleInfo[]>, bundle: BundleInfo) => {
+        const category = bundle.category || 'other'
+        if (!acc[category]) acc[category] = []
+        acc[category].push(bundle)
+        return acc
+      },
+      {}
+    )
   }, [bundlesData])
 
   // Real-time pricing calculation
@@ -155,14 +157,14 @@ export default function SubscriptionDashboard({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Tenant-ID': tenantId
+          'X-Tenant-ID': tenantId,
         },
         body: JSON.stringify({
           bundles: selectedBundles,
           users: Math.max(1, users),
           annual,
-          promoCode: promoCode.trim() || undefined
-        })
+          promoCode: promoCode.trim() || undefined,
+        }),
       })
 
       if (!response.ok) {
@@ -172,7 +174,7 @@ export default function SubscriptionDashboard({
 
       const result = await response.json()
       setCalculation(result)
-      
+
       // Trigger subscription change callback
       onSubscriptionChange?.(selectedBundles)
     } catch (error) {
@@ -192,12 +194,10 @@ export default function SubscriptionDashboard({
 
   // Handle bundle selection with optimistic updates
   const handleBundleToggle = useCallback((bundleId: string) => {
-    setSelectedBundles(prev => {
+    setSelectedBundles((prev) => {
       const isSelected = prev.includes(bundleId)
-      const newSelection = isSelected 
-        ? prev.filter(id => id !== bundleId)
-        : [...prev, bundleId]
-      
+      const newSelection = isSelected ? prev.filter((id) => id !== bundleId) : [...prev, bundleId]
+
       return newSelection
     })
   }, [])
@@ -209,20 +209,21 @@ export default function SubscriptionDashboard({
     try {
       await simulateCheckout(calculation, users, annual)
     } catch (error) {
-      console.error('Checkout failed:', error)
       alert('Checkout simulation failed. Please try again.')
     }
   }, [calculation, users, annual])
 
   if (bundlesError) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-6">
           <div className="flex">
             <ExclamationTriangleIcon className="h-6 w-6 text-red-400" />
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">Failed to load bundles</h3>
-              <p className="mt-1 text-sm text-red-700">Please refresh the page or contact support.</p>
+              <p className="mt-1 text-sm text-red-700">
+                Please refresh the page or contact support.
+              </p>
             </div>
           </div>
         </div>
@@ -231,36 +232,34 @@ export default function SubscriptionDashboard({
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-          <CreditCardIcon className="h-8 w-8 mr-3 text-blue-600" />
+        <h1 className="flex items-center text-3xl font-bold text-gray-900">
+          <CreditCardIcon className="mr-3 h-8 w-8 text-blue-600" />
           Subscription Management
         </h1>
-        <p className="mt-2 text-lg text-gray-600">
-          Configure your CoreFlow360 bundles and pricing
-        </p>
+        <p className="mt-2 text-lg text-gray-600">Configure your CoreFlow360 bundles and pricing</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Bundle Selection */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="space-y-8 lg:col-span-2">
           {/* Configuration Controls */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <Cog6ToothIcon className="h-5 w-5 mr-2" />
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
+              <Cog6ToothIcon className="mr-2 h-5 w-5" />
               Configuration
             </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {/* User Count */}
               <div>
                 <label htmlFor="users" className="block text-sm font-medium text-gray-700">
                   Number of Users
                 </label>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="relative mt-1 rounded-md shadow-sm">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                     <UserGroupIcon className="h-4 w-4 text-gray-400" />
                   </div>
                   <input
@@ -270,22 +269,22 @@ export default function SubscriptionDashboard({
                     max="100000"
                     value={users}
                     onChange={(e) => setUsers(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="pl-10 block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full rounded-md border-gray-300 pl-10 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               {/* Billing Cycle */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
                   Billing Cycle
                 </label>
                 <div className="flex space-x-2">
                   <button
                     onClick={() => setAnnual(false)}
-                    className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                      !annual 
-                        ? 'bg-blue-600 text-white' 
+                    className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                      !annual
+                        ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -293,9 +292,9 @@ export default function SubscriptionDashboard({
                   </button>
                   <button
                     onClick={() => setAnnual(true)}
-                    className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                      annual 
-                        ? 'bg-blue-600 text-white' 
+                    className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                      annual
+                        ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -316,7 +315,7 @@ export default function SubscriptionDashboard({
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                   placeholder="LAUNCH25"
-                  className="mt-1 block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -325,7 +324,7 @@ export default function SubscriptionDashboard({
           {/* Bundle Categories */}
           {bundlesLoading ? (
             <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
             </div>
           ) : (
             Object.entries(bundlesByCategory).map(([category, bundles]) => (
@@ -333,19 +332,19 @@ export default function SubscriptionDashboard({
                 key={category}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
               >
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 capitalize flex items-center">
-                  <SparklesIcon className="h-5 w-5 mr-2 text-blue-600" />
+                <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-900 capitalize">
+                  <SparklesIcon className="mr-2 h-5 w-5 text-blue-600" />
                   {category.replace('_', ' ')} Bundles
                 </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {bundles.map((bundle) => (
                     <motion.div
                       key={bundle.id}
                       whileHover={{ scale: 1.02 }}
-                      className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                      className={`cursor-pointer rounded-lg border p-4 transition-all ${
                         selectedBundles.includes(bundle.id)
                           ? 'border-blue-500 bg-blue-50 shadow-md'
                           : 'border-gray-200 hover:border-gray-300'
@@ -359,25 +358,28 @@ export default function SubscriptionDashboard({
                               type="checkbox"
                               checked={selectedBundles.includes(bundle.id)}
                               onChange={() => handleBundleToggle(bundle.id)}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
                             <h4 className="ml-3 text-sm font-semibold text-gray-900">
                               {bundle.name}
                             </h4>
-                            <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              bundle.tier === 'professional' ? 'bg-blue-100 text-blue-800' :
-                              bundle.tier === 'enterprise' ? 'bg-purple-100 text-purple-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
+                            <span
+                              className={`ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                bundle.tier === 'professional'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : bundle.tier === 'enterprise'
+                                    ? 'bg-purple-100 text-purple-800'
+                                    : 'bg-gray-100 text-gray-800'
+                              }`}
+                            >
                               {bundle.tier}
                             </span>
                           </div>
-                          <p className="mt-1 text-sm text-gray-600">
-                            {bundle.description}
-                          </p>
+                          <p className="mt-1 text-sm text-gray-600">{bundle.description}</p>
                           <div className="mt-2 text-sm text-gray-900">
                             <span className="font-medium">
-                              ${bundle.pricing.basePrice}/mo base + ${bundle.pricing.perUserPrice}/user
+                              ${bundle.pricing.basePrice}/mo base + ${bundle.pricing.perUserPrice}
+                              /user
                             </span>
                             {bundle.pricing.annualDiscount > 0 && (
                               <span className="ml-2 text-green-600">
@@ -390,13 +392,13 @@ export default function SubscriptionDashboard({
                               {bundle.features.slice(0, 3).map((feature, idx) => (
                                 <span
                                   key={idx}
-                                  className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700"
+                                  className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
                                 >
                                   {feature}
                                 </span>
                               ))}
                               {bundle.features.length > 3 && (
-                                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700">
+                                <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
                                   +{bundle.features.length - 3} more
                                 </span>
                               )}
@@ -416,15 +418,15 @@ export default function SubscriptionDashboard({
         <div className="space-y-6">
           <div className="sticky top-8">
             {/* Calculation Summary */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <CurrencyDollarIcon className="h-5 w-5 mr-2" />
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
+                <CurrencyDollarIcon className="mr-2 h-5 w-5" />
                 Pricing Summary
               </h3>
 
               {isCalculating ? (
                 <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-600"></div>
                 </div>
               ) : calculation ? (
                 <div className="space-y-4">
@@ -449,16 +451,18 @@ export default function SubscriptionDashboard({
                         <span>-${calculation.discount.toFixed(2)}</span>
                       </div>
                     )}
-                    <div className="flex justify-between text-lg font-semibold text-gray-900 mt-2">
+                    <div className="mt-2 flex justify-between text-lg font-semibold text-gray-900">
                       <span>Total</span>
                       <span>${calculation.total.toFixed(2)}/mo</span>
                     </div>
                   </div>
 
                   {/* Savings */}
-                  {(calculation.savings.annual > 0 || calculation.savings.volume > 0 || calculation.savings.multiBundle > 0) && (
-                    <div className="bg-green-50 border border-green-200 rounded-md p-3">
-                      <h4 className="text-sm font-medium text-green-800 mb-2">Your Savings</h4>
+                  {(calculation.savings.annual > 0 ||
+                    calculation.savings.volume > 0 ||
+                    calculation.savings.multiBundle > 0) && (
+                    <div className="rounded-md border border-green-200 bg-green-50 p-3">
+                      <h4 className="mb-2 text-sm font-medium text-green-800">Your Savings</h4>
                       <div className="space-y-1 text-sm text-green-700">
                         {calculation.savings.annual > 0 && (
                           <div>Annual billing: ${calculation.savings.annual.toFixed(2)}/mo</div>
@@ -475,12 +479,12 @@ export default function SubscriptionDashboard({
 
                   {/* Warnings */}
                   {calculation.warnings.length > 0 && (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                    <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3">
                       <div className="flex">
                         <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
                         <div className="ml-3">
                           <h4 className="text-sm font-medium text-yellow-800">Warnings</h4>
-                          <ul className="mt-1 text-sm text-yellow-700 list-disc list-inside">
+                          <ul className="mt-1 list-inside list-disc text-sm text-yellow-700">
                             {calculation.warnings.map((warning, idx) => (
                               <li key={idx}>{warning}</li>
                             ))}
@@ -492,12 +496,12 @@ export default function SubscriptionDashboard({
 
                   {/* Recommendations */}
                   {calculation.recommendations.length > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                      <h4 className="text-sm font-medium text-blue-800 mb-2">Recommendations</h4>
+                    <div className="rounded-md border border-blue-200 bg-blue-50 p-3">
+                      <h4 className="mb-2 text-sm font-medium text-blue-800">Recommendations</h4>
                       <ul className="space-y-1 text-sm text-blue-700">
                         {calculation.recommendations.map((rec, idx) => (
                           <li key={idx} className="flex items-start">
-                            <CheckCircleIcon className="h-4 w-4 text-blue-400 mt-0.5 mr-2 flex-shrink-0" />
+                            <CheckCircleIcon className="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 text-blue-400" />
                             {rec}
                           </li>
                         ))}
@@ -510,22 +514,20 @@ export default function SubscriptionDashboard({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleCheckout}
-                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center justify-center"
+                    className="flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   >
-                    <CreditCardIcon className="h-5 w-5 mr-2" />
+                    <CreditCardIcon className="mr-2 h-5 w-5" />
                     Start Subscription - ${calculation.total.toFixed(2)}/mo
                   </motion.button>
 
-                  <p className="text-xs text-gray-500 text-center">
+                  <p className="text-center text-xs text-gray-500">
                     Valid until {new Date(calculation.metadata.validUntil).toLocaleDateString()}
                   </p>
                 </div>
               ) : selectedBundles.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  Select bundles to see pricing
-                </p>
+                <p className="py-8 text-center text-gray-500">Select bundles to see pricing</p>
               ) : errors.length > 0 ? (
-                <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <div className="rounded-md border border-red-200 bg-red-50 p-3">
                   <div className="flex">
                     <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
                     <div className="ml-3">
@@ -543,12 +545,12 @@ export default function SubscriptionDashboard({
 
             {/* Quick Stats */}
             {calculation && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-gray-50 rounded-lg border border-gray-200 p-4 mt-4"
+                className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4"
               >
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Quick Stats</h4>
+                <h4 className="mb-3 text-sm font-medium text-gray-900">Quick Stats</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Cost per user</span>

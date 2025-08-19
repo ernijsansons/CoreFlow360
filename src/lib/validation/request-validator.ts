@@ -7,16 +7,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 export interface ValidationConfig {
-  maxBodySize?: number        // Maximum request body size in bytes
-  maxUrlLength?: number       // Maximum URL length
-  maxHeaderSize?: number      // Maximum total header size
-  allowedMethods?: string[]   // Allowed HTTP methods
-  allowedContentTypes?: string[]  // Allowed content types
-  requireContentType?: boolean    // Require Content-Type header
-  maxQueryParams?: number     // Maximum number of query parameters
-  maxFormFields?: number      // Maximum number of form fields
-  blockedUserAgents?: RegExp[]    // Blocked user agents
-  blockedIPs?: string[]       // Blocked IP addresses
+  maxBodySize?: number // Maximum request body size in bytes
+  maxUrlLength?: number // Maximum URL length
+  maxHeaderSize?: number // Maximum total header size
+  allowedMethods?: string[] // Allowed HTTP methods
+  allowedContentTypes?: string[] // Allowed content types
+  requireContentType?: boolean // Require Content-Type header
+  maxQueryParams?: number // Maximum number of query parameters
+  maxFormFields?: number // Maximum number of form fields
+  blockedUserAgents?: RegExp[] // Blocked user agents
+  blockedIPs?: string[] // Blocked IP addresses
   rateLimit?: {
     windowMs: number
     maxRequests: number
@@ -26,39 +26,34 @@ export interface ValidationConfig {
 export interface ValidationResult {
   isValid: boolean
   errors: string[]
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 // Default validation configurations for different endpoint types
 export const validationConfigs = {
   public: {
-    maxBodySize: 1024 * 1024,      // 1MB
+    maxBodySize: 1024 * 1024, // 1MB
     maxUrlLength: 2048,
-    maxHeaderSize: 8192,           // 8KB
+    maxHeaderSize: 8192, // 8KB
     allowedMethods: ['GET', 'POST', 'OPTIONS'],
     maxQueryParams: 20,
-    blockedUserAgents: [
-      /bot/i,
-      /crawler/i,
-      /spider/i,
-      /scraper/i
-    ].filter(Boolean), // Remove empty entries
-    requireContentType: false
+    blockedUserAgents: [/bot/i, /crawler/i, /spider/i, /scraper/i].filter(Boolean), // Remove empty entries
+    requireContentType: false,
   },
 
   api: {
     maxBodySize: 10 * 1024 * 1024, // 10MB
     maxUrlLength: 2048,
-    maxHeaderSize: 16384,          // 16KB
+    maxHeaderSize: 16384, // 16KB
     allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedContentTypes: [
       'application/json',
       'application/x-www-form-urlencoded',
-      'multipart/form-data'
+      'multipart/form-data',
     ],
     maxQueryParams: 50,
     maxFormFields: 100,
-    requireContentType: true
+    requireContentType: true,
   },
 
   upload: {
@@ -66,23 +61,20 @@ export const validationConfigs = {
     maxUrlLength: 1024,
     maxHeaderSize: 8192,
     allowedMethods: ['POST', 'PUT', 'PATCH'],
-    allowedContentTypes: [
-      'multipart/form-data',
-      'application/octet-stream'
-    ],
+    allowedContentTypes: ['multipart/form-data', 'application/octet-stream'],
     maxFormFields: 10,
-    requireContentType: true
+    requireContentType: true,
   },
 
   webhook: {
-    maxBodySize: 5 * 1024 * 1024,  // 5MB
+    maxBodySize: 5 * 1024 * 1024, // 5MB
     maxUrlLength: 1024,
     maxHeaderSize: 16384,
     allowedMethods: ['POST'],
     allowedContentTypes: ['application/json'],
     maxQueryParams: 5,
-    requireContentType: true
-  }
+    requireContentType: true,
+  },
 } as const
 
 /**
@@ -93,7 +85,7 @@ export async function validateRequest(
   config: ValidationConfig = validationConfigs.api
 ): Promise<ValidationResult> {
   const errors: string[] = []
-  const metadata: Record<string, any> = {}
+  const metadata: Record<string, unknown> = {}
 
   try {
     // Validate HTTP method
@@ -107,9 +99,11 @@ export async function validateRequest(
     }
 
     // Validate headers
-    const totalHeaderSize = Array.from(request.headers.entries())
-      .reduce((size, [key, value]) => size + key.length + value.length, 0)
-    
+    const totalHeaderSize = Array.from(request.headers.entries()).reduce(
+      (size, [key, value]) => size + key.length + value.length,
+      0
+    )
+
     if (config.maxHeaderSize && totalHeaderSize > config.maxHeaderSize) {
       errors.push(`Total header size exceeds maximum of ${config.maxHeaderSize} bytes`)
     }
@@ -128,7 +122,7 @@ export async function validateRequest(
     // Validate query parameters
     const searchParams = new URL(request.url).searchParams
     const queryParamCount = Array.from(searchParams.keys()).length
-    
+
     if (config.maxQueryParams && queryParamCount > config.maxQueryParams) {
       errors.push(`Too many query parameters: ${queryParamCount} > ${config.maxQueryParams}`)
     }
@@ -166,17 +160,18 @@ export async function validateRequest(
     }
 
     // Validate form data (for form submissions)
-    if (contentType?.includes('multipart/form-data') || 
-        contentType?.includes('application/x-www-form-urlencoded')) {
-      
+    if (
+      contentType?.includes('multipart/form-data') ||
+      contentType?.includes('application/x-www-form-urlencoded')
+    ) {
       try {
         const formData = await request.clone().formData()
         const fieldCount = Array.from(formData.keys()).length
-        
+
         if (config.maxFormFields && fieldCount > config.maxFormFields) {
           errors.push(`Too many form fields: ${fieldCount} > ${config.maxFormFields}`)
         }
-        
+
         metadata.formFieldCount = fieldCount
       } catch (error) {
         // If we can't parse form data, that's also an error
@@ -187,14 +182,13 @@ export async function validateRequest(
     return {
       isValid: errors.length === 0,
       errors,
-      metadata
+      metadata,
     }
-
   } catch (error) {
     return {
       isValid: false,
       errors: [`Validation error: ${error instanceof Error ? error.message : 'Unknown error'}`],
-      metadata
+      metadata,
     }
   }
 }
@@ -209,20 +203,22 @@ export async function validateJsonBody<T>(
   try {
     const body = await request.json()
     const result = schema.safeParse(body)
-    
+
     if (result.success) {
       return { isValid: true, data: result.data }
     } else {
       return { isValid: false, errors: result.error }
     }
   } catch (error) {
-    return { 
-      isValid: false, 
-      errors: new z.ZodError([{
-        code: z.ZodIssueCode.custom,
-        path: [],
-        message: 'Invalid JSON body'
-      }])
+    return {
+      isValid: false,
+      errors: new z.ZodError([
+        {
+          code: z.ZodIssueCode.custom,
+          path: [],
+          message: 'Invalid JSON body',
+        },
+      ]),
     }
   }
 }
@@ -230,13 +226,16 @@ export async function validateJsonBody<T>(
 /**
  * Sanitize string input
  */
-export function sanitizeString(input: string, options: {
-  maxLength?: number
-  allowHtml?: boolean
-  stripControlChars?: boolean
-} = {}): string {
+export function sanitizeString(
+  input: string,
+  options: {
+    maxLength?: number
+    allowHtml?: boolean
+    stripControlChars?: boolean
+  } = {}
+): string {
   const { maxLength = 1000, allowHtml = false, stripControlChars = true } = options
-  
+
   let sanitized = input
 
   // Trim whitespace
@@ -278,18 +277,18 @@ export async function validateFileUpload(
   } = {}
 ): Promise<ValidationResult> {
   const errors: string[] = []
-  const metadata: Record<string, any> = {
+  const metadata: Record<string, unknown> = {
     fileName: file.name,
     fileSize: file.size,
     fileType: file.type,
-    lastModified: file.lastModified
+    lastModified: file.lastModified,
   }
 
   const {
     maxSize = 10 * 1024 * 1024, // 10MB default
     allowedTypes = [],
     allowedExtensions = [],
-    requireSignatureCheck = true
+    requireSignatureCheck = true,
   } = options
 
   // Validate file size
@@ -318,14 +317,16 @@ export async function validateFileUpload(
     try {
       const buffer = await file.slice(0, 16).arrayBuffer()
       const signature = new Uint8Array(buffer)
-      
+
       // Basic signature validation (this would be expanded based on allowed types)
       const isValidSignature = validateFileSignature(signature, file.type)
       if (!isValidSignature) {
         errors.push('File signature does not match declared type')
       }
-      
-      metadata.signature = Array.from(signature.slice(0, 4)).map(b => b.toString(16).padStart(2, '0')).join(' ')
+
+      metadata.signature = Array.from(signature.slice(0, 4))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join(' ')
     } catch (error) {
       errors.push('Failed to read file signature')
     }
@@ -334,7 +335,7 @@ export async function validateFileUpload(
   return {
     isValid: errors.length === 0,
     errors,
-    metadata
+    metadata,
   }
 }
 
@@ -344,15 +345,19 @@ export async function validateFileUpload(
 function validateFileSignature(signature: Uint8Array, declaredType: string): boolean {
   // Common file signatures
   const signatures: Record<string, number[][]> = {
-    'image/jpeg': [[0xFF, 0xD8, 0xFF]],
-    'image/png': [[0x89, 0x50, 0x4E, 0x47]],
+    'image/jpeg': [[0xff, 0xd8, 0xff]],
+    'image/png': [[0x89, 0x50, 0x4e, 0x47]],
     'image/gif': [[0x47, 0x49, 0x46, 0x38]],
     'image/webp': [[0x52, 0x49, 0x46, 0x46]], // RIFF header
     'application/pdf': [[0x25, 0x50, 0x44, 0x46]],
-    'audio/mpeg': [[0xFF, 0xFB], [0xFF, 0xF3], [0xFF, 0xF2]],
+    'audio/mpeg': [
+      [0xff, 0xfb],
+      [0xff, 0xf3],
+      [0xff, 0xf2],
+    ],
     'audio/wav': [[0x52, 0x49, 0x46, 0x46]], // RIFF header
-    'audio/webm': [[0x1A, 0x45, 0xDF, 0xA3]],
-    'video/mp4': [[0x66, 0x74, 0x79, 0x70]]
+    'audio/webm': [[0x1a, 0x45, 0xdf, 0xa3]],
+    'video/mp4': [[0x66, 0x74, 0x79, 0x70]],
   }
 
   const expectedSignatures = signatures[declaredType]
@@ -360,7 +365,7 @@ function validateFileSignature(signature: Uint8Array, declaredType: string): boo
     return true // Unknown type, assume valid
   }
 
-  return expectedSignatures.some(expected =>
+  return expectedSignatures.some((expected) =>
     expected.every((byte, index) => signature[index] === byte)
   )
 }
@@ -372,11 +377,11 @@ function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
   const realIP = request.headers.get('x-real-ip')
   const cfConnectingIP = request.headers.get('cf-connecting-ip')
-  
+
   if (cfConnectingIP) return cfConnectingIP
   if (realIP) return realIP
   if (forwarded) return forwarded.split(',')[0].trim()
-  
+
   return request.ip || 'unknown'
 }
 
@@ -389,18 +394,18 @@ export function withValidation(
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
     const validation = await validateRequest(request, config)
-    
+
     if (!validation.isValid) {
       return NextResponse.json(
         {
           error: 'Validation failed',
           details: validation.errors,
-          metadata: process.env.NODE_ENV === 'development' ? validation.metadata : undefined
+          metadata: process.env.NODE_ENV === 'development' ? validation.metadata : undefined,
         },
         { status: 400 }
       )
     }
-    
+
     return handler(request)
   }
 }
@@ -414,21 +419,21 @@ export function withSchemaValidation<T>(
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
     const validation = await validateJsonBody(request, schema)
-    
+
     if (!validation.isValid) {
       return NextResponse.json(
         {
           error: 'Schema validation failed',
-          details: validation.errors?.errors.map(e => ({
+          details: validation.errors?.errors.map((e) => ({
             path: e.path.join('.'),
             message: e.message,
-            code: e.code
-          }))
+            code: e.code,
+          })),
         },
         { status: 400 }
       )
     }
-    
+
     return handler(request, validation.data!)
   }
 }

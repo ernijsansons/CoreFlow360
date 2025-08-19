@@ -19,24 +19,23 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       includeMetrics: true,
       includeSystem: true,
       includePerformance: true,
-      timeout: 10000 // Longer timeout for detailed check
+      timeout: 10000, // Longer timeout for detailed check
     }
-    
+
     // Run comprehensive health check
     const report = await healthChecker.runAllChecks(options)
-    
+
     // Create standardized response with detailed information
     const response = healthChecker.createHealthResponse(report, request)
-    
+
     return new NextResponse(JSON.stringify(response.body, null, 2), {
       status: response.statusCode,
       headers: {
         ...response.headers,
-        'X-Health-Detail-Level': 'comprehensive'
-      }
+        'X-Health-Detail-Level': 'comprehensive',
+      },
     })
-    
-  } catch (error: any) {
+  } catch (error: unknown) {
     const context = createErrorContext(request, '/api/health/detailed')
     return handleError(error, context)
   }

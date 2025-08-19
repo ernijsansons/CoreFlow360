@@ -39,7 +39,7 @@ export class ClientCSRF {
    */
   static setToken(token: string): void {
     this.csrfToken = token
-    
+
     // Update meta tag if it exists
     if (typeof window !== 'undefined') {
       const metaTag = document.querySelector('meta[name="csrf-token"]')

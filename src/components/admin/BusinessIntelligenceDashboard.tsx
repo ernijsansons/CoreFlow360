@@ -22,7 +22,7 @@ import {
   UserGroupIcon,
   CubeIcon,
   FireIcon,
-  RocketLaunchIcon
+  RocketLaunchIcon,
 } from '@heroicons/react/24/outline'
 import {
   LineChart,
@@ -47,7 +47,7 @@ import {
   PolarRadiusAxis,
   Radar,
   ComposedChart,
-  Legend
+  Legend,
 } from 'recharts'
 import { toast } from 'react-hot-toast'
 
@@ -89,16 +89,16 @@ interface BusinessDashboard {
       horizon: number
       confidence: number
       trendDirection: 'up' | 'down' | 'stable'
-      keyPredictions: any[]
+      keyPredictions: unknown[]
     }
   }
   analytics: {
-    revenueAnalysis: any
-    costAnalysis: any
-    efficiencyMetrics: any
-    riskAssessment: any
-    customerAnalysis: any
-    operationalMetrics: any
+    revenueAnalysis: unknown
+    costAnalysis: unknown
+    efficiencyMetrics: unknown
+    riskAssessment: unknown
+    customerAnalysis: unknown
+    operationalMetrics: unknown
   }
   forecasts: Array<{
     id: string
@@ -171,7 +171,7 @@ const COLORS = {
   purple: '#8b5cf6',
   pink: '#ec4899',
   indigo: '#4f46e5',
-  cyan: '#06b6d4'
+  cyan: '#06b6d4',
 }
 
 const CATEGORY_COLORS = {
@@ -181,14 +181,14 @@ const CATEGORY_COLORS = {
   growth: COLORS.purple,
   risk: COLORS.warning,
   satisfaction: COLORS.pink,
-  performance: COLORS.cyan
+  performance: COLORS.cyan,
 }
 
 const IMPACT_COLORS = {
   critical: 'text-red-600 bg-red-100',
   high: 'text-orange-600 bg-orange-100',
   medium: 'text-yellow-600 bg-yellow-100',
-  low: 'text-blue-600 bg-blue-100'
+  low: 'text-blue-600 bg-blue-100',
 }
 
 const CATEGORY_ICONS = {
@@ -198,12 +198,14 @@ const CATEGORY_ICONS = {
   growth: TrendingUpIcon,
   risk: ExclamationTriangleIcon,
   satisfaction: UserGroupIcon,
-  performance: ChartBarIcon
+  performance: ChartBarIcon,
 }
 
 export default function BusinessIntelligenceDashboard() {
   const [data, setData] = useState<BusinessDashboard | null>(null)
-  const [selectedView, setSelectedView] = useState<'overview' | 'kpis' | 'forecasts' | 'insights' | 'analytics'>('overview')
+  const [selectedView, setSelectedView] = useState<
+    'overview' | 'kpis' | 'forecasts' | 'insights' | 'analytics'
+  >('overview')
   const [loading, setLoading] = useState(true)
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [refreshInterval, setRefreshInterval] = useState(60)
@@ -213,12 +215,12 @@ export default function BusinessIntelligenceDashboard() {
 
   useEffect(() => {
     loadBusinessData()
-    
+
     let interval: NodeJS.Timer | null = null
     if (autoRefresh) {
       interval = setInterval(loadBusinessData, refreshInterval * 1000)
     }
-    
+
     return () => {
       if (interval) clearInterval(interval)
     }
@@ -229,43 +231,41 @@ export default function BusinessIntelligenceDashboard() {
       const params = new URLSearchParams({
         includeForecasts: 'true',
         includeInsights: 'true',
-        includeRecommendations: 'true'
+        includeRecommendations: 'true',
       })
-      
+
       if (selectedCategory) params.set('categories', selectedCategory)
 
       const response = await fetch(`/api/intelligence/business?${params}`)
       const result = await response.json()
-      
+
       if (result.success) {
         setData(result)
       } else {
         throw new Error(result.error || 'Failed to load data')
       }
-      
     } catch (error) {
-      console.error('Failed to load business intelligence data:', error)
       toast.error('Failed to load business intelligence data')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleAction = async (action: string, actionData?: any) => {
+  const handleAction = async (action: string, actionData?: unknown) => {
     try {
       const response = await fetch('/api/intelligence/business', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           action,
-          data: actionData
-        })
+          data: actionData,
+        }),
       })
-      
+
       const result = await response.json()
-      
+
       if (result.success) {
         toast.success(`Action "${action}" completed successfully`)
         if (action !== 'export') {
@@ -274,9 +274,8 @@ export default function BusinessIntelligenceDashboard() {
       } else {
         throw new Error(result.error)
       }
-      
+
       return result
-      
     } catch (error) {
       toast.error(`Action "${action}" failed`)
       throw error
@@ -286,15 +285,14 @@ export default function BusinessIntelligenceDashboard() {
   const handleGenerateInsights = async () => {
     try {
       const result = await handleAction('insights')
-      
+
       if (result.insights && result.insights.length > 0) {
-        result.insights.slice(0, 3).forEach((insight: any, index: number) => {
+        result.insights.slice(0, 3).forEach((insight: unknown, index: number) => {
           setTimeout(() => {
             toast.success(`New Insight: ${insight.title}`, { duration: 5000 })
           }, index * 1500)
         })
       }
-      
     } catch (error) {
       // Error already handled
     }
@@ -315,16 +313,15 @@ export default function BusinessIntelligenceDashboard() {
   const handleExport = async () => {
     try {
       const result = await handleAction('export', { format: 'json' })
-      
+
       const blob = new Blob([JSON.stringify(result.result.data, null, 2)], {
-        type: 'application/json'
+        type: 'application/json',
       })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       a.download = `business-intelligence-${new Date().toISOString().split('T')[0]}.json`
       a.click()
-      
     } catch (error) {
       // Error already handled
     }
@@ -345,9 +342,9 @@ export default function BusinessIntelligenceDashboard() {
   }
 
   const getTrendIcon = (trend: number) => {
-    if (trend > 5) return <TrendingUpIcon className="w-4 h-4 text-green-600" />
-    if (trend < -5) return <TrendingDownIcon className="w-4 h-4 text-red-600" />
-    return <span className="w-4 h-4 inline-block bg-gray-400 rounded-full" />
+    if (trend > 5) return <TrendingUpIcon className="h-4 w-4 text-green-600" />
+    if (trend < -5) return <TrendingDownIcon className="h-4 w-4 text-red-600" />
+    return <span className="inline-block h-4 w-4 rounded-full bg-gray-400" />
   }
 
   const formatValue = (value: number, unit: string) => {
@@ -357,7 +354,7 @@ export default function BusinessIntelligenceDashboard() {
     return value.toLocaleString()
   }
 
-  const generateKPITrendData = (kpi: any) => {
+  const generateKPITrendData = (kpi: unknown) => {
     // Generate mock trend data for visualization
     const data = []
     for (let i = 30; i >= 0; i--) {
@@ -366,29 +363,29 @@ export default function BusinessIntelligenceDashboard() {
       const variation = (Math.random() - 0.5) * 0.1
       data.push({
         date: date.toLocaleDateString(),
-        value: kpi.value * (1 + variation)
+        value: kpi.value * (1 + variation),
       })
     }
     return data
   }
 
-  const generateForecastChartData = (forecast: any) => {
+  const generateForecastChartData = (forecast: unknown) => {
     if (!forecast.predictions || forecast.predictions.length === 0) return []
-    
-    return forecast.predictions.map((pred: any) => ({
+
+    return forecast.predictions.map((pred: unknown) => ({
       date: new Date(pred.timestamp).toLocaleDateString(),
       predicted: pred.predictedValue,
       upper: pred.upperBound,
       lower: pred.lowerBound,
-      confidence: pred.confidence * 100
+      confidence: pred.confidence * 100,
     }))
   }
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4" />
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-indigo-600" />
           <p className="text-gray-600">Loading business intelligence...</p>
         </div>
       </div>
@@ -397,14 +394,14 @@ export default function BusinessIntelligenceDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="mx-auto max-w-7xl p-6">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <ChartBarIcon className="w-10 h-10 text-indigo-600 mr-4" />
+              <ChartBarIcon className="mr-4 h-10 w-10 text-indigo-600" />
               <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                <h1 className="mb-2 text-4xl font-bold text-gray-900">
                   Business Intelligence Center
                 </h1>
                 <p className="text-lg text-gray-600">
@@ -416,18 +413,22 @@ export default function BusinessIntelligenceDashboard() {
               <div className="flex items-center">
                 <button
                   onClick={() => setAutoRefresh(!autoRefresh)}
-                  className={`p-2 rounded-lg transition-colors ${
-                    autoRefresh 
-                      ? 'bg-green-100 text-green-600 hover:bg-green-200' 
+                  className={`rounded-lg p-2 transition-colors ${
+                    autoRefresh
+                      ? 'bg-green-100 text-green-600 hover:bg-green-200'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
-                  {autoRefresh ? <PlayIcon className="w-4 h-4" /> : <PauseIcon className="w-4 h-4" />}
+                  {autoRefresh ? (
+                    <PlayIcon className="h-4 w-4" />
+                  ) : (
+                    <PauseIcon className="h-4 w-4" />
+                  )}
                 </button>
                 <select
                   value={refreshInterval}
                   onChange={(e) => setRefreshInterval(parseInt(e.target.value))}
-                  className="ml-2 px-3 py-1 border rounded-md text-sm"
+                  className="ml-2 rounded-md border px-3 py-1 text-sm"
                   disabled={!autoRefresh}
                 >
                   <option value="30">30s</option>
@@ -438,23 +439,23 @@ export default function BusinessIntelligenceDashboard() {
               </div>
               <button
                 onClick={handleGenerateInsights}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center"
+                className="flex items-center rounded-lg bg-purple-600 px-4 py-2 text-white transition-colors hover:bg-purple-700"
               >
-                <LightBulbIcon className="w-4 h-4 mr-2" />
+                <LightBulbIcon className="mr-2 h-4 w-4" />
                 Generate Insights
               </button>
               <button
                 onClick={() => loadBusinessData()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                className="flex items-center rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
               >
-                <ArrowPathIcon className="w-4 h-4 mr-2" />
+                <ArrowPathIcon className="mr-2 h-4 w-4" />
                 Refresh
               </button>
               <button
                 onClick={handleExport}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center"
+                className="flex items-center rounded-lg bg-gray-600 px-4 py-2 text-white transition-colors hover:bg-gray-700"
               >
-                <DocumentArrowDownIcon className="w-4 h-4 mr-2" />
+                <DocumentArrowDownIcon className="mr-2 h-4 w-4" />
                 Export
               </button>
             </div>
@@ -466,12 +467,12 @@ export default function BusinessIntelligenceDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <div className="p-3 bg-indigo-100 rounded-lg mr-4">
-                  <SparklesIcon className="w-8 h-8 text-indigo-600" />
+                <div className="mr-4 rounded-lg bg-indigo-100 p-3">
+                  <SparklesIcon className="h-8 w-8 text-indigo-600" />
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900">Business Health Score</h3>
@@ -485,31 +486,37 @@ export default function BusinessIntelligenceDashboard() {
                 <div className="text-gray-600">{getHealthStatus(data.overview.healthScore)}</div>
               </div>
             </div>
-            
+
             {/* Trend Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-              <div className="p-4 bg-green-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
+            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="rounded-lg bg-green-50 p-4">
+                <div className="mb-2 flex items-center justify-between">
                   <span className="font-medium text-green-900">Positive Trends</span>
-                  <TrendingUpIcon className="w-5 h-5 text-green-600" />
+                  <TrendingUpIcon className="h-5 w-5 text-green-600" />
                 </div>
-                <div className="text-2xl font-bold text-green-600">{data.overview.trendSummary.positive}%</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {data.overview.trendSummary.positive}%
+                </div>
                 <div className="text-sm text-green-700">of key metrics improving</div>
               </div>
-              <div className="p-4 bg-red-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
+              <div className="rounded-lg bg-red-50 p-4">
+                <div className="mb-2 flex items-center justify-between">
                   <span className="font-medium text-red-900">Negative Trends</span>
-                  <TrendingDownIcon className="w-5 h-5 text-red-600" />
+                  <TrendingDownIcon className="h-5 w-5 text-red-600" />
                 </div>
-                <div className="text-2xl font-bold text-red-600">{data.overview.trendSummary.negative}%</div>
+                <div className="text-2xl font-bold text-red-600">
+                  {data.overview.trendSummary.negative}%
+                </div>
                 <div className="text-sm text-red-700">require attention</div>
               </div>
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
+              <div className="rounded-lg bg-gray-50 p-4">
+                <div className="mb-2 flex items-center justify-between">
                   <span className="font-medium text-gray-900">Stable Metrics</span>
-                  <div className="w-5 h-5 bg-gray-400 rounded-full" />
+                  <div className="h-5 w-5 rounded-full bg-gray-400" />
                 </div>
-                <div className="text-2xl font-bold text-gray-600">{data.overview.trendSummary.neutral}%</div>
+                <div className="text-2xl font-bold text-gray-600">
+                  {data.overview.trendSummary.neutral}%
+                </div>
                 <div className="text-sm text-gray-700">performing as expected</div>
               </div>
             </div>
@@ -517,17 +524,15 @@ export default function BusinessIntelligenceDashboard() {
         </div>
 
         {/* Key Metrics Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <CubeIcon className="w-8 h-8 text-blue-600" />
-              <span className="text-3xl font-bold text-gray-900">
-                {data.summary.totalKPIs}
-              </span>
+            <div className="mb-4 flex items-center justify-between">
+              <CubeIcon className="h-8 w-8 text-blue-600" />
+              <span className="text-3xl font-bold text-gray-900">{data.summary.totalKPIs}</span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900">Active KPIs</h3>
             <p className="text-sm text-gray-600">Key performance indicators</p>
@@ -537,10 +542,10 @@ export default function BusinessIntelligenceDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <LightBulbIcon className="w-8 h-8 text-yellow-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <LightBulbIcon className="h-8 w-8 text-yellow-600" />
               <span className="text-3xl font-bold text-gray-900">
                 {data.summary.criticalInsights}
               </span>
@@ -553,10 +558,10 @@ export default function BusinessIntelligenceDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <CalendarIcon className="w-8 h-8 text-purple-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <CalendarIcon className="h-8 w-8 text-purple-600" />
               <span className="text-3xl font-bold text-gray-900">
                 {data.summary.activeForecast}
               </span>
@@ -569,10 +574,10 @@ export default function BusinessIntelligenceDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl shadow-lg p-6"
+            className="rounded-xl bg-white p-6 shadow-lg"
           >
-            <div className="flex items-center justify-between mb-4">
-              <RocketLaunchIcon className="w-8 h-8 text-green-600" />
+            <div className="mb-4 flex items-center justify-between">
+              <RocketLaunchIcon className="h-8 w-8 text-green-600" />
               <span className="text-3xl font-bold text-gray-900">
                 {data.summary.pendingRecommendations}
               </span>
@@ -584,24 +589,24 @@ export default function BusinessIntelligenceDashboard() {
 
         {/* View Selector */}
         <div className="mb-6">
-          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex space-x-1 rounded-lg bg-gray-100 p-1">
             {[
               { id: 'overview', name: 'Overview', icon: ChartBarIcon },
               { id: 'kpis', name: 'KPIs', icon: CubeIcon },
               { id: 'forecasts', name: 'Forecasts', icon: CalendarIcon },
               { id: 'insights', name: 'Insights', icon: LightBulbIcon },
-              { id: 'analytics', name: 'Analytics', icon: SparklesIcon }
+              { id: 'analytics', name: 'Analytics', icon: SparklesIcon },
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setSelectedView(tab.id as any)}
-                className={`flex items-center px-4 py-2 rounded-md transition-all ${
+                onClick={() => setSelectedView(tab.id as unknown)}
+                className={`flex items-center rounded-md px-4 py-2 transition-all ${
                   selectedView === tab.id
                     ? 'bg-white text-indigo-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <tab.icon className="w-4 h-4 mr-2" />
+                <tab.icon className="mr-2 h-4 w-4" />
                 {tab.name}
               </button>
             ))}
@@ -609,22 +614,22 @@ export default function BusinessIntelligenceDashboard() {
         </div>
 
         {/* Main Content Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             {selectedView === 'overview' && (
               <>
                 {/* Critical Insights */}
                 {data.overview.criticalInsights.length > 0 && (
-                  <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h3 className="text-xl font-semibold mb-4 flex items-center">
-                      <ExclamationTriangleIcon className="w-6 h-6 mr-2 text-red-600" />
+                  <div className="rounded-xl bg-white p-6 shadow-lg">
+                    <h3 className="mb-4 flex items-center text-xl font-semibold">
+                      <ExclamationTriangleIcon className="mr-2 h-6 w-6 text-red-600" />
                       Critical Business Insights
                     </h3>
                     <div className="space-y-3">
                       {data.overview.criticalInsights.map((insight) => (
-                        <div key={insight.id} className="p-4 bg-red-50 rounded-lg">
-                          <div className="flex items-start justify-between mb-2">
+                        <div key={insight.id} className="rounded-lg bg-red-50 p-4">
+                          <div className="mb-2 flex items-start justify-between">
                             <h4 className="font-semibold text-red-900">{insight.title}</h4>
                             <span className="text-sm text-red-700">
                               {(insight.confidence * 100).toFixed(0)}% confidence
@@ -638,9 +643,9 @@ export default function BusinessIntelligenceDashboard() {
                 )}
 
                 {/* Forecast Summary */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-xl font-semibold mb-4">Forecast Overview</h3>
-                  <div className="flex items-center justify-between mb-4">
+                <div className="rounded-xl bg-white p-6 shadow-lg">
+                  <h3 className="mb-4 text-xl font-semibold">Forecast Overview</h3>
+                  <div className="mb-4 flex items-center justify-between">
                     <div>
                       <div className="text-sm text-gray-600">Forecast Horizon</div>
                       <div className="text-2xl font-bold text-gray-900">
@@ -657,16 +662,16 @@ export default function BusinessIntelligenceDashboard() {
                       <div className="text-sm text-gray-600">Trend Direction</div>
                       <div className="flex items-center">
                         {data.overview.forecastSummary.trendDirection === 'up' ? (
-                          <TrendingUpIcon className="w-8 h-8 text-green-600" />
+                          <TrendingUpIcon className="h-8 w-8 text-green-600" />
                         ) : data.overview.forecastSummary.trendDirection === 'down' ? (
-                          <TrendingDownIcon className="w-8 h-8 text-red-600" />
+                          <TrendingDownIcon className="h-8 w-8 text-red-600" />
                         ) : (
-                          <div className="w-8 h-8 bg-gray-400 rounded-full" />
+                          <div className="h-8 w-8 rounded-full bg-gray-400" />
                         )}
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Mini forecast chart */}
                   {data.forecasts.length > 0 && (
                     <ResponsiveContainer width="100%" height={200}>
@@ -675,24 +680,24 @@ export default function BusinessIntelligenceDashboard() {
                         <XAxis dataKey="date" />
                         <YAxis />
                         <Tooltip />
-                        <Area 
-                          type="monotone" 
-                          dataKey="upper" 
-                          stroke="none" 
-                          fill={COLORS.info} 
+                        <Area
+                          type="monotone"
+                          dataKey="upper"
+                          stroke="none"
+                          fill={COLORS.info}
                           fillOpacity={0.1}
                         />
-                        <Area 
-                          type="monotone" 
-                          dataKey="lower" 
-                          stroke="none" 
-                          fill={COLORS.info} 
+                        <Area
+                          type="monotone"
+                          dataKey="lower"
+                          stroke="none"
+                          fill={COLORS.info}
                           fillOpacity={0.1}
                         />
-                        <Line 
-                          type="monotone" 
-                          dataKey="predicted" 
-                          stroke={COLORS.primary} 
+                        <Line
+                          type="monotone"
+                          dataKey="predicted"
+                          stroke={COLORS.primary}
                           strokeWidth={2}
                         />
                       </AreaChart>
@@ -703,13 +708,13 @@ export default function BusinessIntelligenceDashboard() {
             )}
 
             {selectedView === 'kpis' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-4">
+              <div className="rounded-xl bg-white p-6 shadow-lg">
+                <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-xl font-semibold">Key Performance Indicators</h3>
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="px-3 py-1 border rounded-md text-sm"
+                    className="rounded-md border px-3 py-1 text-sm"
                   >
                     <option value="">All Categories</option>
                     <option value="revenue">Revenue</option>
@@ -719,18 +724,30 @@ export default function BusinessIntelligenceDashboard() {
                     <option value="satisfaction">Satisfaction</option>
                   </select>
                 </div>
-                
+
                 <div className="space-y-4">
                   {data.overview.kpis
-                    .filter(kpi => !selectedCategory || kpi.category === selectedCategory)
+                    .filter((kpi) => !selectedCategory || kpi.category === selectedCategory)
                     .map((kpi) => {
-                      const IconComponent = CATEGORY_ICONS[kpi.category as keyof typeof CATEGORY_ICONS] || ChartBarIcon
+                      const IconComponent =
+                        CATEGORY_ICONS[kpi.category as keyof typeof CATEGORY_ICONS] || ChartBarIcon
                       return (
-                        <div key={kpi.id} className="p-4 bg-gray-50 rounded-lg">
-                          <div className="flex items-center justify-between mb-3">
+                        <div key={kpi.id} className="rounded-lg bg-gray-50 p-4">
+                          <div className="mb-3 flex items-center justify-between">
                             <div className="flex items-center">
-                              <div className={`p-2 rounded-lg mr-3`} style={{ backgroundColor: `${CATEGORY_COLORS[kpi.category as keyof typeof CATEGORY_COLORS]}20` }}>
-                                <IconComponent className="w-5 h-5" style={{ color: CATEGORY_COLORS[kpi.category as keyof typeof CATEGORY_COLORS] }} />
+                              <div
+                                className={`mr-3 rounded-lg p-2`}
+                                style={{
+                                  backgroundColor: `${CATEGORY_COLORS[kpi.category as keyof typeof CATEGORY_COLORS]}20`,
+                                }}
+                              >
+                                <IconComponent
+                                  className="h-5 w-5"
+                                  style={{
+                                    color:
+                                      CATEGORY_COLORS[kpi.category as keyof typeof CATEGORY_COLORS],
+                                  }}
+                                />
                               </div>
                               <div>
                                 <h4 className="font-semibold text-gray-900">{kpi.name}</h4>
@@ -741,45 +758,55 @@ export default function BusinessIntelligenceDashboard() {
                               <div className="text-2xl font-bold text-gray-900">
                                 {formatValue(kpi.value, kpi.unit)}
                               </div>
-                              <div className="flex items-center justify-end mt-1">
+                              <div className="mt-1 flex items-center justify-end">
                                 {getTrendIcon(kpi.trends.daily)}
-                                <span className={`ml-1 text-sm ${
-                                  kpi.trends.daily > 0 ? 'text-green-600' : 
-                                  kpi.trends.daily < 0 ? 'text-red-600' : 
-                                  'text-gray-600'
-                                }`}>
-                                  {kpi.trends.daily > 0 ? '+' : ''}{kpi.trends.daily.toFixed(1)}%
+                                <span
+                                  className={`ml-1 text-sm ${
+                                    kpi.trends.daily > 0
+                                      ? 'text-green-600'
+                                      : kpi.trends.daily < 0
+                                        ? 'text-red-600'
+                                        : 'text-gray-600'
+                                  }`}
+                                >
+                                  {kpi.trends.daily > 0 ? '+' : ''}
+                                  {kpi.trends.daily.toFixed(1)}%
                                 </span>
                               </div>
                             </div>
                           </div>
-                          
+
                           {/* Mini trend chart */}
                           <ResponsiveContainer width="100%" height={60}>
                             <LineChart data={generateKPITrendData(kpi)}>
-                              <Line 
-                                type="monotone" 
-                                dataKey="value" 
-                                stroke={CATEGORY_COLORS[kpi.category as keyof typeof CATEGORY_COLORS]}
+                              <Line
+                                type="monotone"
+                                dataKey="value"
+                                stroke={
+                                  CATEGORY_COLORS[kpi.category as keyof typeof CATEGORY_COLORS]
+                                }
                                 strokeWidth={2}
                                 dot={false}
                               />
                             </LineChart>
                           </ResponsiveContainer>
-                          
+
                           {/* Target progress */}
                           {kpi.targets && (
                             <div className="mt-3">
-                              <div className="flex justify-between text-xs text-gray-600 mb-1">
+                              <div className="mb-1 flex justify-between text-xs text-gray-600">
                                 <span>Target Progress</span>
                                 <span>{((kpi.value / kpi.targets.target) * 100).toFixed(0)}%</span>
                               </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div 
+                              <div className="h-2 w-full rounded-full bg-gray-200">
+                                <div
                                   className="h-2 rounded-full transition-all"
-                                  style={{ 
+                                  style={{
                                     width: `${Math.min(100, (kpi.value / kpi.targets.target) * 100)}%`,
-                                    backgroundColor: kpi.value >= kpi.targets.target ? COLORS.success : COLORS.warning
+                                    backgroundColor:
+                                      kpi.value >= kpi.targets.target
+                                        ? COLORS.success
+                                        : COLORS.warning,
                                   }}
                                 />
                               </div>
@@ -795,25 +822,30 @@ export default function BusinessIntelligenceDashboard() {
             {selectedView === 'forecasts' && (
               <div className="space-y-6">
                 {data.forecasts.map((forecast) => (
-                  <div key={forecast.id} className="bg-white rounded-xl shadow-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
+                  <div key={forecast.id} className="rounded-xl bg-white p-6 shadow-lg">
+                    <div className="mb-4 flex items-center justify-between">
                       <h3 className="text-xl font-semibold">
-                        {data.overview.kpis.find(k => k.id === forecast.metricId)?.name || 'Forecast'}
+                        {data.overview.kpis.find((k) => k.id === forecast.metricId)?.name ||
+                          'Forecast'}
                       </h3>
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-gray-600">
                           {forecast.horizon} day forecast
                         </span>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          forecast.accuracy > 0.8 ? 'bg-green-100 text-green-700' :
-                          forecast.accuracy > 0.6 ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-red-100 text-red-700'
-                        }`}>
+                        <span
+                          className={`rounded-full px-3 py-1 text-sm font-medium ${
+                            forecast.accuracy > 0.8
+                              ? 'bg-green-100 text-green-700'
+                              : forecast.accuracy > 0.6
+                                ? 'bg-yellow-100 text-yellow-700'
+                                : 'bg-red-100 text-red-700'
+                          }`}
+                        >
                           {(forecast.accuracy * 100).toFixed(0)}% accuracy
                         </span>
                       </div>
                     </div>
-                    
+
                     {/* Forecast chart */}
                     <ResponsiveContainer width="100%" height={300}>
                       <ComposedChart data={generateForecastChartData(forecast)}>
@@ -821,40 +853,40 @@ export default function BusinessIntelligenceDashboard() {
                         <XAxis dataKey="date" />
                         <YAxis />
                         <Tooltip />
-                        <Area 
-                          type="monotone" 
-                          dataKey="upper" 
+                        <Area
+                          type="monotone"
+                          dataKey="upper"
                           stackId="1"
-                          stroke="none" 
-                          fill={COLORS.info} 
+                          stroke="none"
+                          fill={COLORS.info}
                           fillOpacity={0.2}
                         />
-                        <Area 
-                          type="monotone" 
-                          dataKey="lower" 
+                        <Area
+                          type="monotone"
+                          dataKey="lower"
                           stackId="1"
-                          stroke="none" 
-                          fill={COLORS.info} 
+                          stroke="none"
+                          fill={COLORS.info}
                           fillOpacity={0.2}
                         />
-                        <Line 
-                          type="monotone" 
-                          dataKey="predicted" 
-                          stroke={COLORS.primary} 
+                        <Line
+                          type="monotone"
+                          dataKey="predicted"
+                          stroke={COLORS.primary}
                           strokeWidth={3}
                           dot={{ fill: COLORS.primary }}
                         />
                       </ComposedChart>
                     </ResponsiveContainer>
-                    
+
                     {/* Scenarios */}
                     {forecast.scenarios && forecast.scenarios.length > 0 && (
                       <div className="mt-4">
-                        <h4 className="font-medium text-gray-900 mb-2">Scenario Analysis</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <h4 className="mb-2 font-medium text-gray-900">Scenario Analysis</h4>
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                           {forecast.scenarios.map((scenario, idx) => (
-                            <div key={idx} className="p-3 bg-gray-50 rounded-lg">
-                              <div className="flex items-center justify-between mb-1">
+                            <div key={idx} className="rounded-lg bg-gray-50 p-3">
+                              <div className="mb-1 flex items-center justify-between">
                                 <span className="font-medium text-gray-900">{scenario.name}</span>
                                 <span className="text-sm text-gray-600">
                                   {(scenario.probability * 100).toFixed(0)}%
@@ -863,7 +895,10 @@ export default function BusinessIntelligenceDashboard() {
                               <div className="text-xs text-gray-600">
                                 {scenario.predictions.length > 0 && (
                                   <span>
-                                    Outcome: {scenario.predictions[scenario.predictions.length - 1].value.toFixed(0)}
+                                    Outcome:{' '}
+                                    {scenario.predictions[
+                                      scenario.predictions.length - 1
+                                    ].value.toFixed(0)}
                                   </span>
                                 )}
                               </div>
@@ -880,47 +915,55 @@ export default function BusinessIntelligenceDashboard() {
             {selectedView === 'insights' && (
               <div className="space-y-4">
                 {data.insights
-                  .filter(insight => insight.status === 'new')
+                  .filter((insight) => insight.status === 'new')
                   .map((insight) => (
-                    <div key={insight.id} className="bg-white rounded-xl shadow-lg p-6">
-                      <div className="flex items-start justify-between mb-3">
+                    <div key={insight.id} className="rounded-xl bg-white p-6 shadow-lg">
+                      <div className="mb-3 flex items-start justify-between">
                         <div className="flex items-center">
-                          <LightBulbIcon className="w-6 h-6 mr-3 text-yellow-600" />
+                          <LightBulbIcon className="mr-3 h-6 w-6 text-yellow-600" />
                           <div>
                             <h4 className="font-semibold text-gray-900">{insight.title}</h4>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${
-                                IMPACT_COLORS[insight.impact as keyof typeof IMPACT_COLORS]
-                              }`}>
+                            <div className="mt-1 flex items-center gap-3">
+                              <span
+                                className={`inline-flex rounded px-2 py-1 text-xs font-medium ${
+                                  IMPACT_COLORS[insight.impact as keyof typeof IMPACT_COLORS]
+                                }`}
+                              >
                                 {insight.impact.toUpperCase()} IMPACT
                               </span>
                               <span className="text-sm text-gray-600">
-                                {insight.category} • {(insight.confidence * 100).toFixed(0)}% confidence
+                                {insight.category} • {(insight.confidence * 100).toFixed(0)}%
+                                confidence
                               </span>
                             </div>
                           </div>
                         </div>
                       </div>
-                      
-                      <p className="text-gray-700 mb-4">{insight.description}</p>
-                      
+
+                      <p className="mb-4 text-gray-700">{insight.description}</p>
+
                       {insight.recommendations.length > 0 && (
                         <div className="space-y-2">
                           <h5 className="font-medium text-gray-900">Recommended Actions:</h5>
                           {insight.recommendations.map((rec, idx) => (
-                            <div key={idx} className="p-3 bg-blue-50 rounded-lg">
+                            <div key={idx} className="rounded-lg bg-blue-50 p-3">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                   <p className="text-sm font-medium text-blue-900">{rec.action}</p>
-                                  <p className="text-xs text-blue-700 mt-1">
-                                    Impact: {rec.estimatedImpact} • Effort: {rec.effort} • Timeline: {rec.timeline}
+                                  <p className="mt-1 text-xs text-blue-700">
+                                    Impact: {rec.estimatedImpact} • Effort: {rec.effort} • Timeline:{' '}
+                                    {rec.timeline}
                                   </p>
                                 </div>
-                                <span className={`ml-3 px-2 py-1 rounded text-xs font-medium ${
-                                  rec.priority === 1 ? 'bg-red-100 text-red-700' :
-                                  rec.priority === 2 ? 'bg-yellow-100 text-yellow-700' :
-                                  'bg-green-100 text-green-700'
-                                }`}>
+                                <span
+                                  className={`ml-3 rounded px-2 py-1 text-xs font-medium ${
+                                    rec.priority === 1
+                                      ? 'bg-red-100 text-red-700'
+                                      : rec.priority === 2
+                                        ? 'bg-yellow-100 text-yellow-700'
+                                        : 'bg-green-100 text-green-700'
+                                  }`}
+                                >
                                   P{rec.priority}
                                 </span>
                               </div>
@@ -934,12 +977,12 @@ export default function BusinessIntelligenceDashboard() {
             )}
 
             {selectedView === 'analytics' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-xl font-semibold mb-4">Deep Analytics</h3>
-                <div className="text-center py-12 text-gray-500">
-                  <SparklesIcon className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+              <div className="rounded-xl bg-white p-6 shadow-lg">
+                <h3 className="mb-4 text-xl font-semibold">Deep Analytics</h3>
+                <div className="py-12 text-center text-gray-500">
+                  <SparklesIcon className="mx-auto mb-3 h-12 w-12 text-gray-400" />
                   <p>Advanced analytics visualization coming soon</p>
-                  <p className="text-sm mt-2">Revenue analysis, cost optimization, and more</p>
+                  <p className="mt-2 text-sm">Revenue analysis, cost optimization, and more</p>
                 </div>
               </div>
             )}
@@ -948,19 +991,19 @@ export default function BusinessIntelligenceDashboard() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Recommendations */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <RocketLaunchIcon className="w-5 h-5 mr-2 text-green-600" />
+            <div className="rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 flex items-center text-lg font-semibold">
+                <RocketLaunchIcon className="mr-2 h-5 w-5 text-green-600" />
                 Priority Recommendations
               </h3>
               <div className="space-y-3">
                 {data.recommendations
-                  .filter(rec => rec.priority === 1)
+                  .filter((rec) => rec.priority === 1)
                   .slice(0, 3)
                   .map((rec, index) => (
-                    <div key={index} className="p-3 bg-green-50 rounded-lg">
+                    <div key={index} className="rounded-lg bg-green-50 p-3">
                       <h4 className="font-medium text-green-900">{rec.title}</h4>
-                      <p className="text-sm text-green-800 mt-1">{rec.description}</p>
+                      <p className="mt-1 text-sm text-green-800">{rec.description}</p>
                       <div className="mt-2 text-xs text-green-700">
                         <div>ROI: {rec.expectedROI}</div>
                         <div>Time: {rec.implementationTime}</div>
@@ -971,63 +1014,68 @@ export default function BusinessIntelligenceDashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+            <div className="rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 text-lg font-semibold">Quick Actions</h3>
               <div className="space-y-2">
-                <button 
+                <button
                   onClick={handleGenerateInsights}
-                  className="w-full px-4 py-2 text-left text-sm bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
+                  className="w-full rounded-lg bg-purple-50 px-4 py-2 text-left text-sm text-purple-700 transition-colors hover:bg-purple-100"
                 >
-                  <LightBulbIcon className="w-4 h-4 mr-2 inline" />
+                  <LightBulbIcon className="mr-2 inline h-4 w-4" />
                   Generate New Insights
                 </button>
-                <button 
+                <button
                   onClick={() => handleRunSimulation('growth')}
                   disabled={simulationRunning}
-                  className="w-full px-4 py-2 text-left text-sm bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50"
+                  className="w-full rounded-lg bg-green-50 px-4 py-2 text-left text-sm text-green-700 transition-colors hover:bg-green-100 disabled:opacity-50"
                 >
-                  <TrendingUpIcon className="w-4 h-4 mr-2 inline" />
+                  <TrendingUpIcon className="mr-2 inline h-4 w-4" />
                   {simulationRunning ? 'Running...' : 'Run Growth Simulation'}
                 </button>
-                <button 
+                <button
                   onClick={() => handleRunSimulation('volatile')}
                   disabled={simulationRunning}
-                  className="w-full px-4 py-2 text-left text-sm bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-colors disabled:opacity-50"
+                  className="w-full rounded-lg bg-yellow-50 px-4 py-2 text-left text-sm text-yellow-700 transition-colors hover:bg-yellow-100 disabled:opacity-50"
                 >
-                  <FireIcon className="w-4 h-4 mr-2 inline" />
+                  <FireIcon className="mr-2 inline h-4 w-4" />
                   {simulationRunning ? 'Running...' : 'Run Volatile Simulation'}
                 </button>
-                <button 
+                <button
                   onClick={handleExport}
-                  className="w-full px-4 py-2 text-left text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                  className="w-full rounded-lg bg-blue-50 px-4 py-2 text-left text-sm text-blue-700 transition-colors hover:bg-blue-100"
                 >
-                  <DocumentArrowDownIcon className="w-4 h-4 mr-2 inline" />
+                  <DocumentArrowDownIcon className="mr-2 inline h-4 w-4" />
                   Export Report
                 </button>
               </div>
             </div>
 
             {/* Recent Alerts */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <ExclamationTriangleIcon className="w-5 h-5 mr-2 text-red-600" />
+            <div className="rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 flex items-center text-lg font-semibold">
+                <ExclamationTriangleIcon className="mr-2 h-5 w-5 text-red-600" />
                 Recent Alerts
               </h3>
               <div className="space-y-3">
                 {data.alerts.slice(0, 5).map((alert, index) => (
-                  <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                  <div key={index} className="rounded-lg bg-gray-50 p-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className={`inline-flex px-2 py-1 rounded text-xs font-medium mb-1 ${
-                          alert.severity === 'critical' ? 'bg-red-100 text-red-700' :
-                          alert.severity === 'high' ? 'bg-orange-100 text-orange-700' :
-                          alert.severity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-blue-100 text-blue-700'
-                        }`}>
+                        <div
+                          className={`mb-1 inline-flex rounded px-2 py-1 text-xs font-medium ${
+                            alert.severity === 'critical'
+                              ? 'bg-red-100 text-red-700'
+                              : alert.severity === 'high'
+                                ? 'bg-orange-100 text-orange-700'
+                                : alert.severity === 'medium'
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-blue-100 text-blue-700'
+                          }`}
+                        >
                           {alert.severity.toUpperCase()}
                         </div>
                         <p className="text-sm text-gray-900">{alert.message}</p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="mt-1 text-xs text-gray-500">
                           {new Date(alert.timestamp).toLocaleString()}
                         </p>
                       </div>

@@ -20,12 +20,14 @@ const ForecastRequestSchema = z.object({
     current_value: z.number().optional(),
     historical_data: z.array(z.number()).optional(),
     growth_rate: z.number().min(-1).max(5).optional(),
-    sector: z.string().optional()
+    sector: z.string().optional(),
   }),
-  forecast_type: z.enum(['revenue', 'expenses', 'growth', 'risk', 'strategic', 'comprehensive']).default('comprehensive'),
+  forecast_type: z
+    .enum(['revenue', 'expenses', 'growth', 'risk', 'strategic', 'comprehensive'])
+    .default('comprehensive'),
   horizon_months: z.number().min(1).max(60).default(12),
   tenant_id: z.string().min(1, 'Tenant ID is required'),
-  user_id: z.string().min(1, 'User ID is required')
+  user_id: z.string().min(1, 'User ID is required'),
 })
 
 const StrategicAnalysisRequestSchema = z.object({
@@ -34,11 +36,11 @@ const StrategicAnalysisRequestSchema = z.object({
     employee_count: z.number().optional(),
     market_position: z.string().optional(),
     industry: z.string().optional(),
-    years_in_business: z.number().optional()
+    years_in_business: z.number().optional(),
   }),
   analysis_depth: z.enum(['basic', 'comprehensive', 'deep_dive']).default('comprehensive'),
   tenant_id: z.string().min(1, 'Tenant ID is required'),
-  user_id: z.string().min(1, 'User ID is required')
+  user_id: z.string().min(1, 'User ID is required'),
 })
 
 type ForecastRequest = z.infer<typeof ForecastRequestSchema>
@@ -52,25 +54,34 @@ class FinRobotServiceWrapper {
   private static instance: FinRobotServiceWrapper
   private pythonPath: string
   private servicePath: string
-  
+
   constructor() {
     this.pythonPath = process.env.PYTHON_PATH || 'python3'
-    this.servicePath = path.join(process.cwd(), 'src', 'modules', 'finrobot', 'api', 'integration.py')
+    this.servicePath = path.join(
+      process.cwd(),
+      'src',
+      'modules',
+      'finrobot',
+      'api',
+      'integration.py'
+    )
   }
-  
+
   static getInstance(): FinRobotServiceWrapper {
     if (!FinRobotServiceWrapper.instance) {
       FinRobotServiceWrapper.instance = new FinRobotServiceWrapper()
     }
     return FinRobotServiceWrapper.instance
   }
-  
-  async executeForecast(request: ForecastRequest): Promise<any> {
+
+  async executeForecast(request: ForecastRequest): Promise<unknown> {
     return new Promise((resolve, reject) => {
       const startTime = Date.now()
-      
+
       // Create Python integration call
-      const python = spawn(this.pythonPath, ['-c', `
+      const python = spawn(this.pythonPath, [
+        '-c',
+        `
 import sys
 import os
 import json
@@ -102,38 +113,37 @@ async def forecast():
         }))
 
 asyncio.run(forecast())
-      `])
-      
+      `,
+      ])
+
       let output = ''
       let error = ''
-      
+
       python.stdout.on('data', (data) => {
         output += data.toString()
       })
-      
+
       python.stderr.on('data', (data) => {
         error += data.toString()
       })
-      
+
       python.on('close', (code) => {
         const processingTime = Date.now() - startTime
-        
+
         if (code !== 0) {
-          console.error('FinRobot Python process error:', error)
           reject(new Error(`FinRobot process failed with code ${code}: ${error}`))
           return
         }
-        
+
         try {
           const result = JSON.parse(output.trim())
           result.api_processing_time_ms = processingTime
           resolve(result)
         } catch (parseError) {
-          console.error('Failed to parse FinRobot output:', output)
           reject(new Error(`Failed to parse FinRobot response: ${parseError}`))
         }
       })
-      
+
       // Set timeout
       setTimeout(() => {
         python.kill()
@@ -141,12 +151,14 @@ asyncio.run(forecast())
       }, 45000) // 45 second timeout for comprehensive analysis
     })
   }
-  
-  async executeStrategicAnalysis(request: StrategicAnalysisRequest): Promise<any> {
+
+  async executeStrategicAnalysis(request: StrategicAnalysisRequest): Promise<unknown> {
     return new Promise((resolve, reject) => {
       const startTime = Date.now()
-      
-      const python = spawn(this.pythonPath, ['-c', `
+
+      const python = spawn(this.pythonPath, [
+        '-c',
+        `
 import sys
 import os
 import json
@@ -177,27 +189,28 @@ async def strategic_analysis():
         }))
 
 asyncio.run(strategic_analysis())
-      `])
-      
+      `,
+      ])
+
       let output = ''
       let error = ''
-      
+
       python.stdout.on('data', (data) => {
         output += data.toString()
       })
-      
+
       python.stderr.on('data', (data) => {
         error += data.toString()
       })
-      
+
       python.on('close', (code) => {
         const processingTime = Date.now() - startTime
-        
+
         if (code !== 0) {
           reject(new Error(`FinRobot strategic analysis failed: ${error}`))
           return
         }
-        
+
         try {
           const result = JSON.parse(output.trim())
           result.api_processing_time_ms = processingTime
@@ -206,17 +219,19 @@ asyncio.run(strategic_analysis())
           reject(new Error(`Failed to parse FinRobot strategic response: ${parseError}`))
         }
       })
-      
+
       setTimeout(() => {
         python.kill()
         reject(new Error('FinRobot strategic analysis timeout'))
       }, 60000) // 60 second timeout for strategic analysis
     })
   }
-  
-  async healthCheck(tenantId: string): Promise<any> {
+
+  async healthCheck(tenantId: string): Promise<unknown> {
     return new Promise((resolve, reject) => {
-      const python = spawn(this.pythonPath, ['-c', `
+      const python = spawn(this.pythonPath, [
+        '-c',
+        `
 import sys
 import os
 import json
@@ -247,32 +262,33 @@ async def health_check():
         }))
 
 asyncio.run(health_check())
-      `])
-      
+      `,
+      ])
+
       let output = ''
       let error = ''
-      
+
       python.stdout.on('data', (data) => {
         output += data.toString()
       })
-      
+
       python.stderr.on('data', (data) => {
         error += data.toString()
       })
-      
+
       python.on('close', (code) => {
         if (code !== 0) {
           reject(new Error(`FinRobot health check failed: ${error}`))
           return
         }
-        
+
         try {
           resolve(JSON.parse(output.trim()))
         } catch (parseError) {
           reject(new Error(`Failed to parse health check response: ${parseError}`))
         }
       })
-      
+
       setTimeout(() => {
         python.kill()
         reject(new Error('Health check timeout'))
@@ -287,83 +303,89 @@ asyncio.run(health_check())
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  
+
   try {
     const body = await request.json()
     const { action, ...requestData } = body
-    
+
     const finrobot = FinRobotServiceWrapper.getInstance()
-    
+
     switch (action) {
       case 'execute_forecast': {
         const validatedRequest = ForecastRequestSchema.parse(requestData)
         const result = await finrobot.executeForecast(validatedRequest)
-        
+
         return NextResponse.json({
           success: true,
           data: result,
           processing_time_ms: Date.now() - startTime,
           service: 'finrobot',
-          action: 'execute_forecast'
+          action: 'execute_forecast',
         })
       }
-      
+
       case 'strategic_analysis': {
         const validatedRequest = StrategicAnalysisRequestSchema.parse(requestData)
         const result = await finrobot.executeStrategicAnalysis(validatedRequest)
-        
+
         return NextResponse.json({
           success: true,
           data: result,
           processing_time_ms: Date.now() - startTime,
           service: 'finrobot',
-          action: 'strategic_analysis'
+          action: 'strategic_analysis',
         })
       }
-      
+
       case 'health_check': {
         const tenantId = requestData.tenant_id
         if (!tenantId) {
           throw new Error('Tenant ID is required for health check')
         }
-        
+
         const result = await finrobot.healthCheck(tenantId)
-        
+
         return NextResponse.json({
           success: true,
           data: result,
           processing_time_ms: Date.now() - startTime,
           service: 'finrobot',
-          action: 'health_check'
+          action: 'health_check',
         })
       }
-      
+
       default:
-        return NextResponse.json({
-          success: false,
-          error: `Unknown action: ${action}`,
-          available_actions: ['execute_forecast', 'strategic_analysis', 'health_check']
-        }, { status: 400 })
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Unknown action: ${action}`,
+            available_actions: ['execute_forecast', 'strategic_analysis', 'health_check'],
+          },
+          { status: 400 }
+        )
     }
-    
   } catch (error) {
-    console.error('FinRobot API error:', error)
-    
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        success: false,
-        error: 'Validation error',
-        details: error.errors,
-        service: 'finrobot'
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Validation error',
+          details: error.errors,
+          service: 'finrobot',
+        },
+        { status: 400 }
+      )
     }
-    
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      service: 'finrobot',
-      processing_time_ms: Date.now() - startTime
-    }, { status: 500 })
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        service: 'finrobot',
+        processing_time_ms: Date.now() - startTime,
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -371,19 +393,19 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const action = searchParams.get('action')
   const tenantId = searchParams.get('tenant_id')
-  
+
   try {
     if (action === 'health' && tenantId) {
       const finrobot = FinRobotServiceWrapper.getInstance()
       const result = await finrobot.healthCheck(tenantId)
-      
+
       return NextResponse.json({
         success: true,
         data: result,
-        service: 'finrobot'
+        service: 'finrobot',
       })
     }
-    
+
     if (action === 'capabilities') {
       return NextResponse.json({
         success: true,
@@ -395,20 +417,20 @@ export async function GET(request: NextRequest) {
             'multi_agent_forecasting',
             'strategic_analysis',
             'cross_departmental_impact',
-            'risk_assessment', 
+            'risk_assessment',
             'growth_opportunity_identification',
-            'comprehensive_business_analysis'
+            'comprehensive_business_analysis',
           ],
           agents: ['revenue', 'expenses', 'growth', 'risk', 'strategic'],
           forecast_types: ['revenue', 'expenses', 'growth', 'risk', 'strategic', 'comprehensive'],
           max_horizon_months: 60,
           min_horizon_months: 1,
           tenant_isolated: true,
-          pricing_tier: 'enterprise'
-        }
+          pricing_tier: 'enterprise',
+        },
       })
     }
-    
+
     // Default: Return service information
     return NextResponse.json({
       service: 'finrobot',
@@ -418,29 +440,31 @@ export async function GET(request: NextRequest) {
       endpoints: {
         'POST /api/ai/finrobot': {
           actions: ['execute_forecast', 'strategic_analysis', 'health_check'],
-          description: 'Main FinRobot multi-agent processing endpoint'
+          description: 'Main FinRobot multi-agent processing endpoint',
         },
         'GET /api/ai/finrobot?action=health&tenant_id=X': {
-          description: 'Health check for specific tenant'
+          description: 'Health check for specific tenant',
         },
         'GET /api/ai/finrobot?action=capabilities': {
-          description: 'Get service capabilities'
-        }
+          description: 'Get service capabilities',
+        },
       },
       integration: 'direct_code',
       performance: {
         avg_response_time: '< 500ms',
         max_horizon_months: 60,
         concurrent_requests: 25,
-        agents: 5
-      }
+        agents: 5,
+      },
     })
-    
   } catch (error) {
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      service: 'finrobot'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        service: 'finrobot',
+      },
+      { status: 500 }
+    )
   }
 }

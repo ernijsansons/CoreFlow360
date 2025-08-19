@@ -20,15 +20,19 @@ import {
   ArrowRight,
   Lightbulb,
   Target,
-  Shield
+  Shield,
 } from 'lucide-react'
-import { AccessibleButton, AccessibleInput, AccessibleSelect } from '@/components/accessibility/AccessibleComponents'
+import {
+  AccessibleButton,
+  AccessibleInput,
+  AccessibleSelect,
+} from '@/components/accessibility/AccessibleComponents'
 import { WorkflowQuestion, Workflow } from '@/lib/automation/workflow-types'
 
 interface AutomationQuestionsPanelProps {
   questions: WorkflowQuestion[]
-  answers: Record<string, any>
-  onAnswersChange: (answers: Record<string, any>) => void
+  answers: Record<string, unknown>
+  onAnswersChange: (answers: Record<string, unknown>) => void
   workflow: Workflow
   onWorkflowChange: (workflow: Workflow) => void
 }
@@ -38,14 +42,14 @@ export function AutomationQuestionsPanel({
   answers,
   onAnswersChange,
   workflow,
-  onWorkflowChange
+  onWorkflowChange,
 }: AutomationQuestionsPanelProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [isCompleted, setIsCompleted] = useState(false)
-  
+
   const totalQuestions = questions.length
-  const answeredQuestions = Object.keys(answers).filter(key => 
-    questions.find(q => q.id === key)
+  const answeredQuestions = Object.keys(answers).filter((key) =>
+    questions.find((q) => q.id === key)
   ).length
 
   const progress = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0
@@ -55,11 +59,11 @@ export function AutomationQuestionsPanel({
     configuration: Settings,
     integration: Zap,
     timing: Clock,
-    error_handling: Shield
+    error_handling: Shield,
   }
 
   // Handle answer change
-  const handleAnswerChange = (questionId: string, value: any) => {
+  const handleAnswerChange = (questionId: string, value: unknown) => {
     const newAnswers = { ...answers, [questionId]: value }
     onAnswersChange(newAnswers)
 
@@ -93,9 +97,9 @@ export function AutomationQuestionsPanel({
 
   if (questions.length === 0) {
     return (
-      <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-8 text-center">
-        <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-white mb-2">Perfect Workflow!</h3>
+      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-8 text-center">
+        <CheckCircle className="mx-auto mb-4 h-12 w-12 text-green-400" />
+        <h3 className="mb-2 text-lg font-semibold text-white">Perfect Workflow!</h3>
         <p className="text-gray-400">
           Your automation is ready to deploy with no additional configuration needed.
         </p>
@@ -106,17 +110,17 @@ export function AutomationQuestionsPanel({
   return (
     <div className="space-y-6">
       {/* Progress Bar */}
-      <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
-        <div className="flex items-center justify-between mb-3">
+      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+        <div className="mb-3 flex items-center justify-between">
           <h3 className="font-semibold text-white">Optimization Progress</h3>
           <span className="text-sm text-gray-400">
             {answeredQuestions}/{totalQuestions} completed
           </span>
         </div>
-        
-        <div className="w-full bg-gray-800 rounded-full h-3">
+
+        <div className="h-3 w-full rounded-full bg-gray-800">
           <motion.div
-            className="bg-gradient-to-r from-violet-500 to-cyan-500 h-3 rounded-full transition-all duration-500"
+            className="h-3 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 transition-all duration-500"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
           />
@@ -128,7 +132,7 @@ export function AutomationQuestionsPanel({
             animate={{ opacity: 1, y: 0 }}
             className="mt-3 flex items-center gap-2 text-green-400"
           >
-            <CheckCircle className="w-4 h-4" />
+            <CheckCircle className="h-4 w-4" />
             <span className="text-sm">All questions completed!</span>
           </motion.div>
         )}
@@ -145,23 +149,17 @@ export function AutomationQuestionsPanel({
             <button
               key={question.id}
               onClick={() => goToQuestion(index)}
-              className={`
-                flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-200
-                ${isCurrent 
+              className={`flex flex-shrink-0 items-center gap-2 rounded-lg border px-4 py-2 transition-all duration-200 ${
+                isCurrent
                   ? 'border-violet-500 bg-violet-500/10 text-violet-300'
                   : isAnswered
                     ? 'border-green-500 bg-green-500/10 text-green-300 hover:bg-green-500/20'
                     : 'border-gray-700 bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
-                }
-              `}
+              } `}
             >
-              <Icon className="w-4 h-4" />
-              <span className="text-sm font-medium">
-                {index + 1}
-              </span>
-              {isAnswered && (
-                <CheckCircle className="w-3 h-3" />
-              )}
+              <Icon className="h-4 w-4" />
+              <span className="text-sm font-medium">{index + 1}</span>
+              {isAnswered && <CheckCircle className="h-3 w-3" />}
             </button>
           )
         })}
@@ -180,17 +178,14 @@ export function AutomationQuestionsPanel({
             <QuestionCard
               question={questions[currentQuestionIndex]}
               answer={answers[questions[currentQuestionIndex]?.id]}
-              onAnswerChange={(value) => 
+              onAnswerChange={(value) =>
                 handleAnswerChange(questions[currentQuestionIndex].id, value)
               }
               questionNumber={currentQuestionIndex + 1}
               totalQuestions={totalQuestions}
             />
           ) : (
-            <CompletionCard 
-              answeredQuestions={answeredQuestions}
-              totalQuestions={totalQuestions}
-            />
+            <CompletionCard answeredQuestions={answeredQuestions} totalQuestions={totalQuestions} />
           )}
         </motion.div>
       </AnimatePresence>
@@ -216,28 +211,31 @@ export function AutomationQuestionsPanel({
           disabled={isCompleted || currentQuestionIndex === questions.length - 1}
         >
           Next
-          <ArrowRight className="w-4 h-4 ml-2" />
+          <ArrowRight className="ml-2 h-4 w-4" />
         </AccessibleButton>
       </div>
 
       {/* Question Categories Overview */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+      <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Object.entries(
-          questions.reduce((acc, question) => {
-            acc[question.category] = (acc[question.category] || 0) + 1
-            return acc
-          }, {} as Record<string, number>)
+          questions.reduce(
+            (acc, question) => {
+              acc[question.category] = (acc[question.category] || 0) + 1
+              return acc
+            },
+            {} as Record<string, number>
+          )
         ).map(([category, count]) => {
           const Icon = categoryIcons[category as keyof typeof categoryIcons] || HelpCircle
           const answeredInCategory = questions
-            .filter(q => q.category === category)
-            .filter(q => answers[q.id] !== undefined).length
+            .filter((q) => q.category === category)
+            .filter((q) => answers[q.id] !== undefined).length
 
           return (
-            <div key={category} className="bg-gray-900/40 border border-gray-800 rounded-lg p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-gray-800 rounded-lg">
-                  <Icon className="w-4 h-4 text-violet-400" />
+            <div key={category} className="rounded-lg border border-gray-800 bg-gray-900/40 p-4">
+              <div className="mb-2 flex items-center gap-3">
+                <div className="rounded-lg bg-gray-800 p-2">
+                  <Icon className="h-4 w-4 text-violet-400" />
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-white capitalize">
@@ -248,10 +246,10 @@ export function AutomationQuestionsPanel({
                   </p>
                 </div>
               </div>
-              
-              <div className="w-full bg-gray-800 rounded-full h-1">
+
+              <div className="h-1 w-full rounded-full bg-gray-800">
                 <div
-                  className="bg-violet-500 h-1 rounded-full transition-all duration-300"
+                  className="h-1 rounded-full bg-violet-500 transition-all duration-300"
                   style={{ width: `${(answeredInCategory / count) * 100}%` }}
                 />
               </div>
@@ -266,8 +264,8 @@ export function AutomationQuestionsPanel({
 // Individual Question Card Component
 interface QuestionCardProps {
   question: WorkflowQuestion
-  answer: any
-  onAnswerChange: (value: any) => void
+  answer: unknown
+  onAnswerChange: (value: unknown) => void
   questionNumber: number
   totalQuestions: number
 }
@@ -277,22 +275,23 @@ function QuestionCard({
   answer,
   onAnswerChange,
   questionNumber,
-  totalQuestions
+  totalQuestions,
 }: QuestionCardProps) {
-  const Icon = {
-    configuration: Settings,
-    integration: Zap,
-    timing: Clock,
-    error_handling: Shield
-  }[question.category] || HelpCircle
+  const Icon =
+    {
+      configuration: Settings,
+      integration: Zap,
+      timing: Clock,
+      error_handling: Shield,
+    }[question.category] || HelpCircle
 
   return (
-    <div className="bg-gray-900/60 border border-gray-800 rounded-xl overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900/60">
       {/* Question Header */}
-      <div className="bg-gradient-to-r from-violet-500/10 to-cyan-500/10 border-b border-gray-700 px-6 py-4">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-violet-500/20 rounded-lg">
-            <Icon className="w-5 h-5 text-violet-400" />
+      <div className="border-b border-gray-700 bg-gradient-to-r from-violet-500/10 to-cyan-500/10 px-6 py-4">
+        <div className="mb-2 flex items-center gap-3">
+          <div className="rounded-lg bg-violet-500/20 p-2">
+            <Icon className="h-5 w-5 text-violet-400" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -300,7 +299,7 @@ function QuestionCard({
                 {question.category.replace('_', ' ')}
               </span>
               {question.required && (
-                <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">
+                <span className="rounded bg-red-500/20 px-2 py-1 text-xs text-red-400">
                   Required
                 </span>
               )}
@@ -314,9 +313,7 @@ function QuestionCard({
 
       {/* Question Content */}
       <div className="p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">
-          {question.question}
-        </h3>
+        <h3 className="mb-4 text-lg font-semibold text-white">{question.question}</h3>
 
         {/* Answer Input */}
         <div className="space-y-4">
@@ -334,9 +331,9 @@ function QuestionCard({
               label=""
               value={answer || ''}
               onChange={onAnswerChange}
-              options={question.options.map(option => ({
+              options={question.options.map((option) => ({
                 value: option,
-                label: option
+                label: option,
               }))}
               placeholder="Choose an option..."
             />
@@ -350,12 +347,7 @@ function QuestionCard({
             />
           )}
 
-          {question.type === 'boolean' && (
-            <BooleanInput
-              value={answer}
-              onChange={onAnswerChange}
-            />
-          )}
+          {question.type === 'boolean' && <BooleanInput value={answer} onChange={onAnswerChange} />}
 
           {question.type === 'number' && (
             <AccessibleInput
@@ -368,36 +360,33 @@ function QuestionCard({
           )}
 
           {question.type === 'date' && (
-            <AccessibleInput
-              label=""
-              type="date"
-              value={answer || ''}
-              onChange={onAnswerChange}
-            />
+            <AccessibleInput label="" type="date" value={answer || ''} onChange={onAnswerChange} />
           )}
         </div>
 
         {/* Smart Suggestions */}
         {question.category === 'timing' && (
-          <div className="mt-4 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <Lightbulb className="w-4 h-4 text-blue-400" />
+          <div className="mt-4 rounded-lg border border-blue-500/30 bg-blue-900/20 p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-blue-400" />
               <span className="text-sm font-medium text-blue-300">Smart Suggestion</span>
             </div>
             <p className="text-sm text-blue-200">
-              For most business processes, immediate execution works best unless you need to avoid peak hours.
+              For most business processes, immediate execution works best unless you need to avoid
+              peak hours.
             </p>
           </div>
         )}
 
         {question.category === 'integration' && (
-          <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <Target className="w-4 h-4 text-yellow-400" />
+          <div className="mt-4 rounded-lg border border-yellow-500/30 bg-yellow-900/20 p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <Target className="h-4 w-4 text-yellow-400" />
               <span className="text-sm font-medium text-yellow-300">Integration Note</span>
             </div>
             <p className="text-sm text-yellow-200">
-              This will require setting up a connection to the external service. We'll guide you through that later.
+              This will require setting up a connection to the external service. We'll guide you
+              through that later.
             </p>
           </div>
         )}
@@ -416,7 +405,7 @@ interface MultiSelectInputProps {
 function MultiSelectInput({ options, value, onChange }: MultiSelectInputProps) {
   const toggleOption = (option: string) => {
     if (value.includes(option)) {
-      onChange(value.filter(v => v !== option))
+      onChange(value.filter((v) => v !== option))
     } else {
       onChange([...value, option])
     }
@@ -424,16 +413,16 @@ function MultiSelectInput({ options, value, onChange }: MultiSelectInputProps) {
 
   return (
     <div className="space-y-2">
-      {options.map(option => (
+      {options.map((option) => (
         <label
           key={option}
-          className="flex items-center gap-3 p-3 bg-gray-800/50 border border-gray-700 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer"
+          className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-700 bg-gray-800/50 p-3 transition-colors hover:bg-gray-700/50"
         >
           <input
             type="checkbox"
             checked={value.includes(option)}
             onChange={() => toggleOption(option)}
-            className="w-4 h-4 text-violet-500 bg-gray-700 border-gray-600 rounded focus:ring-violet-500"
+            className="h-4 w-4 rounded border-gray-600 bg-gray-700 text-violet-500 focus:ring-violet-500"
           />
           <span className="text-white">{option}</span>
         </label>
@@ -453,25 +442,25 @@ function BooleanInput({ value, onChange }: BooleanInputProps) {
     <div className="flex gap-4">
       <button
         onClick={() => onChange(true)}
-        className={`flex-1 p-4 border rounded-lg transition-all ${
+        className={`flex-1 rounded-lg border p-4 transition-all ${
           value === true
             ? 'border-green-500 bg-green-500/10 text-green-300'
             : 'border-gray-700 bg-gray-800/50 text-gray-300 hover:bg-gray-700/50'
         }`}
       >
-        <CheckCircle className="w-5 h-5 mx-auto mb-2" />
+        <CheckCircle className="mx-auto mb-2 h-5 w-5" />
         <span className="block text-sm font-medium">Yes</span>
       </button>
-      
+
       <button
         onClick={() => onChange(false)}
-        className={`flex-1 p-4 border rounded-lg transition-all ${
+        className={`flex-1 rounded-lg border p-4 transition-all ${
           value === false
             ? 'border-red-500 bg-red-500/10 text-red-300'
             : 'border-gray-700 bg-gray-800/50 text-gray-300 hover:bg-gray-700/50'
         }`}
       >
-        <AlertCircle className="w-5 h-5 mx-auto mb-2" />
+        <AlertCircle className="mx-auto mb-2 h-5 w-5" />
         <span className="block text-sm font-medium">No</span>
       </button>
     </div>
@@ -486,23 +475,22 @@ interface CompletionCardProps {
 
 function CompletionCard({ answeredQuestions, totalQuestions }: CompletionCardProps) {
   return (
-    <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-xl p-8 text-center">
-      <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-        <CheckCircle className="w-8 h-8 text-white" />
+    <div className="rounded-xl border border-green-500/30 bg-gradient-to-r from-green-900/20 to-emerald-900/20 p-8 text-center">
+      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-500">
+        <CheckCircle className="h-8 w-8 text-white" />
       </div>
-      
-      <h3 className="text-2xl font-bold text-white mb-2">
-        Questions Completed!
-      </h3>
-      
-      <p className="text-green-200 mb-4">
-        You've answered {answeredQuestions} out of {totalQuestions} questions. 
-        Your workflow has been optimized based on your responses.
+
+      <h3 className="mb-2 text-2xl font-bold text-white">Questions Completed!</h3>
+
+      <p className="mb-4 text-green-200">
+        You've answered {answeredQuestions} out of {totalQuestions} questions. Your workflow has
+        been optimized based on your responses.
       </p>
 
-      <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+      <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-4">
         <p className="text-sm text-green-300">
-          <strong>Next:</strong> Review your finalized workflow and deploy it to start automating your business processes.
+          <strong>Next:</strong> Review your finalized workflow and deploy it to start automating
+          your business processes.
         </p>
       </div>
     </div>

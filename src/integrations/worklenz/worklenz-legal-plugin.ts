@@ -1,7 +1,7 @@
 /**
  * CoreFlow360 - Worklenz Legal Case Management Plugin
  * MATHEMATICALLY PERFECT, ALGORITHMICALLY OPTIMAL, PROVABLY CORRECT
- * 
+ *
  * AI-enhanced legal case management with document analysis and workflow automation
  * Adapts Worklenz's project management for legal practice management
  */
@@ -9,7 +9,11 @@
 import { CoreFlowPlugin, DataMappingConfig } from '../nocobase/plugin-orchestrator'
 import { ModuleType, AIModelType } from '@prisma/client'
 import { CoreFlowEventBus, EventType, EventChannel } from '@/core/events/event-bus'
-import { AIAgentOrchestrator, TaskType, TaskPriority } from '@/ai/orchestration/ai-agent-orchestrator'
+import {
+  AIAgentOrchestrator,
+  TaskType,
+  TaskPriority,
+} from '@/ai/orchestration/ai-agent-orchestrator'
 import { executeSecureOperation } from '@/services/security/enhanced-secure-operations'
 import { withPerformanceTracking } from '@/utils/performance/hyperscale-performance-tracker'
 
@@ -20,29 +24,29 @@ export interface LegalCase {
   title: string
   description?: string
   clientId: string
-  
+
   // Case Details
   caseType: CaseType
   practiceArea: PracticeArea
   priority: CasePriority
   status: CaseStatus
-  
+
   // Timeline
   createdDate: Date
   dueDate?: Date
   closedDate?: Date
-  
+
   // Team
   assignedAttorneys: string[]
   assignedParalegals: string[]
   leadAttorney?: string
-  
+
   // Legal Specifics
   jurisdiction: string
   court?: string
   judge?: string
   opposingParties: OpposingParty[]
-  
+
   // AI Analysis
   aiInsights?: LegalCaseAIInsights
   documentAnalysis?: DocumentAnalysis[]
@@ -54,23 +58,23 @@ export interface LegalTask {
   caseId: string
   name: string
   description?: string
-  
+
   // Task Details
   type: LegalTaskType
   priority: TaskPriority
   status: TaskStatus
   dueDate?: Date
-  
+
   // Assignment
   assigneeId?: string
   estimatedHours?: number
   actualHours?: number
-  
+
   // Legal Specifics
   billable: boolean
   clientVisible: boolean
   courtDeadline: boolean
-  
+
   // AI Enhancement
   aiSuggestions?: TaskAISuggestions
 }
@@ -81,22 +85,22 @@ export interface LegalDocument {
   taskId?: string
   name: string
   type: DocumentType
-  
+
   // File Details
   filePath: string
   fileSize: number
   mimeType: string
   uploadDate: Date
-  
+
   // Legal Metadata
   confidentiality: ConfidentialityLevel
   privileged: boolean
   workProduct: boolean
-  
+
   // Document Processing
   ocrText?: string
   extractedEntities?: DocumentEntity[]
-  
+
   // AI Analysis
   aiAnalysis?: DocumentAIAnalysis
   legalReview?: LegalReviewResult
@@ -106,17 +110,17 @@ export interface LegalClient {
   id: string
   name: string
   type: ClientType
-  
+
   // Contact Information
   email?: string
   phone?: string
   address?: Address
-  
+
   // Legal Details
   retainerStatus: RetainerStatus
   billingRate?: number
   conflictChecked: boolean
-  
+
   // AI Insights
   aiProfile?: ClientAIProfile
 }
@@ -126,17 +130,17 @@ export interface TimeEntry {
   caseId: string
   taskId?: string
   attorneyId: string
-  
+
   // Time Details
   date: Date
   duration: number // minutes
   description: string
-  
+
   // Billing
   billable: boolean
   rate?: number
   billed: boolean
-  
+
   // AI Enhancement
   aiCategorization?: TimeCategorization
 }
@@ -326,7 +330,7 @@ export enum CaseType {
   CRIMINAL = 'CRIMINAL',
   IMMIGRATION = 'IMMIGRATION',
   INTELLECTUAL_PROPERTY = 'INTELLECTUAL_PROPERTY',
-  REAL_ESTATE = 'REAL_ESTATE'
+  REAL_ESTATE = 'REAL_ESTATE',
 }
 
 export enum PracticeArea {
@@ -339,7 +343,7 @@ export enum PracticeArea {
   CRIMINAL = 'CRIMINAL',
   IMMIGRATION = 'IMMIGRATION',
   BANKRUPTCY = 'BANKRUPTCY',
-  TAX = 'TAX'
+  TAX = 'TAX',
 }
 
 export enum CasePriority {
@@ -347,7 +351,7 @@ export enum CasePriority {
   MEDIUM = 'MEDIUM',
   HIGH = 'HIGH',
   URGENT = 'URGENT',
-  CRITICAL = 'CRITICAL'
+  CRITICAL = 'CRITICAL',
 }
 
 export enum CaseStatus {
@@ -355,7 +359,7 @@ export enum CaseStatus {
   ACTIVE = 'ACTIVE',
   ON_HOLD = 'ON_HOLD',
   CLOSED = 'CLOSED',
-  ARCHIVED = 'ARCHIVED'
+  ARCHIVED = 'ARCHIVED',
 }
 
 export enum LegalTaskType {
@@ -368,7 +372,7 @@ export enum LegalTaskType {
   DEPOSITION = 'DEPOSITION',
   DISCOVERY = 'DISCOVERY',
   NEGOTIATION = 'NEGOTIATION',
-  ADMINISTRATIVE = 'ADMINISTRATIVE'
+  ADMINISTRATIVE = 'ADMINISTRATIVE',
 }
 
 export enum TaskStatus {
@@ -376,7 +380,7 @@ export enum TaskStatus {
   IN_PROGRESS = 'IN_PROGRESS',
   UNDER_REVIEW = 'UNDER_REVIEW',
   COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
 }
 
 export enum DocumentType {
@@ -389,7 +393,7 @@ export enum DocumentType {
   RESEARCH = 'RESEARCH',
   MEMO = 'MEMO',
   AGREEMENT = 'AGREEMENT',
-  COURT_ORDER = 'COURT_ORDER'
+  COURT_ORDER = 'COURT_ORDER',
 }
 
 export enum ConfidentialityLevel {
@@ -397,7 +401,7 @@ export enum ConfidentialityLevel {
   CONFIDENTIAL = 'CONFIDENTIAL',
   ATTORNEY_CLIENT_PRIVILEGED = 'ATTORNEY_CLIENT_PRIVILEGED',
   WORK_PRODUCT = 'WORK_PRODUCT',
-  EYES_ONLY = 'EYES_ONLY'
+  EYES_ONLY = 'EYES_ONLY',
 }
 
 export enum ClientType {
@@ -405,7 +409,7 @@ export enum ClientType {
   SMALL_BUSINESS = 'SMALL_BUSINESS',
   CORPORATION = 'CORPORATION',
   NON_PROFIT = 'NON_PROFIT',
-  GOVERNMENT = 'GOVERNMENT'
+  GOVERNMENT = 'GOVERNMENT',
 }
 
 export enum RetainerStatus {
@@ -413,7 +417,7 @@ export enum RetainerStatus {
   PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',
   DEPLETED = 'DEPLETED',
-  EXPIRED = 'EXPIRED'
+  EXPIRED = 'EXPIRED',
 }
 
 export enum EntityType {
@@ -424,14 +428,14 @@ export enum EntityType {
   MONEY = 'MONEY',
   LEGAL_TERM = 'LEGAL_TERM',
   CASE_REFERENCE = 'CASE_REFERENCE',
-  STATUTE = 'STATUTE'
+  STATUTE = 'STATUTE',
 }
 
 export enum CitationType {
   CASE_LAW = 'CASE_LAW',
   STATUTE = 'STATUTE',
   REGULATION = 'REGULATION',
-  SECONDARY_SOURCE = 'SECONDARY_SOURCE'
+  SECONDARY_SOURCE = 'SECONDARY_SOURCE',
 }
 
 // Legal AI Capabilities
@@ -455,7 +459,7 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
   module = ModuleType.PROJECT_MANAGEMENT // Repurposed for legal
   version = '1.0.0'
   status: 'ACTIVE' | 'INACTIVE' | 'LOADING' | 'ERROR' = 'INACTIVE'
-  
+
   config = {
     enabled: true,
     priority: 3,
@@ -468,85 +472,85 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
         method: 'GET' as const,
         handler: 'getCases',
         authentication: true,
-        rateLimit: 100
+        rateLimit: 100,
       },
       {
         path: '/api/legal/cases',
         method: 'POST' as const,
         handler: 'createCase',
         authentication: true,
-        rateLimit: 20
+        rateLimit: 20,
       },
       {
         path: '/api/legal/cases/:id',
         method: 'GET' as const,
         handler: 'getCase',
         authentication: true,
-        rateLimit: 200
+        rateLimit: 200,
       },
       {
         path: '/api/legal/documents/analyze',
         method: 'POST' as const,
         handler: 'analyzeDocument',
         authentication: true,
-        rateLimit: 10
+        rateLimit: 10,
       },
       {
         path: '/api/legal/ai/case-strategy',
         method: 'POST' as const,
         handler: 'generateCaseStrategy',
         authentication: true,
-        rateLimit: 5
+        rateLimit: 5,
       },
       {
         path: '/api/legal/ai/document-review',
         method: 'POST' as const,
         handler: 'reviewDocument',
         authentication: true,
-        rateLimit: 10
+        rateLimit: 10,
       },
       {
         path: '/api/legal/ai/deadline-analysis',
         method: 'POST' as const,
         handler: 'analyzeDeadlines',
         authentication: true,
-        rateLimit: 20
+        rateLimit: 20,
       },
       {
         path: '/api/legal/time-entries',
         method: 'POST' as const,
         handler: 'createTimeEntry',
         authentication: true,
-        rateLimit: 100
-      }
+        rateLimit: 100,
+      },
     ],
     webhooks: [
       {
         event: 'case.created',
         internal: true,
-        retry: { attempts: 3, backoff: 'EXPONENTIAL' as const }
+        retry: { attempts: 3, backoff: 'EXPONENTIAL' as const },
       },
       {
         event: 'document.uploaded',
         internal: true,
-        retry: { attempts: 3, backoff: 'EXPONENTIAL' as const }
+        retry: { attempts: 3, backoff: 'EXPONENTIAL' as const },
       },
       {
         event: 'deadline.approaching',
         internal: true,
-        retry: { attempts: 3, backoff: 'EXPONENTIAL' as const }
-      }
-    ]
+        retry: { attempts: 3, backoff: 'EXPONENTIAL' as const },
+      },
+    ],
   }
-  
+
   capabilities = {
     aiEnabled: true,
     realTimeSync: true,
     crossModuleData: true,
     industrySpecific: true,
-    customFields: true
+    customFields: true,
   }
-  
+
   private eventBus: CoreFlowEventBus
   private aiOrchestrator: AIAgentOrchestrator
   private worklenzAPI: WorklenzAPIClient
@@ -558,46 +562,56 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
     contractReview: true,
     riskAssessment: true,
     timeTracking: true,
-    clientCommunication: true
+    clientCommunication: true,
   }
-  
+
   // AI Model configurations
   private documentAnalysisModel = {
     model: AIModelType.CLAUDE3_OPUS,
     features: [
-      'entity_extraction', 'sentiment_analysis', 'key_term_identification',
-      'citation_extraction', 'action_item_detection', 'risk_flagging'
+      'entity_extraction',
+      'sentiment_analysis',
+      'key_term_identification',
+      'citation_extraction',
+      'action_item_detection',
+      'risk_flagging',
     ],
     specializations: {
       contracts: true,
       litigation: true,
       correspondence: true,
-      legal_research: true
-    }
+      legal_research: true,
+    },
   }
-  
+
   private caseStrategyModel = {
     model: AIModelType.GPT4,
     capabilities: [
-      'case_analysis', 'strategy_development', 'risk_assessment',
-      'precedent_research', 'timeline_optimization'
+      'case_analysis',
+      'strategy_development',
+      'risk_assessment',
+      'precedent_research',
+      'timeline_optimization',
     ],
     knowledgeBase: {
       caselaw: true,
       statutes: true,
       regulations: true,
-      practice_guides: true
-    }
+      practice_guides: true,
+    },
   }
-  
+
   private deadlineAnalysisModel = {
     model: AIModelType.CLAUDE3_OPUS,
     functions: [
-      'deadline_extraction', 'critical_path_analysis', 'resource_planning',
-      'risk_identification', 'notification_scheduling'
-    ]
+      'deadline_extraction',
+      'critical_path_analysis',
+      'resource_planning',
+      'risk_identification',
+      'notification_scheduling',
+    ],
   }
-  
+
   constructor(eventBus: CoreFlowEventBus, aiOrchestrator: AIAgentOrchestrator) {
     this.eventBus = eventBus
     this.aiOrchestrator = aiOrchestrator
@@ -608,24 +622,20 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
    * Initialize the plugin
    */
   async initialize(): Promise<void> {
-    console.log('⚖️ Initializing Worklenz Legal Plugin...')
-    
     // Connect to Worklenz instance
     await this.worklenzAPI.connect()
-    
+
     // Setup event listeners
     this.setupEventListeners()
-    
+
     // Initialize AI models
     await this.initializeAIModels()
-    
+
     // Load legal templates and workflows
     await this.loadLegalTemplates()
-    
+
     // Setup legal monitoring
     await this.setupLegalMonitoring()
-    
-    console.log('✅ Worklenz Legal Plugin initialized')
   }
 
   /**
@@ -637,17 +647,15 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
       { operation: 'PLUGIN_ACTIVATION', pluginId: this.id },
       async () => {
         this.status = 'ACTIVE'
-        
+
         // Start deadline monitoring
         await this.startDeadlineMonitoring()
-        
+
         // Enable document processing
         await this.enableDocumentProcessing()
-        
+
         // Activate case analytics
         await this.activateCaseAnalytics()
-        
-        console.log('✅ Worklenz Legal Plugin activated')
       }
     )
   }
@@ -657,11 +665,9 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
    */
   async deactivate(): Promise<void> {
     this.status = 'INACTIVE'
-    
+
     // Stop monitoring processes
     await this.stopMonitoringProcesses()
-    
-    console.log('⏹️ Worklenz Legal Plugin deactivated')
   }
 
   /**
@@ -669,13 +675,12 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
    */
   async destroy(): Promise<void> {
     await this.worklenzAPI.disconnect()
-    console.log('🗑️ Worklenz Legal Plugin destroyed')
   }
 
   /**
    * Sync data with Worklenz
    */
-  async syncData(direction: 'IN' | 'OUT', data: any): Promise<any> {
+  async syncData(direction: 'IN' | 'OUT', data: unknown): Promise<unknown> {
     return await withPerformanceTracking('worklenz_sync', async () => {
       if (direction === 'IN') {
         return await this.importToWorklenz(data)
@@ -688,7 +693,7 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
   /**
    * Transform data for Worklenz format
    */
-  async transformData(data: any, targetFormat: string): Promise<any> {
+  async transformData(data: unknown, targetFormat: string): Promise<unknown> {
     switch (targetFormat) {
       case 'case':
         return this.transformToCase(data)
@@ -708,34 +713,31 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
   /**
    * Validate legal data
    */
-  async validateData(data: any): Promise<boolean> {
+  async validateData(data: unknown): Promise<boolean> {
     // Validate required fields
     if (data.type === 'case' && (!data.title || !data.clientId)) {
       throw new Error('Case title and client ID are required')
     }
-    
+
     if (data.type === 'document' && (!data.name || !data.filePath)) {
       throw new Error('Document name and file path are required')
     }
-    
+
     // Validate confidentiality settings
     if (data.type === 'document' && !data.confidentiality) {
       throw new Error('Document confidentiality level must be specified')
     }
-    
+
     return true
   }
 
   /**
    * AI-Enhanced Document Analysis
    */
-  async analyzeDocument(
-    documentId: string,
-    analysisType?: string[]
-  ): Promise<DocumentAIAnalysis> {
+  async analyzeDocument(documentId: string, analysisType?: string[]): Promise<DocumentAIAnalysis> {
     const document = await this.getDocument(documentId)
     const documentText = await this.extractDocumentText(document)
-    
+
     const taskId = await this.aiOrchestrator.submitTask(
       TaskType.ANALYZE_CUSTOMER, // Repurposed for document analysis
       {
@@ -743,45 +745,45 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
         text: documentText,
         analysisTypes: analysisType || ['entities', 'sentiment', 'citations', 'actions'],
         documentModel: this.documentAnalysisModel,
-        legalContext: await this.getLegalContext(document.caseId)
+        legalContext: await this.getLegalContext(document.caseId),
       },
       {
         entityType: 'legal_document',
         entityId: documentId,
         businessRules: await this.getLegalRules(),
-        confidentiality: document.confidentiality
+        confidentiality: document.confidentiality,
       },
       {
         maxExecutionTime: 45000,
         accuracyThreshold: 0.92,
         explainability: true,
-        realTime: false
+        realTime: false,
       },
       TaskPriority.HIGH,
       document.tenantId
     )
-    
+
     const task = await this.waitForTaskCompletion(taskId)
-    
+
     if (!task.result?.success) {
       throw new Error('Document analysis failed')
     }
-    
+
     const analysis: DocumentAIAnalysis = task.result.data
-    
+
     // Store analysis results
     await this.saveDocumentAnalysis(documentId, analysis)
-    
+
     // Trigger follow-up actions
     if (analysis.redFlags.length > 0) {
       await this.handleDocumentRedFlags(documentId, analysis.redFlags)
     }
-    
+
     // Extract action items
     if (analysis.actionItems.length > 0) {
       await this.createTasksFromActionItems(document.caseId, analysis.actionItems)
     }
-    
+
     // Publish analysis event
     await this.eventBus.publishEvent(
       EventType.AI_PREDICTION_READY,
@@ -789,31 +791,28 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
       {
         documentId,
         analysis,
-        analysisType: 'document_analysis'
+        analysisType: 'document_analysis',
       },
       {
         module: ModuleType.PROJECT_MANAGEMENT,
         tenantId: document.tenantId,
         entityType: 'legal_document',
-        entityId: documentId
+        entityId: documentId,
       }
     )
-    
+
     return analysis
   }
 
   /**
    * Generate AI-Powered Case Strategy
    */
-  async generateCaseStrategy(
-    caseId: string,
-    objectives?: string[]
-  ): Promise<any> {
+  async generateCaseStrategy(caseId: string, objectives?: string[]): Promise<unknown> {
     const legalCase = await this.getCase(caseId)
     const documents = await this.getCaseDocuments(caseId)
     const precedents = await this.findRelevantPrecedents(legalCase)
     const timeline = await this.getCaseTimeline(caseId)
-    
+
     const taskId = await this.aiOrchestrator.submitTask(
       TaskType.RECOMMEND_ACTION,
       {
@@ -822,7 +821,7 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
         precedents,
         timeline,
         objectives: objectives || ['maximize_success', 'minimize_cost', 'optimize_timeline'],
-        strategyModel: this.caseStrategyModel
+        strategyModel: this.caseStrategyModel,
       },
       {
         entityType: 'legal_case',
@@ -830,49 +829,46 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
         industryContext: {
           practiceArea: legalCase.practiceArea,
           jurisdiction: legalCase.jurisdiction,
-          caseType: legalCase.caseType
-        }
+          caseType: legalCase.caseType,
+        },
       },
       {
         maxExecutionTime: 60000,
         accuracyThreshold: 0.88,
         explainability: true,
-        realTime: false
+        realTime: false,
       },
       TaskPriority.HIGH,
       legalCase.tenantId
     )
-    
+
     const task = await this.waitForTaskCompletion(taskId)
-    
+
     if (!task.result?.success) {
       throw new Error('Case strategy generation failed')
     }
-    
+
     const strategy = task.result.data
-    
+
     // Store strategy
     await this.saveCaseStrategy(caseId, strategy)
-    
+
     // Create strategic tasks
     if (strategy.recommendedActions) {
       await this.createStrategicTasks(caseId, strategy.recommendedActions)
     }
-    
+
     return strategy
   }
 
   /**
    * AI-Powered Document Review
    */
-  async reviewDocument(
-    documentId: string,
-    reviewCriteria?: string[]
-  ): Promise<LegalReviewResult> {
+  async reviewDocument(documentId: string, reviewCriteria?: string[]): Promise<LegalReviewResult> {
     const document = await this.getDocument(documentId)
     const documentText = await this.extractDocumentText(document)
     const reviewGuidelines = await this.getReviewGuidelines(document.type)
-    
+
     const taskId = await this.aiOrchestrator.submitTask(
       TaskType.ANALYZE_CUSTOMER, // Repurposed for document review
       {
@@ -880,29 +876,29 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
         text: documentText,
         reviewCriteria: reviewCriteria || ['completeness', 'accuracy', 'compliance', 'risk'],
         guidelines: reviewGuidelines,
-        documentModel: this.documentAnalysisModel
+        documentModel: this.documentAnalysisModel,
       },
       {
         entityType: 'legal_document',
         entityId: documentId,
-        businessRules: await this.getDocumentReviewRules()
+        businessRules: await this.getDocumentReviewRules(),
       },
       {
         maxExecutionTime: 30000,
-        accuracyThreshold: 0.90,
+        accuracyThreshold: 0.9,
         explainability: true,
-        realTime: false
+        realTime: false,
       },
       TaskPriority.HIGH,
       document.tenantId
     )
-    
+
     const task = await this.waitForTaskCompletion(taskId)
-    
+
     if (!task.result?.success) {
       throw new Error('Document review failed')
     }
-    
+
     const review: LegalReviewResult = {
       reviewStatus: 'IN_REVIEW',
       reviewerId: 'ai-system',
@@ -910,12 +906,12 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
       comments: task.result.data.comments,
       requiredChanges: task.result.data.requiredChanges,
       confidentialityVerified: task.result.data.confidentialityVerified,
-      privilegeVerified: task.result.data.privilegeVerified
+      privilegeVerified: task.result.data.privilegeVerified,
     }
-    
+
     // Save review results
     await this.saveDocumentReview(documentId, review)
-    
+
     return review
   }
 
@@ -927,7 +923,7 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
     const tasks = await this.getCaseTasks(caseId)
     const documents = await this.getCaseDocuments(caseId)
     const courtRules = await this.getCourtRules(legalCase.jurisdiction, legalCase.court)
-    
+
     const taskId = await this.aiOrchestrator.submitTask(
       TaskType.DETECT_ANOMALY, // Repurposed for deadline analysis
       {
@@ -936,40 +932,40 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
         documents,
         courtRules,
         deadlineModel: this.deadlineAnalysisModel,
-        currentDate: new Date()
+        currentDate: new Date(),
       },
       {
         entityType: 'legal_case',
         entityId: caseId,
-        businessRules: await this.getDeadlineRules()
+        businessRules: await this.getDeadlineRules(),
       },
       {
         maxExecutionTime: 20000,
         accuracyThreshold: 0.85,
         explainability: true,
-        realTime: true
+        realTime: true,
       },
       TaskPriority.CRITICAL,
       legalCase.tenantId
     )
-    
+
     const task = await this.waitForTaskCompletion(taskId)
-    
+
     if (!task.result?.success) {
       throw new Error('Deadline analysis failed')
     }
-    
+
     const alerts: DeadlineAlert[] = task.result.data.alerts
-    
+
     // Process critical alerts
-    const criticalAlerts = alerts.filter(alert => alert.severity === 'CRITICAL')
+    const criticalAlerts = alerts.filter((alert) => alert.severity === 'CRITICAL')
     for (const alert of criticalAlerts) {
       await this.handleCriticalDeadline(caseId, alert)
     }
-    
+
     // Schedule notifications
     await this.scheduleDeadlineNotifications(caseId, alerts)
-    
+
     return alerts
   }
 
@@ -979,7 +975,7 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
   async createTimeEntry(timeEntryData: Partial<TimeEntry>): Promise<TimeEntry> {
     // AI categorization of time entry
     const categorization = await this.categorizeTimeEntry(timeEntryData.description!)
-    
+
     const timeEntry: TimeEntry = {
       id: `time_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       caseId: timeEntryData.caseId!,
@@ -991,15 +987,15 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
       billable: timeEntryData.billable ?? categorization.billabilityScore > 0.7,
       rate: timeEntryData.rate,
       billed: false,
-      aiCategorization: categorization
+      aiCategorization: categorization,
     }
-    
+
     // Save time entry
     await this.saveTimeEntry(timeEntry)
-    
+
     // Update case metrics
     await this.updateCaseTimeMetrics(timeEntry.caseId, timeEntry)
-    
+
     return timeEntry
   }
 
@@ -1009,16 +1005,16 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
   private async monitorLegalCase(legalCase: LegalCase): Promise<void> {
     // Check deadline compliance
     await this.checkDeadlineCompliance(legalCase.id)
-    
+
     // Monitor document status
     await this.monitorDocumentStatus(legalCase.id)
-    
+
     // Track case progress
     await this.trackCaseProgress(legalCase.id)
-    
+
     // Update AI insights
     legalCase.aiInsights = await this.updateCaseInsights(legalCase)
-    
+
     // Check for significant changes
     await this.detectSignificantCaseChanges(legalCase)
   }
@@ -1040,7 +1036,7 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
         }
       }
     )
-    
+
     // Listen for accounting events (billing)
     this.eventBus.registerHandler(
       'worklenz-accounting-sync',
@@ -1054,7 +1050,7 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
         }
       }
     )
-    
+
     // Listen for AI events (analysis completed)
     this.eventBus.registerHandler(
       'worklenz-ai-sync',
@@ -1074,14 +1070,10 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
    * Initialize AI models for legal work
    */
   private async initializeAIModels(): Promise<void> {
-    console.log('🤖 Initializing legal AI models...')
-    
     // Document analysis model
-    // Case strategy model  
+    // Case strategy model
     // Deadline tracking model
     // Contract review model
-    
-    console.log('✅ Legal AI models initialized')
   }
 
   /**
@@ -1100,8 +1092,8 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
             { sourceField: 'startDate', targetField: 'createdDate' },
             { sourceField: 'endDate', targetField: 'dueDate' },
             { sourceField: 'priority', targetField: 'priority' },
-            { sourceField: 'status', targetField: 'status' }
-          ]
+            { sourceField: 'status', targetField: 'status' },
+          ],
         },
         {
           source: 'Task',
@@ -1112,39 +1104,39 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
             { sourceField: 'description', targetField: 'description' },
             { sourceField: 'assigneeId', targetField: 'assigneeId' },
             { sourceField: 'dueDate', targetField: 'dueDate' },
-            { sourceField: 'status', targetField: 'status' }
-          ]
-        }
+            { sourceField: 'status', targetField: 'status' },
+          ],
+        },
       ],
       relationships: [
         {
           sourceEntity: 'LegalCase',
           targetEntity: 'LegalClient',
           type: 'MANY_TO_ONE',
-          foreignKey: 'clientId'
+          foreignKey: 'clientId',
         },
         {
           sourceEntity: 'LegalTask',
           targetEntity: 'LegalCase',
           type: 'MANY_TO_ONE',
-          foreignKey: 'caseId'
-        }
-      ]
+          foreignKey: 'caseId',
+        },
+      ],
     }
   }
 
   /**
    * Helper methods
    */
-  private async importToWorklenz(data: any): Promise<any> {
+  private async importToWorklenz(data: unknown): Promise<unknown> {
     return await this.worklenzAPI.importData(data)
   }
 
-  private async exportFromWorklenz(query: any): Promise<any> {
+  private async exportFromWorklenz(query: unknown): Promise<unknown> {
     return await this.worklenzAPI.exportData(query)
   }
 
-  private transformToCase(data: any): LegalCase {
+  private transformToCase(data: unknown): LegalCase {
     return {
       id: data.id || '',
       caseNumber: data.caseNumber || `CASE-${Date.now()}`,
@@ -1160,11 +1152,11 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
       assignedAttorneys: data.attorneys || [],
       assignedParalegals: data.paralegals || [],
       jurisdiction: data.jurisdiction || 'State',
-      opposingParties: data.opposingParties || []
+      opposingParties: data.opposingParties || [],
     }
   }
 
-  private transformToTask(data: any): LegalTask {
+  private transformToTask(data: unknown): LegalTask {
     return {
       id: data.id || '',
       caseId: data.caseId || data.projectId,
@@ -1178,11 +1170,11 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
       estimatedHours: data.estimatedHours,
       billable: data.billable ?? true,
       clientVisible: data.clientVisible ?? false,
-      courtDeadline: data.courtDeadline ?? false
+      courtDeadline: data.courtDeadline ?? false,
     }
   }
 
-  private transformToDocument(data: any): LegalDocument {
+  private transformToDocument(data: unknown): LegalDocument {
     return {
       id: data.id || '',
       caseId: data.caseId,
@@ -1195,11 +1187,11 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
       uploadDate: new Date(data.uploadDate || Date.now()),
       confidentiality: data.confidentiality || ConfidentialityLevel.CONFIDENTIAL,
       privileged: data.privileged ?? false,
-      workProduct: data.workProduct ?? false
+      workProduct: data.workProduct ?? false,
     }
   }
 
-  private transformToClient(data: any): LegalClient {
+  private transformToClient(data: unknown): LegalClient {
     return {
       id: data.id || '',
       name: data.name || data.companyName,
@@ -1208,11 +1200,11 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
       phone: data.phone,
       address: data.address,
       retainerStatus: data.retainerStatus || RetainerStatus.NONE,
-      conflictChecked: data.conflictChecked ?? false
+      conflictChecked: data.conflictChecked ?? false,
     }
   }
 
-  private transformToTimeEntry(data: any): TimeEntry {
+  private transformToTimeEntry(data: unknown): TimeEntry {
     return {
       id: data.id || '',
       caseId: data.caseId,
@@ -1223,129 +1215,135 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
       description: data.description,
       billable: data.billable ?? true,
       rate: data.rate,
-      billed: data.billed ?? false
+      billed: data.billed ?? false,
     }
   }
 
-  private async waitForTaskCompletion(taskId: string, timeout = 60000): Promise<any> {
+  private async waitForTaskCompletion(taskId: string, timeout = 60000): Promise<unknown> {
     const startTime = Date.now()
-    
+
     while (Date.now() - startTime < timeout) {
       const task = await this.aiOrchestrator.getTaskStatus(taskId)
-      
+
       if (task?.status === 'COMPLETED' || task?.status === 'FAILED') {
         return task
       }
-      
-      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      await new Promise((resolve) => setTimeout(resolve, 1000))
     }
-    
+
     throw new Error('Task timeout')
   }
 
-  private async loadLegalTemplates(): Promise<void> {
-    console.log('📋 Loading legal templates...')
-  }
+  private async loadLegalTemplates(): Promise<void> {}
 
-  private async setupLegalMonitoring(): Promise<void> {
-    console.log('👁️ Setting up legal monitoring...')
-  }
+  private async setupLegalMonitoring(): Promise<void> {}
 
-  private async startDeadlineMonitoring(): Promise<void> {
-    console.log('⏰ Starting deadline monitoring...')
-  }
+  private async startDeadlineMonitoring(): Promise<void> {}
 
-  private async enableDocumentProcessing(): Promise<void> {
-    console.log('📄 Enabling document processing...')
-  }
+  private async enableDocumentProcessing(): Promise<void> {}
 
-  private async activateCaseAnalytics(): Promise<void> {
-    console.log('📊 Activating case analytics...')
-  }
+  private async activateCaseAnalytics(): Promise<void> {}
 
-  private async stopMonitoringProcesses(): Promise<void> {
-    console.log('⏹️ Stopping monitoring processes...')
-  }
+  private async stopMonitoringProcesses(): Promise<void> {}
 
   // Data access methods
-  private async getDocument(documentId: string): Promise<any> { return {} }
-  private async extractDocumentText(document: any): Promise<string> { return '' }
-  private async getLegalContext(caseId?: string): Promise<any> { return {} }
-  private async getLegalRules(): Promise<any> { return {} }
-  private async getCase(caseId: string): Promise<any> { return {} }
-  private async getCaseDocuments(caseId: string): Promise<any[]> { return [] }
-  private async findRelevantPrecedents(legalCase: any): Promise<any[]> { return [] }
-  private async getCaseTimeline(caseId: string): Promise<any> { return {} }
-  private async getReviewGuidelines(documentType: DocumentType): Promise<any> { return {} }
-  private async getDocumentReviewRules(): Promise<any> { return {} }
-  private async getCaseTasks(caseId: string): Promise<any[]> { return [] }
-  private async getCourtRules(jurisdiction: string, court?: string): Promise<any> { return {} }
-  private async getDeadlineRules(): Promise<any> { return {} }
+  private async getDocument(_documentId: string): Promise<unknown> {
+    return {}
+  }
+  private async extractDocumentText(_document: unknown): Promise<string> {
+    return ''
+  }
+  private async getLegalContext(caseId?: string): Promise<unknown> {
+    return {}
+  }
+  private async getLegalRules(): Promise<unknown> {
+    return {}
+  }
+  private async getCase(_caseId: string): Promise<unknown> {
+    return {}
+  }
+  private async getCaseDocuments(_caseId: string): Promise<unknown[]> {
+    return []
+  }
+  private async findRelevantPrecedents(_legalCase: unknown): Promise<unknown[]> {
+    return []
+  }
+  private async getCaseTimeline(_caseId: string): Promise<unknown> {
+    return {}
+  }
+  private async getReviewGuidelines(_documentType: DocumentType): Promise<unknown> {
+    return {}
+  }
+  private async getDocumentReviewRules(): Promise<unknown> {
+    return {}
+  }
+  private async getCaseTasks(_caseId: string): Promise<unknown[]> {
+    return []
+  }
+  private async getCourtRules(_jurisdiction: string, court?: string): Promise<unknown> {
+    return {}
+  }
+  private async getDeadlineRules(): Promise<unknown> {
+    return {}
+  }
 
   // Action methods
-  private async saveDocumentAnalysis(documentId: string, analysis: DocumentAIAnalysis): Promise<void> {
-    console.log(`📊 Saving document analysis for ${documentId}`)
-  }
+  private async saveDocumentAnalysis(
+    _documentId: string,
+    analysis: DocumentAIAnalysis
+  ): Promise<void> {}
 
-  private async handleDocumentRedFlags(documentId: string, redFlags: RedFlag[]): Promise<void> {
-    console.log(`🚨 Handling document red flags for ${documentId}`)
-  }
+  private async handleDocumentRedFlags(_documentId: string, _redFlags: RedFlag[]): Promise<void> {}
 
-  private async createTasksFromActionItems(caseId: string, actionItems: ActionItem[]): Promise<void> {
-    console.log(`📋 Creating tasks from action items for case ${caseId}`)
-  }
+  private async createTasksFromActionItems(
+    _caseId: string,
+    actionItems: ActionItem[]
+  ): Promise<void> {}
 
-  private async saveCaseStrategy(caseId: string, strategy: any): Promise<void> {
-    console.log(`💡 Saving case strategy for ${caseId}`)
-  }
+  private async saveCaseStrategy(_caseId: string, _strategy: unknown): Promise<void> {}
 
-  private async createStrategicTasks(caseId: string, actions: any[]): Promise<void> {
-    console.log(`🎯 Creating strategic tasks for case ${caseId}`)
-  }
+  private async createStrategicTasks(_caseId: string, _actions: unknown[]): Promise<void> {}
 
-  private async saveDocumentReview(documentId: string, review: LegalReviewResult): Promise<void> {
-    console.log(`✅ Saving document review for ${documentId}`)
-  }
+  private async saveDocumentReview(
+    _documentId: string,
+    _review: LegalReviewResult
+  ): Promise<void> {}
 
-  private async handleCriticalDeadline(caseId: string, alert: DeadlineAlert): Promise<void> {
-    console.log(`🚨 Handling critical deadline for case ${caseId}`)
-  }
+  private async handleCriticalDeadline(_caseId: string, _alert: DeadlineAlert): Promise<void> {}
 
-  private async scheduleDeadlineNotifications(caseId: string, alerts: DeadlineAlert[]): Promise<void> {
-    console.log(`⏰ Scheduling deadline notifications for case ${caseId}`)
-  }
+  private async scheduleDeadlineNotifications(
+    _caseId: string,
+    alerts: DeadlineAlert[]
+  ): Promise<void> {}
 
-  private async categorizeTimeEntry(description: string): Promise<TimeCategorization> {
+  private async categorizeTimeEntry(_description: string): Promise<TimeCategorization> {
     // AI categorization of time entry
     return {
       category: 'LEGAL_WORK',
       subCategory: 'RESEARCH',
       confidence: 0.8,
-      billabilityScore: 0.9
+      billabilityScore: 0.9,
     }
   }
 
-  private async saveTimeEntry(timeEntry: TimeEntry): Promise<void> {
-    console.log(`⏱️ Saving time entry for case ${timeEntry.caseId}`)
-  }
+  private async saveTimeEntry(_timeEntry: TimeEntry): Promise<void> {}
 
-  private async updateCaseTimeMetrics(caseId: string, timeEntry: TimeEntry): Promise<void> {
-    console.log(`📊 Updating case time metrics for ${caseId}`)
-  }
+  private async updateCaseTimeMetrics(_caseId: string, _timeEntry: TimeEntry): Promise<void> {}
 
-  private async checkDeadlineCompliance(caseId: string): Promise<void> {
+  private async checkDeadlineCompliance(_caseId: string): Promise<void> {
     // Check deadline compliance
   }
 
-  private async monitorDocumentStatus(caseId: string): Promise<void> {
+  private async monitorDocumentStatus(_caseId: string): Promise<void> {
     // Monitor document status
   }
 
-  private async trackCaseProgress(caseId: string): Promise<void> {
+  private async trackCaseProgress(_caseId: string): Promise<void> {
     // Track case progress
   }
 
-  private async updateCaseInsights(legalCase: LegalCase): Promise<LegalCaseAIInsights> {
+  private async updateCaseInsights(_legalCase: LegalCase): Promise<LegalCaseAIInsights> {
     return {
       complexityScore: 0,
       estimatedDuration: 0,
@@ -1353,25 +1351,19 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
       keyIssues: [],
       precedentCases: [],
       strategicRecommendations: [],
-      deadlineAlerts: []
+      deadlineAlerts: [],
     }
   }
 
-  private async detectSignificantCaseChanges(legalCase: LegalCase): Promise<void> {
+  private async detectSignificantCaseChanges(_legalCase: LegalCase): Promise<void> {
     // Detect significant changes in case
   }
 
-  private async createClientFromCRM(data: any): Promise<void> {
-    console.log('👥 Creating legal client from CRM')
-  }
+  private async createClientFromCRM(_data: unknown): Promise<void> {}
 
-  private async syncLegalBilling(data: any): Promise<void> {
-    console.log('💰 Syncing legal billing with accounting')
-  }
+  private async syncLegalBilling(_data: unknown): Promise<void> {}
 
-  private async processDocumentAnalysisResult(data: any): Promise<void> {
-    console.log('📊 Processing document analysis result')
-  }
+  private async processDocumentAnalysisResult(_data: unknown): Promise<void> {}
 }
 
 /**
@@ -1380,51 +1372,45 @@ export class WorklenzLegalPlugin implements CoreFlowPlugin {
 class WorklenzAPIClient {
   private baseURL: string
   private apiKey: string
-  
+
   constructor() {
     this.baseURL = process.env.WORKLENZ_API_URL || 'http://localhost:3000/api'
     this.apiKey = process.env.WORKLENZ_API_KEY || ''
   }
-  
-  async connect(): Promise<void> {
-    console.log('🔌 Connecting to Worklenz API...')
-  }
-  
-  async disconnect(): Promise<void> {
-    console.log('🔌 Disconnecting from Worklenz API...')
-  }
-  
-  async importData(data: any): Promise<any> {
+
+  async connect(): Promise<void> {}
+
+  async disconnect(): Promise<void> {}
+
+  async importData(data: unknown): Promise<unknown> {
     return data
   }
-  
-  async exportData(query: any): Promise<any> {
+
+  async exportData(_query: unknown): Promise<unknown> {
     return {}
   }
-  
-  async createProject(project: any): Promise<any> {
-    console.log('📋 Creating project in Worklenz')
+
+  async createProject(project: unknown): Promise<unknown> {
     return project
   }
-  
-  async getProject(projectId: string): Promise<any> {
+
+  async getProject(_projectId: string): Promise<unknown> {
     return {}
   }
-  
-  async updateProject(projectId: string, updates: any): Promise<any> {
+
+  async updateProject(_projectId: string, _updates: unknown): Promise<unknown> {
     return {}
   }
-  
-  async createTask(task: any): Promise<any> {
-    console.log('✅ Creating task in Worklenz')
+
+  async createTask(task: unknown): Promise<unknown> {
     return task
   }
-  
-  async getTasks(filters?: any): Promise<any[]> {
+
+  async getTasks(filters?: unknown): Promise<unknown[]> {
     return []
   }
-  
-  async getTimeEntries(filters?: any): Promise<any[]> {
+
+  async getTimeEntries(filters?: unknown): Promise<unknown[]> {
     return []
   }
 }

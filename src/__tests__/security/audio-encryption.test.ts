@@ -41,7 +41,7 @@ describe('AudioEncryptionService', () => {
     it('should decrypt audio buffer successfully', async () => {
       const metadata = { customerId: 'test-123' }
       const encrypted = await encryptionService.encryptAudio(testAudioBuffer, metadata)
-      
+
       const decrypted = await encryptionService.decryptAudio(
         encrypted.data,
         encrypted.metadata,
@@ -54,9 +54,9 @@ describe('AudioEncryptionService', () => {
 
     it('should fail decryption with tampered data', async () => {
       const encrypted = await encryptionService.encryptAudio(testAudioBuffer)
-      
+
       // Tamper with encrypted data
-      encrypted.data[0] = encrypted.data[0] ^ 0xFF
+      encrypted.data[0] = encrypted.data[0] ^ 0xff
 
       await expect(
         encryptionService.decryptAudio(encrypted.data, encrypted.metadata)
@@ -66,14 +66,12 @@ describe('AudioEncryptionService', () => {
     it('should fail decryption with wrong metadata', async () => {
       const metadata = { customerId: 'test-123' }
       const encrypted = await encryptionService.encryptAudio(testAudioBuffer, metadata)
-      
+
       // Try to decrypt with different metadata
       await expect(
-        encryptionService.decryptAudio(
-          encrypted.data,
-          encrypted.metadata,
-          { customerId: 'wrong-123' }
-        )
+        encryptionService.decryptAudio(encrypted.data, encrypted.metadata, {
+          customerId: 'wrong-123',
+        })
       ).rejects.toThrow('Audio authentication failed')
     })
   })
@@ -82,7 +80,7 @@ describe('AudioEncryptionService', () => {
     it('should encrypt and decrypt transcript', async () => {
       const metadata = { noteId: 'note-789' }
       const encrypted = await encryptionService.encryptTranscript(testTranscript, metadata)
-      
+
       expect(encrypted.data).toBeInstanceOf(Buffer)
       expect(encrypted.data.toString()).not.toEqual(testTranscript)
 
@@ -98,7 +96,7 @@ describe('AudioEncryptionService', () => {
     it('should handle unicode transcripts', async () => {
       const unicodeTranscript = 'Test with emojis 🎙️ and special chars: ñáéíóú'
       const encrypted = await encryptionService.encryptTranscript(unicodeTranscript)
-      
+
       const decrypted = await encryptionService.decryptTranscript(
         encrypted.data,
         encrypted.metadata
@@ -125,7 +123,7 @@ describe('AudioEncryptionService', () => {
       stream.write(testAudioBuffer.slice(1000, 2000))
       stream.end()
 
-      await new Promise(resolve => stream.on('finish', resolve))
+      await new Promise((resolve) => stream.on('finish', resolve))
 
       const encryptedData = Buffer.concat(chunks)
       expect(encryptedData).toBeInstanceOf(Buffer)
@@ -137,14 +135,15 @@ describe('AudioEncryptionService', () => {
 
     it('should decrypt streamed data', async () => {
       const metadata = { streamId: 'stream-456' }
-      const { stream: encryptStream, getMetadata } = encryptionService.createEncryptionStream(metadata)
+      const { stream: encryptStream, getMetadata } =
+        encryptionService.createEncryptionStream(metadata)
 
       // Encrypt data
       const encryptedChunks: Buffer[] = []
       encryptStream.on('data', (chunk) => encryptedChunks.push(chunk))
       encryptStream.end(testAudioBuffer)
-      
-      await new Promise(resolve => encryptStream.on('finish', resolve))
+
+      await new Promise((resolve) => encryptStream.on('finish', resolve))
 
       const encryptedData = Buffer.concat(encryptedChunks)
       const encryptionMetadata = getMetadata()
@@ -155,7 +154,7 @@ describe('AudioEncryptionService', () => {
       decryptStream.on('data', (chunk) => decryptedChunks.push(chunk))
       decryptStream.end(encryptedData)
 
-      await new Promise(resolve => decryptStream.on('finish', resolve))
+      await new Promise((resolve) => decryptStream.on('finish', resolve))
 
       const decryptedData = Buffer.concat(decryptedChunks)
       expect(decryptedData).toEqual(testAudioBuffer)
@@ -235,7 +234,7 @@ describe('AudioEncryptionService', () => {
       expect(isValid).toBe(true)
 
       // Tamper with data
-      testAudioBuffer[0] = testAudioBuffer[0] ^ 0xFF
+      testAudioBuffer[0] = testAudioBuffer[0] ^ 0xff
       const isInvalid = await encryptionService.verifyIntegrity(testAudioBuffer, hash)
       expect(isInvalid).toBe(false)
     })
@@ -250,14 +249,8 @@ describe('AudioEncryptionService', () => {
       expect(encrypted1.metadata.salt).not.toEqual(encrypted2.metadata.salt)
 
       // But both should decrypt to same data
-      const decrypted1 = await encryptionService.decryptAudio(
-        encrypted1.data,
-        encrypted1.metadata
-      )
-      const decrypted2 = await encryptionService.decryptAudio(
-        encrypted2.data,
-        encrypted2.metadata
-      )
+      const decrypted1 = await encryptionService.decryptAudio(encrypted1.data, encrypted1.metadata)
+      const decrypted2 = await encryptionService.decryptAudio(encrypted2.data, encrypted2.metadata)
 
       expect(decrypted1.data).toEqual(decrypted2.data)
     })
@@ -267,7 +260,7 @@ describe('AudioEncryptionService', () => {
     it('should handle large audio files efficiently', async () => {
       // Create 10MB audio buffer
       const largeBuffer = crypto.randomBytes(10 * 1024 * 1024)
-      
+
       const startTime = Date.now()
       const encrypted = await encryptionService.encryptAudio(largeBuffer)
       const encryptTime = Date.now() - startTime
@@ -276,10 +269,7 @@ describe('AudioEncryptionService', () => {
       expect(encrypted.data.length).toBeCloseTo(largeBuffer.length, -100) // Size should be similar
 
       const decryptStart = Date.now()
-      const decrypted = await encryptionService.decryptAudio(
-        encrypted.data,
-        encrypted.metadata
-      )
+      const decrypted = await encryptionService.decryptAudio(encrypted.data, encrypted.metadata)
       const decryptTime = Date.now() - decryptStart
 
       expect(decryptTime).toBeLessThan(1000) // Should decrypt 10MB in < 1 second

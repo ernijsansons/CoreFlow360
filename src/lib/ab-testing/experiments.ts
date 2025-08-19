@@ -7,7 +7,7 @@ export interface Variant {
   id: string
   name: string
   weight: number // 0-100 percentage
-  config: Record<string, any>
+  config: Record<string, unknown>
 }
 
 export interface Experiment {
@@ -40,8 +40,8 @@ export const experiments: Experiment[] = [
         weight: 50,
         config: {
           headline: 'Turn Your Business Into a Revenue Machine',
-          subheadline: 'That Runs Itself'
-        }
+          subheadline: 'That Runs Itself',
+        },
       },
       {
         id: 'variant-a',
@@ -49,11 +49,11 @@ export const experiments: Experiment[] = [
         weight: 50,
         config: {
           headline: 'Achieve 10X Business Growth',
-          subheadline: 'With Autonomous Operations'
-        }
-      }
+          subheadline: 'With Autonomous Operations',
+        },
+      },
     ],
-    metrics: ['conversion_rate', 'bounce_rate', 'time_on_page']
+    metrics: ['conversion_rate', 'bounce_rate', 'time_on_page'],
   },
   {
     id: 'cta-button-test',
@@ -68,8 +68,8 @@ export const experiments: Experiment[] = [
         weight: 33,
         config: {
           primaryCTA: 'Start Free 30-Day Trial',
-          secondaryCTA: 'Watch 3-Min Demo'
-        }
+          secondaryCTA: 'Watch 3-Min Demo',
+        },
       },
       {
         id: 'variant-a',
@@ -77,8 +77,8 @@ export const experiments: Experiment[] = [
         weight: 33,
         config: {
           primaryCTA: 'Get Started Free',
-          secondaryCTA: 'See How It Works'
-        }
+          secondaryCTA: 'See How It Works',
+        },
       },
       {
         id: 'variant-b',
@@ -86,11 +86,11 @@ export const experiments: Experiment[] = [
         weight: 34,
         config: {
           primaryCTA: 'Claim Your $500 Discount',
-          secondaryCTA: 'Schedule Demo'
-        }
-      }
+          secondaryCTA: 'Schedule Demo',
+        },
+      },
     ],
-    metrics: ['cta_click_rate', 'form_submission_rate']
+    metrics: ['cta_click_rate', 'form_submission_rate'],
   },
   {
     id: 'social-proof-test',
@@ -105,8 +105,8 @@ export const experiments: Experiment[] = [
         weight: 50,
         config: {
           type: 'user_count',
-          display: '2,847+ businesses transformed'
-        }
+          display: '2,847+ businesses transformed',
+        },
       },
       {
         id: 'variant-a',
@@ -114,11 +114,11 @@ export const experiments: Experiment[] = [
         weight: 50,
         config: {
           type: 'revenue_stats',
-          display: '$127M+ revenue generated'
-        }
-      }
+          display: '$127M+ revenue generated',
+        },
+      },
     ],
-    metrics: ['trust_indicator_impact', 'conversion_rate']
+    metrics: ['trust_indicator_impact', 'conversion_rate'],
   },
   {
     id: 'pricing-display-test',
@@ -133,8 +133,8 @@ export const experiments: Experiment[] = [
         weight: 50,
         config: {
           type: 'interactive',
-          showCalculator: true
-        }
+          showCalculator: true,
+        },
       },
       {
         id: 'variant-a',
@@ -142,11 +142,11 @@ export const experiments: Experiment[] = [
         weight: 50,
         config: {
           type: 'simple_tiers',
-          tiers: ['Starter', 'Professional', 'Enterprise']
-        }
-      }
+          tiers: ['Starter', 'Professional', 'Enterprise'],
+        },
+      },
     ],
-    metrics: ['pricing_engagement', 'checkout_initiation']
+    metrics: ['pricing_engagement', 'checkout_initiation'],
   },
   {
     id: 'urgency-element-test',
@@ -155,7 +155,7 @@ export const experiments: Experiment[] = [
     status: 'active',
     startDate: new Date('2024-01-01'),
     targetAudience: {
-      newUsers: true
+      newUsers: true,
     },
     variants: [
       {
@@ -164,8 +164,8 @@ export const experiments: Experiment[] = [
         weight: 33,
         config: {
           type: 'countdown',
-          message: 'Limited Time: Early Access Pricing'
-        }
+          message: 'Limited Time: Early Access Pricing',
+        },
       },
       {
         id: 'variant-a',
@@ -173,8 +173,8 @@ export const experiments: Experiment[] = [
         weight: 33,
         config: {
           type: 'spots',
-          message: 'Only 47 spots remaining'
-        }
+          message: 'Only 47 spots remaining',
+        },
       },
       {
         id: 'variant-b',
@@ -182,22 +182,22 @@ export const experiments: Experiment[] = [
         weight: 34,
         config: {
           type: 'none',
-          message: null
-        }
-      }
+          message: null,
+        },
+      },
     ],
-    metrics: ['urgency_impact', 'conversion_rate', 'anxiety_metrics']
-  }
+    metrics: ['urgency_impact', 'conversion_rate', 'anxiety_metrics'],
+  },
 ]
 
 // Get active experiments
 export function getActiveExperiments(): Experiment[] {
-  return experiments.filter(exp => exp.status === 'active')
+  return experiments.filter((exp) => exp.status === 'active')
 }
 
 // Get experiment by ID
 export function getExperiment(id: string): Experiment | undefined {
-  return experiments.find(exp => exp.id === id)
+  return experiments.find((exp) => exp.id === id)
 }
 
 // Check if user qualifies for experiment

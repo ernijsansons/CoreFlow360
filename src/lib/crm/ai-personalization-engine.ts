@@ -18,23 +18,23 @@ export interface RecipientProfile {
   title: string
   company: string
   industry: string
-  
+
   // Behavioral Data
   personalityType?: PersonalityType
   communicationStyle?: CommunicationStyle
   decisionMakingStyle?: 'ANALYTICAL' | 'DRIVER' | 'EXPRESSIVE' | 'AMIABLE'
-  
+
   // Engagement History
   previousInteractions: Interaction[]
   contentPreferences: ContentPreference[]
   responsePatterns: ResponsePattern[]
-  
+
   // Context
   currentChallenges: string[]
   goals: string[]
   painPoints: string[]
   triggers: string[]
-  
+
   // Social & Professional
   recentActivity: Activity[]
   interests: string[]
@@ -62,7 +62,13 @@ export interface WritingStyle {
 }
 
 export interface MessageObjective {
-  primary: 'BOOK_MEETING' | 'GET_RESPONSE' | 'BUILD_RELATIONSHIP' | 'SHARE_CONTENT' | 'QUALIFY' | 'CLOSE_DEAL'
+  primary:
+    | 'BOOK_MEETING'
+    | 'GET_RESPONSE'
+    | 'BUILD_RELATIONSHIP'
+    | 'SHARE_CONTENT'
+    | 'QUALIFY'
+    | 'CLOSE_DEAL'
   secondary?: string[]
   callToAction: CallToAction
   urgency: 'LOW' | 'MEDIUM' | 'HIGH'
@@ -71,7 +77,7 @@ export interface MessageObjective {
 export interface PersonalizedMessage {
   id: string
   type: string
-  
+
   // Content
   subject?: string
   greeting: string
@@ -79,32 +85,38 @@ export interface PersonalizedMessage {
   closing: string
   signature: string
   postscript?: string
-  
+
   // Metadata
   personalizationScore: number // 0-100
   readabilityScore: number // 0-100
   sentimentScore: number // -1 to 1
   predictedResponseRate: number // 0-1
-  
+
   // Elements Used
   personalizationElements: PersonalizationElement[]
   psychologicalTriggers: PsychologicalTrigger[]
-  
+
   // Variations
   alternatives?: MessageVariation[]
-  
+
   // Follow-up Strategy
   followUpStrategy: FollowUpStrategy
-  
+
   // Insights
   insights: MessageInsight[]
   warnings?: string[]
-  
+
   generatedAt: Date
 }
 
 export interface PersonalizationElement {
-  type: 'COMPANY_NEWS' | 'PERSONAL_ACHIEVEMENT' | 'SHARED_CONNECTION' | 'PAIN_POINT' | 'INDUSTRY_TREND' | 'BEHAVIORAL_INSIGHT'
+  type:
+    | 'COMPANY_NEWS'
+    | 'PERSONAL_ACHIEVEMENT'
+    | 'SHARED_CONNECTION'
+    | 'PAIN_POINT'
+    | 'INDUSTRY_TREND'
+    | 'BEHAVIORAL_INSIGHT'
   content: string
   placement: 'SUBJECT' | 'OPENING' | 'BODY' | 'CLOSING'
   impact: 'HIGH' | 'MEDIUM' | 'LOW'
@@ -191,7 +203,12 @@ export interface ResponseAnalysis {
 }
 
 export interface BuyingSignal {
-  type: 'BUDGET_MENTION' | 'TIMELINE_MENTION' | 'DECISION_PROCESS' | 'PAIN_CONFIRMATION' | 'FEATURE_INTEREST'
+  type:
+    | 'BUDGET_MENTION'
+    | 'TIMELINE_MENTION'
+    | 'DECISION_PROCESS'
+    | 'PAIN_CONFIRMATION'
+    | 'FEATURE_INTEREST'
   strength: 'WEAK' | 'MODERATE' | 'STRONG'
   quote: string
   response: string
@@ -212,11 +229,11 @@ export interface DynamicContentLibrary {
   closings: ContentBlock[]
   postscripts: ContentBlock[]
   objectionHandlers: ObjectionHandler[]
-  
+
   // Industry-specific
   industryInsights: Record<string, ContentBlock[]>
   roleBasedMessaging: Record<string, ContentBlock[]>
-  
+
   // Seasonal & Timely
   seasonalHooks: SeasonalContent[]
   currentEvents: CurrentEventHook[]
@@ -236,13 +253,13 @@ export class AIPersonalizationEngine {
   private sentimentAnalyzer: SentimentAnalyzer
   private contentLibrary: DynamicContentLibrary
   private performanceTracker: PerformanceTracker
-  
+
   constructor() {
     this.sentimentAnalyzer = new SentimentAnalyzer()
     this.contentLibrary = this.initializeContentLibrary()
     this.performanceTracker = new PerformanceTracker()
   }
-  
+
   /**
    * Generate hyper-personalized message
    */
@@ -250,56 +267,55 @@ export class AIPersonalizationEngine {
     try {
       // Analyze recipient profile
       const profileAnalysis = await this.analyzeRecipientProfile(request.recipient)
-      
+
       // Determine optimal message structure
       const messageStructure = this.determineMessageStructure(
         request.type,
         request.context,
         profileAnalysis
       )
-      
+
       // Generate content for each section
-      const subject = request.type === 'EMAIL' ? 
-        await this.generateSubjectLine(request, profileAnalysis) : undefined
-      
+      const subject =
+        request.type === 'EMAIL'
+          ? await this.generateSubjectLine(request, profileAnalysis)
+          : undefined
+
       const greeting = await this.generateGreeting(request.recipient, request.style)
       const body = await this.generateBody(request, profileAnalysis, messageStructure)
       const closing = await this.generateClosing(request.objectives, request.style)
       const signature = await this.generateSignature(request.context)
       const postscript = await this.generatePostscript(request, profileAnalysis)
-      
+
       // Analyze generated content
       const sentimentAnalysis = await this.sentimentAnalyzer.analyze(body)
       const readabilityScore = this.calculateReadability(body)
       const personalizationScore = this.calculatePersonalizationScore(body, request.recipient)
-      
+
       // Generate variations for A/B testing
-      const alternatives = await this.generateVariations(
-        { subject, body, closing },
-        request
-      )
-      
+      const alternatives = await this.generateVariations({ subject, body, closing }, request)
+
       // Create follow-up strategy
       const followUpStrategy = this.createFollowUpStrategy(
         request.recipient,
         request.context,
         sentimentAnalysis
       )
-      
+
       // Predict performance
       const predictedResponseRate = await this.predictResponseRate(
         request.recipient,
         body,
         request.context
       )
-      
+
       // Extract insights
       const insights = this.extractInsights(
         profileAnalysis,
         sentimentAnalysis,
         personalizationScore
       )
-      
+
       return {
         id: `msg-${Date.now()}`,
         type: request.type,
@@ -319,14 +335,13 @@ export class AIPersonalizationEngine {
         followUpStrategy,
         insights,
         warnings: this.checkForWarnings(body, request.recipient),
-        generatedAt: new Date()
+        generatedAt: new Date(),
       }
     } catch (error) {
-      console.error('Error generating personalized message:', error)
       throw new Error('Failed to generate personalized message')
     }
   }
-  
+
   /**
    * Analyze response and suggest next action
    */
@@ -337,19 +352,19 @@ export class AIPersonalizationEngine {
   ): Promise<ResponseAnalysis> {
     // Analyze sentiment
     const sentiment = await this.sentimentAnalyzer.analyze(response)
-    
+
     // Detect intent
     const intent = await this.detectIntent(response, sentiment)
-    
+
     // Extract buying signals
     const buyingSignals = this.extractBuyingSignals(response)
-    
+
     // Identify objections
     const objections = this.identifyObjections(response)
-    
+
     // Extract questions
     const questions = this.extractQuestions(response)
-    
+
     // Determine next best action
     const nextBestAction = this.determineNextAction(
       intent,
@@ -358,17 +373,17 @@ export class AIPersonalizationEngine {
       questions,
       recipient
     )
-    
+
     return {
       sentiment,
       intent,
       buyingSignals,
       objections,
       questions,
-      nextBestAction
+      nextBestAction,
     }
   }
-  
+
   /**
    * Generate real-time coaching suggestions
    */
@@ -378,7 +393,7 @@ export class AIPersonalizationEngine {
     objectives: MessageObjective[]
   ): Promise<CoachingSuggestion[]> {
     const suggestions: CoachingSuggestion[] = []
-    
+
     // Check tone alignment
     const toneAnalysis = await this.analyzeTone(draft)
     if (!this.isToneAppropriate(toneAnalysis, recipient)) {
@@ -387,10 +402,10 @@ export class AIPersonalizationEngine {
         severity: 'MEDIUM',
         issue: 'Tone mismatch with recipient profile',
         suggestion: this.suggestToneAdjustment(toneAnalysis, recipient),
-        example: this.generateToneExample(recipient)
+        example: this.generateToneExample(recipient),
       })
     }
-    
+
     // Check personalization level
     const personalizationScore = this.calculatePersonalizationScore(draft, recipient)
     if (personalizationScore < 60) {
@@ -399,10 +414,10 @@ export class AIPersonalizationEngine {
         severity: 'HIGH',
         issue: 'Low personalization score',
         suggestion: 'Add more specific references to their company, role, or recent activities',
-        example: this.generatePersonalizationExample(recipient)
+        example: this.generatePersonalizationExample(recipient),
       })
     }
-    
+
     // Check call-to-action clarity
     const ctaAnalysis = this.analyzeCTA(draft, objectives)
     if (!ctaAnalysis.clear) {
@@ -411,10 +426,10 @@ export class AIPersonalizationEngine {
         severity: 'HIGH',
         issue: 'Unclear or missing call-to-action',
         suggestion: ctaAnalysis.suggestion,
-        example: ctaAnalysis.example
+        example: ctaAnalysis.example,
       })
     }
-    
+
     // Check length optimization
     const lengthAnalysis = this.analyzeLengh(draft, recipient)
     if (!lengthAnalysis.optimal) {
@@ -423,13 +438,13 @@ export class AIPersonalizationEngine {
         severity: 'LOW',
         issue: lengthAnalysis.issue,
         suggestion: lengthAnalysis.suggestion,
-        example: lengthAnalysis.example
+        example: lengthAnalysis.example,
       })
     }
-    
+
     return suggestions
   }
-  
+
   /**
    * Generate subject line variations
    */
@@ -440,36 +455,36 @@ export class AIPersonalizationEngine {
     const templates = [
       // Personalized achievement
       `Congrats on ${analysis.recentAchievement} - quick question`,
-      
+
       // Pain point focused
       `${request.recipient.company}'s ${analysis.topPainPoint} solution`,
-      
+
       // Mutual connection
       `${analysis.mutualConnection} suggested we connect`,
-      
+
       // Industry insight
       `${analysis.industryTrend} impact on ${request.recipient.company}`,
-      
+
       // Direct value prop
       `Cut ${analysis.metric} by 50% at ${request.recipient.company}`,
-      
+
       // Question-based
       `How does ${request.recipient.company} handle ${analysis.challenge}?`,
-      
+
       // Time-sensitive
       `${analysis.timeSensitiveTopic} - 2 min read`,
-      
+
       // Competitive
-      `How ${analysis.competitor} increased revenue 40%`
+      `How ${analysis.competitor} increased revenue 40%`,
     ]
-    
+
     // Select best template based on context and analysis
     const selectedTemplate = this.selectBestTemplate(templates, request, analysis)
-    
+
     // Fill in variables
     return this.fillTemplate(selectedTemplate, request.recipient, analysis)
   }
-  
+
   /**
    * Generate message body with dynamic sections
    */
@@ -479,41 +494,38 @@ export class AIPersonalizationEngine {
     structure: MessageStructure
   ): Promise<string> {
     const sections: string[] = []
-    
+
     // Opening hook
     if (structure.includeHook) {
       sections.push(await this.generateHook(request.recipient, analysis))
     }
-    
+
     // Context/Reason for reaching out
     if (structure.includeContext) {
       sections.push(await this.generateContext(request.context, analysis))
     }
-    
+
     // Value proposition
     if (structure.includeValueProp) {
-      sections.push(await this.generateValueProposition(
-        request.recipient,
-        request.objectives,
-        analysis
-      ))
+      sections.push(
+        await this.generateValueProposition(request.recipient, request.objectives, analysis)
+      )
     }
-    
+
     // Social proof
     if (structure.includeSocialProof) {
-      sections.push(await this.generateSocialProof(
-        request.recipient.industry,
-        request.recipient.company
-      ))
+      sections.push(
+        await this.generateSocialProof(request.recipient.industry, request.recipient.company)
+      )
     }
-    
+
     // Call to action
     sections.push(await this.generateCTA(request.objectives[0].callToAction))
-    
+
     // Join sections with appropriate transitions
     return this.joinSections(sections, request.style.tone)
   }
-  
+
   /**
    * Create intelligent follow-up strategy
    */
@@ -524,16 +536,16 @@ export class AIPersonalizationEngine {
   ): FollowUpStrategy {
     const timing: FollowUpTiming[] = []
     const triggers: FollowUpTrigger[] = []
-    
+
     // Base timing on recipient's engagement patterns
     if (recipient.responsePatterns.length > 0) {
       const avgResponseTime = this.calculateAvgResponseTime(recipient.responsePatterns)
-      
+
       timing.push({
         dayNumber: Math.ceil(avgResponseTime * 1.5),
         timeOfDay: this.getBestTimeToContact(recipient),
         channel: 'EMAIL',
-        condition: 'no_response'
+        condition: 'no_response',
       })
     } else {
       // Default follow-up timing
@@ -543,46 +555,46 @@ export class AIPersonalizationEngine {
         { dayNumber: 14, timeOfDay: '11:00 AM', channel: 'PHONE' }
       )
     }
-    
+
     // Define triggers based on recipient behavior
     triggers.push({
       event: 'OPENED',
       action: 'WAIT',
-      content: { tone: 'patient', focus: 'value', length: 'short' }
+      content: { tone: 'patient', focus: 'value', length: 'short' },
     })
-    
+
     triggers.push({
       event: 'CLICKED',
       action: 'IMMEDIATE_FOLLOW_UP',
-      content: { tone: 'enthusiastic', focus: 'benefits', length: 'medium' }
+      content: { tone: 'enthusiastic', focus: 'benefits', length: 'medium' },
     })
-    
+
     triggers.push({
       event: 'NO_RESPONSE',
       action: 'CHANGE_CHANNEL',
-      content: { tone: 'persistent', focus: 'different_angle', length: 'very_short' }
+      content: { tone: 'persistent', focus: 'different_angle', length: 'very_short' },
     })
-    
+
     // Content themes based on analysis
     const contentThemes = this.generateContentThemes(recipient, context)
-    
+
     // Escalation path
     const escalationPath: EscalationStep[] = [
       { step: 1, action: 'Add humor or pattern interrupt' },
       { step: 2, action: 'Reference competitor success' },
       { step: 3, action: 'Offer valuable resource' },
       { step: 4, action: 'Executive introduction' },
-      { step: 5, action: 'Break-up email' }
+      { step: 5, action: 'Break-up email' },
     ]
-    
+
     return {
       recommendedTiming: timing,
       triggers,
       contentThemes,
-      escalationPath
+      escalationPath,
     }
   }
-  
+
   /**
    * Initialize content library with proven templates
    */
@@ -596,7 +608,7 @@ export class AIPersonalizationEngine {
           variables: ['achievement', 'context'],
           effectiveness: 85,
           bestFor: ['COLD_OUTREACH', 'executives'],
-          avoidFor: ['technical_roles']
+          avoidFor: ['technical_roles'],
         },
         {
           id: 'pain-point-open',
@@ -605,19 +617,20 @@ export class AIPersonalizationEngine {
           variables: ['company', 'challenge'],
           effectiveness: 78,
           bestFor: ['FOLLOW_UP', 'decision_makers'],
-          avoidFor: ['entry_level']
-        }
+          avoidFor: ['entry_level'],
+        },
       ],
       valuePropPositions: [
         {
           id: 'roi-focused',
           category: 'financial',
-          content: 'Companies like {{similar_company}} have seen {{metric}}% improvement in {{area}} within {{timeframe}}.',
+          content:
+            'Companies like {{similar_company}} have seen {{metric}}% improvement in {{area}} within {{timeframe}}.',
           variables: ['similar_company', 'metric', 'area', 'timeframe'],
           effectiveness: 82,
           bestFor: ['CFO', 'finance_team'],
-          avoidFor: ['creative_roles']
-        }
+          avoidFor: ['creative_roles'],
+        },
       ],
       socialProof: [
         {
@@ -627,8 +640,8 @@ export class AIPersonalizationEngine {
           variables: ['competitor', 'achievement'],
           effectiveness: 76,
           bestFor: ['competitive_industries'],
-          avoidFor: ['industry_leaders']
-        }
+          avoidFor: ['industry_leaders'],
+        },
       ],
       closings: [
         {
@@ -638,28 +651,29 @@ export class AIPersonalizationEngine {
           variables: ['company'],
           effectiveness: 71,
           bestFor: ['first_touch', 'cold_outreach'],
-          avoidFor: ['urgent_situations']
-        }
+          avoidFor: ['urgent_situations'],
+        },
       ],
       postscripts: [
         {
           id: 'ps-value-add',
           category: 'value',
-          content: 'P.S. I put together a quick analysis of {{topic}} for {{industry}} companies - happy to share if helpful.',
+          content:
+            'P.S. I put together a quick analysis of {{topic}} for {{industry}} companies - happy to share if helpful.',
           variables: ['topic', 'industry'],
           effectiveness: 68,
           bestFor: ['no_response_follow_up'],
-          avoidFor: ['initial_outreach']
-        }
+          avoidFor: ['initial_outreach'],
+        },
       ],
       objectionHandlers: [],
       industryInsights: {},
       roleBasedMessaging: {},
       seasonalHooks: [],
-      currentEvents: []
+      currentEvents: [],
     }
   }
-  
+
   // Helper methods
   private async analyzeRecipientProfile(recipient: RecipientProfile): Promise<ProfileAnalysis> {
     return {
@@ -670,10 +684,10 @@ export class AIPersonalizationEngine {
       metric: 'operational costs',
       challenge: 'scaling operations',
       timeSensitiveTopic: 'Q4 planning',
-      competitor: 'Industry Leader Inc'
+      competitor: 'Industry Leader Inc',
     }
   }
-  
+
   private determineMessageStructure(
     type: string,
     context: MessageContext,
@@ -684,47 +698,46 @@ export class AIPersonalizationEngine {
       includeContext: context.campaignType === 'COLD_OUTREACH',
       includeValueProp: true,
       includeSocialProof: analysis.topPainPoint !== undefined,
-      includeCTA: true
+      includeCTA: true,
     }
   }
-  
+
   private calculatePersonalizationScore(message: string, recipient: RecipientProfile): number {
     let score = 50 // Base score
-    
+
     // Check for name usage
     if (message.includes(recipient.name)) score += 5
-    
+
     // Check for company mentions
     if (message.includes(recipient.company)) score += 10
-    
+
     // Check for role/title relevance
     if (message.toLowerCase().includes(recipient.title.toLowerCase())) score += 5
-    
+
     // Check for pain point mentions
-    recipient.painPoints.forEach(pain => {
+    recipient.painPoints.forEach((pain) => {
       if (message.toLowerCase().includes(pain.toLowerCase())) score += 10
     })
-    
+
     // Check for recent activity references
-    if (recipient.recentActivity.some(activity => 
-      message.includes(activity.description)
-    )) score += 15
-    
+    if (recipient.recentActivity.some((activity) => message.includes(activity.description)))
+      score += 15
+
     return Math.min(100, score)
   }
-  
+
   private calculateReadability(text: string): number {
     // Simple readability calculation
     const words = text.split(/\s+/).length
     const sentences = text.split(/[.!?]+/).length
     const avgWordsPerSentence = words / sentences
-    
+
     // Flesch Reading Ease approximation
     const score = 206.835 - 1.015 * avgWordsPerSentence
-    
+
     return Math.max(0, Math.min(100, score))
   }
-  
+
   private async predictResponseRate(
     recipient: RecipientProfile,
     message: string,
@@ -732,50 +745,51 @@ export class AIPersonalizationEngine {
   ): Promise<number> {
     // Mock prediction based on various factors
     let baseRate = 0.15
-    
+
     // Adjust based on personalization
     const personalizationScore = this.calculatePersonalizationScore(message, recipient)
     baseRate += (personalizationScore / 100) * 0.2
-    
+
     // Adjust based on recipient engagement history
     if (recipient.previousInteractions.length > 0) {
-      const engagementRate = recipient.previousInteractions.filter(i => i.responded).length / 
-                           recipient.previousInteractions.length
+      const engagementRate =
+        recipient.previousInteractions.filter((i) => i.responded).length /
+        recipient.previousInteractions.length
       baseRate += engagementRate * 0.1
     }
-    
+
     // Adjust based on context
     if (context.referralSource) baseRate += 0.25
     if (context.campaignType === 'RE_ENGAGEMENT') baseRate *= 0.7
-    
+
     return Math.min(0.9, baseRate)
   }
-  
-  private extractPersonalizationElements(body: string): PersonalizationElement[] {
+
+  private extractPersonalizationElements(_body: string): PersonalizationElement[] {
     // Mock extraction
     return [
       {
         type: 'COMPANY_NEWS',
         content: 'Recent funding round',
         placement: 'OPENING',
-        impact: 'HIGH'
-      }
+        impact: 'HIGH',
+      },
     ]
   }
-  
-  private identifyPsychologicalTriggers(body: string): PsychologicalTrigger[] {
+
+  private identifyPsychologicalTriggers(_body: string): PsychologicalTrigger[] {
     // Mock identification
     return [
       {
         type: 'SOCIAL_PROOF',
         implementation: 'Competitor success story',
-        subtlety: 'MODERATE'
-      }
+        subtlety: 'MODERATE',
+      },
     ]
   }
-  
+
   private async generateVariations(
-    content: any,
+    content: unknown,
     request: PersonalizationRequest
   ): Promise<MessageVariation[]> {
     // Generate 2-3 variations for A/B testing
@@ -789,44 +803,44 @@ export class AIPersonalizationEngine {
         predictedPerformance: {
           responseRate: 0.18,
           sentimentImpact: 0.7,
-          conversionProbability: 0.12
-        }
-      }
+          conversionProbability: 0.12,
+        },
+      },
     ]
   }
-  
+
   private extractInsights(
-    analysis: ProfileAnalysis,
-    sentiment: SentimentAnalysis,
+    _analysis: ProfileAnalysis,
+    _sentiment: SentimentAnalysis,
     personalizationScore: number
   ): MessageInsight[] {
     return [
       {
         type: 'OPTIMIZATION',
         insight: 'Message tone aligns well with recipient profile',
-        confidence: 0.85
-      }
+        confidence: 0.85,
+      },
     ]
   }
-  
-  private checkForWarnings(body: string, recipient: RecipientProfile): string[] {
+
+  private checkForWarnings(_body: string, _recipient: RecipientProfile): string[] {
     const warnings: string[] = []
-    
+
     // Check for spam triggers
     const spamWords = ['free', 'guarantee', 'urgent', 'act now']
-    spamWords.forEach(word => {
+    spamWords.forEach((word) => {
       if (body.toLowerCase().includes(word)) {
         warnings.push(`Contains potential spam trigger: "${word}"`)
       }
     })
-    
+
     return warnings
   }
 }
 
 // Supporting classes
 class SentimentAnalyzer {
-  async analyze(text: string): Promise<SentimentAnalysis> {
+  async analyze(_text: string): Promise<SentimentAnalysis> {
     // Mock sentiment analysis
     return {
       overallSentiment: 0.7,
@@ -838,7 +852,7 @@ class SentimentAnalyzer {
         sadness: 0.0,
         disgust: 0.0,
         anger: 0.0,
-        anticipation: 0.7
+        anticipation: 0.7,
       },
       toneAnalysis: {
         analytical: 0.6,
@@ -846,21 +860,21 @@ class SentimentAnalyzer {
         tentative: 0.2,
         friendly: 0.7,
         formal: 0.5,
-        urgent: 0.3
+        urgent: 0.3,
       },
       languageMetrics: {
         wordCount: 150,
         sentenceCount: 8,
         avgWordsPerSentence: 18.75,
         complexWords: 12,
-        readingLevel: 'COLLEGE'
-      }
+        readingLevel: 'COLLEGE',
+      },
     }
   }
 }
 
 class PerformanceTracker {
-  trackMessagePerformance(message: PersonalizedMessage, outcome: any): void {
+  trackMessagePerformance(_message: PersonalizedMessage, _outcome: unknown): void {
     // Track performance for continuous improvement
   }
 }

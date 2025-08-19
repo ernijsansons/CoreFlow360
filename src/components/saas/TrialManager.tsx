@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
+import {
   BeakerIcon,
   ClockIcon,
   UserPlusIcon,
@@ -27,7 +27,7 @@ import {
   BoltIcon,
   ShieldCheckIcon,
   CreditCardIcon,
-  PhoneIcon
+  PhoneIcon,
 } from '@heroicons/react/24/outline'
 import { MetricCard } from '@/components/ui/MetricCard'
 
@@ -89,7 +89,7 @@ const statusColors = {
   ACTIVE: 'text-blue-700 bg-blue-100',
   CONVERTED: 'text-green-700 bg-green-100',
   EXPIRED: 'text-red-700 bg-red-100',
-  CANCELLED: 'text-gray-700 bg-gray-100'
+  CANCELLED: 'text-gray-700 bg-gray-100',
 }
 
 const getConversionColor = (probability: number) => {
@@ -109,12 +109,14 @@ export default function TrialManager({
   onSendEmail,
   onScheduleCall,
   onOfferIncentive,
-  onExtendTrial
+  onExtendTrial,
 }: TrialManagerProps) {
   const [trials, setTrials] = useState<Trial[]>([])
   const [metrics, setMetrics] = useState<TrialMetrics | null>(null)
   const [loading, setLoading] = useState(true)
-  const [selectedView, setSelectedView] = useState<'all' | 'active' | 'expiring' | 'high-intent'>('all')
+  const [selectedView, setSelectedView] = useState<'all' | 'active' | 'expiring' | 'high-intent'>(
+    'all'
+  )
   const [sortBy, setSortBy] = useState<string>('daysRemaining')
 
   useEffect(() => {
@@ -124,7 +126,7 @@ export default function TrialManager({
   const loadTrialData = async () => {
     try {
       setLoading(true)
-      
+
       // Mock data for demonstration
       const mockTrials: Trial[] = [
         {
@@ -145,7 +147,7 @@ export default function TrialManager({
             reports: 0.88,
             integrations: 0.78,
             automation: 0.65,
-            api: 0.45
+            api: 0.45,
           },
           onboardingProgress: 0.9,
           completedTasks: ['profile_setup', 'data_import', 'first_report', 'team_invite'],
@@ -155,39 +157,39 @@ export default function TrialManager({
               type: 'EMAIL',
               date: '2024-08-01',
               description: 'Welcome email sent',
-              outcome: 'Opened and clicked'
+              outcome: 'Opened and clicked',
             },
             {
               type: 'CALL',
               date: '2024-08-03',
               description: 'Onboarding call scheduled',
-              outcome: 'Completed - very positive'
+              outcome: 'Completed - very positive',
             },
             {
               type: 'DEMO',
               date: '2024-08-05',
               description: 'Advanced features demo',
-              outcome: 'High interest in automation features'
-            }
+              outcome: 'High interest in automation features',
+            },
           ],
           conversionSignals: [
             {
               signal: 'Added team members',
               strength: 'STRONG',
-              date: '2024-08-02'
+              date: '2024-08-02',
             },
             {
               signal: 'Created 10+ reports',
               strength: 'STRONG',
-              date: '2024-08-04'
+              date: '2024-08-04',
             },
             {
               signal: 'Asked about enterprise features',
               strength: 'MODERATE',
-              date: '2024-08-06'
-            }
+              date: '2024-08-06',
+            },
           ],
-          riskFactors: []
+          riskFactors: [],
         },
         {
           id: 'trial-2',
@@ -206,7 +208,7 @@ export default function TrialManager({
             dashboard: 0.3,
             reports: 0.1,
             integrations: 0.0,
-            automation: 0.0
+            automation: 0.0,
           },
           onboardingProgress: 0.4,
           completedTasks: ['profile_setup'],
@@ -216,28 +218,28 @@ export default function TrialManager({
               type: 'EMAIL',
               date: '2024-08-01',
               description: 'Welcome email sent',
-              outcome: 'Not opened'
+              outcome: 'Not opened',
             },
             {
               type: 'EMAIL',
               date: '2024-08-04',
               description: 'Getting started reminder',
-              outcome: 'Opened but no action'
-            }
+              outcome: 'Opened but no action',
+            },
           ],
           conversionSignals: [],
           riskFactors: [
             {
               factor: 'Low engagement',
               severity: 'HIGH',
-              description: 'User has not logged in for 3 days'
+              description: 'User has not logged in for 3 days',
             },
             {
               factor: 'Incomplete onboarding',
               severity: 'MEDIUM',
-              description: 'Only 40% of onboarding tasks completed'
-            }
-          ]
+              description: 'Only 40% of onboarding tasks completed',
+            },
+          ],
         },
         {
           id: 'trial-3',
@@ -255,7 +257,7 @@ export default function TrialManager({
           featureUsage: {
             dashboard: 0.2,
             reports: 0.05,
-            integrations: 0.0
+            integrations: 0.0,
           },
           onboardingProgress: 0.2,
           completedTasks: ['profile_setup'],
@@ -265,53 +267,57 @@ export default function TrialManager({
               type: 'EMAIL',
               date: '2024-07-20',
               description: 'Welcome email sent',
-              outcome: 'Not opened'
+              outcome: 'Not opened',
             },
             {
               type: 'EMAIL',
               date: '2024-07-25',
               description: 'Check-in email',
-              outcome: 'Not opened'
+              outcome: 'Not opened',
             },
             {
               type: 'EMAIL',
               date: '2024-08-02',
               description: 'Trial expiring reminder',
-              outcome: 'Opened but no response'
-            }
+              outcome: 'Opened but no response',
+            },
           ],
           conversionSignals: [],
           riskFactors: [
             {
               factor: 'Never logged in after signup',
               severity: 'HIGH',
-              description: 'User created account but never used the product'
-            }
-          ]
-        }
+              description: 'User created account but never used the product',
+            },
+          ],
+        },
       ]
 
       const mockMetrics: TrialMetrics = {
         totalTrials: mockTrials.length,
-        activeTrials: mockTrials.filter(t => t.status === 'ACTIVE').length,
+        activeTrials: mockTrials.filter((t) => t.status === 'ACTIVE').length,
         conversionRate: 28.5,
         averageTimeToConversion: 8.5,
         trialToCustomerValue: 1850,
-        expiringToday: mockTrials.filter(t => t.daysRemaining === 0 && t.status === 'ACTIVE').length,
-        expiringThisWeek: mockTrials.filter(t => t.daysRemaining <= 7 && t.daysRemaining > 0 && t.status === 'ACTIVE').length,
-        highIntentTrials: mockTrials.filter(t => t.conversionProbability > 70 && t.status === 'ACTIVE').length
+        expiringToday: mockTrials.filter((t) => t.daysRemaining === 0 && t.status === 'ACTIVE')
+          .length,
+        expiringThisWeek: mockTrials.filter(
+          (t) => t.daysRemaining <= 7 && t.daysRemaining > 0 && t.status === 'ACTIVE'
+        ).length,
+        highIntentTrials: mockTrials.filter(
+          (t) => t.conversionProbability > 70 && t.status === 'ACTIVE'
+        ).length,
       }
 
       setTrials(mockTrials)
       setMetrics(mockMetrics)
     } catch (error) {
-      console.error('Failed to load trial data:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const filteredTrials = trials.filter(trial => {
+  const filteredTrials = trials.filter((trial) => {
     switch (selectedView) {
       case 'active':
         return trial.status === 'ACTIVE'
@@ -326,8 +332,8 @@ export default function TrialManager({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -335,35 +341,41 @@ export default function TrialManager({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Trial Management</h1>
-          <p className="text-gray-600 mt-1">Track trial conversions and optimize onboarding</p>
+          <p className="mt-1 text-gray-600">Track trial conversions and optimize onboarding</p>
         </div>
       </div>
 
       {/* Critical Alerts */}
-      {trials.filter(t => t.status === 'ACTIVE' && (t.daysRemaining <= 1 || t.riskFactors.some(r => r.severity === 'HIGH'))).length > 0 && (
+      {trials.filter(
+        (t) =>
+          t.status === 'ACTIVE' &&
+          (t.daysRemaining <= 1 || t.riskFactors.some((r) => r.severity === 'HIGH'))
+      ).length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-red-50 border border-red-200 rounded-lg p-4"
+          className="rounded-lg border border-red-200 bg-red-50 p-4"
         >
           <div className="flex items-start">
-            <ExclamationTriangleIcon className="h-5 w-5 text-red-400 mt-0.5" />
+            <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 text-red-400" />
             <div className="ml-3 flex-1">
               <h3 className="text-sm font-medium text-red-800">Urgent Action Required</h3>
               <p className="mt-1 text-sm text-red-700">
-                {trials.filter(t => t.daysRemaining === 0 && t.status === 'ACTIVE').length} trial(s) expire today, 
-                {' '}{trials.filter(t => t.riskFactors.some(r => r.severity === 'HIGH')).length} high-risk trial(s) need intervention
+                {trials.filter((t) => t.daysRemaining === 0 && t.status === 'ACTIVE').length}{' '}
+                trial(s) expire today,{' '}
+                {trials.filter((t) => t.riskFactors.some((r) => r.severity === 'HIGH')).length}{' '}
+                high-risk trial(s) need intervention
               </p>
               <div className="mt-3 flex space-x-2">
-                <button className="inline-flex items-center px-3 py-1 border border-red-300 rounded-md text-xs font-medium text-red-700 bg-white hover:bg-red-50">
-                  <PhoneIcon className="h-3 w-3 mr-1" />
+                <button className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-50">
+                  <PhoneIcon className="mr-1 h-3 w-3" />
                   Schedule Calls
                 </button>
-                <button className="inline-flex items-center px-3 py-1 border border-red-300 rounded-md text-xs font-medium text-red-700 bg-white hover:bg-red-50">
-                  <GiftIcon className="h-3 w-3 mr-1" />
+                <button className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-50">
+                  <GiftIcon className="mr-1 h-3 w-3" />
                   Send Incentives
                 </button>
               </div>
@@ -407,19 +419,19 @@ export default function TrialManager({
       )}
 
       {/* View Controls */}
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="rounded-lg bg-white p-4 shadow">
         <div className="flex items-center justify-between">
-          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex space-x-1 rounded-lg bg-gray-100 p-1">
             {[
               { key: 'all', label: 'All Trials' },
               { key: 'active', label: 'Active' },
               { key: 'expiring', label: 'Expiring Soon' },
-              { key: 'high-intent', label: 'High Intent' }
+              { key: 'high-intent', label: 'High Intent' },
             ].map((view) => (
               <button
                 key={view.key}
-                onClick={() => setSelectedView(view.key as any)}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                onClick={() => setSelectedView(view.key as unknown)}
+                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                   selectedView === view.key
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-500 hover:text-gray-700'
@@ -433,7 +445,7 @@ export default function TrialManager({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="daysRemaining">Days Remaining</option>
             <option value="conversionProbability">Conversion Probability</option>
@@ -444,7 +456,7 @@ export default function TrialManager({
       </div>
 
       {/* Trials List */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="overflow-hidden bg-white shadow sm:rounded-md">
         <ul className="divide-y divide-gray-200">
           {filteredTrials.map((trial, index) => (
             <motion.li
@@ -452,19 +464,24 @@ export default function TrialManager({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="hover:bg-gray-50 cursor-pointer"
+              className="cursor-pointer hover:bg-gray-50"
               onClick={() => onTrialSelect?.(trial)}
             >
               <div className="px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0">
-                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                        trial.status === 'ACTIVE' ? 'bg-blue-100 text-blue-600' :
-                        trial.status === 'CONVERTED' ? 'bg-green-100 text-green-600' :
-                        trial.status === 'EXPIRED' ? 'bg-red-100 text-red-600' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                          trial.status === 'ACTIVE'
+                            ? 'bg-blue-100 text-blue-600'
+                            : trial.status === 'CONVERTED'
+                              ? 'bg-green-100 text-green-600'
+                              : trial.status === 'EXPIRED'
+                                ? 'bg-red-100 text-red-600'
+                                : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
                         <BeakerIcon className="h-5 w-5" />
                       </div>
                     </div>
@@ -473,35 +490,45 @@ export default function TrialManager({
                         <p className="text-sm font-medium text-gray-900">
                           {trial.companyName || trial.userName}
                         </p>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[trial.status]}`}>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[trial.status]}`}
+                        >
                           {trial.status}
                         </span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-purple-800 bg-purple-100">
+                        <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">
                           {trial.planName}
                         </span>
                         {trial.daysRemaining <= 1 && trial.status === 'ACTIVE' && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-red-800 bg-red-100">
-                            <ClockIcon className="h-3 w-3 mr-1" />
+                          <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
+                            <ClockIcon className="mr-1 h-3 w-3" />
                             Expires {trial.daysRemaining === 0 ? 'Today' : 'Tomorrow'}
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center mt-1">
+                      <div className="mt-1 flex items-center">
                         <p className="text-sm text-gray-500">
-                          {trial.userEmail} • {trial.daysRemaining > 0 ? `${trial.daysRemaining} days left` : 
-                           trial.daysRemaining === 0 ? 'Expires today' : `Expired ${Math.abs(trial.daysRemaining)} days ago`}
+                          {trial.userEmail} •{' '}
+                          {trial.daysRemaining > 0
+                            ? `${trial.daysRemaining} days left`
+                            : trial.daysRemaining === 0
+                              ? 'Expires today'
+                              : `Expired ${Math.abs(trial.daysRemaining)} days ago`}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-6 mt-2">
+                      <div className="mt-2 flex items-center space-x-6">
                         <div className="flex items-center space-x-1">
                           <span className="text-xs text-gray-500">Conversion:</span>
-                          <span className={`text-xs font-medium ${getConversionColor(trial.conversionProbability)}`}>
+                          <span
+                            className={`text-xs font-medium ${getConversionColor(trial.conversionProbability)}`}
+                          >
                             {trial.conversionProbability}%
                           </span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <span className="text-xs text-gray-500">Engagement:</span>
-                          <span className={`text-xs font-medium ${getEngagementColor(trial.engagementScore)}`}>
+                          <span
+                            className={`text-xs font-medium ${getEngagementColor(trial.engagementScore)}`}
+                          >
                             {trial.engagementScore}%
                           </span>
                         </div>
@@ -520,7 +547,7 @@ export default function TrialManager({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
                       <p className="text-sm font-medium text-gray-900">
@@ -530,7 +557,7 @@ export default function TrialManager({
                         {trial.conversionSignals.length} positive signal(s)
                       </p>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       {trial.status === 'ACTIVE' && trial.daysRemaining <= 3 && (
                         <>
@@ -539,7 +566,7 @@ export default function TrialManager({
                               e.stopPropagation()
                               onOfferIncentive?.(trial)
                             }}
-                            className="p-2 text-orange-400 hover:text-orange-600 hover:bg-orange-50 rounded-md"
+                            className="rounded-md p-2 text-orange-400 hover:bg-orange-50 hover:text-orange-600"
                             title="Offer Incentive"
                           >
                             <GiftIcon className="h-4 w-4" />
@@ -549,7 +576,7 @@ export default function TrialManager({
                               e.stopPropagation()
                               onExtendTrial?.(trial)
                             }}
-                            className="p-2 text-purple-400 hover:text-purple-600 hover:bg-purple-50 rounded-md"
+                            className="rounded-md p-2 text-purple-400 hover:bg-purple-50 hover:text-purple-600"
                             title="Extend Trial"
                           >
                             <CalendarIcon className="h-4 w-4" />
@@ -561,7 +588,7 @@ export default function TrialManager({
                           e.stopPropagation()
                           onScheduleCall?.(trial)
                         }}
-                        className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-md"
+                        className="rounded-md p-2 text-blue-400 hover:bg-blue-50 hover:text-blue-600"
                         title="Schedule Call"
                       >
                         <PhoneIcon className="h-4 w-4" />
@@ -571,7 +598,7 @@ export default function TrialManager({
                           e.stopPropagation()
                           onSendEmail?.(trial)
                         }}
-                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md"
+                        className="rounded-md p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
                         title="Send Email"
                       >
                         <EnvelopeIcon className="h-4 w-4" />
@@ -582,16 +609,18 @@ export default function TrialManager({
 
                 {/* Conversion Signals (for high-intent trials) */}
                 {trial.conversionSignals.length > 0 && (
-                  <div className="mt-4 pt-3 border-t border-gray-200">
-                    <p className="text-xs font-medium text-gray-700 mb-2">Positive Signals:</p>
+                  <div className="mt-4 border-t border-gray-200 pt-3">
+                    <p className="mb-2 text-xs font-medium text-gray-700">Positive Signals:</p>
                     <div className="flex flex-wrap gap-2">
                       {trial.conversionSignals.slice(0, 3).map((signal, idx) => (
                         <span
                           key={idx}
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            signal.strength === 'STRONG' ? 'text-green-700 bg-green-50' :
-                            signal.strength === 'MODERATE' ? 'text-yellow-700 bg-yellow-50' :
-                            'text-blue-700 bg-blue-50'
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                            signal.strength === 'STRONG'
+                              ? 'bg-green-50 text-green-700'
+                              : signal.strength === 'MODERATE'
+                                ? 'bg-yellow-50 text-yellow-700'
+                                : 'bg-blue-50 text-blue-700'
                           }`}
                         >
                           {signal.signal}
@@ -603,16 +632,18 @@ export default function TrialManager({
 
                 {/* Risk Factors (for at-risk trials) */}
                 {trial.riskFactors.length > 0 && (
-                  <div className="mt-4 pt-3 border-t border-gray-200">
-                    <p className="text-xs font-medium text-gray-700 mb-2">Risk Factors:</p>
+                  <div className="mt-4 border-t border-gray-200 pt-3">
+                    <p className="mb-2 text-xs font-medium text-gray-700">Risk Factors:</p>
                     <div className="flex flex-wrap gap-2">
                       {trial.riskFactors.map((risk, idx) => (
                         <span
                           key={idx}
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            risk.severity === 'HIGH' ? 'text-red-700 bg-red-50' :
-                            risk.severity === 'MEDIUM' ? 'text-yellow-700 bg-yellow-50' :
-                            'text-gray-700 bg-gray-50'
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                            risk.severity === 'HIGH'
+                              ? 'bg-red-50 text-red-700'
+                              : risk.severity === 'MEDIUM'
+                                ? 'bg-yellow-50 text-yellow-700'
+                                : 'bg-gray-50 text-gray-700'
                           }`}
                         >
                           {risk.factor}
@@ -629,12 +660,10 @@ export default function TrialManager({
 
       {/* Empty State */}
       {filteredTrials.length === 0 && (
-        <div className="text-center py-12">
+        <div className="py-12 text-center">
           <BeakerIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No trials found</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            No trials match the selected criteria
-          </p>
+          <p className="mt-1 text-sm text-gray-500">No trials match the selected criteria</p>
         </div>
       )}
     </div>

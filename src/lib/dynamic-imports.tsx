@@ -14,17 +14,17 @@ interface LoadingComponentProps {
 /**
  * Default loading component for dynamic imports
  */
-const LoadingComponent: React.FC<LoadingComponentProps> = ({ 
-  message = 'Loading...', 
-  fullHeight = false 
+const LoadingComponent: React.FC<LoadingComponentProps> = ({
+  message = 'Loading...',
+  fullHeight = false,
 }) => (
-  <div 
+  <div
     className={`flex items-center justify-center p-8 ${
       fullHeight ? 'min-h-screen' : 'min-h-[200px]'
     }`}
   >
     <div className="text-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+      <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-indigo-600"></div>
       <p className="mt-2 text-sm text-gray-600">{message}</p>
     </div>
   </div>
@@ -46,17 +46,17 @@ class DynamicImportErrorBoundary extends React.Component<
     return { hasError: true }
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Dynamic import error:', error, errorInfo)
-  }
+  componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo) {}
 
   render() {
     if (this.state.hasError) {
-      const Fallback = this.props.fallback || (() => (
-        <div className="p-4 border border-red-200 rounded-md bg-red-50">
-          <p className="text-red-600">Failed to load component. Please refresh the page.</p>
-        </div>
-      ))
+      const Fallback =
+        this.props.fallback ||
+        (() => (
+          <div className="rounded-md border border-red-200 bg-red-50 p-4">
+            <p className="text-red-600">Failed to load component. Please refresh the page.</p>
+          </div>
+        ))
       return <Fallback />
     }
 
@@ -82,12 +82,12 @@ export function createDynamicComponent<P = {}>(
     fallback,
     ssr = true,
     loadingMessage = 'Loading component...',
-    fullHeight = false
+    fullHeight = false,
   } = options
 
   const DynamicComponent = dynamic(importFn, {
     loading: () => <LoadingComp message={loadingMessage} fullHeight={fullHeight} />,
-    ssr
+    ssr,
   })
 
   return function WrappedDynamicComponent(props: P) {
@@ -106,10 +106,10 @@ export function createDynamicComponent<P = {}>(
  */
 
 // Charts and visualizations
-export const DynamicChart = createDynamicComponent(
-  () => import('@/components/analytics/Chart'),
-  { loadingMessage: 'Loading chart...', ssr: false }
-)
+export const DynamicChart = createDynamicComponent(() => import('@/components/analytics/Chart'), {
+  loadingMessage: 'Loading chart...',
+  ssr: false,
+})
 
 export const DynamicDashboard = createDynamicComponent(
   () => import('@/components/dashboard/Dashboard'),
@@ -129,22 +129,22 @@ export const DynamicFileUpload = createDynamicComponent(
 )
 
 // Calendar component
-export const DynamicCalendar = createDynamicComponent(
-  () => import('@/components/ui/Calendar'),
-  { loadingMessage: 'Loading calendar...', ssr: false }
-)
+export const DynamicCalendar = createDynamicComponent(() => import('@/components/ui/Calendar'), {
+  loadingMessage: 'Loading calendar...',
+  ssr: false,
+})
 
 // Data grid
-export const DynamicDataGrid = createDynamicComponent(
-  () => import('@/components/ui/DataGrid'),
-  { loadingMessage: 'Loading data grid...', ssr: false }
-)
+export const DynamicDataGrid = createDynamicComponent(() => import('@/components/ui/DataGrid'), {
+  loadingMessage: 'Loading data grid...',
+  ssr: false,
+})
 
 // PDF viewer
-export const DynamicPDFViewer = createDynamicComponent(
-  () => import('@/components/ui/PDFViewer'),
-  { loadingMessage: 'Loading PDF viewer...', ssr: false }
-)
+export const DynamicPDFViewer = createDynamicComponent(() => import('@/components/ui/PDFViewer'), {
+  loadingMessage: 'Loading PDF viewer...',
+  ssr: false,
+})
 
 // Voice notes component
 export const DynamicVoiceNotes = createDynamicComponent(
@@ -182,30 +182,25 @@ export function createModuleDynamicImport<P = {}>(
   componentPath: string,
   options: Parameters<typeof createDynamicComponent>[1] = {}
 ) {
-  return createDynamicComponent<P>(
-    () => import(`@/modules/${moduleName}/${componentPath}`),
-    {
-      loadingMessage: `Loading ${moduleName} module...`,
-      ssr: false,
-      ...options
-    }
-  )
+  return createDynamicComponent<P>(() => import(`@/modules/${moduleName}/${componentPath}`), {
+    loadingMessage: `Loading ${moduleName} module...`,
+    ssr: false,
+    ...options,
+  })
 }
 
 /**
  * Preload utility for critical routes
  */
-export const preloadComponent = (importFn: () => Promise<any>) => {
+export const preloadComponent = (importFn: () => Promise<unknown>) => {
   // Only preload in browser environment
   if (typeof window !== 'undefined') {
     // Use requestIdleCallback if available, otherwise setTimeout
-    const schedulePreload = (window as any).requestIdleCallback || 
-      ((cb: () => void) => setTimeout(cb, 100))
-    
+    const schedulePreload =
+      (window as unknown).requestIdleCallback || ((cb: () => void) => setTimeout(cb, 100))
+
     schedulePreload(() => {
-      importFn().catch(error => {
-        console.warn('Failed to preload component:', error)
-      })
+      importFn().catch((error) => {})
     })
   }
 }
@@ -216,21 +211,21 @@ export const preloadComponent = (importFn: () => Promise<any>) => {
 export const FeatureBundles = {
   // CRM features
   crm: () => import('@/features/crm'),
-  
-  // Analytics features  
+
+  // Analytics features
   analytics: () => import('@/features/analytics'),
-  
+
   // AI features
   ai: () => import('@/features/ai'),
-  
+
   // Voice features
   voice: () => import('@/features/voice'),
-  
+
   // Billing features
   billing: () => import('@/features/billing'),
-  
+
   // Admin features
-  admin: () => import('@/features/admin')
+  admin: () => import('@/features/admin'),
 }
 
 /**
@@ -242,25 +237,25 @@ export async function importWithRetry<T>(
   delay = 1000
 ): Promise<T> {
   let lastError: Error | null = null
-  
+
   for (let i = 0; i < retries; i++) {
     try {
       return await importFn()
     } catch (error) {
       lastError = error as Error
-      
+
       // Don't retry if it's a 404 or similar
       if (error instanceof Error && error.message.includes('404')) {
         throw error
       }
-      
+
       // Wait before retry
       if (i < retries - 1) {
-        await new Promise(resolve => setTimeout(resolve, delay * (i + 1)))
+        await new Promise((resolve) => setTimeout(resolve, delay * (i + 1)))
       }
     }
   }
-  
+
   throw lastError || new Error('Import failed after retries')
 }
 
@@ -274,18 +269,18 @@ export function withProgressiveEnhancement<P extends object>(
 ) {
   return function ProgressiveComponent(props: P) {
     const [shouldEnhance, setShouldEnhance] = React.useState(false)
-    
+
     React.useEffect(() => {
       // Check if we should load the enhanced version
       if (condition()) {
         setShouldEnhance(true)
       }
     }, [])
-    
+
     if (shouldEnhance) {
       return <EnhancedComponent {...props} />
     }
-    
+
     return <Component {...props} />
   }
 }
@@ -296,7 +291,7 @@ export function withProgressiveEnhancement<P extends object>(
 export function useLazyLoad(threshold = 0.1) {
   const [isInView, setIsInView] = React.useState(false)
   const ref = React.useRef<HTMLDivElement>(null)
-  
+
   React.useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -307,13 +302,13 @@ export function useLazyLoad(threshold = 0.1) {
       },
       { threshold }
     )
-    
+
     if (ref.current) {
       observer.observe(ref.current)
     }
-    
+
     return () => observer.disconnect()
   }, [threshold])
-  
+
   return { ref, isInView }
 }

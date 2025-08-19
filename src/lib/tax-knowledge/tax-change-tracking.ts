@@ -28,7 +28,7 @@ export const TAX_CHANGE_SOURCES: TaxChangeSource[] = [
     type: 'irs',
     region: 'US',
     updateFrequency: 'daily',
-    isActive: true
+    isActive: true,
   },
   {
     id: 'irs-revenue-rulings',
@@ -37,7 +37,7 @@ export const TAX_CHANGE_SOURCES: TaxChangeSource[] = [
     type: 'irs',
     region: 'US',
     updateFrequency: 'weekly',
-    isActive: true
+    isActive: true,
   },
   {
     id: 'treasury-regulations',
@@ -46,8 +46,8 @@ export const TAX_CHANGE_SOURCES: TaxChangeSource[] = [
     type: 'irs',
     region: 'US',
     updateFrequency: 'daily',
-    isActive: true
-  }
+    isActive: true,
+  },
 ]
 
 // Tax Change Detection
@@ -68,9 +68,9 @@ export interface TaxChange {
   businessImpacts: BusinessImpactEstimate[]
 }
 
-export type TaxChangeCategory = 
+export type TaxChangeCategory =
   | 'deductions'
-  | 'credits' 
+  | 'credits'
   | 'rates'
   | 'compliance'
   | 'filing'
@@ -119,20 +119,20 @@ export class TaxChangeTracker {
   // Monitor tax changes (would integrate with actual RSS/API feeds in production)
   async monitorChanges(): Promise<TaxChange[]> {
     const newChanges: TaxChange[] = []
-    
+
     // Simulate checking IRS news releases
     const mockChanges = await this.simulateIRSChanges()
     newChanges.push(...mockChanges)
-    
+
     // Process through AI analysis
     for (const change of newChanges) {
       change.aiAnalysis = await this.analyzeChangeWithAI(change)
       change.businessImpacts = await this.estimateBusinessImpacts(change)
     }
-    
+
     this.changes.push(...newChanges)
     this.notifySubscribers(newChanges)
-    
+
     return newChanges
   }
 
@@ -143,7 +143,8 @@ export class TaxChangeTracker {
         id: 'irs-2025-001',
         sourceId: 'irs-news-releases',
         title: 'IRS Announces Updated Business Meal Deduction Rules for 2025',
-        description: 'New guidance on business meal deductibility, client entertainment, and documentation requirements.',
+        description:
+          'New guidance on business meal deductibility, client entertainment, and documentation requirements.',
         effectiveDate: new Date('2025-01-01'),
         announcedDate: new Date('2024-12-15'),
         urgency: 'medium',
@@ -151,52 +152,64 @@ export class TaxChangeTracker {
         affectedSections: ['IRC Section 162(a)', 'IRC Section 274'],
         keywords: ['business meals', 'entertainment', 'deduction', '50%', 'documentation'],
         originalUrl: 'https://www.irs.gov/newsroom/ir-2024-xxx',
-        businessImpacts: []
+        businessImpacts: [],
       },
       {
         id: 'irs-2025-002',
         sourceId: 'treasury-regulations',
         title: 'Section 199A QBI Deduction Threshold Adjustments',
-        description: 'Inflation adjustments to Qualified Business Income deduction thresholds for tax year 2025.',
+        description:
+          'Inflation adjustments to Qualified Business Income deduction thresholds for tax year 2025.',
         effectiveDate: new Date('2025-01-01'),
         announcedDate: new Date('2024-11-30'),
         urgency: 'high',
         categories: ['deductions', 'rates'],
         affectedSections: ['IRC Section 199A'],
-        keywords: ['QBI', 'qualified business income', 'threshold', 'inflation adjustment', 'pass-through'],
-        originalUrl: 'https://www.treasury.gov/resource-center/tax-policy/Pages/tax-policy-news.aspx',
-        businessImpacts: []
-      }
+        keywords: [
+          'QBI',
+          'qualified business income',
+          'threshold',
+          'inflation adjustment',
+          'pass-through',
+        ],
+        originalUrl:
+          'https://www.treasury.gov/resource-center/tax-policy/Pages/tax-policy-news.aspx',
+        businessImpacts: [],
+      },
     ]
   }
 
   private async analyzeChangeWithAI(change: TaxChange): Promise<TaxChangeAnalysis> {
     // Mock AI analysis - in production would use GPT-4/Claude for analysis
     const analysis: TaxChangeAnalysis = {
-      summary: `This change affects ${change.categories.join(', ')} for businesses. ` +
-               `Key provisions take effect ${change.effectiveDate.toLocaleDateString()}.`,
+      summary:
+        `This change affects ${change.categories.join(', ')} for businesses. ` +
+        `Key provisions take effect ${change.effectiveDate.toLocaleDateString()}.`,
       keyPoints: [
         'New documentation requirements may apply',
         'Potential changes to deductible amounts',
         'Review current expense policies',
-        'Consider timing of transactions'
+        'Consider timing of transactions',
       ],
       potentialImpact: change.categories.includes('deductions') ? 'mixed' : 'neutral',
       complexity: change.affectedSections.length > 2 ? 'complex' : 'moderate',
       actionRequired: change.urgency === 'high' || change.urgency === 'critical',
       timeToImplement: change.urgency === 'critical' ? '30 days' : 'before year-end',
       relatedRules: change.affectedSections,
-      disclaimer: this.getTaxDisclaimerText()
+      disclaimer: this.getTaxDisclaimerText(),
     }
-    
+
     return analysis
   }
 
   private async estimateBusinessImpacts(change: TaxChange): Promise<BusinessImpactEstimate[]> {
     const impacts: BusinessImpactEstimate[] = []
-    
+
     // Freelancer impact
-    if (change.categories.includes('deductions') || change.categories.includes('business_expenses')) {
+    if (
+      change.categories.includes('deductions') ||
+      change.categories.includes('business_expenses')
+    ) {
       impacts.push({
         businessType: 'freelancer',
         impactType: change.title.includes('Deduction') ? 'cost_savings' : 'compliance_burden',
@@ -206,13 +219,13 @@ export class TaxChangeTracker {
         actionItems: [
           'Review current expense tracking methods',
           'Update documentation procedures',
-          'Consult with tax professional about implementation'
+          'Consult with tax professional about implementation',
         ],
         timeline: 'Implement before next tax season',
-        disclaimer: this.getTaxDisclaimerText()
+        disclaimer: this.getTaxDisclaimerText(),
       })
     }
-    
+
     // Small business impact
     impacts.push({
       businessType: 'small_business',
@@ -224,72 +237,74 @@ export class TaxChangeTracker {
         'Review business structure efficiency',
         'Analyze current tax strategies',
         'Schedule consultation with CPA',
-        'Update accounting procedures if needed'
+        'Update accounting procedures if needed',
       ],
       timeline: 'Complete review within 60 days',
-      disclaimer: this.getTaxDisclaimerText()
+      disclaimer: this.getTaxDisclaimerText(),
     })
-    
+
     return impacts
   }
 
   private getTaxDisclaimerText(): string {
-    return "🚨 THIS IS NOT TAX ADVICE 🚨 These are AI-generated suggestions for informational purposes only. " +
-           "Tax laws are complex and individual circumstances vary significantly. Always consult with a qualified " +
-           "tax attorney, CPA, or enrolled agent before making any tax-related decisions. CoreFlow360 assumes " +
-           "ZERO LIABILITY for any actions taken based on this information."
+    return (
+      '🚨 THIS IS NOT TAX ADVICE 🚨 These are AI-generated suggestions for informational purposes only. ' +
+      'Tax laws are complex and individual circumstances vary significantly. Always consult with a qualified ' +
+      'tax attorney, CPA, or enrolled agent before making any tax-related decisions. CoreFlow360 assumes ' +
+      'ZERO LIABILITY for any actions taken based on this information.'
+    )
   }
 
   // Subscription management
   subscribe(callback: (changes: TaxChange[]) => void) {
     this.subscribers.push(callback)
     return () => {
-      this.subscribers = this.subscribers.filter(sub => sub !== callback)
+      this.subscribers = this.subscribers.filter((sub) => sub !== callback)
     }
   }
 
   private notifySubscribers(changes: TaxChange[]) {
-    this.subscribers.forEach(callback => callback(changes))
+    this.subscribers.forEach((callback) => callback(changes))
   }
 
   // Get changes by business type
   getChangesForBusinessType(businessType: string): TaxChange[] {
-    return this.changes.filter(change => 
-      change.businessImpacts.some(impact => 
-        impact.businessType === businessType && impact.applicabilityScore > 50
+    return this.changes.filter((change) =>
+      change.businessImpacts.some(
+        (impact) => impact.businessType === businessType && impact.applicabilityScore > 50
       )
     )
   }
 
   // Get urgent changes requiring immediate action
   getUrgentChanges(): TaxChange[] {
-    return this.changes.filter(change => 
-      change.urgency === 'high' || change.urgency === 'critical'
+    return this.changes.filter(
+      (change) => change.urgency === 'high' || change.urgency === 'critical'
     )
   }
 
   // Export changes for customer notifications
-  getChangesForNotification(userId: string, userProfile: any): TaxChange[] {
+  getChangesForNotification(userId: string, userProfile: unknown): TaxChange[] {
     // Filter changes based on user profile and business type
-    return this.changes.filter(change => {
+    return this.changes.filter((change) => {
       // Check if change is relevant to user's business
-      const hasRelevantImpact = change.businessImpacts.some(impact =>
-        impact.businessType === userProfile.businessType &&
-        impact.applicabilityScore > 60
+      const hasRelevantImpact = change.businessImpacts.some(
+        (impact) =>
+          impact.businessType === userProfile.businessType && impact.applicabilityScore > 60
       )
-      
+
       // Check if change affects user's industry
-      const isIndustryRelevant = change.keywords.some(keyword =>
+      const isIndustryRelevant = change.keywords.some((keyword) =>
         userProfile.industry?.toLowerCase().includes(keyword.toLowerCase())
       )
-      
+
       return hasRelevantImpact || isIndustryRelevant
     })
   }
 }
 
 // Hook for using tax change tracking
-export function useTaxChangeTracking(userProfile?: any) {
+export function useTaxChangeTracking(userProfile?: unknown) {
   const [tracker] = useState(() => new TaxChangeTracker())
   const [changes, setChanges] = useState<TaxChange[]>([])
   const [urgentChanges, setUrgentChanges] = useState<TaxChange[]>([])
@@ -298,9 +313,9 @@ export function useTaxChangeTracking(userProfile?: any) {
 
   useEffect(() => {
     const unsubscribe = tracker.subscribe((newChanges) => {
-      setChanges(prev => [...prev, ...newChanges])
+      setChanges((prev) => [...prev, ...newChanges])
       setUrgentChanges(tracker.getUrgentChanges())
-      
+
       if (userProfile) {
         setRelevantChanges(tracker.getChangesForBusinessType(userProfile.businessType))
       }
@@ -314,7 +329,6 @@ export function useTaxChangeTracking(userProfile?: any) {
     try {
       await tracker.monitorChanges()
     } catch (error) {
-      console.error('Tax change monitoring error:', error)
     } finally {
       setIsMonitoring(false)
     }
@@ -326,7 +340,7 @@ export function useTaxChangeTracking(userProfile?: any) {
     relevantChanges,
     isMonitoring,
     startMonitoring,
-    tracker
+    tracker,
   }
 }
 
@@ -380,12 +394,13 @@ export class TaxImpactCalculator {
         'Review current tax strategy with professional',
         'Update accounting procedures as needed',
         'Monitor implementation deadlines',
-        'Consider timing of business decisions'
+        'Consider timing of business decisions',
       ],
-      disclaimer: "🚨 ESTIMATE ONLY - NOT TAX ADVICE 🚨 These calculations are rough estimates based on " +
-                 "limited information and should not be relied upon for tax planning. Actual impacts " +
-                 "will vary significantly based on individual circumstances. Consult with a qualified " +
-                 "tax professional for accurate analysis."
+      disclaimer:
+        '🚨 ESTIMATE ONLY - NOT TAX ADVICE 🚨 These calculations are rough estimates based on ' +
+        'limited information and should not be relied upon for tax planning. Actual impacts ' +
+        'will vary significantly based on individual circumstances. Consult with a qualified ' +
+        'tax professional for accurate analysis.',
     }
   }
 }

@@ -22,7 +22,7 @@ import {
   StopIcon,
   PlayIcon,
   ArrowRightIcon,
-  FlagIcon
+  FlagIcon,
 } from '@heroicons/react/24/outline'
 
 interface RepActivity {
@@ -95,34 +95,36 @@ export default function ManagerEfficiencyDashboard({
   managerId,
   tenantId,
   teamMembers,
-  className = ''
+  className = '',
 }: ManagerEfficiencyDashboardProps) {
   const [repActivities, setRepActivities] = useState<RepActivity[]>([])
   const [efficiencyInsights, setEfficiencyInsights] = useState<EfficiencyInsight[]>([])
   const [selectedRep, setSelectedRep] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<'overview' | 'live_tracking' | 'efficiency' | 'coaching'>('overview')
+  const [viewMode, setViewMode] = useState<
+    'overview' | 'live_tracking' | 'efficiency' | 'coaching'
+  >('overview')
   const [coachingMode, setCoachingMode] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadRepActivities()
     generateEfficiencyInsights()
-    
+
     // Real-time updates every 30 seconds
     const interval = setInterval(() => {
       updateRealTimeData()
     }, 30000)
-    
+
     return () => clearInterval(interval)
   }, [teamMembers])
 
   const loadRepActivities = async () => {
     try {
       setLoading(true)
-      
+
       // Simulate loading rep activities
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
       const mockActivities: RepActivity[] = [
         {
           id: 'rep-1',
@@ -133,7 +135,7 @@ export default function ManagerEfficiencyDashboard({
             latitude: 40.7589,
             longitude: -73.9851,
             address: '123 TechFlow Solutions, NYC',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           },
           currentVisit: {
             customerId: 'customer-1',
@@ -142,7 +144,7 @@ export default function ManagerEfficiencyDashboard({
             visitDuration: 45,
             activitiesCompleted: 3,
             notesQuality: 85,
-            performanceScore: 88
+            performanceScore: 88,
           },
           todayMetrics: {
             visitsCompleted: 2,
@@ -152,29 +154,29 @@ export default function ManagerEfficiencyDashboard({
             idleTime: 20,
             milesTravel: 15.2,
             efficiency: 0.75,
-            revenueGenerated: 125000
+            revenueGenerated: 125000,
           },
           behaviorPatterns: {
             avgVisitDuration: 65,
             visitQuality: 0.88,
             punctuality: 0.92,
             notesTaking: 0.85,
-            followUpSpeed: 0.78
+            followUpSpeed: 0.78,
           },
           alerts: [
             {
               type: 'efficiency',
               message: 'Visit duration 15 minutes over optimal - consider time management',
               severity: 'medium',
-              timestamp: new Date(Date.now() - 300000).toISOString()
+              timestamp: new Date(Date.now() - 300000).toISOString(),
             },
             {
               type: 'opportunity',
               message: 'Customer showing strong buying signals - suggest closing techniques',
               severity: 'high',
-              timestamp: new Date(Date.now() - 600000).toISOString()
-            }
-          ]
+              timestamp: new Date(Date.now() - 600000).toISOString(),
+            },
+          ],
         },
         {
           id: 'rep-2',
@@ -185,7 +187,7 @@ export default function ManagerEfficiencyDashboard({
             latitude: 40.7505,
             longitude: -73.9934,
             address: 'En route to DataStream Corp',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           },
           todayMetrics: {
             visitsCompleted: 3,
@@ -195,23 +197,23 @@ export default function ManagerEfficiencyDashboard({
             idleTime: 5,
             milesTravel: 22.8,
             efficiency: 0.82,
-            revenueGenerated: 95000
+            revenueGenerated: 95000,
           },
           behaviorPatterns: {
             avgVisitDuration: 58,
             visitQuality: 0.91,
             punctuality: 0.95,
             notesTaking: 0.92,
-            followUpSpeed: 0.88
+            followUpSpeed: 0.88,
           },
           alerts: [
             {
               type: 'compliance',
               message: 'Remember to log visit notes within 30 minutes of completion',
               severity: 'low',
-              timestamp: new Date(Date.now() - 900000).toISOString()
-            }
-          ]
+              timestamp: new Date(Date.now() - 900000).toISOString(),
+            },
+          ],
         },
         {
           id: 'rep-3',
@@ -222,7 +224,7 @@ export default function ManagerEfficiencyDashboard({
             latitude: 40.7282,
             longitude: -73.7949,
             address: 'Coffee Shop - Queens',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           },
           todayMetrics: {
             visitsCompleted: 1,
@@ -232,36 +234,34 @@ export default function ManagerEfficiencyDashboard({
             idleTime: 75, // 1h 15m idle time
             milesTravel: 12.1,
             efficiency: 0.42,
-            revenueGenerated: 0
+            revenueGenerated: 0,
           },
           behaviorPatterns: {
             avgVisitDuration: 45,
             visitQuality: 0.65,
             punctuality: 0.72,
             notesTaking: 0.58,
-            followUpSpeed: 0.45
+            followUpSpeed: 0.45,
           },
           alerts: [
             {
               type: 'efficiency',
               message: 'Excessive idle time detected - 75 minutes unproductive today',
               severity: 'high',
-              timestamp: new Date(Date.now() - 600000).toISOString()
+              timestamp: new Date(Date.now() - 600000).toISOString(),
             },
             {
               type: 'behavior',
               message: 'Below target visits for the day - recommend immediate action',
               severity: 'high',
-              timestamp: new Date(Date.now() - 1200000).toISOString()
-            }
-          ]
-        }
+              timestamp: new Date(Date.now() - 1200000).toISOString(),
+            },
+          ],
+        },
       ]
-      
+
       setRepActivities(mockActivities)
-      
     } catch (error) {
-      console.error('Failed to load rep activities:', error)
     } finally {
       setLoading(false)
     }
@@ -279,12 +279,12 @@ export default function ManagerEfficiencyDashboard({
         recommendation: 'Implement time boxing techniques and agenda-driven meetings',
         potentialSavings: {
           timeMinutes: 60,
-          efficiency: 0.15
-        }
+          efficiency: 0.15,
+        },
       },
       {
         repId: 'user-3',
-        repName: 'Sam Wilson', 
+        repName: 'Sam Wilson',
         insight: 'High idle time correlation with low productivity days',
         category: 'time_waste',
         impact: 'high',
@@ -292,80 +292,92 @@ export default function ManagerEfficiencyDashboard({
         potentialSavings: {
           timeMinutes: 180,
           revenue: 45000,
-          efficiency: 0.35
-        }
+          efficiency: 0.35,
+        },
       },
       {
         repId: 'user-2',
         repName: 'Jordan Lee',
         insight: 'Suboptimal travel routes increasing fuel costs by 25%',
-        category: 'travel_optimization', 
+        category: 'travel_optimization',
         impact: 'medium',
         recommendation: 'Use AI route optimization and cluster nearby visits',
         potentialSavings: {
           timeMinutes: 45,
-          efficiency: 0.12
-        }
-      }
+          efficiency: 0.12,
+        },
+      },
     ]
-    
+
     setEfficiencyInsights(insights)
   }
 
   const updateRealTimeData = () => {
     // Update rep locations and metrics in real-time
-    setRepActivities(prev => prev.map(rep => ({
-      ...rep,
-      currentLocation: {
-        ...rep.currentLocation,
-        timestamp: new Date().toISOString()
-      },
-      currentVisit: rep.currentVisit ? {
-        ...rep.currentVisit,
-        visitDuration: Math.floor((Date.now() - new Date(rep.currentVisit.visitStarted).getTime()) / 60000)
-      } : undefined
-    })))
+    setRepActivities((prev) =>
+      prev.map((rep) => ({
+        ...rep,
+        currentLocation: {
+          ...rep.currentLocation,
+          timestamp: new Date().toISOString(),
+        },
+        currentVisit: rep.currentVisit
+          ? {
+              ...rep.currentVisit,
+              visitDuration: Math.floor(
+                (Date.now() - new Date(rep.currentVisit.visitStarted).getTime()) / 60000
+              ),
+            }
+          : undefined,
+      }))
+    )
   }
 
-  const sendCoachingMessage = (repId: string, message: string) => {
+  const sendCoachingMessage = (_repId: string, _message: string) => {
     // Real-time coaching message to rep
-    console.log(`Coaching message sent to ${repId}:`, message)
     // In production, this would use WebSocket or push notification
   }
 
   const triggerIntervention = (repId: string, type: 'call' | 'message' | 'alert') => {
-    const rep = repActivities.find(r => r.repId === repId)
+    const rep = repActivities.find((r) => r.repId === repId)
     if (!rep) return
 
     switch (type) {
       case 'call':
-        console.log(`Initiating call to ${rep.repName}`)
         break
       case 'message':
         sendCoachingMessage(repId, 'Please check in - efficiency metrics need attention')
         break
       case 'alert':
-        console.log(`High-priority alert sent to ${rep.repName}`)
         break
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active_visit': return 'bg-green-100 text-green-800 border-green-200'
-      case 'traveling': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'idle': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'offline': return 'bg-gray-100 text-gray-800 border-gray-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'active_visit':
+        return 'bg-green-100 text-green-800 border-green-200'
+      case 'traveling':
+        return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'idle':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case 'offline':
+        return 'bg-gray-100 text-gray-800 border-gray-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200'
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'low': return 'bg-blue-100 text-blue-800 border-blue-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'high':
+        return 'bg-red-100 text-red-800 border-red-200'
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case 'low':
+        return 'bg-blue-100 text-blue-800 border-blue-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
@@ -379,17 +391,17 @@ export default function ManagerEfficiencyDashboard({
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount)
   }
 
   if (loading) {
     return (
-      <div className={`bg-white rounded-lg shadow-lg p-8 ${className}`}>
-        <div className="flex items-center justify-center h-64">
+      <div className={`rounded-lg bg-white p-8 shadow-lg ${className}`}>
+        <div className="flex h-64 items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 font-medium">Loading team performance data...</p>
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
+            <p className="font-medium text-gray-600">Loading team performance data...</p>
           </div>
         </div>
       </div>
@@ -399,14 +411,14 @@ export default function ManagerEfficiencyDashboard({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="rounded-lg bg-white p-6 shadow-lg">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-              <EyeIcon className="h-8 w-8 mr-3 text-red-600" />
+            <h2 className="flex items-center text-2xl font-bold text-gray-900">
+              <EyeIcon className="mr-3 h-8 w-8 text-red-600" />
               Manager Efficiency Dashboard
             </h2>
-            <p className="text-gray-600 mt-1">Real-time team performance monitoring and coaching</p>
+            <p className="mt-1 text-gray-600">Real-time team performance monitoring and coaching</p>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -415,10 +427,10 @@ export default function ManagerEfficiencyDashboard({
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
-                  className={`px-4 py-2 text-sm font-medium border ${
+                  className={`border px-4 py-2 text-sm font-medium ${
                     viewMode === mode
-                      ? 'bg-red-600 text-white border-red-600'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      ? 'border-red-600 bg-red-600 text-white'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                   } ${mode === 'overview' ? 'rounded-l-lg' : mode === 'coaching' ? 'rounded-r-lg' : ''}`}
                 >
                   {mode.charAt(0).toUpperCase() + mode.replace('_', ' ').slice(1)}
@@ -433,50 +445,61 @@ export default function ManagerEfficiencyDashboard({
       {viewMode === 'overview' && (
         <>
           {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white rounded-lg shadow p-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+            <div className="rounded-lg bg-white p-6 shadow">
               <div className="flex items-center">
                 <UserGroupIcon className="h-6 w-6 text-blue-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Active Reps</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {repActivities.filter(r => r.status !== 'offline').length}/{repActivities.length}
+                    {repActivities.filter((r) => r.status !== 'offline').length}/
+                    {repActivities.length}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="rounded-lg bg-white p-6 shadow">
               <div className="flex items-center">
                 <ClockIcon className="h-6 w-6 text-green-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Avg Efficiency</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {Math.round(repActivities.reduce((acc, rep) => acc + rep.todayMetrics.efficiency, 0) / repActivities.length * 100)}%
+                    {Math.round(
+                      (repActivities.reduce((acc, rep) => acc + rep.todayMetrics.efficiency, 0) /
+                        repActivities.length) *
+                        100
+                    )}
+                    %
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="rounded-lg bg-white p-6 shadow">
               <div className="flex items-center">
                 <CurrencyDollarIcon className="h-6 w-6 text-purple-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Revenue Today</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(repActivities.reduce((acc, rep) => acc + rep.todayMetrics.revenueGenerated, 0))}
+                    {formatCurrency(
+                      repActivities.reduce((acc, rep) => acc + rep.todayMetrics.revenueGenerated, 0)
+                    )}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="rounded-lg bg-white p-6 shadow">
               <div className="flex items-center">
                 <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Active Alerts</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {repActivities.reduce((acc, rep) => acc + rep.alerts.filter(a => a.severity === 'high').length, 0)}
+                    {repActivities.reduce(
+                      (acc, rep) => acc + rep.alerts.filter((a) => a.severity === 'high').length,
+                      0
+                    )}
                   </p>
                 </div>
               </div>
@@ -484,21 +507,25 @@ export default function ManagerEfficiencyDashboard({
           </div>
 
           {/* Rep Performance Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
             {repActivities.map((rep) => (
               <motion.div
                 key={rep.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-lg shadow-lg overflow-hidden"
+                className="overflow-hidden rounded-lg bg-white shadow-lg"
               >
                 {/* Rep Header */}
-                <div className={`p-4 ${rep.status === 'idle' ? 'bg-red-50 border-b border-red-200' : 'bg-gray-50 border-b border-gray-200'}`}>
+                <div
+                  className={`p-4 ${rep.status === 'idle' ? 'border-b border-red-200 bg-red-50' : 'border-b border-gray-200 bg-gray-50'}`}
+                >
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-semibold text-gray-900">{rep.repName}</h3>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <span className={`px-2 py-1 text-xs rounded-full border ${getStatusColor(rep.status)}`}>
+                      <div className="mt-1 flex items-center space-x-2">
+                        <span
+                          className={`rounded-full border px-2 py-1 text-xs ${getStatusColor(rep.status)}`}
+                        >
                           {rep.status.replace('_', ' ').toUpperCase()}
                         </span>
                         <span className="text-xs text-gray-500">
@@ -507,7 +534,9 @@ export default function ManagerEfficiencyDashboard({
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className={`text-2xl font-bold ${rep.todayMetrics.efficiency > 0.7 ? 'text-green-600' : rep.todayMetrics.efficiency > 0.5 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      <div
+                        className={`text-2xl font-bold ${rep.todayMetrics.efficiency > 0.7 ? 'text-green-600' : rep.todayMetrics.efficiency > 0.5 ? 'text-yellow-600' : 'text-red-600'}`}
+                      >
                         {Math.round(rep.todayMetrics.efficiency * 100)}%
                       </div>
                       <div className="text-xs text-gray-500">Efficiency</div>
@@ -515,16 +544,19 @@ export default function ManagerEfficiencyDashboard({
                   </div>
                 </div>
 
-                <div className="p-4 space-y-4">
+                <div className="space-y-4 p-4">
                   {/* Current Activity */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Current Location</h4>
+                    <h4 className="mb-2 text-sm font-medium text-gray-700">Current Location</h4>
                     <p className="text-sm text-gray-600">{rep.currentLocation.address}</p>
                     {rep.currentVisit && (
-                      <div className="mt-2 p-2 bg-green-50 rounded">
-                        <p className="text-sm font-medium text-green-800">{rep.currentVisit.customerName}</p>
+                      <div className="mt-2 rounded bg-green-50 p-2">
+                        <p className="text-sm font-medium text-green-800">
+                          {rep.currentVisit.customerName}
+                        </p>
                         <p className="text-xs text-green-600">
-                          Visit duration: {rep.currentVisit.visitDuration}m • Score: {rep.currentVisit.performanceScore}/100
+                          Visit duration: {rep.currentVisit.visitDuration}m • Score:{' '}
+                          {rep.currentVisit.performanceScore}/100
                         </p>
                       </div>
                     )}
@@ -532,20 +564,28 @@ export default function ManagerEfficiencyDashboard({
 
                   {/* Today's Metrics */}
                   <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="text-center p-2 bg-blue-50 rounded">
-                      <div className="font-bold text-blue-600">{rep.todayMetrics.visitsCompleted}/{rep.todayMetrics.visitsPlanned}</div>
+                    <div className="rounded bg-blue-50 p-2 text-center">
+                      <div className="font-bold text-blue-600">
+                        {rep.todayMetrics.visitsCompleted}/{rep.todayMetrics.visitsPlanned}
+                      </div>
                       <div className="text-xs text-gray-600">Visits</div>
                     </div>
-                    <div className="text-center p-2 bg-green-50 rounded">
-                      <div className="font-bold text-green-600">{formatDuration(rep.todayMetrics.customerFaceTime)}</div>
+                    <div className="rounded bg-green-50 p-2 text-center">
+                      <div className="font-bold text-green-600">
+                        {formatDuration(rep.todayMetrics.customerFaceTime)}
+                      </div>
                       <div className="text-xs text-gray-600">Customer Time</div>
                     </div>
-                    <div className="text-center p-2 bg-yellow-50 rounded">
-                      <div className="font-bold text-yellow-600">{formatDuration(rep.todayMetrics.travelTime)}</div>
+                    <div className="rounded bg-yellow-50 p-2 text-center">
+                      <div className="font-bold text-yellow-600">
+                        {formatDuration(rep.todayMetrics.travelTime)}
+                      </div>
                       <div className="text-xs text-gray-600">Travel Time</div>
                     </div>
-                    <div className="text-center p-2 bg-purple-50 rounded">
-                      <div className="font-bold text-purple-600">{formatCurrency(rep.todayMetrics.revenueGenerated)}</div>
+                    <div className="rounded bg-purple-50 p-2 text-center">
+                      <div className="font-bold text-purple-600">
+                        {formatCurrency(rep.todayMetrics.revenueGenerated)}
+                      </div>
                       <div className="text-xs text-gray-600">Revenue</div>
                     </div>
                   </div>
@@ -553,11 +593,16 @@ export default function ManagerEfficiencyDashboard({
                   {/* Alerts */}
                   {rep.alerts.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">Active Alerts</h4>
+                      <h4 className="mb-2 text-sm font-medium text-gray-700">Active Alerts</h4>
                       <div className="space-y-2">
                         {rep.alerts.slice(0, 2).map((alert, idx) => (
-                          <div key={idx} className={`p-2 rounded text-xs border ${getSeverityColor(alert.severity)}`}>
-                            <div className="font-medium">{alert.type.replace('_', ' ').toUpperCase()}</div>
+                          <div
+                            key={idx}
+                            className={`rounded border p-2 text-xs ${getSeverityColor(alert.severity)}`}
+                          >
+                            <div className="font-medium">
+                              {alert.type.replace('_', ' ').toUpperCase()}
+                            </div>
                             <div>{alert.message}</div>
                           </div>
                         ))}
@@ -566,10 +611,10 @@ export default function ManagerEfficiencyDashboard({
                   )}
 
                   {/* Quick Actions */}
-                  <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                  <div className="flex items-center justify-between border-t border-gray-200 pt-2">
                     <button
                       onClick={() => setSelectedRep(rep.repId)}
-                      className="text-blue-600 hover:text-blue-800 text-sm"
+                      className="text-sm text-blue-600 hover:text-blue-800"
                     >
                       View Details
                     </button>
@@ -588,7 +633,7 @@ export default function ManagerEfficiencyDashboard({
                       >
                         <PhoneIcon className="h-4 w-4" />
                       </button>
-                      {rep.alerts.some(a => a.severity === 'high') && (
+                      {rep.alerts.some((a) => a.severity === 'high') && (
                         <button
                           onClick={() => triggerIntervention(rep.repId, 'alert')}
                           className="p-1 text-red-600 hover:text-red-800"
@@ -608,12 +653,12 @@ export default function ManagerEfficiencyDashboard({
 
       {/* Efficiency Insights */}
       {viewMode === 'efficiency' && (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-lg font-semibold mb-6 flex items-center">
-            <ChartBarIcon className="h-5 w-5 mr-2 text-orange-600" />
+        <div className="rounded-lg bg-white p-6 shadow-lg">
+          <h3 className="mb-6 flex items-center text-lg font-semibold">
+            <ChartBarIcon className="mr-2 h-5 w-5 text-orange-600" />
             AI Efficiency Analysis
           </h3>
-          
+
           <div className="space-y-6">
             {efficiencyInsights.map((insight, idx) => (
               <motion.div
@@ -621,27 +666,31 @@ export default function ManagerEfficiencyDashboard({
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                className="border border-gray-200 rounded-lg p-6"
+                className="rounded-lg border border-gray-200 p-6"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
+                    <div className="mb-2 flex items-center space-x-3">
                       <h4 className="font-semibold text-gray-900">{insight.repName}</h4>
-                      <span className={`px-3 py-1 text-xs rounded-full border ${
-                        insight.impact === 'high' ? 'bg-red-100 text-red-800 border-red-200' :
-                        insight.impact === 'medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                        'bg-blue-100 text-blue-800 border-blue-200'
-                      }`}>
+                      <span
+                        className={`rounded-full border px-3 py-1 text-xs ${
+                          insight.impact === 'high'
+                            ? 'border-red-200 bg-red-100 text-red-800'
+                            : insight.impact === 'medium'
+                              ? 'border-yellow-200 bg-yellow-100 text-yellow-800'
+                              : 'border-blue-200 bg-blue-100 text-blue-800'
+                        }`}
+                      >
                         {insight.impact.toUpperCase()} IMPACT
                       </span>
-                      <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">
+                      <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-800">
                         {insight.category.replace('_', ' ').toUpperCase()}
                       </span>
                     </div>
-                    
-                    <p className="text-gray-700 mb-3">{insight.insight}</p>
-                    
-                    <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-3">
+
+                    <p className="mb-3 text-gray-700">{insight.insight}</p>
+
+                    <div className="mb-3 rounded border border-blue-200 bg-blue-50 p-3">
                       <p className="text-sm text-blue-800">
                         <strong>Recommendation:</strong> {insight.recommendation}
                       </p>
@@ -652,19 +701,25 @@ export default function ManagerEfficiencyDashboard({
                         {insight.potentialSavings.timeMinutes && (
                           <div className="flex items-center space-x-1">
                             <ClockIcon className="h-4 w-4 text-green-600" />
-                            <span className="text-green-700">Save {insight.potentialSavings.timeMinutes} min/day</span>
+                            <span className="text-green-700">
+                              Save {insight.potentialSavings.timeMinutes} min/day
+                            </span>
                           </div>
                         )}
                         {insight.potentialSavings.revenue && (
                           <div className="flex items-center space-x-1">
                             <CurrencyDollarIcon className="h-4 w-4 text-green-600" />
-                            <span className="text-green-700">+{formatCurrency(insight.potentialSavings.revenue)} potential</span>
+                            <span className="text-green-700">
+                              +{formatCurrency(insight.potentialSavings.revenue)} potential
+                            </span>
                           </div>
                         )}
                         {insight.potentialSavings.efficiency && (
                           <div className="flex items-center space-x-1">
                             <TrendingUpIcon className="h-4 w-4 text-green-600" />
-                            <span className="text-green-700">+{Math.round(insight.potentialSavings.efficiency * 100)}% efficiency</span>
+                            <span className="text-green-700">
+                              +{Math.round(insight.potentialSavings.efficiency * 100)}% efficiency
+                            </span>
                           </div>
                         )}
                       </div>
@@ -674,13 +729,13 @@ export default function ManagerEfficiencyDashboard({
                   <div className="ml-4 flex items-center space-x-2">
                     <button
                       onClick={() => sendCoachingMessage(insight.repId, insight.recommendation)}
-                      className="px-4 py-2 bg-blue-100 text-blue-800 text-sm rounded hover:bg-blue-200"
+                      className="rounded bg-blue-100 px-4 py-2 text-sm text-blue-800 hover:bg-blue-200"
                     >
                       Send Coaching
                     </button>
                     <button
                       onClick={() => triggerIntervention(insight.repId, 'call')}
-                      className="px-4 py-2 bg-green-100 text-green-800 text-sm rounded hover:bg-green-200"
+                      className="rounded bg-green-100 px-4 py-2 text-sm text-green-800 hover:bg-green-200"
                     >
                       Discuss Now
                     </button>
@@ -693,14 +748,14 @@ export default function ManagerEfficiencyDashboard({
       )}
 
       {/* Big Brother Privacy Notice */}
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4">
         <div className="flex items-center space-x-2 text-red-800">
           <EyeIcon className="h-5 w-5" />
-          <span className="font-medium text-sm">Performance Monitoring Active</span>
+          <span className="text-sm font-medium">Performance Monitoring Active</span>
         </div>
-        <p className="text-xs text-red-700 mt-1">
-          Real-time location tracking, behavior analysis, and efficiency monitoring enabled for all team members. 
-          Data is used for coaching, performance improvement, and compliance purposes.
+        <p className="mt-1 text-xs text-red-700">
+          Real-time location tracking, behavior analysis, and efficiency monitoring enabled for all
+          team members. Data is used for coaching, performance improvement, and compliance purposes.
         </p>
       </div>
     </div>

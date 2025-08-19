@@ -31,7 +31,7 @@ export interface CacheStats {
 
 // In-memory cache fallback using LRU
 class MemoryCache {
-  private cache = new Map<string, { value: any; expires: number; size: number }>()
+  private cache = new Map<string, { value: unknown; expires: number; size: number }>()
   private readonly maxSize = 100 * 1024 * 1024 // 100MB
   private currentSize = 0
   private stats: CacheStats = { hits: 0, misses: 0, errors: 0, totalKeys: 0, memoryUsage: 0 }
@@ -49,10 +49,9 @@ class MemoryCache {
 
     // Remove LRU entries if over memory limit
     if (this.currentSize > this.maxSize) {
-      const entries = Array.from(this.cache.entries())
-        .sort((a, b) => a[1].expires - b[1].expires)
-      
-      let sizeToFree = this.currentSize - (this.maxSize * 0.8)
+      const entries = Array.from(this.cache.entries()).sort((a, b) => a[1].expires - b[1].expires)
+
+      let sizeToFree = this.currentSize - this.maxSize * 0.8
       for (const [key, entry] of entries) {
         if (sizeToFree <= 0) break
         keysToDelete.push(key)
@@ -61,7 +60,7 @@ class MemoryCache {
     }
 
     // Delete marked keys
-    keysToDelete.forEach(key => {
+    keysToDelete.forEach((key) => {
       const entry = this.cache.get(key)
       if (entry) {
         this.currentSize -= entry.size
@@ -73,11 +72,11 @@ class MemoryCache {
     this.stats.memoryUsage = this.currentSize
   }
 
-  set(key: string, value: any, ttlSeconds: number = 3600): boolean {
+  set(key: string, value: unknown, ttlSeconds: number = 3600): boolean {
     try {
       const serialized = JSON.stringify(value)
       const size = Buffer.byteLength(serialized, 'utf8')
-      const expires = Date.now() + (ttlSeconds * 1000)
+      const expires = Date.now() + ttlSeconds * 1000
 
       this.cache.set(key, { value, expires, size })
       this.currentSize += size
@@ -86,12 +85,12 @@ class MemoryCache {
       return true
     } catch (error) {
       this.stats.errors++
-      console.error('Memory cache set error:', error)
+
       return false
     }
   }
 
-  get(key: string): any | null {
+  get(key: string): unknown | null {
     const entry = this.cache.get(key)
     if (!entry) {
       this.stats.misses++
@@ -133,7 +132,7 @@ class MemoryCache {
 
 // Redis cache implementation
 class RedisCache {
-  private redis: any = null
+  private redis: unknown = null
   private isConnected = false
 
   constructor() {
@@ -147,28 +146,27 @@ class RedisCache {
       // Mock Redis implementation for development
       // In production, use ioredis with sentinel support
       this.redis = {
-        set: async (key: string, value: string, mode: string, duration: number) => 'OK',
-        get: async (key: string) => null,
+        _set: async (key: string, _value: string, _mode: string, _duration: number) => 'OK',
+        _get: async (key: string) => null,
         del: async (...keys: string[]) => keys.length,
-        exists: async (...keys: string[]) => 0,
+        _exists: async (...keys: string[]) => 0,
         flushdb: async () => 'OK',
-        keys: async (pattern: string) => [],
+        _keys: async (pattern: string) => [],
         mget: async (...keys: string[]) => new Array(keys.length).fill(null),
-        mset: async (...keyValues: string[]) => 'OK',
-        ttl: async (key: string) => -1,
-        expire: async (key: string, seconds: number) => 1,
-        info: async () => 'redis_version:6.2.0\nused_memory:1024000'
+        _mset: async (...keyValues: string[]) => 'OK',
+        _ttl: async (key: string) => -1,
+        _expire: async (key: string, _seconds: number) => 1,
+        info: async () => 'redis_version:6.2.0\nused_memory:1024000',
       }
-      
+
       this.isConnected = true
       console.info('✅ Redis cache initialized')
     } catch (error) {
-      console.error('❌ Redis initialization failed:', error)
       this.isConnected = false
     }
   }
 
-  async set(key: string, value: any, ttlSeconds: number = 3600): Promise<boolean> {
+  async set(key: string, value: unknown, ttlSeconds: number = 3600): Promise<boolean> {
     if (!this.isConnected) return false
 
     try {
@@ -176,19 +174,17 @@ class RedisCache {
       await this.redis.set(key, serialized, 'EX', ttlSeconds)
       return true
     } catch (error) {
-      console.error('Redis set error:', error)
       return false
     }
   }
 
-  async get(key: string): Promise<any | null> {
+  async get(key: string): Promise<unknown | null> {
     if (!this.isConnected) return null
 
     try {
       const value = await this.redis.get(key)
       return value ? JSON.parse(value) : null
     } catch (error) {
-      console.error('Redis get error:', error)
       return null
     }
   }
@@ -200,7 +196,6 @@ class RedisCache {
       const result = await this.redis.del(key)
       return result > 0
     } catch (error) {
-      console.error('Redis delete error:', error)
       return false
     }
   }
@@ -210,9 +205,7 @@ class RedisCache {
 
     try {
       await this.redis.flushdb()
-    } catch (error) {
-      console.error('Redis clear error:', error)
-    }
+    } catch (error) {}
   }
 
   async getStats(): Promise<CacheStats> {
@@ -223,16 +216,15 @@ class RedisCache {
     try {
       const info = await this.redis.info('memory')
       const memoryUsage = parseInt(info.match(/used_memory:(\d+)/)?.[1] || '0')
-      
+
       return {
         hits: 0, // Would be tracked separately
         misses: 0,
         errors: 0,
         totalKeys: 0, // Would use DBSIZE command
-        memoryUsage
+        memoryUsage,
       }
     } catch (error) {
-      console.error('Redis stats error:', error)
       return { hits: 0, misses: 0, errors: 0, totalKeys: 0, memoryUsage: 0 }
     }
   }
@@ -247,102 +239,86 @@ export class CacheManager {
   /**
    * Cache a value with automatic fallback
    */
-  async set(key: string, value: any, options: CacheOptions = {}): Promise<boolean> {
-    return withPerformanceTracking(
-      'cache.set',
-      async () => {
-        const {
-          ttl = 3600,
-          compress = false,
-          namespace = 'default'
-        } = options
+  async set(key: string, value: unknown, options: CacheOptions = {}): Promise<boolean> {
+    return withPerformanceTracking('cache.set', async () => {
+      const { ttl = 3600, compress = false, namespace = 'default' } = options
 
-        const cacheKey = this.buildKey(key, namespace)
-        
-        // Compression for large values
-        let cacheValue = value
-        if (compress && typeof value === 'string' && value.length > 1000) {
-          // Would implement compression here
-          cacheValue = value // Placeholder
-        }
+      const cacheKey = this.buildKey(key, namespace)
 
-        // Try Redis first, fallback to memory
-        if (this.useRedis) {
-          const success = await this.redisCache.set(cacheKey, cacheValue, ttl)
-          if (success) return true
-        }
-
-        // Fallback to memory cache
-        return this.memoryCache.set(cacheKey, cacheValue, ttl)
+      // Compression for large values
+      let cacheValue = value
+      if (compress && typeof value === 'string' && value.length > 1000) {
+        // Would implement compression here
+        cacheValue = value // Placeholder
       }
-    )
+
+      // Try Redis first, fallback to memory
+      if (this.useRedis) {
+        const success = await this.redisCache.set(cacheKey, cacheValue, ttl)
+        if (success) return true
+      }
+
+      // Fallback to memory cache
+      return this.memoryCache.set(cacheKey, cacheValue, ttl)
+    })
   }
 
   /**
    * Retrieve a cached value
    */
-  async get<T = any>(key: string, options: CacheOptions = {}): Promise<T | null> {
-    return withPerformanceTracking(
-      'cache.get',
-      async () => {
-        const { namespace = 'default' } = options
-        const cacheKey = this.buildKey(key, namespace)
+  async get<T = unknown>(key: string, options: CacheOptions = {}): Promise<T | null> {
+    return withPerformanceTracking('cache.get', async () => {
+      const { namespace = 'default' } = options
+      const cacheKey = this.buildKey(key, namespace)
 
-        // Try Redis first, fallback to memory
-        if (this.useRedis) {
-          const value = await this.redisCache.get(cacheKey)
-          if (value !== null) return value
-        }
-
-        // Fallback to memory cache
-        return this.memoryCache.get(cacheKey)
+      // Try Redis first, fallback to memory
+      if (this.useRedis) {
+        const value = await this.redisCache.get(cacheKey)
+        if (value !== null) return value
       }
-    )
+
+      // Fallback to memory cache
+      return this.memoryCache.get(cacheKey)
+    })
   }
 
   /**
    * Delete a cached value
    */
   async delete(key: string, options: CacheOptions = {}): Promise<boolean> {
-    return withPerformanceTracking(
-      'cache.delete',
-      async () => {
-        const { namespace = 'default' } = options
-        const cacheKey = this.buildKey(key, namespace)
+    return withPerformanceTracking('cache.delete', async () => {
+      const { namespace = 'default' } = options
+      const cacheKey = this.buildKey(key, namespace)
 
-        let redisResult = true
-        let memoryResult = true
+      let redisResult = true
+      let memoryResult = true
 
-        if (this.useRedis) {
-          redisResult = await this.redisCache.delete(cacheKey)
-        }
-
-        memoryResult = this.memoryCache.delete(cacheKey)
-
-        return redisResult || memoryResult
+      if (this.useRedis) {
+        redisResult = await this.redisCache.delete(cacheKey)
       }
-    )
+
+      memoryResult = this.memoryCache.delete(cacheKey)
+
+      return redisResult || memoryResult
+    })
   }
 
   /**
    * Clear all cached values
    */
   async clear(namespace?: string): Promise<void> {
-    return withPerformanceTracking(
-      'cache.clear',
-      async () => {
-        if (namespace) {
-          // Clear specific namespace (would need pattern matching in Redis)
-          // For now, clear everything
-        }
-
-        if (this.useRedis) {
-          await this.redisCache.clear()
-        }
-
-        this.memoryCache.clear()
+    return withPerformanceTracking('cache.clear', async () => {
+      if (namespace) {
+        // Clear specific namespace (would need pattern matching in Redis)
+        // For now, clear everything
       }
-    )
+
+      if (this.useRedis) {
+        await this.redisCache.clear()
+      }
+
+      this.memoryCache.clear()
+    })
   }
 
   /**
@@ -351,12 +327,12 @@ export class CacheManager {
   async getStats(): Promise<{ redis: CacheStats; memory: CacheStats }> {
     const [redisStats, memoryStats] = await Promise.all([
       this.redisCache.getStats(),
-      Promise.resolve(this.memoryCache.getStats())
+      Promise.resolve(this.memoryCache.getStats()),
     ])
 
     return {
       redis: redisStats,
-      memory: memoryStats
+      memory: memoryStats,
     }
   }
 
@@ -368,24 +344,21 @@ export class CacheManager {
     fetcher: () => Promise<T>,
     options: CacheOptions = {}
   ): Promise<T> {
-    return withPerformanceTracking(
-      'cache.remember',
-      async () => {
-        // Try to get from cache first
-        const cached = await this.get<T>(key, options)
-        if (cached !== null) {
-          return cached
-        }
-
-        // Fetch fresh data
-        const fresh = await fetcher()
-
-        // Cache the result
-        await this.set(key, fresh, options)
-
-        return fresh
+    return withPerformanceTracking('cache.remember', async () => {
+      // Try to get from cache first
+      const cached = await this.get<T>(key, options)
+      if (cached !== null) {
+        return cached
       }
-    )
+
+      // Fetch fresh data
+      const fresh = await fetcher()
+
+      // Cache the result
+      await this.set(key, fresh, options)
+
+      return fresh
+    })
   }
 
   /**
@@ -414,39 +387,40 @@ export const cached = {
    * Cache user data
    */
   user: {
-    get: (userId: string) => 
-      cacheManager.get(`user:${userId}`, { namespace: 'users', ttl: 1800 }),
-    set: (userId: string, userData: any) => 
+    get: (userId: string) => cacheManager.get(`user:${userId}`, { namespace: 'users', ttl: 1800 }),
+    set: (userId: string, userData: unknown) =>
       cacheManager.set(`user:${userId}`, userData, { namespace: 'users', ttl: 1800 }),
-    delete: (userId: string) => 
-      cacheManager.delete(`user:${userId}`, { namespace: 'users' })
+    delete: (userId: string) => cacheManager.delete(`user:${userId}`, { namespace: 'users' }),
   },
 
   /**
    * Cache subscription data
    */
   subscription: {
-    get: (tenantId: string) => 
+    get: (tenantId: string) =>
       cacheManager.get(`subscription:${tenantId}`, { namespace: 'subscriptions', ttl: 300 }),
-    set: (tenantId: string, subscriptionData: any) => 
-      cacheManager.set(`subscription:${tenantId}`, subscriptionData, { namespace: 'subscriptions', ttl: 300 }),
-    delete: (tenantId: string) => 
-      cacheManager.delete(`subscription:${tenantId}`, { namespace: 'subscriptions' })
+    set: (tenantId: string, subscriptionData: unknown) =>
+      cacheManager.set(`subscription:${tenantId}`, subscriptionData, {
+        namespace: 'subscriptions',
+        ttl: 300,
+      }),
+    delete: (tenantId: string) =>
+      cacheManager.delete(`subscription:${tenantId}`, { namespace: 'subscriptions' }),
   },
 
   /**
    * Cache API responses
    */
   api: {
-    get: (endpoint: string, params?: any) => {
+    get: (endpoint: string, params?: unknown) => {
       const key = params ? `${endpoint}:${JSON.stringify(params)}` : endpoint
       return cacheManager.get(key, { namespace: 'api', ttl: 60 })
     },
-    set: (endpoint: string, data: any, params?: any) => {
+    set: (endpoint: string, data: unknown, params?: unknown) => {
       const key = params ? `${endpoint}:${JSON.stringify(params)}` : endpoint
       return cacheManager.set(key, data, { namespace: 'api', ttl: 60 })
-    }
-  }
+    },
+  },
 }
 
 /*

@@ -15,7 +15,7 @@ export interface QueryAnalysis {
   timestamp: Date
   userId?: string
   tenantId?: string
-  params?: any[]
+  params?: unknown[]
   result: {
     rowCount: number
     affectedRows?: number
@@ -36,7 +36,7 @@ export interface QueryAnalysis {
     recommendations: string[]
   }
   explain?: {
-    plan: any
+    plan: unknown
     cost: number
     actualTime: number
   }
@@ -111,7 +111,7 @@ export interface PerformanceAlert {
   severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
   message: string
   timestamp: Date
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
   resolved: boolean
   resolution?: {
     action: string
@@ -139,25 +139,21 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
     this.connectionPool = {
       maxConnections: 50,
       currentConnections: 0,
-      connectionQueue: []
+      connectionQueue: [],
     }
-    
+
     this.initialize()
   }
 
   private async initialize(): Promise<void> {
-    console.log('📊 Initializing Database Performance Orchestrator')
-    
     // Set up query logging
     this.setupQueryLogging()
-    
+
     // Start performance monitoring
     this.startPerformanceMonitoring()
-    
+
     // Generate initial index recommendations
     await this.analyzeIndexOptimizations()
-    
-    console.log('✅ Database Performance Orchestrator initialized')
   }
 
   /**
@@ -175,17 +171,15 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
       implementation: string
     }>
   }> {
-    console.log('📈 Generating database performance report...')
-
     const summary = await this.collectHealthMetrics()
     const slowQueries = this.getSlowQueries(50) // Top 50 slow queries
-    const activeAlerts = this.alerts.filter(a => !a.resolved)
-    
+    const activeAlerts = this.alerts.filter((a) => !a.resolved)
+
     const optimizations = [
       ...this.generateQueryOptimizations(),
       ...this.generateConnectionOptimizations(),
       ...this.generateCacheOptimizations(),
-      ...this.generateStorageOptimizations()
+      ...this.generateStorageOptimizations(),
     ]
 
     return {
@@ -193,7 +187,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
       slowQueries,
       indexRecommendations: this.indexRecommendations,
       alerts: activeAlerts,
-      optimizations
+      optimizations,
     }
   }
 
@@ -219,18 +213,18 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
 
     for (const queryAnalysis of slowQueries) {
       const analysis = await this.analyzeQueryPerformance(queryAnalysis.query)
-      
+
       recommendations.push({
         query: queryAnalysis.query,
         issues: analysis.issues,
         suggestions: analysis.suggestions,
-        estimatedImprovement: analysis.estimatedImprovement
+        estimatedImprovement: analysis.estimatedImprovement,
       })
     }
 
     return {
       optimized: recommendations.length,
-      recommendations
+      recommendations,
     }
   }
 
@@ -242,30 +236,32 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
     recommendations: IndexRecommendation[]
     applied: string[]
   }> {
-    console.log('🔍 Analyzing index optimization opportunities...')
-
     await this.analyzeIndexOptimizations()
-    
+
     const highPriorityIndexes = this.indexRecommendations.filter(
-      r => r.priority === 'HIGH' || r.priority === 'CRITICAL'
+      (r) => r.priority === 'HIGH' || r.priority === 'CRITICAL'
     )
 
     const applied: string[] = []
 
     // Apply critical indexes automatically (in development/staging)
     if (process.env.NODE_ENV !== 'production') {
-      for (const index of highPriorityIndexes.slice(0, 5)) { // Limit to 5 for safety
+      for (const index of highPriorityIndexes.slice(0, 5)) {
+        // Limit to 5 for safety
         try {
           await this.createIndex(index)
           applied.push(index.implementation)
-          
+
           this.emit('indexCreated', {
             table: index.table,
             columns: index.columns,
-            type: index.type
+            type: index.type,
           })
         } catch (error) {
-          console.error(`Failed to create index on ${index.table?.replace(/[<>'"]/g, '') || 'unknown table'}:`, error)
+          console.error(
+            `Failed to create index on ${index.table?.replace(/[<>'"]/g, '') || 'unknown table'}:`,
+            error
+          )
         }
       }
     }
@@ -273,7 +269,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
     return {
       created: applied.length,
       recommendations: this.indexRecommendations,
-      applied
+      applied,
     }
   }
 
@@ -283,9 +279,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
   private setupQueryLogging(): void {
     // In a real implementation, this would integrate with Prisma's query event logging
     // For now, we'll simulate query monitoring
-    
-    console.log('🔍 Setting up query performance monitoring...')
-    
+
     // Simulate query collection (in production, use Prisma query events)
     setInterval(() => {
       this.simulateQueryCollection()
@@ -311,7 +305,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
       estimatedImprovement += 15
     }
 
-    if (query.toLowerCase().includes('like \'%')) {
+    if (query.toLowerCase().includes("like '%")) {
       issues.push('Leading wildcard in LIKE clause prevents index usage')
       suggestions.push('Use full-text search or redesign query to avoid leading wildcards')
       estimatedImprovement += 30
@@ -358,7 +352,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
         }
         const access = tableAccess.get(table)!
         access.frequency++
-        columns.forEach(col => access.columns.add(col))
+        columns.forEach((col) => access.columns.add(col))
       }
     }
 
@@ -366,7 +360,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
     for (const [table, access] of tableAccess.entries()) {
       if (access.frequency >= 5 && access.columns.size > 0) {
         const columns = Array.from(access.columns).slice(0, 3) // Max 3 columns per index
-        
+
         this.indexRecommendations.push({
           table,
           columns,
@@ -375,21 +369,21 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
           impact: {
             queryImprovement: Math.min(80, access.frequency * 3),
             storageOverhead: columns.length * 2, // Rough estimate in MB
-            maintenanceCost: columns.length > 2 ? 'HIGH' : 'MEDIUM'
+            maintenanceCost: columns.length > 2 ? 'HIGH' : 'MEDIUM',
           },
           affectedQueries: slowQueries
-            .filter(q => this.extractTablesFromQuery(q.query).includes(table))
-            .map(q => q.query)
+            .filter((q) => this.extractTablesFromQuery(q.query).includes(table))
+            .map((q) => q.query)
             .slice(0, 5),
           reason: `Frequently accessed table (${access.frequency} slow queries) with common column patterns`,
-          implementation: `CREATE INDEX idx_${table?.replace(/[<>'"]/g, '') || 'unknown'}_${columns.map(c => c?.replace(/[<>'"]/g, '') || 'unknown').join('_')} ON ${table?.replace(/[<>'"]/g, '') || 'unknown'} (${columns.map(c => c?.replace(/[<>'"]/g, '') || 'unknown').join(', ')})`
+          implementation: `CREATE INDEX idx_${table?.replace(/[<>'"]/g, '') || 'unknown'}_${columns.map((c) => c?.replace(/[<>'"]/g, '') || 'unknown').join('_')} ON ${table?.replace(/[<>'"]/g, '') || 'unknown'} (${columns.map((c) => c?.replace(/[<>'"]/g, '') || 'unknown').join(', ')})`,
         })
       }
     }
 
     // Add tenant isolation index recommendations
     this.addTenantIsolationIndexes()
-    
+
     // Add foreign key index recommendations
     this.addForeignKeyIndexes()
   }
@@ -397,16 +391,14 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
   /**
    * Create database index
    */
-  private async createIndex(recommendation: IndexRecommendation): Promise<void> {
+  private async createIndex(_recommendation: IndexRecommendation): Promise<void> {
     try {
-      console.log(`Creating index: ${recommendation.implementation}`)
-      
       // In production, this would execute the actual CREATE INDEX statement
       // await this.prisma.$executeRaw(recommendation.implementation)
-      
-      console.log(`✅ Index created successfully: ${recommendation.table}`)
     } catch (error) {
-      console.error(`❌ Failed to create index: ${error?.toString()?.replace(/[<>'"]/g, '') || 'Unknown error'}`)
+      console.error(
+        `❌ Failed to create index: ${error?.toString()?.replace(/[<>'"]/g, '') || 'Unknown error'}`
+      )
       throw error
     }
   }
@@ -426,50 +418,54 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
         connectionsPerSecond: this.calculateConnectionsPerSecond(),
         peakConnections: Math.max(this.connectionPool.currentConnections, 35),
         errorRate: this.calculateErrorRate(),
-        health: this.assessConnectionHealth()
+        health: this.assessConnectionHealth(),
       },
       queries: {
         averageExecutionTime: this.calculateAverageExecutionTime(),
-        slowQueries: this.queryAnalytics.filter(q => q.executionTime > 1000).length,
+        slowQueries: this.queryAnalytics.filter((q) => q.executionTime > 1000).length,
         totalQueries: this.queryAnalytics.length,
         queriesPerSecond: this.calculateQueriesPerSecond(),
-        errorRate: this.calculateQueryErrorRate()
+        errorRate: this.calculateQueryErrorRate(),
       },
       storage: {
         totalSize: 1024, // MB
-        indexSize: 256,   // MB
-        dataSize: 768,    // MB
-        freeSpace: 2048,  // MB
-        growthRate: 10    // MB per day
+        indexSize: 256, // MB
+        dataSize: 768, // MB
+        freeSpace: 2048, // MB
+        growthRate: 10, // MB per day
       },
       cache: {
         hitRate: 85.5,
         missRate: 14.5,
         evictions: 120,
         size: 512, // MB
-        efficiency: 88.2
+        efficiency: 88.2,
       },
       replication: {
         lag: 50, // ms
         status: 'HEALTHY',
-        lastSync: new Date()
+        lastSync: new Date(),
       },
       locks: {
         active: 2,
         waiting: 0,
-        deadlocks: 0
+        deadlocks: 0,
       },
-      overall: 'HEALTHY'
+      overall: 'HEALTHY',
     }
 
     // Assess overall health
-    if (metrics.connections.errorRate > 5 || 
-        metrics.queries.averageExecutionTime > 2000 ||
-        metrics.cache.hitRate < 70) {
+    if (
+      metrics.connections.errorRate > 5 ||
+      metrics.queries.averageExecutionTime > 2000 ||
+      metrics.cache.hitRate < 70
+    ) {
       metrics.overall = 'CRITICAL'
-    } else if (metrics.connections.errorRate > 2 || 
-               metrics.queries.averageExecutionTime > 1000 ||
-               metrics.cache.hitRate < 80) {
+    } else if (
+      metrics.connections.errorRate > 2 ||
+      metrics.queries.averageExecutionTime > 1000 ||
+      metrics.cache.hitRate < 80
+    ) {
       metrics.overall = 'WARNING'
     }
 
@@ -487,23 +483,23 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
   }> {
     const optimizations = []
 
-    const slowQueryCount = this.queryAnalytics.filter(q => q.executionTime > 1000).length
+    const slowQueryCount = this.queryAnalytics.filter((q) => q.executionTime > 1000).length
     if (slowQueryCount > 10) {
       optimizations.push({
         type: 'Query Optimization',
         description: `${slowQueryCount} slow queries detected requiring optimization`,
         impact: 'High - 30-50% performance improvement expected',
-        implementation: 'Review query patterns, add indexes, optimize JOINs'
+        implementation: 'Review query patterns, add indexes, optimize JOINs',
       })
     }
 
-    const heavyJoinCount = this.queryAnalytics.filter(q => q.optimization.heavyJoin).length
+    const heavyJoinCount = this.queryAnalytics.filter((q) => q.optimization.heavyJoin).length
     if (heavyJoinCount > 5) {
       optimizations.push({
         type: 'JOIN Optimization',
         description: `${heavyJoinCount} queries with complex JOINs`,
         impact: 'Medium - 20-30% improvement for complex queries',
-        implementation: 'Add composite indexes on JOIN columns, consider query restructuring'
+        implementation: 'Add composite indexes on JOIN columns, consider query restructuring',
       })
     }
 
@@ -523,7 +519,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
         type: 'Connection Pool',
         description: 'High connection usage detected',
         impact: 'Medium - Reduce connection contention',
-        implementation: 'Optimize connection pooling, implement connection recycling'
+        implementation: 'Optimize connection pooling, implement connection recycling',
       })
     }
 
@@ -544,7 +540,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
         type: 'Query Cache',
         description: `Cache hit rate of ${cacheHitRate}% below optimal`,
         impact: 'High - 40-60% improvement for repeated queries',
-        implementation: 'Increase cache size, optimize cache eviction policy'
+        implementation: 'Increase cache size, optimize cache eviction policy',
       })
     }
 
@@ -563,7 +559,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
       type: 'Data Archival',
       description: 'Implement automated data archival for old records',
       impact: 'Medium - Reduce database size and improve performance',
-      implementation: 'Archive audit logs older than 1 year, implement partitioning'
+      implementation: 'Archive audit logs older than 1 year, implement partitioning',
     })
 
     return optimizations
@@ -573,14 +569,14 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
 
   private getSlowQueries(limit: number): QueryAnalysis[] {
     return this.queryAnalytics
-      .filter(q => q.executionTime > 500) // Queries taking more than 500ms
+      .filter((q) => q.executionTime > 500) // Queries taking more than 500ms
       .sort((a, b) => b.executionTime - a.executionTime)
       .slice(0, limit)
   }
 
   private calculateAverageExecutionTime(): number {
     if (this.queryAnalytics.length === 0) return 0
-    
+
     const total = this.queryAnalytics.reduce((sum, q) => sum + q.executionTime, 0)
     return Math.round(total / this.queryAnalytics.length)
   }
@@ -598,9 +594,9 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
   private calculateQueriesPerSecond(): number {
     // Mock calculation based on recent queries
     const recentQueries = this.queryAnalytics.filter(
-      q => q.timestamp > new Date(Date.now() - 60000)
+      (q) => q.timestamp > new Date(Date.now() - 60000)
     )
-    return Math.round(recentQueries.length / 60 * 100) / 100
+    return Math.round((recentQueries.length / 60) * 100) / 100
   }
 
   private calculateQueryErrorRate(): number {
@@ -618,37 +614,37 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
     const tables: string[] = []
     const regex = /(?:from|join|update|into)\s+["`]?(\w+)["`]?/gi
     let match
-    
+
     while ((match = regex.exec(query)) !== null) {
       tables.push(match[1].toLowerCase())
     }
-    
+
     return [...new Set(tables)]
   }
 
   private extractColumnsFromQuery(query: string): string[] {
     const columns: string[] = []
-    
+
     // Extract WHERE clause columns
     const whereRegex = /where\s+.*?(\w+)\s*[=<>]/gi
     let match
     while ((match = whereRegex.exec(query)) !== null) {
       columns.push(match[1].toLowerCase())
     }
-    
+
     // Extract ORDER BY columns
     const orderRegex = /order\s+by\s+(\w+)/gi
     while ((match = orderRegex.exec(query)) !== null) {
       columns.push(match[1].toLowerCase())
     }
-    
+
     return [...new Set(columns)]
   }
 
   private addTenantIsolationIndexes(): void {
     // Add tenant-specific index recommendations for multi-tenant optimization
     const tenantTables = ['users', 'customers', 'invoices', 'projects', 'auditLogs']
-    
+
     for (const table of tenantTables) {
       this.indexRecommendations.push({
         table,
@@ -658,11 +654,13 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
         impact: {
           queryImprovement: 70,
           storageOverhead: 5,
-          maintenanceCost: 'LOW'
+          maintenanceCost: 'LOW',
         },
-        affectedQueries: [`SELECT * FROM ${table?.replace(/[<>'"]/g, '') || 'unknown'} WHERE tenantId = ?`],
+        affectedQueries: [
+          `SELECT * FROM ${table?.replace(/[<>'"]/g, '') || 'unknown'} WHERE tenantId = ?`,
+        ],
         reason: 'Multi-tenant architecture requires tenant isolation index',
-        implementation: `CREATE INDEX idx_${table?.replace(/[<>'"]/g, '') || 'unknown'}_tenant_id ON ${table?.replace(/[<>'"]/g, '') || 'unknown'} (tenantId)`
+        implementation: `CREATE INDEX idx_${table?.replace(/[<>'"]/g, '') || 'unknown'}_tenant_id ON ${table?.replace(/[<>'"]/g, '') || 'unknown'} (tenantId)`,
       })
     }
   }
@@ -673,7 +671,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
       { table: 'customers', column: 'userId', priority: 'MEDIUM' as const },
       { table: 'invoices', column: 'customerId', priority: 'HIGH' as const },
       { table: 'projects', column: 'customerId', priority: 'MEDIUM' as const },
-      { table: 'auditLogs', column: 'userId', priority: 'LOW' as const }
+      { table: 'auditLogs', column: 'userId', priority: 'LOW' as const },
     ]
 
     for (const fk of foreignKeys) {
@@ -685,11 +683,13 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
         impact: {
           queryImprovement: fk.priority === 'HIGH' ? 60 : 40,
           storageOverhead: 3,
-          maintenanceCost: 'LOW'
+          maintenanceCost: 'LOW',
         },
-        affectedQueries: [`SELECT * FROM ${fk.table?.replace(/[<>'"]/g, '') || 'unknown'} WHERE ${fk.column?.replace(/[<>'"]/g, '') || 'unknown'} = ?`],
+        affectedQueries: [
+          `SELECT * FROM ${fk.table?.replace(/[<>'"]/g, '') || 'unknown'} WHERE ${fk.column?.replace(/[<>'"]/g, '') || 'unknown'} = ?`,
+        ],
         reason: 'Foreign key relationships require indexes for JOIN performance',
-        implementation: `CREATE INDEX idx_${fk.table?.replace(/[<>'"]/g, '') || 'unknown'}_${fk.column?.replace(/[<>'"]/g, '') || 'unknown'} ON ${fk.table?.replace(/[<>'"]/g, '') || 'unknown'} (${fk.column?.replace(/[<>'"]/g, '') || 'unknown'})`
+        implementation: `CREATE INDEX idx_${fk.table?.replace(/[<>'"]/g, '') || 'unknown'}_${fk.column?.replace(/[<>'"]/g, '') || 'unknown'} ON ${fk.table?.replace(/[<>'"]/g, '') || 'unknown'} (${fk.column?.replace(/[<>'"]/g, '') || 'unknown'})`,
       })
     }
   }
@@ -701,13 +701,13 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
       'SELECT c.*, u.name FROM customers c JOIN users u ON c.userId = u.id WHERE c.tenantId = ?',
       'UPDATE invoices SET status = ? WHERE id = ? AND tenantId = ?',
       'SELECT COUNT(*) FROM projects WHERE customerId = ? AND status IN (?, ?)',
-      'INSERT INTO auditLogs (tenantId, userId, action, timestamp) VALUES (?, ?, ?, ?)'
+      'INSERT INTO auditLogs (tenantId, userId, action, timestamp) VALUES (?, ?, ?, ?)',
     ]
 
     for (let i = 0; i < Math.floor(Math.random() * 3) + 1; i++) {
       const query = mockQueries[Math.floor(Math.random() * mockQueries.length)]
       const executionTime = Math.floor(Math.random() * 2000) + 50 // 50-2050ms
-      
+
       const analysis: QueryAnalysis = {
         id: `query_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         query,
@@ -715,26 +715,26 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
         timestamp: new Date(),
         tenantId: 'tenant_' + Math.floor(Math.random() * 100),
         result: {
-          rowCount: Math.floor(Math.random() * 1000)
+          rowCount: Math.floor(Math.random() * 1000),
         },
         performance: {
           planning: Math.floor(executionTime * 0.1),
           execution: Math.floor(executionTime * 0.9),
           total: executionTime,
           bufferHits: Math.floor(Math.random() * 1000),
-          bufferMisses: Math.floor(Math.random() * 100)
+          bufferMisses: Math.floor(Math.random() * 100),
         },
         optimization: {
           needsIndex: executionTime > 1000,
           slowQuery: executionTime > 1000,
           heavyJoin: query.includes('JOIN'),
           missedCache: Math.random() > 0.8,
-          recommendations: executionTime > 1000 ? ['Add index', 'Optimize JOIN'] : []
-        }
+          recommendations: executionTime > 1000 ? ['Add index', 'Optimize JOIN'] : [],
+        },
       }
 
       this.queryAnalytics.push(analysis)
-      
+
       // Keep only last 1000 queries
       if (this.queryAnalytics.length > 1000) {
         this.queryAnalytics = this.queryAnalytics.slice(-1000)
@@ -746,7 +746,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
           type: 'SLOW_QUERY',
           severity: 'HIGH',
           message: `Slow query detected: ${query} (${executionTime}ms)`,
-          metadata: { query, executionTime }
+          metadata: { query, executionTime },
         })
       }
     }
@@ -757,7 +757,7 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
       id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date(),
       resolved: false,
-      ...alertData
+      ...alertData,
     }
 
     this.alerts.push(alert)
@@ -771,20 +771,20 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
 
   private startPerformanceMonitoring(): void {
     this.isMonitoring = true
-    
+
     this.monitoringInterval = setInterval(async () => {
       if (!this.isMonitoring) return
 
       try {
         const metrics = await this.collectHealthMetrics()
-        
+
         // Check for performance issues
         if (metrics.queries.averageExecutionTime > 2000) {
           this.generateAlert({
             type: 'SLOW_QUERY',
             severity: 'CRITICAL',
             message: `Average query execution time is ${metrics.queries.averageExecutionTime}ms`,
-            metadata: { averageTime: metrics.queries.averageExecutionTime }
+            metadata: { averageTime: metrics.queries.averageExecutionTime },
           })
         }
 
@@ -793,18 +793,13 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
             type: 'HIGH_CONNECTIONS',
             severity: 'WARNING',
             message: `High connection usage: ${metrics.connections.active}/${metrics.connections.total}`,
-            metadata: { activeConnections: metrics.connections.active }
+            metadata: { activeConnections: metrics.connections.active },
           })
         }
 
         this.emit('healthMetrics', metrics)
-
-      } catch (error) {
-        console.error('Performance monitoring error:', error)
-      }
+      } catch (error) {}
     }, 30000) // Every 30 seconds
-
-    console.log('📊 Database performance monitoring started')
   }
 
   /**
@@ -826,20 +821,20 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
    * Get active alerts
    */
   getActiveAlerts(): PerformanceAlert[] {
-    return this.alerts.filter(alert => !alert.resolved)
+    return this.alerts.filter((alert) => !alert.resolved)
   }
 
   /**
    * Resolve alert
    */
   resolveAlert(alertId: string, resolution: string): boolean {
-    const alert = this.alerts.find(a => a.id === alertId)
+    const alert = this.alerts.find((a) => a.id === alertId)
     if (alert) {
       alert.resolved = true
       alert.resolution = {
         action: resolution,
         timestamp: new Date(),
-        result: 'Resolved by administrator'
+        result: 'Resolved by administrator',
       }
       this.emit('alertResolved', alert)
       return true
@@ -852,13 +847,12 @@ export class DatabasePerformanceOrchestrator extends EventEmitter {
    */
   async cleanup(): Promise<void> {
     this.isMonitoring = false
-    
+
     if (this.monitoringInterval) {
       clearInterval(this.monitoringInterval)
     }
 
     this.removeAllListeners()
-    console.log('✅ Database Performance Orchestrator cleanup completed')
   }
 }
 

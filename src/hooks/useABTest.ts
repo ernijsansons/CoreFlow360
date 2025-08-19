@@ -26,7 +26,7 @@ export function useABTest(experimentId: string) {
     }
   }
 
-  const trackMetric = (metric: string, value: any) => {
+  const trackMetric = (metric: string, value: unknown) => {
     if (abTestManager) {
       abTestManager.trackMetric(experimentId, metric, value)
     }
@@ -38,6 +38,6 @@ export function useABTest(experimentId: string) {
     isControl: variant?.id === 'control',
     config: variant?.config || {},
     trackConversion,
-    trackMetric
+    trackMetric,
   }
 }

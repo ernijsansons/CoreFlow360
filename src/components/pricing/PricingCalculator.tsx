@@ -16,7 +16,7 @@ import {
   BUNDLE_DISCOUNTS,
   ModulePricing,
   PricingCalculation,
-  BusinessSubscription
+  BusinessSubscription,
 } from '@/lib/pricing'
 import {
   Users,
@@ -35,7 +35,7 @@ import {
   Info,
   DollarSign,
   Percent,
-  Crown
+  Crown,
 } from 'lucide-react'
 
 interface PricingCalculatorProps {
@@ -53,13 +53,13 @@ const INDUSTRIES = [
   'CONSULTING',
   'RETAIL',
   'FINANCE',
-  'REAL_ESTATE'
+  'REAL_ESTATE',
 ]
 
 export function PricingCalculator({
   onPricingChange,
   showMultiBusiness = true,
-  className = ''
+  className = '',
 }: PricingCalculatorProps) {
   const [userCount, setUserCount] = useState(5)
   const [selectedModules, setSelectedModules] = useState(['crm', 'accounting'])
@@ -73,8 +73,8 @@ export function PricingCalculator({
       billingOrder: 1,
       discountRate: 0,
       monthlyTotal: 0,
-      industry: 'GENERAL'
-    }
+      industry: 'GENERAL',
+    },
   ])
   const [activeTab, setActiveTab] = useState<'single' | 'portfolio'>('single')
   const [showDetails, setShowDetails] = useState(false)
@@ -92,7 +92,9 @@ export function PricingCalculator({
 
   // Calculate ROI comparison
   const roiComparison = calculateROIComparison(
-    activeTab === 'single' ? singleBusinessCalculation.finalPrice : portfolioCalculation.totalFinalPrice,
+    activeTab === 'single'
+      ? singleBusinessCalculation.finalPrice
+      : portfolioCalculation.totalFinalPrice,
     activeTab === 'single' ? userCount : businesses.reduce((sum, b) => sum + b.userCount, 0)
   )
 
@@ -104,21 +106,23 @@ export function PricingCalculator({
 
   const toggleModule = (moduleKey: string) => {
     if (activeTab === 'single') {
-      setSelectedModules(prev => 
-        prev.includes(moduleKey) 
-          ? prev.filter(m => m !== moduleKey)
-          : [...prev, moduleKey]
+      setSelectedModules((prev) =>
+        prev.includes(moduleKey) ? prev.filter((m) => m !== moduleKey) : [...prev, moduleKey]
       )
     } else {
       // Update first business in portfolio
-      setBusinesses(prev => prev.map((business, index) => 
-        index === 0 ? {
-          ...business,
-          selectedModules: business.selectedModules.includes(moduleKey)
-            ? business.selectedModules.filter(m => m !== moduleKey)
-            : [...business.selectedModules, moduleKey]
-        } : business
-      ))
+      setBusinesses((prev) =>
+        prev.map((business, index) =>
+          index === 0
+            ? {
+                ...business,
+                selectedModules: business.selectedModules.includes(moduleKey)
+                  ? business.selectedModules.filter((m) => m !== moduleKey)
+                  : [...business.selectedModules, moduleKey],
+              }
+            : business
+        )
+      )
     }
   }
 
@@ -131,7 +135,7 @@ export function PricingCalculator({
       billingOrder: businesses.length + 1,
       discountRate: 0,
       monthlyTotal: 0,
-      industry: 'GENERAL'
+      industry: 'GENERAL',
     }
     setBusinesses([...businesses, newBusiness])
   }
@@ -143,29 +147,33 @@ export function PricingCalculator({
   }
 
   const updateBusiness = (index: number, updates: Partial<BusinessSubscription>) => {
-    setBusinesses(prev => prev.map((business, i) => 
-      i === index ? { ...business, ...updates } : business
-    ))
+    setBusinesses((prev) =>
+      prev.map((business, i) => (i === index ? { ...business, ...updates } : business))
+    )
   }
 
   const getModulesByCategory = () => {
-    const categories = MODULE_PRICING.reduce((acc, module) => {
-      if (!acc[module.category]) acc[module.category] = []
-      acc[module.category].push(module)
-      return acc
-    }, {} as Record<string, ModulePricing[]>)
-    
+    const categories = MODULE_PRICING.reduce(
+      (acc, module) => {
+        if (!acc[module.category]) acc[module.category] = []
+        acc[module.category].push(module)
+        return acc
+      },
+      {} as Record<string, ModulePricing[]>
+    )
+
     return categories
   }
 
   const modulesByCategory = getModulesByCategory()
-  const currentModules = activeTab === 'single' ? selectedModules : businesses[0]?.selectedModules || []
+  const currentModules =
+    activeTab === 'single' ? selectedModules : businesses[0]?.selectedModules || []
 
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h2 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
           Pricing Calculator
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
@@ -176,56 +184,57 @@ export function PricingCalculator({
       {/* Mode Selector */}
       {showMultiBusiness && (
         <div className="flex items-center justify-center">
-          <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          <div className="rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
             <button
               onClick={() => setActiveTab('single')}
-              className={`px-6 py-3 rounded-md font-medium transition-colors ${
+              className={`rounded-md px-6 py-3 font-medium transition-colors ${
                 activeTab === 'single'
-                  ? 'bg-white dark:bg-gray-600 text-purple-600 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-white text-purple-600 shadow-sm dark:bg-gray-600'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
-              <Building2 className="w-4 h-4 inline mr-2" />
+              <Building2 className="mr-2 inline h-4 w-4" />
               Single Business
             </button>
             <button
               onClick={() => setActiveTab('portfolio')}
-              className={`px-6 py-3 rounded-md font-medium transition-colors ${
+              className={`rounded-md px-6 py-3 font-medium transition-colors ${
                 activeTab === 'portfolio'
-                  ? 'bg-white dark:bg-gray-600 text-purple-600 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-white text-purple-600 shadow-sm dark:bg-gray-600'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
-              <Crown className="w-4 h-4 inline mr-2" />
+              <Crown className="mr-2 inline h-4 w-4" />
               Multi-Business Portfolio
             </button>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Configuration Panel */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6 lg:col-span-2">
           {/* Basic Configuration */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
               Business Configuration
             </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+
+            <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Number of Users
                 </label>
                 <div className="flex items-center space-x-3">
                   <button
-                    onClick={() => activeTab === 'single' ? 
-                      setUserCount(Math.max(1, userCount - 1)) :
-                      updateBusiness(0, { userCount: Math.max(1, businesses[0].userCount - 1) })
+                    onClick={() =>
+                      activeTab === 'single'
+                        ? setUserCount(Math.max(1, userCount - 1))
+                        : updateBusiness(0, { userCount: Math.max(1, businesses[0].userCount - 1) })
                     }
-                    className="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                    className="rounded-lg border border-gray-300 p-2 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
                   >
-                    <Minus className="w-4 h-4" />
+                    <Minus className="h-4 w-4" />
                   </button>
                   <div className="flex-1 text-center">
                     <span className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -233,30 +242,32 @@ export function PricingCalculator({
                     </span>
                   </div>
                   <button
-                    onClick={() => activeTab === 'single' ? 
-                      setUserCount(userCount + 1) :
-                      updateBusiness(0, { userCount: businesses[0].userCount + 1 })
+                    onClick={() =>
+                      activeTab === 'single'
+                        ? setUserCount(userCount + 1)
+                        : updateBusiness(0, { userCount: businesses[0].userCount + 1 })
                     }
-                    className="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                    className="rounded-lg border border-gray-300 p-2 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="h-4 w-4" />
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Industry
                 </label>
                 <select
                   value={activeTab === 'single' ? industry : businesses[0]?.industry || 'GENERAL'}
-                  onChange={(e) => activeTab === 'single' ? 
-                    setIndustry(e.target.value) :
-                    updateBusiness(0, { industry: e.target.value })
+                  onChange={(e) =>
+                    activeTab === 'single'
+                      ? setIndustry(e.target.value)
+                      : updateBusiness(0, { industry: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-700"
                 >
-                  {INDUSTRIES.map(ind => (
+                  {INDUSTRIES.map((ind) => (
                     <option key={ind} value={ind}>
                       {ind.toLowerCase().replace('_', ' ')}
                     </option>
@@ -267,20 +278,23 @@ export function PricingCalculator({
 
             {/* Module Selection */}
             <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900 dark:text-white">
-                Select Modules
-              </h4>
-              
+              <h4 className="font-semibold text-gray-900 dark:text-white">Select Modules</h4>
+
               {Object.entries(modulesByCategory).map(([category, modules]) => (
-                <div key={category} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                  <h5 className="font-medium text-gray-900 dark:text-white mb-3 capitalize">
+                <div
+                  key={category}
+                  className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                >
+                  <h5 className="mb-3 font-medium text-gray-900 capitalize dark:text-white">
                     {category} Modules
                   </h5>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {modules.map(module => {
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {modules.map((module) => {
                       const isSelected = currentModules.includes(module.moduleKey)
-                      const isDisabled = module.dependencies?.some(dep => !currentModules.includes(dep))
-                      
+                      const isDisabled = module.dependencies?.some(
+                        (dep) => !currentModules.includes(dep)
+                      )
+
                       return (
                         <motion.button
                           key={module.moduleKey}
@@ -288,30 +302,31 @@ export function PricingCalculator({
                           whileTap={{ scale: 0.98 }}
                           onClick={() => !isDisabled && toggleModule(module.moduleKey)}
                           disabled={isDisabled}
-                          className={`p-3 rounded-lg border-2 transition-all text-left ${
+                          className={`rounded-lg border-2 p-3 text-left transition-all ${
                             isSelected
                               ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20'
                               : isDisabled
-                              ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 opacity-50 cursor-not-allowed'
-                              : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
+                                ? 'cursor-not-allowed border-gray-200 bg-gray-50 opacity-50 dark:border-gray-700 dark:bg-gray-700'
+                                : 'border-gray-200 hover:border-purple-300 dark:border-gray-700'
                           }`}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <p className="font-medium text-gray-900 dark:text-white text-sm">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
                                 {module.name}
                               </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {formatPricing(module.basePrice)}/mo + {formatPricing(module.perUserPrice)}/user
+                              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                {formatPricing(module.basePrice)}/mo +{' '}
+                                {formatPricing(module.perUserPrice)}/user
                               </p>
                               {module.dependencies && (
-                                <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                <p className="mt-1 text-xs text-yellow-600 dark:text-yellow-400">
                                   Requires: {module.dependencies.join(', ')}
                                 </p>
                               )}
                             </div>
                             <div className="ml-2">
-                              {isSelected && <Check className="w-5 h-5 text-purple-600" />}
+                              {isSelected && <Check className="h-5 w-5 text-purple-600" />}
                             </div>
                           </div>
                         </motion.button>
@@ -325,41 +340,50 @@ export function PricingCalculator({
 
           {/* Portfolio Configuration */}
           {activeTab === 'portfolio' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
+            <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+              <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Business Portfolio
                 </h3>
                 <button
                   onClick={addBusiness}
-                  className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                  className="flex items-center space-x-2 rounded-lg bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="h-4 w-4" />
                   <span>Add Business</span>
                 </button>
               </div>
 
               <div className="space-y-4">
                 {businesses.map((business, index) => (
-                  <div key={business.tenantId} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
+                  <div
+                    key={business.tenantId}
+                    className="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                  >
+                    <div className="mb-3 flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="flex items-center space-x-2">
                           {index === 0 ? (
-                            <Crown className="w-5 h-5 text-yellow-500" />
+                            <Crown className="h-5 w-5 text-yellow-500" />
                           ) : (
-                            <Building2 className="w-5 h-5 text-gray-400" />
+                            <Building2 className="h-5 w-5 text-gray-400" />
                           )}
                           <input
                             type="text"
                             value={business.businessName}
-                            onChange={(e) => updateBusiness(index, { businessName: e.target.value })}
-                            className="font-medium bg-transparent border-none focus:ring-2 focus:ring-purple-500 rounded px-2 py-1"
+                            onChange={(e) =>
+                              updateBusiness(index, { businessName: e.target.value })
+                            }
+                            className="rounded border-none bg-transparent px-2 py-1 font-medium focus:ring-2 focus:ring-purple-500"
                           />
                         </div>
                         {index > 0 && (
-                          <span className="px-2 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
-                            -{Math.round(portfolioCalculation.businessBreakdown[index]?.discountRate * 100 || 0)}% discount
+                          <span className="rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
+                            -
+                            {Math.round(
+                              portfolioCalculation.businessBreakdown[index]?.discountRate * 100 || 0
+                            )}
+                            % discount
                           </span>
                         )}
                       </div>
@@ -368,30 +392,34 @@ export function PricingCalculator({
                           onClick={() => removeBusiness(index)}
                           className="text-red-500 hover:text-red-700"
                         >
-                          <Minus className="w-4 h-4" />
+                          <Minus className="h-4 w-4" />
                         </button>
                       )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
                           Users
                         </label>
                         <input
                           type="number"
                           min="1"
                           value={business.userCount}
-                          onChange={(e) => updateBusiness(index, { userCount: parseInt(e.target.value) || 1 })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg"
+                          onChange={(e) =>
+                            updateBusiness(index, { userCount: parseInt(e.target.value) || 1 })
+                          }
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
                           Monthly Cost
                         </label>
-                        <p className="text-lg font-bold text-gray-900 dark:text-white py-2">
-                          {formatPricing(portfolioCalculation.businessBreakdown[index]?.finalPrice || 0)}
+                        <p className="py-2 text-lg font-bold text-gray-900 dark:text-white">
+                          {formatPricing(
+                            portfolioCalculation.businessBreakdown[index]?.finalPrice || 0
+                          )}
                         </p>
                       </div>
                     </div>
@@ -407,47 +435,52 @@ export function PricingCalculator({
           {/* Main Price Card */}
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl p-6 text-white"
+            className="rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 p-6 text-white"
           >
-            <div className="text-center mb-4">
-              <h3 className="text-lg font-semibold mb-2">
+            <div className="mb-4 text-center">
+              <h3 className="mb-2 text-lg font-semibold">
                 {activeTab === 'single' ? 'Monthly Total' : 'Portfolio Total'}
               </h3>
-              <div className="text-4xl font-bold mb-2">
+              <div className="mb-2 text-4xl font-bold">
                 {formatPricing(
-                  activeTab === 'single' 
-                    ? singleBusinessCalculation.finalPrice 
+                  activeTab === 'single'
+                    ? singleBusinessCalculation.finalPrice
                     : portfolioCalculation.totalFinalPrice
                 )}
               </div>
-              <p className="text-purple-100 text-sm">per month</p>
+              <p className="text-sm text-purple-100">per month</p>
             </div>
 
             {/* Discount Badge */}
             {((activeTab === 'single' && singleBusinessCalculation.discountRate > 0) ||
               (activeTab === 'portfolio' && portfolioCalculation.averageDiscountRate > 0)) && (
-              <div className="bg-white/20 rounded-lg p-3 text-center mb-4">
-                <div className="flex items-center justify-center space-x-2 mb-1">
-                  <TrendingDown className="w-5 h-5" />
+              <div className="mb-4 rounded-lg bg-white/20 p-3 text-center">
+                <div className="mb-1 flex items-center justify-center space-x-2">
+                  <TrendingDown className="h-5 w-5" />
                   <span className="font-semibold">
-                    {Math.round((activeTab === 'single' 
-                      ? singleBusinessCalculation.discountRate 
-                      : portfolioCalculation.averageDiscountRate) * 100)}% Discount Applied
+                    {Math.round(
+                      (activeTab === 'single'
+                        ? singleBusinessCalculation.discountRate
+                        : portfolioCalculation.averageDiscountRate) * 100
+                    )}
+                    % Discount Applied
                   </span>
                 </div>
                 <p className="text-sm text-purple-100">
-                  You save {formatPricing(
-                    activeTab === 'single' 
-                      ? singleBusinessCalculation.savings 
+                  You save{' '}
+                  {formatPricing(
+                    activeTab === 'single'
+                      ? singleBusinessCalculation.savings
                       : portfolioCalculation.totalMonthlySavings
-                  )} per month!
+                  )}{' '}
+                  per month!
                 </p>
               </div>
             )}
 
             {/* ROI Comparison */}
-            <div className="bg-white/10 rounded-lg p-3">
-              <h4 className="font-semibold mb-2 text-center">vs Traditional ERP</h4>
+            <div className="rounded-lg bg-white/10 p-3">
+              <h4 className="mb-2 text-center font-semibold">vs Traditional ERP</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>CoreFlow360:</span>
@@ -464,8 +497,8 @@ export function PricingCalculator({
                   </span>
                 </div>
                 <div className="text-center">
-                  <span className="inline-flex items-center px-2 py-1 bg-green-500/20 rounded-full text-xs">
-                    <Award className="w-3 h-3 mr-1" />
+                  <span className="inline-flex items-center rounded-full bg-green-500/20 px-2 py-1 text-xs">
+                    <Award className="mr-1 h-3 w-3" />
                     {roiComparison.savingsPercent.toFixed(0)}% cheaper
                   </span>
                 </div>
@@ -475,8 +508,8 @@ export function PricingCalculator({
 
           {/* Progressive Discount Explanation */}
           {activeTab === 'portfolio' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+              <h3 className="mb-4 font-semibold text-gray-900 dark:text-white">
                 Progressive Discounts
               </h3>
               <div className="space-y-3">
@@ -484,15 +517,16 @@ export function PricingCalculator({
                   { business: '2nd Business', discount: 20 },
                   { business: '3rd Business', discount: 35 },
                   { business: '4th Business', discount: 45 },
-                  { business: '5th+ Business', discount: 50 }
+                  { business: '5th+ Business', discount: 50 },
                 ].map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-700"
+                  >
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {item.business}
                     </span>
-                    <span className="text-sm font-bold text-green-600">
-                      {item.discount}% off
-                    </span>
+                    <span className="text-sm font-bold text-green-600">{item.discount}% off</span>
                   </div>
                 ))}
               </div>
@@ -501,17 +535,18 @@ export function PricingCalculator({
 
           {/* Bundle Recommendations */}
           {singleBusinessCalculation.bundleRecommendation && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border-l-4 border-yellow-500">
-              <div className="flex items-center space-x-2 mb-2">
-                <Sparkles className="w-5 h-5 text-yellow-500" />
+            <div className="rounded-xl border-l-4 border-yellow-500 bg-white p-6 shadow-sm dark:bg-gray-800">
+              <div className="mb-2 flex items-center space-x-2">
+                <Sparkles className="h-5 w-5 text-yellow-500" />
                 <h3 className="font-semibold text-gray-900 dark:text-white">
                   Bundle Recommendation
                 </h3>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                Save more with our {BUNDLE_DISCOUNTS[singleBusinessCalculation.bundleRecommendation]?.name}
+              <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
+                Save more with our{' '}
+                {BUNDLE_DISCOUNTS[singleBusinessCalculation.bundleRecommendation]?.name}
               </p>
-              <button className="w-full px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">
+              <button className="w-full rounded-lg bg-yellow-500 px-4 py-2 text-white transition-colors hover:bg-yellow-600">
                 View Bundle Details
               </button>
             </div>

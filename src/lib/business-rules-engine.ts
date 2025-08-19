@@ -11,7 +11,7 @@ export interface BusinessContext {
   userId?: string
   tenantId?: string
   userRole?: string
-  subscription?: any
+  subscription?: unknown
   modules?: string[]
   userCount?: number
   billingCycle?: string
@@ -45,14 +45,14 @@ export interface BusinessRule {
 export interface BusinessRuleCondition {
   field: string
   operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains' | 'in' | 'not_in'
-  value: any
+  value: unknown
   logicalOperator?: 'AND' | 'OR'
 }
 
 export interface BusinessRuleAction {
   type: 'allow' | 'deny' | 'require' | 'recommend' | 'notify' | 'calculate'
   action: string
-  parameters?: Record<string, any>
+  parameters?: Record<string, unknown>
 }
 
 export class BusinessRulesEngine {
@@ -81,13 +81,9 @@ export class BusinessRulesEngine {
       description: 'Apply volume discounts based on user count',
       category: 'pricing',
       priority: 'high',
-      conditions: [
-        { field: 'userCount', operator: 'greater_than', value: 20 }
-      ],
-      actions: [
-        { type: 'allow', action: 'apply_volume_discount' }
-      ],
-      enabled: true
+      conditions: [{ field: 'userCount', operator: 'greater_than', value: 20 }],
+      actions: [{ type: 'allow', action: 'apply_volume_discount' }],
+      enabled: true,
     })
 
     // Access rules
@@ -99,13 +95,13 @@ export class BusinessRulesEngine {
       priority: 'high',
       conditions: [
         { field: 'pricingModel', operator: 'equals', value: 'standard' },
-        { field: 'userCount', operator: 'greater_than', value: 100, logicalOperator: 'AND' }
+        { field: 'userCount', operator: 'greater_than', value: 100, logicalOperator: 'AND' },
       ],
       actions: [
         { type: 'deny', action: 'access_enterprise_modules' },
-        { type: 'recommend', action: 'upgrade_to_enterprise' }
+        { type: 'recommend', action: 'upgrade_to_enterprise' },
       ],
-      enabled: true
+      enabled: true,
     })
 
     // Subscription rules
@@ -115,14 +111,12 @@ export class BusinessRulesEngine {
       description: 'Enforce subscription limits',
       category: 'subscription',
       priority: 'critical',
-      conditions: [
-        { field: 'userCount', operator: 'greater_than', value: 10000 }
-      ],
+      conditions: [{ field: 'userCount', operator: 'greater_than', value: 10000 }],
       actions: [
         { type: 'deny', action: 'exceed_user_limit' },
-        { type: 'require', action: 'enterprise_pricing' }
+        { type: 'require', action: 'enterprise_pricing' },
       ],
-      enabled: true
+      enabled: true,
     })
 
     // Data rules
@@ -132,14 +126,12 @@ export class BusinessRulesEngine {
       description: 'Enforce data retention policies',
       category: 'data',
       priority: 'high',
-      conditions: [
-        { field: 'subscription.status', operator: 'equals', value: 'cancelled' }
-      ],
+      conditions: [{ field: 'subscription.status', operator: 'equals', value: 'cancelled' }],
       actions: [
         { type: 'require', action: 'data_export' },
-        { type: 'notify', action: 'data_deletion_schedule' }
+        { type: 'notify', action: 'data_deletion_schedule' },
       ],
-      enabled: true
+      enabled: true,
     })
 
     // Security rules
@@ -151,13 +143,18 @@ export class BusinessRulesEngine {
       priority: 'high',
       conditions: [
         { field: 'pricingModel', operator: 'equals', value: 'enterprise' },
-        { field: 'deploymentType', operator: 'equals', value: 'on-premise', logicalOperator: 'AND' }
+        {
+          field: 'deploymentType',
+          operator: 'equals',
+          value: 'on-premise',
+          logicalOperator: 'AND',
+        },
       ],
       actions: [
         { type: 'require', action: 'security_audit' },
-        { type: 'require', action: 'compliance_certification' }
+        { type: 'require', action: 'compliance_certification' },
       ],
-      enabled: true
+      enabled: true,
     })
 
     // Compliance rules
@@ -167,14 +164,12 @@ export class BusinessRulesEngine {
       description: 'Enforce GDPR compliance for EU customers',
       category: 'compliance',
       priority: 'critical',
-      conditions: [
-        { field: 'region', operator: 'in', value: ['EU', 'UK'] }
-      ],
+      conditions: [{ field: 'region', operator: 'in', value: ['EU', 'UK'] }],
       actions: [
         { type: 'require', action: 'gdpr_features' },
-        { type: 'require', action: 'data_processing_agreement' }
+        { type: 'require', action: 'data_processing_agreement' },
       ],
-      enabled: true
+      enabled: true,
     })
   }
 
@@ -196,7 +191,7 @@ export class BusinessRulesEngine {
    * Get all rules for a category
    */
   getRulesByCategory(category: string): BusinessRule[] {
-    return Array.from(this.rules.values()).filter(rule => rule.category === category)
+    return Array.from(this.rules.values()).filter((rule) => rule.category === category)
   }
 
   /**
@@ -208,7 +203,7 @@ export class BusinessRulesEngine {
     for (const rule of this.rules.values()) {
       if (!rule.enabled) continue
 
-      const isRelevant = rule.actions.some(actionDef => actionDef.action === action)
+      const isRelevant = rule.actions.some((actionDef) => actionDef.action === action)
       if (!isRelevant) continue
 
       const evaluation = await this.evaluateRule(rule, context)
@@ -221,35 +216,41 @@ export class BusinessRulesEngine {
   /**
    * Evaluate a single business rule
    */
-  private async evaluateRule(rule: BusinessRule, context: BusinessContext): Promise<BusinessRuleResult> {
+  private async evaluateRule(
+    rule: BusinessRule,
+    context: BusinessContext
+  ): Promise<BusinessRuleResult> {
     const conditionsMet = await this.evaluateConditions(rule.conditions, context)
-    
+
     if (!conditionsMet.met) {
       return {
         allowed: true,
-        reason: `Rule ${rule.name} conditions not met`
+        reason: `Rule ${rule.name} conditions not met`,
       }
     }
 
-    const actions = rule.actions.map(action => this.evaluateAction(action, context))
-    
+    const actions = rule.actions.map((action) => this.evaluateAction(action, context))
+
     return {
-      allowed: !actions.some(action => action.type === 'deny'),
+      allowed: !actions.some((action) => action.type === 'deny'),
       reason: rule.description,
       conditions: conditionsMet.conditions,
       recommendations: actions
-        .filter(action => action.type === 'recommend')
-        .map(action => action.action),
+        .filter((action) => action.type === 'recommend')
+        .map((action) => action.action),
       alternatives: actions
-        .filter(action => action.type === 'require')
-        .map(action => action.action)
+        .filter((action) => action.type === 'require')
+        .map((action) => action.action),
     }
   }
 
   /**
    * Evaluate rule conditions
    */
-  private async evaluateConditions(conditions: BusinessRuleCondition[], context: BusinessContext): Promise<{ met: boolean; conditions: string[] }> {
+  private async evaluateConditions(
+    conditions: BusinessRuleCondition[],
+    context: BusinessContext
+  ): Promise<{ met: boolean; conditions: string[] }> {
     const evaluatedConditions: string[] = []
     let allMet = true
 
@@ -257,9 +258,11 @@ export class BusinessRulesEngine {
       const condition = conditions[i]
       const value = this.getFieldValue(context, condition.field)
       const met = this.evaluateCondition(condition, value)
-      
-      evaluatedConditions.push(`${condition.field} ${condition.operator} ${condition.value} = ${met}`)
-      
+
+      evaluatedConditions.push(
+        `${condition.field} ${condition.operator} ${condition.value} = ${met}`
+      )
+
       if (i > 0 && condition.logicalOperator === 'OR') {
         // For OR conditions, we need to check if any previous condition was met
         const previousMet = evaluatedConditions[i - 1].includes('= true')
@@ -275,7 +278,7 @@ export class BusinessRulesEngine {
   /**
    * Evaluate a single condition
    */
-  private evaluateCondition(condition: BusinessRuleCondition, value: any): boolean {
+  private evaluateCondition(condition: BusinessRuleCondition, value: unknown): boolean {
     switch (condition.operator) {
       case 'equals':
         return value === condition.value
@@ -299,9 +302,9 @@ export class BusinessRulesEngine {
   /**
    * Get field value from context (supports nested fields)
    */
-  private getFieldValue(context: BusinessContext, field: string): any {
+  private getFieldValue(context: BusinessContext, field: string): unknown {
     const parts = field.split('.')
-    let value: any = context
+    let value: unknown = context
 
     for (const part of parts) {
       if (value && typeof value === 'object' && part in value) {
@@ -317,10 +320,13 @@ export class BusinessRulesEngine {
   /**
    * Evaluate a business rule action
    */
-  private evaluateAction(action: BusinessRuleAction, context: BusinessContext): { type: string; action: string } {
+  private evaluateAction(
+    action: BusinessRuleAction,
+    context: BusinessContext
+  ): { type: string; action: string } {
     return {
       type: action.type,
-      action: action.action
+      action: action.action,
     }
   }
 
@@ -329,15 +335,15 @@ export class BusinessRulesEngine {
    */
   async isActionAllowed(context: BusinessContext, action: string): Promise<BusinessRuleResult> {
     const results = await this.evaluateRules(context, action)
-    
-    const deniedRules = results.filter(result => !result.allowed)
+
+    const deniedRules = results.filter((result) => !result.allowed)
     if (deniedRules.length > 0) {
       return deniedRules[0] // Return the first denial
     }
 
     return {
       allowed: true,
-      reason: 'Action allowed by business rules'
+      reason: 'Action allowed by business rules',
     }
   }
 
@@ -362,10 +368,13 @@ export class BusinessRulesEngine {
   /**
    * Validate subscription changes
    */
-  async validateSubscriptionChange(currentSubscription: any, proposedChanges: any): Promise<BusinessRuleResult[]> {
+  async validateSubscriptionChange(
+    currentSubscription: unknown,
+    proposedChanges: unknown
+  ): Promise<BusinessRuleResult[]> {
     const context: BusinessContext = {
       subscription: currentSubscription,
-      ...proposedChanges
+      ...proposedChanges,
     }
 
     return await this.evaluateRules(context, 'subscription_change')
@@ -374,10 +383,13 @@ export class BusinessRulesEngine {
   /**
    * Validate module access
    */
-  async validateModuleAccess(context: BusinessContext, moduleKey: string): Promise<BusinessRuleResult> {
+  async validateModuleAccess(
+    context: BusinessContext,
+    moduleKey: string
+  ): Promise<BusinessRuleResult> {
     const moduleContext = {
       ...context,
-      requestedModule: moduleKey
+      requestedModule: moduleKey,
     }
 
     return await this.isActionAllowed(moduleContext, 'access_module')
@@ -386,10 +398,13 @@ export class BusinessRulesEngine {
   /**
    * Validate pricing changes
    */
-  async validatePricingChange(context: BusinessContext, newPricing: any): Promise<BusinessRuleResult[]> {
+  async validatePricingChange(
+    context: BusinessContext,
+    newPricing: unknown
+  ): Promise<BusinessRuleResult[]> {
     const pricingContext = {
       ...context,
-      proposedPricing: newPricing
+      proposedPricing: newPricing,
     }
 
     return await this.evaluateRules(pricingContext, 'pricing_change')
@@ -430,7 +445,7 @@ export class BusinessRulesEngine {
       recommendations,
       warnings,
       opportunities,
-      risks
+      risks,
     }
   }
 
@@ -439,7 +454,7 @@ export class BusinessRulesEngine {
    */
   async applyBusinessRules<T>(data: T, context: BusinessContext): Promise<T> {
     const rules = await this.evaluateRules(context, 'data_processing')
-    
+
     // Apply any data transformation rules
     for (const rule of rules) {
       if (rule.alternatives && rule.alternatives.length > 0) {
@@ -454,7 +469,7 @@ export class BusinessRulesEngine {
   /**
    * Apply data transformations based on business rules
    */
-  private applyDataTransformations<T>(data: T, transformations: string[]): T {
+  private applyDataTransformations<T>(_data: T, _transformations: string[]): T {
     // Apply transformations based on business rules
     // This is a simplified implementation
     return data
@@ -499,8 +514,8 @@ export class BusinessRulesEngine {
       total: rules.length,
       byCategory,
       byPriority,
-      enabled: rules.filter(r => r.enabled).length,
-      disabled: rules.filter(r => !r.enabled).length
+      enabled: rules.filter((r) => r.enabled).length,
+      disabled: rules.filter((r) => !r.enabled).length,
     }
   }
 }

@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
+import {
   RocketLaunchIcon,
   CheckCircleIcon,
   ClockIcon,
@@ -28,7 +28,7 @@ import {
   CalendarIcon,
   StarIcon,
   TrophyIcon,
-  FireIcon
+  FireIcon,
 } from '@heroicons/react/24/outline'
 import { MetricCard } from '@/components/ui/MetricCard'
 
@@ -116,21 +116,21 @@ interface OnboardingManagerProps {
   onCustomerSelect?: (customer: CustomerOnboarding) => void
   onStepComplete?: (customerId: string, stepId: string) => void
   onScheduleCall?: (customer: CustomerOnboarding) => void
-  onSendResource?: (customer: CustomerOnboarding, resource: any) => void
+  onSendResource?: (customer: CustomerOnboarding, resource: unknown) => void
 }
 
 const statusColors = {
   NOT_STARTED: 'text-gray-700 bg-gray-100',
   IN_PROGRESS: 'text-blue-700 bg-blue-100',
   COMPLETED: 'text-green-700 bg-green-100',
-  STALLED: 'text-red-700 bg-red-100'
+  STALLED: 'text-red-700 bg-red-100',
 }
 
 const categoryColors = {
   SETUP: 'text-blue-600 bg-blue-50',
   INTEGRATION: 'text-purple-600 bg-purple-50',
   TRAINING: 'text-orange-600 bg-orange-50',
-  ACTIVATION: 'text-green-600 bg-green-50'
+  ACTIVATION: 'text-green-600 bg-green-50',
 }
 
 const getHealthColor = (score: number) => {
@@ -143,13 +143,15 @@ export default function OnboardingManager({
   onCustomerSelect,
   onStepComplete,
   onScheduleCall,
-  onSendResource
+  onSendResource,
 }: OnboardingManagerProps) {
   const [customers, setCustomers] = useState<CustomerOnboarding[]>([])
   const [metrics, setMetrics] = useState<OnboardingMetrics | null>(null)
   const [templates, setTemplates] = useState<OnboardingTemplate[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedView, setSelectedView] = useState<'all' | 'active' | 'stalled' | 'completed'>('all')
+  const [selectedView, setSelectedView] = useState<'all' | 'active' | 'stalled' | 'completed'>(
+    'all'
+  )
   const [sortBy, setSortBy] = useState<string>('overallProgress')
 
   useEffect(() => {
@@ -159,7 +161,7 @@ export default function OnboardingManager({
   const loadOnboardingData = async () => {
     try {
       setLoading(true)
-      
+
       // Mock onboarding steps
       const mockSteps: OnboardingStep[] = [
         {
@@ -169,9 +171,7 @@ export default function OnboardingManager({
           category: 'SETUP',
           estimatedTime: 10,
           required: true,
-          resources: [
-            { type: 'ARTICLE', title: 'Getting Started Guide', url: '/guide/setup' }
-          ]
+          resources: [{ type: 'ARTICLE', title: 'Getting Started Guide', url: '/guide/setup' }],
         },
         {
           id: 'data-import',
@@ -183,8 +183,8 @@ export default function OnboardingManager({
           dependencies: ['profile-setup'],
           resources: [
             { type: 'VIDEO', title: 'Data Import Tutorial', url: '/videos/import', duration: 5 },
-            { type: 'TEMPLATE', title: 'CSV Import Template', url: '/templates/csv' }
-          ]
+            { type: 'TEMPLATE', title: 'CSV Import Template', url: '/templates/csv' },
+          ],
         },
         {
           id: 'team-invite',
@@ -194,9 +194,7 @@ export default function OnboardingManager({
           estimatedTime: 15,
           required: false,
           dependencies: ['profile-setup'],
-          resources: [
-            { type: 'ARTICLE', title: 'User Management Guide', url: '/guide/users' }
-          ]
+          resources: [{ type: 'ARTICLE', title: 'User Management Guide', url: '/guide/users' }],
         },
         {
           id: 'first-report',
@@ -207,9 +205,14 @@ export default function OnboardingManager({
           required: true,
           dependencies: ['data-import'],
           resources: [
-            { type: 'VIDEO', title: 'Report Builder Tutorial', url: '/videos/reports', duration: 8 },
-            { type: 'DEMO', title: 'Live Demo Session', url: '/demo/reports' }
-          ]
+            {
+              type: 'VIDEO',
+              title: 'Report Builder Tutorial',
+              url: '/videos/reports',
+              duration: 8,
+            },
+            { type: 'DEMO', title: 'Live Demo Session', url: '/demo/reports' },
+          ],
         },
         {
           id: 'automation-setup',
@@ -220,10 +223,19 @@ export default function OnboardingManager({
           required: false,
           dependencies: ['first-report'],
           resources: [
-            { type: 'VIDEO', title: 'Automation Masterclass', url: '/videos/automation', duration: 15 },
-            { type: 'TEMPLATE', title: 'Common Automation Templates', url: '/templates/automation' }
-          ]
-        }
+            {
+              type: 'VIDEO',
+              title: 'Automation Masterclass',
+              url: '/videos/automation',
+              duration: 15,
+            },
+            {
+              type: 'TEMPLATE',
+              title: 'Common Automation Templates',
+              url: '/templates/automation',
+            },
+          ],
+        },
       ]
 
       // Mock customer onboarding data
@@ -251,7 +263,7 @@ export default function OnboardingManager({
               description: 'Profile and basic configuration finished',
               targetDate: '2024-08-06',
               completedDate: '2024-08-05',
-              status: 'COMPLETED'
+              status: 'COMPLETED',
             },
             {
               id: 'm2',
@@ -259,7 +271,7 @@ export default function OnboardingManager({
               description: 'Successfully imported and validated data',
               targetDate: '2024-08-08',
               completedDate: '2024-08-07',
-              status: 'COMPLETED'
+              status: 'COMPLETED',
             },
             {
               id: 'm3',
@@ -267,35 +279,35 @@ export default function OnboardingManager({
               description: 'Generated first meaningful report/insight',
               targetDate: '2024-08-10',
               completedDate: '2024-08-08',
-              status: 'COMPLETED'
+              status: 'COMPLETED',
             },
             {
               id: 'm4',
               title: 'Full Platform Adoption',
               description: 'Using advanced features and automation',
               targetDate: '2024-08-12',
-              status: 'PENDING'
-            }
+              status: 'PENDING',
+            },
           ],
           touchpoints: [
             {
               type: 'EMAIL',
               date: '2024-08-05',
               description: 'Welcome and onboarding kickoff email',
-              outcome: 'Opened and engaged'
+              outcome: 'Opened and engaged',
             },
             {
               type: 'CALL',
               date: '2024-08-06',
               description: 'Onboarding kickoff call with CSM',
-              outcome: 'Excellent - very motivated customer'
+              outcome: 'Excellent - very motivated customer',
             },
             {
               type: 'EMAIL',
               date: '2024-08-07',
               description: 'Data import success confirmation',
-              outcome: 'Customer replied with questions'
-            }
+              outcome: 'Customer replied with questions',
+            },
           ],
           healthScore: 92,
           riskFactors: [],
@@ -306,11 +318,11 @@ export default function OnboardingManager({
               reports: true,
               integrations: true,
               automation: false,
-              api: false
+              api: false,
             },
             engagementScore: 88,
-            satisfactionScore: 4.8
-          }
+            satisfactionScore: 4.8,
+          },
         },
         {
           id: 'onb-2',
@@ -335,55 +347,55 @@ export default function OnboardingManager({
               description: 'Profile and basic configuration finished',
               targetDate: '2024-08-02',
               completedDate: '2024-08-01',
-              status: 'COMPLETED'
+              status: 'COMPLETED',
             },
             {
               id: 'm2',
               title: 'Data Integration Live',
               description: 'Successfully imported and validated data',
               targetDate: '2024-08-05',
-              status: 'OVERDUE'
+              status: 'OVERDUE',
             },
             {
               id: 'm3',
               title: 'First Value Achieved',
               description: 'Generated first meaningful report/insight',
               targetDate: '2024-08-08',
-              status: 'PENDING'
-            }
+              status: 'PENDING',
+            },
           ],
           touchpoints: [
             {
               type: 'EMAIL',
               date: '2024-08-01',
               description: 'Welcome email sent',
-              outcome: 'Not opened'
+              outcome: 'Not opened',
             },
             {
               type: 'EMAIL',
               date: '2024-08-04',
               description: 'Follow-up reminder email',
-              outcome: 'Opened but no action'
+              outcome: 'Opened but no action',
             },
             {
               type: 'EMAIL',
               date: '2024-08-07',
               description: 'CSM personal outreach',
-              outcome: 'Reply: "Will get to it this week"'
-            }
+              outcome: 'Reply: "Will get to it this week"',
+            },
           ],
           healthScore: 35,
           riskFactors: [
             {
               factor: 'Delayed progress',
               severity: 'HIGH',
-              description: 'Customer is 4 days behind schedule'
+              description: 'Customer is 4 days behind schedule',
             },
             {
               factor: 'Low engagement',
               severity: 'MEDIUM',
-              description: 'Minimal platform usage after signup'
-            }
+              description: 'Minimal platform usage after signup',
+            },
           ],
           successMetrics: {
             timeToFirstValue: 0,
@@ -392,22 +404,22 @@ export default function OnboardingManager({
               reports: false,
               integrations: false,
               automation: false,
-              api: false
+              api: false,
             },
-            engagementScore: 25
-          }
-        }
+            engagementScore: 25,
+          },
+        },
       ]
 
       const mockMetrics: OnboardingMetrics = {
         totalCustomers: mockCustomers.length,
-        activeOnboarding: mockCustomers.filter(c => c.status === 'IN_PROGRESS').length,
+        activeOnboarding: mockCustomers.filter((c) => c.status === 'IN_PROGRESS').length,
         completionRate: 85.5,
         averageTimeToComplete: 12.5,
         averageTimeToFirstValue: 4.2,
-        stalledOnboarding: mockCustomers.filter(c => c.status === 'STALLED').length,
+        stalledOnboarding: mockCustomers.filter((c) => c.status === 'STALLED').length,
         successScore: 87.3,
-        csmEfficiency: 92.1
+        csmEfficiency: 92.1,
       }
 
       const mockTemplates: OnboardingTemplate[] = [
@@ -416,8 +428,8 @@ export default function OnboardingManager({
           name: 'Starter Plan Onboarding',
           description: 'Streamlined onboarding for small teams',
           planTypes: ['Starter'],
-          steps: mockSteps.filter(s => s.required || ['team-invite'].includes(s.id)),
-          estimatedDuration: 5
+          steps: mockSteps.filter((s) => s.required || ['team-invite'].includes(s.id)),
+          estimatedDuration: 5,
         },
         {
           id: 'template-professional',
@@ -425,21 +437,20 @@ export default function OnboardingManager({
           description: 'Comprehensive onboarding with advanced features',
           planTypes: ['Professional'],
           steps: mockSteps,
-          estimatedDuration: 10
-        }
+          estimatedDuration: 10,
+        },
       ]
 
       setCustomers(mockCustomers)
       setMetrics(mockMetrics)
       setTemplates(mockTemplates)
     } catch (error) {
-      console.error('Failed to load onboarding data:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const filteredCustomers = customers.filter(customer => {
+  const filteredCustomers = customers.filter((customer) => {
     switch (selectedView) {
       case 'active':
         return customer.status === 'IN_PROGRESS'
@@ -454,8 +465,8 @@ export default function OnboardingManager({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -463,34 +474,37 @@ export default function OnboardingManager({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Customer Onboarding</h1>
-          <p className="text-gray-600 mt-1">Track onboarding progress and optimize customer success</p>
+          <p className="mt-1 text-gray-600">
+            Track onboarding progress and optimize customer success
+          </p>
         </div>
       </div>
 
       {/* Stalled Customers Alert */}
-      {customers.filter(c => c.status === 'STALLED').length > 0 && (
+      {customers.filter((c) => c.status === 'STALLED').length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-orange-50 border border-orange-200 rounded-lg p-4"
+          className="rounded-lg border border-orange-200 bg-orange-50 p-4"
         >
           <div className="flex items-start">
-            <ExclamationTriangleIcon className="h-5 w-5 text-orange-400 mt-0.5" />
+            <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 text-orange-400" />
             <div className="ml-3 flex-1">
               <h3 className="text-sm font-medium text-orange-800">Onboarding Attention Needed</h3>
               <p className="mt-1 text-sm text-orange-700">
-                {customers.filter(c => c.status === 'STALLED').length} customer(s) have stalled onboarding and need intervention
+                {customers.filter((c) => c.status === 'STALLED').length} customer(s) have stalled
+                onboarding and need intervention
               </p>
               <div className="mt-3 flex space-x-2">
-                <button className="inline-flex items-center px-3 py-1 border border-orange-300 rounded-md text-xs font-medium text-orange-700 bg-white hover:bg-orange-50">
-                  <CalendarIcon className="h-3 w-3 mr-1" />
+                <button className="inline-flex items-center rounded-md border border-orange-300 bg-white px-3 py-1 text-xs font-medium text-orange-700 hover:bg-orange-50">
+                  <CalendarIcon className="mr-1 h-3 w-3" />
                   Schedule Check-ins
                 </button>
-                <button className="inline-flex items-center px-3 py-1 border border-orange-300 rounded-md text-xs font-medium text-orange-700 bg-white hover:bg-orange-50">
-                  <VideoCameraIcon className="h-3 w-3 mr-1" />
+                <button className="inline-flex items-center rounded-md border border-orange-300 bg-white px-3 py-1 text-xs font-medium text-orange-700 hover:bg-orange-50">
+                  <VideoCameraIcon className="mr-1 h-3 w-3" />
                   Offer Demo Sessions
                 </button>
               </div>
@@ -534,19 +548,19 @@ export default function OnboardingManager({
       )}
 
       {/* View Controls */}
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="rounded-lg bg-white p-4 shadow">
         <div className="flex items-center justify-between">
-          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex space-x-1 rounded-lg bg-gray-100 p-1">
             {[
               { key: 'all', label: 'All Customers' },
               { key: 'active', label: 'In Progress' },
               { key: 'stalled', label: 'Stalled' },
-              { key: 'completed', label: 'Completed' }
+              { key: 'completed', label: 'Completed' },
             ].map((view) => (
               <button
                 key={view.key}
-                onClick={() => setSelectedView(view.key as any)}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                onClick={() => setSelectedView(view.key as unknown)}
+                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                   selectedView === view.key
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-500 hover:text-gray-700'
@@ -560,7 +574,7 @@ export default function OnboardingManager({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="overallProgress">Progress</option>
             <option value="healthScore">Health Score</option>
@@ -571,7 +585,7 @@ export default function OnboardingManager({
       </div>
 
       {/* Customers List */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="overflow-hidden bg-white shadow sm:rounded-md">
         <ul className="divide-y divide-gray-200">
           {filteredCustomers.map((customer, index) => (
             <motion.li
@@ -579,50 +593,56 @@ export default function OnboardingManager({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="hover:bg-gray-50 cursor-pointer"
+              className="cursor-pointer hover:bg-gray-50"
               onClick={() => onCustomerSelect?.(customer)}
             >
               <div className="px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0">
-                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                        customer.status === 'COMPLETED' ? 'bg-green-100 text-green-600' :
-                        customer.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-600' :
-                        customer.status === 'STALLED' ? 'bg-red-100 text-red-600' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                          customer.status === 'COMPLETED'
+                            ? 'bg-green-100 text-green-600'
+                            : customer.status === 'IN_PROGRESS'
+                              ? 'bg-blue-100 text-blue-600'
+                              : customer.status === 'STALLED'
+                                ? 'bg-red-100 text-red-600'
+                                : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
                         <RocketLaunchIcon className="h-5 w-5" />
                       </div>
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center space-x-2">
-                        <p className="text-sm font-medium text-gray-900">
-                          {customer.companyName}
-                        </p>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[customer.status]}`}>
+                        <p className="text-sm font-medium text-gray-900">{customer.companyName}</p>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[customer.status]}`}
+                        >
                           {customer.status.replace('_', ' ')}
                         </span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-purple-800 bg-purple-100">
+                        <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">
                           {customer.planName}
                         </span>
                         {customer.assignedCSM && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-gray-700 bg-gray-100">
+                          <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
                             CSM: {customer.assignedCSM}
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center mt-1">
+                      <div className="mt-1 flex items-center">
                         <p className="text-sm text-gray-500">
-                          {customer.customerEmail} • Started {new Date(customer.startDate).toLocaleDateString()}
+                          {customer.customerEmail} • Started{' '}
+                          {new Date(customer.startDate).toLocaleDateString()}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-6 mt-2">
+                      <div className="mt-2 flex items-center space-x-6">
                         <div className="flex items-center space-x-1">
                           <span className="text-xs text-gray-500">Progress:</span>
-                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                          <div className="h-2 w-16 rounded-full bg-gray-200">
                             <div
-                              className="bg-blue-600 h-2 rounded-full"
+                              className="h-2 rounded-full bg-blue-600"
                               style={{ width: `${customer.overallProgress * 100}%` }}
                             />
                           </div>
@@ -632,7 +652,9 @@ export default function OnboardingManager({
                         </div>
                         <div className="flex items-center space-x-1">
                           <span className="text-xs text-gray-500">Health:</span>
-                          <span className={`text-xs font-medium ${getHealthColor(customer.healthScore)}`}>
+                          <span
+                            className={`text-xs font-medium ${getHealthColor(customer.healthScore)}`}
+                          >
                             {customer.healthScore}
                           </span>
                         </div>
@@ -651,7 +673,7 @@ export default function OnboardingManager({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
                       <p className="text-sm font-medium text-gray-900">
@@ -666,7 +688,7 @@ export default function OnboardingManager({
                         </p>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       {customer.status === 'STALLED' && (
                         <button
@@ -674,7 +696,7 @@ export default function OnboardingManager({
                             e.stopPropagation()
                             onScheduleCall?.(customer)
                           }}
-                          className="p-2 text-orange-400 hover:text-orange-600 hover:bg-orange-50 rounded-md"
+                          className="rounded-md p-2 text-orange-400 hover:bg-orange-50 hover:text-orange-600"
                           title="Schedule Call"
                         >
                           <CalendarIcon className="h-4 w-4" />
@@ -685,7 +707,7 @@ export default function OnboardingManager({
                           e.stopPropagation()
                           onSendResource?.(customer, null)
                         }}
-                        className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-md"
+                        className="rounded-md p-2 text-blue-400 hover:bg-blue-50 hover:text-blue-600"
                         title="Send Resources"
                       >
                         <AcademicCapIcon className="h-4 w-4" />
@@ -695,7 +717,7 @@ export default function OnboardingManager({
                           e.stopPropagation()
                           // Send message
                         }}
-                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md"
+                        className="rounded-md p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
                         title="Send Message"
                       >
                         <EnvelopeIcon className="h-4 w-4" />
@@ -706,10 +728,15 @@ export default function OnboardingManager({
 
                 {/* Current Step & Next Actions */}
                 {customer.currentStep && (
-                  <div className="mt-4 pt-3 border-t border-gray-200">
+                  <div className="mt-4 border-t border-gray-200 pt-3">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-medium text-gray-700">
-                        Current Step: <span className="text-blue-600">{customer.currentStep.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                        Current Step:{' '}
+                        <span className="text-blue-600">
+                          {customer.currentStep
+                            .replace('-', ' ')
+                            .replace(/\b\w/g, (l) => l.toUpperCase())}
+                        </span>
                       </p>
                       {customer.currentStep && (
                         <button
@@ -717,9 +744,9 @@ export default function OnboardingManager({
                             e.stopPropagation()
                             onStepComplete?.(customer.customerId, customer.currentStep!)
                           }}
-                          className="inline-flex items-center px-2 py-1 border border-green-300 rounded text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100"
+                          className="inline-flex items-center rounded border border-green-300 bg-green-50 px-2 py-1 text-xs font-medium text-green-700 hover:bg-green-100"
                         >
-                          <CheckCircleIcon className="h-3 w-3 mr-1" />
+                          <CheckCircleIcon className="mr-1 h-3 w-3" />
                           Mark Complete
                         </button>
                       )}
@@ -729,16 +756,18 @@ export default function OnboardingManager({
 
                 {/* Risk Factors */}
                 {customer.riskFactors.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <p className="text-xs font-medium text-gray-700 mb-2">Risk Factors:</p>
+                  <div className="mt-3 border-t border-gray-200 pt-3">
+                    <p className="mb-2 text-xs font-medium text-gray-700">Risk Factors:</p>
                     <div className="flex flex-wrap gap-2">
                       {customer.riskFactors.map((risk, idx) => (
                         <span
                           key={idx}
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            risk.severity === 'HIGH' ? 'text-red-700 bg-red-50' :
-                            risk.severity === 'MEDIUM' ? 'text-yellow-700 bg-yellow-50' :
-                            'text-gray-700 bg-gray-50'
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                            risk.severity === 'HIGH'
+                              ? 'bg-red-50 text-red-700'
+                              : risk.severity === 'MEDIUM'
+                                ? 'bg-yellow-50 text-yellow-700'
+                                : 'bg-gray-50 text-gray-700'
                           }`}
                         >
                           {risk.factor}
@@ -755,12 +784,10 @@ export default function OnboardingManager({
 
       {/* Empty State */}
       {filteredCustomers.length === 0 && (
-        <div className="text-center py-12">
+        <div className="py-12 text-center">
           <RocketLaunchIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No onboarding customers found</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            No customers match the selected criteria
-          </p>
+          <p className="mt-1 text-sm text-gray-500">No customers match the selected criteria</p>
         </div>
       )}
     </div>

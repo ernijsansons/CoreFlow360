@@ -6,17 +6,13 @@ import Stripe from 'stripe'
 import { prisma } from '@/lib/db'
 import { publishModuleEvent } from '@/services/events/subscription-aware-event-bus'
 
-
-
 export async function handlePaymentFailed(invoice: Stripe.Invoice) {
   try {
-    console.log(`❌ Payment failed: ${invoice.id}`)
-    
     if (!invoice.subscription) return
 
     // Find legacy tenant subscription
     const legacySubscription = await prisma.legacyTenantSubscription.findFirst({
-      where: { stripeSubscriptionId: invoice.subscription as string }
+      where: { stripeSubscriptionId: invoice.subscription as string },
     })
 
     if (!legacySubscription) return
@@ -30,22 +26,12 @@ export async function handlePaymentFailed(invoice: Stripe.Invoice) {
     }
 
     // Publish payment failure event
-    await publishModuleEvent(
-      'subscription',
-      'payment.failed',
-      legacySubscription.tenantId,
-      {
-        invoiceId: invoice.id,
-        amountDue: invoice.total / 100,
-        attemptCount: invoice.attempt_count
-      }
-    )
-
-    console.log(`💸 Payment failed for tenant ${legacySubscription.tenantId}`)
-
-  } catch (error) {
-    console.error('Error handling payment failure:', error)
-  }
+    await publishModuleEvent('subscription', 'payment.failed', legacySubscription.tenantId, {
+      invoiceId: invoice.id,
+      amountDue: invoice.total / 100,
+      attemptCount: invoice.attempt_count,
+    })
+  } catch (error) {}
 }
 
 async function createFailedPaymentBillingEvent(invoice: Stripe.Invoice, tenantId: string) {
@@ -63,12 +49,14 @@ async function createFailedPaymentBillingEvent(invoice: Stripe.Invoice, tenantId
       stripeInvoiceId: invoice.id,
       failureReason: 'Payment failed',
       retryCount: invoice.attempt_count - 1,
-      nextRetryAt: invoice.next_payment_attempt ? new Date(invoice.next_payment_attempt * 1000) : null,
+      nextRetryAt: invoice.next_payment_attempt
+        ? new Date(invoice.next_payment_attempt * 1000)
+        : null,
       metadata: JSON.stringify({
         attempt_count: invoice.attempt_count,
-        failure_message: 'stripe_payment_failed'
-      })
-    }
+        failure_message: 'stripe_payment_failed',
+      }),
+    },
   })
 }
 
@@ -76,14 +64,14 @@ async function updateTenantStatusOnFailure(tenantId: string, subscriptionId: str
   await prisma.tenant.update({
     where: { id: tenantId },
     data: {
-      subscriptionStatus: 'PAYMENT_FAILED'
-    }
+      subscriptionStatus: 'PAYMENT_FAILED',
+    },
   })
 
   await prisma.legacyTenantSubscription.update({
     where: { id: subscriptionId },
     data: {
-      status: 'paused'
-    }
+      status: 'paused',
+    },
   })
 }

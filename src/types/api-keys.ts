@@ -20,9 +20,9 @@ export interface APIKey {
   vendor: APIKeyVendor
 }
 
-export type APIKeyStatus = 
+export type APIKeyStatus =
   | 'ACTIVE'
-  | 'INACTIVE' 
+  | 'INACTIVE'
   | 'EXPIRED'
   | 'ROTATION_REQUIRED'
   | 'COMPROMISED'
@@ -38,7 +38,7 @@ export interface APIKeyVendor {
   requiredPermissions: string[]
 }
 
-export type VendorCategory = 
+export type VendorCategory =
   | 'AI_ML'
   | 'PAYMENT'
   | 'COMMUNICATION'
@@ -82,7 +82,7 @@ export interface SecurityFactor {
   description: string
 }
 
-export type SecurityFactorType = 
+export type SecurityFactorType =
   | 'KEY_AGE'
   | 'ROTATION_FREQUENCY'
   | 'USAGE_PATTERNS'
@@ -145,12 +145,12 @@ export interface APIKeyAuditEvent {
   action: AuditAction
   userId: string
   timestamp: Date
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
   ipAddress?: string
   userAgent?: string
 }
 
-export type AuditAction = 
+export type AuditAction =
   | 'CREATED'
   | 'UPDATED'
   | 'DELETED'
@@ -184,7 +184,7 @@ export interface SecurityAnomaly {
   confidence: number
 }
 
-export type AnomalyType = 
+export type AnomalyType =
   | 'UNUSUAL_USAGE_PATTERN'
   | 'GEOGRAPHIC_ANOMALY'
   | 'RATE_LIMIT_BREACH'
@@ -202,7 +202,7 @@ export interface AIRecommendation {
   implementationGuide?: string
 }
 
-export type RecommendationType = 
+export type RecommendationType =
   | 'ROTATE_KEY'
   | 'REDUCE_PERMISSIONS'
   | 'INCREASE_MONITORING'
@@ -219,7 +219,7 @@ export interface PredictedIssue {
   preventionSteps: string[]
 }
 
-export type PredictedIssueType = 
+export type PredictedIssueType =
   | 'KEY_COMPROMISE'
   | 'SERVICE_DEGRADATION'
   | 'RATE_LIMIT_HIT'
@@ -257,7 +257,7 @@ export interface APIKeyFilter {
   offset?: number
 }
 
-export type APIKeySortField = 
+export type APIKeySortField =
   | 'name'
   | 'service'
   | 'status'
@@ -270,10 +270,10 @@ export type APIKeySortField =
 export interface APIKeyBulkOperation {
   operation: BulkOperationType
   keyIds: string[]
-  parameters?: Record<string, any>
+  parameters?: Record<string, unknown>
 }
 
-export type BulkOperationType = 
+export type BulkOperationType =
   | 'ROTATE'
   | 'DEACTIVATE'
   | 'DELETE'
@@ -313,7 +313,7 @@ export interface APIKeyResponse {
 export interface APIKeyOperationResponse {
   success: boolean
   message: string
-  data?: any
+  data?: unknown
   errors?: ValidationError[]
   warnings?: ValidationWarning[]
 }
@@ -324,7 +324,7 @@ export class APIKeyError extends Error {
     message: string,
     public code: string,
     public statusCode: number = 400,
-    public details?: Record<string, any>
+    public details?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'APIKeyError'

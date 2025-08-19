@@ -3,29 +3,29 @@
  * Main dashboard for SaaS/Online Business management
  */
 
-"use client"
+'use client'
 
-import { useState } from "react"
-import DashboardLayout from "@/components/layouts/DashboardLayout"
-import SubscriptionManager from "@/components/saas/SubscriptionManager"
-import CustomerSuccessManager from "@/components/saas/CustomerSuccessManager"
-import RevenueOpsManager from "@/components/saas/RevenueOpsManager"
-import TrialManager from "@/components/saas/TrialManager"
-import OnboardingManager from "@/components/saas/OnboardingManager"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
+import { useState } from 'react'
+import DashboardLayout from '@/components/layouts/DashboardLayout'
+import SubscriptionManager from '@/components/saas/SubscriptionManager'
+import CustomerSuccessManager from '@/components/saas/CustomerSuccessManager'
+import RevenueOpsManager from '@/components/saas/RevenueOpsManager'
+import TrialManager from '@/components/saas/TrialManager'
+import OnboardingManager from '@/components/saas/OnboardingManager'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
   CreditCardIcon,
   UsersIcon,
   ChartBarIcon,
   BeakerIcon,
   CurrencyDollarIcon,
-  RocketLaunchIcon
-} from "@heroicons/react/24/outline"
+  RocketLaunchIcon,
+} from '@heroicons/react/24/outline'
 
 export default function SaaSPage() {
-  const [activeTab, setActiveTab] = useState("subscriptions")
+  const [activeTab, setActiveTab] = useState('subscriptions')
 
-  const handleSubscriptionSelect = (subscription: any) => {
+  const handleSubscriptionSelect = (_subscription: unknown) => {
     // TODO: Open subscription detail modal
   }
 
@@ -33,71 +33,71 @@ export default function SaaSPage() {
     // TODO: Open create subscription modal
   }
 
-  const handleUpgradeSubscription = (subscription: any) => {
+  const handleUpgradeSubscription = (_subscription: unknown) => {
     // TODO: Open upgrade modal
   }
 
-  const handleCancelSubscription = (subscription: any) => {
+  const handleCancelSubscription = (_subscription: unknown) => {
     // TODO: Open cancellation flow
   }
 
-  const handleCustomerSelect = (customer: any) => {
+  const handleCustomerSelect = (_customer: unknown) => {
     // TODO: Open customer detail modal
   }
 
-  const handleSendMessage = (customer: any) => {
+  const handleSendMessage = (_customer: unknown) => {
     // TODO: Open messaging interface
   }
 
-  const handleScheduleCall = (customer: any) => {
+  const handleScheduleCall = (_customer: unknown) => {
     // TODO: Open calendar scheduling
   }
 
-  const handleCreateIntervention = (customer: any) => {
+  const handleCreateIntervention = (_customer: unknown) => {
     // TODO: Open intervention workflow
   }
 
-  const handleRevenueDrillDown = (metric: string, data: any) => {
+  const handleRevenueDrillDown = (_metric: string, _data: unknown) => {
     // TODO: Open detailed revenue analysis
   }
 
-  const handleExportData = (dataType: string) => {
+  const handleExportData = (_dataType: string) => {
     // TODO: Generate and download report
   }
 
-  const handleTrialSelect = (trial: any) => {
+  const handleTrialSelect = (_trial: unknown) => {
     // TODO: Open trial detail modal
   }
 
-  const handleTrialSendEmail = (trial: any) => {
+  const handleTrialSendEmail = (_trial: unknown) => {
     // TODO: Open email composer
   }
 
-  const handleTrialScheduleCall = (trial: any) => {
+  const handleTrialScheduleCall = (_trial: unknown) => {
     // TODO: Open calendar scheduling
   }
 
-  const handleOfferIncentive = (trial: any) => {
+  const handleOfferIncentive = (_trial: unknown) => {
     // TODO: Open incentive offer flow
   }
 
-  const handleExtendTrial = (trial: any) => {
+  const handleExtendTrial = (_trial: unknown) => {
     // TODO: Open trial extension flow
   }
 
-  const handleOnboardingCustomerSelect = (customer: any) => {
+  const handleOnboardingCustomerSelect = (_customer: unknown) => {
     // TODO: Open customer onboarding detail
   }
 
-  const handleStepComplete = (customerId: string, stepId: string) => {
+  const handleStepComplete = (_customerId: string, _stepId: string) => {
     // TODO: Mark onboarding step as complete
   }
 
-  const handleOnboardingScheduleCall = (customer: any) => {
+  const handleOnboardingScheduleCall = (_customer: unknown) => {
     // TODO: Open calendar scheduling for onboarding
   }
 
-  const handleSendResource = (customer: any, resource: any) => {
+  const handleSendResource = (_customer: unknown, _resource: unknown) => {
     // TODO: Send onboarding resource
   }
 
@@ -187,7 +187,7 @@ export default function SaaSPage() {
             </TabsContent>
 
             <TabsContent value="analytics" className="mt-6">
-              <div className="text-center py-12">
+              <div className="py-12 text-center">
                 <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">SaaS Analytics</h3>
                 <p className="mt-1 text-sm text-gray-500">

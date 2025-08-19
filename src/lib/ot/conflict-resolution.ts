@@ -1,69 +1,73 @@
 /**
  * CoreFlow360 - Advanced Conflict Resolution System
- * 
+ *
  * Sophisticated conflict detection and resolution for business data with
  * semantic understanding, business rules, and automated merge strategies
  */
 
-import { EventEmitter } from 'events';
-import { eventStore } from '@/lib/events/event-store';
-import { EVENT_TYPES } from '@/lib/events/domain-events';
+import { EventEmitter } from 'events'
+import { eventStore } from '@/lib/events/event-store'
+import { EVENT_TYPES } from '@/lib/events/domain-events'
 
 export interface DataConflict {
-  id: string;
-  entityType: string;
-  entityId: string;
-  fieldPath: string;
-  conflictType: 'concurrent_update' | 'version_mismatch' | 'business_rule_violation' | 'schema_change';
-  localValue: any;
-  remoteValue: any;
-  baseValue?: any;
-  timestamp: Date;
-  userId1: string;
-  userId2: string;
-  tenantId: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  autoResolvable: boolean;
-  suggestedResolution?: ConflictResolution;
-  businessContext?: Record<string, any>;
+  id: string
+  entityType: string
+  entityId: string
+  fieldPath: string
+  conflictType:
+    | 'concurrent_update'
+    | 'version_mismatch'
+    | 'business_rule_violation'
+    | 'schema_change'
+  localValue: unknown
+  remoteValue: unknown
+  baseValue?: unknown
+  timestamp: Date
+  userId1: string
+  userId2: string
+  tenantId: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  autoResolvable: boolean
+  suggestedResolution?: ConflictResolution
+  businessContext?: Record<string, unknown>
 }
 
 export interface ConflictResolution {
-  strategy: 'take_local' | 'take_remote' | 'merge' | 'manual' | 'business_rule' | 'timestamp_based';
-  resolvedValue: any;
-  reasoning: string;
-  confidence: number;
-  requiresApproval: boolean;
-  metadata?: Record<string, any>;
+  strategy: 'take_local' | 'take_remote' | 'merge' | 'manual' | 'business_rule' | 'timestamp_based'
+  resolvedValue: unknown
+  reasoning: string
+  confidence: number
+  requiresApproval: boolean
+  metadata?: Record<string, unknown>
 }
 
 export interface MergeResult {
-  success: boolean;
-  resolvedValue: any;
-  conflicts: DataConflict[];
-  strategy: string;
-  confidence: number;
+  success: boolean
+  resolvedValue: unknown
+  conflicts: DataConflict[]
+  strategy: string
+  confidence: number
 }
 
 export interface BusinessRule {
-  id: string;
-  name: string;
-  entityType: string;
-  fieldPath: string;
-  condition: (value: any, context: any) => boolean;
-  priority: number;
-  description: string;
+  id: string
+  name: string
+  entityType: string
+  fieldPath: string
+  condition: (value: unknown, context: unknown) => boolean
+  priority: number
+  description: string
 }
 
 export class ConflictResolutionEngine extends EventEmitter {
-  private businessRules: Map<string, BusinessRule[]> = new Map();
-  private conflictHistory: Map<string, DataConflict[]> = new Map();
-  private resolutionStrategies: Map<string, Function> = new Map();
+  private businessRules: Map<string, BusinessRule[]> = new Map()
+  private conflictHistory: Map<string, DataConflict[]> = new Map()
+  private resolutionStrategies: Map<string, Function> = new Map()
 
   constructor() {
-    super();
-    this.initializeDefaultRules();
-    this.initializeResolutionStrategies();
+    super()
+    this.initializeDefaultRules()
+    this.initializeResolutionStrategies()
   }
 
   /**
@@ -72,32 +76,32 @@ export class ConflictResolutionEngine extends EventEmitter {
   detectConflicts(
     entityType: string,
     entityId: string,
-    localChanges: Record<string, any>,
-    remoteChanges: Record<string, any>,
-    baseState: Record<string, any>,
+    localChanges: Record<string, unknown>,
+    remoteChanges: Record<string, unknown>,
+    baseState: Record<string, unknown>,
     context: {
-      userId1: string;
-      userId2: string;
-      tenantId: string;
-      timestamp1: Date;
-      timestamp2: Date;
+      userId1: string
+      userId2: string
+      tenantId: string
+      timestamp1: Date
+      timestamp2: Date
     }
   ): DataConflict[] {
-    const conflicts: DataConflict[] = [];
-    
+    const conflicts: DataConflict[] = []
+
     // Find overlapping field changes
-    const localFields = new Set(Object.keys(localChanges));
-    const remoteFields = new Set(Object.keys(remoteChanges));
-    const conflictingFields = new Set([...localFields].filter(f => remoteFields.has(f)));
+    const localFields = new Set(Object.keys(localChanges))
+    const remoteFields = new Set(Object.keys(remoteChanges))
+    const conflictingFields = new Set([...localFields].filter((f) => remoteFields.has(f)))
 
     for (const fieldPath of conflictingFields) {
-      const localValue = localChanges[fieldPath];
-      const remoteValue = remoteChanges[fieldPath];
-      const baseValue = baseState[fieldPath];
+      const localValue = localChanges[fieldPath]
+      const remoteValue = remoteChanges[fieldPath]
+      const baseValue = baseState[fieldPath]
 
       // Skip if values are identical
       if (this.deepEqual(localValue, remoteValue)) {
-        continue;
+        continue
       }
 
       const conflict: DataConflict = {
@@ -119,23 +123,23 @@ export class ConflictResolutionEngine extends EventEmitter {
           timestamp1: context.timestamp1,
           timestamp2: context.timestamp2,
           entityType,
-          fieldPath
-        }
-      };
+          fieldPath,
+        },
+      }
 
       // Analyze conflict and suggest resolution
-      conflict.suggestedResolution = this.analyzeConflict(conflict);
-      conflict.autoResolvable = this.isAutoResolvable(conflict);
+      conflict.suggestedResolution = this.analyzeConflict(conflict)
+      conflict.autoResolvable = this.isAutoResolvable(conflict)
 
-      conflicts.push(conflict);
+      conflicts.push(conflict)
     }
 
     // Store conflicts in history
     if (conflicts.length > 0) {
-      this.storeConflictHistory(entityId, conflicts);
+      this.storeConflictHistory(entityId, conflicts)
     }
 
-    return conflicts;
+    return conflicts
   }
 
   /**
@@ -145,83 +149,82 @@ export class ConflictResolutionEngine extends EventEmitter {
     conflicts: DataConflict[],
     strategy?: string
   ): Promise<{
-    resolvedData: Record<string, any>;
-    unresolvedConflicts: DataConflict[];
+    resolvedData: Record<string, unknown>
+    unresolvedConflicts: DataConflict[]
     resolutionLog: Array<{
-      conflict: DataConflict;
-      resolution: ConflictResolution;
-      success: boolean;
-    }>;
+      conflict: DataConflict
+      resolution: ConflictResolution
+      success: boolean
+    }>
   }> {
-    const resolvedData: Record<string, any> = {};
-    const unresolvedConflicts: DataConflict[] = [];
-    const resolutionLog: Array<any> = [];
+    const resolvedData: Record<string, unknown> = {}
+    const unresolvedConflicts: DataConflict[] = []
+    const resolutionLog: Array<unknown> = []
 
     for (const conflict of conflicts) {
       try {
-        const resolution = strategy 
+        const resolution = strategy
           ? await this.applySpecificStrategy(conflict, strategy)
-          : conflict.suggestedResolution || await this.getDefaultResolution(conflict);
+          : conflict.suggestedResolution || (await this.getDefaultResolution(conflict))
 
         if (resolution.requiresApproval && !strategy) {
-          unresolvedConflicts.push(conflict);
-          continue;
+          unresolvedConflicts.push(conflict)
+          continue
         }
 
-        resolvedData[conflict.fieldPath] = resolution.resolvedValue;
-        
+        resolvedData[conflict.fieldPath] = resolution.resolvedValue
+
         resolutionLog.push({
           conflict,
           resolution,
-          success: true
-        });
+          success: true,
+        })
 
         // Create event for conflict resolution
-        await this.recordConflictResolution(conflict, resolution);
-
+        await this.recordConflictResolution(conflict, resolution)
       } catch (error) {
-        unresolvedConflicts.push(conflict);
+        unresolvedConflicts.push(conflict)
         resolutionLog.push({
           conflict,
           resolution: null,
           success: false,
-          error: error.message
-        });
+          error: error.message,
+        })
       }
     }
 
     return {
       resolvedData,
       unresolvedConflicts,
-      resolutionLog
-    };
+      resolutionLog,
+    }
   }
 
   /**
    * Three-way merge with intelligent conflict detection
    */
   performThreeWayMerge(
-    baseState: Record<string, any>,
-    localChanges: Record<string, any>,
-    remoteChanges: Record<string, any>,
+    baseState: Record<string, unknown>,
+    localChanges: Record<string, unknown>,
+    remoteChanges: Record<string, unknown>,
     entityType: string,
     entityId: string,
-    context: any
+    context: unknown
   ): MergeResult {
-    const mergedData = { ...baseState };
-    const conflicts: DataConflict[] = [];
+    const mergedData = { ...baseState }
+    const conflicts: DataConflict[] = []
 
     // Apply non-conflicting local changes
     for (const [field, value] of Object.entries(localChanges)) {
       if (!(field in remoteChanges)) {
-        mergedData[field] = value;
+        mergedData[field] = value
       }
     }
 
     // Apply non-conflicting remote changes
     for (const [field, value] of Object.entries(remoteChanges)) {
       if (!(field in localChanges)) {
-        mergedData[field] = value;
+        mergedData[field] = value
       }
     }
 
@@ -233,35 +236,35 @@ export class ConflictResolutionEngine extends EventEmitter {
       remoteChanges,
       baseState,
       context
-    );
+    )
 
     for (const conflict of detectedConflicts) {
       if (conflict.autoResolvable && conflict.suggestedResolution) {
-        mergedData[conflict.fieldPath] = conflict.suggestedResolution.resolvedValue;
+        mergedData[conflict.fieldPath] = conflict.suggestedResolution.resolvedValue
       } else {
-        conflicts.push(conflict);
+        conflicts.push(conflict)
       }
     }
 
-    const confidence = conflicts.length === 0 ? 1.0 : Math.max(0.1, 1.0 - (conflicts.length * 0.2));
+    const confidence = conflicts.length === 0 ? 1.0 : Math.max(0.1, 1.0 - conflicts.length * 0.2)
 
     return {
       success: conflicts.length === 0,
       resolvedValue: mergedData,
       conflicts,
       strategy: 'three_way_merge',
-      confidence
-    };
+      confidence,
+    }
   }
 
   /**
    * Analyze conflict and suggest resolution strategy
    */
   private analyzeConflict(conflict: DataConflict): ConflictResolution {
-    const { entityType, fieldPath, localValue, remoteValue, businessContext } = conflict;
+    const { entityType, fieldPath, localValue, remoteValue, businessContext } = conflict
 
     // Business rule-based resolution
-    const rules = this.getApplicableRules(entityType, fieldPath);
+    const rules = this.getApplicableRules(entityType, fieldPath)
     for (const rule of rules) {
       if (rule.condition(localValue, businessContext)) {
         return {
@@ -270,8 +273,8 @@ export class ConflictResolutionEngine extends EventEmitter {
           reasoning: `Business rule: ${rule.description}`,
           confidence: 0.9,
           requiresApproval: false,
-          metadata: { ruleId: rule.id }
-        };
+          metadata: { ruleId: rule.id },
+        }
       }
       if (rule.condition(remoteValue, businessContext)) {
         return {
@@ -280,34 +283,34 @@ export class ConflictResolutionEngine extends EventEmitter {
           reasoning: `Business rule: ${rule.description}`,
           confidence: 0.9,
           requiresApproval: false,
-          metadata: { ruleId: rule.id }
-        };
+          metadata: { ruleId: rule.id },
+        }
       }
     }
 
     // Timestamp-based resolution
     if (businessContext?.timestamp1 && businessContext?.timestamp2) {
-      const isLocalNewer = businessContext.timestamp1 > businessContext.timestamp2;
+      const isLocalNewer = businessContext.timestamp1 > businessContext.timestamp2
       return {
         strategy: 'timestamp_based',
         resolvedValue: isLocalNewer ? localValue : remoteValue,
         reasoning: `Using newer timestamp (${isLocalNewer ? 'local' : 'remote'})`,
         confidence: 0.7,
-        requiresApproval: false
-      };
+        requiresApproval: false,
+      }
     }
 
     // Data type-specific resolution
     if (typeof localValue === 'number' && typeof remoteValue === 'number') {
-      return this.resolveNumericConflict(conflict);
+      return this.resolveNumericConflict(conflict)
     }
 
     if (typeof localValue === 'string' && typeof remoteValue === 'string') {
-      return this.resolveTextConflict(conflict);
+      return this.resolveTextConflict(conflict)
     }
 
     if (Array.isArray(localValue) && Array.isArray(remoteValue)) {
-      return this.resolveArrayConflict(conflict);
+      return this.resolveArrayConflict(conflict)
     }
 
     // Default: require manual resolution
@@ -316,51 +319,51 @@ export class ConflictResolutionEngine extends EventEmitter {
       resolvedValue: localValue,
       reasoning: 'Complex conflict requires manual resolution',
       confidence: 0.3,
-      requiresApproval: true
-    };
+      requiresApproval: true,
+    }
   }
 
   /**
    * Resolve numeric conflicts (sum, max, average, etc.)
    */
   private resolveNumericConflict(conflict: DataConflict): ConflictResolution {
-    const { localValue, remoteValue, fieldPath } = conflict;
+    const { localValue, remoteValue, fieldPath } = conflict
 
     // For revenue/money fields, use sum
-    if (fieldPath.toLowerCase().includes('revenue') || 
-        fieldPath.toLowerCase().includes('amount') ||
-        fieldPath.toLowerCase().includes('cost')) {
+    if (
+      fieldPath.toLowerCase().includes('revenue') ||
+      fieldPath.toLowerCase().includes('amount') ||
+      fieldPath.toLowerCase().includes('cost')
+    ) {
       return {
         strategy: 'merge',
         resolvedValue: localValue + remoteValue,
         reasoning: 'Summed monetary values',
         confidence: 0.8,
-        requiresApproval: false
-      };
+        requiresApproval: false,
+      }
     }
 
     // For counters, use max
-    if (fieldPath.toLowerCase().includes('count') ||
-        fieldPath.toLowerCase().includes('total')) {
+    if (fieldPath.toLowerCase().includes('count') || fieldPath.toLowerCase().includes('total')) {
       return {
         strategy: 'merge',
         resolvedValue: Math.max(localValue, remoteValue),
         reasoning: 'Used maximum count value',
         confidence: 0.8,
-        requiresApproval: false
-      };
+        requiresApproval: false,
+      }
     }
 
     // For scores/ratings, use average
-    if (fieldPath.toLowerCase().includes('score') ||
-        fieldPath.toLowerCase().includes('rating')) {
+    if (fieldPath.toLowerCase().includes('score') || fieldPath.toLowerCase().includes('rating')) {
       return {
         strategy: 'merge',
         resolvedValue: (localValue + remoteValue) / 2,
         reasoning: 'Averaged score values',
         confidence: 0.7,
-        requiresApproval: false
-      };
+        requiresApproval: false,
+      }
     }
 
     // Default: use higher value
@@ -369,15 +372,15 @@ export class ConflictResolutionEngine extends EventEmitter {
       resolvedValue: Math.max(localValue, remoteValue),
       reasoning: 'Used higher numeric value',
       confidence: 0.6,
-      requiresApproval: false
-    };
+      requiresApproval: false,
+    }
   }
 
   /**
    * Resolve text conflicts with diff-based merging
    */
   private resolveTextConflict(conflict: DataConflict): ConflictResolution {
-    const { localValue, remoteValue, baseValue } = conflict;
+    const { localValue, remoteValue, baseValue } = conflict
 
     // If one is extension of the other, use longer
     if (localValue.includes(remoteValue)) {
@@ -386,8 +389,8 @@ export class ConflictResolutionEngine extends EventEmitter {
         resolvedValue: localValue,
         reasoning: 'Local value contains remote value',
         confidence: 0.8,
-        requiresApproval: false
-      };
+        requiresApproval: false,
+      }
     }
 
     if (remoteValue.includes(localValue)) {
@@ -396,21 +399,21 @@ export class ConflictResolutionEngine extends EventEmitter {
         resolvedValue: remoteValue,
         reasoning: 'Remote value contains local value',
         confidence: 0.8,
-        requiresApproval: false
-      };
+        requiresApproval: false,
+      }
     }
 
     // Try to merge if there's a common base
     if (baseValue) {
-      const merged = this.mergeTextChanges(baseValue, localValue, remoteValue);
+      const merged = this.mergeTextChanges(baseValue, localValue, remoteValue)
       if (merged.success) {
         return {
           strategy: 'merge',
           resolvedValue: merged.result,
           reasoning: 'Successfully merged text changes',
           confidence: merged.confidence,
-          requiresApproval: false
-        };
+          requiresApproval: false,
+        }
       }
     }
 
@@ -420,53 +423,62 @@ export class ConflictResolutionEngine extends EventEmitter {
       resolvedValue: localValue,
       reasoning: 'Text conflict requires manual resolution',
       confidence: 0.3,
-      requiresApproval: true
-    };
+      requiresApproval: true,
+    }
   }
 
   /**
    * Resolve array conflicts with set operations
    */
   private resolveArrayConflict(conflict: DataConflict): ConflictResolution {
-    const { localValue, remoteValue } = conflict;
+    const { localValue, remoteValue } = conflict
 
     // Union of arrays (deduplicated)
-    const merged = [...new Set([...localValue, ...remoteValue])];
+    const merged = [...new Set([...localValue, ...remoteValue])]
 
     return {
       strategy: 'merge',
       resolvedValue: merged,
       reasoning: 'Merged arrays with union operation',
       confidence: 0.8,
-      requiresApproval: false
-    };
+      requiresApproval: false,
+    }
   }
 
   /**
    * Simple text merge algorithm
    */
-  private mergeTextChanges(base: string, local: string, remote: string): {
-    success: boolean;
-    result: string;
-    confidence: number;
+  private mergeTextChanges(
+    base: string,
+    local: string,
+    remote: string
+  ): {
+    success: boolean
+    result: string
+    confidence: number
   } {
     // Simple approach: if changes don't overlap, concatenate
-    const localDiff = local.replace(base, '');
-    const remoteDiff = remote.replace(base, '');
+    const localDiff = local.replace(base, '')
+    const remoteDiff = remote.replace(base, '')
 
-    if (localDiff && remoteDiff && !localDiff.includes(remoteDiff) && !remoteDiff.includes(localDiff)) {
+    if (
+      localDiff &&
+      remoteDiff &&
+      !localDiff.includes(remoteDiff) &&
+      !remoteDiff.includes(localDiff)
+    ) {
       return {
         success: true,
         result: base + localDiff + remoteDiff,
-        confidence: 0.7
-      };
+        confidence: 0.7,
+      }
     }
 
     return {
       success: false,
       result: local,
-      confidence: 0.3
-    };
+      confidence: 0.3,
+    }
   }
 
   /**
@@ -475,79 +487,89 @@ export class ConflictResolutionEngine extends EventEmitter {
   private calculateConflictSeverity(
     entityType: string,
     fieldPath: string,
-    localValue: any,
-    remoteValue: any
+    _localValue: unknown,
+    remoteValue: unknown
   ): 'low' | 'medium' | 'high' | 'critical' {
     // Critical fields that can't have conflicts
-    const criticalFields = ['id', 'tenantId', 'status', 'deletedAt'];
+    const criticalFields = ['id', 'tenantId', 'status', 'deletedAt']
     if (criticalFields.includes(fieldPath)) {
-      return 'critical';
+      return 'critical'
     }
 
     // High-impact business fields
-    const highImpactFields = ['email', 'phone', 'revenue', 'contractValue', 'subscriptionStatus'];
-    if (highImpactFields.some(field => fieldPath.toLowerCase().includes(field))) {
-      return 'high';
+    const highImpactFields = ['email', 'phone', 'revenue', 'contractValue', 'subscriptionStatus']
+    if (highImpactFields.some((field) => fieldPath.toLowerCase().includes(field))) {
+      return 'high'
     }
 
     // Medium impact for personal/contact info
-    const mediumImpactFields = ['name', 'address', 'company', 'title'];
-    if (mediumImpactFields.some(field => fieldPath.toLowerCase().includes(field))) {
-      return 'medium';
+    const mediumImpactFields = ['name', 'address', 'company', 'title']
+    if (mediumImpactFields.some((field) => fieldPath.toLowerCase().includes(field))) {
+      return 'medium'
     }
 
-    return 'low';
+    return 'low'
   }
 
   /**
    * Check if conflict can be auto-resolved
    */
   private isAutoResolvable(conflict: DataConflict): boolean {
-    return conflict.severity !== 'critical' && 
-           conflict.suggestedResolution !== undefined &&
-           conflict.suggestedResolution.confidence >= 0.7 &&
-           !conflict.suggestedResolution.requiresApproval;
+    return (
+      conflict.severity !== 'critical' &&
+      conflict.suggestedResolution !== undefined &&
+      conflict.suggestedResolution.confidence >= 0.7 &&
+      !conflict.suggestedResolution.requiresApproval
+    )
   }
 
   /**
    * Get applicable business rules for entity and field
    */
   private getApplicableRules(entityType: string, fieldPath: string): BusinessRule[] {
-    const rules = this.businessRules.get(entityType) || [];
+    const rules = this.businessRules.get(entityType) || []
     return rules
-      .filter(rule => rule.fieldPath === fieldPath || rule.fieldPath === '*')
-      .sort((a, b) => b.priority - a.priority);
+      .filter((rule) => rule.fieldPath === fieldPath || rule.fieldPath === '*')
+      .sort((a, b) => b.priority - a.priority)
   }
 
   /**
    * Apply specific resolution strategy
    */
-  private async applySpecificStrategy(conflict: DataConflict, strategy: string): Promise<ConflictResolution> {
-    const strategyFn = this.resolutionStrategies.get(strategy);
+  private async applySpecificStrategy(
+    conflict: DataConflict,
+    strategy: string
+  ): Promise<ConflictResolution> {
+    const strategyFn = this.resolutionStrategies.get(strategy)
     if (!strategyFn) {
-      throw new Error(`Unknown resolution strategy: ${strategy}`);
+      throw new Error(`Unknown resolution strategy: ${strategy}`)
     }
 
-    return strategyFn(conflict);
+    return strategyFn(conflict)
   }
 
   /**
    * Get default resolution when no specific strategy is provided
    */
   private async getDefaultResolution(conflict: DataConflict): Promise<ConflictResolution> {
-    return conflict.suggestedResolution || {
-      strategy: 'manual',
-      resolvedValue: conflict.localValue,
-      reasoning: 'Default to local value, requires manual review',
-      confidence: 0.5,
-      requiresApproval: true
-    };
+    return (
+      conflict.suggestedResolution || {
+        strategy: 'manual',
+        resolvedValue: conflict.localValue,
+        reasoning: 'Default to local value, requires manual review',
+        confidence: 0.5,
+        requiresApproval: true,
+      }
+    )
   }
 
   /**
    * Record conflict resolution as domain event
    */
-  private async recordConflictResolution(conflict: DataConflict, resolution: ConflictResolution): Promise<void> {
+  private async recordConflictResolution(
+    conflict: DataConflict,
+    resolution: ConflictResolution
+  ): Promise<void> {
     try {
       await eventStore.appendEvent(
         conflict.entityId,
@@ -559,19 +581,17 @@ export class ConflictResolutionEngine extends EventEmitter {
           strategy: resolution.strategy,
           resolvedValue: resolution.resolvedValue,
           confidence: resolution.confidence,
-          reasoning: resolution.reasoning
+          reasoning: resolution.reasoning,
         },
         {
           tenantId: conflict.tenantId,
           userId: 'system',
           source: 'conflict-resolution',
           correlationId: `conflict-${conflict.id}`,
-          schemaVersion: '1.0.0'
+          schemaVersion: '1.0.0',
         }
-      );
-    } catch (error) {
-      console.error('Failed to record conflict resolution event:', error);
-    }
+      )
+    } catch (error) {}
   }
 
   /**
@@ -579,15 +599,15 @@ export class ConflictResolutionEngine extends EventEmitter {
    */
   private storeConflictHistory(entityId: string, conflicts: DataConflict[]): void {
     if (!this.conflictHistory.has(entityId)) {
-      this.conflictHistory.set(entityId, []);
+      this.conflictHistory.set(entityId, [])
     }
-    
-    const history = this.conflictHistory.get(entityId)!;
-    history.push(...conflicts);
-    
+
+    const history = this.conflictHistory.get(entityId)!
+    history.push(...conflicts)
+
     // Keep only last 100 conflicts per entity
     if (history.length > 100) {
-      history.splice(0, history.length - 100);
+      history.splice(0, history.length - 100)
     }
   }
 
@@ -603,7 +623,7 @@ export class ConflictResolutionEngine extends EventEmitter {
         fieldPath: 'email',
         condition: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
         priority: 100,
-        description: 'Email must be in valid format'
+        description: 'Email must be in valid format',
       },
       {
         id: 'revenue-positive',
@@ -612,7 +632,7 @@ export class ConflictResolutionEngine extends EventEmitter {
         fieldPath: 'totalRevenue',
         condition: (value) => typeof value === 'number' && value >= 0,
         priority: 90,
-        description: 'Revenue cannot be negative'
+        description: 'Revenue cannot be negative',
       },
       {
         id: 'phone-format',
@@ -621,16 +641,16 @@ export class ConflictResolutionEngine extends EventEmitter {
         fieldPath: 'phone',
         condition: (value) => !value || /^\+?[\d\s\-\(\)]+$/.test(value),
         priority: 80,
-        description: 'Phone number must be in valid format'
-      }
-    ];
+        description: 'Phone number must be in valid format',
+      },
+    ]
 
-    rules.forEach(rule => {
+    rules.forEach((rule) => {
       if (!this.businessRules.has(rule.entityType)) {
-        this.businessRules.set(rule.entityType, []);
+        this.businessRules.set(rule.entityType, [])
       }
-      this.businessRules.get(rule.entityType)!.push(rule);
-    });
+      this.businessRules.get(rule.entityType)!.push(rule)
+    })
   }
 
   /**
@@ -642,27 +662,28 @@ export class ConflictResolutionEngine extends EventEmitter {
       resolvedValue: conflict.localValue,
       reasoning: 'Manually selected local value',
       confidence: 1.0,
-      requiresApproval: false
-    }));
+      requiresApproval: false,
+    }))
 
     this.resolutionStrategies.set('take_remote', (conflict: DataConflict) => ({
       strategy: 'take_remote',
       resolvedValue: conflict.remoteValue,
       reasoning: 'Manually selected remote value',
       confidence: 1.0,
-      requiresApproval: false
-    }));
+      requiresApproval: false,
+    }))
 
     this.resolutionStrategies.set('latest_timestamp', (conflict: DataConflict) => {
-      const isLocalNewer = conflict.businessContext?.timestamp1 > conflict.businessContext?.timestamp2;
+      const isLocalNewer =
+        conflict.businessContext?.timestamp1 > conflict.businessContext?.timestamp2
       return {
         strategy: 'latest_timestamp',
         resolvedValue: isLocalNewer ? conflict.localValue : conflict.remoteValue,
         reasoning: 'Selected value with latest timestamp',
         confidence: 0.8,
-        requiresApproval: false
-      };
-    });
+        requiresApproval: false,
+      }
+    })
   }
 
   /**
@@ -670,39 +691,39 @@ export class ConflictResolutionEngine extends EventEmitter {
    */
   addBusinessRule(rule: BusinessRule): void {
     if (!this.businessRules.has(rule.entityType)) {
-      this.businessRules.set(rule.entityType, []);
+      this.businessRules.set(rule.entityType, [])
     }
-    this.businessRules.get(rule.entityType)!.push(rule);
+    this.businessRules.get(rule.entityType)!.push(rule)
   }
 
   /**
    * Get conflict statistics
    */
   getConflictStatistics(): {
-    totalConflicts: number;
-    autoResolvedCount: number;
-    manualResolvedCount: number;
-    conflictsByType: Record<string, number>;
-    conflictsBySeverity: Record<string, number>;
+    totalConflicts: number
+    autoResolvedCount: number
+    manualResolvedCount: number
+    conflictsByType: Record<string, number>
+    conflictsBySeverity: Record<string, number>
   } {
-    let totalConflicts = 0;
-    let autoResolvedCount = 0;
-    let manualResolvedCount = 0;
-    const conflictsByType: Record<string, number> = {};
-    const conflictsBySeverity: Record<string, number> = {};
+    let totalConflicts = 0
+    let autoResolvedCount = 0
+    let manualResolvedCount = 0
+    const conflictsByType: Record<string, number> = {}
+    const conflictsBySeverity: Record<string, number> = {}
 
     for (const conflicts of this.conflictHistory.values()) {
       for (const conflict of conflicts) {
-        totalConflicts++;
-        
+        totalConflicts++
+
         if (conflict.autoResolvable) {
-          autoResolvedCount++;
+          autoResolvedCount++
         } else {
-          manualResolvedCount++;
+          manualResolvedCount++
         }
-        
-        conflictsByType[conflict.conflictType] = (conflictsByType[conflict.conflictType] || 0) + 1;
-        conflictsBySeverity[conflict.severity] = (conflictsBySeverity[conflict.severity] || 0) + 1;
+
+        conflictsByType[conflict.conflictType] = (conflictsByType[conflict.conflictType] || 0) + 1
+        conflictsBySeverity[conflict.severity] = (conflictsBySeverity[conflict.severity] || 0) + 1
       }
     }
 
@@ -711,34 +732,34 @@ export class ConflictResolutionEngine extends EventEmitter {
       autoResolvedCount,
       manualResolvedCount,
       conflictsByType,
-      conflictsBySeverity
-    };
+      conflictsBySeverity,
+    }
   }
 
   /**
    * Deep equality check
    */
-  private deepEqual(a: any, b: any): boolean {
-    if (a === b) return true;
-    if (a == null || b == null) return false;
-    if (typeof a !== typeof b) return false;
-    
+  private deepEqual(a: unknown, b: unknown): boolean {
+    if (a === b) return true
+    if (a == null || b == null) return false
+    if (typeof a !== typeof b) return false
+
     if (typeof a === 'object') {
-      const keysA = Object.keys(a);
-      const keysB = Object.keys(b);
-      if (keysA.length !== keysB.length) return false;
-      
+      const keysA = Object.keys(a)
+      const keysB = Object.keys(b)
+      if (keysA.length !== keysB.length) return false
+
       for (const key of keysA) {
         if (!keysB.includes(key) || !this.deepEqual(a[key], b[key])) {
-          return false;
+          return false
         }
       }
-      return true;
+      return true
     }
-    
-    return false;
+
+    return false
   }
 }
 
 // Global conflict resolution engine
-export const conflictResolver = new ConflictResolutionEngine();
+export const conflictResolver = new ConflictResolutionEngine()

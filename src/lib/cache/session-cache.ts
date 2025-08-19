@@ -24,7 +24,7 @@ export const sessionCache = {
     const key = `${CACHE_PREFIXES.SESSION}${sessionToken}`
     return await redis.get<CachedSession>(key)
   },
-  
+
   /**
    * Set cached session
    */
@@ -33,20 +33,20 @@ export const sessionCache = {
     // Cache for 1 hour, refresh on access
     return await redis.set(key, session, CACHE_TTL.LONG)
   },
-  
+
   /**
    * Update last accessed time
    */
   async touch(sessionToken: string): Promise<boolean> {
     const key = `${CACHE_PREFIXES.SESSION}${sessionToken}`
     const session = await redis.get<CachedSession>(key)
-    
+
     if (!session) return false
-    
+
     session.lastAccessed = new Date()
     return await redis.set(key, session, CACHE_TTL.LONG)
   },
-  
+
   /**
    * Delete cached session
    */
@@ -55,7 +55,7 @@ export const sessionCache = {
     const deleted = await redis.del(key)
     return deleted > 0
   },
-  
+
   /**
    * Get all active sessions for a user
    */
@@ -63,7 +63,7 @@ export const sessionCache = {
     const key = `${CACHE_PREFIXES.USER}sessions:${userId}`
     return await redis.smembers(key)
   },
-  
+
   /**
    * Add session to user's active sessions
    */
@@ -72,14 +72,14 @@ export const sessionCache = {
     await redis.sadd(key, sessionToken)
     await redis.expire(key, CACHE_TTL.DAY)
   },
-  
+
   /**
    * Remove session from user's active sessions
    */
   async removeUserSession(userId: string, sessionToken: string): Promise<void> {
     const key = `${CACHE_PREFIXES.USER}sessions:${userId}`
     await redis.del(sessionToken) // Note: This might need adjustment based on Redis client API
-  }
+  },
 }
 
 /**
@@ -93,7 +93,7 @@ export const userCache = {
     const key = `${CACHE_PREFIXES.USER}${userId}`
     return await redis.get<User>(key)
   },
-  
+
   /**
    * Set cached user data
    */
@@ -101,20 +101,20 @@ export const userCache = {
     const key = `${CACHE_PREFIXES.USER}${userId}`
     return await redis.set(key, user, CACHE_TTL.MEDIUM)
   },
-  
+
   /**
    * Invalidate user cache
    */
   async invalidate(userId: string): Promise<void> {
     const key = `${CACHE_PREFIXES.USER}${userId}`
     await redis.del(key)
-    
+
     // Also invalidate related caches
     const sessions = await sessionCache.getUserSessions(userId)
     for (const session of sessions) {
       await sessionCache.delete(session)
     }
-  }
+  },
 }
 
 /**
@@ -124,47 +124,47 @@ export const tenantCache = {
   /**
    * Get cached tenant data
    */
-  async get(tenantId: string): Promise<any | null> {
+  async get(tenantId: string): Promise<unknown | null> {
     const key = `${CACHE_PREFIXES.TENANT}${tenantId}`
     return await redis.get(key)
   },
-  
+
   /**
    * Set cached tenant data
    */
-  async set(tenantId: string, tenant: any): Promise<boolean> {
+  async set(tenantId: string, tenant: unknown): Promise<boolean> {
     const key = `${CACHE_PREFIXES.TENANT}${tenantId}`
     return await redis.set(key, tenant, CACHE_TTL.LONG)
   },
-  
+
   /**
    * Get tenant settings
    */
-  async getSettings(tenantId: string): Promise<Record<string, any>> {
+  async getSettings(tenantId: string): Promise<Record<string, unknown>> {
     const key = `${CACHE_PREFIXES.TENANT}settings:${tenantId}`
-    return await redis.hash.getAll(key) || {}
+    return (await redis.hash.getAll(key)) || {}
   },
-  
+
   /**
    * Set tenant setting
    */
-  async setSetting(tenantId: string, setting: string, value: any): Promise<boolean> {
+  async setSetting(tenantId: string, setting: string, value: unknown): Promise<boolean> {
     const key = `${CACHE_PREFIXES.TENANT}settings:${tenantId}`
     const result = await redis.hash.set(key, setting, value)
     await redis.expire(key, CACHE_TTL.DAY)
     return result
   },
-  
+
   /**
    * Invalidate tenant cache
    */
   async invalidate(tenantId: string): Promise<void> {
     const keys = [
       `${CACHE_PREFIXES.TENANT}${tenantId}`,
-      `${CACHE_PREFIXES.TENANT}settings:${tenantId}`
+      `${CACHE_PREFIXES.TENANT}settings:${tenantId}`,
     ]
     await redis.del(...keys)
-  }
+  },
 }
 
 /**
@@ -178,7 +178,7 @@ export const subscriptionCache = {
     const key = `${CACHE_PREFIXES.SUBSCRIPTION}${userId}`
     return await redis.get<Subscription>(key)
   },
-  
+
   /**
    * Set cached subscription
    */
@@ -186,7 +186,7 @@ export const subscriptionCache = {
     const key = `${CACHE_PREFIXES.SUBSCRIPTION}${userId}`
     return await redis.set(key, subscription, CACHE_TTL.MEDIUM)
   },
-  
+
   /**
    * Get active modules for user
    */
@@ -194,7 +194,7 @@ export const subscriptionCache = {
     const key = `${CACHE_PREFIXES.SUBSCRIPTION}modules:${userId}`
     return await redis.smembers(key)
   },
-  
+
   /**
    * Set active modules for user
    */
@@ -206,17 +206,17 @@ export const subscriptionCache = {
       await redis.expire(key, CACHE_TTL.MEDIUM)
     }
   },
-  
+
   /**
    * Invalidate subscription cache
    */
   async invalidate(userId: string): Promise<void> {
     const keys = [
       `${CACHE_PREFIXES.SUBSCRIPTION}${userId}`,
-      `${CACHE_PREFIXES.SUBSCRIPTION}modules:${userId}`
+      `${CACHE_PREFIXES.SUBSCRIPTION}modules:${userId}`,
     ]
     await redis.del(...keys)
-  }
+  },
 }
 
 /**
@@ -231,7 +231,7 @@ export const featureFlagCache = {
     const value = await redis.get<boolean>(key)
     return value
   },
-  
+
   /**
    * Set feature flag status
    */
@@ -239,7 +239,7 @@ export const featureFlagCache = {
     const key = `${CACHE_PREFIXES.FEATURE_FLAG}${tenantId}:${feature}`
     await redis.set(key, enabled, CACHE_TTL.LONG)
   },
-  
+
   /**
    * Get all feature flags for tenant
    */
@@ -247,5 +247,5 @@ export const featureFlagCache = {
     const pattern = `${CACHE_PREFIXES.FEATURE_FLAG}${tenantId}:*`
     // Note: This would need actual implementation based on Redis scan
     return {}
-  }
+  },
 }

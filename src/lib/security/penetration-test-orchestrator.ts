@@ -20,7 +20,7 @@ export interface PenetrationTest {
   duration?: number
   results: TestResult[]
   recommendations: string[]
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
 }
 
 export interface TestResult {
@@ -64,9 +64,16 @@ export interface SecurityScanConfig {
     maxRequests: number
   }
   testTypes: Array<
-    'SQL_INJECTION' | 'XSS' | 'CSRF' | 'DIRECTORY_TRAVERSAL' | 
-    'AUTHENTICATION_BYPASS' | 'AUTHORIZATION_FLAWS' | 'SENSITIVE_DATA_EXPOSURE' |
-    'SECURITY_MISCONFIG' | 'VULNERABLE_COMPONENTS' | 'LOGGING_MONITORING'
+    | 'SQL_INJECTION'
+    | 'XSS'
+    | 'CSRF'
+    | 'DIRECTORY_TRAVERSAL'
+    | 'AUTHENTICATION_BYPASS'
+    | 'AUTHORIZATION_FLAWS'
+    | 'SENSITIVE_DATA_EXPOSURE'
+    | 'SECURITY_MISCONFIG'
+    | 'VULNERABLE_COMPONENTS'
+    | 'LOGGING_MONITORING'
   >
   aggressive: boolean
   reportFormat: 'JSON' | 'XML' | 'HTML' | 'PDF'
@@ -78,7 +85,7 @@ export class PenetrationTestOrchestrator extends EventEmitter {
   private httpClient = axios.create({
     timeout: 30000,
     maxRedirects: 5,
-    validateStatus: () => true // Don't throw on error status codes
+    validateStatus: () => true, // Don't throw on error status codes
   })
 
   constructor() {
@@ -103,20 +110,20 @@ export class PenetrationTestOrchestrator extends EventEmitter {
       metadata: {
         config,
         userAgent: 'CoreFlow360-SecurityScanner/1.0',
-        scanId: randomBytes(16).toString('hex')
-      }
+        scanId: randomBytes(16).toString('hex'),
+      },
     }
 
     this.activeTests.set(test.id, test)
     test.status = 'RUNNING'
 
-    console.log(`🔍 Starting penetration test: ${test.id}`)
+    
 
     try {
       // Run all selected test types
       for (const testType of config.testTypes) {
-        console.log(`🎯 Running ${testType} tests...`)
         
+
         const results = await this.executeTestType(testType, config)
         test.results.push(...results)
 
@@ -124,13 +131,13 @@ export class PenetrationTestOrchestrator extends EventEmitter {
         this.emit('testProgress', {
           testId: test.id,
           completedType: testType,
-          totalResults: test.results.length
+          totalResults: test.results.length,
         })
       }
 
       // Generate recommendations
       test.recommendations = this.generateRecommendations(test.results)
-      
+
       test.status = 'COMPLETED'
       test.completedAt = new Date()
       test.duration = test.completedAt.getTime() - test.startedAt.getTime()
@@ -141,19 +148,18 @@ export class PenetrationTestOrchestrator extends EventEmitter {
       this.testHistory.push(test)
       this.activeTests.delete(test.id)
 
-      console.log(`✅ Penetration test completed: ${test.id}`)
-      console.log(`   Results: ${test.results.length} findings`)
-      console.log(`   Severity: ${test.severity}`)
-      console.log(`   Duration: ${Math.round(test.duration / 1000)}s`)
+      console.log(`Penetration test completed: ${test.id}`)
+      console.log(`  Total findings: ${test.results.length}`)
+      console.log(`  Severity: ${test.severity}`)
+      console.log(`  Duration: ${test.duration}ms`)
 
       this.emit('testCompleted', test)
-
     } catch (error) {
       test.status = 'FAILED'
       test.completedAt = new Date()
       test.metadata.error = error instanceof Error ? error.message : 'Unknown error'
 
-      console.error(`❌ Penetration test failed: ${test.id}`, error)
+      console.error(`Penetration test failed: ${test.id}`, error)
       this.emit('testFailed', test)
     }
 
@@ -163,9 +169,9 @@ export class PenetrationTestOrchestrator extends EventEmitter {
   /**
    * Test for SQL Injection vulnerabilities
    */
-  async testSqlInjection(baseUrl: string, endpoints: string[], auth: any): Promise<TestResult[]> {
+  async testSqlInjection(baseUrl: string, endpoints: string[], auth: unknown): Promise<TestResult[]> {
     const results: TestResult[] = []
-    
+
     const payloads = [
       "' OR '1'='1",
       "' OR 1=1--",
@@ -173,7 +179,7 @@ export class PenetrationTestOrchestrator extends EventEmitter {
       "'; DROP TABLE users--",
       "' AND (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES)>0--",
       "1' OR SLEEP(5)--",
-      "1' OR BENCHMARK(10000000,MD5(1))--"
+      "1' OR BENCHMARK(10000000,MD5(1))--",
     ]
 
     for (const endpoint of endpoints) {
@@ -181,13 +187,13 @@ export class PenetrationTestOrchestrator extends EventEmitter {
         try {
           const testUrl = `${baseUrl}${endpoint}?id=${encodeURIComponent(payload)}`
           const startTime = Date.now()
-          
+
           const response = await this.httpClient.get(testUrl, {
-            headers: this.getAuthHeaders(auth)
+            headers: this.getAuthHeaders(auth),
           })
-          
+
           const responseTime = Date.now() - startTime
-          
+
           // Detect SQL injection indicators
           const sqlErrorPatterns = [
             /syntax error/i,
@@ -196,12 +202,10 @@ export class PenetrationTestOrchestrator extends EventEmitter {
             /microsoft.*odbc.*sql/i,
             /postgresql.*error/i,
             /warning.*mysql/i,
-            /sqlite_exec/i
+            /sqlite_exec/i,
           ]
 
-          const hasError = sqlErrorPatterns.some(pattern => 
-            pattern.test(response.data)
-          )
+          const hasError = sqlErrorPatterns.some((pattern) => pattern.test(response.data))
 
           const isTimeBasedSqli = responseTime > 5000 && payload.includes('SLEEP')
 
@@ -215,7 +219,7 @@ export class PenetrationTestOrchestrator extends EventEmitter {
                 description: 'SQL Injection vulnerability detected',
                 impact: 'Database compromise, data theft, authentication bypass',
                 likelihood: 'HIGH',
-                exploitability: 'HIGH'
+                exploitability: 'HIGH',
               },
               evidence: {
                 request: testUrl,
@@ -225,8 +229,8 @@ export class PenetrationTestOrchestrator extends EventEmitter {
                   `Response time: ${responseTime}ms`,
                   `Status code: ${response.status}`,
                   `SQL error detected: ${hasError}`,
-                  `Time-based detection: ${isTimeBasedSqli}`
-                ]
+                  `Time-based detection: ${isTimeBasedSqli}`,
+                ],
               },
               remediation: {
                 steps: [
@@ -234,18 +238,17 @@ export class PenetrationTestOrchestrator extends EventEmitter {
                   'Implement input validation and sanitization',
                   'Use ORM frameworks with built-in protection',
                   'Apply principle of least privilege to database accounts',
-                  'Enable database query logging and monitoring'
+                  'Enable database query logging and monitoring',
                 ],
                 priority: 'CRITICAL',
                 effort: 'MEDIUM',
-                timeline: '1-2 weeks'
-              }
+                timeline: '1-2 weeks',
+              },
             })
           }
-
         } catch (error) {
           // Network errors don't necessarily indicate vulnerabilities
-          console.warn(`SQL injection test error for ${endpoint}:`, error)
+          
         }
       }
     }
@@ -256,9 +259,9 @@ export class PenetrationTestOrchestrator extends EventEmitter {
   /**
    * Test for Cross-Site Scripting (XSS) vulnerabilities
    */
-  async testXss(baseUrl: string, endpoints: string[], auth: any): Promise<TestResult[]> {
+  async testXss(baseUrl: string, endpoints: string[], auth: unknown): Promise<TestResult[]> {
     const results: TestResult[] = []
-    
+
     const payloads = [
       "<script>alert('XSS')</script>",
       "<img src=x onerror=alert('XSS')>",
@@ -267,7 +270,7 @@ export class PenetrationTestOrchestrator extends EventEmitter {
       "';alert('XSS');//",
       "<iframe src=javascript:alert('XSS')></iframe>",
       "<body onload=alert('XSS')>",
-      "<%2Fscript%3E%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
+      "<%2Fscript%3E%3Cscript%3Ealert('XSS')%3C%2Fscript%3E",
     ]
 
     for (const endpoint of endpoints) {
@@ -275,14 +278,14 @@ export class PenetrationTestOrchestrator extends EventEmitter {
         try {
           // Test GET parameter injection
           const testUrl = `${baseUrl}${endpoint}?search=${encodeURIComponent(payload)}`
-          
+
           const response = await this.httpClient.get(testUrl, {
-            headers: this.getAuthHeaders(auth)
+            headers: this.getAuthHeaders(auth),
           })
 
           // Check if payload is reflected in response
-          const isReflected = response.data.includes(payload) || 
-                             response.data.includes(payload.replace(/'/g, '"'))
+          const isReflected =
+            response.data.includes(payload) || response.data.includes(payload.replace(/'/g, '"'))
 
           if (isReflected && response.headers['content-type']?.includes('text/html')) {
             results.push({
@@ -294,7 +297,7 @@ export class PenetrationTestOrchestrator extends EventEmitter {
                 description: 'Reflected XSS vulnerability detected',
                 impact: 'Session hijacking, defacement, malicious redirects',
                 likelihood: 'HIGH',
-                exploitability: 'HIGH'
+                exploitability: 'HIGH',
               },
               evidence: {
                 request: testUrl,
@@ -303,8 +306,8 @@ export class PenetrationTestOrchestrator extends EventEmitter {
                 logs: [
                   `Payload reflected: ${isReflected}`,
                   `Content-Type: ${response.headers['content-type']}`,
-                  `Status code: ${response.status}`
-                ]
+                  `Status code: ${response.status}`,
+                ],
               },
               remediation: {
                 steps: [
@@ -312,30 +315,34 @@ export class PenetrationTestOrchestrator extends EventEmitter {
                   'Use Content Security Policy (CSP) headers',
                   'Validate and sanitize all user inputs',
                   'Use secure templating engines',
-                  'Implement HttpOnly and Secure cookie flags'
+                  'Implement HttpOnly and Secure cookie flags',
                 ],
                 priority: 'HIGH',
                 effort: 'MEDIUM',
-                timeline: '1-2 weeks'
-              }
+                timeline: '1-2 weeks',
+              },
             })
           }
 
           // Test POST body injection
           if (endpoint.includes('form') || endpoint.includes('post')) {
             try {
-              const postResponse = await this.httpClient.post(`${baseUrl}${endpoint}`, {
-                data: payload,
-                comment: payload
-              }, {
-                headers: {
-                  ...this.getAuthHeaders(auth),
-                  'Content-Type': 'application/json'
+              const postResponse = await this.httpClient.post(
+                `${baseUrl}${endpoint}`,
+                {
+                  data: payload,
+                  comment: payload,
+                },
+                {
+                  headers: {
+                    ...this.getAuthHeaders(auth),
+                    'Content-Type': 'application/json',
+                  },
                 }
-              })
+              )
 
               const isPostReflected = postResponse.data.includes(payload)
-              
+
               if (isPostReflected) {
                 results.push({
                   testName: 'Stored XSS Test',
@@ -346,7 +353,7 @@ export class PenetrationTestOrchestrator extends EventEmitter {
                     description: 'Stored XSS vulnerability detected',
                     impact: 'Persistent attacks, session hijacking, data theft',
                     likelihood: 'HIGH',
-                    exploitability: 'HIGH'
+                    exploitability: 'HIGH',
                   },
                   evidence: {
                     request: `POST ${baseUrl}${endpoint}`,
@@ -354,8 +361,8 @@ export class PenetrationTestOrchestrator extends EventEmitter {
                     payload,
                     logs: [
                       `Stored payload reflected: ${isPostReflected}`,
-                      `Status code: ${postResponse.status}`
-                    ]
+                      `Status code: ${postResponse.status}`,
+                    ],
                   },
                   remediation: {
                     steps: [
@@ -363,21 +370,20 @@ export class PenetrationTestOrchestrator extends EventEmitter {
                       'Use output encoding for all dynamic content',
                       'Implement Content Security Policy',
                       'Use secure coding practices',
-                      'Regular security code reviews'
+                      'Regular security code reviews',
                     ],
                     priority: 'CRITICAL',
                     effort: 'HIGH',
-                    timeline: '2-3 weeks'
-                  }
+                    timeline: '2-3 weeks',
+                  },
                 })
               }
             } catch (postError) {
               // POST test failed, continue
             }
           }
-
         } catch (error) {
-          console.warn(`XSS test error for ${endpoint}:`, error)
+          
         }
       }
     }
@@ -388,15 +394,23 @@ export class PenetrationTestOrchestrator extends EventEmitter {
   /**
    * Test for authentication and authorization flaws
    */
-  async testAuthenticationFlaws(baseUrl: string, endpoints: string[], auth: any): Promise<TestResult[]> {
+  async testAuthenticationFlaws(
+    baseUrl: string,
+    endpoints: string[],
+    auth: unknown
+  ): Promise<TestResult[]> {
     const results: TestResult[] = []
 
     // Test for missing authentication
     for (const endpoint of endpoints) {
       try {
         const response = await this.httpClient.get(`${baseUrl}${endpoint}`)
-        
-        if (response.status === 200 && !endpoint.includes('public') && !endpoint.includes('login')) {
+
+        if (
+          response.status === 200 &&
+          !endpoint.includes('public') &&
+          !endpoint.includes('login')
+        ) {
           results.push({
             testName: 'Missing Authentication Test',
             passed: false,
@@ -406,27 +420,24 @@ export class PenetrationTestOrchestrator extends EventEmitter {
               description: 'Endpoint accessible without authentication',
               impact: 'Unauthorized access to sensitive resources',
               likelihood: 'HIGH',
-              exploitability: 'HIGH'
+              exploitability: 'HIGH',
             },
             evidence: {
               request: `GET ${baseUrl}${endpoint}`,
               response: response.data.substring(0, 500),
-              logs: [
-                `Status code: ${response.status}`,
-                'No authentication required'
-              ]
+              logs: [`Status code: ${response.status}`, 'No authentication required'],
             },
             remediation: {
               steps: [
                 'Implement authentication for all sensitive endpoints',
                 'Use secure session management',
                 'Implement proper access controls',
-                'Regular security audits of endpoints'
+                'Regular security audits of endpoints',
               ],
               priority: 'HIGH',
               effort: 'MEDIUM',
-              timeline: '1-2 weeks'
-            }
+              timeline: '1-2 weeks',
+            },
           })
         }
       } catch (error) {
@@ -441,7 +452,7 @@ export class PenetrationTestOrchestrator extends EventEmitter {
         auth.credentials.token.replace(/.$/, 'X'), // Change last character
         'Bearer invalid_token',
         'Bearer ' + Buffer.from('{"user":"admin"}').toString('base64'),
-        auth.credentials.token.substring(0, -10) + 'tampered'
+        auth.credentials.token.substring(0, -10) + 'tampered',
       ]
 
       for (const endpoint of endpoints) {
@@ -449,8 +460,8 @@ export class PenetrationTestOrchestrator extends EventEmitter {
           try {
             const response = await this.httpClient.get(`${baseUrl}${endpoint}`, {
               headers: {
-                'Authorization': token
-              }
+                Authorization: token,
+              },
             })
 
             if (response.status === 200) {
@@ -463,16 +474,13 @@ export class PenetrationTestOrchestrator extends EventEmitter {
                   description: 'Application accepts invalid/manipulated tokens',
                   impact: 'Authentication bypass, privilege escalation',
                   likelihood: 'MEDIUM',
-                  exploitability: 'HIGH'
+                  exploitability: 'HIGH',
                 },
                 evidence: {
                   request: `GET ${baseUrl}${endpoint}`,
                   response: response.data.substring(0, 500),
                   payload: token,
-                  logs: [
-                    `Status code: ${response.status}`,
-                    'Invalid token accepted'
-                  ]
+                  logs: [`Status code: ${response.status}`, 'Invalid token accepted'],
                 },
                 remediation: {
                   steps: [
@@ -480,12 +488,12 @@ export class PenetrationTestOrchestrator extends EventEmitter {
                     'Verify token signatures',
                     'Check token expiration',
                     'Validate token structure and claims',
-                    'Implement token revocation'
+                    'Implement token revocation',
                   ],
                   priority: 'CRITICAL',
                   effort: 'HIGH',
-                  timeline: '1-2 weeks'
-                }
+                  timeline: '1-2 weeks',
+                },
               })
             }
           } catch (error) {
@@ -516,13 +524,13 @@ export class PenetrationTestOrchestrator extends EventEmitter {
         '/server-status',
         '/phpinfo.php',
         '/web.config',
-        '/.htaccess'
+        '/.htaccess',
       ]
 
       for (const file of sensitiveFiles) {
         try {
           const response = await this.httpClient.get(`${baseUrl}${file}`)
-          
+
           if (response.status === 200) {
             results.push({
               testName: 'Sensitive File Exposure Test',
@@ -533,27 +541,27 @@ export class PenetrationTestOrchestrator extends EventEmitter {
                 description: `Sensitive file exposed: ${file}`,
                 impact: 'Information disclosure, system compromise',
                 likelihood: 'MEDIUM',
-                exploitability: 'LOW'
+                exploitability: 'LOW',
               },
               evidence: {
                 request: `GET ${baseUrl}${file}`,
                 response: response.data.substring(0, 500),
                 logs: [
                   `Status code: ${response.status}`,
-                  `Content length: ${response.headers['content-length']}`
-                ]
+                  `Content length: ${response.headers['content-length']}`,
+                ],
               },
               remediation: {
                 steps: [
                   'Remove or restrict access to sensitive files',
                   'Configure web server security rules',
                   'Implement proper file permissions',
-                  'Use .gitignore for version control exclusions'
+                  'Use .gitignore for version control exclusions',
                 ],
                 priority: file.includes('.env') ? 'CRITICAL' : 'MEDIUM',
                 effort: 'LOW',
-                timeline: '1 week'
-              }
+                timeline: '1 week',
+              },
             })
           }
         } catch (error) {
@@ -564,13 +572,13 @@ export class PenetrationTestOrchestrator extends EventEmitter {
       // Test security headers
       const response = await this.httpClient.get(baseUrl)
       const headers = response.headers
-      
+
       const requiredHeaders = [
         'strict-transport-security',
         'x-content-type-options',
         'x-frame-options',
         'x-xss-protection',
-        'content-security-policy'
+        'content-security-policy',
       ]
 
       for (const header of requiredHeaders) {
@@ -584,32 +592,31 @@ export class PenetrationTestOrchestrator extends EventEmitter {
               description: `Missing security header: ${header}`,
               impact: 'Increased attack surface, client-side vulnerabilities',
               likelihood: 'MEDIUM',
-              exploitability: 'MEDIUM'
+              exploitability: 'MEDIUM',
             },
             evidence: {
               request: `GET ${baseUrl}`,
               logs: [
                 `Missing header: ${header}`,
-                `Present headers: ${Object.keys(headers).join(', ')}`
-              ]
+                `Present headers: ${Object.keys(headers).join(', ')}`,
+              ],
             },
             remediation: {
               steps: [
                 `Add ${header} header to server configuration`,
                 'Review and implement all security headers',
                 'Use security header testing tools',
-                'Regular security header audits'
+                'Regular security header audits',
               ],
               priority: 'MEDIUM',
               effort: 'LOW',
-              timeline: '1 week'
-            }
+              timeline: '1 week',
+            },
           })
         }
       }
-
     } catch (error) {
-      console.error('Security misconfiguration test error:', error)
+      
     }
 
     return results
@@ -620,14 +627,18 @@ export class PenetrationTestOrchestrator extends EventEmitter {
    */
   private generateRecommendations(results: TestResult[]): string[] {
     const recommendations: string[] = []
-    const vulnerabilityTypes = new Set(results.map(r => r.vulnerability?.cwe).filter(Boolean))
+    const vulnerabilityTypes = new Set(results.map((r) => r.vulnerability?.cwe).filter(Boolean))
 
     if (vulnerabilityTypes.has('CWE-89')) {
-      recommendations.push('Implement parameterized queries and input validation to prevent SQL injection')
+      recommendations.push(
+        'Implement parameterized queries and input validation to prevent SQL injection'
+      )
     }
 
     if (vulnerabilityTypes.has('CWE-79')) {
-      recommendations.push('Deploy Content Security Policy and output encoding to prevent XSS attacks')
+      recommendations.push(
+        'Deploy Content Security Policy and output encoding to prevent XSS attacks'
+      )
     }
 
     if (vulnerabilityTypes.has('CWE-306') || vulnerabilityTypes.has('CWE-287')) {
@@ -643,15 +654,19 @@ export class PenetrationTestOrchestrator extends EventEmitter {
     }
 
     // General recommendations
-    const criticalCount = results.filter(r => r.severity === 'CRITICAL').length
-    const highCount = results.filter(r => r.severity === 'HIGH').length
+    const criticalCount = results.filter((r) => r.severity === 'CRITICAL').length
+    const highCount = results.filter((r) => r.severity === 'HIGH').length
 
     if (criticalCount > 0) {
-      recommendations.push(`URGENT: ${criticalCount} critical vulnerabilities require immediate attention`)
+      recommendations.push(
+        `URGENT: ${criticalCount} critical vulnerabilities require immediate attention`
+      )
     }
 
     if (highCount > 0) {
-      recommendations.push(`${highCount} high-severity vulnerabilities should be addressed within 1-2 weeks`)
+      recommendations.push(
+        `${highCount} high-severity vulnerabilities should be addressed within 1-2 weeks`
+      )
     }
 
     recommendations.push('Implement automated security testing in CI/CD pipeline')
@@ -665,7 +680,7 @@ export class PenetrationTestOrchestrator extends EventEmitter {
    * Execute specific test type
    */
   private async executeTestType(
-    testType: SecurityScanConfig['testTypes'][0], 
+    testType: SecurityScanConfig['testTypes'][0],
     config: SecurityScanConfig
   ): Promise<TestResult[]> {
     switch (testType) {
@@ -679,17 +694,17 @@ export class PenetrationTestOrchestrator extends EventEmitter {
       case 'SECURITY_MISCONFIG':
         return this.testSecurityMisconfigurations(config.baseUrl)
       default:
-        console.warn(`Test type ${testType} not implemented yet`)
+        
         return []
     }
   }
 
   private calculateOverallSeverity(results: TestResult[]): PenetrationTest['severity'] {
     const severityCounts = {
-      CRITICAL: results.filter(r => r.severity === 'CRITICAL').length,
-      HIGH: results.filter(r => r.severity === 'HIGH').length,
-      MEDIUM: results.filter(r => r.severity === 'MEDIUM').length,
-      LOW: results.filter(r => r.severity === 'LOW').length
+      CRITICAL: results.filter((r) => r.severity === 'CRITICAL').length,
+      HIGH: results.filter((r) => r.severity === 'HIGH').length,
+      MEDIUM: results.filter((r) => r.severity === 'MEDIUM').length,
+      LOW: results.filter((r) => r.severity === 'LOW').length,
     }
 
     if (severityCounts.CRITICAL > 0) return 'CRITICAL'
@@ -701,14 +716,16 @@ export class PenetrationTestOrchestrator extends EventEmitter {
   private getAuthHeaders(auth: SecurityScanConfig['authentication']): Record<string, string> {
     switch (auth.type) {
       case 'BEARER':
-        return { 'Authorization': `Bearer ${auth.credentials.token}` }
+        return { Authorization: `Bearer ${auth.credentials.token}` }
       case 'BASIC':
-        const basic = Buffer.from(`${auth.credentials.username}:${auth.credentials.password}`).toString('base64')
-        return { 'Authorization': `Basic ${basic}` }
+        const basic = Buffer.from(
+          `${auth.credentials.username}:${auth.credentials.password}`
+        ).toString('base64')
+        return { Authorization: `Basic ${basic}` }
       case 'API_KEY':
         return { 'X-API-Key': auth.credentials.apiKey }
       case 'COOKIE':
-        return { 'Cookie': auth.credentials.cookie }
+        return { Cookie: auth.credentials.cookie }
       default:
         return {}
     }
@@ -716,26 +733,26 @@ export class PenetrationTestOrchestrator extends EventEmitter {
 
   private setupHttpInterceptors(): void {
     // Request interceptor for logging
-    this.httpClient.interceptors.request.use(request => {
+    this.httpClient.interceptors.request.use((request) => {
       if (process.env.NODE_ENV === 'development') {
-        console.log(`🔍 Testing: ${request.method?.toUpperCase()} ${request.url}`)
+        console.log(`[PenTest] ${request.method} ${request.url}`)
       }
       return request
     })
 
     // Response interceptor for analysis
-    this.httpClient.interceptors.response.use(response => {
+    this.httpClient.interceptors.response.use((response) => {
       // Log suspicious responses
       if (response.data && typeof response.data === 'string') {
         const suspiciousPatterns = [
           /error in your sql syntax/i,
           /warning.*mysql/i,
           /uncaught exception/i,
-          /stack trace/i
+          /stack trace/i,
         ]
 
-        if (suspiciousPatterns.some(pattern => pattern.test(response.data))) {
-          console.warn(`⚠️ Suspicious response detected from ${response.config.url}`)
+        if (suspiciousPatterns.some((pattern) => pattern.test(response.data))) {
+          
         }
       }
 
@@ -756,22 +773,22 @@ export class PenetrationTestOrchestrator extends EventEmitter {
     failed: number
   } {
     let results: TestResult[]
-    
+
     if (testId) {
-      const test = this.testHistory.find(t => t.id === testId)
+      const test = this.testHistory.find((t) => t.id === testId)
       results = test?.results || []
     } else {
-      results = this.testHistory.flatMap(t => t.results)
+      results = this.testHistory.flatMap((t) => t.results)
     }
 
     return {
       total: results.length,
-      critical: results.filter(r => r.severity === 'CRITICAL').length,
-      high: results.filter(r => r.severity === 'HIGH').length,
-      medium: results.filter(r => r.severity === 'MEDIUM').length,
-      low: results.filter(r => r.severity === 'LOW').length,
-      passed: results.filter(r => r.passed).length,
-      failed: results.filter(r => !r.passed).length
+      critical: results.filter((r) => r.severity === 'CRITICAL').length,
+      high: results.filter((r) => r.severity === 'HIGH').length,
+      medium: results.filter((r) => r.severity === 'MEDIUM').length,
+      low: results.filter((r) => r.severity === 'LOW').length,
+      passed: results.filter((r) => r.passed).length,
+      failed: results.filter((r) => !r.passed).length,
     }
   }
 
@@ -799,10 +816,10 @@ export class PenetrationTestOrchestrator extends EventEmitter {
       test.status = 'FAILED'
       test.completedAt = new Date()
       test.metadata.cancelled = true
-      
+
       this.activeTests.delete(testId)
       this.testHistory.push(test)
-      
+
       this.emit('testCancelled', test)
       return true
     }
@@ -817,9 +834,9 @@ export class PenetrationTestOrchestrator extends EventEmitter {
     for (const testId of this.activeTests.keys()) {
       await this.cancelTest(testId)
     }
-    
+
     this.removeAllListeners()
-    console.log('✅ Penetration Test Orchestrator cleanup completed')
+    
   }
 }
 

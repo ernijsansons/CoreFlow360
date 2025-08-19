@@ -36,7 +36,7 @@ export interface CacheConfig {
   }
 }
 
-export interface CacheEntry<T = any> {
+export interface CacheEntry<T = unknown> {
   value: T
   metadata: {
     size: number
@@ -87,9 +87,14 @@ export class CacheManager extends EventEmitter {
     this.config = config
     this.strategies = new Map()
     this.refreshQueue = new Map()
-    
+
     // Skip Redis initialization during build
-    if (!process.env.VERCEL && !process.env.CI && process.env.NEXT_PHASE !== 'phase-production-build' && process.env.VERCEL_ENV !== 'preview') {
+    if (
+      !process.env.VERCEL &&
+      !process.env.CI &&
+      process.env.NEXT_PHASE !== 'phase-production-build' &&
+      process.env.VERCEL_ENV !== 'preview'
+    ) {
       this.initializeRedis()
     }
     this.initializeMemoryCache()
@@ -113,14 +118,14 @@ export class CacheManager extends EventEmitter {
     }
   ): Promise<boolean> {
     const startTime = Date.now()
-    
+
     try {
       // Apply cache strategy if specified
       const strategy = options?.strategy ? this.strategies.get(options.strategy) : null
       const ttl = options?.ttl || strategy?.ttl || this.config.memory.ttl
       const compress = options?.compress ?? strategy?.compression ?? this.shouldCompress(value)
       const tags = options?.tags || strategy?.tags || []
-      
+
       // Create cache entry
       const entry: CacheEntry<T> = {
         value,
@@ -131,55 +136,54 @@ export class CacheManager extends EventEmitter {
           lastAccessed: new Date(),
           accessCount: 0,
           tags,
-          version: options?.version || '1.0'
-        }
+          version: options?.version || '1.0',
+        },
       }
-      
+
       // Compress if needed
-      let finalValue: any = value
+      let finalValue: unknown = value
       if (compress && entry.metadata.size > this.config.compression.minSize) {
         finalValue = this.compressValue(value)
         entry.metadata.compressed = true
         entry.metadata.size = this.calculateSize(finalValue)
       }
-      
+
       // Write-through strategy: write to both memory and Redis
       if (this.config.strategies.writeThrough) {
         const [memorySuccess, redisSuccess] = await Promise.allSettled([
           this.setMemory(key, entry, ttl),
-          this.setRedis(key, finalValue, ttl, tags)
+          this.setRedis(key, finalValue, ttl, tags),
         ])
-        
+
         const success = memorySuccess.status === 'fulfilled' && redisSuccess.status === 'fulfilled'
         this.updateMetrics('set', Date.now() - startTime, success)
         return success
       }
-      
+
       // Write-back strategy: write to memory first, Redis asynchronously
       if (this.config.strategies.writeBack) {
         const memorySuccess = await this.setMemory(key, entry, ttl)
-        
+
         // Schedule Redis write
         setImmediate(() => this.setRedis(key, finalValue, ttl, tags))
-        
+
         this.updateMetrics('set', Date.now() - startTime, memorySuccess)
         return memorySuccess
       }
-      
+
       // Default: write to both sequentially
       const memorySuccess = await this.setMemory(key, entry, ttl)
       const redisSuccess = await this.setRedis(key, finalValue, ttl, tags)
-      
+
       const success = memorySuccess && redisSuccess
       this.updateMetrics('set', Date.now() - startTime, success)
-      
+
       // Schedule refresh if needed
       if (success && strategy?.refreshStrategy === 'scheduled') {
         this.scheduleRefresh(key, strategy, ttl)
       }
-      
+
       return success
-      
     } catch (error) {
       this.updateMetrics('set', Date.now() - startTime, false)
       this.emit('error', { operation: 'set', key, error })
@@ -199,26 +203,26 @@ export class CacheManager extends EventEmitter {
     }
   ): Promise<T | null> {
     const startTime = Date.now()
-    
+
     try {
       // Try memory cache first
       const memoryEntry = this.memoryCache.get(key)
       if (memoryEntry) {
         memoryEntry.metadata.lastAccessed = new Date()
         memoryEntry.metadata.accessCount++
-        
+
         this.updateMetrics('get', Date.now() - startTime, true, 'memory')
         this.emit('hit', { key, source: 'memory', responseTime: Date.now() - startTime })
-        
+
         return memoryEntry.value as T
       }
-      
+
       // Try Redis cache
       const redisValue = await this.getRedis(key)
       if (redisValue !== null) {
         // Decompress if needed
         const value = this.isCompressed(redisValue) ? this.decompressValue(redisValue) : redisValue
-        
+
         // Update memory cache
         const entry: CacheEntry<T> = {
           value: value as T,
@@ -229,36 +233,35 @@ export class CacheManager extends EventEmitter {
             lastAccessed: new Date(),
             accessCount: 1,
             tags: [],
-            version: '1.0'
-          }
+            version: '1.0',
+          },
         }
-        
+
         this.memoryCache.set(key, entry)
-        
+
         this.updateMetrics('get', Date.now() - startTime, true, 'redis')
         this.emit('hit', { key, source: 'redis', responseTime: Date.now() - startTime })
-        
+
         return value as T
       }
-      
+
       // Cache miss - try fallback if provided
       if (options?.fallback) {
         const value = await options.fallback()
-        
+
         // Cache the fallback result
         await this.set(key, value, { strategy: options.strategy })
-        
+
         this.updateMetrics('get', Date.now() - startTime, false)
         this.emit('miss', { key, hadFallback: true, responseTime: Date.now() - startTime })
-        
+
         return value
       }
-      
+
       this.updateMetrics('get', Date.now() - startTime, false)
       this.emit('miss', { key, hadFallback: false, responseTime: Date.now() - startTime })
-      
+
       return null
-      
     } catch (error) {
       this.updateMetrics('get', Date.now() - startTime, false)
       this.emit('error', { operation: 'get', key, error })
@@ -272,12 +275,12 @@ export class CacheManager extends EventEmitter {
   async mget<T>(keys: string[]): Promise<Map<string, T>> {
     const results = new Map<string, T>()
     const startTime = Date.now()
-    
+
     try {
       // Check memory cache first
       const memoryHits = new Map<string, T>()
       const memoryMisses: string[] = []
-      
+
       for (const key of keys) {
         const entry = this.memoryCache.get(key)
         if (entry) {
@@ -288,12 +291,12 @@ export class CacheManager extends EventEmitter {
           memoryMisses.push(key)
         }
       }
-      
+
       // Batch get from Redis for memory misses
       let redisResults = new Map<string, T>()
       if (memoryMisses.length > 0) {
         redisResults = await this.mgetRedis(memoryMisses)
-        
+
         // Update memory cache with Redis hits
         for (const [key, value] of redisResults) {
           const entry: CacheEntry<T> = {
@@ -305,13 +308,13 @@ export class CacheManager extends EventEmitter {
               lastAccessed: new Date(),
               accessCount: 1,
               tags: [],
-              version: '1.0'
-            }
+              version: '1.0',
+            },
           }
           this.memoryCache.set(key, entry)
         }
       }
-      
+
       // Combine results
       for (const [key, value] of memoryHits) {
         results.set(key, value)
@@ -319,23 +322,22 @@ export class CacheManager extends EventEmitter {
       for (const [key, value] of redisResults) {
         results.set(key, value)
       }
-      
+
       const hitCount = results.size
       const missCount = keys.length - hitCount
-      
+
       this.metrics.hits += hitCount
       this.metrics.misses += missCount
       this.updateHitRatio()
-      
+
       this.emit('multiget', {
         keys: keys.length,
         hits: hitCount,
         misses: missCount,
-        responseTime: Date.now() - startTime
+        responseTime: Date.now() - startTime,
       })
-      
+
       return results
-      
     } catch (error) {
       this.emit('error', { operation: 'mget', keys, error })
       return results
@@ -348,19 +350,18 @@ export class CacheManager extends EventEmitter {
   async delete(key: string | string[]): Promise<boolean> {
     const keys = Array.isArray(key) ? key : [key]
     const startTime = Date.now()
-    
+
     try {
       // Delete from memory cache
       for (const k of keys) {
         this.memoryCache.delete(k)
       }
-      
+
       // Delete from Redis
       await this.deleteRedis(keys)
-      
+
       this.emit('delete', { keys, responseTime: Date.now() - startTime })
       return true
-      
     } catch (error) {
       this.emit('error', { operation: 'delete', keys, error })
       return false
@@ -373,41 +374,40 @@ export class CacheManager extends EventEmitter {
   async invalidateByTags(tags: string[]): Promise<number> {
     const startTime = Date.now()
     let invalidatedCount = 0
-    
+
     try {
       // Get keys associated with tags from Redis
       const pipeline = this.redis.pipeline()
       for (const tag of tags) {
         pipeline.smembers(`tag:${tag}`)
       }
-      
+
       const results = await pipeline.exec()
       const keysToInvalidate = new Set<string>()
-      
+
       if (results) {
         for (const result of results) {
           if (result[1]) {
             const keys = result[1] as string[]
-            keys.forEach(key => keysToInvalidate.add(key))
+            keys.forEach((key) => keysToInvalidate.add(key))
           }
         }
       }
-      
+
       // Delete the keys
       if (keysToInvalidate.size > 0) {
         const keysArray = Array.from(keysToInvalidate)
         await this.delete(keysArray)
         invalidatedCount = keysArray.length
       }
-      
-      this.emit('invalidate', { 
-        tags, 
-        keysInvalidated: invalidatedCount, 
-        responseTime: Date.now() - startTime 
+
+      this.emit('invalidate', {
+        tags,
+        keysInvalidated: invalidatedCount,
+        responseTime: Date.now() - startTime,
       })
-      
+
       return invalidatedCount
-      
     } catch (error) {
       this.emit('error', { operation: 'invalidateByTags', tags, error })
       return 0
@@ -417,36 +417,32 @@ export class CacheManager extends EventEmitter {
   /**
    * Preload cache with common data
    */
-  async preload(preloadRules: Array<{
-    key: string
-    loader: () => Promise<any>
-    strategy?: string
-    ttl?: number
-  }>): Promise<number> {
+  async preload(
+    preloadRules: Array<{
+      key: string
+      loader: () => Promise<unknown>
+      strategy?: string
+      ttl?: number
+    }>
+  ): Promise<number> {
     let loadedCount = 0
-    
-    console.log(`🔄 Preloading ${preloadRules.length} cache entries`)
-    
+
     const promises = preloadRules.map(async (rule) => {
       try {
         const value = await rule.loader()
         const success = await this.set(rule.key, value, {
           strategy: rule.strategy,
-          ttl: rule.ttl
+          ttl: rule.ttl,
         })
-        
+
         if (success) {
           loadedCount++
         }
-        
-      } catch (error) {
-        console.error(`Failed to preload cache key ${rule.key}:`, error)
-      }
+      } catch (error) {}
     })
-    
+
     await Promise.allSettled(promises)
-    
-    console.log(`✅ Preloaded ${loadedCount}/${preloadRules.length} cache entries`)
+
     return loadedCount
   }
 
@@ -464,7 +460,7 @@ export class CacheManager extends EventEmitter {
       memoryEntries: this.memoryCache.size,
       redisMemoryUsage: 0, // Would need Redis INFO command
       strategiesActive: this.strategies.size,
-      refreshQueueSize: this.refreshQueue.size
+      refreshQueueSize: this.refreshQueue.size,
     }
   }
 
@@ -473,53 +469,59 @@ export class CacheManager extends EventEmitter {
    */
   registerStrategy(strategy: CacheStrategy): void {
     this.strategies.set(strategy.name, strategy)
-    console.log(`📋 Registered cache strategy: ${strategy.name}`)
   }
 
   /**
    * Warm up cache for specific tenant
    */
   async warmup(tenantId: string): Promise<void> {
-    console.log(`🔥 Warming up cache for tenant: ${tenantId}`)
-    
     // Common data to preload
     const preloadRules = [
       {
         key: `tenant:${tenantId}:config`,
         loader: async () => ({ config: 'tenant_config_data' }),
         strategy: 'tenant_config',
-        ttl: 3600
+        ttl: 3600,
       },
       {
         key: `tenant:${tenantId}:subscriptions`,
         loader: async () => ({ subscriptions: 'subscription_data' }),
         strategy: 'subscription_data',
-        ttl: 1800
-      }
+        ttl: 1800,
+      },
     ]
-    
+
     await this.preload(preloadRules)
   }
 
   // Private methods
   private initializeRedis(): void {
     // Skip during build
-    if (process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
-      console.log('⏭️ Skipping Redis cache initialization during build')
+    if (
+      process.env.VERCEL ||
+      process.env.CI ||
+      process.env.NEXT_PHASE === 'phase-production-build' ||
+      process.env.VERCEL_ENV === 'preview'
+    ) {
       return
     }
-    
+
     if (this.config.redis.cluster) {
       // Redis Cluster setup
-      this.redis = new Cluster([{
-        host: this.config.redis.host,
-        port: this.config.redis.port
-      }], {
-        maxRetriesPerRequest: this.config.redis.maxRetriesPerRequest,
-        retryDelayOnFailover: this.config.redis.retryDelayOnFailover,
-        enableOfflineQueue: this.config.redis.enableOfflineQueue,
-        lazyConnect: true
-      })
+      this.redis = new Cluster(
+        [
+          {
+            host: this.config.redis.host,
+            port: this.config.redis.port,
+          },
+        ],
+        {
+          maxRetriesPerRequest: this.config.redis.maxRetriesPerRequest,
+          retryDelayOnFailover: this.config.redis.retryDelayOnFailover,
+          enableOfflineQueue: this.config.redis.enableOfflineQueue,
+          lazyConnect: true,
+        }
+      )
     } else {
       // Single Redis instance
       this.redis = new Redis({
@@ -529,18 +531,16 @@ export class CacheManager extends EventEmitter {
         maxRetriesPerRequest: this.config.redis.maxRetriesPerRequest,
         retryDelayOnFailover: this.config.redis.retryDelayOnFailover,
         enableOfflineQueue: this.config.redis.enableOfflineQueue,
-        lazyConnect: true
+        lazyConnect: true,
       })
     }
-    
+
     if (this.redis) {
       this.redis.on('connect', () => {
         this.isConnected = true
-        console.log('✅ Redis cache connected')
       })
-      
+
       this.redis.on('error', (error) => {
-        console.error('❌ Redis cache error:', error)
         this.emit('redisError', error)
       })
     }
@@ -555,10 +555,8 @@ export class CacheManager extends EventEmitter {
       dispose: (entry, key) => {
         this.metrics.evictions++
         this.emit('eviction', { key, size: entry.metadata.size })
-      }
+      },
     })
-    
-    console.log('✅ Memory cache initialized')
   }
 
   private initializeMetrics(): void {
@@ -571,7 +569,7 @@ export class CacheManager extends EventEmitter {
       compressionRatio: 0,
       averageResponseTime: 0,
       evictions: 0,
-      errors: 0
+      errors: 0,
     }
   }
 
@@ -586,7 +584,7 @@ export class CacheManager extends EventEmitter {
         preload: false,
         tags: ['user', 'session'],
         invalidationRules: ['user_logout'],
-        refreshStrategy: 'lazy'
+        refreshStrategy: 'lazy',
       },
       {
         name: 'tenant_config',
@@ -596,7 +594,7 @@ export class CacheManager extends EventEmitter {
         preload: true,
         tags: ['tenant', 'config'],
         invalidationRules: ['tenant_update'],
-        refreshStrategy: 'eager'
+        refreshStrategy: 'eager',
       },
       {
         name: 'dashboard_data',
@@ -606,11 +604,11 @@ export class CacheManager extends EventEmitter {
         preload: false,
         tags: ['dashboard', 'metrics'],
         invalidationRules: ['data_update'],
-        refreshStrategy: 'scheduled'
-      }
+        refreshStrategy: 'scheduled',
+      },
     ]
-    
-    defaultStrategies.forEach(strategy => {
+
+    defaultStrategies.forEach((strategy) => {
       this.strategies.set(strategy.name, strategy)
     })
   }
@@ -624,17 +622,22 @@ export class CacheManager extends EventEmitter {
     }
   }
 
-  private async setRedis(key: string, value: any, ttl: number, tags: string[]): Promise<boolean> {
+  private async setRedis(
+    key: string,
+    value: unknown,
+    ttl: number,
+    tags: string[]
+  ): Promise<boolean> {
     try {
       const pipeline = this.redis.pipeline()
       pipeline.setex(key, ttl, JSON.stringify(value))
-      
+
       // Add to tag sets
       for (const tag of tags) {
         pipeline.sadd(`tag:${tag}`, key)
         pipeline.expire(`tag:${tag}`, ttl + 60)
       }
-      
+
       await pipeline.exec()
       return true
     } catch (error) {
@@ -642,7 +645,7 @@ export class CacheManager extends EventEmitter {
     }
   }
 
-  private async getRedis(key: string): Promise<any> {
+  private async getRedis(key: string): Promise<unknown> {
     try {
       const value = await this.redis.get(key)
       return value ? JSON.parse(value) : null
@@ -653,10 +656,10 @@ export class CacheManager extends EventEmitter {
 
   private async mgetRedis<T>(keys: string[]): Promise<Map<string, T>> {
     const results = new Map<string, T>()
-    
+
     try {
       const values = await this.redis.mget(...keys)
-      
+
       for (let i = 0; i < keys.length; i++) {
         const value = values[i]
         if (value) {
@@ -665,11 +668,8 @@ export class CacheManager extends EventEmitter {
           results.set(keys[i], decompressed)
         }
       }
-      
-    } catch (error) {
-      console.error('mgetRedis error:', error)
-    }
-    
+    } catch (error) {}
+
     return results
   }
 
@@ -678,60 +678,62 @@ export class CacheManager extends EventEmitter {
       if (keys.length > 0 && this.redis) {
         await this.redis.del(...keys)
       }
-    } catch (error) {
-      console.error('deleteRedis error:', error)
-    }
+    } catch (error) {}
   }
 
-  private shouldCompress(value: any): boolean {
+  private shouldCompress(value: unknown): boolean {
     if (!this.config.compression.enabled) {
       return false
     }
-    
+
     const size = this.calculateSize(value)
     return size > this.config.compression.minSize
   }
 
-  private compressValue(value: any): string {
+  private compressValue(value: unknown): string {
     const json = JSON.stringify(value)
     const compressed = gzipSync(json, { level: this.config.compression.level })
     return `__compressed__${compressed.toString('base64')}`
   }
 
-  private decompressValue(compressedValue: string): any {
+  private decompressValue(compressedValue: string): unknown {
     const base64Data = compressedValue.replace('__compressed__', '')
     const compressed = Buffer.from(base64Data, 'base64')
     const decompressed = gunzipSync(compressed)
     return JSON.parse(decompressed.toString())
   }
 
-  private isCompressed(value: any): boolean {
+  private isCompressed(value: unknown): boolean {
     return typeof value === 'string' && value.startsWith('__compressed__')
   }
 
-  private calculateSize(value: any): number {
+  private calculateSize(value: unknown): number {
     return Buffer.byteLength(JSON.stringify(value), 'utf8')
   }
 
   private scheduleRefresh(key: string, strategy: CacheStrategy, ttl: number): void {
     // Schedule refresh at 80% of TTL
     const refreshTime = ttl * 0.8 * 1000
-    
+
     const timer = setTimeout(async () => {
       try {
         // Attempt to refresh the cache entry
         this.emit('refreshNeeded', { key, strategy: strategy.name })
       } catch (error) {
-        console.error(`Failed to refresh cache key ${key}:`, error)
       } finally {
         this.refreshQueue.delete(key)
       }
     }, refreshTime)
-    
+
     this.refreshQueue.set(key, timer)
   }
 
-  private updateMetrics(operation: string, responseTime: number, success: boolean, source?: string): void {
+  private updateMetrics(
+    operation: string,
+    responseTime: number,
+    success: boolean,
+    source?: string
+  ): void {
     if (operation === 'get') {
       if (success) {
         this.metrics.hits++
@@ -740,14 +742,14 @@ export class CacheManager extends EventEmitter {
       }
       this.updateHitRatio()
     }
-    
+
     if (!success) {
       this.metrics.errors++
     }
-    
+
     // Update average response time
     this.metrics.averageResponseTime = (this.metrics.averageResponseTime + responseTime) / 2
-    
+
     // Update memory usage
     this.metrics.memoryUsage = this.memoryCache.calculatedSize || 0
   }
@@ -772,14 +774,12 @@ export class CacheManager extends EventEmitter {
       clearTimeout(timer)
     }
     this.refreshQueue.clear()
-    
+
     // Clear memory cache
     this.memoryCache.clear()
-    
+
     // Disconnect Redis
     await this.redis.quit()
-    
-    console.log('✅ Cache manager cleanup completed')
   }
 }
 

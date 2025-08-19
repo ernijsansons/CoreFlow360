@@ -9,11 +9,11 @@ import { db } from '@/lib/db'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { createHash } from 'crypto'
-import { 
+import {
   encryptAudioMiddleware,
   decryptAudioMiddleware,
   encryptTranscriptMiddleware,
-  decryptTranscriptMiddleware 
+  decryptTranscriptMiddleware,
 } from '@/middleware/audio-encryption.middleware'
 import { audioEncryption } from '@/lib/security/audio-encryption'
 import { TenantSecureDatabase } from '@/lib/security/tenant-isolation'
@@ -36,16 +36,13 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(url.searchParams.get('offset') || '0')
 
     if (!customerId && !leadId) {
-      return NextResponse.json(
-        { error: 'customerId or leadId required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'customerId or leadId required' }, { status: 400 })
     }
 
     // Build query conditions
-    const where: any = {
+    const where: unknown = {
       userId: session.user.id,
-      deletedAt: null
+      deletedAt: null,
     }
 
     if (customerId) where.customerId = customerId
@@ -72,16 +69,16 @@ export async function GET(request: NextRequest) {
           category: true,
           tags: true,
           createdAt: true,
-          audioUrl: true
-        }
+          audioUrl: true,
+        },
       }),
-      db.voiceNote.count({ where })
+      db.voiceNote.count({ where }),
     ])
 
     // Get tenant ID for decryption
     const user = await db.user.findUnique({
       where: { id: session.user.id },
-      select: { tenantId: true }
+      select: { tenantId: true },
     })
 
     // Decrypt transcripts
@@ -98,7 +95,6 @@ export async function GET(request: NextRequest) {
               note.transcriptEncryptionMetadata
             )
           } catch (error) {
-            console.error('Failed to decrypt transcript:', error)
             decryptedTranscript = '[Decryption failed]'
           }
         }
@@ -115,7 +111,7 @@ export async function GET(request: NextRequest) {
           category: note.category,
           tags: note.tags,
           createdAt: note.createdAt,
-          audioUrl: note.audioUrl
+          audioUrl: note.audioUrl,
         }
       })
     )
@@ -125,15 +121,10 @@ export async function GET(request: NextRequest) {
       total,
       limit,
       offset,
-      hasMore: offset + limit < total
+      hasMore: offset + limit < total,
     })
-
   } catch (error) {
-    console.error('Error fetching voice notes:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch voice notes' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch voice notes' }, { status: 500 })
   }
 }
 
@@ -158,43 +149,37 @@ export async function POST(request: NextRequest) {
     const leadId = formData.get('leadId') as string | null
 
     if (!transcript) {
-      return NextResponse.json(
-        { error: 'Transcript required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Transcript required' }, { status: 400 })
     }
 
     // Get tenant ID
     const user = await db.user.findUnique({
       where: { id: session.user.id },
-      select: { tenantId: true }
+      select: { tenantId: true },
     })
 
     if (!user?.tenantId) {
-      return NextResponse.json(
-        { error: 'Tenant not found' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
     }
 
     let audioUrl: string | null = null
     let audioSize: number | null = null
-    let audioEncryptionMetadata: any = null
+    let audioEncryptionMetadata: unknown = null
 
     // Save audio file if provided
     if (audioFile && audioFile.size > 0) {
       try {
         const buffer = Buffer.from(await audioFile.arrayBuffer())
-        
+
         // Encrypt audio before saving
         const metadata = {
           tenantId: user.tenantId,
           originalName: audioFile.name,
           mimeType: audioFile.type,
           size: audioFile.size,
-          uploadedAt: new Date().toISOString()
+          uploadedAt: new Date().toISOString(),
         }
-        
+
         const encrypted = await audioEncryption.encryptAudio(buffer, metadata)
         audioSize = encrypted.data.length
         audioEncryptionMetadata = encrypted.metadata
@@ -217,9 +202,7 @@ export async function POST(request: NextRequest) {
 
         // Store relative URL
         audioUrl = `/uploads/voice-notes/${user.tenantId}/${filename}`
-        
       } catch (err) {
-        console.error('Error saving audio file:', err)
         // Continue without audio file
       }
     }
@@ -228,16 +211,12 @@ export async function POST(request: NextRequest) {
     const analysis = analyzeTranscript(transcript)
 
     // Encrypt transcript
-    const encryptedTranscript = await encryptTranscriptMiddleware(
-      user.tenantId,
-      transcript,
-      {
-        customerId,
-        leadId,
-        confidence,
-        duration
-      }
-    )
+    const encryptedTranscript = await encryptTranscriptMiddleware(user.tenantId, transcript, {
+      customerId,
+      leadId,
+      confidence,
+      duration,
+    })
 
     // Create voice note
     const voiceNote = await db.voiceNote.create({
@@ -267,9 +246,9 @@ export async function POST(request: NextRequest) {
         metadata: {
           userAgent: request.headers.get('user-agent'),
           platform: detectPlatform(request.headers.get('user-agent') || ''),
-          encryptionVersion: '1.0'
-        }
-      }
+          encryptionVersion: '1.0',
+        },
+      },
     })
 
     // Update customer/lead activity with tenant security
@@ -278,17 +257,17 @@ export async function POST(request: NextRequest) {
         db.customer,
         {
           where: { id: customerId },
-          data: { 
+          data: {
             lastActivityAt: new Date(),
-            updatedAt: new Date()
-          }
+            updatedAt: new Date(),
+          },
         },
         {
           tenantId: session.user.tenantId,
           userId: session.user.id,
           operation: 'UPDATE',
           entityType: 'customer',
-          entityId: customerId
+          entityId: customerId,
         }
       )
     }
@@ -298,17 +277,17 @@ export async function POST(request: NextRequest) {
         db.lead,
         {
           where: { id: leadId },
-          data: { 
+          data: {
             lastActivityAt: new Date(),
-            updatedAt: new Date()
-          }
+            updatedAt: new Date(),
+          },
         },
         {
           tenantId: session.user.tenantId,
           userId: session.user.id,
           operation: 'UPDATE',
           entityType: 'lead',
-          entityId: leadId
+          entityId: leadId,
         }
       )
     }
@@ -326,17 +305,12 @@ export async function POST(request: NextRequest) {
       category: voiceNote.category,
       tags: voiceNote.tags,
       audioUrl: voiceNote.audioUrl,
-      createdAt: voiceNote.createdAt
+      createdAt: voiceNote.createdAt,
     }
 
     return NextResponse.json(sanitizedNote, { status: 201 })
-
   } catch (error) {
-    console.error('Error creating voice note:', error)
-    return NextResponse.json(
-      { error: 'Failed to create voice note' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create voice note' }, { status: 500 })
   }
 }
 
@@ -363,8 +337,8 @@ export async function PATCH(request: NextRequest) {
       where: {
         id,
         userId: session.user.id,
-        deletedAt: null
-      }
+        deletedAt: null,
+      },
     })
 
     if (!note) {
@@ -372,8 +346,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Update allowed fields
-    const updateData: any = {}
-    
+    const updateData: unknown = {}
+
     if (data.transcript !== undefined) {
       updateData.transcript = data.transcript
       // Re-analyze if transcript changed
@@ -394,15 +368,15 @@ export async function PATCH(request: NextRequest) {
         where: { id },
         data: {
           ...updateData,
-          updatedAt: new Date()
-        }
+          updatedAt: new Date(),
+        },
       },
       {
         tenantId: session.user.tenantId,
         userId: session.user.id,
         operation: 'UPDATE',
         entityType: 'voiceNote',
-        entityId: id
+        entityId: id,
       }
     )
 
@@ -423,15 +397,10 @@ export async function PATCH(request: NextRequest) {
       priority: updatedNote.priority,
       category: updatedNote.category,
       tags: updatedNote.tags,
-      updatedAt: updatedNote.updatedAt
+      updatedAt: updatedNote.updatedAt,
     })
-
   } catch (error) {
-    console.error('Error updating voice note:', error)
-    return NextResponse.json(
-      { error: 'Failed to update voice note' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to update voice note' }, { status: 500 })
   }
 }
 
@@ -456,8 +425,8 @@ export async function DELETE(request: NextRequest) {
       where: {
         id,
         userId: session.user.id,
-        deletedAt: null
-      }
+        deletedAt: null,
+      },
     })
 
     if (!note) {
@@ -469,14 +438,14 @@ export async function DELETE(request: NextRequest) {
       db.voiceNote,
       {
         where: { id },
-        data: { deletedAt: new Date() }
+        data: { deletedAt: new Date() },
       },
       {
         tenantId: session.user.tenantId,
         userId: session.user.id,
         operation: 'DELETE',
         entityType: 'voiceNote',
-        entityId: id
+        entityId: id,
       }
     )
 
@@ -488,13 +457,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true })
-
   } catch (error) {
-    console.error('Error deleting voice note:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete voice note' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to delete voice note' }, { status: 500 })
   }
 }
 
@@ -512,20 +476,33 @@ function analyzeTranscript(transcript: string): {
 } {
   // Generate title (first sentence or 50 chars)
   const firstSentence = transcript.split(/[.!?]/)[0]
-  const title = firstSentence.length > 50 
-    ? firstSentence.substring(0, 47) + '...'
-    : firstSentence
+  const title = firstSentence.length > 50 ? firstSentence.substring(0, 47) + '...' : firstSentence
 
   // Generate summary (first 2-3 sentences)
-  const sentences = transcript.split(/[.!?]/).filter(s => s.trim().length > 0)
+  const sentences = transcript.split(/[.!?]/).filter((s) => s.trim().length > 0)
   const summary = sentences.slice(0, 3).join('. ') + '.'
 
   // Extract keywords (basic implementation)
   const words = transcript.toLowerCase().split(/\s+/)
-  const stopWords = new Set(['the', 'is', 'at', 'which', 'on', 'a', 'an', 'and', 'or', 'but', 'in', 'with', 'to', 'for'])
+  const stopWords = new Set([
+    'the',
+    'is',
+    'at',
+    'which',
+    'on',
+    'a',
+    'an',
+    'and',
+    'or',
+    'but',
+    'in',
+    'with',
+    'to',
+    'for',
+  ])
   const wordFreq: Record<string, number> = {}
-  
-  words.forEach(word => {
+
+  words.forEach((word) => {
     const cleaned = word.replace(/[^a-z0-9]/g, '')
     if (cleaned.length > 3 && !stopWords.has(cleaned)) {
       wordFreq[cleaned] = (wordFreq[cleaned] || 0) + 1
@@ -538,17 +515,35 @@ function analyzeTranscript(transcript: string): {
     .map(([word]) => word)
 
   // Analyze sentiment (basic positive/negative word detection)
-  const positiveWords = ['good', 'great', 'excellent', 'happy', 'satisfied', 'perfect', 'love', 'amazing']
-  const negativeWords = ['bad', 'poor', 'terrible', 'unhappy', 'disappointed', 'hate', 'awful', 'problem']
-  
+  const positiveWords = [
+    'good',
+    'great',
+    'excellent',
+    'happy',
+    'satisfied',
+    'perfect',
+    'love',
+    'amazing',
+  ]
+  const negativeWords = [
+    'bad',
+    'poor',
+    'terrible',
+    'unhappy',
+    'disappointed',
+    'hate',
+    'awful',
+    'problem',
+  ]
+
   let sentimentScore = 0
   const lowerTranscript = transcript.toLowerCase()
-  
-  positiveWords.forEach(word => {
+
+  positiveWords.forEach((word) => {
     if (lowerTranscript.includes(word)) sentimentScore += 0.1
   })
-  
-  negativeWords.forEach(word => {
+
+  negativeWords.forEach((word) => {
     if (lowerTranscript.includes(word)) sentimentScore -= 0.1
   })
 
@@ -556,7 +551,11 @@ function analyzeTranscript(transcript: string): {
 
   // Determine priority based on keywords
   let priority = 'MEDIUM'
-  if (lowerTranscript.includes('urgent') || lowerTranscript.includes('asap') || lowerTranscript.includes('emergency')) {
+  if (
+    lowerTranscript.includes('urgent') ||
+    lowerTranscript.includes('asap') ||
+    lowerTranscript.includes('emergency')
+  ) {
     priority = 'HIGH'
   } else if (lowerTranscript.includes('whenever') || lowerTranscript.includes('no rush')) {
     priority = 'LOW'
@@ -576,21 +575,26 @@ function analyzeTranscript(transcript: string): {
 
   // Extract tags from common patterns
   const tags: string[] = []
-  
+
   // Phone numbers
   const phoneRegex = /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g
   if (phoneRegex.test(transcript)) tags.push('phone-number')
-  
+
   // Email addresses
   const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g
   if (emailRegex.test(transcript)) tags.push('email')
-  
+
   // Dates
-  const dateRegex = /\b(january|february|march|april|may|june|july|august|september|october|november|december|\d{1,2}\/\d{1,2}|\d{1,2}-\d{1,2})\b/gi
+  const dateRegex =
+    /\b(january|february|march|april|may|june|july|august|september|october|november|december|\d{1,2}\/\d{1,2}|\d{1,2}-\d{1,2})\b/gi
   if (dateRegex.test(transcript)) tags.push('date-mentioned')
 
   // Action items
-  if (lowerTranscript.includes('todo') || lowerTranscript.includes('action') || lowerTranscript.includes('need to')) {
+  if (
+    lowerTranscript.includes('todo') ||
+    lowerTranscript.includes('action') ||
+    lowerTranscript.includes('need to')
+  ) {
     tags.push('action-item')
   }
 
@@ -601,7 +605,7 @@ function analyzeTranscript(transcript: string): {
     sentiment,
     priority,
     category,
-    tags
+    tags,
   }
 }
 

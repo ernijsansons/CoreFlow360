@@ -6,14 +6,14 @@
 import { NextResponse } from 'next/server'
 import { AppError } from './errors/base-error'
 
-export interface StandardApiResponse<T = any> {
+export interface StandardApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: {
     type: string
     message: string
     code: string
-    details?: any
+    details?: unknown
     requestId?: string
   }
   meta?: {
@@ -32,15 +32,18 @@ export interface StandardApiResponse<T = any> {
  */
 export function successResponse<T>(
   data: T,
-  meta?: any,
+  meta?: unknown,
   status: number = 200
 ): NextResponse<StandardApiResponse<T>> {
-  return NextResponse.json({
-    success: true,
-    data,
-    meta,
-    timestamp: new Date().toISOString()
-  }, { status })
+  return NextResponse.json(
+    {
+      success: true,
+      data,
+      meta,
+      timestamp: new Date().toISOString(),
+    },
+    { status }
+  )
 }
 
 /**
@@ -60,7 +63,7 @@ export function errorResponse(
       message: error.message,
       code: error.code,
       details: error.details,
-      requestId
+      requestId,
     }
     statusCode = status || error.statusCode
   } else if (error instanceof Error) {
@@ -68,22 +71,25 @@ export function errorResponse(
       type: 'INTERNAL_ERROR',
       message: error.message,
       code: 'INTERNAL_ERROR',
-      requestId
+      requestId,
     }
   } else {
     errorData = {
       type: 'UNKNOWN_ERROR',
       message: String(error),
       code: 'UNKNOWN_ERROR',
-      requestId
+      requestId,
     }
   }
 
-  return NextResponse.json({
-    success: false,
-    error: errorData,
-    timestamp: new Date().toISOString()
-  }, { status: statusCode })
+  return NextResponse.json(
+    {
+      success: false,
+      error: errorData,
+      timestamp: new Date().toISOString(),
+    },
+    { status: statusCode }
+  )
 }
 
 /**
@@ -96,10 +102,10 @@ export function paginatedResponse<T>(
     limit: number
     totalCount: number
   },
-  additionalMeta?: any
+  additionalMeta?: unknown
 ): NextResponse<StandardApiResponse<T[]>> {
   const totalPages = Math.ceil(pagination.totalCount / pagination.limit)
-  
+
   return successResponse(data, {
     ...additionalMeta,
     page: pagination.page,
@@ -107,7 +113,7 @@ export function paginatedResponse<T>(
     totalCount: pagination.totalCount,
     totalPages,
     hasNext: pagination.page < totalPages,
-    hasPrev: pagination.page > 1
+    hasPrev: pagination.page > 1,
   })
 }
 
@@ -132,19 +138,22 @@ export function noContentResponse(): NextResponse {
  * Create a validation error response
  */
 export function validationErrorResponse(
-  errors: any,
+  errors: unknown,
   message: string = 'Validation failed'
 ): NextResponse<StandardApiResponse<never>> {
-  return NextResponse.json({
-    success: false,
-    error: {
-      type: 'VALIDATION_ERROR',
-      message,
-      code: 'VALIDATION_ERROR',
-      details: errors
+  return NextResponse.json(
+    {
+      success: false,
+      error: {
+        type: 'VALIDATION_ERROR',
+        message,
+        code: 'VALIDATION_ERROR',
+        details: errors,
+      },
+      timestamp: new Date().toISOString(),
     },
-    timestamp: new Date().toISOString()
-  }, { status: 400 })
+    { status: 400 }
+  )
 }
 
 /**
@@ -153,15 +162,18 @@ export function validationErrorResponse(
 export function authErrorResponse(
   message: string = 'Authentication required'
 ): NextResponse<StandardApiResponse<never>> {
-  return NextResponse.json({
-    success: false,
-    error: {
-      type: 'AUTHENTICATION_ERROR',
-      message,
-      code: 'AUTH_REQUIRED'
+  return NextResponse.json(
+    {
+      success: false,
+      error: {
+        type: 'AUTHENTICATION_ERROR',
+        message,
+        code: 'AUTH_REQUIRED',
+      },
+      timestamp: new Date().toISOString(),
     },
-    timestamp: new Date().toISOString()
-  }, { status: 401 })
+    { status: 401 }
+  )
 }
 
 /**
@@ -170,15 +182,18 @@ export function authErrorResponse(
 export function forbiddenResponse(
   message: string = 'Access forbidden'
 ): NextResponse<StandardApiResponse<never>> {
-  return NextResponse.json({
-    success: false,
-    error: {
-      type: 'AUTHORIZATION_ERROR',
-      message,
-      code: 'FORBIDDEN'
+  return NextResponse.json(
+    {
+      success: false,
+      error: {
+        type: 'AUTHORIZATION_ERROR',
+        message,
+        code: 'FORBIDDEN',
+      },
+      timestamp: new Date().toISOString(),
     },
-    timestamp: new Date().toISOString()
-  }, { status: 403 })
+    { status: 403 }
+  )
 }
 
 /**
@@ -187,38 +202,42 @@ export function forbiddenResponse(
 export function notFoundResponse(
   resource: string = 'Resource'
 ): NextResponse<StandardApiResponse<never>> {
-  return NextResponse.json({
-    success: false,
-    error: {
-      type: 'NOT_FOUND_ERROR',
-      message: `${resource} not found`,
-      code: 'NOT_FOUND'
+  return NextResponse.json(
+    {
+      success: false,
+      error: {
+        type: 'NOT_FOUND_ERROR',
+        message: `${resource} not found`,
+        code: 'NOT_FOUND',
+      },
+      timestamp: new Date().toISOString(),
     },
-    timestamp: new Date().toISOString()
-  }, { status: 404 })
+    { status: 404 }
+  )
 }
 
 /**
  * Create a rate limit error response
  */
-export function rateLimitResponse(
-  retryAfter?: number
-): NextResponse<StandardApiResponse<never>> {
+export function rateLimitResponse(retryAfter?: number): NextResponse<StandardApiResponse<never>> {
   const headers = new Headers()
   if (retryAfter) {
     headers.set('Retry-After', String(retryAfter))
   }
 
-  return NextResponse.json({
-    success: false,
-    error: {
-      type: 'RATE_LIMIT_ERROR',
-      message: 'Too many requests',
-      code: 'RATE_LIMITED',
-      details: { retryAfter }
+  return NextResponse.json(
+    {
+      success: false,
+      error: {
+        type: 'RATE_LIMIT_ERROR',
+        message: 'Too many requests',
+        code: 'RATE_LIMITED',
+        details: { retryAfter },
+      },
+      timestamp: new Date().toISOString(),
     },
-    timestamp: new Date().toISOString()
-  }, { status: 429, headers })
+    { status: 429, headers }
+  )
 }
 
 /**
@@ -234,5 +253,5 @@ export const api = {
   unauthorized: authErrorResponse,
   forbidden: forbiddenResponse,
   notFound: notFoundResponse,
-  rateLimit: rateLimitResponse
+  rateLimit: rateLimitResponse,
 }

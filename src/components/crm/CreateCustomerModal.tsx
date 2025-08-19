@@ -35,10 +35,10 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
     // Clear validation error when user starts typing
     if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: '' }))
+      setValidationErrors((prev) => ({ ...prev, [name]: '' }))
     }
   }
 
@@ -78,9 +78,9 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
       },
       onError: (error) => {
         // Handle error (could show toast notification)
-        console.error('Failed to create customer:', error)
+
         setValidationErrors({ submit: error.message || 'Failed to create customer' })
-      }
+      },
     })
   }
 
@@ -103,7 +103,7 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          <div className="bg-opacity-75 fixed inset-0 bg-gray-500 transition-opacity" />
         </Transition.Child>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -117,11 +117,11 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-                <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
                   <button
                     type="button"
-                    className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                     onClick={handleClose}
                   >
                     <span className="sr-only">Close</span>
@@ -130,8 +130,8 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
                 </div>
 
                 <div className="sm:flex sm:items-start">
-                  <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                    <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
+                  <div className="mt-3 w-full text-center sm:mt-0 sm:text-left">
+                    <Dialog.Title as="h3" className="text-lg leading-6 font-semibold text-gray-900">
                       Create New Customer
                     </Dialog.Title>
 
@@ -139,7 +139,10 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
                       {/* Name Fields */}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="firstName"
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             First Name *
                           </label>
                           <input
@@ -155,12 +158,17 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
                             }`}
                           />
                           {validationErrors.firstName && (
-                            <p className="mt-1 text-sm text-red-600">{validationErrors.firstName}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                              {validationErrors.firstName}
+                            </p>
                           )}
                         </div>
 
                         <div>
-                          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="lastName"
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Last Name *
                           </label>
                           <input
@@ -227,7 +235,10 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
 
                       {/* Company */}
                       <div>
-                        <label htmlFor="company" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="company"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Company
                         </label>
                         <input
@@ -242,7 +253,10 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
 
                       {/* Address */}
                       <div>
-                        <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="address"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Address
                         </label>
                         <input
@@ -258,7 +272,10 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
                       {/* Status and Source */}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="status"
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Status
                           </label>
                           <select
@@ -278,7 +295,10 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
                         </div>
 
                         <div>
-                          <label htmlFor="source" className="block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="source"
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Source
                           </label>
                           <input
@@ -305,7 +325,7 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
                         <button
                           type="submit"
                           disabled={createCustomerMutation.isPending}
-                          className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed sm:ml-3 sm:w-auto"
+                          className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-gray-300 sm:ml-3 sm:w-auto"
                         >
                           {createCustomerMutation.isPending ? 'Creating...' : 'Create Customer'}
                         </button>
@@ -313,7 +333,7 @@ export default function CreateCustomerModal({ isOpen, onClose }: CreateCustomerM
                           type="button"
                           onClick={handleClose}
                           disabled={createCustomerMutation.isPending}
-                          className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 sm:mt-0 sm:w-auto"
+                          className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50 disabled:opacity-50 sm:mt-0 sm:w-auto"
                         >
                           Cancel
                         </button>

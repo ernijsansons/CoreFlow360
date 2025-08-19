@@ -14,12 +14,12 @@ export interface AIFlowContext {
   industry: string
   department?: string
   sessionId: string
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
 }
 
 export interface AIFlowRequest {
   workflow: string
-  data: any
+  data: unknown
   context: AIFlowContext
   priority: 'low' | 'medium' | 'high' | 'critical'
   timeout?: number
@@ -28,10 +28,10 @@ export interface AIFlowRequest {
 
 export interface AIResult {
   success: boolean
-  data: any
+  data: unknown
   confidence: number
   insights: string[]
-  predictions?: any[]
+  predictions?: unknown[]
   recommendations?: string[]
   crossDeptImpact?: CrossDeptImpact[]
   executionTime: number

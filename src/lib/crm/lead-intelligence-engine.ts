@@ -6,19 +6,19 @@
 export interface LeadProfile {
   id: string
   tenantId: string
-  
+
   // Basic Information
   email: string
   alternateEmails?: string[]
   firstName: string
   lastName: string
   fullName: string
-  
+
   // Contact Information
   phoneNumbers: PhoneNumber[]
   location: LocationInfo
   timezone: string
-  
+
   // Professional Information
   currentTitle: string
   currentCompany: CompanyInfo
@@ -27,63 +27,63 @@ export interface LeadProfile {
   seniority: 'ENTRY' | 'MID' | 'SENIOR' | 'EXECUTIVE' | 'C_SUITE'
   department: string
   skills: string[]
-  
+
   // Social Profiles
   linkedinUrl?: string
   twitterUrl?: string
   facebookUrl?: string
   githubUrl?: string
   personalWebsite?: string
-  
+
   // Enrichment Data
   enrichmentSources: EnrichmentSource[]
   lastEnrichedAt: Date
   enrichmentScore: number // 0-100 quality score
   dataCompleteness: number // 0-100 percentage
-  
+
   // Behavioral Data
   technographics: Technographic[]
   intentData: IntentSignal[]
   websiteActivity: WebActivity[]
   contentEngagement: ContentEngagement[]
-  
+
   // Predictive Scores
   leadScore: number // 0-100
   conversionProbability: number // 0-1
   dealSizePrediction?: DealSizePrediction
   churnRisk: number // 0-1
   expansionPotential: number // 0-1
-  
+
   // Relationship Data
   mutualConnections: Connection[]
   referralPaths: ReferralPath[]
   influenceNetwork: InfluenceNode[]
-  
+
   // Company Insights
   companyGrowthStage: 'STARTUP' | 'GROWTH' | 'MATURE' | 'ENTERPRISE'
   companyFunding?: FundingInfo
   companyNews: NewsItem[]
   competitorUsage: CompetitorInfo[]
-  
+
   // Communication Preferences
   preferredChannel: 'EMAIL' | 'PHONE' | 'LINKEDIN' | 'TEXT'
   bestTimeToContact: TimeWindow[]
   communicationFrequency: 'HIGH' | 'MEDIUM' | 'LOW'
   engagementStyle: 'FORMAL' | 'CASUAL' | 'TECHNICAL' | 'RELATIONSHIP'
-  
+
   // AI Insights
   personalityProfile?: PersonalityProfile
   buyingRole: 'CHAMPION' | 'DECISION_MAKER' | 'INFLUENCER' | 'USER' | 'BLOCKER'
   painPoints: string[]
   motivations: string[]
   objections: string[]
-  
+
   // Compliance & Privacy
   gdprConsent?: boolean
   emailOptIn?: boolean
   dataRetentionDate?: Date
   doNotContact?: boolean
-  
+
   createdAt: Date
   updatedAt: Date
 }
@@ -125,7 +125,7 @@ export interface LocationInfo {
 export interface EnrichmentSource {
   source: 'APOLLO' | 'ZOOMINFO' | 'CLEARBIT' | 'HUNTER' | 'LINKEDIN' | 'INTERNAL' | 'MANUAL'
   enrichedAt: Date
-  dataPoints: Record<string, any>
+  dataPoints: Record<string, unknown>
   confidence: number
   cost: number // Track API costs
 }
@@ -252,7 +252,7 @@ export class LeadIntelligenceEngine {
       apollo: process.env.APOLLO_API_KEY,
       zoominfo: process.env.ZOOMINFO_API_KEY,
       clearbit: process.env.CLEARBIT_API_KEY,
-      hunter: process.env.HUNTER_API_KEY
+      hunter: process.env.HUNTER_API_KEY,
     }
   }
 
@@ -263,7 +263,7 @@ export class LeadIntelligenceEngine {
     const enrichmentResults: EnrichmentSource[] = []
     let combinedData: Partial<LeadProfile> = {
       email,
-      ...additionalContext
+      ...additionalContext,
     }
 
     try {
@@ -312,11 +312,11 @@ export class LeadIntelligenceEngine {
         firstName: combinedData.firstName || '',
         lastName: combinedData.lastName || '',
         fullName: `${combinedData.firstName || ''} ${combinedData.lastName || ''}`.trim(),
-        
+
         phoneNumbers: combinedData.phoneNumbers || [],
         location: combinedData.location || { country: 'Unknown' },
         timezone: combinedData.timezone || 'UTC',
-        
+
         currentTitle: combinedData.currentTitle || '',
         currentCompany: combinedData.currentCompany || this.getEmptyCompany(),
         previousCompanies: combinedData.previousCompanies || [],
@@ -324,53 +324,52 @@ export class LeadIntelligenceEngine {
         seniority: combinedData.seniority || 'MID',
         department: combinedData.department || '',
         skills: combinedData.skills || [],
-        
+
         linkedinUrl: combinedData.linkedinUrl,
         twitterUrl: combinedData.twitterUrl,
-        
+
         enrichmentSources: enrichmentResults,
         lastEnrichedAt: new Date(),
         enrichmentScore,
         dataCompleteness,
-        
+
         technographics: combinedData.technographics || [],
         intentData: combinedData.intentData || [],
         websiteActivity: combinedData.websiteActivity || [],
         contentEngagement: combinedData.contentEngagement || [],
-        
+
         leadScore: predictiveScores.leadScore,
         conversionProbability: predictiveScores.conversionProbability,
         dealSizePrediction: predictiveScores.dealSizePrediction,
         churnRisk: predictiveScores.churnRisk,
         expansionPotential: predictiveScores.expansionPotential,
-        
+
         mutualConnections: combinedData.mutualConnections || [],
         referralPaths: combinedData.referralPaths || [],
         influenceNetwork: combinedData.influenceNetwork || [],
-        
+
         companyGrowthStage: combinedData.companyGrowthStage || 'GROWTH',
         companyFunding: combinedData.companyFunding,
         companyNews: combinedData.companyNews || [],
         competitorUsage: combinedData.competitorUsage || [],
-        
+
         preferredChannel: aiInsights.preferredChannel,
         bestTimeToContact: aiInsights.bestTimeToContact,
         communicationFrequency: aiInsights.communicationFrequency,
         engagementStyle: aiInsights.engagementStyle,
-        
+
         personalityProfile: aiInsights.personalityProfile,
         buyingRole: aiInsights.buyingRole,
         painPoints: aiInsights.painPoints,
         motivations: aiInsights.motivations,
         objections: aiInsights.objections,
-        
+
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       }
 
       return leadProfile
     } catch (error) {
-      console.error('Error enriching lead:', error)
       throw new Error('Failed to enrich lead profile')
     }
   }
@@ -385,7 +384,7 @@ export class LeadIntelligenceEngine {
   }> {
     try {
       const features = this.extractConversionFeatures(lead)
-      
+
       // Calculate base probability from engagement signals
       let probability = 0.3 // Base probability
 
@@ -393,8 +392,8 @@ export class LeadIntelligenceEngine {
       if (lead.seniority === 'C_SUITE' || lead.seniority === 'EXECUTIVE') {
         probability += 0.15
       }
-      
-      if (lead.intentData.some(intent => intent.score > 70)) {
+
+      if (lead.intentData.some((intent) => intent.score > 70)) {
         probability += 0.2
       }
 
@@ -402,7 +401,7 @@ export class LeadIntelligenceEngine {
         probability += 0.1
       }
 
-      if (lead.contentEngagement.filter(e => e.engagementType === 'DOWNLOAD').length > 0) {
+      if (lead.contentEngagement.filter((e) => e.engagementType === 'DOWNLOAD').length > 0) {
         probability += 0.15
       }
 
@@ -411,7 +410,7 @@ export class LeadIntelligenceEngine {
       }
 
       // Negative factors
-      if (lead.competitorUsage.some(c => c.satisfactionLevel === 'HIGH')) {
+      if (lead.competitorUsage.some((c) => c.satisfactionLevel === 'HIGH')) {
         probability -= 0.2
       }
 
@@ -431,14 +430,13 @@ export class LeadIntelligenceEngine {
       return {
         probability,
         factors,
-        recommendations
+        recommendations,
       }
     } catch (error) {
-      console.error('Error predicting conversion:', error)
       return {
         probability: 0.5,
         factors: [],
-        recommendations: ['Unable to generate predictions']
+        recommendations: ['Unable to generate predictions'],
       }
     }
   }
@@ -469,11 +467,11 @@ export class LeadIntelligenceEngine {
 
       // Adjust based on seniority
       const seniorityMultiplier = {
-        'C_SUITE': 3,
-        'EXECUTIVE': 2.5,
-        'SENIOR': 1.5,
-        'MID': 1,
-        'ENTRY': 0.5
+        C_SUITE: 3,
+        EXECUTIVE: 2.5,
+        SENIOR: 1.5,
+        MID: 1,
+        ENTRY: 0.5,
       }
       baseValue *= seniorityMultiplier[lead.seniority] || 1
 
@@ -482,7 +480,7 @@ export class LeadIntelligenceEngine {
       baseValue *= industryMultiplier
 
       // Adjust based on technographics
-      if (lead.technographics.some(t => t.monthlySpend && t.monthlySpend > 5000)) {
+      if (lead.technographics.some((t) => t.monthlySpend && t.monthlySpend > 5000)) {
         baseValue *= 1.5
       }
 
@@ -495,7 +493,7 @@ export class LeadIntelligenceEngine {
         `Company size: ${company.size}`,
         `Seniority level: ${lead.seniority}`,
         `Industry: ${company.industry}`,
-        `Current tech spend: $${lead.technographics.reduce((sum, t) => sum + (t.monthlySpend || 0), 0)}/month`
+        `Current tech spend: $${lead.technographics.reduce((sum, t) => sum + (t.monthlySpend || 0), 0)}/month`,
       ]
 
       return {
@@ -503,16 +501,15 @@ export class LeadIntelligenceEngine {
         maxValue,
         mostLikelyValue,
         confidence: 0.75,
-        factors
+        factors,
       }
     } catch (error) {
-      console.error('Error predicting deal size:', error)
       return {
         minValue: 5000,
         maxValue: 50000,
         mostLikelyValue: 15000,
         confidence: 0.5,
-        factors: ['Default prediction due to limited data']
+        factors: ['Default prediction due to limited data'],
       }
     }
   }
@@ -530,14 +527,14 @@ export class LeadIntelligenceEngine {
         { vendor: 'HubSpot', product: 'HubSpot CRM' },
         { vendor: 'Pipedrive', product: 'Pipedrive' },
         { vendor: 'Monday.com', product: 'Monday CRM' },
-        { vendor: 'Zoho', product: 'Zoho CRM' }
+        { vendor: 'Zoho', product: 'Zoho CRM' },
       ]
 
       for (const tech of lead.technographics) {
-        const competitor = competitorTech.find(c => 
+        const competitor = competitorTech.find((c) =>
           tech.vendor.toLowerCase().includes(c.vendor.toLowerCase())
         )
-        
+
         if (competitor) {
           competitors.push({
             competitorName: competitor.vendor,
@@ -545,29 +542,31 @@ export class LeadIntelligenceEngine {
             usageSince: tech.adoptedDate,
             satisfactionLevel: this.estimateSatisfaction(tech),
             contractEndDate: tech.contractEndDate,
-            switchingLikelihood: this.calculateSwitchingLikelihood(tech)
+            switchingLikelihood: this.calculateSwitchingLikelihood(tech),
           })
         }
       }
 
       // Check for indirect signals of competitor usage
-      if (lead.websiteActivity.some(activity => 
-        activity.url.includes('salesforce.com') || 
-        activity.pageTitle.toLowerCase().includes('salesforce')
-      )) {
-        if (!competitors.find(c => c.competitorName === 'Salesforce')) {
+      if (
+        lead.websiteActivity.some(
+          (activity) =>
+            activity.url.includes('salesforce.com') ||
+            activity.pageTitle.toLowerCase().includes('salesforce')
+        )
+      ) {
+        if (!competitors.find((c) => c.competitorName === 'Salesforce')) {
           competitors.push({
             competitorName: 'Salesforce',
             product: 'Salesforce CRM',
             satisfactionLevel: 'MEDIUM',
-            switchingLikelihood: 0.3
+            switchingLikelihood: 0.3,
           })
         }
       }
 
       return competitors
     } catch (error) {
-      console.error('Error identifying competitors:', error)
       return []
     }
   }
@@ -583,8 +582,9 @@ export class LeadIntelligenceEngine {
   }> {
     try {
       // Analyze lead profile for strategy
-      const isHighValue = lead.leadScore > 70 || lead.seniority === 'C_SUITE' || lead.seniority === 'EXECUTIVE'
-      const hasUrgency = lead.intentData.some(i => i.score > 80)
+      const isHighValue =
+        lead.leadScore > 70 || lead.seniority === 'C_SUITE' || lead.seniority === 'EXECUTIVE'
+      const hasUrgency = lead.intentData.some((i) => i.score > 80)
       const isEngaged = lead.websiteActivity.length > 3 || lead.contentEngagement.length > 0
 
       let strategy = ''
@@ -596,7 +596,7 @@ export class LeadIntelligenceEngine {
           channel: 'PHONE',
           action: 'Direct call from senior sales rep',
           priority: 'HIGH',
-          timing: 'Within 24 hours'
+          timing: 'Within 24 hours',
         })
       } else if (isEngaged) {
         strategy = 'Nurture engaged lead with targeted content and gradual relationship building'
@@ -604,7 +604,7 @@ export class LeadIntelligenceEngine {
           channel: 'EMAIL',
           action: 'Send personalized case study',
           priority: 'MEDIUM',
-          timing: 'Within 48 hours'
+          timing: 'Within 48 hours',
         })
       } else {
         strategy = 'Educational approach to build awareness and trust'
@@ -612,7 +612,7 @@ export class LeadIntelligenceEngine {
           channel: 'EMAIL',
           action: 'Add to nurture campaign',
           priority: 'LOW',
-          timing: 'Start weekly touches'
+          timing: 'Start weekly touches',
         })
       }
 
@@ -622,7 +622,7 @@ export class LeadIntelligenceEngine {
           channel: 'LINKEDIN',
           action: 'Connect with personalized message',
           priority: 'MEDIUM',
-          timing: 'Day 1'
+          timing: 'Day 1',
         })
       }
 
@@ -636,26 +636,26 @@ export class LeadIntelligenceEngine {
         strategy,
         tactics,
         messaging,
-        timeline
+        timeline,
       }
     } catch (error) {
-      console.error('Error generating engagement strategy:', error)
       throw new Error('Failed to generate engagement strategy')
     }
   }
 
   // Private helper methods
-  private async enrichFromApollo(email: string): Promise<{ source: EnrichmentSource, data: Partial<LeadProfile> }> {
+  private async enrichFromApollo(
+    email: string
+  ): Promise<{ source: EnrichmentSource; data: Partial<LeadProfile> }> {
     // Simulated Apollo enrichment - would call real API
-    console.log('Enriching from Apollo:', email)
-    
+
     return {
       source: {
         source: 'APOLLO',
         enrichedAt: new Date(),
         dataPoints: {},
         confidence: 0.85,
-        cost: 0.10
+        cost: 0.1,
       },
       data: {
         firstName: 'John',
@@ -668,68 +668,74 @@ export class LeadIntelligenceEngine {
           industry: 'Technology',
           size: 'MEDIUM',
           employeeCount: 500,
-          location: { country: 'USA', state: 'CA', city: 'San Francisco' }
+          location: { country: 'USA', state: 'CA', city: 'San Francisco' },
         } as CompanyInfo,
         seniority: 'EXECUTIVE',
         department: 'Sales',
-        phoneNumbers: [{
-          number: '+1-555-0123',
-          type: 'WORK',
-          isPrimary: true,
-          isVerified: true
-        }],
-        linkedinUrl: 'https://linkedin.com/in/johndoe'
-      }
+        phoneNumbers: [
+          {
+            number: '+1-555-0123',
+            type: 'WORK',
+            isPrimary: true,
+            isVerified: true,
+          },
+        ],
+        linkedinUrl: 'https://linkedin.com/in/johndoe',
+      },
     }
   }
 
-  private async enrichFromClearbit(email: string): Promise<{ source: EnrichmentSource, data: Partial<LeadProfile> }> {
+  private async enrichFromClearbit(
+    email: string
+  ): Promise<{ source: EnrichmentSource; data: Partial<LeadProfile> }> {
     // Simulated Clearbit enrichment
-    console.log('Enriching from Clearbit:', email)
-    
+
     return {
       source: {
         source: 'CLEARBIT',
         enrichedAt: new Date(),
         dataPoints: {},
-        confidence: 0.90,
-        cost: 0.15
+        confidence: 0.9,
+        cost: 0.15,
       },
       data: {
         location: {
           city: 'San Francisco',
           state: 'CA',
           country: 'USA',
-          postalCode: '94105'
+          postalCode: '94105',
         },
         timezone: 'America/Los_Angeles',
         twitterUrl: 'https://twitter.com/johndoe',
-        personalWebsite: 'https://johndoe.com'
-      }
+        personalWebsite: 'https://johndoe.com',
+      },
     }
   }
 
-  private async enrichFromHunter(email: string): Promise<{ source: EnrichmentSource, data: Partial<LeadProfile> }> {
+  private async enrichFromHunter(
+    email: string
+  ): Promise<{ source: EnrichmentSource; data: Partial<LeadProfile> }> {
     // Simulated Hunter enrichment
-    console.log('Enriching from Hunter:', email)
-    
+
     return {
       source: {
         source: 'HUNTER',
         enrichedAt: new Date(),
         dataPoints: {},
         confidence: 0.75,
-        cost: 0.05
+        cost: 0.05,
       },
       data: {
         alternateEmails: [`john@personal.com`],
         gdprConsent: true,
-        emailOptIn: true
-      }
+        emailOptIn: true,
+      },
     }
   }
 
-  private async enrichFromInternal(email: string): Promise<{ source: EnrichmentSource, data: Partial<LeadProfile> }> {
+  private async enrichFromInternal(
+    email: string
+  ): Promise<{ source: EnrichmentSource; data: Partial<LeadProfile> }> {
     // Internal CRM data enrichment
     return {
       source: {
@@ -737,7 +743,7 @@ export class LeadIntelligenceEngine {
         enrichedAt: new Date(),
         dataPoints: {},
         confidence: 1.0,
-        cost: 0
+        cost: 0,
       },
       data: {
         websiteActivity: [
@@ -747,8 +753,8 @@ export class LeadIntelligenceEngine {
             visitDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
             duration: 180,
             source: 'organic',
-            actions: ['viewed_pricing', 'clicked_enterprise']
-          }
+            actions: ['viewed_pricing', 'clicked_enterprise'],
+          },
         ],
         contentEngagement: [
           {
@@ -757,20 +763,27 @@ export class LeadIntelligenceEngine {
             title: 'AI in Modern CRM',
             engagementDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
             engagementType: 'DOWNLOAD',
-            engagementScore: 0.8
-          }
-        ]
-      }
+            engagementScore: 0.8,
+          },
+        ],
+      },
     }
   }
 
-  private mergeEnrichmentData(existing: Partial<LeadProfile>, newData: Partial<LeadProfile>): Partial<LeadProfile> {
+  private mergeEnrichmentData(
+    existing: Partial<LeadProfile>,
+    newData: Partial<LeadProfile>
+  ): Partial<LeadProfile> {
     // Intelligent merging - prefer non-empty values, higher confidence sources
     const merged = { ...existing }
 
     for (const [key, value] of Object.entries(newData)) {
-      if (value && (!merged[key as keyof LeadProfile] || this.isHigherQuality(value, merged[key as keyof LeadProfile]))) {
-        (merged as any)[key] = value
+      if (
+        value &&
+        (!merged[key as keyof LeadProfile] ||
+          this.isHigherQuality(value, merged[key as keyof LeadProfile]))
+      ) {
+        ;(merged as unknown)[key] = value
       }
     }
 
@@ -786,7 +799,7 @@ export class LeadIntelligenceEngine {
     return merged
   }
 
-  private isHigherQuality(newValue: any, existingValue: any): boolean {
+  private isHigherQuality(newValue: unknown, existingValue: unknown): boolean {
     // Simple quality comparison - can be enhanced
     if (!existingValue) return true
     if (typeof newValue === 'string' && newValue.length > existingValue.length) return true
@@ -796,28 +809,34 @@ export class LeadIntelligenceEngine {
 
   private mergePhoneNumbers(existing: PhoneNumber[], newNumbers: PhoneNumber[]): PhoneNumber[] {
     const phoneMap = new Map<string, PhoneNumber>()
-    
+
     // Add existing numbers
-    existing.forEach(phone => phoneMap.set(phone.number, phone))
-    
+    existing.forEach((phone) => phoneMap.set(phone.number, phone))
+
     // Merge new numbers
-    newNumbers.forEach(phone => {
+    newNumbers.forEach((phone) => {
       if (!phoneMap.has(phone.number)) {
         phoneMap.set(phone.number, phone)
       }
     })
-    
+
     return Array.from(phoneMap.values())
   }
 
   private calculateEnrichmentScore(data: Partial<LeadProfile>): number {
     const importantFields = [
-      'firstName', 'lastName', 'currentTitle', 'currentCompany',
-      'phoneNumbers', 'linkedinUrl', 'seniority', 'department'
+      'firstName',
+      'lastName',
+      'currentTitle',
+      'currentCompany',
+      'phoneNumbers',
+      'linkedinUrl',
+      'seniority',
+      'department',
     ]
-    
+
     let score = 0
-    let maxScore = importantFields.length * 10
+    const maxScore = importantFields.length * 10
 
     for (const field of importantFields) {
       if (data[field as keyof LeadProfile]) {
@@ -834,13 +853,15 @@ export class LeadIntelligenceEngine {
   }
 
   private calculateDataCompleteness(data: Partial<LeadProfile>): number {
-    const allFields = Object.keys(data).filter(key => data[key as keyof LeadProfile] !== undefined)
+    const allFields = Object.keys(data).filter(
+      (key) => data[key as keyof LeadProfile] !== undefined
+    )
     const totalPossibleFields = 40 // Approximate number of fields
-    
+
     return Math.round((allFields.length / totalPossibleFields) * 100)
   }
 
-  private async generateAIInsights(data: Partial<LeadProfile>): Promise<any> {
+  private async generateAIInsights(data: Partial<LeadProfile>): Promise<unknown> {
     // AI-powered insights generation
     return {
       preferredChannel: this.inferPreferredChannel(data),
@@ -851,11 +872,11 @@ export class LeadIntelligenceEngine {
       buyingRole: this.inferBuyingRole(data),
       painPoints: this.inferPainPoints(data),
       motivations: this.inferMotivations(data),
-      objections: this.inferObjections(data)
+      objections: this.inferObjections(data),
     }
   }
 
-  private async calculatePredictiveScores(data: Partial<LeadProfile>): Promise<any> {
+  private async calculatePredictiveScores(data: Partial<LeadProfile>): Promise<unknown> {
     // Calculate various predictive scores
     const leadScore = this.calculateLeadScore(data)
     const conversionProbability = this.calculateConversionProbability(data)
@@ -868,7 +889,7 @@ export class LeadIntelligenceEngine {
       conversionProbability,
       dealSizePrediction,
       churnRisk,
-      expansionPotential
+      expansionPotential,
     }
   }
 
@@ -894,24 +915,27 @@ export class LeadIntelligenceEngine {
 
   private calculateConversionProbability(data: Partial<LeadProfile>): number {
     const leadScore = this.calculateLeadScore(data)
-    const engagementLevel = (data.websiteActivity?.length || 0) + (data.contentEngagement?.length || 0)
-    
-    let probability = leadScore / 100 * 0.5 // Lead score contributes 50%
+    const engagementLevel =
+      (data.websiteActivity?.length || 0) + (data.contentEngagement?.length || 0)
+
+    let probability = (leadScore / 100) * 0.5 // Lead score contributes 50%
     probability += Math.min(engagementLevel / 10, 0.3) // Engagement contributes up to 30%
-    
-    if (data.intentData && data.intentData.some(i => i.score > 70)) {
+
+    if (data.intentData && data.intentData.some((i) => i.score > 70)) {
       probability += 0.2 // High intent adds 20%
     }
 
     return Math.min(1, Math.max(0, probability))
   }
 
-  private async estimateDealSize(data: Partial<LeadProfile>): Promise<DealSizePrediction | undefined> {
+  private async estimateDealSize(
+    data: Partial<LeadProfile>
+  ): Promise<DealSizePrediction | undefined> {
     if (!data.currentCompany) return undefined
 
     const baseValue = this.getBaseValueByCompanySize(data.currentCompany.size || 'MEDIUM')
     const seniorityMultiplier = this.getSeniorityMultiplier(data.seniority || 'MID')
-    
+
     const estimatedValue = baseValue * seniorityMultiplier
 
     return {
@@ -919,7 +943,7 @@ export class LeadIntelligenceEngine {
       maxValue: Math.round(estimatedValue * 1.5),
       mostLikelyValue: Math.round(estimatedValue),
       confidence: 0.7,
-      factors: ['Company size', 'Seniority level', 'Industry']
+      factors: ['Company size', 'Seniority level', 'Industry'],
     }
   }
 
@@ -927,7 +951,7 @@ export class LeadIntelligenceEngine {
     // Simple churn risk calculation
     let risk = 0.3 // Base risk
 
-    if (data.competitorUsage && data.competitorUsage.some(c => c.satisfactionLevel === 'LOW')) {
+    if (data.competitorUsage && data.competitorUsage.some((c) => c.satisfactionLevel === 'LOW')) {
       risk -= 0.2 // Lower satisfaction = lower churn risk for us
     }
 
@@ -952,11 +976,13 @@ export class LeadIntelligenceEngine {
     return Math.min(1, Math.max(0, potential))
   }
 
-  private inferPreferredChannel(data: Partial<LeadProfile>): 'EMAIL' | 'PHONE' | 'LINKEDIN' | 'TEXT' {
-    if (data.linkedinUrl && data.contentEngagement?.some(e => e.contentType === 'LINKEDIN')) {
+  private inferPreferredChannel(
+    data: Partial<LeadProfile>
+  ): 'EMAIL' | 'PHONE' | 'LINKEDIN' | 'TEXT' {
+    if (data.linkedinUrl && data.contentEngagement?.some((e) => e.contentType === 'LINKEDIN')) {
       return 'LINKEDIN'
     }
-    if (data.phoneNumbers && data.phoneNumbers.some(p => p.type === 'MOBILE')) {
+    if (data.phoneNumbers && data.phoneNumbers.some((p) => p.type === 'MOBILE')) {
       return 'PHONE'
     }
     return 'EMAIL'
@@ -965,23 +991,26 @@ export class LeadIntelligenceEngine {
   private inferBestContactTimes(data: Partial<LeadProfile>): TimeWindow[] {
     // Default business hours based on timezone
     const timezone = data.timezone || 'America/New_York'
-    
+
     return [
       { dayOfWeek: 2, startHour: 9, endHour: 11, timezone }, // Tuesday morning
       { dayOfWeek: 3, startHour: 14, endHour: 16, timezone }, // Wednesday afternoon
-      { dayOfWeek: 4, startHour: 10, endHour: 12, timezone } // Thursday morning
+      { dayOfWeek: 4, startHour: 10, endHour: 12, timezone }, // Thursday morning
     ]
   }
 
   private inferCommunicationFrequency(data: Partial<LeadProfile>): 'HIGH' | 'MEDIUM' | 'LOW' {
-    const engagementLevel = (data.websiteActivity?.length || 0) + (data.contentEngagement?.length || 0)
-    
+    const engagementLevel =
+      (data.websiteActivity?.length || 0) + (data.contentEngagement?.length || 0)
+
     if (engagementLevel > 10) return 'HIGH'
     if (engagementLevel > 5) return 'MEDIUM'
     return 'LOW'
   }
 
-  private inferEngagementStyle(data: Partial<LeadProfile>): 'FORMAL' | 'CASUAL' | 'TECHNICAL' | 'RELATIONSHIP' {
+  private inferEngagementStyle(
+    data: Partial<LeadProfile>
+  ): 'FORMAL' | 'CASUAL' | 'TECHNICAL' | 'RELATIONSHIP' {
     if (data.seniority === 'C_SUITE' || data.seniority === 'EXECUTIVE') return 'FORMAL'
     if (data.department === 'Engineering' || data.department === 'IT') return 'TECHNICAL'
     if (data.department === 'Sales' || data.department === 'Marketing') return 'RELATIONSHIP'
@@ -992,17 +1021,21 @@ export class LeadIntelligenceEngine {
     // Basic inference based on role and behavior
     const isExecutive = data.seniority === 'C_SUITE' || data.seniority === 'EXECUTIVE'
     const isTechnical = data.department === 'Engineering' || data.department === 'IT'
-    
+
     return {
       discProfile: isExecutive ? 'D' : isTechnical ? 'C' : 'I',
-      communicationStyle: isExecutive ? ['direct', 'results-oriented'] : ['collaborative', 'detailed'],
+      communicationStyle: isExecutive
+        ? ['direct', 'results-oriented']
+        : ['collaborative', 'detailed'],
       decisionMakingStyle: isExecutive ? 'FAST' : 'ANALYTICAL',
       riskTolerance: data.companyGrowthStage === 'STARTUP' ? 'HIGH' : 'MEDIUM',
-      learningStyle: isTechnical ? 'VISUAL' : 'AUDITORY'
+      learningStyle: isTechnical ? 'VISUAL' : 'AUDITORY',
     }
   }
 
-  private inferBuyingRole(data: Partial<LeadProfile>): 'CHAMPION' | 'DECISION_MAKER' | 'INFLUENCER' | 'USER' | 'BLOCKER' {
+  private inferBuyingRole(
+    data: Partial<LeadProfile>
+  ): 'CHAMPION' | 'DECISION_MAKER' | 'INFLUENCER' | 'USER' | 'BLOCKER' {
     if (data.seniority === 'C_SUITE') return 'DECISION_MAKER'
     if (data.seniority === 'EXECUTIVE') return 'DECISION_MAKER'
     if (data.contentEngagement && data.contentEngagement.length > 3) return 'CHAMPION'
@@ -1012,9 +1045,13 @@ export class LeadIntelligenceEngine {
 
   private inferPainPoints(data: Partial<LeadProfile>): string[] {
     const painPoints = []
-    
+
     if (data.currentCompany?.size === 'ENTERPRISE') {
-      painPoints.push('Complex integration requirements', 'Scalability concerns', 'Security and compliance')
+      painPoints.push(
+        'Complex integration requirements',
+        'Scalability concerns',
+        'Security and compliance'
+      )
     } else if (data.currentCompany?.size === 'SMALL') {
       painPoints.push('Limited budget', 'Resource constraints', 'Need for simplicity')
     }
@@ -1028,7 +1065,7 @@ export class LeadIntelligenceEngine {
 
   private inferMotivations(data: Partial<LeadProfile>): string[] {
     const motivations = []
-    
+
     if (data.seniority === 'C_SUITE' || data.seniority === 'EXECUTIVE') {
       motivations.push('Revenue growth', 'Competitive advantage', 'Operational efficiency')
     }
@@ -1042,9 +1079,13 @@ export class LeadIntelligenceEngine {
 
   private inferObjections(data: Partial<LeadProfile>): string[] {
     const objections = []
-    
+
     if (data.competitorUsage && data.competitorUsage.length > 0) {
-      objections.push('Already using competitor solution', 'Switching costs', 'Integration complexity')
+      objections.push(
+        'Already using competitor solution',
+        'Switching costs',
+        'Integration complexity'
+      )
     }
 
     if (data.currentCompany?.size === 'ENTERPRISE') {
@@ -1065,27 +1106,27 @@ export class LeadIntelligenceEngine {
       domain: '',
       industry: 'Unknown',
       size: 'MEDIUM',
-      location: { country: 'Unknown' }
+      location: { country: 'Unknown' },
     }
   }
 
   private getBaseValueByCompanySize(size: string): number {
     const sizeToValue = {
-      'ENTERPRISE': 100000,
-      'LARGE': 50000,
-      'MEDIUM': 25000,
-      'SMALL': 10000
+      ENTERPRISE: 100000,
+      LARGE: 50000,
+      MEDIUM: 25000,
+      SMALL: 10000,
     }
     return sizeToValue[size as keyof typeof sizeToValue] || 25000
   }
 
   private getSeniorityMultiplier(seniority: string): number {
     const seniorityToMultiplier = {
-      'C_SUITE': 3,
-      'EXECUTIVE': 2.5,
-      'SENIOR': 1.5,
-      'MID': 1,
-      'ENTRY': 0.5
+      C_SUITE: 3,
+      EXECUTIVE: 2.5,
+      SENIOR: 1.5,
+      MID: 1,
+      ENTRY: 0.5,
     }
     return seniorityToMultiplier[seniority as keyof typeof seniorityToMultiplier] || 1
   }
@@ -1116,7 +1157,7 @@ export class LeadIntelligenceEngine {
     return Math.min(1, likelihood)
   }
 
-  private extractConversionFeatures(lead: LeadProfile): Record<string, any> {
+  private extractConversionFeatures(lead: LeadProfile): Record<string, unknown> {
     return {
       seniority: lead.seniority,
       companySize: lead.currentCompany.size,
@@ -1125,18 +1166,21 @@ export class LeadIntelligenceEngine {
       hasPhone: lead.phoneNumbers.length > 0,
       hasLinkedIn: !!lead.linkedinUrl,
       competitorCount: lead.competitorUsage.length,
-      leadScore: lead.leadScore
+      leadScore: lead.leadScore,
     }
   }
 
-  private identifyConversionFactors(lead: LeadProfile, features: Record<string, any>): ConversionFactor[] {
+  private identifyConversionFactors(
+    lead: LeadProfile,
+    features: Record<string, unknown>
+  ): ConversionFactor[] {
     const factors: ConversionFactor[] = []
 
     if (features.seniority === 'C_SUITE' || features.seniority === 'EXECUTIVE') {
       factors.push({
         factor: 'Executive-level contact',
         impact: 'POSITIVE',
-        weight: 0.8
+        weight: 0.8,
       })
     }
 
@@ -1144,7 +1188,7 @@ export class LeadIntelligenceEngine {
       factors.push({
         factor: 'Shows buying intent',
         impact: 'POSITIVE',
-        weight: 0.9
+        weight: 0.9,
       })
     }
 
@@ -1152,14 +1196,18 @@ export class LeadIntelligenceEngine {
       factors.push({
         factor: 'Using competitor solution',
         impact: 'NEGATIVE',
-        weight: 0.6
+        weight: 0.6,
       })
     }
 
     return factors
   }
 
-  private generateConversionRecommendations(lead: LeadProfile, probability: number, factors: ConversionFactor[]): string[] {
+  private generateConversionRecommendations(
+    lead: LeadProfile,
+    probability: number,
+    factors: ConversionFactor[]
+  ): string[] {
     const recommendations = []
 
     if (probability > 0.7) {
@@ -1188,7 +1236,10 @@ export class LeadIntelligenceEngine {
     return recommendations
   }
 
-  private async generateMessagingTemplates(lead: LeadProfile, strategy: string): Promise<MessageTemplate[]> {
+  private async generateMessagingTemplates(
+    lead: LeadProfile,
+    strategy: string
+  ): Promise<MessageTemplate[]> {
     const templates: MessageTemplate[] = []
 
     // Initial outreach
@@ -1197,7 +1248,7 @@ export class LeadIntelligenceEngine {
       channel: lead.preferredChannel,
       subject: `${lead.firstName}, noticed your interest in ${lead.contentEngagement[0]?.title || 'modern CRM solutions'}`,
       body: this.generatePersonalizedMessage(lead, 'initial'),
-      personalizationTokens: ['firstName', 'company', 'painPoint']
+      personalizationTokens: ['firstName', 'company', 'painPoint'],
     })
 
     // Follow-up
@@ -1206,27 +1257,30 @@ export class LeadIntelligenceEngine {
       channel: 'EMAIL',
       subject: 'Quick question about your CRM evaluation',
       body: this.generatePersonalizedMessage(lead, 'followup'),
-      personalizationTokens: ['previousInteraction', 'valueProposition']
+      personalizationTokens: ['previousInteraction', 'valueProposition'],
     })
 
     return templates
   }
 
-  private generatePersonalizedMessage(lead: LeadProfile, type: string): string {
+  private generatePersonalizedMessage(_lead: LeadProfile, _type: string): string {
     // This would use AI to generate personalized messages
     return `Hi ${lead.firstName}, [personalized message based on profile and engagement]`
   }
 
-  private createEngagementTimeline(lead: LeadProfile, tactics: EngagementTactic[]): EngagementTimeline {
+  private createEngagementTimeline(
+    lead: LeadProfile,
+    tactics: EngagementTactic[]
+  ): EngagementTimeline {
     return {
       startDate: new Date(),
       touchpoints: tactics.map((tactic, index) => ({
         day: index * 2 + 1,
         action: tactic.action,
         channel: tactic.channel,
-        expectedOutcome: 'Engagement or response'
+        expectedOutcome: 'Engagement or response',
       })),
-      reviewDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 2 weeks
+      reviewDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 2 weeks
     }
   }
 }

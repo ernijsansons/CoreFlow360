@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
+import {
   SparklesIcon,
   EnvelopeIcon,
   ChatBubbleLeftRightIcon,
@@ -46,7 +46,7 @@ import {
   MicrophoneIcon,
   EyeIcon,
   AcademicCapIcon,
-  PencilIcon
+  PencilIcon,
 } from '@heroicons/react/24/outline'
 import { toast } from 'react-hot-toast'
 
@@ -54,7 +54,7 @@ interface CreativeOutreachMethod {
   id: string
   name: string
   description: string
-  icon: React.ComponentType<any>
+  icon: React.ComponentType<unknown>
   category: string
   effectiveness: number
   personalizationLevel: 'low' | 'medium' | 'high' | 'ultra'
@@ -76,14 +76,14 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
   {
     id: 'personalized-infographic',
     name: 'Decision Impact Infographic',
-    description: 'AI-generated infographic with decision maker\'s name showing business impact',
+    description: "AI-generated infographic with decision maker's name showing business impact",
     icon: PhotoIcon,
     category: 'Visual Impact',
     effectiveness: 95,
     personalizationLevel: 'ultra',
     channels: ['email', 'linkedin', 'whatsapp'],
     templates: [],
-    aiPrompt: 'Generate personalized business impact visualization'
+    aiPrompt: 'Generate personalized business impact visualization',
   },
   {
     id: 'animated-roi-calculator',
@@ -95,7 +95,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['email', 'web'],
     templates: [],
-    aiPrompt: 'Create interactive ROI visualization'
+    aiPrompt: 'Create interactive ROI visualization',
   },
   {
     id: 'ceo-desk-mockup',
@@ -107,7 +107,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'ultra',
     channels: ['mobile', 'email'],
     templates: [],
-    aiPrompt: 'Generate AR desk mockup'
+    aiPrompt: 'Generate AR desk mockup',
   },
   {
     id: 'company-future-vision',
@@ -119,7 +119,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['email', 'presentation'],
     templates: [],
-    aiPrompt: 'Create future state visualization'
+    aiPrompt: 'Create future state visualization',
   },
   {
     id: 'competitor-comparison-chart',
@@ -131,7 +131,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'medium',
     channels: ['email', 'web'],
     templates: [],
-    aiPrompt: 'Generate competitive analysis visual'
+    aiPrompt: 'Generate competitive analysis visual',
   },
 
   // Video & Animation Methods (21-40)
@@ -145,19 +145,19 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'ultra',
     channels: ['email', 'linkedin'],
     templates: [],
-    aiPrompt: 'Create AI CEO recommendation video'
+    aiPrompt: 'Create AI CEO recommendation video',
   },
   {
     id: 'personalized-movie-trailer',
     name: 'Success Story Movie Trailer',
-    description: 'Hollywood-style trailer of their company\'s success story',
+    description: "Hollywood-style trailer of their company's success story",
     icon: TvIcon,
     category: 'Video & Animation',
     effectiveness: 91,
     personalizationLevel: 'ultra',
     channels: ['email', 'social'],
     templates: [],
-    aiPrompt: 'Generate company success movie trailer'
+    aiPrompt: 'Generate company success movie trailer',
   },
   {
     id: 'animated-journey-map',
@@ -169,7 +169,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['email', 'web'],
     templates: [],
-    aiPrompt: 'Create customer journey animation'
+    aiPrompt: 'Create customer journey animation',
   },
   {
     id: 'time-lapse-transformation',
@@ -181,7 +181,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['email', 'presentation'],
     templates: [],
-    aiPrompt: 'Generate transformation time-lapse'
+    aiPrompt: 'Generate transformation time-lapse',
   },
   {
     id: 'whiteboard-explanation',
@@ -193,7 +193,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'medium',
     channels: ['email', 'web'],
     templates: [],
-    aiPrompt: 'Create whiteboard explainer video'
+    aiPrompt: 'Create whiteboard explainer video',
   },
 
   // Interactive Experiences (41-60)
@@ -207,7 +207,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'ultra',
     channels: ['vr', 'web'],
     templates: [],
-    aiPrompt: 'Create virtual office tour'
+    aiPrompt: 'Create virtual office tour',
   },
   {
     id: 'gamified-savings-quest',
@@ -219,7 +219,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['web', 'mobile'],
     templates: [],
-    aiPrompt: 'Design savings quest game'
+    aiPrompt: 'Design savings quest game',
   },
   {
     id: 'ai-chatbot-advisor',
@@ -231,7 +231,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'ultra',
     channels: ['web', 'whatsapp'],
     templates: [],
-    aiPrompt: 'Create AI business advisor'
+    aiPrompt: 'Create AI business advisor',
   },
   {
     id: 'decision-tree-explorer',
@@ -243,7 +243,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'medium',
     channels: ['web', 'email'],
     templates: [],
-    aiPrompt: 'Build decision tree explorer'
+    aiPrompt: 'Build decision tree explorer',
   },
   {
     id: 'virtual-workshop',
@@ -255,7 +255,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['zoom', 'web'],
     templates: [],
-    aiPrompt: 'Design virtual workshop'
+    aiPrompt: 'Design virtual workshop',
   },
 
   // Physical & Tangible (61-70)
@@ -269,7 +269,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'ultra',
     channels: ['direct-mail'],
     templates: [],
-    aiPrompt: 'Design executive survival kit'
+    aiPrompt: 'Design executive survival kit',
   },
   {
     id: 'custom-puzzle-solution',
@@ -281,7 +281,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['direct-mail'],
     templates: [],
-    aiPrompt: 'Create solution puzzle'
+    aiPrompt: 'Create solution puzzle',
   },
   {
     id: 'augmented-business-card',
@@ -293,19 +293,19 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'medium',
     channels: ['in-person', 'direct-mail'],
     templates: [],
-    aiPrompt: 'Design AR business card'
+    aiPrompt: 'Design AR business card',
   },
   {
     id: 'success-timeline-poster',
     name: 'Future Success Timeline',
-    description: 'Large poster showing their company\'s future milestones',
+    description: "Large poster showing their company's future milestones",
     icon: CalendarIcon,
     category: 'Physical',
     effectiveness: 85,
     personalizationLevel: 'high',
     channels: ['direct-mail'],
     templates: [],
-    aiPrompt: 'Create success timeline poster'
+    aiPrompt: 'Create success timeline poster',
   },
   {
     id: 'mini-billboard',
@@ -317,7 +317,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['direct-mail'],
     templates: [],
-    aiPrompt: 'Design mini billboard messages'
+    aiPrompt: 'Design mini billboard messages',
   },
 
   // Audio & Voice (71-80)
@@ -331,7 +331,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'ultra',
     channels: ['email', 'spotify'],
     templates: [],
-    aiPrompt: 'Create personalized podcast episode'
+    aiPrompt: 'Create personalized podcast episode',
   },
   {
     id: 'voice-message-celebrity',
@@ -343,19 +343,19 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['whatsapp', 'email'],
     templates: [],
-    aiPrompt: 'Generate celebrity voice message'
+    aiPrompt: 'Generate celebrity voice message',
   },
   {
     id: 'success-anthem',
     name: 'Company Success Anthem',
-    description: 'AI-composed song about their company\'s future',
+    description: "AI-composed song about their company's future",
     icon: MusicalNoteIcon,
     category: 'Audio',
     effectiveness: 82,
     personalizationLevel: 'ultra',
     channels: ['email', 'social'],
     templates: [],
-    aiPrompt: 'Compose company success anthem'
+    aiPrompt: 'Compose company success anthem',
   },
   {
     id: 'radio-ad-simulation',
@@ -367,7 +367,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['email', 'web'],
     templates: [],
-    aiPrompt: 'Create future radio ad'
+    aiPrompt: 'Create future radio ad',
   },
   {
     id: 'meditation-success',
@@ -379,7 +379,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'medium',
     channels: ['app', 'email'],
     templates: [],
-    aiPrompt: 'Create success meditation'
+    aiPrompt: 'Create success meditation',
   },
 
   // Social & Viral (81-90)
@@ -393,7 +393,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'ultra',
     channels: ['linkedin'],
     templates: [],
-    aiPrompt: 'Orchestrate LinkedIn campaign'
+    aiPrompt: 'Orchestrate LinkedIn campaign',
   },
   {
     id: 'viral-challenge',
@@ -405,7 +405,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['tiktok', 'instagram'],
     templates: [],
-    aiPrompt: 'Create viral challenge'
+    aiPrompt: 'Create viral challenge',
   },
   {
     id: 'employee-testimonials',
@@ -417,19 +417,19 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['linkedin', 'glassdoor'],
     templates: [],
-    aiPrompt: 'Generate employee testimonials'
+    aiPrompt: 'Generate employee testimonials',
   },
   {
     id: 'industry-news-feature',
     name: 'Fake Future News Article',
-    description: 'News article about their company\'s future success',
+    description: "News article about their company's future success",
     icon: NewspaperIcon,
     category: 'Social',
     effectiveness: 84,
     personalizationLevel: 'ultra',
     channels: ['email', 'web'],
     templates: [],
-    aiPrompt: 'Write future news article'
+    aiPrompt: 'Write future news article',
   },
   {
     id: 'customer-success-stories',
@@ -441,7 +441,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['youtube', 'email'],
     templates: [],
-    aiPrompt: 'Create customer testimonials'
+    aiPrompt: 'Create customer testimonials',
   },
 
   // Data & Analytics (91-100)
@@ -455,7 +455,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['sms', 'email'],
     templates: [],
-    aiPrompt: 'Monitor competitor activities'
+    aiPrompt: 'Monitor competitor activities',
   },
   {
     id: 'market-opportunity-radar',
@@ -467,7 +467,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['dashboard', 'email'],
     templates: [],
-    aiPrompt: 'Identify market opportunities'
+    aiPrompt: 'Identify market opportunities',
   },
   {
     id: 'predictive-success-model',
@@ -479,7 +479,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'ultra',
     channels: ['web', 'presentation'],
     templates: [],
-    aiPrompt: 'Build success prediction model'
+    aiPrompt: 'Build success prediction model',
   },
   {
     id: 'industry-benchmark-report',
@@ -491,7 +491,7 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'high',
     channels: ['email', 'pdf'],
     templates: [],
-    aiPrompt: 'Generate benchmark report'
+    aiPrompt: 'Generate benchmark report',
   },
   {
     id: 'growth-simulation',
@@ -503,8 +503,8 @@ const CREATIVE_OUTREACH_METHODS: CreativeOutreachMethod[] = [
     personalizationLevel: 'ultra',
     channels: ['web', 'app'],
     templates: [],
-    aiPrompt: 'Create growth simulation'
-  }
+    aiPrompt: 'Create growth simulation',
+  },
 ]
 
 const ENGAGEMENT_SEQUENCES = [
@@ -517,8 +517,8 @@ const ENGAGEMENT_SEQUENCES = [
       { day: 3, methods: ['ai-ceo-conversation', 'industry-news-feature'] },
       { day: 7, methods: ['executive-survival-kit', 'personalized-podcast'] },
       { day: 14, methods: ['virtual-office-tour', 'success-timeline-poster'] },
-      { day: 21, methods: ['roi-calculator', 'competitor-comparison-chart'] }
-    ]
+      { day: 21, methods: ['roi-calculator', 'competitor-comparison-chart'] },
+    ],
   },
   {
     id: 'innovation-showcase',
@@ -529,47 +529,50 @@ const ENGAGEMENT_SEQUENCES = [
       { day: 2, methods: ['virtual-workshop', 'ai-chatbot-advisor'] },
       { day: 5, methods: ['gamified-savings-quest', 'future-vision-board'] },
       { day: 10, methods: ['growth-simulation', 'predictive-success-model'] },
-      { day: 15, methods: ['personalized-movie-trailer', 'viral-challenge'] }
-    ]
-  }
+      { day: 15, methods: ['personalized-movie-trailer', 'viral-challenge'] },
+    ],
+  },
 ]
 
 export default function CreativeOutreachAutomation() {
   const [selectedMethods, setSelectedMethods] = useState<string[]>([])
-  const [activeSequence, setActiveSequence] = useState<any>(null)
+  const [activeSequence, setActiveSequence] = useState<unknown>(null)
   const [targetProfile, setTargetProfile] = useState({
     name: '',
     title: '',
     company: '',
     industry: '',
     challenges: [],
-    preferences: []
+    preferences: [],
   })
   const [generatingContent, setGeneratingContent] = useState(false)
-  const [previewContent, setPreviewContent] = useState<any>(null)
+  const [previewContent, setPreviewContent] = useState<unknown>(null)
 
-  const generatePersonalizedContent = useCallback(async (method: CreativeOutreachMethod) => {
-    setGeneratingContent(true)
-    try {
-      const response = await fetch('/api/crm/outreach/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          method: method.id,
-          targetProfile,
-          aiPrompt: method.aiPrompt
+  const generatePersonalizedContent = useCallback(
+    async (method: CreativeOutreachMethod) => {
+      setGeneratingContent(true)
+      try {
+        const response = await fetch('/api/crm/outreach/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            method: method.id,
+            targetProfile,
+            aiPrompt: method.aiPrompt,
+          }),
         })
-      })
 
-      const result = await response.json()
-      setPreviewContent(result)
-      toast.success(`Generated ${method.name} content!`)
-    } catch (error) {
-      toast.error('Failed to generate content')
-    } finally {
-      setGeneratingContent(false)
-    }
-  }, [targetProfile])
+        const result = await response.json()
+        setPreviewContent(result)
+        toast.success(`Generated ${method.name} content!`)
+      } catch (error) {
+        toast.error('Failed to generate content')
+      } finally {
+        setGeneratingContent(false)
+      }
+    },
+    [targetProfile]
+  )
 
   const launchSequence = useCallback(async () => {
     if (!activeSequence || selectedMethods.length === 0) {
@@ -584,8 +587,8 @@ export default function CreativeOutreachAutomation() {
         body: JSON.stringify({
           sequence: activeSequence,
           methods: selectedMethods,
-          targetProfile
-        })
+          targetProfile,
+        }),
       })
 
       if (response.ok) {
@@ -598,62 +601,54 @@ export default function CreativeOutreachAutomation() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="mx-auto max-w-7xl p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Creative Outreach Automation
-          </h1>
-          <p className="text-lg text-gray-600">
-            100 innovative ways to engage decision makers
-          </p>
+          <h1 className="mb-2 text-4xl font-bold text-gray-900">Creative Outreach Automation</h1>
+          <p className="text-lg text-gray-600">100 innovative ways to engage decision makers</p>
         </div>
 
         {/* Target Profile */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-semibold mb-4">Target Profile</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mb-6 rounded-xl bg-white p-6 shadow-lg">
+          <h2 className="mb-4 text-2xl font-semibold">Target Profile</h2>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Decision Maker Name
               </label>
               <input
                 value={targetProfile.name}
-                onChange={(e) => setTargetProfile(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                onChange={(e) => setTargetProfile((prev) => ({ ...prev, name: e.target.value }))}
+                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-purple-500"
                 placeholder="John Smith"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title
-              </label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Title</label>
               <input
                 value={targetProfile.title}
-                onChange={(e) => setTargetProfile(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                onChange={(e) => setTargetProfile((prev) => ({ ...prev, title: e.target.value }))}
+                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-purple-500"
                 placeholder="CEO"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company
-              </label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Company</label>
               <input
                 value={targetProfile.company}
-                onChange={(e) => setTargetProfile(prev => ({ ...prev, company: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                onChange={(e) => setTargetProfile((prev) => ({ ...prev, company: e.target.value }))}
+                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-purple-500"
                 placeholder="Acme Corp"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Industry
-              </label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Industry</label>
               <select
                 value={targetProfile.industry}
-                onChange={(e) => setTargetProfile(prev => ({ ...prev, industry: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                onChange={(e) =>
+                  setTargetProfile((prev) => ({ ...prev, industry: e.target.value }))
+                }
+                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-purple-500"
               >
                 <option value="">Select industry</option>
                 <option value="technology">Technology</option>
@@ -667,59 +662,66 @@ export default function CreativeOutreachAutomation() {
         </div>
 
         {/* Creative Methods Grid */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-semibold mb-4">Creative Outreach Methods</h2>
-          
+        <div className="mb-6 rounded-xl bg-white p-6 shadow-lg">
+          <h2 className="mb-4 text-2xl font-semibold">Creative Outreach Methods</h2>
+
           {/* Category Tabs */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {Array.from(new Set(CREATIVE_OUTREACH_METHODS.map(m => m.category))).map(category => (
-              <button
-                key={category}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                {category}
-              </button>
-            ))}
+          <div className="mb-6 flex flex-wrap gap-2">
+            {Array.from(new Set(CREATIVE_OUTREACH_METHODS.map((m) => m.category))).map(
+              (category) => (
+                <button
+                  key={category}
+                  className="rounded-lg bg-gray-100 px-4 py-2 transition-colors hover:bg-gray-200"
+                >
+                  {category}
+                </button>
+              )
+            )}
           </div>
 
           {/* Methods Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+          <div className="grid max-h-96 grid-cols-1 gap-4 overflow-y-auto md:grid-cols-2 lg:grid-cols-3">
             {CREATIVE_OUTREACH_METHODS.map((method) => (
               <motion.div
                 key={method.id}
                 whileHover={{ scale: 1.02 }}
                 onClick={() => {
                   if (selectedMethods.includes(method.id)) {
-                    setSelectedMethods(prev => prev.filter(id => id !== method.id))
+                    setSelectedMethods((prev) => prev.filter((id) => id !== method.id))
                   } else {
-                    setSelectedMethods(prev => [...prev, method.id])
+                    setSelectedMethods((prev) => [...prev, method.id])
                   }
                 }}
-                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                className={`cursor-pointer rounded-lg border-2 p-4 transition-all ${
                   selectedMethods.includes(method.id)
                     ? 'border-purple-500 bg-purple-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <method.icon className="w-6 h-6 text-purple-600 flex-shrink-0" />
+                <div className="mb-2 flex items-start justify-between">
+                  <method.icon className="h-6 w-6 flex-shrink-0 text-purple-600" />
                   <span className="text-sm font-medium text-gray-500">
                     {method.effectiveness}% effective
                   </span>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">{method.name}</h3>
-                <p className="text-sm text-gray-600 mb-2">{method.description}</p>
+                <h3 className="mb-1 font-semibold text-gray-900">{method.name}</h3>
+                <p className="mb-2 text-sm text-gray-600">{method.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    method.personalizationLevel === 'ultra' ? 'bg-red-100 text-red-700' :
-                    method.personalizationLevel === 'high' ? 'bg-orange-100 text-orange-700' :
-                    method.personalizationLevel === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-green-100 text-green-700'
-                  }`}>
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs ${
+                      method.personalizationLevel === 'ultra'
+                        ? 'bg-red-100 text-red-700'
+                        : method.personalizationLevel === 'high'
+                          ? 'bg-orange-100 text-orange-700'
+                          : method.personalizationLevel === 'medium'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-green-100 text-green-700'
+                    }`}
+                  >
                     {method.personalizationLevel} personalization
                   </span>
                   <div className="flex gap-1">
-                    {method.channels.slice(0, 2).map(channel => (
+                    {method.channels.slice(0, 2).map((channel) => (
                       <span key={channel} className="text-xs text-gray-500">
                         {channel}
                       </span>
@@ -732,25 +734,25 @@ export default function CreativeOutreachAutomation() {
         </div>
 
         {/* Engagement Sequences */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-semibold mb-4">Engagement Sequences</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mb-6 rounded-xl bg-white p-6 shadow-lg">
+          <h2 className="mb-4 text-2xl font-semibold">Engagement Sequences</h2>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {ENGAGEMENT_SEQUENCES.map((sequence) => (
               <div
                 key={sequence.id}
                 onClick={() => setActiveSequence(sequence)}
-                className={`p-6 rounded-lg border-2 cursor-pointer transition-all ${
+                className={`cursor-pointer rounded-lg border-2 p-6 transition-all ${
                   activeSequence?.id === sequence.id
                     ? 'border-purple-500 bg-purple-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <h3 className="font-semibold text-lg mb-2">{sequence.name}</h3>
-                <p className="text-gray-600 mb-4">{sequence.description}</p>
+                <h3 className="mb-2 text-lg font-semibold">{sequence.name}</h3>
+                <p className="mb-4 text-gray-600">{sequence.description}</p>
                 <div className="space-y-2">
                   {sequence.steps.map((step, index) => (
                     <div key={index} className="flex items-center text-sm">
-                      <span className="font-medium text-gray-700 mr-2">Day {step.day}:</span>
+                      <span className="mr-2 font-medium text-gray-700">Day {step.day}:</span>
                       <span className="text-gray-600">{step.methods.length} touchpoints</span>
                     </div>
                   ))}
@@ -765,21 +767,21 @@ export default function CreativeOutreachAutomation() {
           <button
             onClick={() => {
               if (selectedMethods.length > 0) {
-                const method = CREATIVE_OUTREACH_METHODS.find(m => m.id === selectedMethods[0])
+                const method = CREATIVE_OUTREACH_METHODS.find((m) => m.id === selectedMethods[0])
                 if (method) generatePersonalizedContent(method)
               }
             }}
             disabled={selectedMethods.length === 0 || generatingContent}
-            className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center disabled:opacity-50"
+            className="flex items-center rounded-lg bg-gray-600 px-6 py-3 text-white transition-colors hover:bg-gray-700 disabled:opacity-50"
           >
             {generatingContent ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
                 Generating Preview...
               </>
             ) : (
               <>
-                <EyeIcon className="w-5 h-5 mr-2" />
+                <EyeIcon className="mr-2 h-5 w-5" />
                 Preview Content
               </>
             )}
@@ -787,9 +789,9 @@ export default function CreativeOutreachAutomation() {
           <button
             onClick={launchSequence}
             disabled={selectedMethods.length === 0 || !activeSequence}
-            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all flex items-center disabled:opacity-50"
+            className="flex items-center rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 text-white transition-all hover:from-purple-700 hover:to-pink-700 disabled:opacity-50"
           >
-            <RocketLaunchIcon className="w-5 h-5 mr-2" />
+            <RocketLaunchIcon className="mr-2 h-5 w-5" />
             Launch Sequence
           </button>
         </div>

@@ -6,7 +6,11 @@
 import { Redis } from 'ioredis'
 
 // Skip initialization during build
-const isBuildTime = () => process.env.VERCEL || process.env.CI || process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview'
+const isBuildTime = () =>
+  process.env.VERCEL ||
+  process.env.CI ||
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.VERCEL_ENV === 'preview'
 
 // Lazy Redis connection
 let redis: Redis | null = null
@@ -15,7 +19,7 @@ function getRedisConnection(): Redis | null {
   if (isBuildTime()) {
     return null
   }
-  
+
   if (!redis) {
     redis = new Redis({
       host: process.env.REDIS_HOST || 'localhost',
@@ -24,10 +28,10 @@ function getRedisConnection(): Redis | null {
       db: parseInt(process.env.REDIS_CALL_LIMIT_DB || '2'),
       maxRetriesPerRequest: 3,
       retryDelayOnFailover: 50,
-      lazyConnect: true
+      lazyConnect: true,
     })
   }
-  
+
   return redis
 }
 
@@ -42,7 +46,7 @@ interface CallRateLimitResult {
 
 interface CallLimitConfig {
   maxCallsPerMinute: number
-  maxCallsPerHour: number  
+  maxCallsPerHour: number
   maxDailyCalls: number
   maxDailyCost: number
   maxConcurrentCalls: number
@@ -62,66 +66,57 @@ export class CallRateLimiter {
     maxDailyCalls: parseInt(process.env.VOICE_CALLS_PER_DAY || '1000'),
     maxDailyCost: parseFloat(process.env.VOICE_DAILY_BUDGET_LIMIT || '100'),
     maxConcurrentCalls: parseInt(process.env.VOICE_MAX_CONCURRENT_CALLS || '5'),
-    costPerCall: parseFloat(process.env.VOICE_AVERAGE_COST_PER_CALL || '0.40')
+    costPerCall: parseFloat(process.env.VOICE_AVERAGE_COST_PER_CALL || '0.40'),
   }
 
   /**
    * Check if call is allowed based on comprehensive rate limits
    */
   async checkCallLimit(
-    tenantId: string, 
+    tenantId: string,
     priority: number = 3,
     customConfig?: Partial<CallLimitConfig>
   ): Promise<CallRateLimitResult> {
     const config = { ...this.defaultConfig, ...customConfig }
-    
+
     try {
       // Run all checks in parallel for performance
-      const [
-        minuteCheck,
-        hourCheck, 
-        dailyCheck,
-        costCheck,
-        concurrencyCheck,
-        systemCheck
-      ] = await Promise.all([
-        this.checkTimeBasedLimit(tenantId, 'minute', config.maxCallsPerMinute, priority),
-        this.checkTimeBasedLimit(tenantId, 'hour', config.maxCallsPerHour, priority),
-        this.checkTimeBasedLimit(tenantId, 'day', config.maxDailyCalls, priority),
-        this.checkCostLimit(tenantId, config.maxDailyCost, config.costPerCall),
-        this.checkConcurrencyLimit(tenantId, config.maxConcurrentCalls),
-        this.checkSystemHealth()
-      ])
+      const [minuteCheck, hourCheck, dailyCheck, costCheck, concurrencyCheck, systemCheck] =
+        await Promise.all([
+          this.checkTimeBasedLimit(tenantId, 'minute', config.maxCallsPerMinute, priority),
+          this.checkTimeBasedLimit(tenantId, 'hour', config.maxCallsPerHour, priority),
+          this.checkTimeBasedLimit(tenantId, 'day', config.maxDailyCalls, priority),
+          this.checkCostLimit(tenantId, config.maxDailyCost, config.costPerCall),
+          this.checkConcurrencyLimit(tenantId, config.maxConcurrentCalls),
+          this.checkSystemHealth(),
+        ])
 
       // Find the most restrictive result
       const checks = [minuteCheck, hourCheck, dailyCheck, costCheck, concurrencyCheck, systemCheck]
-      const blockedCheck = checks.find(check => !check.allowed)
-      
+      const blockedCheck = checks.find((check) => !check.allowed)
+
       if (blockedCheck) {
         return blockedCheck
       }
-      
+
       // All checks passed - return the most restrictive remaining count
-      const minRemaining = Math.min(...checks.map(c => c.remaining))
-      
+      const minRemaining = Math.min(...checks.map((c) => c.remaining))
+
       return {
         allowed: true,
         remaining: minRemaining,
-        resetTime: Math.max(...checks.map(c => c.resetTime)),
+        resetTime: Math.max(...checks.map((c) => c.resetTime)),
         retryAfter: 0,
-        costRemaining: costCheck.costRemaining
+        costRemaining: costCheck.costRemaining,
       }
-      
     } catch (error) {
-      console.error('Call rate limit check error:', error)
-      
       // Fail closed for calls - better to miss a call than exceed limits
       return {
         allowed: false,
         remaining: 0,
         resetTime: Date.now() + 60000,
         retryAfter: 60,
-        reason: 'rate_limit_check_error'
+        reason: 'rate_limit_check_error',
       }
     }
   }
@@ -137,10 +132,10 @@ export class CallRateLimiter {
   ): Promise<CallRateLimitResult> {
     const windowMs = {
       minute: 60 * 1000,
-      hour: 60 * 60 * 1000, 
-      day: 24 * 60 * 60 * 1000
+      hour: 60 * 60 * 1000,
+      day: 24 * 60 * 60 * 1000,
     }[window]
-    
+
     const key = `call_limit:${tenantId}:${window}`
     const now = Date.now()
     const windowStart = now - windowMs
@@ -154,24 +149,24 @@ export class CallRateLimiter {
         allowed: true,
         remaining: maxCalls,
         resetTime: now + windowMs,
-        retryAfter: 0
+        retryAfter: 0,
       }
     }
-    
+
     const pipeline = connection.pipeline()
-    
+
     // Remove expired entries
     pipeline.zremrangebyscore(key, 0, windowStart)
-    
+
     // Count current calls in window
     pipeline.zcard(key)
-    
+
     // Add current call
     pipeline.zadd(key, now, `${now}-${Math.random()}`)
-    
+
     // Set expiry
     pipeline.expire(key, Math.ceil(windowMs / 1000))
-    
+
     const results = await pipeline.exec()
     if (!results) throw new Error('Redis pipeline failed')
 
@@ -183,7 +178,7 @@ export class CallRateLimiter {
       remaining: Math.max(0, adjustedMax - currentCount - 1),
       resetTime: now + windowMs,
       retryAfter: allowed ? 0 : Math.ceil((windowStart + windowMs - now) / 1000),
-      reason: allowed ? undefined : `${window}_limit_exceeded`
+      reason: allowed ? undefined : `${window}_limit_exceeded`,
     }
   }
 
@@ -198,7 +193,7 @@ export class CallRateLimiter {
     const key = `call_cost:${tenantId}:daily`
     const now = Date.now()
     const dayStart = new Date().setHours(0, 0, 0, 0)
-    const dayEnd = dayStart + (24 * 60 * 60 * 1000)
+    const dayEnd = dayStart + 24 * 60 * 60 * 1000
 
     const connection = this.getRedis()
     if (!connection) {
@@ -207,14 +202,14 @@ export class CallRateLimiter {
         remaining: 100,
         resetTime: dayEnd,
         retryAfter: 0,
-        costRemaining: maxDailyCost
+        costRemaining: maxDailyCost,
       }
     }
-    
+
     // Get current daily spend
     const currentSpend = await connection.get(key)
     const dailySpend = parseFloat(currentSpend || '0')
-    
+
     // Check if adding this call would exceed budget
     const projectedSpend = dailySpend + costPerCall
     const allowed = projectedSpend <= maxDailyCost
@@ -230,7 +225,7 @@ export class CallRateLimiter {
       resetTime: dayEnd,
       retryAfter: allowed ? 0 : Math.ceil((dayEnd - now) / 1000),
       costRemaining: Math.max(0, maxDailyCost - projectedSpend),
-      reason: allowed ? undefined : 'daily_budget_exceeded'
+      reason: allowed ? undefined : 'daily_budget_exceeded',
     }
   }
 
@@ -242,27 +237,27 @@ export class CallRateLimiter {
     maxConcurrent: number
   ): Promise<CallRateLimitResult> {
     const key = `active_calls:${tenantId}`
-    
+
     const connection = this.getRedis()
     if (!connection) {
       return {
         allowed: true,
         remaining: maxConcurrent,
         resetTime: Date.now() + 300000,
-        retryAfter: 0
+        retryAfter: 0,
       }
     }
-    
+
     const activeCount = await connection.scard(key)
-    
+
     const allowed = activeCount < maxConcurrent
 
     return {
       allowed,
       remaining: Math.max(0, maxConcurrent - activeCount - (allowed ? 1 : 0)),
-      resetTime: Date.now() + (5 * 60 * 1000), // Assume calls last 5 minutes on average
+      resetTime: Date.now() + 5 * 60 * 1000, // Assume calls last 5 minutes on average
       retryAfter: allowed ? 0 : 60, // Retry in 1 minute
-      reason: allowed ? undefined : 'concurrent_limit_exceeded'
+      reason: allowed ? undefined : 'concurrent_limit_exceeded',
     }
   }
 
@@ -276,10 +271,10 @@ export class CallRateLimiter {
         allowed: true,
         remaining: 100,
         resetTime: Date.now() + 60000,
-        retryAfter: 0
+        retryAfter: 0,
       }
     }
-    
+
     // Check if emergency mode is enabled
     const emergencyMode = await connection.get('system:emergency_mode')
     if (emergencyMode) {
@@ -287,20 +282,23 @@ export class CallRateLimiter {
       return {
         allowed: false,
         remaining: 0,
-        resetTime: Date.now() + (5 * 60 * 1000),
+        resetTime: Date.now() + 5 * 60 * 1000,
         retryAfter: 300,
-        reason: `emergency_mode:${data.reason}`
+        reason: `emergency_mode:${data.reason}`,
       }
     }
 
     // Check total system load
-    const totalActiveCalls = await connection.eval(`
+    const totalActiveCalls = (await connection.eval(
+      `
       local total = 0
       for i, key in ipairs(redis.call('KEYS', 'active_calls:*')) do
         total = total + redis.call('SCARD', key)
       end
       return total
-    `, 0) as number
+    `,
+      0
+    )) as number
 
     const systemMaxCalls = parseInt(process.env.VOICE_SYSTEM_MAX_CALLS || '100')
     const allowed = totalActiveCalls < systemMaxCalls
@@ -308,9 +306,9 @@ export class CallRateLimiter {
     return {
       allowed,
       remaining: Math.max(0, systemMaxCalls - totalActiveCalls - (allowed ? 1 : 0)),
-      resetTime: Date.now() + (10 * 60 * 1000),
+      resetTime: Date.now() + 10 * 60 * 1000,
       retryAfter: allowed ? 0 : 120,
-      reason: allowed ? undefined : 'system_overload'
+      reason: allowed ? undefined : 'system_overload',
     }
   }
 
@@ -320,24 +318,24 @@ export class CallRateLimiter {
   async recordCallStart(tenantId: string, callSid: string, cost: number = 0): Promise<void> {
     const connection = this.getRedis()
     if (!connection) return
-    
+
     const pipeline = connection.pipeline()
-    
+
     // Track active call
     pipeline.sadd(`active_calls:${tenantId}`, callSid)
     pipeline.expire(`active_calls:${tenantId}`, 3600) // 1 hour max
-    
+
     // Track cost if provided
     if (cost > 0) {
       const costKey = `call_cost:${tenantId}:daily`
       pipeline.incrbyfloat(costKey, cost)
-      
+
       // Set expiry to end of day
       const now = Date.now()
       const dayEnd = new Date().setHours(23, 59, 59, 999)
       pipeline.expire(costKey, Math.ceil((dayEnd - now) / 1000))
     }
-    
+
     await pipeline.exec()
   }
 
@@ -345,25 +343,25 @@ export class CallRateLimiter {
    * Record call completion
    */
   async recordCallCompletion(
-    tenantId: string, 
-    callSid: string, 
+    tenantId: string,
+    callSid: string,
     actualCost: number = 0,
     success: boolean = true
   ): Promise<void> {
     const connection = this.getRedis()
     if (!connection) return
-    
+
     const pipeline = connection.pipeline()
-    
+
     // Remove from active calls
     pipeline.srem(`active_calls:${tenantId}`, callSid)
-    
+
     // Update actual cost
     if (actualCost > 0) {
       const costKey = `call_cost:${tenantId}:daily`
       pipeline.incrbyfloat(costKey, actualCost)
     }
-    
+
     // Track success metrics for adaptive limiting
     const successKey = `call_success:${tenantId}`
     if (success) {
@@ -371,7 +369,7 @@ export class CallRateLimiter {
     }
     pipeline.hincrby(successKey, 'total', 1)
     pipeline.expire(successKey, 86400) // 24 hour window
-    
+
     await pipeline.exec()
   }
 
@@ -387,35 +385,49 @@ export class CallRateLimiter {
     success: { rate: number; recent: number }
   }> {
     const now = Date.now()
-    
+
     const connection = this.getRedis()
     if (!connection) {
       const defaultStatus = {
-        minute: { current: 0, limit: this.defaultConfig.maxCallsPerMinute, remaining: this.defaultConfig.maxCallsPerMinute },
-        hour: { current: 0, limit: this.defaultConfig.maxCallsPerHour, remaining: this.defaultConfig.maxCallsPerHour },
-        day: { current: 0, limit: this.defaultConfig.maxDailyCalls, remaining: this.defaultConfig.maxDailyCalls },
-        cost: { spent: 0, limit: this.defaultConfig.maxDailyCost, remaining: this.defaultConfig.maxDailyCost },
-        concurrent: { active: 0, limit: this.defaultConfig.maxConcurrentCalls, remaining: this.defaultConfig.maxConcurrentCalls },
-        success: { rate: 1.0, recent: 0 }
+        minute: {
+          current: 0,
+          limit: this.defaultConfig.maxCallsPerMinute,
+          remaining: this.defaultConfig.maxCallsPerMinute,
+        },
+        hour: {
+          current: 0,
+          limit: this.defaultConfig.maxCallsPerHour,
+          remaining: this.defaultConfig.maxCallsPerHour,
+        },
+        day: {
+          current: 0,
+          limit: this.defaultConfig.maxDailyCalls,
+          remaining: this.defaultConfig.maxDailyCalls,
+        },
+        cost: {
+          spent: 0,
+          limit: this.defaultConfig.maxDailyCost,
+          remaining: this.defaultConfig.maxDailyCost,
+        },
+        concurrent: {
+          active: 0,
+          limit: this.defaultConfig.maxConcurrentCalls,
+          remaining: this.defaultConfig.maxConcurrentCalls,
+        },
+        success: { rate: 1.0, recent: 0 },
       }
       return defaultStatus
     }
-    
-    const [
-      minuteCount,
-      hourCount,
-      dayCount,
-      dailyCost,
-      activeCount,
-      successMetrics
-    ] = await Promise.all([
-      connection.zcount(`call_limit:${tenantId}:minute`, now - 60000, now),
-      connection.zcount(`call_limit:${tenantId}:hour`, now - 3600000, now),
-      connection.zcount(`call_limit:${tenantId}:day`, now - 86400000, now),
-      connection.get(`call_cost:${tenantId}:daily`),
-      connection.scard(`active_calls:${tenantId}`),
-      connection.hmget(`call_success:${tenantId}`, 'successful', 'total')
-    ])
+
+    const [minuteCount, hourCount, dayCount, dailyCost, activeCount, successMetrics] =
+      await Promise.all([
+        connection.zcount(`call_limit:${tenantId}:minute`, now - 60000, now),
+        connection.zcount(`call_limit:${tenantId}:hour`, now - 3600000, now),
+        connection.zcount(`call_limit:${tenantId}:day`, now - 86400000, now),
+        connection.get(`call_cost:${tenantId}:daily`),
+        connection.scard(`active_calls:${tenantId}`),
+        connection.hmget(`call_success:${tenantId}`, 'successful', 'total'),
+      ])
 
     const spent = parseFloat(dailyCost || '0')
     const successful = parseInt(successMetrics[0] || '0')
@@ -426,32 +438,32 @@ export class CallRateLimiter {
       minute: {
         current: minuteCount,
         limit: this.defaultConfig.maxCallsPerMinute,
-        remaining: Math.max(0, this.defaultConfig.maxCallsPerMinute - minuteCount)
+        remaining: Math.max(0, this.defaultConfig.maxCallsPerMinute - minuteCount),
       },
       hour: {
         current: hourCount,
         limit: this.defaultConfig.maxCallsPerHour,
-        remaining: Math.max(0, this.defaultConfig.maxCallsPerHour - hourCount)
+        remaining: Math.max(0, this.defaultConfig.maxCallsPerHour - hourCount),
       },
       day: {
         current: dayCount,
         limit: this.defaultConfig.maxDailyCalls,
-        remaining: Math.max(0, this.defaultConfig.maxDailyCalls - dayCount)
+        remaining: Math.max(0, this.defaultConfig.maxDailyCalls - dayCount),
       },
       cost: {
         spent,
         limit: this.defaultConfig.maxDailyCost,
-        remaining: Math.max(0, this.defaultConfig.maxDailyCost - spent)
+        remaining: Math.max(0, this.defaultConfig.maxDailyCost - spent),
       },
       concurrent: {
         active: activeCount,
         limit: this.defaultConfig.maxConcurrentCalls,
-        remaining: Math.max(0, this.defaultConfig.maxConcurrentCalls - activeCount)
+        remaining: Math.max(0, this.defaultConfig.maxConcurrentCalls - activeCount),
       },
       success: {
         rate: successRate,
-        recent: total
-      }
+        recent: total,
+      },
     }
   }
 
@@ -461,15 +473,17 @@ export class CallRateLimiter {
   async pauseCalling(tenantId: string, reason: string, duration: number = 300): Promise<void> {
     const connection = this.getRedis()
     if (!connection) return
-    
+
     const key = `call_pause:${tenantId}`
-    await connection.setex(key, duration, JSON.stringify({
-      paused: true,
-      reason,
-      pausedAt: Date.now()
-    }))
-    
-    console.warn(`🛑 Calling paused for tenant ${tenantId}: ${reason}`)
+    await connection.setex(
+      key,
+      duration,
+      JSON.stringify({
+        paused: true,
+        reason,
+        pausedAt: Date.now(),
+      })
+    )
   }
 
   /**
@@ -478,7 +492,7 @@ export class CallRateLimiter {
   async isCallingPaused(tenantId: string): Promise<boolean> {
     const connection = this.getRedis()
     if (!connection) return false
-    
+
     const key = `call_pause:${tenantId}`
     const result = await connection.get(key)
     return !!result
@@ -490,10 +504,9 @@ export class CallRateLimiter {
   async resumeCalling(tenantId: string): Promise<void> {
     const connection = this.getRedis()
     if (!connection) return
-    
+
     const key = `call_pause:${tenantId}`
     await connection.del(key)
-    console.log(`▶️ Calling resumed for tenant ${tenantId}`)
   }
 }
 

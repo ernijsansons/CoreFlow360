@@ -17,15 +17,15 @@ describe('Bundle Orchestrator Integration Tests', () => {
     industry: 'FINANCE',
     department: 'FINANCE',
     sessionId: `test_session_${Date.now()}`,
-    metadata: { test: true }
+    metadata: { test: true },
   }
 
   beforeAll(async () => {
-    console.log('🚀 Starting Bundle Orchestrator Integration Tests')
+    
   })
 
   afterAll(async () => {
-    console.log('✅ Bundle Orchestrator Integration Tests Complete')
+    
   })
 
   describe('Financial AI Bundle Tests', () => {
@@ -35,13 +35,13 @@ describe('Bundle Orchestrator Integration Tests', () => {
         data: {
           text: 'The quarterly earnings report shows excellent growth with 25% revenue increase and strong market position',
           sector: 'technology',
-          market_condition: 'bull_market'
+          market_condition: 'bull_market',
         },
         context: {
           ...testContext,
-          activeBundles: ['finance_ai_fingpt']
+          activeBundles: ['finance_ai_fingpt'],
         },
-        priority: 'high'
+        priority: 'high',
       }
 
       const result = await bundleOrchestrator.executeAIFlow(request)
@@ -52,8 +52,10 @@ describe('Bundle Orchestrator Integration Tests', () => {
       expect(result.insights.length).toBeGreaterThan(0) // Should have insights
       expect(result.executionTime).toBeLessThan(300) // Sub-300ms performance target
       expect(result.fallbackUsed).toBe(true) // Will use fallback in test environment
-      
-      console.log(`✅ FinGPT test: ${result.confidence.toFixed(3)} confidence, ${result.executionTime}ms`)
+
+      console.log(
+        `✅ FinGPT test: ${result.confidence.toFixed(3)} confidence, ${result.executionTime}ms`
+      )
     }, 15000)
 
     test('FinRobot multi-agent forecasting with production service', async () => {
@@ -64,13 +66,13 @@ describe('Bundle Orchestrator Integration Tests', () => {
           historical_data: [2000000, 2100000, 2300000, 2400000],
           growth_rate: 0.08,
           sector: 'fintech',
-          horizon: 12
+          horizon: 12,
         },
         context: {
           ...testContext,
-          activeBundles: ['finance_ai_fingpt', 'finance_ai_finrobot'] // Include dependency
+          activeBundles: ['finance_ai_fingpt', 'finance_ai_finrobot'], // Include dependency
         },
-        priority: 'high'
+        priority: 'high',
       }
 
       const result = await bundleOrchestrator.executeAIFlow(request)
@@ -81,8 +83,10 @@ describe('Bundle Orchestrator Integration Tests', () => {
       expect(result.insights.length).toBeGreaterThan(0) // Should have insights
       expect(result.executionTime).toBeLessThan(600) // Sub-600ms for complex forecasting
       expect(result.predictions).toBeDefined()
-      
-      console.log(`✅ FinRobot test: ${result.confidence.toFixed(3)} confidence, ${result.executionTime}ms`)
+
+      console.log(
+        `✅ FinRobot test: ${result.confidence.toFixed(3)} confidence, ${result.executionTime}ms`
+      )
     }, 20000)
 
     test('Combined FinGPT + FinRobot comprehensive analysis', async () => {
@@ -93,13 +97,13 @@ describe('Bundle Orchestrator Integration Tests', () => {
           historical_data: [4000000, 4200000, 4600000, 4800000],
           growth_rate: 0.12,
           sector: 'enterprise_saas',
-          horizon: 12
+          horizon: 12,
         },
         context: {
           ...testContext,
-          activeBundles: ['finance_ai_fingpt', 'finance_ai_finrobot']
+          activeBundles: ['finance_ai_fingpt', 'finance_ai_finrobot'],
         },
-        priority: 'critical'
+        priority: 'critical',
       }
 
       const result = await bundleOrchestrator.executeAIFlow(request)
@@ -111,8 +115,10 @@ describe('Bundle Orchestrator Integration Tests', () => {
       expect(result.crossDeptImpact).toBeDefined() // Cross-departmental analysis
       expect(result.recommendations).toBeDefined()
       expect(result.executionTime).toBeLessThan(800) // Combined services still fast
-      
-      console.log(`✅ FinGPT+FinRobot test: ${result.confidence.toFixed(3)} confidence, ${result.executionTime}ms`)
+
+      console.log(
+        `✅ FinGPT+FinRobot test: ${result.confidence.toFixed(3)} confidence, ${result.executionTime}ms`
+      )
     }, 25000)
   })
 
@@ -128,24 +134,24 @@ describe('Bundle Orchestrator Integration Tests', () => {
               description: 'Software License - Enterprise Plan',
               quantity: 25,
               unit_price: 99.99,
-              currency: 'USD'
+              currency: 'USD',
             },
             {
               description: 'Professional Services - Implementation',
               quantity: 40,
-              unit_price: 150.00,
-              currency: 'USD'
-            }
+              unit_price: 150.0,
+              currency: 'USD',
+            },
           ],
           due_date: '2025-09-08',
-          tax_rate: 0.08
+          tax_rate: 0.08,
         },
         context: {
           ...testContext,
           activeBundles: ['erp_advanced_idurar'],
-          industry: 'SOFTWARE'
+          industry: 'SOFTWARE',
         },
-        priority: 'high'
+        priority: 'high',
       }
 
       const result = await bundleOrchestrator.executeAIFlow(request)
@@ -153,8 +159,8 @@ describe('Bundle Orchestrator Integration Tests', () => {
       expect(result.success).toBe(true)
       expect(result.executionTime).toBeLessThan(400) // Sub-400ms invoice generation
       expect(result.fallbackUsed).toBe(true) // Will use fallback in test environment
+
       
-      console.log(`✅ IDURAR test: ${result.executionTime}ms execution`)
     }, 15000)
 
     test('ERPNext payroll processing with multi-region support', async () => {
@@ -168,7 +174,7 @@ describe('Bundle Orchestrator Integration Tests', () => {
               department: 'Engineering',
               position: 'Senior Developer',
               base_salary: 120000,
-              region: 'US'
+              region: 'US',
             },
             {
               employee_id: 'EMP002',
@@ -176,22 +182,22 @@ describe('Bundle Orchestrator Integration Tests', () => {
               department: 'Marketing',
               position: 'Marketing Manager',
               base_salary: 95000,
-              region: 'US'
-            }
+              region: 'US',
+            },
           ],
           pay_period: {
             start_date: '2025-08-01',
             end_date: '2025-08-31',
-            pay_date: '2025-09-01'
+            pay_date: '2025-09-01',
           },
-          region: 'US'
+          region: 'US',
         },
         context: {
           ...testContext,
           activeBundles: ['erpnext_hr_manufacturing'],
-          department: 'HR'
+          department: 'HR',
         },
-        priority: 'high'
+        priority: 'high',
       }
 
       const result = await bundleOrchestrator.executeAIFlow(request)
@@ -199,8 +205,8 @@ describe('Bundle Orchestrator Integration Tests', () => {
       expect(result.success).toBe(true)
       expect(result.executionTime).toBeLessThan(500) // Sub-500ms payroll processing
       expect(result.fallbackUsed).toBe(true) // Will use fallback in test environment
+
       
-      console.log(`✅ ERPNext test: ${result.executionTime}ms execution`)
     }, 20000)
   })
 
@@ -220,16 +226,16 @@ describe('Bundle Orchestrator Integration Tests', () => {
             client_id: 'CLIENT_TECHCORP',
             matter_id: 'MATTER_IP_2025',
             billable: true,
-            billing_increment: 0.25
-          }
+            billing_increment: 0.25,
+          },
         },
         context: {
           ...testContext,
           activeBundles: ['legal_professional_dolibarr'],
           department: 'LEGAL',
-          industry: 'LEGAL'
+          industry: 'LEGAL',
         },
-        priority: 'high'
+        priority: 'high',
       }
 
       const result = await bundleOrchestrator.executeAIFlow(request)
@@ -237,8 +243,8 @@ describe('Bundle Orchestrator Integration Tests', () => {
       expect(result.success).toBe(true)
       expect(result.executionTime).toBeLessThan(300) // Sub-300ms time tracking
       expect(result.fallbackUsed).toBe(true) // Will use fallback in test environment
+
       
-      console.log(`✅ Dolibarr time tracking test: ${result.executionTime}ms execution`)
     }, 15000)
 
     test('Dolibarr conflict checking with comprehensive analysis', async () => {
@@ -250,15 +256,15 @@ describe('Bundle Orchestrator Integration Tests', () => {
             matter_type: 'Corporate M&A Transaction',
             adverse_parties: ['TechCorp Industries', 'Global Innovation Partners'],
             proposed_representation: 'Acquisition due diligence and transaction legal services',
-            jurisdiction: 'US'
-          }
+            jurisdiction: 'US',
+          },
         },
         context: {
           ...testContext,
           activeBundles: ['legal_professional_dolibarr'],
-          department: 'LEGAL'
+          department: 'LEGAL',
         },
-        priority: 'critical'
+        priority: 'critical',
       }
 
       const result = await bundleOrchestrator.executeAIFlow(request)
@@ -266,8 +272,8 @@ describe('Bundle Orchestrator Integration Tests', () => {
       expect(result.success).toBe(true)
       expect(result.executionTime).toBeLessThan(400) // Sub-400ms conflict checking
       expect(result.fallbackUsed).toBe(true) // Will use fallback in test environment
+
       
-      console.log(`✅ Dolibarr conflict check test: ${result.executionTime}ms execution`)
     }, 15000)
   })
 
@@ -279,7 +285,7 @@ describe('Bundle Orchestrator Integration Tests', () => {
           scenario: 'revenue_growth_projection',
           growth_target: 0.25,
           timeframe_months: 12,
-          departments: ['SALES', 'HR', 'MANUFACTURING', 'FINANCE']
+          departments: ['SALES', 'HR', 'MANUFACTURING', 'FINANCE'],
         },
         context: {
           ...testContext,
@@ -287,10 +293,10 @@ describe('Bundle Orchestrator Integration Tests', () => {
             'finance_ai_fingpt',
             'finance_ai_finrobot',
             'erpnext_hr_manufacturing',
-            'erp_advanced_idurar'
-          ]
+            'erp_advanced_idurar',
+          ],
         },
-        priority: 'critical'
+        priority: 'critical',
       }
 
       const result = await bundleOrchestrator.executeAIFlow(request)
@@ -301,8 +307,10 @@ describe('Bundle Orchestrator Integration Tests', () => {
       expect(result.crossDeptImpact!.length).toBeGreaterThanOrEqual(0) // May have impacts
       expect(result.insights.length).toBeGreaterThan(0) // Should have at least one insight
       expect(result.executionTime).toBeLessThan(1000) // Complex analysis under 1 second
-      
-      console.log(`✅ Cross-dept analysis: ${result.crossDeptImpact!.length} impacts analyzed, ${result.executionTime}ms`)
+
+      console.log(
+        `✅ Cross-dept analysis: ${result.crossDeptImpact!.length} impacts analyzed, ${result.executionTime}ms`
+      )
     }, 25000)
 
     test('Bundle compatibility and routing optimization', async () => {
@@ -311,30 +319,27 @@ describe('Bundle Orchestrator Integration Tests', () => {
         'finance_ai_finrobot',
         'erp_advanced_idurar',
         'erpnext_hr_manufacturing',
-        'legal_professional_dolibarr'
+        'legal_professional_dolibarr',
       ]
 
       for (const bundleId of bundles) {
         const capabilities = await bundleOrchestrator.getBundleCapabilities([bundleId])
         expect(capabilities.length).toBeGreaterThan(0)
-        
-        const hasAccess = await bundleOrchestrator.validateBundleAccess(
-          bundleId as any, 
-          {
-            tenantId: testContext.tenantId,
-            userId: testContext.userId,
-            roles: [],
-            permissions: [],
-            sessionId: testContext.sessionId,
-            ipAddress: '127.0.0.1',
-            bundleAccess: [bundleId],
-            rateLimit: { remaining: 100, resetTime: Date.now() + 3600000 }
-          }
-        )
+
+        const hasAccess = await bundleOrchestrator.validateBundleAccess(bundleId, {
+          tenantId: testContext.tenantId,
+          userId: testContext.userId,
+          roles: [],
+          permissions: [],
+          sessionId: testContext.sessionId,
+          ipAddress: '127.0.0.1',
+          bundleAccess: [bundleId],
+          rateLimit: { remaining: 100, resetTime: Date.now() + 3600000 },
+        })
         expect(hasAccess).toBe(true)
       }
 
-      console.log('✅ Bundle compatibility validated for all 5 services')
+      console.log('✅ All bundle capabilities validated')
     })
 
     test('Optimal workflow routing with intelligent bundle selection', async () => {
@@ -342,36 +347,35 @@ describe('Bundle Orchestrator Integration Tests', () => {
         {
           workflow: 'sentiment analysis for quarterly earnings',
           expectedWorkflow: 'financial_sentiment_analysis',
-          bundles: ['finance_ai_fingpt']
+          bundles: ['finance_ai_fingpt'],
         },
         {
           workflow: 'revenue forecast for next year',
           expectedWorkflow: 'financial_forecasting',
-          bundles: ['finance_ai_finrobot']
+          bundles: ['finance_ai_finrobot'],
         },
         {
           workflow: 'comprehensive business analysis',
           expectedWorkflow: 'cross_dept_analysis',
-          bundles: ['finance_ai_fingpt', 'finance_ai_finrobot', 'erp_advanced_idurar']
+          bundles: ['finance_ai_fingpt', 'finance_ai_finrobot', 'erp_advanced_idurar'],
         },
         {
           workflow: 'basic crm customer analysis',
           expectedWorkflow: 'isolated_crm_analysis',
-          bundles: ['crm_basic']
-        }
+          bundles: ['crm_basic'],
+        },
       ]
 
       for (const testCase of testCases) {
-        const routing = bundleOrchestrator.getOptimalWorkflow(
-          testCase.workflow,
-          testCase.bundles
-        )
+        const routing = bundleOrchestrator.getOptimalWorkflow(testCase.workflow, testCase.bundles)
 
         expect(routing.workflow).toBe(testCase.expectedWorkflow)
         expect(routing.confidence).toBeGreaterThan(0.6)
         expect(routing.reasoning).toBeTruthy() // Should have reasoning
-        
-        console.log(`✅ Optimal routing: ${testCase.workflow} → ${routing.workflow} (${routing.confidence.toFixed(3)} confidence)`)
+
+        console.log(
+          `✅ Optimal routing: ${testCase.workflow} → ${routing.workflow} (${routing.confidence.toFixed(3)} confidence)`
+        )
       }
     })
   })
@@ -381,14 +385,14 @@ describe('Bundle Orchestrator Integration Tests', () => {
       const request: AIFlowRequest = {
         workflow: 'financial_sentiment_analysis',
         data: {
-          text: 'Test fallback scenario with service unavailability simulation'
+          text: 'Test fallback scenario with service unavailability simulation',
         },
         context: {
           ...testContext,
-          activeBundles: [] // No bundles active - should trigger fallback
+          activeBundles: [], // No bundles active - should trigger fallback
         },
         priority: 'low',
-        fallbackStrategy: 'basic_llm'
+        fallbackStrategy: 'basic_llm',
       }
 
       const result = await bundleOrchestrator.executeAIFlow(request)
@@ -397,41 +401,43 @@ describe('Bundle Orchestrator Integration Tests', () => {
       expect(result.fallbackUsed).toBe(true)
       expect(result.confidence).toBeLessThanOrEqual(0.72) // Lower confidence for fallback
       expect(result.recommendations).toBeDefined()
-      
-      console.log(`✅ Fallback test: ${result.confidence.toFixed(3)} confidence, fallback used`)
+
+      console.log(`✅ Service fallback: ${result.confidence.toFixed(3)} confidence, fallback used`)
     }, 10000)
 
     test('Concurrent service execution performance', async () => {
       const concurrentRequests = Array.from({ length: 5 }, (_, i) => ({
         workflow: 'financial_sentiment_analysis',
         data: {
-          text: `Concurrent test ${i + 1}: The market shows strong performance indicators`
+          text: `Concurrent test ${i + 1}: The market shows strong performance indicators`,
         },
         context: {
           ...testContext,
           activeBundles: ['finance_ai_fingpt'],
-          sessionId: `concurrent_${i}_${Date.now()}`
+          sessionId: `concurrent_${i}_${Date.now()}`,
         },
-        priority: 'medium' as const
+        priority: 'medium' as const,
       }))
 
       const startTime = Date.now()
       const results = await Promise.all(
-        concurrentRequests.map(req => bundleOrchestrator.executeAIFlow(req))
+        concurrentRequests.map((req) => bundleOrchestrator.executeAIFlow(req))
       )
       const totalTime = Date.now() - startTime
 
       // All requests should succeed
-      expect(results.every(r => r.success)).toBe(true)
-      
+      expect(results.every((r) => r.success)).toBe(true)
+
       // Average execution time should be reasonable
       const averageTime = totalTime / results.length
       expect(averageTime).toBeLessThan(500) // Sub-500ms average
-      
-      // All will use fallback in test environment
-      expect(results.every(r => r.fallbackUsed)).toBe(true)
 
-      console.log(`✅ Concurrent execution: ${results.length} requests, ${averageTime.toFixed(0)}ms avg`)
+      // All will use fallback in test environment
+      expect(results.every((r) => r.fallbackUsed)).toBe(true)
+
+      console.log(
+        `✅ Concurrent execution: ${results.length} requests, ${averageTime.toFixed(0)}ms avg`
+      )
     }, 20000)
   })
 
@@ -442,9 +448,9 @@ describe('Bundle Orchestrator Integration Tests', () => {
         data: { text: 'Test with invalid bundle' },
         context: {
           ...testContext,
-          activeBundles: ['invalid_bundle_id']
+          activeBundles: ['invalid_bundle_id'],
         },
-        priority: 'low'
+        priority: 'low',
       }
 
       const result = await bundleOrchestrator.executeAIFlow(request)
@@ -452,8 +458,8 @@ describe('Bundle Orchestrator Integration Tests', () => {
       expect(result.success).toBe(true) // Should handle gracefully with fallback
       expect(result.fallbackUsed).toBe(true)
       expect(result.warnings || []).toBeDefined()
-      
-      console.log('✅ Invalid bundle handling: graceful fallback activated')
+
+      console.log('✅ Invalid bundle handled gracefully')
     })
 
     test('Empty data handling', async () => {
@@ -462,17 +468,17 @@ describe('Bundle Orchestrator Integration Tests', () => {
         data: {},
         context: {
           ...testContext,
-          activeBundles: ['finance_ai_fingpt']
+          activeBundles: ['finance_ai_fingpt'],
         },
-        priority: 'low'
+        priority: 'low',
       }
 
       const result = await bundleOrchestrator.executeAIFlow(request)
 
       expect(result.success).toBe(true)
       expect(result.executionTime).toBeLessThan(1000)
-      
-      console.log('✅ Empty data handling: request processed gracefully')
+
+      console.log('✅ Empty data handled successfully')
     })
   })
 })
@@ -481,27 +487,29 @@ describe('Bundle Pricing Integration Tests', () => {
   test('Complex multi-business pricing calculation', async () => {
     // Import the pricing calculator directly instead of making HTTP request
     const { BundlePricingCalculator } = await import('@/app/api/subscriptions/calculate/route')
-    
+
     // Use the format expected by the existing pricing calculator
     const pricingRequest = {
       bundles: ['finance_ai_fingpt', 'finance_ai_finrobot', 'erp_advanced_idurar'],
       users: 50,
       annual: true,
       businessCount: 3, // Simulating 3 businesses for multi-business discount
-      region: 'US' as const
+      region: 'US' as const,
     }
 
     // Use the calculator directly
     const calculator = new BundlePricingCalculator()
     const result = calculator.calculatePricing(pricingRequest)
-    
+
     expect(result).toBeDefined()
     expect(result.pricing).toBeDefined()
     expect(result.pricing.monthlyTotal).toBeGreaterThan(0)
     expect(result.pricing.annualTotal).toBeGreaterThan(0)
     expect(result.discounts.totalSavings).toBeGreaterThan(0)
     expect(result.recommendations.length).toBeGreaterThan(0)
-    
-    console.log(`✅ Multi-business pricing: $${result.pricing.monthlyTotal}/month (${result.discounts.totalDiscount * 100}% total discount)`)
+
+    console.log(
+      `✅ Multi-business pricing: $${result.pricing.monthlyTotal}/month (${result.discounts.totalDiscount * 100}% total discount)`
+    )
   }, 10000)
 })

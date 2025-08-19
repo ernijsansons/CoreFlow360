@@ -1,5 +1,5 @@
 /**
- * CoreFlow360 - Module Manager Service  
+ * CoreFlow360 - Module Manager Service
  * Dynamic activation/deactivation of modules based on subscriptions
  */
 
@@ -48,7 +48,7 @@ export class CoreFlowModuleManager implements ModuleManager {
   async activateModule(tenantId: string, moduleKey: string): Promise<void> {
     // Validate module exists and is available
     const moduleDefinition = await prisma.moduleDefinition.findUnique({
-      where: { moduleKey, isActive: true }
+      where: { moduleKey, isActive: true },
     })
 
     if (!moduleDefinition) {
@@ -57,7 +57,7 @@ export class CoreFlowModuleManager implements ModuleManager {
 
     // Get current subscription
     let subscription = await prisma.tenantSubscription.findUnique({
-      where: { tenantId }
+      where: { tenantId },
     })
 
     // Create subscription if it doesn't exist
@@ -72,23 +72,22 @@ export class CoreFlowModuleManager implements ModuleManager {
           currentPeriodStart: new Date(),
           currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        }
+        },
       })
     }
 
     // Parse current active modules
     const activeModules = JSON.parse(subscription.activeModules) as Record<string, boolean>
-    
+
     // Check if already active
     if (activeModules[moduleKey]) {
-      console.log(`Module '${moduleKey}' is already active for tenant '${tenantId}'`)
       return
     }
 
     // Validate dependencies
-    const currentModuleList = Object.keys(activeModules).filter(key => activeModules[key])
+    const currentModuleList = Object.keys(activeModules).filter((key) => activeModules[key])
     const newModuleList = [...currentModuleList, moduleKey]
-    
+
     const validation = await this.validateModuleDependencies(newModuleList)
     if (!validation.isValid) {
       throw new Error(`Dependency validation failed: ${validation.errors.join(', ')}`)
@@ -101,35 +100,37 @@ export class CoreFlowModuleManager implements ModuleManager {
 
     // Check user count limits
     if (subscription.userCount < moduleDefinition.minUserCount) {
-      throw new Error(`Module '${moduleKey}' requires at least ${moduleDefinition.minUserCount} users`)
+      throw new Error(
+        `Module '${moduleKey}' requires at least ${moduleDefinition.minUserCount} users`
+      )
     }
 
     if (moduleDefinition.maxUserCount && subscription.userCount > moduleDefinition.maxUserCount) {
-      throw new Error(`Module '${moduleKey}' supports maximum ${moduleDefinition.maxUserCount} users`)
+      throw new Error(
+        `Module '${moduleKey}' supports maximum ${moduleDefinition.maxUserCount} users`
+      )
     }
 
     // Activate the module
     activeModules[moduleKey] = true
-    
+
     await prisma.tenantSubscription.update({
       where: { tenantId },
       data: {
         activeModules: JSON.stringify(activeModules),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     })
 
     // Create subscription event
     await this.logSubscriptionEvent(tenantId, 'module_activated', {
       moduleKey,
       previousState: subscription.activeModules,
-      newState: JSON.stringify(activeModules)
+      newState: JSON.stringify(activeModules),
     })
 
     // Trigger module initialization hooks
     await this.triggerModuleHooks(tenantId, moduleKey, 'activated')
-
-    console.log(`✅ Module '${moduleKey}' activated for tenant '${tenantId}'`)
   }
 
   /**
@@ -137,7 +138,7 @@ export class CoreFlowModuleManager implements ModuleManager {
    */
   async deactivateModule(tenantId: string, moduleKey: string): Promise<void> {
     const subscription = await prisma.tenantSubscription.findUnique({
-      where: { tenantId }
+      where: { tenantId },
     })
 
     if (!subscription) {
@@ -145,40 +146,39 @@ export class CoreFlowModuleManager implements ModuleManager {
     }
 
     const activeModules = JSON.parse(subscription.activeModules) as Record<string, boolean>
-    
+
     if (!activeModules[moduleKey]) {
-      console.log(`Module '${moduleKey}' is already inactive for tenant '${tenantId}'`)
       return
     }
 
     // Check for dependent modules
     const dependentModules = await this.findDependentModules(moduleKey, Object.keys(activeModules))
     if (dependentModules.length > 0) {
-      throw new Error(`Cannot deactivate '${moduleKey}' - required by: ${dependentModules.join(', ')}`)
+      throw new Error(
+        `Cannot deactivate '${moduleKey}' - required by: ${dependentModules.join(', ')}`
+      )
     }
 
     // Deactivate the module
     activeModules[moduleKey] = false
-    
+
     await prisma.tenantSubscription.update({
       where: { tenantId },
       data: {
         activeModules: JSON.stringify(activeModules),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     })
 
     // Create subscription event
     await this.logSubscriptionEvent(tenantId, 'module_deactivated', {
       moduleKey,
       previousState: subscription.activeModules,
-      newState: JSON.stringify(activeModules)
+      newState: JSON.stringify(activeModules),
     })
 
     // Trigger module cleanup hooks
     await this.triggerModuleHooks(tenantId, moduleKey, 'deactivated')
-
-    console.log(`✅ Module '${moduleKey}' deactivated for tenant '${tenantId}'`)
   }
 
   /**
@@ -186,7 +186,7 @@ export class CoreFlowModuleManager implements ModuleManager {
    */
   async isModuleActive(tenantId: string, moduleKey: string): Promise<boolean> {
     const subscription = await prisma.tenantSubscription.findUnique({
-      where: { tenantId }
+      where: { tenantId },
     })
 
     if (!subscription) return false
@@ -200,13 +200,13 @@ export class CoreFlowModuleManager implements ModuleManager {
    */
   async getActiveModules(tenantId: string): Promise<string[]> {
     const subscription = await prisma.tenantSubscription.findUnique({
-      where: { tenantId }
+      where: { tenantId },
     })
 
     if (!subscription) return []
 
     const activeModules = JSON.parse(subscription.activeModules) as Record<string, boolean>
-    return Object.keys(activeModules).filter(key => activeModules[key])
+    return Object.keys(activeModules).filter((key) => activeModules[key])
   }
 
   /**
@@ -219,41 +219,43 @@ export class CoreFlowModuleManager implements ModuleManager {
 
     // Fetch module definitions for all requested modules
     const moduleDefinitions = await prisma.moduleDefinition.findMany({
-      where: { moduleKey: { in: modules }, isActive: true }
+      where: { moduleKey: { in: modules }, isActive: true },
     })
 
     // Check if all requested modules exist
-    const foundModules = moduleDefinitions.map(m => m.moduleKey)
-    const missingModules = modules.filter(m => !foundModules.includes(m))
-    
+    const foundModules = moduleDefinitions.map((m) => m.moduleKey)
+    const missingModules = modules.filter((m) => !foundModules.includes(m))
+
     if (missingModules.length > 0) {
       errors.push(`Modules not found: ${missingModules.join(', ')}`)
     }
 
     // Validate dependencies for each module
-         for (const moduleDef of moduleDefinitions) {
-       const dependencies = JSON.parse(moduleDef.dependencies || '[]') as string[]
-       const conflicts = JSON.parse(moduleDef.conflicts || '[]') as string[]
+    for (const moduleDef of moduleDefinitions) {
+      const dependencies = JSON.parse(moduleDef.dependencies || '[]') as string[]
+      const conflicts = JSON.parse(moduleDef.conflicts || '[]') as string[]
 
       // Check dependencies
       for (const dependency of dependencies) {
         if (!modules.includes(dependency)) {
-                   errors.push(`Module '${moduleDef.moduleKey}' requires '${dependency}'`)
-         suggestions.push(`Add '${moduleDef.moduleKey}' to enable '${moduleDef.moduleKey}'`)
+          errors.push(`Module '${moduleDef.moduleKey}' requires '${dependency}'`)
+          suggestions.push(`Add '${moduleDef.moduleKey}' to enable '${moduleDef.moduleKey}'`)
         }
       }
 
       // Check conflicts
       for (const conflict of conflicts) {
         if (modules.includes(conflict)) {
-                   errors.push(`Module '${moduleDef.moduleKey}' conflicts with '${conflict}'`)
-         suggestions.push(`Remove '${conflict}' to enable '${moduleDef.moduleKey}'`)
+          errors.push(`Module '${moduleDef.moduleKey}' conflicts with '${conflict}'`)
+          suggestions.push(`Remove '${conflict}' to enable '${moduleDef.moduleKey}'`)
         }
       }
 
       // Check enterprise requirements
-             if (moduleDef.enterpriseOnly && modules.length < 5) {
-         warnings.push(`Module '${moduleDef.moduleKey}' is enterprise-only and may require additional licensing`)
+      if (moduleDef.enterpriseOnly && modules.length < 5) {
+        warnings.push(
+          `Module '${moduleDef.moduleKey}' is enterprise-only and may require additional licensing`
+        )
       }
     }
 
@@ -261,19 +263,22 @@ export class CoreFlowModuleManager implements ModuleManager {
       isValid: errors.length === 0,
       errors,
       warnings,
-      suggestions
+      suggestions,
     }
   }
 
   /**
    * Get capabilities for a specific module
    */
-  async getModuleCapabilities(tenantId: string, moduleKey: string): Promise<ModuleCapabilities | null> {
+  async getModuleCapabilities(
+    tenantId: string,
+    moduleKey: string
+  ): Promise<ModuleCapabilities | null> {
     const isActive = await this.isModuleActive(tenantId, moduleKey)
     if (!isActive) return null
 
     const moduleDefinition = await prisma.moduleDefinition.findUnique({
-      where: { moduleKey, isActive: true }
+      where: { moduleKey, isActive: true },
     })
 
     if (!moduleDefinition) return null
@@ -283,14 +288,17 @@ export class CoreFlowModuleManager implements ModuleManager {
       featureFlags: JSON.parse(moduleDefinition.featureFlags || '{}'),
       crossModuleEvents: JSON.parse(moduleDefinition.crossModuleEvents || '[]'),
       apiEndpoints: this.getApiEndpointsForModule(moduleKey),
-      uiComponents: this.getUIComponentsForModule(moduleKey)
+      uiComponents: this.getUIComponentsForModule(moduleKey),
     }
   }
 
   /**
    * Update subscription modules in bulk
    */
-  async updateSubscriptionModules(tenantId: string, targetModules: string[]): Promise<SubscriptionUpdateResult> {
+  async updateSubscriptionModules(
+    tenantId: string,
+    targetModules: string[]
+  ): Promise<SubscriptionUpdateResult> {
     const currentModules = await this.getActiveModules(tenantId)
     const activatedModules: string[] = []
     const deactivatedModules: string[] = []
@@ -308,15 +316,15 @@ export class CoreFlowModuleManager implements ModuleManager {
           deactivatedModules: [],
           errors,
           warnings: validation.warnings,
-          newActiveModules: currentModules
+          newActiveModules: currentModules,
         }
       }
 
       warnings.push(...validation.warnings)
 
       // Calculate modules to activate/deactivate
-      const toActivate = targetModules.filter(m => !currentModules.includes(m))
-      const toDeactivate = currentModules.filter(m => !targetModules.includes(m))
+      const toActivate = targetModules.filter((m) => !currentModules.includes(m))
+      const toDeactivate = currentModules.filter((m) => !targetModules.includes(m))
 
       // Deactivate modules first (in reverse dependency order)
       for (const moduleKey of toDeactivate) {
@@ -346,9 +354,8 @@ export class CoreFlowModuleManager implements ModuleManager {
         deactivatedModules,
         errors,
         warnings,
-        newActiveModules
+        newActiveModules,
       }
-
     } catch (error) {
       errors.push(`Bulk update failed: ${error}`)
       return {
@@ -357,7 +364,7 @@ export class CoreFlowModuleManager implements ModuleManager {
         deactivatedModules,
         errors,
         warnings,
-        newActiveModules: currentModules
+        newActiveModules: currentModules,
       }
     }
   }
@@ -365,17 +372,20 @@ export class CoreFlowModuleManager implements ModuleManager {
   /**
    * Private helper methods
    */
-  private async findDependentModules(moduleKey: string, activeModules: string[]): Promise<string[]> {
+  private async findDependentModules(
+    moduleKey: string,
+    activeModules: string[]
+  ): Promise<string[]> {
     const moduleDefinitions = await prisma.moduleDefinition.findMany({
-      where: { moduleKey: { in: activeModules }, isActive: true }
+      where: { moduleKey: { in: activeModules }, isActive: true },
     })
 
     const dependentModules: string[] = []
 
-         for (const moduleDef of moduleDefinitions) {
-       const dependencies = JSON.parse(moduleDef.dependencies || '[]') as string[]
-       if (dependencies.includes(moduleKey)) {
-         dependentModules.push(moduleDef.moduleKey)
+    for (const moduleDef of moduleDefinitions) {
+      const dependencies = JSON.parse(moduleDef.dependencies || '[]') as string[]
+      if (dependencies.includes(moduleKey)) {
+        dependentModules.push(moduleDef.moduleKey)
       }
     }
 
@@ -383,12 +393,12 @@ export class CoreFlowModuleManager implements ModuleManager {
   }
 
   private async logSubscriptionEvent(
-    tenantId: string, 
-    eventType: string, 
+    tenantId: string,
+    eventType: string,
     details: Record<string, unknown>
   ): Promise<void> {
     const subscription = await prisma.tenantSubscription.findUnique({
-      where: { tenantId }
+      where: { tenantId },
     })
 
     if (!subscription) return
@@ -399,14 +409,14 @@ export class CoreFlowModuleManager implements ModuleManager {
         eventType,
         newState: JSON.stringify(details),
         effectiveDate: new Date(),
-        metadata: JSON.stringify({ timestamp: new Date().toISOString() })
-      }
+        metadata: JSON.stringify({ timestamp: new Date().toISOString() }),
+      },
     })
   }
 
   private async triggerModuleHooks(
-    tenantId: string, 
-    moduleKey: string, 
+    _tenantId: string,
+    _moduleKey: string,
     action: 'activated' | 'deactivated'
   ): Promise<void> {
     // TODO: Implement module-specific initialization/cleanup hooks
@@ -415,33 +425,31 @@ export class CoreFlowModuleManager implements ModuleManager {
     // - Initializing AI agents for the module
     // - Configuring event listeners
     // - Setting up module-specific caching
-    
-    console.log(`📋 Module hook triggered: ${moduleKey} ${action} for tenant ${tenantId}`)
   }
 
   private getApiEndpointsForModule(moduleKey: string): string[] {
     const endpointMap: Record<string, string[]> = {
-      'crm': ['/api/customers', '/api/deals', '/api/leads'],
-      'accounting': ['/api/invoices', '/api/expenses', '/api/reports'],
-      'hr': ['/api/employees', '/api/performance', '/api/recruitment'],
-      'inventory': ['/api/inventory', '/api/products', '/api/suppliers'],
-      'projects': ['/api/projects', '/api/tasks', '/api/timesheets'],
-      'marketing': ['/api/campaigns', '/api/contacts', '/api/analytics']
+      crm: ['/api/customers', '/api/deals', '/api/leads'],
+      accounting: ['/api/invoices', '/api/expenses', '/api/reports'],
+      hr: ['/api/employees', '/api/performance', '/api/recruitment'],
+      inventory: ['/api/inventory', '/api/products', '/api/suppliers'],
+      projects: ['/api/projects', '/api/tasks', '/api/timesheets'],
+      marketing: ['/api/campaigns', '/api/contacts', '/api/analytics'],
     }
-    
+
     return endpointMap[moduleKey] || []
   }
 
   private getUIComponentsForModule(moduleKey: string): string[] {
     const componentMap: Record<string, string[]> = {
-      'crm': ['CustomerDashboard', 'DealPipeline', 'LeadForm'],
-      'accounting': ['InvoiceList', 'ExpenseTracker', 'FinancialReports'],
-      'hr': ['EmployeeDirectory', 'PerformanceReview', 'Recruitment'],
-      'inventory': ['ProductCatalog', 'StockLevels', 'PurchaseOrders'],
-      'projects': ['ProjectList', 'TaskBoard', 'TimeTracker'],
-      'marketing': ['CampaignBuilder', 'ContactSegments', 'Analytics']
+      crm: ['CustomerDashboard', 'DealPipeline', 'LeadForm'],
+      accounting: ['InvoiceList', 'ExpenseTracker', 'FinancialReports'],
+      hr: ['EmployeeDirectory', 'PerformanceReview', 'Recruitment'],
+      inventory: ['ProductCatalog', 'StockLevels', 'PurchaseOrders'],
+      projects: ['ProjectList', 'TaskBoard', 'TimeTracker'],
+      marketing: ['CampaignBuilder', 'ContactSegments', 'Analytics'],
     }
-    
+
     return componentMap[moduleKey] || []
   }
 }
@@ -453,4 +461,3 @@ export const moduleManager = new CoreFlowModuleManager()
 export async function getModuleManagerForTenant(tenantId: string): Promise<ModuleManager> {
   return new CoreFlowModuleManager(tenantId)
 }
-

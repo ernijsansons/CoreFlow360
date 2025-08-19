@@ -46,52 +46,51 @@ export class EnhancedRateLimiter {
     // Check if user is penalized
     const penaltyKey = `${RATE_LIMIT_PREFIX}:penalty:${key}`
     const isPenalized = await this.isPenalized(penaltyKey)
-    
+
     if (isPenalized) {
       const penaltyExpiry = await this.getPenaltyExpiry(penaltyKey)
       return {
         allowed: false,
         limit: 0,
         remaining: 0,
-        resetAt: new Date(penaltyExpiry)
+        resetAt: new Date(penaltyExpiry),
       }
     }
 
     // Check if user has exceeded any limits
     const exceededLimits = await this.checkLimits(key, config)
-    
+
     if (exceededLimits.length > 0) {
       // Log rate limit violation
-      console.warn(`Rate limit exceeded for ${key}:`, exceededLimits)
-      
+
       // Track rate limit metrics
       this.trackRateLimitMetrics(key, false)
-      
+
       // Apply penalty if configured
       if (config.penalty) {
         await this.applyPenalty(penaltyKey, config.penalty)
       }
-      
+
       return {
         allowed: false,
         limit: exceededLimits[0].limit,
         remaining: 0,
-        resetAt: exceededLimits[0].resetAt
+        resetAt: exceededLimits[0].resetAt,
       }
     }
 
     // All checks passed, increment counters
     await this.increment(key, config)
-    
+
     // Track successful request
     this.trackRateLimitMetrics(key, true)
-    
+
     // Calculate remaining requests (use the most restrictive limit)
     const allLimits = [
       ...(config.perSecond ? [{ window: 1, limit: config.perSecond }] : []),
       ...(config.perMinute ? [{ window: 60, limit: config.perMinute }] : []),
       ...(config.perHour ? [{ window: 3600, limit: config.perHour }] : []),
-      ...(config.perDay ? [{ window: 86400, limit: config.perDay }] : [])
+      ...(config.perDay ? [{ window: 86400, limit: config.perDay }] : []),
     ]
 
     let minRemaining = Infinity
@@ -102,7 +101,7 @@ export class EnhancedRateLimiter {
       const count = await this.getCount(key, window)
       const remaining = limit - count
       const resetAt = new Date(Date.now() + window * 1000)
-      
+
       if (remaining < minRemaining) {
         minRemaining = remaining
         activeLimit = limit
@@ -114,7 +113,7 @@ export class EnhancedRateLimiter {
       allowed: true,
       limit: activeLimit,
       remaining: Math.max(0, minRemaining),
-      resetAt: nextReset
+      resetAt: nextReset,
     }
   }
 
@@ -132,7 +131,7 @@ export class EnhancedRateLimiter {
           window: 'second',
           limit: config.perSecond,
           current: count,
-          resetAt: new Date(Date.now() + 1000)
+          resetAt: new Date(Date.now() + 1000),
         })
       }
     }
@@ -145,7 +144,7 @@ export class EnhancedRateLimiter {
           window: 'minute',
           limit: config.perMinute,
           current: count,
-          resetAt: new Date(Date.now() + 60000)
+          resetAt: new Date(Date.now() + 60000),
         })
       }
     }
@@ -158,7 +157,7 @@ export class EnhancedRateLimiter {
           window: 'hour',
           limit: config.perHour,
           current: count,
-          resetAt: new Date(Date.now() + 3600000)
+          resetAt: new Date(Date.now() + 3600000),
         })
       }
     }
@@ -171,7 +170,7 @@ export class EnhancedRateLimiter {
           window: 'day',
           limit: config.perDay,
           current: count,
-          resetAt: new Date(Date.now() + 86400000)
+          resetAt: new Date(Date.now() + 86400000),
         })
       }
     }
@@ -184,7 +183,7 @@ export class EnhancedRateLimiter {
    */
   private async getCount(key: string, windowSeconds: number): Promise<number> {
     const windowKey = `${RATE_LIMIT_PREFIX}:${key}:${windowSeconds}`
-    
+
     try {
       if (this.redis) {
         const count = await this.redis.get(windowKey)
@@ -198,7 +197,6 @@ export class EnhancedRateLimiter {
         return 0
       }
     } catch (error) {
-      console.error('Failed to get rate limit count:', error)
       return 0
     }
   }
@@ -211,12 +209,12 @@ export class EnhancedRateLimiter {
       ...(config.perSecond ? [1] : []),
       ...(config.perMinute ? [60] : []),
       ...(config.perHour ? [3600] : []),
-      ...(config.perDay ? [86400] : [])
+      ...(config.perDay ? [86400] : []),
     ]
 
     for (const window of windows) {
       const windowKey = `${RATE_LIMIT_PREFIX}:${key}:${window}`
-      
+
       try {
         if (this.redis) {
           // Use Redis INCR with expiry
@@ -225,7 +223,7 @@ export class EnhancedRateLimiter {
         } else {
           // Fallback to memory cache
           const cached = this.memoryCache.get(windowKey) || { count: 0, resetAt: 0 }
-          
+
           if (cached.resetAt <= Date.now()) {
             // Reset if expired
             cached.count = 1
@@ -233,12 +231,10 @@ export class EnhancedRateLimiter {
           } else {
             cached.count++
           }
-          
+
           this.memoryCache.set(windowKey, cached)
         }
-      } catch (error) {
-        console.error('Failed to increment rate limit counter:', error)
-      }
+      } catch (error) {}
     }
   }
 
@@ -255,7 +251,6 @@ export class EnhancedRateLimiter {
         return cached ? cached.resetAt > Date.now() : false
       }
     } catch (error) {
-      console.error('Failed to check penalty status:', error)
       return false
     }
   }
@@ -273,7 +268,6 @@ export class EnhancedRateLimiter {
         return cached ? cached.resetAt : Date.now()
       }
     } catch (error) {
-      console.error('Failed to get penalty expiry:', error)
       return Date.now()
     }
   }
@@ -288,12 +282,10 @@ export class EnhancedRateLimiter {
       } else {
         this.memoryCache.set(penaltyKey, {
           count: 1,
-          resetAt: Date.now() + durationSeconds * 1000
+          resetAt: Date.now() + durationSeconds * 1000,
         })
       }
-    } catch (error) {
-      console.error('Failed to apply penalty:', error)
-    }
+    } catch (error) {}
   }
 
   /**
@@ -302,11 +294,10 @@ export class EnhancedRateLimiter {
   private trackRateLimitMetrics(key: string, allowed: boolean) {
     // Extract user/endpoint info from key
     const [userId, endpoint] = key.split(':')
-    
+
     // You could send these metrics to your monitoring system
     // For now, just log them
     if (!allowed) {
-      console.log(`[RATE_LIMIT_METRIC] blocked request - user: ${userId}, endpoint: ${endpoint}`)
     }
   }
 
@@ -323,15 +314,11 @@ export class EnhancedRateLimiter {
           await this.redis.del(...keys)
         }
       }
-      
+
       // Clear from memory cache
       const cacheKeys = Array.from(this.memoryCache.keys())
-      cacheKeys
-        .filter(k => k.startsWith(key))
-        .forEach(k => this.memoryCache.delete(k))
-    } catch (error) {
-      console.error('Failed to clear rate limit data:', error)
-    }
+      cacheKeys.filter((k) => k.startsWith(key)).forEach((k) => this.memoryCache.delete(k))
+    } catch (error) {}
   }
 
   /**
@@ -339,13 +326,13 @@ export class EnhancedRateLimiter {
    */
   async getStatus(key: string, config: RateLimitConfig): Promise<RateLimitResult> {
     const exceededLimits = await this.checkLimits(key, config)
-    
+
     if (exceededLimits.length > 0) {
       return {
         allowed: false,
         limit: exceededLimits[0].limit,
         remaining: 0,
-        resetAt: exceededLimits[0].resetAt
+        resetAt: exceededLimits[0].resetAt,
       }
     }
 
@@ -354,7 +341,7 @@ export class EnhancedRateLimiter {
       ...(config.perSecond ? [{ window: 1, limit: config.perSecond }] : []),
       ...(config.perMinute ? [{ window: 60, limit: config.perMinute }] : []),
       ...(config.perHour ? [{ window: 3600, limit: config.perHour }] : []),
-      ...(config.perDay ? [{ window: 86400, limit: config.perDay }] : [])
+      ...(config.perDay ? [{ window: 86400, limit: config.perDay }] : []),
     ]
 
     let minRemaining = Infinity
@@ -365,7 +352,7 @@ export class EnhancedRateLimiter {
       const count = await this.getCount(key, window)
       const remaining = limit - count
       const resetAt = new Date(Date.now() + window * 1000)
-      
+
       if (remaining < minRemaining) {
         minRemaining = remaining
         activeLimit = limit
@@ -377,7 +364,7 @@ export class EnhancedRateLimiter {
       allowed: true,
       limit: activeLimit,
       remaining: Math.max(0, minRemaining),
-      resetAt: nextReset
+      resetAt: nextReset,
     }
   }
 }

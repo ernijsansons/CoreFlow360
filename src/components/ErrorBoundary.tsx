@@ -23,9 +23,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return { hasError: true, error }
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo)
-    
+  componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo) {
     // TODO: Send error to monitoring service (Sentry, etc.)
     // Example: Sentry.captureException(error, { extra: errorInfo })
   }
@@ -37,18 +35,16 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6 text-center">
-            <AlertTriangle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-            <h1 className="text-xl font-semibold text-gray-900 mb-2">
-              Something went wrong
-            </h1>
-            <p className="text-gray-600 mb-4">
+        <div className="flex min-h-screen items-center justify-center bg-gray-50">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 text-center shadow-lg">
+            <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-red-500" />
+            <h1 className="mb-2 text-xl font-semibold text-gray-900">Something went wrong</h1>
+            <p className="mb-4 text-gray-600">
               We encountered an unexpected error. Please refresh the page or try again later.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              className="rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
             >
               Refresh Page
             </button>

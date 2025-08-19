@@ -2,7 +2,7 @@
 
 /**
  * Launch Sequence Orchestrator
- * 
+ *
  * Orchestrates the revolutionary consciousness awakening campaign across
  * multiple phases, channels, and consciousness levels.
  */
@@ -56,7 +56,7 @@ interface LaunchSequenceOrchestratorProps {
   currentPhase?: string
   autoAdvance?: boolean
   onPhaseChange?: (phase: LaunchPhase) => void
-  onMetricsUpdate?: (metrics: any) => void
+  onMetricsUpdate?: (metrics: unknown) => void
   className?: string
 }
 
@@ -70,13 +70,37 @@ const LAUNCH_PHASES: LaunchPhase[] = [
     targets: {
       awareness: 50000,
       engagement: 5000,
-      conversion: 500
+      conversion: 500,
     },
     channels: [
-      { id: 'linkedin', name: 'LinkedIn', priority: 'primary', audienceSize: 25000, consciousnessReceptivity: 0.7 },
-      { id: 'twitter', name: 'Twitter/X', priority: 'primary', audienceSize: 15000, consciousnessReceptivity: 0.6 },
-      { id: 'email', name: 'Email List', priority: 'secondary', audienceSize: 8000, consciousnessReceptivity: 0.8 },
-      { id: 'content', name: 'Content Marketing', priority: 'support', audienceSize: 12000, consciousnessReceptivity: 0.5 }
+      {
+        id: 'linkedin',
+        name: 'LinkedIn',
+        priority: 'primary',
+        audienceSize: 25000,
+        consciousnessReceptivity: 0.7,
+      },
+      {
+        id: 'twitter',
+        name: 'Twitter/X',
+        priority: 'primary',
+        audienceSize: 15000,
+        consciousnessReceptivity: 0.6,
+      },
+      {
+        id: 'email',
+        name: 'Email List',
+        priority: 'secondary',
+        audienceSize: 8000,
+        consciousnessReceptivity: 0.8,
+      },
+      {
+        id: 'content',
+        name: 'Content Marketing',
+        priority: 'support',
+        audienceSize: 12000,
+        consciousnessReceptivity: 0.5,
+      },
     ],
     assets: [
       {
@@ -85,7 +109,7 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         variant: 'hero',
         consciousnessLevel: 1,
         message: 'Is your business unconscious?',
-        cta: 'Discover Business Consciousness'
+        cta: 'Discover Business Consciousness',
       },
       {
         id: 'awakening-social',
@@ -93,13 +117,25 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         variant: 'social',
         consciousnessLevel: 1,
         message: 'Most businesses run on autopilot. What if yours could think?',
-        cta: 'Learn More'
-      }
+        cta: 'Learn More',
+      },
     ],
     triggers: [
-      { id: 'time-trigger', condition: 'time', threshold: 14, nextPhase: 'revelation', action: 'advance' },
-      { id: 'engagement-trigger', condition: 'engagement', threshold: 3000, nextPhase: 'revelation', action: 'accelerate' }
-    ]
+      {
+        id: 'time-trigger',
+        condition: 'time',
+        threshold: 14,
+        nextPhase: 'revelation',
+        action: 'advance',
+      },
+      {
+        id: 'engagement-trigger',
+        condition: 'engagement',
+        threshold: 3000,
+        nextPhase: 'revelation',
+        action: 'accelerate',
+      },
+    ],
   },
 
   {
@@ -110,13 +146,37 @@ const LAUNCH_PHASES: LaunchPhase[] = [
     targets: {
       awareness: 100000,
       engagement: 15000,
-      conversion: 2000
+      conversion: 2000,
     },
     channels: [
-      { id: 'linkedin', name: 'LinkedIn', priority: 'primary', audienceSize: 40000, consciousnessReceptivity: 0.8 },
-      { id: 'twitter', name: 'Twitter/X', priority: 'primary', audienceSize: 25000, consciousnessReceptivity: 0.7 },
-      { id: 'youtube', name: 'YouTube', priority: 'secondary', audienceSize: 20000, consciousnessReceptivity: 0.6 },
-      { id: 'podcast', name: 'Podcast Circuit', priority: 'secondary', audienceSize: 15000, consciousnessReceptivity: 0.9 }
+      {
+        id: 'linkedin',
+        name: 'LinkedIn',
+        priority: 'primary',
+        audienceSize: 40000,
+        consciousnessReceptivity: 0.8,
+      },
+      {
+        id: 'twitter',
+        name: 'Twitter/X',
+        priority: 'primary',
+        audienceSize: 25000,
+        consciousnessReceptivity: 0.7,
+      },
+      {
+        id: 'youtube',
+        name: 'YouTube',
+        priority: 'secondary',
+        audienceSize: 20000,
+        consciousnessReceptivity: 0.6,
+      },
+      {
+        id: 'podcast',
+        name: 'Podcast Circuit',
+        priority: 'secondary',
+        audienceSize: 15000,
+        consciousnessReceptivity: 0.9,
+      },
     ],
     assets: [
       {
@@ -125,7 +185,7 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         variant: 'video',
         consciousnessLevel: 2,
         message: '1+1+1+1+1=5 vs 1×2×3×4×5=120',
-        cta: 'Experience Intelligence Multiplication'
+        cta: 'Experience Intelligence Multiplication',
       },
       {
         id: 'revelation-social',
@@ -133,13 +193,25 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         variant: 'social',
         consciousnessLevel: 2,
         message: 'Traditional software adds features. CoreFlow360 multiplies intelligence.',
-        cta: 'See the Difference'
-      }
+        cta: 'See the Difference',
+      },
     ],
     triggers: [
-      { id: 'demo-engagement', condition: 'engagement', threshold: 10000, nextPhase: 'transformation', action: 'advance' },
-      { id: 'consciousness-ready', condition: 'consciousness', threshold: 3, nextPhase: 'transformation', action: 'advance' }
-    ]
+      {
+        id: 'demo-engagement',
+        condition: 'engagement',
+        threshold: 10000,
+        nextPhase: 'transformation',
+        action: 'advance',
+      },
+      {
+        id: 'consciousness-ready',
+        condition: 'consciousness',
+        threshold: 3,
+        nextPhase: 'transformation',
+        action: 'advance',
+      },
+    ],
   },
 
   {
@@ -150,13 +222,37 @@ const LAUNCH_PHASES: LaunchPhase[] = [
     targets: {
       awareness: 200000,
       engagement: 30000,
-      conversion: 5000
+      conversion: 5000,
     },
     channels: [
-      { id: 'events', name: 'Industry Events', priority: 'primary', audienceSize: 10000, consciousnessReceptivity: 0.9 },
-      { id: 'partnerships', name: 'Strategic Partnerships', priority: 'primary', audienceSize: 50000, consciousnessReceptivity: 0.8 },
-      { id: 'linkedin', name: 'LinkedIn', priority: 'secondary', audienceSize: 75000, consciousnessReceptivity: 0.8 },
-      { id: 'pr', name: 'Media & PR', priority: 'secondary', audienceSize: 100000, consciousnessReceptivity: 0.6 }
+      {
+        id: 'events',
+        name: 'Industry Events',
+        priority: 'primary',
+        audienceSize: 10000,
+        consciousnessReceptivity: 0.9,
+      },
+      {
+        id: 'partnerships',
+        name: 'Strategic Partnerships',
+        priority: 'primary',
+        audienceSize: 50000,
+        consciousnessReceptivity: 0.8,
+      },
+      {
+        id: 'linkedin',
+        name: 'LinkedIn',
+        priority: 'secondary',
+        audienceSize: 75000,
+        consciousnessReceptivity: 0.8,
+      },
+      {
+        id: 'pr',
+        name: 'Media & PR',
+        priority: 'secondary',
+        audienceSize: 100000,
+        consciousnessReceptivity: 0.6,
+      },
     ],
     assets: [
       {
@@ -165,7 +261,7 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         variant: 'hero',
         consciousnessLevel: 4,
         message: 'From business tool to business consciousness',
-        cta: 'Begin Transformation'
+        cta: 'Begin Transformation',
       },
       {
         id: 'consciousness-education',
@@ -173,13 +269,25 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         variant: 'video',
         consciousnessLevel: 4,
         message: 'What happens when your business becomes self-aware?',
-        cta: 'Learn About Business Consciousness'
-      }
+        cta: 'Learn About Business Consciousness',
+      },
     ],
     triggers: [
-      { id: 'transformation-ready', condition: 'consciousness', threshold: 5, nextPhase: 'emergence', action: 'advance' },
-      { id: 'market-momentum', condition: 'engagement', threshold: 25000, nextPhase: 'emergence', action: 'advance' }
-    ]
+      {
+        id: 'transformation-ready',
+        condition: 'consciousness',
+        threshold: 5,
+        nextPhase: 'emergence',
+        action: 'advance',
+      },
+      {
+        id: 'market-momentum',
+        condition: 'engagement',
+        threshold: 25000,
+        nextPhase: 'emergence',
+        action: 'advance',
+      },
+    ],
   },
 
   {
@@ -190,13 +298,37 @@ const LAUNCH_PHASES: LaunchPhase[] = [
     targets: {
       awareness: 500000,
       engagement: 75000,
-      conversion: 15000
+      conversion: 15000,
     },
     channels: [
-      { id: 'product-hunt', name: 'Product Hunt', priority: 'primary', audienceSize: 50000, consciousnessReceptivity: 0.7 },
-      { id: 'tech-media', name: 'Tech Media', priority: 'primary', audienceSize: 200000, consciousnessReceptivity: 0.6 },
-      { id: 'influencers', name: 'Business Influencers', priority: 'secondary', audienceSize: 150000, consciousnessReceptivity: 0.8 },
-      { id: 'direct', name: 'Direct Outreach', priority: 'secondary', audienceSize: 25000, consciousnessReceptivity: 0.9 }
+      {
+        id: 'product-hunt',
+        name: 'Product Hunt',
+        priority: 'primary',
+        audienceSize: 50000,
+        consciousnessReceptivity: 0.7,
+      },
+      {
+        id: 'tech-media',
+        name: 'Tech Media',
+        priority: 'primary',
+        audienceSize: 200000,
+        consciousnessReceptivity: 0.6,
+      },
+      {
+        id: 'influencers',
+        name: 'Business Influencers',
+        priority: 'secondary',
+        audienceSize: 150000,
+        consciousnessReceptivity: 0.8,
+      },
+      {
+        id: 'direct',
+        name: 'Direct Outreach',
+        priority: 'secondary',
+        audienceSize: 25000,
+        consciousnessReceptivity: 0.9,
+      },
     ],
     assets: [
       {
@@ -205,7 +337,7 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         variant: 'hero',
         consciousnessLevel: 7,
         message: 'The first conscious business platform is here',
-        cta: 'Activate Business Consciousness'
+        cta: 'Activate Business Consciousness',
       },
       {
         id: 'consciousness-proof',
@@ -213,14 +345,14 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         variant: 'video',
         consciousnessLevel: 7,
         message: 'See consciousness in action: Real businesses, real results',
-        cta: 'Start Your Free Trial'
-      }
+        cta: 'Start Your Free Trial',
+      },
     ],
     triggers: [
       { id: 'full-launch', condition: 'consciousness', threshold: 8, action: 'celebrate' },
-      { id: 'viral-moment', condition: 'engagement', threshold: 50000, action: 'amplify' }
-    ]
-  }
+      { id: 'viral-moment', condition: 'engagement', threshold: 50000, action: 'amplify' },
+    ],
+  },
 ]
 
 const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
@@ -228,24 +360,24 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
   autoAdvance = false,
   onPhaseChange,
   onMetricsUpdate,
-  className = ''
+  className = '',
 }) => {
   const [activePhase, setActivePhase] = useState<LaunchPhase>(
-    LAUNCH_PHASES.find(p => p.id === currentPhase) || LAUNCH_PHASES[0]
+    LAUNCH_PHASES.find((p) => p.id === currentPhase) || LAUNCH_PHASES[0]
   )
   const [phaseDayProgress, setPhaseDayProgress] = useState(0)
   const [phaseMetrics, setPhaseMetrics] = useState({
     awareness: 0,
     engagement: 0,
     conversion: 0,
-    consciousnessLevel: 1
+    consciousnessLevel: 1,
   })
   const [selectedAsset, setSelectedAsset] = useState<LaunchAsset | null>(null)
-  const [campaignTimeline, setCampaignTimeline] = useState<any[]>([])
+  const [campaignTimeline, setCampaignTimeline] = useState<unknown[]>([])
 
   const consciousnessAudio = useConsciousnessAudio({
     initiallyEnabled: true,
-    initialConsciousnessLevel: activePhase.consciousnessLevel
+    initialConsciousnessLevel: activePhase.consciousnessLevel,
   })
 
   // Simulate phase progression
@@ -253,11 +385,11 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
     if (!autoAdvance) return
 
     const timer = setInterval(() => {
-      setPhaseDayProgress(prev => {
+      setPhaseDayProgress((prev) => {
         const newProgress = prev + 1
         if (newProgress >= activePhase.duration) {
           // Auto-advance to next phase
-          const currentIndex = LAUNCH_PHASES.findIndex(p => p.id === activePhase.id)
+          const currentIndex = LAUNCH_PHASES.findIndex((p) => p.id === activePhase.id)
           if (currentIndex < LAUNCH_PHASES.length - 1) {
             const nextPhase = LAUNCH_PHASES[currentIndex + 1]
             setActivePhase(nextPhase)
@@ -281,7 +413,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
       awareness: Math.floor(activePhase.targets.awareness * progressRatio),
       engagement: Math.floor(activePhase.targets.engagement * progressRatio),
       conversion: Math.floor(activePhase.targets.conversion * progressRatio),
-      consciousnessLevel: activePhase.consciousnessLevel
+      consciousnessLevel: activePhase.consciousnessLevel,
     }
     setPhaseMetrics(newMetrics)
     onMetricsUpdate?.(newMetrics)
@@ -289,7 +421,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
 
   // Handle phase change
   const handlePhaseChange = (phaseId: string) => {
-    const phase = LAUNCH_PHASES.find(p => p.id === phaseId)
+    const phase = LAUNCH_PHASES.find((p) => p.id === phaseId)
     if (phase) {
       setActivePhase(phase)
       setPhaseDayProgress(0)
@@ -308,11 +440,14 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
   return (
     <div className={`space-y-8 ${className}`}>
       {/* Phase Control Panel */}
-      <div className="bg-gradient-to-r from-gray-900 to-black border border-gray-700 rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="rounded-2xl border border-gray-700 bg-gradient-to-r from-gray-900 to-black p-6">
+        <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">{activePhase.name}</h2>
-            <p className="text-gray-400">Phase {LAUNCH_PHASES.findIndex(p => p.id === activePhase.id) + 1} of {LAUNCH_PHASES.length}</p>
+            <p className="text-gray-400">
+              Phase {LAUNCH_PHASES.findIndex((p) => p.id === activePhase.id) + 1} of{' '}
+              {LAUNCH_PHASES.length}
+            </p>
           </div>
           <div className="text-right">
             <div className="text-3xl font-bold text-cyan-400">{activePhase.consciousnessLevel}</div>
@@ -322,13 +457,15 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
 
         {/* Progress Bar */}
         <div className="mb-6">
-          <div className="flex justify-between text-sm text-gray-400 mb-2">
-            <span>Day {phaseDayProgress} of {activePhase.duration}</span>
+          <div className="mb-2 flex justify-between text-sm text-gray-400">
+            <span>
+              Day {phaseDayProgress} of {activePhase.duration}
+            </span>
             <span>{Math.round((phaseDayProgress / activePhase.duration) * 100)}% Complete</span>
           </div>
-          <div className="w-full bg-gray-700 rounded-full h-2">
+          <div className="h-2 w-full rounded-full bg-gray-700">
             <motion.div
-              className="bg-gradient-to-r from-cyan-500 to-purple-500 h-2 rounded-full"
+              className="h-2 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500"
               animate={{ width: `${(phaseDayProgress / activePhase.duration) * 100}%` }}
               transition={{ duration: 0.5 }}
             />
@@ -337,7 +474,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
 
         {/* Phase Metrics */}
         <div className="grid grid-cols-4 gap-4">
-          <div className="bg-black/30 rounded-lg p-4 text-center">
+          <div className="rounded-lg bg-black/30 p-4 text-center">
             <div className="text-2xl font-bold text-cyan-400">
               {phaseMetrics.awareness.toLocaleString()}
             </div>
@@ -346,7 +483,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
               Target: {activePhase.targets.awareness.toLocaleString()}
             </div>
           </div>
-          <div className="bg-black/30 rounded-lg p-4 text-center">
+          <div className="rounded-lg bg-black/30 p-4 text-center">
             <div className="text-2xl font-bold text-purple-400">
               {phaseMetrics.engagement.toLocaleString()}
             </div>
@@ -355,7 +492,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
               Target: {activePhase.targets.engagement.toLocaleString()}
             </div>
           </div>
-          <div className="bg-black/30 rounded-lg p-4 text-center">
+          <div className="rounded-lg bg-black/30 p-4 text-center">
             <div className="text-2xl font-bold text-green-400">
               {phaseMetrics.conversion.toLocaleString()}
             </div>
@@ -364,7 +501,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
               Target: {activePhase.targets.conversion.toLocaleString()}
             </div>
           </div>
-          <div className="bg-black/30 rounded-lg p-4 text-center">
+          <div className="rounded-lg bg-black/30 p-4 text-center">
             <div className="text-2xl font-bold text-indigo-400">
               {phaseMetrics.consciousnessLevel.toFixed(1)}
             </div>
@@ -380,10 +517,10 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
           <button
             key={phase.id}
             onClick={() => handlePhaseChange(phase.id)}
-            className={`flex-shrink-0 px-6 py-4 rounded-xl border transition-all ${
+            className={`flex-shrink-0 rounded-xl border px-6 py-4 transition-all ${
               activePhase.id === phase.id
-                ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border-cyan-400 text-cyan-400'
-                : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
+                ? 'border-cyan-400 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-cyan-400'
+                : 'border-gray-600 bg-gray-800 text-gray-300 hover:border-gray-500'
             }`}
           >
             <div className="text-center">
@@ -396,36 +533,38 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
       </div>
 
       {/* Campaign Assets Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {activePhase.assets.map((asset) => (
           <motion.div
             key={asset.id}
-            className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden cursor-pointer hover:border-gray-500 transition-all"
+            className="cursor-pointer overflow-hidden rounded-xl border border-gray-700 bg-gray-800 transition-all hover:border-gray-500"
             whileHover={{ scale: 1.02 }}
             onClick={() => handleAssetSelect(asset)}
           >
             <div className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-semibold text-cyan-400">{asset.type.toUpperCase()}</div>
+              <div className="mb-3 flex items-center justify-between">
+                <div className="text-sm font-semibold text-cyan-400">
+                  {asset.type.toUpperCase()}
+                </div>
                 <div className="text-sm text-gray-400">{asset.variant}</div>
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{asset.message}</h3>
-              <div className="text-sm text-gray-400 mb-4">{asset.cta}</div>
-              
+              <h3 className="mb-2 text-lg font-semibold text-white">{asset.message}</h3>
+              <div className="mb-4 text-sm text-gray-400">{asset.cta}</div>
+
               {/* Mini Asset Preview */}
-              <div className="bg-black/50 rounded-lg p-3">
+              <div className="rounded-lg bg-black/50 p-3">
                 {/* <TeaserCampaignAssets
                   phase={activePhase.id as any}
                   variant={asset.variant as any}
                   showInteractive={false}
                   className="h-24"
                 /> */}
-                <div className="h-24 flex items-center justify-center text-gray-500">
+                <div className="flex h-24 items-center justify-center text-gray-500">
                   <span className="text-xs">Asset Preview Disabled</span>
                 </div>
               </div>
-              
-              <div className="flex items-center justify-between mt-3 text-xs">
+
+              <div className="mt-3 flex items-center justify-between text-xs">
                 <span className="text-purple-400">Level {asset.consciousnessLevel}</span>
                 <span className="text-gray-500">Click to expand</span>
               </div>
@@ -435,18 +574,22 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
       </div>
 
       {/* Channel Performance */}
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6">
-        <h3 className="text-xl font-bold text-white mb-6">Channel Performance</h3>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="rounded-2xl border border-gray-700 bg-gray-900 p-6">
+        <h3 className="mb-6 text-xl font-bold text-white">Channel Performance</h3>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {activePhase.channels.map((channel) => (
-            <div key={channel.id} className="bg-black/30 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
+            <div key={channel.id} className="rounded-lg bg-black/30 p-4">
+              <div className="mb-2 flex items-center justify-between">
                 <h4 className="font-semibold text-white">{channel.name}</h4>
-                <div className={`px-2 py-1 text-xs rounded-full ${
-                  channel.priority === 'primary' ? 'bg-green-500/20 text-green-400' :
-                  channel.priority === 'secondary' ? 'bg-yellow-500/20 text-yellow-400' :
-                  'bg-gray-500/20 text-gray-400'
-                }`}>
+                <div
+                  className={`rounded-full px-2 py-1 text-xs ${
+                    channel.priority === 'primary'
+                      ? 'bg-green-500/20 text-green-400'
+                      : channel.priority === 'secondary'
+                        ? 'bg-yellow-500/20 text-yellow-400'
+                        : 'bg-gray-500/20 text-gray-400'
+                  }`}
+                >
                   {channel.priority}
                 </div>
               </div>
@@ -457,13 +600,15 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Receptivity:</span>
-                  <span className="text-cyan-400">{(channel.consciousnessReceptivity * 100).toFixed(0)}%</span>
+                  <span className="text-cyan-400">
+                    {(channel.consciousnessReceptivity * 100).toFixed(0)}%
+                  </span>
                 </div>
               </div>
               <div className="mt-3">
-                <div className="w-full bg-gray-700 rounded-full h-2">
+                <div className="h-2 w-full rounded-full bg-gray-700">
                   <div
-                    className="bg-gradient-to-r from-cyan-500 to-purple-500 h-2 rounded-full"
+                    className="h-2 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500"
                     style={{ width: `${channel.consciousnessReceptivity * 100}%` }}
                   />
                 </div>
@@ -480,26 +625,29 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
             onClick={() => setSelectedAsset(null)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="max-w-6xl w-full max-h-[90vh] overflow-y-auto"
+              className="max-h-[90vh] w-full max-w-6xl overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-gray-900 rounded-2xl border border-gray-700 overflow-hidden">
-                <div className="p-6 border-b border-gray-700">
+              <div className="overflow-hidden rounded-2xl border border-gray-700 bg-gray-900">
+                <div className="border-b border-gray-700 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-2xl font-bold text-white">{selectedAsset.message}</h3>
-                      <p className="text-gray-400">{selectedAsset.type} • {selectedAsset.variant} • Level {selectedAsset.consciousnessLevel}</p>
+                      <p className="text-gray-400">
+                        {selectedAsset.type} • {selectedAsset.variant} • Level{' '}
+                        {selectedAsset.consciousnessLevel}
+                      </p>
                     </div>
                     <button
                       onClick={() => setSelectedAsset(null)}
-                      className="text-gray-400 hover:text-white text-2xl"
+                      className="text-2xl text-gray-400 hover:text-white"
                     >
                       ×
                     </button>
@@ -515,7 +663,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
                       setSelectedAsset(null)
                     }}
                   /> */}
-                  <div className="h-96 flex items-center justify-center bg-gray-800">
+                  <div className="flex h-96 items-center justify-center bg-gray-800">
                     <p className="text-gray-400">Asset Preview Temporarily Disabled</p>
                   </div>
                 </div>
@@ -526,25 +674,33 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
       </AnimatePresence>
 
       {/* Launch Timeline Overview */}
-      <div className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border border-purple-700 rounded-2xl p-6">
-        <h3 className="text-xl font-bold text-white mb-6">🚀 Complete Launch Timeline</h3>
+      <div className="rounded-2xl border border-purple-700 bg-gradient-to-r from-purple-900/30 to-indigo-900/30 p-6">
+        <h3 className="mb-6 text-xl font-bold text-white">🚀 Complete Launch Timeline</h3>
         <div className="space-y-4">
           {LAUNCH_PHASES.map((phase, index) => (
             <div key={phase.id} className="flex items-center space-x-4">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold ${
-                index <= LAUNCH_PHASES.findIndex(p => p.id === activePhase.id)
-                  ? 'bg-cyan-500 text-black'
-                  : 'bg-gray-700 text-gray-400'
-              }`}>
+              <div
+                className={`flex h-12 w-12 items-center justify-center rounded-full font-bold ${
+                  index <= LAUNCH_PHASES.findIndex((p) => p.id === activePhase.id)
+                    ? 'bg-cyan-500 text-black'
+                    : 'bg-gray-700 text-gray-400'
+                }`}
+              >
                 {index + 1}
               </div>
               <div className="flex-1">
-                <div className="text-white font-semibold">{phase.name}</div>
-                <div className="text-gray-400 text-sm">{phase.duration} days • Level {phase.consciousnessLevel} consciousness</div>
+                <div className="font-semibold text-white">{phase.name}</div>
+                <div className="text-sm text-gray-400">
+                  {phase.duration} days • Level {phase.consciousnessLevel} consciousness
+                </div>
               </div>
               <div className="text-right text-sm">
-                <div className="text-cyan-400">{phase.targets.awareness.toLocaleString()} awareness</div>
-                <div className="text-purple-400">{phase.targets.conversion.toLocaleString()} conversions</div>
+                <div className="text-cyan-400">
+                  {phase.targets.awareness.toLocaleString()} awareness
+                </div>
+                <div className="text-purple-400">
+                  {phase.targets.conversion.toLocaleString()} conversions
+                </div>
               </div>
             </div>
           ))}

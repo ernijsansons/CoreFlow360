@@ -16,8 +16,8 @@ const mockPipeline = {
   smembers: vi.fn().mockReturnThis(),
   exec: vi.fn().mockResolvedValue([
     [null, 1], // incr result
-    [null, 1], // expire result  
-    [null, '1'] // get result
+    [null, 1], // expire result
+    [null, '1'], // get result
   ]),
 }
 
@@ -53,8 +53,8 @@ export const resetRedisMocks = () => {
   mockRedisClient.ttl.mockResolvedValue(-1)
   mockPipeline.exec.mockResolvedValue([
     [null, 1], // incr result
-    [null, 1], // expire result  
-    [null, '1'] // get result
+    [null, 1], // expire result
+    [null, '1'], // get result
   ])
   vi.clearAllMocks()
 }

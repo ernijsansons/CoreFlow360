@@ -14,12 +14,12 @@ const createUserSchema = z.object({
   email: z.string().email('Invalid email address'),
   role: z.enum(['USER', 'MANAGER', 'ADMIN']),
   departmentId: z.string().optional(),
-  permissions: z.array(z.string()).optional()
+  permissions: z.array(z.string()).optional(),
 })
 
 const updateUserSchema = createUserSchema.partial().extend({
   id: z.string(),
-  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']).optional()
+  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']).optional(),
 })
 
 const handleGET = async (context: ApiContext): Promise<NextResponse> => {
@@ -45,28 +45,28 @@ const handleGET = async (context: ApiContext): Promise<NextResponse> => {
       createdAt: true,
       department: {
         select: {
-          name: true
-        }
+          name: true,
+        },
       },
       tenant: {
         select: {
           name: true,
-          slug: true
-        }
-      }
+          slug: true,
+        },
+      },
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
   })
 
-  const transformedUsers = users.map(user => ({
+  const transformedUsers = users.map((user) => ({
     ...user,
-    department: user.department?.name || 'No Department'
+    department: user.department?.name || 'No Department',
   }))
 
   return NextResponse.json({
     success: true,
     users: transformedUsers,
-    total: users.length
+    total: users.length,
   })
 }
 
@@ -83,7 +83,7 @@ const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
 
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({
-    where: { email: validatedData.email }
+    where: { email: validatedData.email },
   })
 
   if (existingUser) {
@@ -94,7 +94,7 @@ const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
   let departmentId = validatedData.departmentId
   if (!departmentId) {
     const defaultDept = await prisma.department.findFirst({
-      where: { tenantId, code: 'GENERAL' }
+      where: { tenantId, code: 'GENERAL' },
     })
     departmentId = defaultDept?.id
   }
@@ -110,16 +110,16 @@ const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
       status: 'ACTIVE',
       permissions: JSON.stringify(validatedData.permissions || []),
       // Note: In production, you'd send an invitation email instead of creating with no password
-      password: null
+      password: null,
     },
     include: {
       department: {
-        select: { name: true }
+        select: { name: true },
       },
       tenant: {
-        select: { name: true, slug: true }
-      }
-    }
+        select: { name: true, slug: true },
+      },
+    },
   })
 
   // Log the user creation
@@ -133,18 +133,21 @@ const handlePOST = async (context: ApiContext): Promise<NextResponse> => {
       newValues: JSON.stringify({
         name: newUser.name,
         email: newUser.email,
-        role: newUser.role
-      })
-    }
+        role: newUser.role,
+      }),
+    },
   })
 
-  return NextResponse.json({
-    success: true,
-    user: {
-      ...newUser,
-      department: newUser.department?.name || 'No Department'
-    }
-  }, { status: 201 })
+  return NextResponse.json(
+    {
+      success: true,
+      user: {
+        ...newUser,
+        department: newUser.department?.name || 'No Department',
+      },
+    },
+    { status: 201 }
+  )
 }
 
 const handlePUT = async (context: ApiContext): Promise<NextResponse> => {
@@ -160,7 +163,7 @@ const handlePUT = async (context: ApiContext): Promise<NextResponse> => {
 
   // Find the user to update
   const existingUser = await prisma.user.findUnique({
-    where: { id: validatedData.id }
+    where: { id: validatedData.id },
   })
 
   if (!existingUser) {
@@ -173,7 +176,7 @@ const handlePUT = async (context: ApiContext): Promise<NextResponse> => {
   }
 
   // Prepare update data
-  const updateData: any = {}
+  const updateData: unknown = {}
   if (validatedData.name) updateData.name = validatedData.name
   if (validatedData.email) updateData.email = validatedData.email
   if (validatedData.role) updateData.role = validatedData.role
@@ -187,12 +190,12 @@ const handlePUT = async (context: ApiContext): Promise<NextResponse> => {
     data: updateData,
     include: {
       department: {
-        select: { name: true }
+        select: { name: true },
       },
       tenant: {
-        select: { name: true, slug: true }
-      }
-    }
+        select: { name: true, slug: true },
+      },
+    },
   })
 
   // Log the user update
@@ -206,22 +209,22 @@ const handlePUT = async (context: ApiContext): Promise<NextResponse> => {
       oldValues: JSON.stringify({
         name: existingUser.name,
         role: existingUser.role,
-        status: existingUser.status
+        status: existingUser.status,
       }),
       newValues: JSON.stringify({
         name: updatedUser.name,
         role: updatedUser.role,
-        status: updatedUser.status
-      })
-    }
+        status: updatedUser.status,
+      }),
+    },
   })
 
   return NextResponse.json({
     success: true,
     user: {
       ...updatedUser,
-      department: updatedUser.department?.name || 'No Department'
-    }
+      department: updatedUser.department?.name || 'No Department',
+    },
   })
 }
 
@@ -242,7 +245,7 @@ const handleDELETE = async (context: ApiContext): Promise<NextResponse> => {
 
   // Find the user to delete
   const existingUser = await prisma.user.findUnique({
-    where: { id: userId }
+    where: { id: userId },
   })
 
   if (!existingUser) {
@@ -257,10 +260,10 @@ const handleDELETE = async (context: ApiContext): Promise<NextResponse> => {
   // Soft delete the user (set status to DELETED)
   await prisma.user.update({
     where: { id: userId },
-    data: { 
+    data: {
       status: 'DELETED',
-      email: `deleted-${Date.now()}-${existingUser.email}` // Prevent email conflicts
-    }
+      email: `deleted-${Date.now()}-${existingUser.email}`, // Prevent email conflicts
+    },
   })
 
   // Log the user deletion
@@ -274,14 +277,14 @@ const handleDELETE = async (context: ApiContext): Promise<NextResponse> => {
       oldValues: JSON.stringify({
         name: existingUser.name,
         email: existingUser.email,
-        role: existingUser.role
-      })
-    }
+        role: existingUser.role,
+      }),
+    },
   })
 
   return NextResponse.json({
     success: true,
-    message: 'User deleted successfully'
+    message: 'User deleted successfully',
   })
 }
 

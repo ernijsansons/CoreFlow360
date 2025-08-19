@@ -1,72 +1,72 @@
 export interface CookieDefinition {
-  name: string;
-  domain: string;
-  category: 'strictly_necessary' | 'performance' | 'functional' | 'targeting' | 'social_media';
-  purpose: string;
-  duration: number; // in days
-  isThirdParty: boolean;
-  vendor: string;
-  dataCollected: string[];
-  consentRequired: boolean;
-  isHttpOnly: boolean;
-  isSecure: boolean;
-  sameSite: 'strict' | 'lax' | 'none';
-  path: string;
+  name: string
+  domain: string
+  category: 'strictly_necessary' | 'performance' | 'functional' | 'targeting' | 'social_media'
+  purpose: string
+  duration: number // in days
+  isThirdParty: boolean
+  vendor: string
+  dataCollected: string[]
+  consentRequired: boolean
+  isHttpOnly: boolean
+  isSecure: boolean
+  sameSite: 'strict' | 'lax' | 'none'
+  path: string
 }
 
 export interface ConsentPattern {
-  url: string;
-  consentBannerPresent: boolean;
-  consentMechanism: 'opt_in' | 'opt_out' | 'pre_ticked' | 'implied' | 'none';
-  granularChoices: boolean;
-  withdrawalAvailable: boolean;
-  cookiesSetBeforeConsent: string[];
-  jurisdiction: 'gdpr' | 'ccpa' | 'other';
-  complianceScore: number; // 0-100
+  url: string
+  consentBannerPresent: boolean
+  consentMechanism: 'opt_in' | 'opt_out' | 'pre_ticked' | 'implied' | 'none'
+  granularChoices: boolean
+  withdrawalAvailable: boolean
+  cookiesSetBeforeConsent: string[]
+  jurisdiction: 'gdpr' | 'ccpa' | 'other'
+  complianceScore: number // 0-100
 }
 
 export interface ChurnPrediction {
-  url: string;
-  consentRate: number; // 0-100%
-  predictedChurn: number; // 0-100%
+  url: string
+  consentRate: number // 0-100%
+  predictedChurn: number // 0-100%
   factors: {
-    bannerIntrusiveness: number;
-    cookieCount: number;
-    thirdPartyCount: number;
-    loadTimeImpact: number;
-    userExperienceScore: number;
-  };
-  recommendations: string[];
+    bannerIntrusiveness: number
+    cookieCount: number
+    thirdPartyCount: number
+    loadTimeImpact: number
+    userExperienceScore: number
+  }
+  recommendations: string[]
 }
 
 export class CookieTracker {
-  private cookieInventory: Map<string, CookieDefinition[]> = new Map();
+  private cookieInventory: Map<string, CookieDefinition[]> = new Map()
 
   constructor(private tenantId: string) {}
 
   async auditCookieCompliance(): Promise<{
-    cookies: CookieDefinition[];
-    patterns: ConsentPattern[];
-    churnPredictions: ChurnPrediction[];
-    overallCompliance: number;
-    report: string;
+    cookies: CookieDefinition[]
+    patterns: ConsentPattern[]
+    churnPredictions: ChurnPrediction[]
+    overallCompliance: number
+    report: string
   }> {
     // 1) Verify ePrivacy compliance
-    const cookies = await this.scanCookies();
-    const patterns = await this.analyzeConsentPatterns();
-    
+    const cookies = await this.scanCookies()
+    const patterns = await this.analyzeConsentPatterns()
+
     // 2) Predict churn impact
-    const churnPredictions = this.predictChurnImpact(cookies, patterns);
-    
-    const overallCompliance = this.calculateOverallCompliance(patterns);
+    const churnPredictions = this.predictChurnImpact(cookies, patterns)
+
+    const overallCompliance = this.calculateOverallCompliance(patterns)
 
     return {
       cookies,
       patterns,
       churnPredictions,
       overallCompliance,
-      report: this.generateXMLReport(cookies, patterns, churnPredictions)
-    };
+      report: this.generateXMLReport(cookies, patterns, churnPredictions),
+    }
   }
 
   private async scanCookies(): Promise<CookieDefinition[]> {
@@ -85,7 +85,7 @@ export class CookieTracker {
         isHttpOnly: false,
         isSecure: true,
         sameSite: 'lax',
-        path: '/'
+        path: '/',
       },
       {
         name: 'session_id',
@@ -100,7 +100,7 @@ export class CookieTracker {
         isHttpOnly: true,
         isSecure: true,
         sameSite: 'strict',
-        path: '/'
+        path: '/',
       },
       {
         name: '_fbp',
@@ -115,7 +115,7 @@ export class CookieTracker {
         isHttpOnly: false,
         isSecure: true,
         sameSite: 'lax',
-        path: '/'
+        path: '/',
       },
       {
         name: 'preferences',
@@ -130,7 +130,7 @@ export class CookieTracker {
         isHttpOnly: false,
         isSecure: true,
         sameSite: 'strict',
-        path: '/'
+        path: '/',
       },
       {
         name: 'hotjar_session',
@@ -145,9 +145,9 @@ export class CookieTracker {
         isHttpOnly: false,
         isSecure: true,
         sameSite: 'lax',
-        path: '/'
-      }
-    ];
+        path: '/',
+      },
+    ]
   }
 
   private async analyzeConsentPatterns(): Promise<ConsentPattern[]> {
@@ -161,7 +161,7 @@ export class CookieTracker {
         withdrawalAvailable: true,
         cookiesSetBeforeConsent: ['session_id'], // Only strictly necessary
         jurisdiction: 'gdpr',
-        complianceScore: 85
+        complianceScore: 85,
       },
       {
         url: 'https://coreflow360.com/landing',
@@ -171,7 +171,7 @@ export class CookieTracker {
         withdrawalAvailable: false, // PROBLEM!
         cookiesSetBeforeConsent: ['_ga', '_fbp', 'hotjar_session'], // MAJOR PROBLEM!
         jurisdiction: 'gdpr',
-        complianceScore: 25
+        complianceScore: 25,
       },
       {
         url: 'https://coreflow360.com/app',
@@ -181,72 +181,84 @@ export class CookieTracker {
         withdrawalAvailable: false,
         cookiesSetBeforeConsent: ['session_id', 'preferences', '_ga'],
         jurisdiction: 'gdpr',
-        complianceScore: 40
-      }
-    ];
+        complianceScore: 40,
+      },
+    ]
   }
 
-  private predictChurnImpact(cookies: CookieDefinition[], patterns: ConsentPattern[]): ChurnPrediction[] {
-    return patterns.map(pattern => {
-      const urlCookies = cookies.filter(c => c.consentRequired);
-      const thirdPartyCookies = urlCookies.filter(c => c.isThirdParty);
-      
+  private predictChurnImpact(
+    cookies: CookieDefinition[],
+    patterns: ConsentPattern[]
+  ): ChurnPrediction[] {
+    return patterns.map((pattern) => {
+      const urlCookies = cookies.filter((c) => c.consentRequired)
+      const thirdPartyCookies = urlCookies.filter((c) => c.isThirdParty)
+
       // Calculate factors affecting user experience
-      const bannerIntrusiveness = pattern.consentBannerPresent ? 
-        (pattern.granularChoices ? 3 : 7) : 0; // 0-10 scale
-      
-      const cookieCount = urlCookies.length;
-      const thirdPartyCount = thirdPartyCookies.length;
-      
+      const bannerIntrusiveness = pattern.consentBannerPresent
+        ? pattern.granularChoices
+          ? 3
+          : 7
+        : 0 // 0-10 scale
+
+      const cookieCount = urlCookies.length
+      const thirdPartyCount = thirdPartyCookies.length
+
       // Estimate load time impact (ms)
-      const loadTimeImpact = cookieCount * 50 + thirdPartyCount * 100;
-      
+      const loadTimeImpact = cookieCount * 50 + thirdPartyCount * 100
+
       // User experience score (higher = better)
-      const userExperienceScore = Math.max(0, 100 - 
-        (bannerIntrusiveness * 5) - 
-        (cookieCount * 2) - 
-        (thirdPartyCount * 3) - 
-        (loadTimeImpact / 10)
-      );
+      const userExperienceScore = Math.max(
+        0,
+        100 - bannerIntrusiveness * 5 - cookieCount * 2 - thirdPartyCount * 3 - loadTimeImpact / 10
+      )
 
       // Predict consent rate based on UX factors
-      const baseConsentRate = 60; // 60% baseline
-      const consentRate = Math.max(10, Math.min(90, 
-        baseConsentRate + 
-        (pattern.granularChoices ? 10 : -15) +
-        (pattern.consentMechanism === 'opt_in' ? 5 : -10) +
-        (cookieCount > 10 ? -20 : 0) +
-        (thirdPartyCount > 5 ? -15 : 0)
-      ));
+      const baseConsentRate = 60 // 60% baseline
+      const consentRate = Math.max(
+        10,
+        Math.min(
+          90,
+          baseConsentRate +
+            (pattern.granularChoices ? 10 : -15) +
+            (pattern.consentMechanism === 'opt_in' ? 5 : -10) +
+            (cookieCount > 10 ? -20 : 0) +
+            (thirdPartyCount > 5 ? -15 : 0)
+        )
+      )
 
       // Predict churn based on poor cookie experience
-      const predictedChurn = Math.max(0, Math.min(50,
-        (bannerIntrusiveness * 2) +
-        (cookieCount > 15 ? 15 : 0) +
-        (thirdPartyCount > 8 ? 10 : 0) +
-        (loadTimeImpact > 1000 ? 20 : 0) +
-        (pattern.complianceScore < 50 ? 10 : 0)
-      ));
+      const predictedChurn = Math.max(
+        0,
+        Math.min(
+          50,
+          bannerIntrusiveness * 2 +
+            (cookieCount > 15 ? 15 : 0) +
+            (thirdPartyCount > 8 ? 10 : 0) +
+            (loadTimeImpact > 1000 ? 20 : 0) +
+            (pattern.complianceScore < 50 ? 10 : 0)
+        )
+      )
 
-      const recommendations: string[] = [];
-      
+      const recommendations: string[] = []
+
       if (bannerIntrusiveness > 5) {
-        recommendations.push('Reduce consent banner intrusiveness');
+        recommendations.push('Reduce consent banner intrusiveness')
       }
       if (cookieCount > 10) {
-        recommendations.push('Reduce total number of cookies');
+        recommendations.push('Reduce total number of cookies')
       }
       if (thirdPartyCount > 5) {
-        recommendations.push('Minimize third-party cookie dependencies');
+        recommendations.push('Minimize third-party cookie dependencies')
       }
       if (loadTimeImpact > 500) {
-        recommendations.push('Optimize cookie loading performance');
+        recommendations.push('Optimize cookie loading performance')
       }
       if (!pattern.granularChoices) {
-        recommendations.push('Implement granular consent choices');
+        recommendations.push('Implement granular consent choices')
       }
       if (pattern.cookiesSetBeforeConsent.length > 1) {
-        recommendations.push('Only set strictly necessary cookies before consent');
+        recommendations.push('Only set strictly necessary cookies before consent')
       }
 
       return {
@@ -258,26 +270,28 @@ export class CookieTracker {
           cookieCount,
           thirdPartyCount,
           loadTimeImpact,
-          userExperienceScore
+          userExperienceScore,
         },
-        recommendations
-      };
-    });
+        recommendations,
+      }
+    })
   }
 
   private calculateOverallCompliance(patterns: ConsentPattern[]): number {
-    if (patterns.length === 0) return 0;
-    
-    const totalScore = patterns.reduce((sum, pattern) => sum + pattern.complianceScore, 0);
-    return Math.round(totalScore / patterns.length);
+    if (patterns.length === 0) return 0
+
+    const totalScore = patterns.reduce((sum, pattern) => sum + pattern.complianceScore, 0)
+    return Math.round(totalScore / patterns.length)
   }
 
   private generateXMLReport(
-    cookies: CookieDefinition[], 
-    patterns: ConsentPattern[], 
+    cookies: CookieDefinition[],
+    patterns: ConsentPattern[],
     churnPredictions: ChurnPrediction[]
   ): string {
-    const patternsXML = patterns.map(pattern => `
+    const patternsXML = patterns
+      .map(
+        (pattern) => `
       <pattern>
         <url>${pattern.url}</url>
         <consentBanner>${pattern.consentBannerPresent}</consentBanner>
@@ -293,9 +307,13 @@ export class CookieTracker {
           ${!pattern.withdrawalAvailable ? '<issue>Must provide easy consent withdrawal</issue>' : ''}
         </issues>
       </pattern>
-    `).join('');
+    `
+      )
+      .join('')
 
-    const churnXML = churnPredictions.map(prediction => `
+    const churnXML = churnPredictions
+      .map(
+        (prediction) => `
       <churn>
         <url>${prediction.url}</url>
         <consentRate>${prediction.consentRate}</consentRate>
@@ -309,15 +327,17 @@ export class CookieTracker {
         </factors>
         <recommendations>${prediction.recommendations.join(', ')}</recommendations>
       </churn>
-    `).join('');
+    `
+      )
+      .join('')
 
     const cookieStats = {
       total: cookies.length,
-      necessary: cookies.filter(c => c.category === 'strictly_necessary').length,
-      thirdParty: cookies.filter(c => c.isThirdParty).length,
-      requireConsent: cookies.filter(c => c.consentRequired).length,
-      insecure: cookies.filter(c => !c.isSecure).length
-    };
+      necessary: cookies.filter((c) => c.category === 'strictly_necessary').length,
+      thirdParty: cookies.filter((c) => c.isThirdParty).length,
+      requireConsent: cookies.filter((c) => c.consentRequired).length,
+      insecure: cookies.filter((c) => !c.isSecure).length,
+    }
 
     return `
       <cookies>
@@ -338,6 +358,6 @@ export class CookieTracker {
           <optimization>Reduce third-party cookie dependencies to improve performance and privacy</optimization>
         </recommendations>
       </cookies>
-    `;
+    `
   }
 }

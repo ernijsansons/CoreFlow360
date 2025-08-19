@@ -25,10 +25,18 @@ import {
   Settings,
   Zap,
   Shield,
-  Info
+  Info,
 } from 'lucide-react'
-import { useTaxChangeTracking, TaxChange, TaxImpactCalculator } from '@/lib/tax-knowledge/tax-change-tracking'
-import { AccessibleButton, AccessibleAlert, AccessibleModal } from '@/components/accessibility/AccessibleComponents'
+import {
+  useTaxChangeTracking,
+  TaxChange,
+  TaxImpactCalculator,
+} from '@/lib/tax-knowledge/tax-change-tracking'
+import {
+  AccessibleButton,
+  AccessibleAlert,
+  AccessibleModal,
+} from '@/components/accessibility/AccessibleComponents'
 
 interface TaxChangeAlertsProps {
   userProfile: {
@@ -40,7 +48,8 @@ interface TaxChangeAlertsProps {
 }
 
 export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
-  const { changes, urgentChanges, relevantChanges, isMonitoring, startMonitoring } = useTaxChangeTracking(userProfile)
+  const { changes, urgentChanges, relevantChanges, isMonitoring, startMonitoring } =
+    useTaxChangeTracking(userProfile)
   const [selectedChange, setSelectedChange] = useState<TaxChange | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [filterUrgency, setFilterUrgency] = useState<string>('all')
@@ -53,20 +62,29 @@ export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
 
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
-      case 'critical': return 'text-red-400 bg-red-900/20 border-red-500/30'
-      case 'high': return 'text-orange-400 bg-orange-900/20 border-orange-500/30'
-      case 'medium': return 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30'
-      default: return 'text-blue-400 bg-blue-900/20 border-blue-500/30'
+      case 'critical':
+        return 'text-red-400 bg-red-900/20 border-red-500/30'
+      case 'high':
+        return 'text-orange-400 bg-orange-900/20 border-orange-500/30'
+      case 'medium':
+        return 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30'
+      default:
+        return 'text-blue-400 bg-blue-900/20 border-blue-500/30'
     }
   }
 
   const getImpactIcon = (impactType: string) => {
     switch (impactType) {
-      case 'cost_savings': return <TrendingUp className="w-5 h-5 text-green-400" />
-      case 'increased_costs': return <TrendingDown className="w-5 h-5 text-red-400" />
-      case 'compliance_burden': return <FileText className="w-5 h-5 text-yellow-400" />
-      case 'opportunity': return <Zap className="w-5 h-5 text-violet-400" />
-      default: return <Info className="w-5 h-5 text-gray-400" />
+      case 'cost_savings':
+        return <TrendingUp className="h-5 w-5 text-green-400" />
+      case 'increased_costs':
+        return <TrendingDown className="h-5 w-5 text-red-400" />
+      case 'compliance_burden':
+        return <FileText className="h-5 w-5 text-yellow-400" />
+      case 'opportunity':
+        return <Zap className="h-5 w-5 text-violet-400" />
+      default:
+        return <Info className="h-5 w-5 text-gray-400" />
     }
   }
 
@@ -76,10 +94,10 @@ export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
   }
 
   const handleDismissAlert = (changeId: string) => {
-    setDismissedAlerts(prev => new Set([...prev, changeId]))
+    setDismissedAlerts((prev) => new Set([...prev, changeId]))
   }
 
-  const filteredChanges = relevantChanges.filter(change => {
+  const filteredChanges = relevantChanges.filter((change) => {
     if (dismissedAlerts.has(change.id)) return false
     if (filterUrgency === 'all') return true
     return change.urgency === filterUrgency
@@ -90,8 +108,8 @@ export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg">
-            <Bell className="w-6 h-6 text-white" />
+          <div className="rounded-lg bg-gradient-to-r from-red-500 to-orange-500 p-2">
+            <Bell className="h-6 w-6 text-white" />
           </div>
           <div>
             <h2 className="text-2xl font-bold text-white">Tax Law Updates</h2>
@@ -103,7 +121,7 @@ export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
           <select
             value={filterUrgency}
             onChange={(e) => setFilterUrgency(e.target.value)}
-            className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm"
+            className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
           >
             <option value="all">All Changes</option>
             <option value="critical">Critical</option>
@@ -119,7 +137,7 @@ export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
             disabled={isMonitoring}
             loading={isMonitoring}
           >
-            <Settings className="w-4 h-4 mr-2" />
+            <Settings className="mr-2 h-4 w-4" />
             {isMonitoring ? 'Monitoring...' : 'Refresh'}
           </AccessibleButton>
         </div>
@@ -129,13 +147,14 @@ export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
       <AccessibleAlert type="warning" className="border-2 border-orange-500/50">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-orange-400" />
+            <Shield className="h-5 w-5 text-orange-400" />
             <strong className="text-orange-300">IMPORTANT LEGAL DISCLAIMER</strong>
           </div>
           <p className="text-gray-300">
-            🚨 <strong>NOT TAX ADVICE</strong> - All information provided is for educational purposes only. 
-            Tax laws are complex and change frequently. Always consult with a qualified tax attorney, 
-            CPA, or enrolled agent before making any tax-related decisions. CoreFlow360 assumes 
+            🚨 <strong>NOT TAX ADVICE</strong> - All information provided is for educational
+            purposes only. Tax laws are complex and change frequently. Always consult with a
+            qualified tax attorney, CPA, or enrolled agent before making any tax-related decisions.
+            CoreFlow360 assumes
             <strong> ZERO LIABILITY</strong> for any actions taken based on this information.
           </p>
         </div>
@@ -146,26 +165,26 @@ export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-red-900/30 to-orange-900/30 border border-red-500/30 rounded-xl p-4"
+          className="rounded-xl border border-red-500/30 bg-gradient-to-r from-red-900/30 to-orange-900/30 p-4"
         >
-          <div className="flex items-center gap-3 mb-3">
-            <AlertTriangle className="w-6 h-6 text-red-400" />
+          <div className="mb-3 flex items-center gap-3">
+            <AlertTriangle className="h-6 w-6 text-red-400" />
             <h3 className="text-lg font-semibold text-red-300">
               {urgentChanges.length} Urgent Tax Updates Require Attention
             </h3>
           </div>
-          <div className="grid md:grid-cols-2 gap-3">
-            {urgentChanges.slice(0, 2).map(change => (
-              <div key={change.id} className="bg-gray-900/50 rounded-lg p-3">
-                <h4 className="font-medium text-white text-sm mb-1">{change.title}</h4>
-                <p className="text-gray-400 text-xs mb-2">{change.description}</p>
+          <div className="grid gap-3 md:grid-cols-2">
+            {urgentChanges.slice(0, 2).map((change) => (
+              <div key={change.id} className="rounded-lg bg-gray-900/50 p-3">
+                <h4 className="mb-1 text-sm font-medium text-white">{change.title}</h4>
+                <p className="mb-2 text-xs text-gray-400">{change.description}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-red-400">
                     Effective: {change.effectiveDate.toLocaleDateString()}
                   </span>
                   <button
                     onClick={() => handleViewDetails(change)}
-                    className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
+                    className="text-xs text-violet-400 transition-colors hover:text-violet-300"
                   >
                     View Details →
                   </button>
@@ -183,40 +202,45 @@ export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
         </h3>
 
         <AnimatePresence>
-          {filteredChanges.map(change => (
+          {filteredChanges.map((change) => (
             <motion.div
               key={change.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className={`border rounded-xl p-6 ${getUrgencyColor(change.urgency)}`}
+              className={`rounded-xl border p-6 ${getUrgencyColor(change.urgency)}`}
             >
-              <div className="flex items-start justify-between mb-4">
+              <div className="mb-4 flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      change.urgency === 'critical' ? 'bg-red-500 text-white' :
-                      change.urgency === 'high' ? 'bg-orange-500 text-white' :
-                      change.urgency === 'medium' ? 'bg-yellow-500 text-black' :
-                      'bg-blue-500 text-white'
-                    }`}>
+                  <div className="mb-2 flex items-center gap-3">
+                    <span
+                      className={`rounded-full px-2 py-1 text-xs font-medium ${
+                        change.urgency === 'critical'
+                          ? 'bg-red-500 text-white'
+                          : change.urgency === 'high'
+                            ? 'bg-orange-500 text-white'
+                            : change.urgency === 'medium'
+                              ? 'bg-yellow-500 text-black'
+                              : 'bg-blue-500 text-white'
+                      }`}
+                    >
                       {change.urgency.toUpperCase()}
                     </span>
                     <span className="text-xs text-gray-400">
                       Announced: {change.announcedDate.toLocaleDateString()}
                     </span>
                   </div>
-                  
-                  <h4 className="text-lg font-semibold text-white mb-2">{change.title}</h4>
-                  <p className="text-gray-300 mb-3">{change.description}</p>
-                  
+
+                  <h4 className="mb-2 text-lg font-semibold text-white">{change.title}</h4>
+                  <p className="mb-3 text-gray-300">{change.description}</p>
+
                   <div className="flex items-center gap-4 text-sm text-gray-400">
                     <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
+                      <Calendar className="h-4 w-4" />
                       Effective: {change.effectiveDate.toLocaleDateString()}
                     </div>
                     <div className="flex items-center gap-1">
-                      <FileText className="w-4 h-4" />
+                      <FileText className="h-4 w-4" />
                       {change.affectedSections.length} IRC Sections
                     </div>
                   </div>
@@ -232,9 +256,9 @@ export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
                   </AccessibleButton>
                   <button
                     onClick={() => handleDismissAlert(change.id)}
-                    className="p-1 text-gray-400 hover:text-white transition-colors rounded"
+                    className="rounded p-1 text-gray-400 transition-colors hover:text-white"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -242,17 +266,19 @@ export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
               {/* Business Impact Preview */}
               {change.businessImpacts.length > 0 && (
                 <div className="border-t border-gray-700/50 pt-4">
-                  <h5 className="text-sm font-medium text-white mb-3">Potential Impact on Your Business</h5>
-                  <div className="grid md:grid-cols-2 gap-3">
+                  <h5 className="mb-3 text-sm font-medium text-white">
+                    Potential Impact on Your Business
+                  </h5>
+                  <div className="grid gap-3 md:grid-cols-2">
                     {change.businessImpacts.slice(0, 2).map((impact, index) => (
-                      <div key={index} className="bg-gray-900/30 rounded-lg p-3">
-                        <div className="flex items-center gap-2 mb-2">
+                      <div key={index} className="rounded-lg bg-gray-900/30 p-3">
+                        <div className="mb-2 flex items-center gap-2">
                           {getImpactIcon(impact.impactType)}
                           <span className="text-sm font-medium text-white capitalize">
                             {impact.impactType.replace('_', ' ')}
                           </span>
                           {impact.estimatedAmount && (
-                            <span className="text-sm text-green-400 ml-auto">
+                            <span className="ml-auto text-sm text-green-400">
                               ${impact.estimatedAmount.toLocaleString()}
                             </span>
                           )}
@@ -271,10 +297,12 @@ export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
         </AnimatePresence>
 
         {filteredChanges.length === 0 && (
-          <div className="text-center py-12">
-            <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-white mb-2">All Caught Up!</h3>
-            <p className="text-gray-400">No new tax changes requiring your attention at this time.</p>
+          <div className="py-12 text-center">
+            <CheckCircle className="mx-auto mb-4 h-12 w-12 text-green-400" />
+            <h3 className="mb-2 text-lg font-medium text-white">All Caught Up!</h3>
+            <p className="text-gray-400">
+              No new tax changes requiring your attention at this time.
+            </p>
           </div>
         )}
       </div>
@@ -301,12 +329,12 @@ export function TaxChangeAlerts({ userProfile }: TaxChangeAlertsProps) {
 // Detailed Tax Change View Component
 interface TaxChangeDetailViewProps {
   change: TaxChange
-  userProfile: any
+  userProfile: unknown
   onClose: () => void
 }
 
 function TaxChangeDetailView({ change, userProfile, onClose }: TaxChangeDetailViewProps) {
-  const [impactCalculation, setImpactCalculation] = useState<any>(null)
+  const [impactCalculation, setImpactCalculation] = useState<unknown>(null)
 
   useEffect(() => {
     const calculation = TaxImpactCalculator.calculateFinancialImpact(change, userProfile)
@@ -317,13 +345,18 @@ function TaxChangeDetailView({ change, userProfile, onClose }: TaxChangeDetailVi
     <div className="space-y-6">
       {/* Change Overview */}
       <div>
-        <div className="flex items-center gap-3 mb-4">
-          <span className={`text-xs font-medium px-3 py-1 rounded-full ${
-            change.urgency === 'critical' ? 'bg-red-500 text-white' :
-            change.urgency === 'high' ? 'bg-orange-500 text-white' :
-            change.urgency === 'medium' ? 'bg-yellow-500 text-black' :
-            'bg-blue-500 text-white'
-          }`}>
+        <div className="mb-4 flex items-center gap-3">
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-medium ${
+              change.urgency === 'critical'
+                ? 'bg-red-500 text-white'
+                : change.urgency === 'high'
+                  ? 'bg-orange-500 text-white'
+                  : change.urgency === 'medium'
+                    ? 'bg-yellow-500 text-black'
+                    : 'bg-blue-500 text-white'
+            }`}
+          >
             {change.urgency.toUpperCase()} PRIORITY
           </span>
           <span className="text-sm text-gray-400">
@@ -331,23 +364,21 @@ function TaxChangeDetailView({ change, userProfile, onClose }: TaxChangeDetailVi
           </span>
         </div>
 
-        <h3 className="text-xl font-bold text-white mb-3">{change.title}</h3>
-        <p className="text-gray-300 mb-4">{change.description}</p>
+        <h3 className="mb-3 text-xl font-bold text-white">{change.title}</h3>
+        <p className="mb-4 text-gray-300">{change.description}</p>
 
-        <div className="grid md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-gray-800/50 rounded-lg p-3">
+        <div className="mb-6 grid gap-4 md:grid-cols-3">
+          <div className="rounded-lg bg-gray-800/50 p-3">
             <div className="text-sm text-gray-400">Categories</div>
             <div className="font-medium text-white">
-              {change.categories.map(cat => cat.replace('_', ' ')).join(', ')}
+              {change.categories.map((cat) => cat.replace('_', ' ')).join(', ')}
             </div>
           </div>
-          <div className="bg-gray-800/50 rounded-lg p-3">
+          <div className="rounded-lg bg-gray-800/50 p-3">
             <div className="text-sm text-gray-400">Affected Sections</div>
-            <div className="font-medium text-white">
-              {change.affectedSections.join(', ')}
-            </div>
+            <div className="font-medium text-white">{change.affectedSections.join(', ')}</div>
           </div>
-          <div className="bg-gray-800/50 rounded-lg p-3">
+          <div className="rounded-lg bg-gray-800/50 p-3">
             <div className="text-sm text-gray-400">Source</div>
             <div className="font-medium text-white">IRS Official</div>
           </div>
@@ -356,24 +387,24 @@ function TaxChangeDetailView({ change, userProfile, onClose }: TaxChangeDetailVi
 
       {/* AI Analysis */}
       {change.aiAnalysis && (
-        <div className="bg-violet-900/20 border border-violet-500/30 rounded-xl p-6">
-          <h4 className="text-lg font-semibold text-violet-300 mb-4">AI Analysis Summary</h4>
-          <p className="text-gray-300 mb-4">{change.aiAnalysis.summary}</p>
-          
-          <div className="grid md:grid-cols-2 gap-4 mb-4">
+        <div className="rounded-xl border border-violet-500/30 bg-violet-900/20 p-6">
+          <h4 className="mb-4 text-lg font-semibold text-violet-300">AI Analysis Summary</h4>
+          <p className="mb-4 text-gray-300">{change.aiAnalysis.summary}</p>
+
+          <div className="mb-4 grid gap-4 md:grid-cols-2">
             <div>
-              <h5 className="font-medium text-white mb-2">Key Points</h5>
+              <h5 className="mb-2 font-medium text-white">Key Points</h5>
               <ul className="space-y-1">
                 {change.aiAnalysis.keyPoints.map((point, index) => (
-                  <li key={index} className="text-sm text-gray-300 flex items-start gap-2">
-                    <span className="text-violet-400 mt-1">•</span>
+                  <li key={index} className="flex items-start gap-2 text-sm text-gray-300">
+                    <span className="mt-1 text-violet-400">•</span>
                     {point}
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <h5 className="font-medium text-white mb-2">Implementation</h5>
+              <h5 className="mb-2 font-medium text-white">Implementation</h5>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-400">Complexity:</span>
@@ -381,7 +412,11 @@ function TaxChangeDetailView({ change, userProfile, onClose }: TaxChangeDetailVi
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Action Required:</span>
-                  <span className={change.aiAnalysis.actionRequired ? 'text-orange-400' : 'text-green-400'}>
+                  <span
+                    className={
+                      change.aiAnalysis.actionRequired ? 'text-orange-400' : 'text-green-400'
+                    }
+                  >
                     {change.aiAnalysis.actionRequired ? 'Yes' : 'No'}
                   </span>
                 </div>
@@ -399,40 +434,45 @@ function TaxChangeDetailView({ change, userProfile, onClose }: TaxChangeDetailVi
 
       {/* Financial Impact */}
       {impactCalculation && (
-        <div className="bg-green-900/20 border border-green-500/30 rounded-xl p-6">
-          <h4 className="text-lg font-semibold text-green-300 mb-4">Financial Impact Estimate</h4>
-          
-          <div className="grid md:grid-cols-3 gap-4 mb-4">
-            <div className="bg-gray-800/50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-green-400 mb-1">
+        <div className="rounded-xl border border-green-500/30 bg-green-900/20 p-6">
+          <h4 className="mb-4 text-lg font-semibold text-green-300">Financial Impact Estimate</h4>
+
+          <div className="mb-4 grid gap-4 md:grid-cols-3">
+            <div className="rounded-lg bg-gray-800/50 p-4 text-center">
+              <div className="mb-1 text-2xl font-bold text-green-400">
                 ${impactCalculation.estimatedSavings.toLocaleString()}
               </div>
               <div className="text-sm text-gray-400">Potential Savings</div>
             </div>
-            <div className="bg-gray-800/50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-red-400 mb-1">
+            <div className="rounded-lg bg-gray-800/50 p-4 text-center">
+              <div className="mb-1 text-2xl font-bold text-red-400">
                 ${impactCalculation.estimatedCosts.toLocaleString()}
               </div>
               <div className="text-sm text-gray-400">Implementation Costs</div>
             </div>
-            <div className="bg-gray-800/50 rounded-lg p-4 text-center">
-              <div className={`text-2xl font-bold mb-1 ${
-                impactCalculation.netImpact >= 0 ? 'text-green-400' : 'text-red-400'
-              }`}>
-                {impactCalculation.netImpact >= 0 ? '+' : ''}${impactCalculation.netImpact.toLocaleString()}
+            <div className="rounded-lg bg-gray-800/50 p-4 text-center">
+              <div
+                className={`mb-1 text-2xl font-bold ${
+                  impactCalculation.netImpact >= 0 ? 'text-green-400' : 'text-red-400'
+                }`}
+              >
+                {impactCalculation.netImpact >= 0 ? '+' : ''}$
+                {impactCalculation.netImpact.toLocaleString()}
               </div>
               <div className="text-sm text-gray-400">Net Impact</div>
             </div>
           </div>
 
-          <div className="bg-gray-800/30 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-3">
+          <div className="rounded-lg bg-gray-800/30 p-4">
+            <div className="mb-3 flex items-center justify-between">
               <span className="text-sm text-gray-400">Confidence Level</span>
-              <span className="text-sm font-medium text-white">{impactCalculation.confidenceLevel}%</span>
+              <span className="text-sm font-medium text-white">
+                {impactCalculation.confidenceLevel}%
+              </span>
             </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div 
-                className="bg-green-500 h-2 rounded-full transition-all duration-300"
+            <div className="h-2 w-full rounded-full bg-gray-700">
+              <div
+                className="h-2 rounded-full bg-green-500 transition-all duration-300"
                 style={{ width: `${impactCalculation.confidenceLevel}%` }}
               />
             </div>
@@ -441,12 +481,12 @@ function TaxChangeDetailView({ change, userProfile, onClose }: TaxChangeDetailVi
       )}
 
       {/* Action Items */}
-      <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-xl p-6">
-        <h4 className="text-lg font-semibold text-yellow-300 mb-4">Recommended Actions</h4>
+      <div className="rounded-xl border border-yellow-500/30 bg-yellow-900/20 p-6">
+        <h4 className="mb-4 text-lg font-semibold text-yellow-300">Recommended Actions</h4>
         <div className="space-y-3">
           {change.businessImpacts[0]?.actionItems.map((action, index) => (
             <div key={index} className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" />
+              <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-400" />
               <span className="text-gray-300">{action}</span>
             </div>
           ))}
@@ -457,32 +497,29 @@ function TaxChangeDetailView({ change, userProfile, onClose }: TaxChangeDetailVi
       <AccessibleAlert type="error">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
+            <Shield className="h-5 w-5" />
             <strong>LEGAL DISCLAIMER - READ CAREFULLY</strong>
           </div>
           <p className="text-sm">
-            {impactCalculation?.disclaimer || 
-             "🚨 NOT TAX ADVICE 🚨 All estimates and suggestions are for informational purposes only. " +
-             "Tax situations are highly individual and complex. Always consult with qualified tax professionals " +
-             "before making any decisions. CoreFlow360 assumes ZERO LIABILITY for any actions taken based on this information."
-            }
+            {impactCalculation?.disclaimer ||
+              '🚨 NOT TAX ADVICE 🚨 All estimates and suggestions are for informational purposes only. ' +
+                'Tax situations are highly individual and complex. Always consult with qualified tax professionals ' +
+                'before making any decisions. CoreFlow360 assumes ZERO LIABILITY for any actions taken based on this information.'}
           </p>
         </div>
       </AccessibleAlert>
 
       {/* Actions */}
-      <div className="flex justify-between pt-4 border-t border-gray-800">
+      <div className="flex justify-between border-t border-gray-800 pt-4">
         <AccessibleButton
           variant="secondary"
           onClick={() => window.open(change.originalUrl, '_blank')}
         >
-          <ExternalLink className="w-4 h-4 mr-2" />
+          <ExternalLink className="mr-2 h-4 w-4" />
           View Original Source
         </AccessibleButton>
-        
-        <AccessibleButton onClick={onClose}>
-          Close
-        </AccessibleButton>
+
+        <AccessibleButton onClick={onClose}>Close</AccessibleButton>
       </div>
     </div>
   )

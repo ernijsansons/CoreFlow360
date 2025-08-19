@@ -6,14 +6,14 @@
 import { NextResponse } from 'next/server'
 import { ZodError } from 'zod'
 import { Prisma } from '@prisma/client'
-import { 
-  AppError, 
-  ValidationError, 
+import {
+  AppError,
+  ValidationError,
   AuthenticationError,
   AuthorizationError,
   NotFoundError,
   DatabaseError,
-  ExternalServiceError
+  ExternalServiceError,
 } from './base-error'
 
 // Error context for enhanced logging
@@ -25,7 +25,7 @@ export interface ErrorContext {
   ip?: string
   userAgent?: string
   requestId?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 // Error response format
@@ -34,7 +34,7 @@ interface ErrorResponse {
     message: string
     code: string
     statusCode: number
-    details?: any
+    details?: unknown
     requestId?: string
     timestamp: string
   }
@@ -48,7 +48,7 @@ function generateCorrelationId(): string {
 // Log error with context
 function logError(error: Error, context?: ErrorContext): string {
   const correlationId = generateCorrelationId()
-  
+
   // In production, this would go to a logging service
   console.error({
     correlationId,
@@ -57,22 +57,19 @@ function logError(error: Error, context?: ErrorContext): string {
       name: error.name,
       message: error.message,
       stack: error.stack,
-      ...(error instanceof AppError && { code: error.code, details: error.details })
+      ...(error instanceof AppError && { code: error.code, details: error.details }),
     },
     context,
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
   })
 
   return correlationId
 }
 
 // Main error handler
-export function handleError(
-  error: unknown,
-  context?: ErrorContext
-): NextResponse<ErrorResponse> {
+export function handleError(error: unknown, context?: ErrorContext): NextResponse<ErrorResponse> {
   const correlationId = logError(error as Error, context)
-  
+
   // Handle known error types
   if (error instanceof AppError) {
     return NextResponse.json<ErrorResponse>(
@@ -83,8 +80,8 @@ export function handleError(
           statusCode: error.statusCode,
           details: error.details,
           requestId: correlationId,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       },
       { status: error.statusCode }
     )
@@ -92,9 +89,9 @@ export function handleError(
 
   // Handle Zod validation errors
   if (error instanceof ZodError) {
-    const formattedErrors = error.errors.map(err => ({
+    const formattedErrors = error.errors.map((err) => ({
       field: err.path.join('.'),
-      message: err.message
+      message: err.message,
     }))
 
     return NextResponse.json<ErrorResponse>(
@@ -105,8 +102,8 @@ export function handleError(
           statusCode: 400,
           details: { errors: formattedErrors },
           requestId: correlationId,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       },
       { status: 400 }
     )
@@ -144,17 +141,18 @@ export function handleError(
           statusCode,
           details: process.env.NODE_ENV === 'development' ? { prismaCode: error.code } : undefined,
           requestId: correlationId,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       },
       { status: statusCode }
     )
   }
 
   // Handle unknown errors
-  const message = process.env.NODE_ENV === 'production' 
-    ? 'An unexpected error occurred'
-    : (error as Error).message || 'Unknown error'
+  const message =
+    process.env.NODE_ENV === 'production'
+      ? 'An unexpected error occurred'
+      : (error as Error).message || 'Unknown error'
 
   return NextResponse.json<ErrorResponse>(
     {
@@ -163,8 +161,8 @@ export function handleError(
         code: 'INTERNAL_ERROR',
         statusCode: 500,
         requestId: correlationId,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     },
     { status: 500 }
   )
@@ -205,7 +203,7 @@ export function handleNotFoundError(
 
 export function handleDatabaseError(
   message: string,
-  originalError?: any,
+  originalError?: unknown,
   context?: ErrorContext
 ): NextResponse<ErrorResponse> {
   return handleError(new DatabaseError(message, originalError), context)
@@ -214,7 +212,7 @@ export function handleDatabaseError(
 export function handleExternalServiceError(
   service: string,
   message: string,
-  originalError?: any,
+  originalError?: unknown,
   context?: ErrorContext
 ): NextResponse<ErrorResponse> {
   return handleError(new ExternalServiceError(service, message, originalError), context)

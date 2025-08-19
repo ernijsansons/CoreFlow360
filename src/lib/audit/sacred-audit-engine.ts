@@ -3,14 +3,14 @@
  * Advanced prompt-driven audit execution with triple-layer structure
  */
 
-import { 
-  SACREDPrompt, 
+import {
+  SACREDPrompt,
   TripleLayerPromptBuilder,
   CompleteContext,
   AuditTask,
   PromptExecutionEngine,
   PromptValidator,
-  SACREDPromptTemplates
+  SACREDPromptTemplates,
 } from './prompt-engineering'
 import { AuditFinding, AuditResult } from './audit-orchestration'
 import { logger } from '@/lib/logging/logger'
@@ -160,7 +160,7 @@ export class SACREDAuditEngine {
       requestId,
       auditType: request.auditType,
       scope: request.scope,
-      component: 'sacred_audit_engine'
+      component: 'sacred_audit_engine',
     })
 
     try {
@@ -169,7 +169,7 @@ export class SACREDAuditEngine {
 
       // Step 2: Validate prompt completeness
       const validation = PromptValidator.validateSACREDPrompt(sacredPrompt)
-      
+
       if (!validation.isValid) {
         throw new Error(`Invalid SACRED prompt: ${validation.errors.join(', ')}`)
       }
@@ -197,11 +197,11 @@ export class SACREDAuditEngine {
         promptValidation: {
           isValid: validation.isValid,
           completenessScore: validation.completenessScore,
-          warnings: validation.warnings
+          warnings: validation.warnings,
         },
         findings: enhancedFindings,
         synthesis,
-        metadata
+        metadata,
       }
 
       // Store in history
@@ -216,15 +216,14 @@ export class SACREDAuditEngine {
         requestId,
         findingsCount: enhancedFindings.length,
         executionTime: response.executionTime,
-        component: 'sacred_audit_engine'
+        component: 'sacred_audit_engine',
       })
 
       return response
-
     } catch (error) {
       logger.error('SACRED audit execution failed', error as Error, {
         requestId,
-        component: 'sacred_audit_engine'
+        component: 'sacred_audit_engine',
       })
       throw error
     }
@@ -263,8 +262,8 @@ export class SACREDAuditEngine {
       ...context,
       codebaseContext: {
         ...sacred.contextual.codebaseContext,
-        ...context.codebaseContext
-      }
+        ...context.codebaseContext,
+      },
     }
 
     // Build audit task
@@ -272,28 +271,30 @@ export class SACREDAuditEngine {
       objective: sacred.specific.outcomes.join('; '),
       methodology: {
         approach: 'Systematic analysis with chain-of-thought reasoning',
-        steps: sacred.reasoned.steps.map(step => ({
+        steps: sacred.reasoned.steps.map((step) => ({
           action: step.description,
           reasoning: step.reasoning,
-          expectedOutput: `Evidence-based findings with ${step.confidence * 100}% confidence`
-        }))
+          expectedOutput: `Evidence-based findings with ${step.confidence * 100}% confidence`,
+        })),
       },
       outputFormat: {
         structure: sacred.deliverable.format as 'xml' | 'json' | 'markdown',
         includeMetrics: true,
-        includeRecommendations: sacred.actionable.requireImplementationSteps
+        includeRecommendations: sacred.actionable.requireImplementationSteps,
       },
       analysisDepth: this.mapReasoningDepth(sacred.reasoned.reasoningDepth),
       focusAreas: sacred.specific.scope,
-      timeBudget: '2-4 hours'
+      timeBudget: '2-4 hours',
     }
 
     return this.promptBuilder
-      .setSystemRole(
-        'Expert SaaS Auditor and Solutions Architect',
-        '20+',
-        ['Security', 'Performance', 'Architecture', 'Cloud Systems', 'DevOps']
-      )
+      .setSystemRole('Expert SaaS Auditor and Solutions Architect', '20+', [
+        'Security',
+        'Performance',
+        'Architecture',
+        'Cloud Systems',
+        'DevOps',
+      ])
       .setContext(fullContext)
       .setTask(task)
       .build()
@@ -303,7 +304,7 @@ export class SACREDAuditEngine {
    * Execute audit with chain-of-thought reasoning
    */
   private async executeWithChainOfThought(
-    prompt: string, 
+    prompt: string,
     request: SACREDAuditRequest
   ): Promise<AuditResult> {
     const chainOfThought: string[] = []
@@ -326,14 +327,14 @@ export class SACREDAuditEngine {
       findings,
       metrics: {
         issues_found: findings.length,
-        critical_issues: findings.filter(f => f.severity === 'critical').length,
+        critical_issues: findings.filter((f) => f.severity === 'critical').length,
         technical_debt_score: 65,
         maintainability_score: 75,
         security_score: 80,
-        performance_score: 85
+        performance_score: 85,
       },
       chain_of_thought: chainOfThought,
-      confidence_score: 88
+      confidence_score: 88,
     }
   }
 
@@ -341,17 +342,17 @@ export class SACREDAuditEngine {
    * Enhance findings with additional analysis
    */
   private async enhanceFindings(
-    findings: AuditFinding[], 
+    findings: AuditFinding[],
     prompt: SACREDPrompt
   ): Promise<EnhancedAuditFinding[]> {
-    return findings.map(finding => {
+    return findings.map((finding) => {
       const enhanced: EnhancedAuditFinding = {
         ...finding,
         evidenceChain: this.buildEvidenceChain(finding),
         remediationSteps: this.buildRemediationSteps(finding, prompt),
         verificationCriteria: this.buildVerificationCriteria(finding),
         confidenceScore: this.calculateFindingConfidence(finding),
-        falsePositiveProbability: this.estimateFalsePositive(finding)
+        falsePositiveProbability: this.estimateFalsePositive(finding),
       }
       return enhanced
     })
@@ -365,8 +366,8 @@ export class SACREDAuditEngine {
       type: 'code' as const,
       source: finding.location,
       content: evidence,
-      relevance: 0.9 - (index * 0.1),
-      explanation: `Evidence ${index + 1} supporting the finding`
+      relevance: 0.9 - index * 0.1,
+      explanation: `Evidence ${index + 1} supporting the finding`,
     }))
   }
 
@@ -385,7 +386,7 @@ export class SACREDAuditEngine {
         effort: finding.effort === 'low' ? 2 : finding.effort === 'medium' ? 8 : 16,
         dependencies: [],
         risks: ['Temporary solution', 'May need refactoring'],
-        alternativeApproaches: finding.recommendations.slice(1)
+        alternativeApproaches: finding.recommendations.slice(1),
       })
     }
 
@@ -397,7 +398,7 @@ export class SACREDAuditEngine {
       effort: finding.implementation_cost,
       dependencies: finding.dependencies,
       risks: ['Requires testing', 'May impact other components'],
-      alternativeApproaches: []
+      alternativeApproaches: [],
     })
 
     return steps
@@ -455,7 +456,7 @@ export class SACREDAuditEngine {
     const baseRate = 0.1 // 10% base false positive rate
 
     // Adjust based on evidence quality
-    const evidenceAdjustment = Math.max(0, baseRate - (finding.evidence.length * 0.02))
+    const evidenceAdjustment = Math.max(0, baseRate - finding.evidence.length * 0.02)
 
     // Adjust based on category
     const categoryAdjustment = finding.category === 'security' ? 0.05 : 0
@@ -470,24 +471,27 @@ export class SACREDAuditEngine {
     findings: EnhancedAuditFinding[],
     request: SACREDAuditRequest
   ): Promise<SACREDAuditResponse['synthesis']> {
-    const criticalFindings = findings.filter(f => f.severity === 'critical')
-    const highFindings = findings.filter(f => f.severity === 'high')
+    const criticalFindings = findings.filter((f) => f.severity === 'critical')
+    const highFindings = findings.filter((f) => f.severity === 'high')
 
     return {
       executiveSummary: this.generateExecutiveSummary(findings, request),
       keyInsights: this.extractKeyInsights(findings),
       riskAssessment: this.assessRisks(findings),
       implementationRoadmap: this.buildImplementationRoadmap(findings),
-      roiAnalysis: this.calculateROI(findings)
+      roiAnalysis: this.calculateROI(findings),
     }
   }
 
   /**
    * Generate executive summary
    */
-  private generateExecutiveSummary(findings: EnhancedAuditFinding[], request: SACREDAuditRequest): string {
-    const critical = findings.filter(f => f.severity === 'critical').length
-    const high = findings.filter(f => f.severity === 'high').length
+  private generateExecutiveSummary(
+    findings: EnhancedAuditFinding[],
+    request: SACREDAuditRequest
+  ): string {
+    const critical = findings.filter((f) => f.severity === 'critical').length
+    const high = findings.filter((f) => f.severity === 'high').length
 
     return `
 ${request.auditType.toUpperCase()} AUDIT EXECUTIVE SUMMARY
@@ -520,7 +524,7 @@ The detailed findings and implementation roadmap provide specific guidance for e
 
     // Group findings by category
     const categories = new Map<string, EnhancedAuditFinding[]>()
-    findings.forEach(finding => {
+    findings.forEach((finding) => {
       const existing = categories.get(finding.category) || []
       existing.push(finding)
       categories.set(finding.category, existing)
@@ -531,15 +535,16 @@ The detailed findings and implementation roadmap provide specific guidance for e
       if (categoryFindings.length > 3) {
         insights.push(`Systemic ${category} issues detected - consider architectural review`)
       }
-      
-      const avgConfidence = categoryFindings.reduce((sum, f) => sum + f.confidenceScore, 0) / categoryFindings.length
+
+      const avgConfidence =
+        categoryFindings.reduce((sum, f) => sum + f.confidenceScore, 0) / categoryFindings.length
       if (avgConfidence > 90) {
         insights.push(`High confidence in ${category} findings - immediate action recommended`)
       }
     })
 
     // ROI insights
-    const highROI = findings.filter(f => f.business_value / f.implementation_cost > 5)
+    const highROI = findings.filter((f) => f.business_value / f.implementation_cost > 5)
     if (highROI.length > 0) {
       insights.push(`${highROI.length} quick wins identified with >5x ROI`)
     }
@@ -552,13 +557,13 @@ The detailed findings and implementation roadmap provide specific guidance for e
    */
   private assessRisks(findings: EnhancedAuditFinding[]): RiskAssessment {
     const riskFactors = findings
-      .filter(f => f.severity === 'critical' || f.severity === 'high')
-      .map(f => ({
+      .filter((f) => f.severity === 'critical' || f.severity === 'high')
+      .map((f) => ({
         factor: f.title,
         severity: f.severity,
         likelihood: this.assessLikelihood(f),
         impact: f.impact,
-        mitigation: f.recommendations[0] || 'Implement recommended fix'
+        mitigation: f.recommendations[0] || 'Implement recommended fix',
       }))
 
     const overallRiskLevel = this.calculateOverallRisk(findings)
@@ -567,7 +572,7 @@ The detailed findings and implementation roadmap provide specific guidance for e
       overallRiskLevel,
       riskFactors,
       riskMatrix: this.buildRiskMatrix(findings),
-      trendAnalysis: 'stable' // Would compare with historical data
+      trendAnalysis: 'stable', // Would compare with historical data
     }
   }
 
@@ -583,9 +588,9 @@ The detailed findings and implementation roadmap provide specific guidance for e
     })
 
     // Group into phases
-    const immediate = prioritized.filter(f => f.severity === 'critical')
-    const shortTerm = prioritized.filter(f => f.severity === 'high' && f.effort !== 'high')
-    const longTerm = prioritized.filter(f => f.severity === 'medium' || f.effort === 'high')
+    const immediate = prioritized.filter((f) => f.severity === 'critical')
+    const shortTerm = prioritized.filter((f) => f.severity === 'high' && f.effort !== 'high')
+    const longTerm = prioritized.filter((f) => f.severity === 'medium' || f.effort === 'high')
 
     return {
       phases: [
@@ -594,32 +599,34 @@ The detailed findings and implementation roadmap provide specific guidance for e
           name: 'Critical Remediation',
           duration: '1-2 weeks',
           objectives: ['Eliminate critical vulnerabilities', 'Stabilize system'],
-          deliverables: immediate.map(f => f.title),
+          deliverables: immediate.map((f) => f.title),
           successCriteria: ['All critical issues resolved', 'Security scan passes'],
-          risks: ['Service disruption during fixes']
+          risks: ['Service disruption during fixes'],
         },
         {
           phase: 2,
           name: 'Quick Wins',
           duration: '2-4 weeks',
           objectives: ['Implement high-ROI improvements', 'Enhance performance'],
-          deliverables: shortTerm.map(f => f.title),
+          deliverables: shortTerm.map((f) => f.title),
           successCriteria: ['Performance metrics improved by 30%', 'User satisfaction increased'],
-          risks: ['Resource contention with feature development']
+          risks: ['Resource contention with feature development'],
         },
         {
           phase: 3,
           name: 'Strategic Improvements',
           duration: '2-3 months',
           objectives: ['Architectural enhancements', 'Technical debt reduction'],
-          deliverables: longTerm.slice(0, 10).map(f => f.title),
+          deliverables: longTerm.slice(0, 10).map((f) => f.title),
           successCriteria: ['Architecture score > 90%', 'Maintainability improved'],
-          risks: ['Scope creep', 'Budget overrun']
-        }
+          risks: ['Scope creep', 'Budget overrun'],
+        },
       ],
       dependencies: this.identifyDependencies(findings),
-      criticalPath: immediate.map(f => f.id),
-      quickWins: findings.filter(f => f.effort === 'low' && f.business_value > 70).map(f => f.id)
+      criticalPath: immediate.map((f) => f.id),
+      quickWins: findings
+        .filter((f) => f.effort === 'low' && f.business_value > 70)
+        .map((f) => f.id),
     }
   }
 
@@ -627,13 +634,14 @@ The detailed findings and implementation roadmap provide specific guidance for e
    * Calculate ROI analysis
    */
   private calculateROI(findings: EnhancedAuditFinding[]): ROIAnalysis {
-    const developmentCost = findings.reduce((sum, f) => sum + (f.implementation_cost * 150), 0) // $150/hour
-    const toolingCost = findings.filter(f => f.category === 'security').length * 1000 // Rough estimate
+    const developmentCost = findings.reduce((sum, f) => sum + f.implementation_cost * 150, 0) // $150/hour
+    const toolingCost = findings.filter((f) => f.category === 'security').length * 1000 // Rough estimate
     const trainingCost = Math.round(developmentCost * 0.1) // 10% of dev cost
 
-    const costSavings = findings.reduce((sum, f) => sum + (f.business_value * 1000), 0)
-    const riskMitigation = findings.filter(f => f.severity === 'critical' || f.severity === 'high').length * 50000
-    const productivityGains = findings.filter(f => f.category === 'performance').length * 10000
+    const costSavings = findings.reduce((sum, f) => sum + f.business_value * 1000, 0)
+    const riskMitigation =
+      findings.filter((f) => f.severity === 'critical' || f.severity === 'high').length * 50000
+    const productivityGains = findings.filter((f) => f.category === 'performance').length * 10000
 
     const totalInvestment = developmentCost + toolingCost + trainingCost
     const totalReturns = costSavings + riskMitigation + productivityGains
@@ -643,17 +651,17 @@ The detailed findings and implementation roadmap provide specific guidance for e
         development: developmentCost,
         tooling: toolingCost,
         training: trainingCost,
-        total: totalInvestment
+        total: totalInvestment,
       },
       expectedReturns: {
         costSavings,
         riskMitigation,
         productivityGains,
-        total: totalReturns
+        total: totalReturns,
       },
       paybackPeriod: Math.round((totalInvestment / totalReturns) * 12), // months
       netPresentValue: totalReturns - totalInvestment,
-      breakEvenPoint: `${Math.round((totalInvestment / totalReturns) * 12)} months`
+      breakEvenPoint: `${Math.round((totalInvestment / totalReturns) * 12)} months`,
     }
   }
 
@@ -661,9 +669,9 @@ The detailed findings and implementation roadmap provide specific guidance for e
    * Calculate metadata
    */
   private calculateMetadata(
-    auditResult: AuditResult, 
-    findings: EnhancedAuditFinding[],
-    validation: any
+    auditResult: AuditResult,
+    _findings: EnhancedAuditFinding[],
+    validation: unknown
   ): SACREDAuditResponse['metadata'] {
     return {
       promptTokens: 2500, // Mock value
@@ -674,8 +682,8 @@ The detailed findings and implementation roadmap provide specific guidance for e
         codeCoverage: 75,
         riskCoverage: 90,
         requirementsCoverage: 80,
-        overallCoverage: 82.5
-      }
+        overallCoverage: 82.5,
+      },
     }
   }
 
@@ -686,7 +694,7 @@ The detailed findings and implementation roadmap provide specific guidance for e
     logger.info('Generating audit report', {
       requestId: response.requestId,
       format,
-      findingsCount: response.findings.length
+      findingsCount: response.findings.length,
     })
 
     // Report generation would be implemented here
@@ -705,7 +713,7 @@ The detailed findings and implementation roadmap provide specific guidance for e
     return `audit_${Date.now()}_${Math.random().toString(36).substring(7)}`
   }
 
-  private getBaseTemplate(auditType: string): SACREDPrompt {
+  private getBaseTemplate(_auditType: string): SACREDPrompt {
     // Would return appropriate base template
     return SACREDPromptTemplates.securityAudit()
   }
@@ -719,25 +727,31 @@ The detailed findings and implementation roadmap provide specific guidance for e
       contextual: { ...base.contextual, ...custom.contextual },
       reasoned: { ...base.reasoned, ...custom.reasoned },
       evidenceBased: { ...base.evidenceBased, ...custom.evidenceBased },
-      deliverable: { ...base.deliverable, ...custom.deliverable }
+      deliverable: { ...base.deliverable, ...custom.deliverable },
     }
   }
 
-  private buildCustomPrompt(request: SACREDAuditRequest): SACREDPrompt {
+  private buildCustomPrompt(_request: SACREDAuditRequest): SACREDPrompt {
     // Build custom prompt based on request
     return SACREDPromptTemplates.securityAudit() // Placeholder
   }
 
-  private mapReasoningDepth(depth: 'shallow' | 'medium' | 'deep'): 'surface' | 'standard' | 'deep' | 'exhaustive' {
+  private mapReasoningDepth(
+    depth: 'shallow' | 'medium' | 'deep'
+  ): 'surface' | 'standard' | 'deep' | 'exhaustive' {
     switch (depth) {
-      case 'shallow': return 'surface'
-      case 'medium': return 'standard'
-      case 'deep': return 'deep'
-      default: return 'standard'
+      case 'shallow':
+        return 'surface'
+      case 'medium':
+        return 'standard'
+      case 'deep':
+        return 'deep'
+      default:
+        return 'standard'
     }
   }
 
-  private generateMockFindings(request: SACREDAuditRequest): AuditFinding[] {
+  private generateMockFindings(_request: SACREDAuditRequest): AuditFinding[] {
     // Generate mock findings for demonstration
     return [
       {
@@ -756,10 +770,10 @@ The detailed findings and implementation roadmap provide specific guidance for e
         recommendations: [
           'Use parameterized queries with Prisma',
           'Implement input validation',
-          'Add SQL injection detection monitoring'
+          'Add SQL injection detection monitoring',
         ],
         dependencies: [],
-        related_findings: []
+        related_findings: [],
       },
       {
         id: 'finding_002',
@@ -773,27 +787,33 @@ The detailed findings and implementation roadmap provide specific guidance for e
         business_value: 70,
         technical_debt: 40,
         location: 'src/app/dashboard/page.tsx:78',
-        evidence: ['users.map(async (user) => await prisma.orders.findMany({where: {userId: user.id}}))'],
+        evidence: [
+          'users.map(async (user) => await prisma.orders.findMany({where: {userId: user.id}}))',
+        ],
         recommendations: [
           'Use Prisma include for eager loading',
           'Implement query batching',
-          'Add caching layer'
+          'Add caching layer',
         ],
         dependencies: [],
-        related_findings: []
-      }
+        related_findings: [],
+      },
     ]
   }
 
-  private assessLikelihood(finding: EnhancedAuditFinding): 'rare' | 'unlikely' | 'possible' | 'likely' | 'certain' {
+  private assessLikelihood(
+    finding: EnhancedAuditFinding
+  ): 'rare' | 'unlikely' | 'possible' | 'likely' | 'certain' {
     if (finding.severity === 'critical') return 'likely'
     if (finding.severity === 'high') return 'possible'
     return 'unlikely'
   }
 
-  private calculateOverallRisk(findings: EnhancedAuditFinding[]): 'low' | 'medium' | 'high' | 'critical' {
-    const criticalCount = findings.filter(f => f.severity === 'critical').length
-    const highCount = findings.filter(f => f.severity === 'high').length
+  private calculateOverallRisk(
+    findings: EnhancedAuditFinding[]
+  ): 'low' | 'medium' | 'high' | 'critical' {
+    const criticalCount = findings.filter((f) => f.severity === 'critical').length
+    const highCount = findings.filter((f) => f.severity === 'high').length
 
     if (criticalCount > 0) return 'critical'
     if (highCount > 5) return 'high'
@@ -806,13 +826,18 @@ The detailed findings and implementation roadmap provide specific guidance for e
       security_risk: 0,
       performance_risk: 0,
       architecture_risk: 0,
-      business_risk: 0
+      business_risk: 0,
     }
 
-    findings.forEach(finding => {
-      const risk = finding.severity === 'critical' ? 10 : 
-                   finding.severity === 'high' ? 5 :
-                   finding.severity === 'medium' ? 2 : 1
+    findings.forEach((finding) => {
+      const risk =
+        finding.severity === 'critical'
+          ? 10
+          : finding.severity === 'high'
+            ? 5
+            : finding.severity === 'medium'
+              ? 2
+              : 1
 
       matrix[`${finding.category}_risk`] = (matrix[`${finding.category}_risk`] || 0) + risk
     })
@@ -821,29 +846,39 @@ The detailed findings and implementation roadmap provide specific guidance for e
   }
 
   private calculatePriorityScore(finding: EnhancedAuditFinding): number {
-    const severityWeight = finding.severity === 'critical' ? 4 :
-                          finding.severity === 'high' ? 3 :
-                          finding.severity === 'medium' ? 2 : 1
+    const severityWeight =
+      finding.severity === 'critical'
+        ? 4
+        : finding.severity === 'high'
+          ? 3
+          : finding.severity === 'medium'
+            ? 2
+            : 1
 
-    const effortWeight = finding.effort === 'low' ? 3 :
-                        finding.effort === 'medium' ? 2 : 1
+    const effortWeight = finding.effort === 'low' ? 3 : finding.effort === 'medium' ? 2 : 1
 
     const roi = finding.business_value / finding.implementation_cost
 
-    return (severityWeight * 10) + (effortWeight * 5) + (roi * 2)
+    return severityWeight * 10 + effortWeight * 5 + roi * 2
   }
 
-  private identifyDependencies(findings: EnhancedAuditFinding[]): Array<{from: string, to: string, type: 'blocks' | 'requires' | 'enhances'}> {
-    const dependencies: Array<{from: string, to: string, type: 'blocks' | 'requires' | 'enhances'}> = []
+  private identifyDependencies(
+    findings: EnhancedAuditFinding[]
+  ): Array<{ from: string; to: string; type: 'blocks' | 'requires' | 'enhances' }> {
+    const dependencies: Array<{
+      from: string
+      to: string
+      type: 'blocks' | 'requires' | 'enhances'
+    }> = []
 
     // Simple dependency identification based on categories and locations
     findings.forEach((finding, index) => {
-      findings.slice(index + 1).forEach(otherFinding => {
+      findings.slice(index + 1).forEach((otherFinding) => {
         if (finding.location === otherFinding.location) {
           dependencies.push({
             from: finding.id,
             to: otherFinding.id,
-            type: 'blocks'
+            type: 'blocks',
           })
         }
       })

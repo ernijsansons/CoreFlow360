@@ -7,13 +7,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { APIVersioning } from '@/middleware/versioning'
 
 export interface VersionedHandler {
-  (request: NextRequest, context?: any): Promise<NextResponse> | NextResponse
+  (request: NextRequest, context?: unknown): Promise<NextResponse> | NextResponse
 }
 
 export interface VersionConfig {
   supportedVersions?: string[]
   currentVersion?: string
-  transformResponse?: (data: any, fromVersion: string, toVersion: string) => any
+  transformResponse?: (data: unknown, fromVersion: string, toVersion: string) => unknown
 }
 
 /**
@@ -23,13 +23,9 @@ export function withAPIVersioning(
   handler: VersionedHandler,
   config: VersionConfig = {}
 ): VersionedHandler {
-  const {
-    supportedVersions = ['v1', 'v2'],
-    currentVersion = 'v2',
-    transformResponse
-  } = config
+  const { supportedVersions = ['v1', 'v2'], currentVersion = 'v2', transformResponse } = config
 
-  return async (request: NextRequest, context?: any) => {
+  return async (request: NextRequest, context?: unknown) => {
     const { pathname } = request.nextUrl
     const { version, cleanPath } = APIVersioning.extractVersion(pathname)
     const requestVersion = version || currentVersion
@@ -40,7 +36,7 @@ export function withAPIVersioning(
         {
           error: 'Unsupported API version',
           message: `Version ${requestVersion} is not supported. Supported versions: ${supportedVersions.join(', ')}`,
-          currentVersion
+          currentVersion,
         },
         { status: 400 }
       )
@@ -52,7 +48,7 @@ export function withAPIVersioning(
         {
           error: 'API version sunset',
           message: `Version ${requestVersion} has been sunset. Please upgrade to ${currentVersion}.`,
-          migrationGuide: `/docs/api/migration/${requestVersion}-to-${currentVersion}`
+          migrationGuide: `/docs/api/migration/${requestVersion}-to-${currentVersion}`,
         },
         { status: 410 }
       )
@@ -69,18 +65,17 @@ export function withAPIVersioning(
           try {
             const data = await response.json()
             const transformed = transformResponse(data, currentVersion, requestVersion)
-            
+
             const newResponse = NextResponse.json(transformed, {
               status: response.status,
               statusText: response.statusText,
-              headers: response.headers
+              headers: response.headers,
             })
 
             // Add version headers
             return APIVersioning.createVersionedResponse(newResponse, pathname)
           } catch (e) {
             // If transformation fails, return original response
-            console.error('Response transformation error:', e)
           }
         }
       }
@@ -89,12 +84,12 @@ export function withAPIVersioning(
       return APIVersioning.createVersionedResponse(response, pathname)
     } catch (error) {
       // Handle errors consistently across versions
-      console.error('API handler error:', error)
+
       return NextResponse.json(
         {
           error: 'Internal server error',
           message: 'An unexpected error occurred',
-          version: requestVersion
+          version: requestVersion,
         },
         { status: 500 }
       )
@@ -109,9 +104,9 @@ export const responseTransformers = {
   /**
    * Transform v2 customer response to v1 format
    */
-  customerV2ToV1: (data: any) => {
+  customerV2ToV1: (data: unknown) => {
     if (Array.isArray(data)) {
-      return data.map(customer => ({
+      return data.map((customer) => ({
         ...customer,
         name: `${customer.firstName || ''} ${customer.lastName || ''}`.trim(),
         // Remove v2-only fields
@@ -121,7 +116,7 @@ export const responseTransformers = {
         source: undefined,
         aiScore: undefined,
         aiChurnRisk: undefined,
-        aiLifetimeValue: undefined
+        aiLifetimeValue: undefined,
       }))
     }
 
@@ -135,21 +130,21 @@ export const responseTransformers = {
       source: undefined,
       aiScore: undefined,
       aiChurnRisk: undefined,
-      aiLifetimeValue: undefined
+      aiLifetimeValue: undefined,
     }
   },
 
   /**
    * Transform v1 customer request to v2 format
    */
-  customerV1ToV2: (data: any) => {
+  customerV1ToV2: (data: unknown) => {
     if (data.name && !data.firstName && !data.lastName) {
       const nameParts = data.name.trim().split(/\s+/)
       return {
         ...data,
         firstName: nameParts[0] || '',
         lastName: nameParts.slice(1).join(' ') || '',
-        status: data.status || 'LEAD'
+        status: data.status || 'LEAD',
       }
     }
     return data
@@ -158,7 +153,7 @@ export const responseTransformers = {
   /**
    * Generic pagination transformer
    */
-  paginationV2ToV1: (response: any) => {
+  paginationV2ToV1: (response: unknown) => {
     if (response.data && response.meta) {
       return {
         ...response,
@@ -166,13 +161,13 @@ export const responseTransformers = {
           page: response.meta.page,
           limit: response.meta.limit,
           total: response.meta.totalCount,
-          pages: Math.ceil(response.meta.totalCount / response.meta.limit)
+          pages: Math.ceil(response.meta.totalCount / response.meta.limit),
         },
-        meta: undefined
+        meta: undefined,
       }
     }
     return response
-  }
+  },
 }
 
 /**
@@ -188,7 +183,7 @@ export function createVersionedRoute(
   },
   config?: VersionConfig
 ) {
-  const versioned: any = {}
+  const versioned: unknown = {}
 
   if (handlers.GET) {
     versioned.GET = withAPIVersioning(handlers.GET, config)

@@ -1,13 +1,16 @@
 /**
  * CoreFlow360 - AI Service Manager
  * MATHEMATICALLY PERFECT, ALGORITHMICALLY OPTIMAL, PROVABLY CORRECT
- * 
+ *
  * Unified AI service integration with OpenAI, Anthropic, and custom models
  */
 
 import OpenAI from 'openai'
 import { AIModelType } from '@prisma/client'
-import { executeSecureOperation, SecureOperationContext } from '@/services/security/secure-operations'
+import {
+  executeSecureOperation,
+  SecureOperationContext,
+} from '@/services/security/secure-operations'
 import { withPerformanceTracking } from '@/utils/performance/performance-tracking'
 import { AuditLogger } from '@/services/security/audit-logging'
 import { getOpenAIKey } from '@/lib/security/credential-manager'
@@ -23,8 +26,8 @@ const AI_SERVICE_CONFIG = {
       'gpt-4': 0.00003,
       'gpt-4-turbo-preview': 0.00001,
       'gpt-3.5-turbo': 0.0000015,
-      'gpt-4-vision-preview': 0.00001
-    }
+      'gpt-4-vision-preview': 0.00001,
+    },
   },
   anthropic: {
     maxRetries: 3,
@@ -34,19 +37,19 @@ const AI_SERVICE_CONFIG = {
     costPerToken: {
       'claude-3-opus-20240229': 0.000015,
       'claude-3-sonnet-20240229': 0.000003,
-      'claude-3-haiku-20240307': 0.00000025
-    }
+      'claude-3-haiku-20240307': 0.00000025,
+    },
   },
   rateLimits: {
     tokensPerMinute: 100000,
     requestsPerMinute: 500,
-    costPerHour: 100
+    costPerHour: 100,
   },
   fallback: {
     enabled: true,
     strategy: 'model_cascade', // model_cascade, service_cascade, fail_fast
-    cooldownPeriod: 60000 // 1 minute
-  }
+    cooldownPeriod: 60000, // 1 minute
+  },
 } as const
 
 export interface AIServiceRequest {
@@ -116,7 +119,7 @@ class AIServiceManager {
   private serviceHealth: Map<string, ServiceHealth> = new Map()
   private rateLimitCounters: Map<string, { count: number; resetTime: number }> = new Map()
   private initialized = false
-  
+
   constructor() {
     this.startHealthMonitoring()
   }
@@ -141,17 +144,17 @@ class AIServiceManager {
         this.openaiClient = new OpenAI({
           apiKey,
           timeout: AI_SERVICE_CONFIG.openai.timeout,
-          maxRetries: AI_SERVICE_CONFIG.openai.maxRetries
+          maxRetries: AI_SERVICE_CONFIG.openai.maxRetries,
         })
       } catch (error) {
-        console.warn('OpenAI API key not available:', error)
+        
       }
     }
 
     // Initialize Anthropic (placeholder - would use actual client)
     if (process.env.ANTHROPIC_API_KEY) {
       // this.anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-      console.log('Anthropic client would be initialized here')
+      
     }
 
     // Initialize service health tracking
@@ -162,17 +165,17 @@ class AIServiceManager {
       responseTime: 0,
       errorRate: 0,
       costEfficiency: 1.0,
-      availability: 1.0
+      availability: 1.0,
     })
 
     this.serviceHealth.set('anthropic', {
-      service: 'anthropic', 
+      service: 'anthropic',
       status: 'healthy',
       lastCheck: new Date(),
       responseTime: 0,
       errorRate: 0,
       costEfficiency: 1.0,
-      availability: 1.0
+      availability: 1.0,
     })
 
     this.initialized = true
@@ -182,10 +185,7 @@ class AIServiceManager {
    * MASTER AI REQUEST METHOD
    * Handles all AI requests with security, performance tracking, and fallbacks
    */
-  async request(
-    context: AIServiceContext,
-    request: AIServiceRequest
-  ): Promise<AIServiceResponse> {
+  async request(context: AIServiceContext, request: AIServiceRequest): Promise<AIServiceResponse> {
     // Ensure services are initialized
     await this.ensureInitialized()
     const secureContext: SecureOperationContext = {
@@ -198,41 +198,38 @@ class AIServiceManager {
         department: context.department,
         model: request.model,
         priority: context.priority,
-        messageCount: request.messages.length
-      }
+        messageCount: request.messages.length,
+      },
     }
 
     const result = await executeSecureOperation(secureContext, async () => {
-      return withPerformanceTracking(
-        `ai_${request.model}_${context.operation}`,
-        async () => {
-          // 1. Rate limit check
-          await this.checkRateLimit(context)
+      return withPerformanceTracking(`ai_${request.model}_${context.operation}`, async () => {
+        // 1. Rate limit check
+        await this.checkRateLimit(context)
 
-          // 2. Budget validation
-          await this.validateBudget(context, request)
+        // 2. Budget validation
+        await this.validateBudget(context, request)
 
-          // 3. Select optimal service and model
-          const { service, model } = await this.selectOptimalService(request.model, context)
+        // 3. Select optimal service and model
+        const { service, model } = await this.selectOptimalService(request.model, context)
 
-          // 4. Execute request with fallback
-          const response = await this.executeWithFallback(service, model, request, context)
+        // 4. Execute request with fallback
+        const response = await this.executeWithFallback(service, model, request, context)
 
-          // 5. Update service health metrics
-          await this.updateServiceHealth(service, response)
+        // 5. Update service health metrics
+        await this.updateServiceHealth(service, response)
 
-          // 6. Log AI usage for audit and cost tracking
-          await this.logAIUsage(context, request, response)
+        // 6. Log AI usage for audit and cost tracking
+        await this.logAIUsage(context, request, response)
 
-          return response
-        }
-      )()
+        return response
+      })()
     })
-    
+
     if (!result.success || !result.data) {
       throw new Error(result.error || 'AI request failed')
     }
-    
+
     return result.data
   }
 
@@ -256,7 +253,7 @@ class AIServiceManager {
         temperature: request.temperature || 0.7,
         max_tokens: request.maxTokens || 4000,
         stream: false, // Handling streaming separately for now
-        tools: request.tools as unknown
+        tools: request.tools as unknown,
       })
 
       const endTime = performance.now()
@@ -264,7 +261,7 @@ class AIServiceManager {
 
       const content = completion.choices[0]?.message?.content || ''
       const usage = completion.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }
-      
+
       const cost = this.calculateCost('openai', model, usage.total_tokens)
 
       return {
@@ -274,22 +271,23 @@ class AIServiceManager {
           promptTokens: usage.prompt_tokens,
           completionTokens: usage.completion_tokens,
           totalTokens: usage.total_tokens,
-          cost
+          cost,
         },
         performance: {
           responseTime,
           retryCount: 0,
-          serviceUsed: 'openai'
+          serviceUsed: 'openai',
         },
         metadata: {
           finishReason: completion.choices[0]?.finish_reason,
-          systemFingerprint: completion.system_fingerprint
-        }
+          systemFingerprint: completion.system_fingerprint,
+        },
       }
-
     } catch (error) {
-      console.error('OpenAI request failed:', error)
-      throw new Error(`OpenAI request failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      
+      throw new Error(
+        `OpenAI request failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -302,12 +300,12 @@ class AIServiceManager {
   ): Promise<AIServiceResponse> {
     // Placeholder for Anthropic integration
     // In production, this would use the actual Anthropic SDK
-    
+
     const startTime = performance.now()
-    
+
     // Simulate Anthropic API call
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
     const endTime = performance.now()
     const responseTime = endTime - startTime
 
@@ -322,13 +320,13 @@ class AIServiceManager {
         promptTokens: Math.floor(mockTokens * 0.7),
         completionTokens: Math.floor(mockTokens * 0.3),
         totalTokens: mockTokens,
-        cost
+        cost,
       },
       performance: {
         responseTime,
         retryCount: 0,
-        serviceUsed: 'anthropic'
-      }
+        serviceUsed: 'anthropic',
+      },
     }
   }
 
@@ -345,7 +343,7 @@ class AIServiceManager {
       CLAUDE3: { service: 'anthropic' as const, model: 'claude-3-opus-20240229' },
       VISION: { service: 'openai' as const, model: 'gpt-4-vision-preview' },
       EMBEDDING: { service: 'openai' as const, model: 'text-embedding-3-large' },
-      CUSTOM: { service: 'custom' as const, model: 'custom-model' }
+      CUSTOM: { service: 'custom' as const, model: 'custom-model' },
     }
 
     let selection = serviceMap[requestedModel]
@@ -389,7 +387,7 @@ class AIServiceManager {
           throw new Error(`Unknown service: ${service}`)
       }
     } catch (error) {
-      console.warn(`AI service ${service} failed (attempt ${retryCount + 1}):`, error)
+      console.error(`AI Service error:`, error)
 
       // Apply fallback strategy
       if (retryCount < 2 && AI_SERVICE_CONFIG.fallback.enabled) {
@@ -428,11 +426,16 @@ class AIServiceManager {
     this.rateLimitCounters.set(key, counter)
   }
 
-  private async validateBudget(context: AIServiceContext, request: AIServiceRequest): Promise<void> {
+  private async validateBudget(
+    context: AIServiceContext,
+    request: AIServiceRequest
+  ): Promise<void> {
     if (context.budgetConstraints) {
       const estimatedCost = this.estimateCost('openai', 'gpt-4', context)
       if (estimatedCost > context.budgetConstraints.maxCost) {
-        throw new Error(`Estimated cost (${estimatedCost}) exceeds budget (${context.budgetConstraints.maxCost})`)
+        throw new Error(
+          `Estimated cost (${estimatedCost}) exceeds budget (${context.budgetConstraints.maxCost})`
+        )
       }
     }
   }
@@ -451,7 +454,7 @@ class AIServiceManager {
   }
 
   private selectCostEffectiveAlternative(
-    requestedModel: AIModelType,
+    _requestedModel: AIModelType,
     _context: AIServiceContext
   ): { service: 'openai' | 'anthropic' | 'custom'; model: string } {
     // Return cheaper alternatives
@@ -459,15 +462,16 @@ class AIServiceManager {
   }
 
   private calculateCost(service: string, model: string, tokens: number): number {
-    const rates = service === 'openai' 
-      ? AI_SERVICE_CONFIG.openai.costPerToken 
-      : AI_SERVICE_CONFIG.anthropic.costPerToken
+    const rates =
+      service === 'openai'
+        ? AI_SERVICE_CONFIG.openai.costPerToken
+        : AI_SERVICE_CONFIG.anthropic.costPerToken
 
     const rate = (rates as Record<string, number>)[model] || 0.00001
     return tokens * rate
   }
 
-  private estimateCost(service: string, model: string, _context: AIServiceContext): number {
+  private estimateCost(_service: string, _model: string, _context: AIServiceContext): number {
     // Estimate based on typical usage patterns
     const estimatedTokens = 2000 // Default estimate
     return this.calculateCost(service, model, estimatedTokens)
@@ -504,13 +508,13 @@ class AIServiceManager {
         cost: response.usage.cost,
         responseTime: response.performance.responseTime,
         operation: context.operation,
-        department: context.department
+        department: context.department,
       },
       metadata: {
         priority: context.priority,
         messageCount: request.messages.length,
-        retryCount: response.performance.retryCount
-      }
+        retryCount: response.performance.retryCount,
+      },
     })
   }
 
@@ -523,11 +527,10 @@ class AIServiceManager {
           const start = performance.now()
           // await this.performHealthCheck(serviceName)
           const responseTime = performance.now() - start
-          
+
           health.responseTime = responseTime
           health.status = responseTime < 5000 ? 'healthy' : 'degraded'
           health.lastCheck = new Date()
-          
         } catch (_error) {
           health.status = 'down'
           health.lastCheck = new Date()
@@ -547,7 +550,10 @@ class AIServiceManager {
     return health
   }
 
-  async getCostSummary(tenantId: string, _timeframe: 'day' | 'week' | 'month' = 'day'): Promise<{
+  async getCostSummary(
+    tenantId: string,
+    _timeframe: 'day' | 'week' | 'month' = 'day'
+  ): Promise<{
     totalCost: number
     breakdown: Record<string, number>
     usage: Record<string, number>
@@ -556,7 +562,7 @@ class AIServiceManager {
     return {
       totalCost: 0,
       breakdown: {},
-      usage: {}
+      usage: {},
     }
   }
 }
@@ -576,7 +582,7 @@ export const aiServiceManager = new Proxy({} as AIServiceManager, {
   get(_target, prop) {
     const manager = getAIServiceManager()
     return manager[prop as keyof AIServiceManager]
-  }
+  },
 })
 
 export { AIServiceManager }

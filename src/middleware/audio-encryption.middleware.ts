@@ -17,7 +17,7 @@ export interface EncryptedFile {
   buffer: Buffer
   size: number
   encrypted: boolean
-  encryptionMetadata?: any
+  encryptionMetadata?: unknown
 }
 
 /**
@@ -30,7 +30,7 @@ export async function encryptAudioMiddleware(
   try {
     // Check if this is a multipart upload with audio
     const contentType = req.headers.get('content-type') || ''
-    
+
     if (!contentType.includes('multipart/form-data')) {
       return handler(req)
     }
@@ -38,7 +38,7 @@ export async function encryptAudioMiddleware(
     // Get form data
     const formData = await req.formData()
     const audioFile = formData.get('audio') as File | null
-    
+
     if (!audioFile) {
       return handler(req)
     }
@@ -67,7 +67,7 @@ export async function encryptAudioMiddleware(
       originalName: audioFile.name,
       mimeType: audioFile.type,
       size: audioFile.size,
-      uploadedAt: new Date().toISOString()
+      uploadedAt: new Date().toISOString(),
     }
 
     // Encrypt the audio
@@ -75,14 +75,14 @@ export async function encryptAudioMiddleware(
 
     // Create new FormData with encrypted audio
     const encryptedFormData = new FormData()
-    
+
     // Add encrypted audio as blob
     const encryptedBlob = new Blob([encrypted.data], { type: 'application/octet-stream' })
     encryptedFormData.set('audio', encryptedBlob, audioFile.name)
-    
+
     // Add encryption metadata
     encryptedFormData.set('encryptionMetadata', JSON.stringify(encrypted.metadata))
-    
+
     // Copy other form fields
     for (const [key, value] of formData.entries()) {
       if (key !== 'audio') {
@@ -94,7 +94,7 @@ export async function encryptAudioMiddleware(
     const encryptedRequest = new NextRequest(req.url, {
       method: req.method,
       headers: req.headers,
-      body: encryptedFormData
+      body: encryptedFormData,
     })
 
     // Log encryption event
@@ -103,17 +103,12 @@ export async function encryptAudioMiddleware(
       tenantId,
       fileSize: audioFile.size,
       encryptedSize: encrypted.data.length,
-      fileName: audioFile.name
+      fileName: audioFile.name,
     })
 
     return handler(encryptedRequest)
-
   } catch (error) {
-    console.error('Audio encryption middleware error:', error)
-    return NextResponse.json(
-      { error: 'Failed to encrypt audio' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to encrypt audio' }, { status: 500 })
   }
 }
 
@@ -123,7 +118,7 @@ export async function encryptAudioMiddleware(
 export async function decryptAudioMiddleware(
   req: NextRequest,
   audioData: Buffer,
-  encryptionMetadata: any
+  encryptionMetadata: unknown
 ): Promise<Buffer> {
   try {
     // Get tenant ID from auth
@@ -149,13 +144,11 @@ export async function decryptAudioMiddleware(
       action: 'AUDIO_DECRYPTED',
       tenantId,
       fileSize: decrypted.data.length,
-      verified: decrypted.verified
+      verified: decrypted.verified,
     })
 
     return decrypted.data
-
   } catch (error) {
-    console.error('Audio decryption middleware error:', error)
     throw error
   }
 }
@@ -163,14 +156,11 @@ export async function decryptAudioMiddleware(
 /**
  * Stream encryption for real-time audio
  */
-export function createEncryptedAudioStream(
-  tenantId: string,
-  metadata?: Record<string, any>
-) {
+export function createEncryptedAudioStream(tenantId: string, metadata?: Record<string, unknown>) {
   const fullMetadata = {
     tenantId,
     streamStarted: new Date().toISOString(),
-    ...metadata
+    ...metadata,
   }
 
   return audioEncryption.createEncryptionStream(fullMetadata)
@@ -179,19 +169,13 @@ export function createEncryptedAudioStream(
 /**
  * Stream decryption for real-time audio playback
  */
-export function createDecryptedAudioStream(
-  tenantId: string,
-  encryptionMetadata: any
-) {
+export function createDecryptedAudioStream(tenantId: string, encryptionMetadata: unknown) {
   // Verify tenant access
   if (encryptionMetadata.tenantId !== tenantId) {
     throw new Error('Unauthorized access to encrypted audio stream')
   }
 
-  return audioEncryption.createDecryptionStream(
-    encryptionMetadata,
-    { tenantId }
-  )
+  return audioEncryption.createDecryptionStream(encryptionMetadata, { tenantId })
 }
 
 /**
@@ -200,21 +184,21 @@ export function createDecryptedAudioStream(
 export async function encryptTranscriptMiddleware(
   tenantId: string,
   transcript: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ) {
   const fullMetadata = {
     tenantId,
     type: 'transcript',
     timestamp: new Date().toISOString(),
-    ...metadata
+    ...metadata,
   }
 
   const encrypted = await audioEncryption.encryptTranscript(transcript, fullMetadata)
-  
+
   // Store encrypted transcript
   return {
     encryptedData: encrypted.data.toString('base64'),
-    encryptionMetadata: encrypted.metadata
+    encryptionMetadata: encrypted.metadata,
   }
 }
 
@@ -224,7 +208,7 @@ export async function encryptTranscriptMiddleware(
 export async function decryptTranscriptMiddleware(
   tenantId: string,
   encryptedData: string,
-  encryptionMetadata: any
+  encryptionMetadata: unknown
 ): Promise<string> {
   // Verify tenant access
   if (encryptionMetadata.tenantId !== tenantId) {
@@ -232,11 +216,7 @@ export async function decryptTranscriptMiddleware(
   }
 
   const buffer = Buffer.from(encryptedData, 'base64')
-  return audioEncryption.decryptTranscript(
-    buffer,
-    encryptionMetadata,
-    { tenantId }
-  )
+  return audioEncryption.decryptTranscript(buffer, encryptionMetadata, { tenantId })
 }
 
 /**
@@ -261,21 +241,19 @@ async function logEncryptionEvent(event: {
           fileSize: event.fileSize,
           encryptedSize: event.encryptedSize,
           verified: event.verified,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     })
-  } catch (error) {
-    console.error('Failed to log encryption event:', error)
-  }
+  } catch (error) {}
 }
 
 /**
  * Express middleware factory for audio encryption
  */
 export function createAudioEncryptionMiddleware() {
-  return async (req: any, res: any, next: any) => {
+  return async (req: unknown, res: unknown, next: unknown) => {
     // Skip if not audio upload
     if (!req.file || !req.file.mimetype.startsWith('audio/')) {
       return next()
@@ -293,13 +271,10 @@ export function createAudioEncryptionMiddleware() {
         tenantId,
         originalName: req.file.originalname,
         mimeType: req.file.mimetype,
-        size: req.file.size
+        size: req.file.size,
       }
 
-      const encrypted = await audioEncryption.encryptAudio(
-        req.file.buffer,
-        metadata
-      )
+      const encrypted = await audioEncryption.encryptAudio(req.file.buffer, metadata)
 
       // Replace file buffer with encrypted data
       req.file.buffer = encrypted.data
@@ -308,9 +283,7 @@ export function createAudioEncryptionMiddleware() {
       req.file.mimetype = 'application/octet-stream'
 
       next()
-
     } catch (error) {
-      console.error('Audio encryption error:', error)
       res.status(500).json({ error: 'Failed to encrypt audio' })
     }
   }
@@ -324,7 +297,7 @@ export const encryptedStorage = multer.memoryStorage()
 export const encryptedUpload = multer({
   storage: encryptedStorage,
   limits: {
-    fileSize: 100 * 1024 * 1024 // 100MB max
+    fileSize: 100 * 1024 * 1024, // 100MB max
   },
   fileFilter: (req, file, cb) => {
     // Accept audio files only
@@ -333,5 +306,5 @@ export const encryptedUpload = multer({
     } else {
       cb(new Error('Only audio files are allowed'))
     }
-  }
+  },
 })

@@ -5,6 +5,8 @@
 
 import { PrismaClient } from '@prisma/client'
 import { RedisClientType } from 'redis'
+import fs from 'fs/promises'
+import path from 'path'
 
 interface ShutdownTask {
   name: string
@@ -31,7 +33,7 @@ export class GracefulShutdownHandler {
       gracePeriod: 30000, // 30 seconds
       forceExitDelay: 5000, // 5 seconds after grace period
       enableLogging: true,
-      ...config
+      ...config,
     }
 
     // Register signal handlers
@@ -50,7 +52,7 @@ export class GracefulShutdownHandler {
    */
   registerTask(task: ShutdownTask): void {
     if (this.isShuttingDown) {
-      console.warn(`Cannot register shutdown task '${task.name}': shutdown in progress`)
+      
       return
     }
 
@@ -66,7 +68,7 @@ export class GracefulShutdownHandler {
    * Remove a shutdown task
    */
   unregisterTask(name: string): void {
-    const index = this.shutdownTasks.findIndex(task => task.name === name)
+    const index = this.shutdownTasks.findIndex((task) => task.name === name)
     if (index !== -1) {
       this.shutdownTasks.splice(index, 1)
       if (this.config.enableLogging) {
@@ -85,9 +87,9 @@ export class GracefulShutdownHandler {
     }
 
     this.isShuttingDown = true
-    
+
     if (this.config.enableLogging) {
-      console.log(`Initiating graceful shutdown (signal: ${signal})...`)
+      console.log(`Starting graceful shutdown (signal: ${signal})...`)
     }
 
     this.shutdownPromise = this.performShutdown(signal)
@@ -104,17 +106,17 @@ export class GracefulShutdownHandler {
   /**
    * Perform the actual shutdown sequence
    */
-  private async performShutdown(signal: string): Promise<void> {
+  private async performShutdown(_signal: string): Promise<void> {
     const startTime = Date.now()
     const tasks = [...this.shutdownTasks] // Create a copy to avoid modification during execution
 
     if (this.config.enableLogging) {
-      console.log(`Starting shutdown sequence with ${tasks.length} tasks...`)
+      console.log(`Executing ${tasks.length} shutdown tasks...`)
     }
 
     // Set up force exit timer
     const forceExitTimer = setTimeout(() => {
-      console.error(`Force exit after ${this.config.gracePeriod + this.config.forceExitDelay}ms`)
+      console.error('Shutdown timeout exceeded. Forcing exit...')
       process.exit(1)
     }, this.config.gracePeriod + this.config.forceExitDelay)
 
@@ -126,9 +128,8 @@ export class GracefulShutdownHandler {
       if (this.config.enableLogging) {
         console.log(`Graceful shutdown completed in ${duration}ms`)
       }
-
     } catch (error) {
-      console.error('Error during graceful shutdown:', error)
+      console.error('Error during shutdown:', error)
       process.exit(1)
     } finally {
       clearTimeout(forceExitTimer)
@@ -144,36 +145,35 @@ export class GracefulShutdownHandler {
 
     for (const task of tasks) {
       const taskStartTime = Date.now()
-      
+
       try {
         if (this.config.enableLogging) {
-          console.log(`Executing shutdown task: ${task.name}`)
+          console.log(`Executing shutdown task: ${task.name}...`)
         }
 
         // Execute task with timeout
         await this.executeTaskWithTimeout(task)
-        
+
         const duration = Date.now() - taskStartTime
         results.push({ name: task.name, success: true, duration })
-        
-        if (this.config.enableLogging) {
-          console.log(` Completed: ${task.name} (${duration}ms)`)
-        }
 
+        if (this.config.enableLogging) {
+          console.log(`✓ ${task.name} completed in ${duration}ms`)
+        }
       } catch (error) {
         const duration = Date.now() - taskStartTime
         const err = error as Error
         results.push({ name: task.name, success: false, duration, error: err })
-        
-        console.error(` Failed: ${task.name} (${duration}ms) - ${err.message}`)
+
+        console.error(`✗ ${task.name} failed after ${duration}ms - ${err.message}`)
       }
     }
 
     // Log summary
     if (this.config.enableLogging) {
-      const successful = results.filter(r => r.success).length
+      const successful = results.filter((r) => r.success).length
       const failed = results.length - successful
-      console.log(`Shutdown tasks completed: ${successful} successful, ${failed} failed`)
+      console.log(`\nShutdown summary: ${successful} succeeded, ${failed} failed`)
     }
   }
 
@@ -186,12 +186,13 @@ export class GracefulShutdownHandler {
         reject(new Error(`Task '${task.name}' timed out after ${task.timeout}ms`))
       }, task.timeout)
 
-      task.handler()
+      task
+        .handler()
         .then(() => {
           clearTimeout(timer)
           resolve()
         })
-        .catch(error => {
+        .catch((error) => {
           clearTimeout(timer)
           reject(error)
         })
@@ -204,11 +205,11 @@ export class GracefulShutdownHandler {
   private registerSignalHandlers(): void {
     const signals = ['SIGTERM', 'SIGINT', 'SIGUSR2'] as const
 
-    signals.forEach(signal => {
+    signals.forEach((signal) => {
       process.on(signal, () => {
-        console.log(`Received ${signal} signal`)
-        this.shutdown(signal).catch(error => {
-          console.error(`Error during shutdown from ${signal}:`, error)
+        
+        this.shutdown(signal).catch((error) => {
+          
           process.exit(1)
         })
       })
@@ -216,7 +217,7 @@ export class GracefulShutdownHandler {
 
     // Handle uncaught exceptions
     process.on('uncaughtException', (error) => {
-      console.error('Uncaught exception:', error)
+      
       this.shutdown('UNCAUGHT_EXCEPTION').catch(() => {
         process.exit(1)
       })
@@ -224,7 +225,7 @@ export class GracefulShutdownHandler {
 
     // Handle unhandled rejections
     process.on('unhandledRejection', (reason, promise) => {
-      console.error('Unhandled rejection at:', promise, 'reason:', reason)
+      
       this.shutdown('UNHANDLED_REJECTION').catch(() => {
         process.exit(1)
       })
@@ -245,8 +246,8 @@ export const shutdownTasks = {
     priority: 1,
     handler: async () => {
       await prisma.$disconnect()
-      console.log('Prisma client disconnected')
-    }
+      
+    },
   }),
 
   /**
@@ -259,9 +260,9 @@ export const shutdownTasks = {
     handler: async () => {
       if (redis.isOpen) {
         await redis.quit()
-        console.log('Redis client disconnected')
+        
       }
-    }
+    },
   }),
 
   /**
@@ -273,18 +274,18 @@ export const shutdownTasks = {
     priority: 3,
     handler: async () => {
       // Flush any pending log operations
-      await new Promise(resolve => {
+      await new Promise((resolve) => {
         process.stdout.write('', resolve)
         process.stderr.write('', resolve)
       })
-      console.log('Logs flushed')
-    }
+      
+    },
   }),
 
   /**
    * Complete in-flight HTTP requests
    */
-  httpServer: (server: any): ShutdownTask => ({
+  httpServer: (server: unknown): ShutdownTask => ({
     name: 'http_server_close',
     timeout: 15000,
     priority: 4,
@@ -294,12 +295,12 @@ export const shutdownTasks = {
           if (error) {
             reject(error)
           } else {
-            console.log('HTTP server closed')
+            
             resolve(undefined)
           }
         })
       })
-    }
+    },
   }),
 
   /**
@@ -311,8 +312,8 @@ export const shutdownTasks = {
     priority: 0, // Highest priority
     handler: async () => {
       await saveFunction()
-      console.log('Application state saved')
-    }
+      
+    },
   }),
 
   /**
@@ -323,9 +324,6 @@ export const shutdownTasks = {
     timeout: 5000,
     priority: 5,
     handler: async () => {
-      const fs = require('fs/promises')
-      const path = require('path')
-      
       for (const dir of tempDirs) {
         try {
           const files = await fs.readdir(dir)
@@ -335,11 +333,11 @@ export const shutdownTasks = {
             }
           }
         } catch (error) {
-          console.warn(`Failed to clean temp directory ${dir}:`, error)
+          console.error(`Failed to clean up directory ${dir}:`, error)
         }
       }
       console.log('Temporary files cleaned up')
-    }
+    },
   }),
 
   /**
@@ -351,9 +349,9 @@ export const shutdownTasks = {
     priority: 1,
     handler: async () => {
       await notifyFunction()
-      console.log('External services notified of shutdown')
-    }
-  })
+      
+    },
+  }),
 }
 
 /**
@@ -361,10 +359,10 @@ export const shutdownTasks = {
  */
 export function setupGracefulShutdown(config?: Partial<ShutdownConfig>): GracefulShutdownHandler {
   const handler = GracefulShutdownHandler.getInstance(config)
-  
+
   // Add default cleanup tasks
   handler.registerTask(shutdownTasks.logs())
-  
+
   return handler
 }
 
@@ -372,12 +370,12 @@ export function setupGracefulShutdown(config?: Partial<ShutdownConfig>): Gracefu
  * Express.js middleware to check shutdown status
  */
 export function shutdownMiddleware(shutdownHandler: GracefulShutdownHandler) {
-  return (req: any, res: any, next: any) => {
+  return (req: unknown, res: unknown, next: unknown) => {
     if (shutdownHandler.isShutdownInProgress()) {
       res.status(503).json({
         error: 'Service unavailable',
         message: 'Server is shutting down',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })
       return
     }
@@ -390,12 +388,12 @@ export function shutdownMiddleware(shutdownHandler: GracefulShutdownHandler) {
  */
 export function nextShutdownMiddleware(shutdownHandler: GracefulShutdownHandler) {
   return (handler: Function) => {
-    return async (req: any, res: any) => {
+    return async (req: unknown, res: unknown) => {
       if (shutdownHandler.isShutdownInProgress()) {
         return res.status(503).json({
           error: 'Service unavailable',
           message: 'Server is shutting down',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         })
       }
       return handler(req, res)

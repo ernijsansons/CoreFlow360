@@ -6,7 +6,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { successResponse, createdResponse, validationErrorResponse, errorResponse } from '@/lib/api-response'
+import {
+  successResponse,
+  createdResponse,
+  validationErrorResponse,
+  errorResponse,
+} from '@/lib/api-response'
 import { feedbackSchema, surveyResponseSchema, interviewRequestSchema } from '@/lib/schemas'
 
 export async function POST(request: NextRequest) {
@@ -28,15 +33,14 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('[Feedback API Error]', error)
     return errorResponse(error as Error)
   }
 }
 
-async function handleFeedbackSubmission(data: any) {
+async function handleFeedbackSubmission(data: unknown) {
   try {
     const validatedData = feedbackSchema.parse(data)
-    
+
     // Create feedback record
     const feedback = await prisma.$executeRaw`
       INSERT INTO customer_feedback (
@@ -68,7 +72,7 @@ async function handleFeedbackSubmission(data: any) {
       type: validatedData.type,
       category: validatedData.category,
       priority: validatedData.priority,
-      hasEmail: !!validatedData.userEmail
+      hasEmail: !!validatedData.userEmail,
     })
 
     // In production, this would:
@@ -77,12 +81,14 @@ async function handleFeedbackSubmission(data: any) {
     // 3. Send confirmation email to user
     // 4. Update feature request board if applicable
 
-    return createdResponse({
-      id: Date.now().toString(), // In production, use actual ID
-      status: 'received',
-      estimatedResponseTime: getResponseTime(validatedData.type, validatedData.priority)
-    }, 'Feedback submitted successfully')
-
+    return createdResponse(
+      {
+        id: Date.now().toString(), // In production, use actual ID
+        status: 'received',
+        estimatedResponseTime: getResponseTime(validatedData.type, validatedData.priority),
+      },
+      'Feedback submitted successfully'
+    )
   } catch (error) {
     if (error instanceof z.ZodError) {
       return validationErrorResponse(error.errors, 'Validation failed')
@@ -91,10 +97,10 @@ async function handleFeedbackSubmission(data: any) {
   }
 }
 
-async function handleSurveyResponse(data: any) {
+async function handleSurveyResponse(data: unknown) {
   try {
     const validatedData = surveyResponseSchema.parse(data)
-    
+
     // Create survey response record
     const response = await prisma.$executeRaw`
       INSERT INTO survey_responses (
@@ -117,18 +123,20 @@ async function handleSurveyResponse(data: any) {
       surveyId: validatedData.surveyId,
       responseCount: Object.keys(validatedData.responses).length,
       timeSpent: validatedData.timeSpent,
-      hasEmail: !!validatedData.userEmail
+      hasEmail: !!validatedData.userEmail,
     })
 
-    return NextResponse.json({
-      success: true,
-      message: 'Survey response recorded successfully',
-      data: {
-        id: Date.now().toString(),
-        completedSurveys: await getUserSurveyCount(validatedData.userId)
-      }
-    }, { status: 201 })
-
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Survey response recorded successfully',
+        data: {
+          id: Date.now().toString(),
+          completedSurveys: await getUserSurveyCount(validatedData.userId),
+        },
+      },
+      { status: 201 }
+    )
   } catch (error) {
     if (error instanceof z.ZodError) {
       return validationErrorResponse(error.errors, 'Validation failed')
@@ -137,10 +145,10 @@ async function handleSurveyResponse(data: any) {
   }
 }
 
-async function handleInterviewRequest(data: any) {
+async function handleInterviewRequest(data: unknown) {
   try {
     const validatedData = interviewRequestSchema.parse(data)
-    
+
     // Create interview request record
     const request = await prisma.$executeRaw`
       INSERT INTO interview_requests (
@@ -168,7 +176,7 @@ async function handleInterviewRequest(data: any) {
       type: validatedData.interviewType,
       email: validatedData.contactEmail,
       company: validatedData.company,
-      preferredDates: validatedData.preferredDates.length
+      preferredDates: validatedData.preferredDates.length,
     })
 
     // In production, this would:
@@ -177,21 +185,23 @@ async function handleInterviewRequest(data: any) {
     // 3. Create calendar invites for preferred slots
     // 4. Send calendar booking link
 
-    return NextResponse.json({
-      success: true,
-      message: 'Interview request submitted successfully',
-      data: {
-        id: Date.now().toString(),
-        status: 'pending',
-        nextSteps: [
-          'We will review your request within 24 hours',
-          'You will receive a calendar booking link via email',
-          'Confirmation call 1 day before scheduled interview'
-        ],
-        incentive: getInterviewIncentive(validatedData.interviewType)
-      }
-    }, { status: 201 })
-
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Interview request submitted successfully',
+        data: {
+          id: Date.now().toString(),
+          status: 'pending',
+          nextSteps: [
+            'We will review your request within 24 hours',
+            'You will receive a calendar booking link via email',
+            'Confirmation call 1 day before scheduled interview',
+          ],
+          incentive: getInterviewIncentive(validatedData.interviewType),
+        },
+      },
+      { status: 201 }
+    )
   } catch (error) {
     if (error instanceof z.ZodError) {
       return validationErrorResponse(error.errors, 'Validation failed')
@@ -210,24 +220,24 @@ function getResponseTime(type: string, priority?: string): string {
 
 function getInterviewIncentive(type: string): string {
   const incentives = {
-    'user_interview': '$50 Amazon gift card',
-    'feature_feedback': 'Early access to new features',
-    'industry_expert': '$100 Amazon gift card'
+    user_interview: '$50 Amazon gift card',
+    feature_feedback: 'Early access to new features',
+    industry_expert: '$100 Amazon gift card',
   }
   return incentives[type as keyof typeof incentives] || 'Thank you gift'
 }
 
 async function getUserSurveyCount(userId?: string): Promise<number> {
   if (!userId) return 1
-  
+
   try {
     // Use parameterized query to prevent SQL injection
     const result = await prisma.surveyResponses.count({
       where: {
-        userId: userId
-      }
+        userId: userId,
+      },
     })
-    
+
     return result || 1
   } catch (error) {
     return 1
@@ -268,21 +278,25 @@ export async function GET(request: NextRequest) {
         data: {
           feedback: stats,
           surveys: surveyStats,
-          period: 'last_30_days'
-        }
+          period: 'last_30_days',
+        },
       })
     }
 
-    return NextResponse.json({
-      success: false,
-      error: 'Invalid request type'
-    }, { status: 400 })
-
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Invalid request type',
+      },
+      { status: 400 }
+    )
   } catch (error) {
-    console.error('[Feedback Stats Error]', error)
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to fetch statistics'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to fetch statistics',
+      },
+      { status: 500 }
+    )
   }
 }

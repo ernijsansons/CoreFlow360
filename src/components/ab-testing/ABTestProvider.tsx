@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { abTestManager } from '@/lib/ab-testing/ab-test-manager'
 
 interface ABTestContextType {
-  experiments: Record<string, any>
+  experiments: Record<string, unknown>
   isReady: boolean
   refreshExperiments: () => void
 }
@@ -12,11 +12,11 @@ interface ABTestContextType {
 const ABTestContext = createContext<ABTestContextType>({
   experiments: {},
   isReady: false,
-  refreshExperiments: () => {}
+  refreshExperiments: () => {},
 })
 
 export function ABTestProvider({ children }: { children: React.ReactNode }) {
-  const [experiments, setExperiments] = useState<Record<string, any>>({})
+  const [experiments, setExperiments] = useState<Record<string, unknown>>({})
   const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {

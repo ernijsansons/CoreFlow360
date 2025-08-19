@@ -20,7 +20,7 @@ export interface ValidationConfig {
 export function validateRequest(config: ValidationConfig) {
   return async function validationMiddleware(
     request: NextRequest,
-    context?: any
+    context?: unknown
   ): Promise<NextResponse | null> {
     const errors: Array<{ field: string; message: string }> = []
 
@@ -48,7 +48,7 @@ export function validateRequest(config: ValidationConfig) {
           } else {
             errors.push({
               field: 'body',
-              message: 'Invalid JSON body'
+              message: 'Invalid JSON body',
             })
           }
         }
@@ -84,7 +84,7 @@ export function validateRequest(config: ValidationConfig) {
           message: 'Invalid request data',
           code: 'VALIDATION_ERROR',
           statusCode: 400,
-          details: errors
+          details: errors,
         }
 
         return NextResponse.json(errorResponse, { status: 400 })
@@ -92,16 +92,16 @@ export function validateRequest(config: ValidationConfig) {
 
       // No errors, continue to handler
       return null
-
     } catch (error) {
-      console.error('Validation middleware error:', error)
-      
-      return NextResponse.json({
-        error: 'Internal validation error',
-        message: 'Failed to validate request',
-        code: 'INTERNAL_ERROR',
-        statusCode: 500
-      }, { status: 500 })
+      return NextResponse.json(
+        {
+          error: 'Internal validation error',
+          message: 'Failed to validate request',
+          code: 'INTERNAL_ERROR',
+          statusCode: 500,
+        },
+        { status: 500 }
+      )
     }
   }
 }
@@ -113,22 +113,22 @@ function formatZodErrors(
   error: ZodError,
   prefix: string = ''
 ): Array<{ field: string; message: string }> {
-  return error.errors.map(err => ({
+  return error.errors.map((err) => ({
     field: prefix ? `${prefix}.${err.path.join('.')}` : err.path.join('.'),
-    message: err.message
+    message: err.message,
   }))
 }
 
 /**
  * Wrapper for route handlers with validation
  */
-export function withValidation<T extends (...args: any[]) => Promise<NextResponse>>(
+export function withValidation<T extends (...args: unknown[]) => Promise<NextResponse>>(
   config: ValidationConfig,
   handler: T
 ): T {
-  return (async (request: NextRequest, context?: any) => {
+  return (async (request: NextRequest, context?: unknown) => {
     const validationError = await validateRequest(config)(request, context)
-    
+
     if (validationError) {
       return validationError
     }
@@ -151,24 +151,30 @@ export async function parseValidatedData<T>(
   } catch (error) {
     if (error instanceof ZodError) {
       const errors = formatZodErrors(error, 'body')
-      const errorResponse = NextResponse.json({
-        error: 'Validation failed',
-        message: 'Invalid request data',
-        code: 'VALIDATION_ERROR',
-        statusCode: 400,
-        details: errors
-      }, { status: 400 })
-      
+      const errorResponse = NextResponse.json(
+        {
+          error: 'Validation failed',
+          message: 'Invalid request data',
+          code: 'VALIDATION_ERROR',
+          statusCode: 400,
+          details: errors,
+        },
+        { status: 400 }
+      )
+
       return { data: null, error: errorResponse }
     }
 
-    const errorResponse = NextResponse.json({
-      error: 'Bad request',
-      message: 'Invalid JSON body',
-      code: 'INVALID_JSON',
-      statusCode: 400
-    }, { status: 400 })
-    
+    const errorResponse = NextResponse.json(
+      {
+        error: 'Bad request',
+        message: 'Invalid JSON body',
+        code: 'INVALID_JSON',
+        statusCode: 400,
+      },
+      { status: 400 }
+    )
+
     return { data: null, error: errorResponse }
   }
 }
@@ -187,24 +193,30 @@ export function validateQueryParams<T>(
   } catch (error) {
     if (error instanceof ZodError) {
       const errors = formatZodErrors(error, 'query')
-      const errorResponse = NextResponse.json({
-        error: 'Invalid query parameters',
-        message: 'Query validation failed',
-        code: 'INVALID_QUERY',
-        statusCode: 400,
-        details: errors
-      }, { status: 400 })
-      
+      const errorResponse = NextResponse.json(
+        {
+          error: 'Invalid query parameters',
+          message: 'Query validation failed',
+          code: 'INVALID_QUERY',
+          statusCode: 400,
+          details: errors,
+        },
+        { status: 400 }
+      )
+
       return { data: null, error: errorResponse }
     }
 
-    const errorResponse = NextResponse.json({
-      error: 'Bad request',
-      message: 'Invalid query parameters',
-      code: 'BAD_REQUEST',
-      statusCode: 400
-    }, { status: 400 })
-    
+    const errorResponse = NextResponse.json(
+      {
+        error: 'Bad request',
+        message: 'Invalid query parameters',
+        code: 'BAD_REQUEST',
+        statusCode: 400,
+      },
+      { status: 400 }
+    )
+
     return { data: null, error: errorResponse }
   }
 }
@@ -213,12 +225,15 @@ export function validateQueryParams<T>(
  * Combine multiple validators
  */
 export function combineValidators(...validators: ValidationConfig[]): ValidationConfig {
-  return validators.reduce((acc, validator) => ({
-    body: validator.body || acc.body,
-    query: validator.query || acc.query,
-    params: validator.params || acc.params,
-    headers: validator.headers || acc.headers
-  }), {})
+  return validators.reduce(
+    (acc, validator) => ({
+      body: validator.body || acc.body,
+      query: validator.query || acc.query,
+      params: validator.params || acc.params,
+      headers: validator.headers || acc.headers,
+    }),
+    {}
+  )
 }
 
 /**
@@ -229,8 +244,8 @@ export const commonValidators = {
   authenticated: {
     headers: z.object({
       authorization: z.string().startsWith('Bearer '),
-      'x-tenant-id': z.string().optional()
-    })
+      'x-tenant-id': z.string().optional(),
+    }),
   },
 
   // Pagination query params
@@ -239,14 +254,14 @@ export const commonValidators = {
       page: z.coerce.number().min(1).default(1),
       limit: z.coerce.number().min(1).max(100).default(20),
       sortBy: z.string().optional(),
-      sortOrder: z.enum(['asc', 'desc']).optional()
-    })
+      sortOrder: z.enum(['asc', 'desc']).optional(),
+    }),
   },
 
   // Tenant context
   tenantScoped: {
     headers: z.object({
-      'x-tenant-id': z.string().min(1)
-    })
-  }
+      'x-tenant-id': z.string().min(1),
+    }),
+  },
 }

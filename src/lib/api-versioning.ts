@@ -27,29 +27,32 @@ export interface APIVersion {
 
 // Supported API versions
 export const API_VERSIONS: Record<string, APIVersion> = {
-  'v1': {
+  v1: {
     version: '1.0.0',
     status: 'active',
     breakingChanges: [],
-    migrationGuide: '/docs/api/v1/migration'
+    migrationGuide: '/docs/api/v1/migration',
   },
-  'v2': {
-    version: '2.0.0', 
+  v2: {
+    version: '2.0.0',
     status: 'active',
     breakingChanges: [
       'Authentication now requires Bearer tokens',
       'Date formats standardized to ISO 8601',
-      'Error responses restructured'
+      'Error responses restructured',
     ],
-    migrationGuide: '/docs/api/v2/migration'
-  }
+    migrationGuide: '/docs/api/v2/migration',
+  },
 }
 
 // Request versioning schema
 const VersionRequestSchema = z.object({
-  version: z.string().regex(/^v\d+$/, 'Version must be in format v1, v2, etc.').optional(),
+  version: z
+    .string()
+    .regex(/^v\d+$/, 'Version must be in format v1, v2, etc.')
+    .optional(),
   acceptVersion: z.string().optional(),
-  apiVersion: z.string().optional()
+  apiVersion: z.string().optional(),
 })
 
 // Version negotiation result
@@ -113,40 +116,46 @@ export class APIVersionManager {
    */
   negotiateVersion(request: NextRequest): VersionNegotiationResult {
     const requestedVersion = this.extractVersion(request)
-    
+
     // If no version specified, use default
     if (!requestedVersion) {
       const version = API_VERSIONS[this.defaultVersion]
       return {
         resolvedVersion: this.defaultVersion,
         isDeprecated: version.status === 'deprecated',
-        deprecationWarning: version.status === 'deprecated' 
-          ? `API version ${this.defaultVersion} is deprecated. Please migrate to ${this.currentVersion}.`
-          : undefined,
+        deprecationWarning:
+          version.status === 'deprecated'
+            ? `API version ${this.defaultVersion} is deprecated. Please migrate to ${this.currentVersion}.`
+            : undefined,
         migrationGuide: version.migrationGuide,
-        supportedUntil: version.supportedUntil
+        supportedUntil: version.supportedUntil,
       }
     }
 
     // Check if requested version is supported
     const version = API_VERSIONS[requestedVersion]
     if (!version) {
-      throw new Error(`Unsupported API version: ${requestedVersion}. Supported versions: ${Object.keys(API_VERSIONS).join(', ')}`)
+      throw new Error(
+        `Unsupported API version: ${requestedVersion}. Supported versions: ${Object.keys(API_VERSIONS).join(', ')}`
+      )
     }
 
     // Check if version is sunset
     if (version.status === 'sunset') {
-      throw new Error(`API version ${requestedVersion} has been sunset and is no longer available. Please migrate to ${this.currentVersion}.`)
+      throw new Error(
+        `API version ${requestedVersion} has been sunset and is no longer available. Please migrate to ${this.currentVersion}.`
+      )
     }
 
     return {
       resolvedVersion: requestedVersion,
       isDeprecated: version.status === 'deprecated',
-      deprecationWarning: version.status === 'deprecated'
-        ? `API version ${requestedVersion} is deprecated and will be sunset on ${version.sunsetDate}. Please migrate to ${this.currentVersion}.`
-        : undefined,
+      deprecationWarning:
+        version.status === 'deprecated'
+          ? `API version ${requestedVersion} is deprecated and will be sunset on ${version.sunsetDate}. Please migrate to ${this.currentVersion}.`
+          : undefined,
       migrationGuide: version.migrationGuide,
-      supportedUntil: version.supportedUntil
+      supportedUntil: version.supportedUntil,
     }
   }
 
@@ -154,7 +163,7 @@ export class APIVersionManager {
    * Create version-aware response with deprecation headers
    */
   createVersionedResponse(
-    data: any,
+    data: unknown,
     versionResult: VersionNegotiationResult,
     options: {
       status?: number
@@ -166,19 +175,22 @@ export class APIVersionManager {
       headers: {
         'API-Version': versionResult.resolvedVersion,
         'API-Supported-Versions': Object.keys(API_VERSIONS).join(', '),
-        ...options.headers
-      }
+        ...options.headers,
+      },
     })
 
     // Add deprecation warnings
     if (versionResult.isDeprecated) {
       response.headers.set('Deprecation', 'true')
-      response.headers.set('Sunset', API_VERSIONS[versionResult.resolvedVersion].sunsetDate || 'TBD')
-      
+      response.headers.set(
+        'Sunset',
+        API_VERSIONS[versionResult.resolvedVersion].sunsetDate || 'TBD'
+      )
+
       if (versionResult.deprecationWarning) {
         response.headers.set('Warning', `299 - "${versionResult.deprecationWarning}"`)
       }
-      
+
       if (versionResult.migrationGuide) {
         response.headers.set('Link', `<${versionResult.migrationGuide}>; rel="migration-guide"`)
       }
@@ -190,7 +202,7 @@ export class APIVersionManager {
   /**
    * Transform response data based on API version
    */
-  transformResponseForVersion(data: any, version: string): any {
+  transformResponseForVersion(data: unknown, version: string): unknown {
     switch (version) {
       case 'v1':
         return this.transformToV1(data)
@@ -204,14 +216,14 @@ export class APIVersionManager {
   /**
    * Transform data to V1 format (legacy compatibility)
    */
-  private transformToV1(data: any): any {
+  private transformToV1(data: unknown): unknown {
     if (Array.isArray(data)) {
-      return data.map(item => this.transformToV1(item))
+      return data.map((item) => this.transformToV1(item))
     }
 
     if (typeof data === 'object' && data !== null) {
-      const transformed: any = {}
-      
+      const transformed: unknown = {}
+
       for (const [key, value] of Object.entries(data)) {
         // V1 used camelCase for dates
         if (key === 'created_at') {
@@ -224,7 +236,7 @@ export class APIVersionManager {
           transformed[key] = this.transformToV1(value)
         }
       }
-      
+
       return transformed
     }
 
@@ -234,14 +246,14 @@ export class APIVersionManager {
   /**
    * Transform data to V2 format (current standard)
    */
-  private transformToV2(data: any): any {
+  private transformToV2(data: unknown): unknown {
     if (Array.isArray(data)) {
-      return data.map(item => this.transformToV2(item))
+      return data.map((item) => this.transformToV2(item))
     }
 
     if (typeof data === 'object' && data !== null) {
-      const transformed: any = {}
-      
+      const transformed: unknown = {}
+
       for (const [key, value] of Object.entries(data)) {
         // V2 uses snake_case for dates and standardized ISO format
         if (key === 'createdAt') {
@@ -254,16 +266,16 @@ export class APIVersionManager {
           transformed[key] = this.transformToV2(value)
         }
       }
-      
+
       // Add metadata for V2
       if (transformed.id) {
         transformed.meta = {
           version: 'v2',
           resource_url: `/api/v2/${this.getResourceName(transformed)}/${transformed.id}`,
-          updated_at: transformed.updated_at || new Date().toISOString()
+          updated_at: transformed.updated_at || new Date().toISOString(),
         }
       }
-      
+
       return transformed
     }
 
@@ -273,7 +285,7 @@ export class APIVersionManager {
   /**
    * Get resource name from data object
    */
-  private getResourceName(data: any): string {
+  private getResourceName(data: unknown): string {
     // Simple heuristic to determine resource type
     if (data.email && data.firstName) return 'users'
     if (data.name && data.industry) return 'tenants'
@@ -285,7 +297,7 @@ export class APIVersionManager {
   /**
    * Validate request data based on API version
    */
-  validateRequestForVersion(data: any, version: string): any {
+  validateRequestForVersion(data: unknown, version: string): unknown {
     switch (version) {
       case 'v1':
         return this.validateV1Request(data)
@@ -296,29 +308,29 @@ export class APIVersionManager {
     }
   }
 
-  private validateV1Request(data: any): any {
+  private validateV1Request(data: unknown): unknown {
     // V1 validation - more permissive
     return data
   }
 
-  private validateV2Request(data: any): any {
+  private validateV2Request(data: unknown): unknown {
     // V2 validation - stricter requirements
     if (typeof data === 'object' && data !== null) {
       // Ensure required fields are present
       const validated = { ...data }
-      
+
       // V2 requires explicit timestamps in ISO format
       if (validated.created_at && !this.isValidISO8601(validated.created_at)) {
         throw new Error('created_at must be in ISO 8601 format')
       }
-      
+
       if (validated.updated_at && !this.isValidISO8601(validated.updated_at)) {
-        throw new Error('updated_at must be in ISO 8601 format')  
+        throw new Error('updated_at must be in ISO 8601 format')
       }
-      
+
       return validated
     }
-    
+
     return data
   }
 
@@ -340,26 +352,26 @@ export class APIVersionManager {
   hasUpgrade(currentVersion: string): boolean {
     const current = API_VERSIONS[currentVersion]
     if (!current) return false
-    
+
     // Check if there's a newer active version
-    return Object.values(API_VERSIONS).some(version => 
-      version.status === 'active' && 
-      this.compareVersions(version.version, current.version) > 0
+    return Object.values(API_VERSIONS).some(
+      (version) =>
+        version.status === 'active' && this.compareVersions(version.version, current.version) > 0
     )
   }
 
   private compareVersions(v1: string, v2: string): number {
     const parts1 = v1.split('.').map(Number)
     const parts2 = v2.split('.').map(Number)
-    
+
     for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
       const part1 = parts1[i] || 0
       const part2 = parts2[i] || 0
-      
+
       if (part1 > part2) return 1
       if (part1 < part2) return -1
     }
-    
+
     return 0
   }
 }
@@ -368,27 +380,29 @@ export class APIVersionManager {
 export const apiVersionManager = APIVersionManager.getInstance()
 
 // Middleware helper for version negotiation
-export function withAPIVersioning(handler: (request: NextRequest, version: string) => Promise<NextResponse>) {
+export function withAPIVersioning(
+  handler: (request: NextRequest, version: string) => Promise<NextResponse>
+) {
   return async (request: NextRequest): Promise<NextResponse> => {
     try {
       const versionResult = apiVersionManager.negotiateVersion(request)
       const response = await handler(request, versionResult.resolvedVersion)
-      
+
       // Add versioning headers to response
       response.headers.set('API-Version', versionResult.resolvedVersion)
       response.headers.set('API-Supported-Versions', Object.keys(API_VERSIONS).join(', '))
-      
+
       if (versionResult.isDeprecated && versionResult.deprecationWarning) {
         response.headers.set('Warning', `299 - "${versionResult.deprecationWarning}"`)
       }
-      
+
       return response
     } catch (error) {
       return NextResponse.json(
         {
           error: 'API Version Error',
           message: error instanceof Error ? error.message : 'Unknown versioning error',
-          supported_versions: Object.keys(API_VERSIONS)
+          supported_versions: Object.keys(API_VERSIONS),
         },
         { status: 400 }
       )
@@ -397,7 +411,7 @@ export function withAPIVersioning(handler: (request: NextRequest, version: strin
 }
 
 // URL rewriting utilities
-export function rewriteVersionedURL(url: string, version: string): string {
+export function rewriteVersionedURL(_url: string, _version: string): string {
   // Convert /api/v1/users to /api/users with version metadata
   const match = url.match(/^\/api\/(v\d+)\/(.+)$/)
   if (match) {

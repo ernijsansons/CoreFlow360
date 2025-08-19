@@ -27,7 +27,7 @@ export function applyRateLimit(request: NextRequest): SecurityValidationResult {
   const now = Date.now()
 
   const current = rateLimitStore.get(key)
-  
+
   if (!current) {
     rateLimitStore.set(key, { count: 1, resetTime: now + RATE_LIMIT_WINDOW })
     return { isValid: true }
@@ -42,7 +42,7 @@ export function applyRateLimit(request: NextRequest): SecurityValidationResult {
     return {
       isValid: false,
       error: 'Rate limit exceeded. Please try again later.',
-      statusCode: 429
+      statusCode: 429,
     }
   }
 
@@ -56,12 +56,12 @@ export function applyRateLimit(request: NextRequest): SecurityValidationResult {
 export async function validateSuperAdminSession(): Promise<SecurityValidationResult> {
   try {
     const session = await getServerSession()
-    
+
     if (!session) {
       return {
         isValid: false,
         error: 'Authentication required',
-        statusCode: 401
+        statusCode: 401,
       }
     }
 
@@ -69,7 +69,7 @@ export async function validateSuperAdminSession(): Promise<SecurityValidationRes
       return {
         isValid: false,
         error: 'Super Admin privileges required',
-        statusCode: 403
+        statusCode: 403,
       }
     }
 
@@ -78,7 +78,7 @@ export async function validateSuperAdminSession(): Promise<SecurityValidationRes
     return {
       isValid: false,
       error: 'Authentication validation failed',
-      statusCode: 500
+      statusCode: 500,
     }
   }
 }
@@ -92,12 +92,11 @@ export function validateRequestHeaders(request: NextRequest): SecurityValidation
   const origin = request.headers.get('origin')
 
   // Check content type for POST/PUT requests
-  if (['POST', 'PUT'].includes(request.method) && 
-      !contentType?.includes('application/json')) {
+  if (['POST', 'PUT'].includes(request.method) && !contentType?.includes('application/json')) {
     return {
       isValid: false,
       error: 'Invalid content type. Expected application/json',
-      statusCode: 400
+      statusCode: 400,
     }
   }
 
@@ -106,7 +105,7 @@ export function validateRequestHeaders(request: NextRequest): SecurityValidation
     return {
       isValid: false,
       error: 'Invalid or missing user agent',
-      statusCode: 400
+      statusCode: 400,
     }
   }
 
@@ -114,14 +113,14 @@ export function validateRequestHeaders(request: NextRequest): SecurityValidation
   if (process.env.NODE_ENV === 'production' && origin) {
     const allowedOrigins = [
       process.env.NEXTAUTH_URL,
-      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null
+      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
     ].filter(Boolean)
 
     if (!allowedOrigins.includes(origin)) {
       return {
         isValid: false,
         error: 'Origin not allowed',
-        statusCode: 403
+        statusCode: 403,
       }
     }
   }
@@ -132,34 +131,41 @@ export function validateRequestHeaders(request: NextRequest): SecurityValidation
 /**
  * Validate API key data payload
  */
-export function validateAPIKeyPayload(data: any, operation: 'create' | 'update' | 'rotate'): SecurityValidationResult {
+export function validateAPIKeyPayload(
+  data: unknown,
+  operation: 'create' | 'update' | 'rotate'
+): SecurityValidationResult {
   try {
     // Check for suspicious patterns in API keys
     if (data.key || data.newKey) {
       const keyToValidate = data.key || data.newKey
-      
+
       // Check for obviously fake keys
-      if (keyToValidate.includes('test') || 
-          keyToValidate.includes('fake') || 
-          keyToValidate.includes('example') ||
-          keyToValidate === 'your-api-key-here' ||
-          keyToValidate.length < 8) {
+      if (
+        keyToValidate.includes('test') ||
+        keyToValidate.includes('fake') ||
+        keyToValidate.includes('example') ||
+        keyToValidate === 'your-api-key-here' ||
+        keyToValidate.length < 8
+      ) {
         return {
           isValid: false,
           error: 'Invalid API key format detected',
-          statusCode: 400
+          statusCode: 400,
         }
       }
 
       // Check for potential injection attempts
-      if (keyToValidate.includes('<') || 
-          keyToValidate.includes('>') || 
-          keyToValidate.includes('script') ||
-          keyToValidate.includes('javascript:')) {
+      if (
+        keyToValidate.includes('<') ||
+        keyToValidate.includes('>') ||
+        keyToValidate.includes('script') ||
+        keyToValidate.includes('javascript:')
+      ) {
         return {
           isValid: false,
           error: 'Malicious content detected in API key',
-          statusCode: 400
+          statusCode: 400,
         }
       }
     }
@@ -169,7 +175,7 @@ export function validateAPIKeyPayload(data: any, operation: 'create' | 'update' 
       return {
         isValid: false,
         error: 'Description too long (max 500 characters)',
-        statusCode: 400
+        statusCode: 400,
       }
     }
 
@@ -179,7 +185,7 @@ export function validateAPIKeyPayload(data: any, operation: 'create' | 'update' 
         return {
           isValid: false,
           error: 'Name too long (max 100 characters)',
-          statusCode: 400
+          statusCode: 400,
         }
       }
 
@@ -187,7 +193,7 @@ export function validateAPIKeyPayload(data: any, operation: 'create' | 'update' 
         return {
           isValid: false,
           error: 'Name contains invalid characters',
-          statusCode: 400
+          statusCode: 400,
         }
       }
     }
@@ -197,7 +203,7 @@ export function validateAPIKeyPayload(data: any, operation: 'create' | 'update' 
     return {
       isValid: false,
       error: 'Payload validation failed',
-      statusCode: 400
+      statusCode: 400,
     }
   }
 }
@@ -207,7 +213,7 @@ export function validateAPIKeyPayload(data: any, operation: 'create' | 'update' 
  */
 export async function auditSecurityEvent(
   event: string,
-  details: Record<string, any>,
+  details: Record<string, unknown>,
   request: NextRequest
 ) {
   try {
@@ -223,13 +229,11 @@ export async function auditSecurityEvent(
       tenantId: session?.user?.tenantId,
       clientIP,
       userAgent,
-      details
+      details,
     })
 
     // TODO: Implement actual audit logging to database or external service
-  } catch (error) {
-    console.error('Failed to audit security event:', error)
-  }
+  } catch (error) {}
 }
 
 /**
@@ -264,7 +268,7 @@ export async function securityMiddleware(
   if (['create', 'update', 'rotate'].includes(operation) && request.method !== 'GET') {
     try {
       const body = await request.json()
-      const payloadResult = validateAPIKeyPayload(body, operation as any)
+      const payloadResult = validateAPIKeyPayload(body, operation as unknown)
       if (!payloadResult.isValid) {
         await auditSecurityEvent('INVALID_PAYLOAD', { operation, payload: body }, request)
         return payloadResult
@@ -273,7 +277,7 @@ export async function securityMiddleware(
       return {
         isValid: false,
         error: 'Invalid JSON payload',
-        statusCode: 400
+        statusCode: 400,
       }
     }
   }
@@ -292,7 +296,7 @@ export function formatErrorResponse(error: string, statusCode: number = 400) {
     {
       error,
       timestamp: new Date().toISOString(),
-      code: statusCode
+      code: statusCode,
     },
     { status: statusCode }
   )
@@ -301,27 +305,29 @@ export function formatErrorResponse(error: string, statusCode: number = 400) {
 /**
  * Sanitize response data to prevent information leakage
  */
-export function sanitizeResponse(data: any): any {
+export function sanitizeResponse(data: unknown): unknown {
   if (Array.isArray(data)) {
-    return data.map(item => sanitizeResponse(item))
+    return data.map((item) => sanitizeResponse(item))
   }
 
   if (typeof data === 'object' && data !== null) {
-    const sanitized: any = {}
-    
+    const sanitized: unknown = {}
+
     for (const [key, value] of Object.entries(data)) {
       // Remove sensitive fields from responses
-      if (key === 'encrypted_key' || 
-          key === 'password' || 
-          key === 'secret' ||
-          key.includes('token')) {
+      if (
+        key === 'encrypted_key' ||
+        key === 'password' ||
+        key === 'secret' ||
+        key.includes('token')
+      ) {
         continue
       }
-      
+
       // Sanitize nested objects
       sanitized[key] = sanitizeResponse(value)
     }
-    
+
     return sanitized
   }
 

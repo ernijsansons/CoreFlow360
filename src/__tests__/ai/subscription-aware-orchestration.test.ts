@@ -32,7 +32,7 @@ describe('Subscription-Aware AI Orchestration', () => {
         taskType: TaskType.ANALYZE_CUSTOMER,
         input: { customerId: '123' },
         context: {},
-        requirements: {}
+        requirements: {},
       })
 
       expect(result.modulesInvolved).toEqual(['crm'])
@@ -49,7 +49,7 @@ describe('Subscription-Aware AI Orchestration', () => {
         taskType: TaskType.OPTIMIZE_PRICING,
         input: { productId: '456' },
         context: {},
-        requirements: {}
+        requirements: {},
       })
 
       expect(result.modulesInvolved).toEqual(['accounting'])
@@ -67,7 +67,7 @@ describe('Subscription-Aware AI Orchestration', () => {
         taskType: TaskType.PREDICT_CHURN,
         input: { customerId: '123' },
         context: {},
-        requirements: { crossModule: true }
+        requirements: { crossModule: true },
       })
 
       expect(result.modulesInvolved).toContain('crm')
@@ -75,7 +75,7 @@ describe('Subscription-Aware AI Orchestration', () => {
       expect(result.crossModuleInsights).toHaveLength(1)
       expect(result.crossModuleInsights[0]).toMatchObject({
         type: 'revenue-behavior-correlation',
-        confidence: expect.any(Number)
+        confidence: expect.any(Number),
       })
     })
 
@@ -87,12 +87,12 @@ describe('Subscription-Aware AI Orchestration', () => {
         taskType: TaskType.PERFORMANCE_ANALYSIS,
         input: { employeeId: '789' },
         context: {},
-        requirements: { crossModule: true }
+        requirements: { crossModule: true },
       })
 
       expect(result.crossModuleInsights).toContainEqual(
         expect.objectContaining({
-          type: 'sales-performance-correlation'
+          type: 'sales-performance-correlation',
         })
       )
     })
@@ -105,7 +105,7 @@ describe('Subscription-Aware AI Orchestration', () => {
         taskType: TaskType.FORECAST_DEMAND,
         input: { productId: '101' },
         context: {},
-        requirements: { crossModule: true }
+        requirements: { crossModule: true },
       })
 
       expect(result.modulesInvolved).toHaveLength(3)
@@ -123,7 +123,7 @@ describe('Subscription-Aware AI Orchestration', () => {
         taskType: TaskType.OPTIMIZE_PRICING, // Requires accounting
         input: { productId: '456' },
         context: {},
-        requirements: {}
+        requirements: {},
       })
 
       expect(result.success).toBe(false)
@@ -139,12 +139,14 @@ describe('Subscription-Aware AI Orchestration', () => {
         taskType: TaskType.ANALYZE_CUSTOMER,
         input: { customerId: '123' },
         context: { requestEnhancedInsights: true },
-        requirements: {}
+        requirements: {},
       })
 
       expect(result.upgradeSuggestions).toContain('accounting')
       expect(result.upgradeSuggestions).toContain('marketing')
-      expect(result.subscriptionLimitations).toContain('Enhanced customer insights require additional modules')
+      expect(result.subscriptionLimitations).toContain(
+        'Enhanced customer insights require additional modules'
+      )
     })
   })
 
@@ -155,12 +157,12 @@ describe('Subscription-Aware AI Orchestration', () => {
       const result = await orchestrator.orchestrateWithSubscriptionAwareness({
         tenantId: testTenantId,
         taskType: TaskType.AUTOMATE_WORKFLOW,
-        input: { 
+        input: {
           workflow: 'lead-qualification',
-          leadId: '123'
+          leadId: '123',
         },
         context: {},
-        requirements: {}
+        requirements: {},
       })
 
       expect(result.success).toBe(true)
@@ -174,18 +176,16 @@ describe('Subscription-Aware AI Orchestration', () => {
       const result = await orchestrator.orchestrateWithSubscriptionAwareness({
         tenantId: testTenantId,
         taskType: TaskType.AUTOMATE_WORKFLOW,
-        input: { 
+        input: {
           workflow: 'quote-to-cash',
-          quoteId: '456'
+          quoteId: '456',
         },
         context: {},
-        requirements: { crossModule: true }
+        requirements: { crossModule: true },
       })
 
       expect(result.success).toBe(true)
-      expect(result.data.workflowSteps).toContainEqual(
-        expect.objectContaining({ module: 'crm' })
-      )
+      expect(result.data.workflowSteps).toContainEqual(expect.objectContaining({ module: 'crm' }))
       expect(result.data.workflowSteps).toContainEqual(
         expect.objectContaining({ module: 'accounting' })
       )
@@ -202,7 +202,7 @@ describe('Subscription-Aware AI Orchestration', () => {
         taskType: TaskType.ANALYZE_CUSTOMER,
         input: { customerId: '123' },
         context: {},
-        requirements: { maxExecutionTime: 1000 }
+        requirements: { maxExecutionTime: 1000 },
       })
 
       const executionTime = Date.now() - startTime
@@ -220,7 +220,7 @@ describe('Subscription-Aware AI Orchestration', () => {
         taskType: TaskType.CROSS_MODULE_SYNC,
         input: { syncAll: true },
         context: {},
-        requirements: { crossModule: true }
+        requirements: { crossModule: true },
       })
 
       expect(result.executionMetadata.parallelOperations).toBe(true)
@@ -237,7 +237,7 @@ describe('Subscription-Aware AI Orchestration', () => {
         taskType: TaskType.ANALYZE_CUSTOMER,
         input: { customerId: '123' },
         context: {},
-        requirements: {}
+        requirements: {},
       })
 
       expect(result.success).toBe(false)
@@ -253,7 +253,7 @@ describe('Subscription-Aware AI Orchestration', () => {
         taskType: TaskType.PREDICT_CHURN,
         input: { customerId: '123' },
         context: {},
-        requirements: { crossModule: true }
+        requirements: { crossModule: true },
       })
 
       expect(result.success).toBe(true)

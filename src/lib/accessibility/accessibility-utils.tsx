@@ -18,39 +18,41 @@ export interface ColorContrastResult {
 export function calculateColorContrast(color1: string, color2: string): ColorContrastResult {
   const rgb1 = hexToRgb(color1)
   const rgb2 = hexToRgb(color2)
-  
+
   if (!rgb1 || !rgb2) {
     return { ratio: 0, wcagAA: false, wcagAAA: false, level: 'fail' }
   }
 
   const l1 = getRelativeLuminance(rgb1.r, rgb1.g, rgb1.b)
   const l2 = getRelativeLuminance(rgb2.r, rgb2.g, rgb2.b)
-  
+
   const ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)
-  
+
   return {
     ratio,
     wcagAA: ratio >= 4.5,
     wcagAAA: ratio >= 7.0,
-    level: ratio >= 7.0 ? 'aaa' : ratio >= 4.5 ? 'aa' : 'fail'
+    level: ratio >= 7.0 ? 'aaa' : ratio >= 4.5 ? 'aa' : 'fail',
   }
 }
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null
 }
 
 function getRelativeLuminance(r: number, g: number, b: number): number {
-  const [rs, gs, bs] = [r, g, b].map(c => {
+  const [rs, gs, bs] = [r, g, b].map((c) => {
     c = c / 255
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
   })
-  
+
   return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs
 }
 
@@ -118,7 +120,7 @@ export function useFocusManagement() {
     }
 
     container.addEventListener('keydown', handleTabKey)
-    
+
     // Focus first element
     firstElement?.focus()
 
@@ -132,7 +134,7 @@ export function useFocusManagement() {
     keyboardNavigation,
     saveFocus,
     restoreFocus,
-    trapFocus
+    trapFocus,
   }
 }
 
@@ -145,37 +147,43 @@ export function getFocusableElements(container: HTMLElement): HTMLElement[] {
     'select:not([disabled])',
     'textarea:not([disabled])',
     '[tabindex]:not([tabindex="-1"])',
-    '[contenteditable="true"]'
+    '[contenteditable="true"]',
   ].join(', ')
 
-  return Array.from(container.querySelectorAll(focusableSelectors))
-    .filter(element => {
-      return element instanceof HTMLElement && 
-             !element.hasAttribute('disabled') &&
-             element.tabIndex >= 0 &&
-             isElementVisible(element)
-    }) as HTMLElement[]
+  return Array.from(container.querySelectorAll(focusableSelectors)).filter((element) => {
+    return (
+      element instanceof HTMLElement &&
+      !element.hasAttribute('disabled') &&
+      element.tabIndex >= 0 &&
+      isElementVisible(element)
+    )
+  }) as HTMLElement[]
 }
 
 function isElementVisible(element: HTMLElement): boolean {
   const style = window.getComputedStyle(element)
-  return style.display !== 'none' && 
-         style.visibility !== 'hidden' && 
-         style.opacity !== '0' &&
-         element.offsetWidth > 0 && 
-         element.offsetHeight > 0
+  return (
+    style.display !== 'none' &&
+    style.visibility !== 'hidden' &&
+    style.opacity !== '0' &&
+    element.offsetWidth > 0 &&
+    element.offsetHeight > 0
+  )
 }
 
 // Screen Reader Announcements
-export function announceToScreenReader(message: string, priority: 'polite' | 'assertive' = 'polite') {
+export function announceToScreenReader(
+  message: string,
+  priority: 'polite' | 'assertive' = 'polite'
+) {
   const announcement = document.createElement('div')
   announcement.setAttribute('aria-live', priority)
   announcement.setAttribute('aria-atomic', 'true')
   announcement.className = 'sr-only'
   announcement.textContent = message
-  
+
   document.body.appendChild(announcement)
-  
+
   // Remove after announcement
   setTimeout(() => {
     document.body.removeChild(announcement)
@@ -187,7 +195,7 @@ export function useSkipLinks() {
   const skipLinks = [
     { href: '#main-content', label: 'Skip to main content' },
     { href: '#navigation', label: 'Skip to navigation' },
-    { href: '#footer', label: 'Skip to footer' }
+    { href: '#footer', label: 'Skip to footer' },
   ]
 
   const SkipLinksComponent = () => (
@@ -196,7 +204,7 @@ export function useSkipLinks() {
         <a
           key={link.href}
           href={link.href}
-          className="inline-block px-4 py-2 bg-violet-600 text-white font-medium rounded-lg mr-2 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+          className="mr-2 inline-block rounded-lg bg-violet-600 px-4 py-2 font-medium text-white focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 focus:outline-none"
         >
           {link.label}
         </a>
@@ -221,19 +229,19 @@ export function useHighContrastMode() {
       testElement.style.height = '5px'
       testElement.style.top = '-999px'
       testElement.style.backgroundColor = 'rgb(31, 41, 55)'
-      
+
       document.body.appendChild(testElement)
-      
+
       const computedStyle = window.getComputedStyle(testElement)
       const isHighContrast = computedStyle.borderTopColor !== computedStyle.backgroundColor
-      
+
       document.body.removeChild(testElement)
       setIsHighContrast(isHighContrast)
     }
 
     checkHighContrast()
     window.addEventListener('resize', checkHighContrast)
-    
+
     return () => {
       window.removeEventListener('resize', checkHighContrast)
     }
@@ -269,7 +277,7 @@ export function useAriaLiveRegion() {
     if (regionRef.current) {
       regionRef.current.setAttribute('aria-live', priority)
       regionRef.current.textContent = message
-      
+
       // Clear after a delay
       setTimeout(() => {
         if (regionRef.current) {
@@ -280,12 +288,7 @@ export function useAriaLiveRegion() {
   }
 
   const LiveRegion = () => (
-    <div
-      ref={regionRef}
-      className="sr-only"
-      aria-live="polite"
-      aria-atomic="true"
-    />
+    <div ref={regionRef} className="sr-only" aria-live="polite" aria-atomic="true" />
   )
 
   return { announce, LiveRegion }
@@ -302,7 +305,7 @@ export const KeyboardCodes = {
   ARROW_LEFT: 'ArrowLeft',
   ARROW_RIGHT: 'ArrowRight',
   HOME: 'Home',
-  END: 'End'
+  END: 'End',
 } as const
 
 export function handleArrowKeyNavigation(
@@ -316,7 +319,7 @@ export function handleArrowKeyNavigation(
   } = {}
 ): number {
   const { loop = true, orientation = 'vertical', onSelect } = options
-  
+
   let newIndex = currentIndex
 
   const isVertical = orientation === 'vertical'
@@ -364,38 +367,42 @@ export interface AccessibilityViolation {
   help: string
 }
 
-export async function runBasicAccessibilityChecks(container: HTMLElement = document.body): Promise<AccessibilityViolation[]> {
+export async function runBasicAccessibilityChecks(
+  container: HTMLElement = document.body
+): Promise<AccessibilityViolation[]> {
   const violations: AccessibilityViolation[] = []
 
   // Check for images without alt text
   const images = container.querySelectorAll('img:not([alt])')
-  images.forEach(img => {
+  images.forEach((img) => {
     violations.push({
       id: 'img-alt',
       impact: 'critical',
       description: 'Image without alt attribute',
       element: img,
-      help: 'Add an alt attribute to describe the image content'
+      help: 'Add an alt attribute to describe the image content',
     })
   })
 
   // Check for buttons without accessible names
   const buttons = container.querySelectorAll('button:not([aria-label]):not([aria-labelledby])')
-  buttons.forEach(button => {
+  buttons.forEach((button) => {
     if (!button.textContent?.trim()) {
       violations.push({
         id: 'button-name',
         impact: 'critical',
         description: 'Button without accessible name',
         element: button,
-        help: 'Add text content, aria-label, or aria-labelledby to the button'
+        help: 'Add text content, aria-label, or aria-labelledby to the button',
       })
     }
   })
 
   // Check for form inputs without labels
-  const inputs = container.querySelectorAll('input:not([type="hidden"]):not([aria-label]):not([aria-labelledby])')
-  inputs.forEach(input => {
+  const inputs = container.querySelectorAll(
+    'input:not([type="hidden"]):not([aria-label]):not([aria-labelledby])'
+  )
+  inputs.forEach((input) => {
     const id = input.getAttribute('id')
     if (!id || !container.querySelector(`label[for="${id}"]`)) {
       violations.push({
@@ -403,18 +410,18 @@ export async function runBasicAccessibilityChecks(container: HTMLElement = docum
         impact: 'critical',
         description: 'Form input without associated label',
         element: input,
-        help: 'Add a label element or aria-label attribute'
+        help: 'Add a label element or aria-label attribute',
       })
     }
   })
 
   // Check for sufficient color contrast
   const textElements = container.querySelectorAll('p, span, div, h1, h2, h3, h4, h5, h6, button, a')
-  textElements.forEach(element => {
+  textElements.forEach((element) => {
     const style = window.getComputedStyle(element)
     const color = style.color
     const backgroundColor = style.backgroundColor
-    
+
     if (color !== 'rgba(0, 0, 0, 0)' && backgroundColor !== 'rgba(0, 0, 0, 0)') {
       const contrast = calculateColorContrast(color, backgroundColor)
       if (!contrast.wcagAA) {
@@ -423,7 +430,7 @@ export async function runBasicAccessibilityChecks(container: HTMLElement = docum
           impact: 'serious',
           description: `Insufficient color contrast (${contrast.ratio.toFixed(2)}:1)`,
           element: element,
-          help: 'Ensure color contrast ratio is at least 4.5:1 for normal text'
+          help: 'Ensure color contrast ratio is at least 4.5:1 for normal text',
         })
       }
     }

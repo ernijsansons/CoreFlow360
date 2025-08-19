@@ -40,15 +40,15 @@ export function usePWA() {
     isOnline: navigator?.onLine ?? true,
     isUpdateAvailable: false,
     installPrompt: null,
-    swRegistration: null
+    swRegistration: null,
   })
 
   useEffect(() => {
     // Check if app is already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-    const isInstalled = isStandalone || (window.navigator as any).standalone === true
-    
-    setPWAState(prev => ({ ...prev, isInstalled }))
+    const isInstalled = isStandalone || (window.navigator as unknown).standalone === true
+
+    setPWAState((prev) => ({ ...prev, isInstalled }))
 
     // Register service worker
     if ('serviceWorker' in navigator) {
@@ -58,38 +58,38 @@ export function usePWA() {
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
-      const installEvent = e as any
-      
-      setPWAState(prev => ({
+      const installEvent = e as unknown
+
+      setPWAState((prev) => ({
         ...prev,
         canInstall: true,
         installPrompt: {
           prompt: async () => {
             await installEvent.prompt()
             const choiceResult = await installEvent.userChoice
-            
+
             if (choiceResult.outcome === 'accepted') {
-              setPWAState(prev => ({ 
-                ...prev, 
-                canInstall: false, 
+              setPWAState((prev) => ({
+                ...prev,
+                canInstall: false,
                 isInstalled: true,
-                installPrompt: null 
+                installPrompt: null,
               }))
             }
           },
-          userChoice: installEvent.userChoice
-        }
+          userChoice: installEvent.userChoice,
+        },
       }))
     }
 
     // Listen for online/offline events
     const handleOnline = () => {
-      setPWAState(prev => ({ ...prev, isOnline: true }))
+      setPWAState((prev) => ({ ...prev, isOnline: true }))
       syncOfflineActions()
     }
 
     const handleOffline = () => {
-      setPWAState(prev => ({ ...prev, isOnline: false }))
+      setPWAState((prev) => ({ ...prev, isOnline: false }))
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -106,10 +106,10 @@ export function usePWA() {
   const registerServiceWorker = async () => {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
+        scope: '/',
       })
 
-      setPWAState(prev => ({ ...prev, swRegistration: registration }))
+      setPWAState((prev) => ({ ...prev, swRegistration: registration }))
 
       // Check for updates
       registration.addEventListener('updatefound', () => {
@@ -117,16 +117,12 @@ export function usePWA() {
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              setPWAState(prev => ({ ...prev, isUpdateAvailable: true }))
+              setPWAState((prev) => ({ ...prev, isUpdateAvailable: true }))
             }
           })
         }
       })
-
-      console.log('[PWA] Service Worker registered successfully')
-    } catch (error) {
-      console.error('[PWA] Service Worker registration failed:', error)
-    }
+    } catch (error) {}
   }
 
   const installPWA = async () => {
@@ -145,7 +141,7 @@ export function usePWA() {
   return {
     ...pwaState,
     installPWA,
-    updatePWA
+    updatePWA,
   }
 }
 
@@ -162,24 +158,24 @@ export function useOfflineActions() {
       ...action,
       id: generateId(),
       timestamp: Date.now(),
-      retryCount: 0
+      retryCount: 0,
     }
 
-    setOfflineActions(prev => [...prev, newAction])
+    setOfflineActions((prev) => [...prev, newAction])
     saveOfflineActions([...offlineActions, newAction])
-    
+
     // Register background sync if available
     if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
-      navigator.serviceWorker.ready.then(registration => {
-        return registration.sync.register('offline-actions')
-      }).catch(error => {
-        console.error('[PWA] Background sync registration failed:', error)
-      })
+      navigator.serviceWorker.ready
+        .then((registration) => {
+          return registration.sync.register('offline-actions')
+        })
+        .catch((error) => {})
     }
   }
 
   const removeOfflineAction = (actionId: string) => {
-    const updatedActions = offlineActions.filter(action => action.id !== actionId)
+    const updatedActions = offlineActions.filter((action) => action.id !== actionId)
     setOfflineActions(updatedActions)
     saveOfflineActions(updatedActions)
   }
@@ -190,7 +186,7 @@ export function useOfflineActions() {
         const response = await fetch(action.url, {
           method: action.method,
           headers: action.headers,
-          body: action.body
+          body: action.body,
         })
 
         if (response.ok) {
@@ -198,15 +194,11 @@ export function useOfflineActions() {
         } else {
           // Increment retry count
           const updatedAction = { ...action, retryCount: action.retryCount + 1 }
-          const updatedActions = offlineActions.map(a => 
-            a.id === action.id ? updatedAction : a
-          )
+          const updatedActions = offlineActions.map((a) => (a.id === action.id ? updatedAction : a))
           setOfflineActions(updatedActions)
           saveOfflineActions(updatedActions)
         }
-      } catch (error) {
-        console.error('[PWA] Failed to sync offline action:', action.id, error)
-      }
+      } catch (error) {}
     }
   }
 
@@ -214,7 +206,7 @@ export function useOfflineActions() {
     offlineActions,
     addOfflineAction,
     removeOfflineAction,
-    syncOfflineActions
+    syncOfflineActions,
   }
 }
 
@@ -226,9 +218,7 @@ function generateId(): string {
 function saveOfflineActions(actions: OfflineAction[]) {
   try {
     localStorage.setItem('coreflow360-offline-actions', JSON.stringify(actions))
-  } catch (error) {
-    console.error('[PWA] Failed to save offline actions:', error)
-  }
+  } catch (error) {}
 }
 
 function loadOfflineActions(): OfflineAction[] {
@@ -236,7 +226,6 @@ function loadOfflineActions(): OfflineAction[] {
     const saved = localStorage.getItem('coreflow360-offline-actions')
     return saved ? JSON.parse(saved) : []
   } catch (error) {
-    console.error('[PWA] Failed to load offline actions:', error)
     return []
   }
 }
@@ -259,25 +248,26 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   return 'denied'
 }
 
-export async function subscribeToPushNotifications(swRegistration: ServiceWorkerRegistration): Promise<PushSubscription | null> {
+export async function subscribeToPushNotifications(
+  swRegistration: ServiceWorkerRegistration
+): Promise<PushSubscription | null> {
   try {
     const subscription = await swRegistration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     })
 
     // Send subscription to server
     await fetch('/api/push/subscribe', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(subscription)
+      body: JSON.stringify(subscription),
     })
 
     return subscription
   } catch (error) {
-    console.error('[PWA] Push notification subscription failed:', error)
     return null
   }
 }
@@ -299,10 +289,8 @@ export async function shareContent(shareData: ShareData): Promise<boolean> {
         return true
       }
     }
-  } catch (error) {
-    console.error('[PWA] Sharing failed:', error)
-  }
-  
+  } catch (error) {}
+
   return false
 }
 
@@ -313,9 +301,9 @@ export function useAppUpdate() {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(reg => {
+      navigator.serviceWorker.ready.then((reg) => {
         setRegistration(reg)
-        
+
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing
           if (newWorker) {
@@ -344,21 +332,20 @@ export function useAppUpdate() {
 export function trackPWAMetrics() {
   // Track app installation
   window.addEventListener('appinstalled', () => {
-    console.log('[PWA] App installed')
     // Track with analytics
   })
 
   // Track display mode
-  const displayMode = window.matchMedia('(display-mode: standalone)').matches 
-    ? 'standalone' 
+  const displayMode = window.matchMedia('(display-_mode: standalone)').matches
+    ? 'standalone'
     : 'browser'
-  
-  console.log('[PWA] Display mode:', displayMode)
 
   // Track connection type
-  const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
+  const connection =
+    (navigator as unknown).connection ||
+    (navigator as unknown).mozConnection ||
+    (navigator as unknown).webkitConnection
   if (connection) {
-    console.log('[PWA] Connection type:', connection.effectiveType)
   }
 }
 
@@ -368,10 +355,9 @@ export async function clearAppCache(): Promise<void> {
     const cacheNames = await caches.keys()
     await Promise.all(
       cacheNames
-        .filter(name => name.startsWith('coreflow360-'))
-        .map(name => caches.delete(name))
+        .filter((name) => name.startsWith('coreflow360-'))
+        .map((name) => caches.delete(name))
     )
-    console.log('[PWA] App cache cleared')
   }
 }
 

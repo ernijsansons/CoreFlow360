@@ -2,7 +2,7 @@
 
 /**
  * Partner Portal Page
- * 
+ *
  * Central hub for Intelligence Certified Consultants with dashboard,
  * certification programs, resources, training, and community features.
  */
@@ -14,31 +14,38 @@ import {
   IntelligenceCertificationProgram,
   // PartnerResourceLibrary, // Disabled - missing dependency
   // PartnerTrainingAcademy, // Disabled - missing dependency
-  PartnerCommunityHub
+  PartnerCommunityHub,
 } from '../../components/partners'
 
 const PartnerPortalPage: React.FC = () => {
-  const [activeSection, setActiveSection] = useState<'dashboard' | 'certification' | 'resources' | 'training' | 'community'>('dashboard')
+  const [activeSection, setActiveSection] = useState<
+    'dashboard' | 'certification' | 'resources' | 'training' | 'community'
+  >('dashboard')
   const [partnerData] = useState({
     id: 'partner-123',
     name: 'Sarah Chen',
     certificationLevel: 'advanced' as const,
-    consciousnessLevel: 7.5
+    consciousnessLevel: 7.5,
   })
 
   const navigationItems = [
     { id: 'dashboard', name: 'Dashboard', icon: '🏠', description: 'Your partner hub' },
-    { id: 'certification', name: 'Certification', icon: '🎓', description: 'Level up your expertise' },
+    {
+      id: 'certification',
+      name: 'Certification',
+      icon: '🎓',
+      description: 'Level up your expertise',
+    },
     { id: 'resources', name: 'Resources', icon: '📚', description: 'Tools & materials' },
     { id: 'training', name: 'Training', icon: '🎯', description: 'Courses & workshops' },
-    { id: 'community', name: 'Community', icon: '🌐', description: 'Connect & collaborate' }
+    { id: 'community', name: 'Community', icon: '🌐', description: 'Connect & collaborate' },
   ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black">
       {/* Header */}
       <div className="border-b border-gray-700 bg-black/30 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-8 py-6">
+        <div className="mx-auto max-w-7xl px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-thin text-white">Partner Portal</h1>
@@ -57,7 +64,7 @@ const PartnerPortalPage: React.FC = () => {
                 </div>
                 <div className="text-xs text-gray-400">Consciousness Level</div>
               </div>
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center text-white font-bold">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 font-bold text-white">
                 SC
               </div>
             </div>
@@ -67,16 +74,16 @@ const PartnerPortalPage: React.FC = () => {
 
       {/* Navigation */}
       <div className="border-b border-gray-700 bg-black/20">
-        <div className="max-w-7xl mx-auto px-8 py-4">
+        <div className="mx-auto max-w-7xl px-8 py-4">
           <div className="flex space-x-2 overflow-x-auto">
             {navigationItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveSection(item.id as any)}
-                className={`flex items-center space-x-3 px-6 py-3 rounded-lg transition-all whitespace-nowrap ${
+                onClick={() => setActiveSection(item.id as unknown)}
+                className={`flex items-center space-x-3 rounded-lg px-6 py-3 whitespace-nowrap transition-all ${
                   activeSection === item.id
-                    ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/50 text-cyan-400'
-                    : 'bg-gray-800/50 border border-gray-600 text-gray-300 hover:border-gray-500 hover:text-white'
+                    ? 'border border-cyan-400/50 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-cyan-400'
+                    : 'border border-gray-600 bg-gray-800/50 text-gray-300 hover:border-gray-500 hover:text-white'
                 }`}
               >
                 <span className="text-xl">{item.icon}</span>
@@ -91,7 +98,7 @@ const PartnerPortalPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-8 py-8">
+      <div className="mx-auto max-w-7xl px-8 py-8">
         <AnimatePresence mode="wait">
           {activeSection === 'dashboard' && (
             <motion.div
@@ -128,11 +135,9 @@ const PartnerPortalPage: React.FC = () => {
                 partnerId={partnerData.id}
                 currentLevel={partnerData.certificationLevel}
                 onEnroll={(level) => {
-                  console.log('Enrolling in:', level)
                   // Handle enrollment
                 }}
                 onModuleStart={(module) => {
-                  console.log('Starting module:', module)
                   // Handle module start
                 }}
               />
@@ -155,9 +160,11 @@ const PartnerPortalPage: React.FC = () => {
                   // Handle resource open
                 }}
               /> */}
-              <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl p-12 text-center">
-                <h2 className="text-2xl font-bold text-white mb-4">Resource Library</h2>
-                <p className="text-gray-400">Resource library temporarily disabled - missing dependencies</p>
+              <div className="rounded-xl bg-gray-800/50 p-12 text-center backdrop-blur-xl">
+                <h2 className="mb-4 text-2xl font-bold text-white">Resource Library</h2>
+                <p className="text-gray-400">
+                  Resource library temporarily disabled - missing dependencies
+                </p>
               </div>
             </motion.div>
           )}
@@ -182,9 +189,11 @@ const PartnerPortalPage: React.FC = () => {
                   // Handle session registration
                 }}
               /> */}
-              <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl p-12 text-center">
-                <h2 className="text-2xl font-bold text-white mb-4">Training Academy</h2>
-                <p className="text-gray-400">Training academy temporarily disabled - missing dependencies</p>
+              <div className="rounded-xl bg-gray-800/50 p-12 text-center backdrop-blur-xl">
+                <h2 className="mb-4 text-2xl font-bold text-white">Training Academy</h2>
+                <p className="text-gray-400">
+                  Training academy temporarily disabled - missing dependencies
+                </p>
               </div>
             </motion.div>
           )}
@@ -201,11 +210,9 @@ const PartnerPortalPage: React.FC = () => {
                 partnerId={partnerData.id}
                 certificationLevel={partnerData.certificationLevel}
                 onMemberConnect={(member) => {
-                  console.log('Connecting with member:', member)
                   // Handle member connection
                 }}
                 onDiscussionOpen={(discussion) => {
-                  console.log('Opening discussion:', discussion)
                   // Handle discussion open
                 }}
               />
@@ -215,9 +222,9 @@ const PartnerPortalPage: React.FC = () => {
       </div>
 
       {/* Quick Stats Footer */}
-      <div className="border-t border-gray-700 bg-black/30 backdrop-blur-xl mt-12">
-        <div className="max-w-7xl mx-auto px-8 py-6">
-          <div className="grid md:grid-cols-4 gap-6 text-center">
+      <div className="mt-12 border-t border-gray-700 bg-black/30 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-8 py-6">
+          <div className="grid gap-6 text-center md:grid-cols-4">
             <div>
               <div className="text-2xl font-bold text-cyan-400">1,247</div>
               <div className="text-sm text-gray-400">Active Partners</div>

@@ -1,7 +1,7 @@
 /**
  * CoreFlow360 - LangChain Manager
  * MATHEMATICALLY PERFECT, ALGORITHMICALLY OPTIMAL, PROVABLY CORRECT
- * 
+ *
  * Advanced AI agent coordination using LangChain framework
  * Enables complex reasoning chains, tool usage, and multi-agent collaboration
  */
@@ -9,11 +9,11 @@
 import { ChatOpenAI } from '@langchain/openai'
 import { ChatAnthropic } from '@langchain/anthropic'
 import { LLMChain, SequentialChain } from 'langchain/chains'
-import { 
+import {
   ChatPromptTemplate,
   HumanMessagePromptTemplate,
   SystemMessagePromptTemplate,
-  PromptTemplate
+  PromptTemplate,
 } from '@langchain/core/prompts'
 import { BufferMemory, ConversationSummaryMemory } from 'langchain/memory'
 import { Tool } from '@langchain/core/tools'
@@ -22,8 +22,8 @@ import { OpenAIEmbeddings } from '@langchain/openai'
 import { Document } from '@langchain/core/documents'
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { AIModelType, PrismaClient } from '@prisma/client'
-import { executeSecureOperation } from '@/services/security/secure-operations'
-import { withPerformanceTracking } from '@/utils/performance/performance-tracking'
+import { executeSecureOperation } from '@/lib/services/security/secure-operations'
+import { withPerformanceTracking } from '@/lib/utils/performance/performance-tracking'
 import { Redis } from 'ioredis'
 
 // LangChain Configuration
@@ -61,43 +61,43 @@ export enum ChainType {
   RECOMMENDATION = 'RECOMMENDATION',
   CONVERSATION = 'CONVERSATION',
   WORKFLOW = 'WORKFLOW',
-  MULTI_AGENT = 'MULTI_AGENT'
+  MULTI_AGENT = 'MULTI_AGENT',
 }
 
 // Tool Definitions for AI Agents
 export interface AIToolConfig {
   name: string
   description: string
-  inputSchema: Record<string, any>
-  outputSchema: Record<string, any>
-  handler: (input: any, context?: any) => Promise<any>
+  inputSchema: Record<string, unknown>
+  outputSchema: Record<string, unknown>
+  handler: (input: unknown, context?: unknown) => Promise<unknown>
 }
 
 // Chain Results
 export interface ChainResult {
   success: boolean
-  output: any
+  output: unknown
   confidence?: number
   reasoning?: string
   tokensUsed?: number
   cost?: number
   executionTime?: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export class LangChainManager {
   private config: LangChainConfig
   private prisma: PrismaClient
   private redis: Redis
-  
+
   // Model instances
-  private models: Map<AIModelType, any> = new Map()
-  private embeddings: Map<string, any> = new Map()
+  private models: Map<AIModelType, unknown> = new Map()
+  private embeddings: Map<string, unknown> = new Map()
   private vectorStore?: PrismaVectorStore
-  
+
   // Chain cache
-  private chainCache: Map<string, any> = new Map()
-  
+  private chainCache: Map<string, unknown> = new Map()
+
   // Tools registry
   private tools: Map<string, Tool> = new Map()
 
@@ -105,7 +105,7 @@ export class LangChainManager {
     this.config = config
     this.prisma = prisma
     this.redis = redis
-    
+
     this.initializeModels()
     this.initializeEmbeddings()
     this.initializeTools()
@@ -116,45 +116,60 @@ export class LangChainManager {
    */
   private initializeModels(): void {
     // OpenAI Models
-    this.models.set(AIModelType.GPT4, new ChatOpenAI({
-      openAIApiKey: this.config.openaiApiKey,
-      modelName: this.config.models[AIModelType.GPT4],
-      temperature: 0.7,
-      maxTokens: 4096,
-      streaming: true
-    }))
+    this.models.set(
+      AIModelType.GPT4,
+      new ChatOpenAI({
+        openAIApiKey: this.config.openaiApiKey,
+        modelName: this.config.models[AIModelType.GPT4],
+        temperature: 0.7,
+        maxTokens: 4096,
+        streaming: true,
+      })
+    )
 
-    this.models.set(AIModelType.GPT4_TURBO, new ChatOpenAI({
-      openAIApiKey: this.config.openaiApiKey,
-      modelName: this.config.models[AIModelType.GPT4_TURBO],
-      temperature: 0.7,
-      maxTokens: 8192,
-      streaming: true
-    }))
+    this.models.set(
+      AIModelType.GPT4_TURBO,
+      new ChatOpenAI({
+        openAIApiKey: this.config.openaiApiKey,
+        modelName: this.config.models[AIModelType.GPT4_TURBO],
+        temperature: 0.7,
+        maxTokens: 8192,
+        streaming: true,
+      })
+    )
 
     // Anthropic Models
-    this.models.set(AIModelType.CLAUDE3_OPUS, new ChatAnthropic({
-      anthropicApiKey: this.config.anthropicApiKey,
-      modelName: this.config.models[AIModelType.CLAUDE3_OPUS],
-      temperature: 0.7,
-      maxTokens: 4096
-    }))
+    this.models.set(
+      AIModelType.CLAUDE3_OPUS,
+      new ChatAnthropic({
+        anthropicApiKey: this.config.anthropicApiKey,
+        modelName: this.config.models[AIModelType.CLAUDE3_OPUS],
+        temperature: 0.7,
+        maxTokens: 4096,
+      })
+    )
 
-    this.models.set(AIModelType.CLAUDE3_SONNET, new ChatAnthropic({
-      anthropicApiKey: this.config.anthropicApiKey,
-      modelName: this.config.models[AIModelType.CLAUDE3_SONNET],
-      temperature: 0.7,
-      maxTokens: 4096
-    }))
+    this.models.set(
+      AIModelType.CLAUDE3_SONNET,
+      new ChatAnthropic({
+        anthropicApiKey: this.config.anthropicApiKey,
+        modelName: this.config.models[AIModelType.CLAUDE3_SONNET],
+        temperature: 0.7,
+        maxTokens: 4096,
+      })
+    )
 
-    this.models.set(AIModelType.CLAUDE3_HAIKU, new ChatAnthropic({
-      anthropicApiKey: this.config.anthropicApiKey,
-      modelName: this.config.models[AIModelType.CLAUDE3_HAIKU],
-      temperature: 0.7,
-      maxTokens: 4096
-    }))
+    this.models.set(
+      AIModelType.CLAUDE3_HAIKU,
+      new ChatAnthropic({
+        anthropicApiKey: this.config.anthropicApiKey,
+        modelName: this.config.models[AIModelType.CLAUDE3_HAIKU],
+        temperature: 0.7,
+        maxTokens: 4096,
+      })
+    )
 
-    console.log(`🤖 Initialized ${this.models.size} language models`)
+    // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // console.log(`🤖 Initialized ${this.models.size} language models`)
   }
 
   /**
@@ -162,21 +177,27 @@ export class LangChainManager {
    */
   private initializeEmbeddings(): void {
     // OpenAI Embeddings
-    this.embeddings.set('openai', new OpenAIEmbeddings({
-      openAIApiKey: this.config.openaiApiKey,
-      modelName: this.config.embeddings.openai.model,
-      dimensions: this.config.embeddings.openai.dimensions
-    }))
+    this.embeddings.set(
+      'openai',
+      new OpenAIEmbeddings({
+        openAIApiKey: this.config.openaiApiKey,
+        modelName: this.config.embeddings.openai.model,
+        dimensions: this.config.embeddings.openai.dimensions,
+      })
+    )
 
     // Voyage AI Embeddings (if configured)
     if (this.config.voyageApiKey) {
-      this.embeddings.set('voyage', new VoyageEmbeddings({
-        apiKey: this.config.voyageApiKey,
-        modelName: this.config.embeddings.voyage.model
-      }))
+      this.embeddings.set(
+        'voyage',
+        new VoyageEmbeddings({
+          apiKey: this.config.voyageApiKey,
+          modelName: this.config.embeddings.voyage.model,
+        })
+      )
     }
 
-    console.log(`🔍 Initialized ${this.embeddings.size} embedding models`)
+    // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // console.log(`🔍 Initialized ${this.embeddings.size} embedding models`)
   }
 
   /**
@@ -192,19 +213,19 @@ export class LangChainManager {
           type: 'object',
           properties: {
             identifier: { type: 'string', description: 'Customer ID or email' },
-            type: { type: 'string', enum: ['id', 'email'] }
+            type: { type: 'string', enum: ['id', 'email'] },
           },
-          required: ['identifier', 'type']
+          required: ['identifier', 'type'],
         },
         outputSchema: {
           type: 'object',
           properties: {
             customer: { type: 'object' },
             activities: { type: 'array' },
-            opportunities: { type: 'array' }
-          }
+            opportunities: { type: 'array' },
+          },
         },
-        handler: this.handleCustomerLookup.bind(this)
+        handler: this.handleCustomerLookup.bind(this),
       },
 
       // Financial Tools
@@ -217,19 +238,19 @@ export class LangChainManager {
             entityType: { type: 'string', enum: ['customer', 'project', 'department'] },
             entityId: { type: 'string' },
             analysisType: { type: 'string', enum: ['revenue', 'cost', 'profit', 'trend'] },
-            timeframe: { type: 'string', description: 'Time period for analysis' }
+            timeframe: { type: 'string', description: 'Time period for analysis' },
           },
-          required: ['entityType', 'entityId', 'analysisType']
+          required: ['entityType', 'entityId', 'analysisType'],
         },
         outputSchema: {
           type: 'object',
           properties: {
             metrics: { type: 'object' },
             trends: { type: 'array' },
-            insights: { type: 'array' }
-          }
+            insights: { type: 'array' },
+          },
         },
-        handler: this.handleFinancialAnalysis.bind(this)
+        handler: this.handleFinancialAnalysis.bind(this),
       },
 
       // Predictive Analytics Tools
@@ -242,9 +263,9 @@ export class LangChainManager {
             predictionType: { type: 'string', enum: ['churn', 'sales', 'demand', 'performance'] },
             entityId: { type: 'string' },
             features: { type: 'object', description: 'Input features for prediction' },
-            horizon: { type: 'integer', description: 'Prediction horizon in days' }
+            horizon: { type: 'integer', description: 'Prediction horizon in days' },
           },
-          required: ['predictionType', 'features']
+          required: ['predictionType', 'features'],
         },
         outputSchema: {
           type: 'object',
@@ -252,10 +273,10 @@ export class LangChainManager {
             prediction: { type: 'number' },
             confidence: { type: 'number' },
             factors: { type: 'object' },
-            recommendations: { type: 'array' }
-          }
+            recommendations: { type: 'array' },
+          },
         },
-        handler: this.handlePrediction.bind(this)
+        handler: this.handlePrediction.bind(this),
       },
 
       // Document Processing Tools
@@ -267,9 +288,9 @@ export class LangChainManager {
           properties: {
             documentId: { type: 'string' },
             processType: { type: 'string', enum: ['extract', 'summarize', 'classify'] },
-            options: { type: 'object', description: 'Processing options' }
+            options: { type: 'object', description: 'Processing options' },
           },
-          required: ['documentId', 'processType']
+          required: ['documentId', 'processType'],
         },
         outputSchema: {
           type: 'object',
@@ -277,10 +298,10 @@ export class LangChainManager {
             extractedText: { type: 'string' },
             summary: { type: 'string' },
             classification: { type: 'object' },
-            metadata: { type: 'object' }
-          }
+            metadata: { type: 'object' },
+          },
         },
-        handler: this.handleDocumentProcessing.bind(this)
+        handler: this.handleDocumentProcessing.bind(this),
       },
 
       // Workflow Tools
@@ -292,9 +313,9 @@ export class LangChainManager {
           properties: {
             workflowId: { type: 'string' },
             inputs: { type: 'object', description: 'Workflow input data' },
-            context: { type: 'object', description: 'Execution context' }
+            context: { type: 'object', description: 'Execution context' },
           },
-          required: ['workflowId', 'inputs']
+          required: ['workflowId', 'inputs'],
         },
         outputSchema: {
           type: 'object',
@@ -302,11 +323,11 @@ export class LangChainManager {
             success: { type: 'boolean' },
             outputs: { type: 'object' },
             steps: { type: 'array' },
-            errors: { type: 'array' }
-          }
+            errors: { type: 'array' },
+          },
         },
-        handler: this.handleWorkflowExecution.bind(this)
-      }
+        handler: this.handleWorkflowExecution.bind(this),
+      },
     ]
 
     // Convert tool configs to LangChain tools
@@ -322,13 +343,13 @@ export class LangChainManager {
           } catch (error) {
             return JSON.stringify({ error: error.message })
           }
-        }
+        },
       })
 
       this.tools.set(toolConfig.name, tool)
     }
 
-    console.log(`🛠️ Initialized ${this.tools.size} AI tools`)
+    // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // console.log(`🛠️ Initialized ${this.tools.size} AI tools`)
   }
 
   /**
@@ -344,7 +365,7 @@ export class LangChainManager {
       { model, analysisType },
       async () => {
         const cacheKey = `analysis_chain_${model}_${analysisType}`
-        
+
         // Check cache first
         if (this.chainCache.has(cacheKey)) {
           return this.chainCache.get(cacheKey)
@@ -355,20 +376,20 @@ export class LangChainManager {
 
         // Create specialized prompt templates based on analysis type
         const promptTemplate = this.createAnalysisPromptTemplate(analysisType)
-        
+
         const chain = new LLMChain({
           llm,
           prompt: promptTemplate,
           memory: new BufferMemory({
             memoryKey: 'chat_history',
             inputKey: 'input',
-            outputKey: 'output'
-          })
+            outputKey: 'output',
+          }),
         })
 
         // Cache the chain
         this.chainCache.set(cacheKey, chain)
-        
+
         return chain
       }
     )
@@ -379,8 +400,8 @@ export class LangChainManager {
    */
   async createPredictionChain(
     model: AIModelType,
-    predictionType: string,
-    features: Record<string, unknown>
+    _predictionType: string,
+    _features: Record<string, unknown>
   ): Promise<SequentialChain> {
     return await withPerformanceTracking('create_prediction_chain', async () => {
       const llm = this.models.get(model)
@@ -402,7 +423,7 @@ export class LangChainManager {
           
           Output your analysis in structured JSON format.
         `),
-        outputKey: 'feature_analysis'
+        outputKey: 'feature_analysis',
       })
 
       // Step 2: Historical pattern recognition
@@ -420,7 +441,7 @@ export class LangChainManager {
           
           Provide structured analysis in JSON format.
         `),
-        outputKey: 'pattern_analysis'
+        outputKey: 'pattern_analysis',
       })
 
       // Step 3: Prediction generation
@@ -442,14 +463,14 @@ export class LangChainManager {
           
           Format as structured JSON with numerical values.
         `),
-        outputKey: 'prediction'
+        outputKey: 'prediction',
       })
 
       return new SequentialChain({
         chains: [featureAnalysisChain, patternChain, predictionChain],
         inputVariables: ['prediction_type', 'features'],
         outputVariables: ['feature_analysis', 'pattern_analysis', 'prediction'],
-        verbose: true
+        verbose: true,
       })
     })
   }
@@ -524,7 +545,7 @@ export class LangChainManager {
       const chain = new LLMChain({
         llm,
         prompt: promptTemplate,
-        outputKey: isLast ? 'final_result' : `agent_${i}_analysis`
+        outputKey: isLast ? 'final_result' : `agent_${i}_analysis`,
       })
 
       chains.push(chain)
@@ -532,7 +553,7 @@ export class LangChainManager {
 
     // Build input/output variables dynamically
     const inputVariables = ['task']
-    const outputVariables = chains.map((_, i) => 
+    const outputVariables = chains.map((_, i) =>
       i === chains.length - 1 ? 'final_result' : `agent_${i}_analysis`
     )
 
@@ -540,7 +561,7 @@ export class LangChainManager {
       chains,
       inputVariables,
       outputVariables,
-      verbose: true
+      verbose: true,
     })
   }
 
@@ -552,28 +573,25 @@ export class LangChainManager {
     toolNames: string[],
     systemPrompt?: string
   ): Promise<AgentExecutor> {
-    return await executeSecureOperation(
-      'CREATE_TOOL_AGENT',
-      { model, toolNames },
-      async () => {
-        const llm = this.models.get(model)
-        if (!llm) throw new Error(`Model not found: ${model}`)
+    return await executeSecureOperation('CREATE_TOOL_AGENT', { model, toolNames }, async () => {
+      const llm = this.models.get(model)
+      if (!llm) throw new Error(`Model not found: ${model}`)
 
-        // Get specified tools
-        const selectedTools: Tool[] = []
-        for (const toolName of toolNames) {
-          const tool = this.tools.get(toolName)
-          if (tool) selectedTools.push(tool)
-        }
+      // Get specified tools
+      const selectedTools: Tool[] = []
+      for (const toolName of toolNames) {
+        const tool = this.tools.get(toolName)
+        if (tool) selectedTools.push(tool)
+      }
 
-        if (selectedTools.length === 0) {
-          throw new Error('No valid tools found for agent')
-        }
+      if (selectedTools.length === 0) {
+        throw new Error('No valid tools found for agent')
+      }
 
-        // Create system prompt
-        const prompt = ChatPromptTemplate.fromMessages([
-          SystemMessagePromptTemplate.fromTemplate(
-            systemPrompt || 
+      // Create system prompt
+      const prompt = ChatPromptTemplate.fromMessages([
+        SystemMessagePromptTemplate.fromTemplate(
+          systemPrompt ||
             `You are an AI assistant specialized in business operations. 
             You have access to various tools to help analyze data, make predictions, 
             and automate workflows. Always use the appropriate tools to provide 
@@ -586,31 +604,30 @@ export class LangChainManager {
             4. Provide clear, actionable recommendations
             
             Be precise, thorough, and always explain your reasoning.`
-          ),
-          HumanMessagePromptTemplate.fromTemplate('{input}'),
-          // MessagesPlaceholder for agent scratchpad
-        ])
+        ),
+        HumanMessagePromptTemplate.fromTemplate('{input}'),
+        // MessagesPlaceholder for agent scratchpad
+      ])
 
-        // Create the agent
-        const agent = await createOpenAIFunctionsAgent({
+      // Create the agent
+      const agent = await createOpenAIFunctionsAgent({
+        llm,
+        tools: selectedTools,
+        prompt,
+      })
+
+      return new AgentExecutor({
+        agent,
+        tools: selectedTools,
+        verbose: true,
+        maxIterations: 10,
+        memory: new ConversationSummaryMemory({
           llm,
-          tools: selectedTools,
-          prompt
-        })
-
-        return new AgentExecutor({
-          agent,
-          tools: selectedTools,
-          verbose: true,
-          maxIterations: 10,
-          memory: new ConversationSummaryMemory({
-            llm,
-            maxTokenLimit: this.config.memory.summaryThreshold,
-            returnMessages: true
-          })
-        })
-      }
-    )
+          maxTokenLimit: this.config.memory.summaryThreshold,
+          returnMessages: true,
+        }),
+      })
+    })
   }
 
   /**
@@ -624,7 +641,7 @@ export class LangChainManager {
     return await withPerformanceTracking('process_document_ai', async () => {
       // Load document from database
       const document = await this.prisma.document.findUnique({
-        where: { id: documentId }
+        where: { id: documentId },
       })
 
       if (!document) {
@@ -721,7 +738,7 @@ export class LangChainManager {
 
       const chain = new LLMChain({
         llm,
-        prompt: promptTemplate
+        prompt: promptTemplate,
       })
 
       const startTime = Date.now()
@@ -729,7 +746,7 @@ export class LangChainManager {
       const result = await chain.call({
         name: document.name,
         mimeType: document.mimeType,
-        content: documentContent
+        content: documentContent,
       })
 
       const executionTime = Date.now() - startTime
@@ -742,8 +759,8 @@ export class LangChainManager {
           documentId,
           processType,
           model,
-          contentLength: documentContent.length
-        }
+          contentLength: documentContent.length,
+        },
       }
     })
   }
@@ -771,7 +788,7 @@ export class LangChainManager {
         
         Output structured JSON with confidence scores for each insight.
       `,
-      
+
       sales_intelligence: `
         As a sales intelligence expert, analyze the sales opportunity data.
         
@@ -790,7 +807,7 @@ export class LangChainManager {
         
         Include numerical predictions with confidence intervals.
       `,
-      
+
       financial_intelligence: `
         As a financial analyst, examine the financial data for insights and recommendations.
         
@@ -808,7 +825,7 @@ export class LangChainManager {
         7. Strategic financial recommendations
         
         Provide quantitative insights with supporting rationale.
-      `
+      `,
     }
 
     const template = templates[analysisType] || templates.customer_intelligence
@@ -819,20 +836,18 @@ export class LangChainManager {
   /**
    * Tool handlers
    */
-  private async handleCustomerLookup(input: any): Promise<any> {
+  private async handleCustomerLookup(input: unknown): Promise<unknown> {
     const { identifier, type } = input
-    
-    const whereClause = type === 'email' 
-      ? { email: identifier }
-      : { id: identifier }
+
+    const whereClause = type === 'email' ? { email: identifier } : { id: identifier }
 
     const customer = await this.prisma.contact.findUnique({
       where: whereClause,
       include: {
         opportunities: true,
         activities: true,
-        communications: true
-      }
+        communications: true,
+      },
     })
 
     if (!customer) {
@@ -846,40 +861,40 @@ export class LangChainManager {
         email: customer.email,
         type: customer.type,
         aiScore: customer.aiScore,
-        aiChurnRisk: customer.aiChurnRisk
+        aiChurnRisk: customer.aiChurnRisk,
       },
-      activities: customer.activities.map(activity => ({
+      activities: customer.activities.map((activity) => ({
         id: activity.id,
         type: activity.type,
         title: activity.title,
-        date: activity.startDate
+        date: activity.startDate,
       })),
-      opportunities: customer.opportunities.map(opp => ({
+      opportunities: customer.opportunities.map((opp) => ({
         id: opp.id,
         name: opp.name,
         amount: opp.amount,
         stage: opp.stage,
-        probability: opp.probability
-      }))
+        probability: opp.probability,
+      })),
     }
   }
 
-  private async handleFinancialAnalysis(input: any): Promise<any> {
+  private async handleFinancialAnalysis(_input: unknown): Promise<unknown> {
     // Implement financial analysis logic
     return { message: 'Financial analysis not yet implemented' }
   }
 
-  private async handlePrediction(input: any): Promise<any> {
+  private async handlePrediction(_input: unknown): Promise<unknown> {
     // Implement prediction logic
     return { message: 'Prediction not yet implemented' }
   }
 
-  private async handleDocumentProcessing(input: any): Promise<any> {
+  private async handleDocumentProcessing(_input: unknown): Promise<unknown> {
     // Implement document processing logic
     return { message: 'Document processing not yet implemented' }
   }
 
-  private async handleWorkflowExecution(input: any): Promise<any> {
+  private async handleWorkflowExecution(_input: unknown): Promise<unknown> {
     // Implement workflow execution logic
     return { message: 'Workflow execution not yet implemented' }
   }

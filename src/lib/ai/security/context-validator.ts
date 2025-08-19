@@ -24,7 +24,7 @@ export function createSecurityContext(flowContext: AIFlowContext): SecurityConte
     dataClassification: flowContext.metadata?.dataClassification || 'internal',
     encryptionRequired: flowContext.metadata?.encryptionRequired !== false,
     auditLog: true,
-    rateLimitTier: flowContext.metadata?.rateLimitTier || 'standard'
+    rateLimitTier: flowContext.metadata?.rateLimitTier || 'standard',
   }
 }
 
@@ -51,7 +51,8 @@ export function validateSecurityContext(context: SecurityContext): boolean {
   const now = new Date()
   const contextTime = new Date(context.timestamp)
   const timeDiff = now.getTime() - contextTime.getTime()
-  if (timeDiff < 0 || timeDiff > 3600000) { // 1 hour max
+  if (timeDiff < 0 || timeDiff > 3600000) {
+    // 1 hour max
     return false
   }
 
@@ -61,7 +62,7 @@ export function validateSecurityContext(context: SecurityContext): boolean {
 /**
  * Sanitize security context for logging
  */
-export function sanitizeContextForLogging(context: SecurityContext): any {
+export function sanitizeContextForLogging(context: SecurityContext): unknown {
   return {
     tenantId: context.tenantId,
     userId: hashUserId(context.userId),
@@ -69,7 +70,7 @@ export function sanitizeContextForLogging(context: SecurityContext): any {
     requestId: context.requestId,
     timestamp: context.timestamp,
     dataClassification: context.dataClassification,
-    rateLimitTier: context.rateLimitTier
+    rateLimitTier: context.rateLimitTier,
   }
 }
 
@@ -80,7 +81,7 @@ export function hasPermission(context: SecurityContext, permission: string): boo
   if (context.role === 'admin') {
     return true
   }
-  
+
   return context.permissions.includes(permission)
 }
 
@@ -129,8 +130,8 @@ export function getRateLimitForTier(tier: string): { requests: number; window: n
     free: { requests: 10, window: 60000 }, // 10 requests per minute
     standard: { requests: 100, window: 60000 }, // 100 requests per minute
     premium: { requests: 1000, window: 60000 }, // 1000 requests per minute
-    enterprise: { requests: 10000, window: 60000 } // 10000 requests per minute
+    enterprise: { requests: 10000, window: 60000 }, // 10000 requests per minute
   }
-  
+
   return limits[tier] || limits.standard
 }

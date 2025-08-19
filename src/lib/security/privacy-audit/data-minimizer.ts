@@ -1,60 +1,65 @@
 export interface DataField {
-  name: string;
-  type: 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array';
-  sensitivity: 'public' | 'internal' | 'confidential' | 'restricted';
-  purpose: string[];
-  lastAccessed: Date;
-  accessFrequency: number;
-  retentionPeriod: number; // days
-  isRequired: boolean;
-  dataSource: string;
-  size: number; // bytes
+  name: string
+  type: 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array'
+  sensitivity: 'public' | 'internal' | 'confidential' | 'restricted'
+  purpose: string[]
+  lastAccessed: Date
+  accessFrequency: number
+  retentionPeriod: number // days
+  isRequired: boolean
+  dataSource: string
+  size: number // bytes
 }
 
 export interface OverCollectionIssue {
-  fieldName: string;
-  issueType: 'unused' | 'redundant' | 'excessive_retention' | 'unnecessary_collection' | 'stale_data';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  description: string;
-  dataVolume: number; // bytes
-  costImpact: number; // estimated monthly cost
-  privacyRisk: number; // 1-10 scale
-  recommendedAction: 'delete' | 'archive' | 'anonymize' | 'reduce_retention' | 'minimize_collection';
+  fieldName: string
+  issueType:
+    | 'unused'
+    | 'redundant'
+    | 'excessive_retention'
+    | 'unnecessary_collection'
+    | 'stale_data'
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  description: string
+  dataVolume: number // bytes
+  costImpact: number // estimated monthly cost
+  privacyRisk: number // 1-10 scale
+  recommendedAction: 'delete' | 'archive' | 'anonymize' | 'reduce_retention' | 'minimize_collection'
   potentialSavings: {
-    storage: number; // bytes
-    processing: number; // estimated monthly cost
-    compliance: number; // risk reduction score
-  };
+    storage: number // bytes
+    processing: number // estimated monthly cost
+    compliance: number // risk reduction score
+  }
 }
 
 export class DataMinimizer {
-  private dataInventory: Map<string, DataField[]> = new Map();
+  private dataInventory: Map<string, DataField[]> = new Map()
 
   constructor(private tenantId: string) {}
 
   async auditDataMinimization(): Promise<{
-    totalFields: number;
-    overCollectionIssues: OverCollectionIssue[];
+    totalFields: number
+    overCollectionIssues: OverCollectionIssue[]
     potentialSavings: {
-      storage: number;
-      cost: number;
-      riskReduction: number;
-    };
-    report: string;
+      storage: number
+      cost: number
+      riskReduction: number
+    }
+    report: string
   }> {
     // 1) Identify over-collection
-    const dataInventory = await this.buildDataInventory();
-    const issues = this.identifyOverCollection(dataInventory);
-    
+    const dataInventory = await this.buildDataInventory()
+    const issues = this.identifyOverCollection(dataInventory)
+
     // 2) Suggest purges
-    const savings = this.calculatePotentialSavings(issues);
+    const savings = this.calculatePotentialSavings(issues)
 
     return {
       totalFields: dataInventory.length,
       overCollectionIssues: issues,
       potentialSavings: savings,
-      report: this.generateXMLReport(dataInventory, issues, savings)
-    };
+      report: this.generateXMLReport(dataInventory, issues, savings),
+    }
   }
 
   private async buildDataInventory(): Promise<DataField[]> {
@@ -70,7 +75,7 @@ export class DataMinimizer {
         retentionPeriod: 365,
         isRequired: true,
         dataSource: 'user_registration',
-        size: 50
+        size: 50,
       },
       {
         name: 'user_phone_secondary',
@@ -82,7 +87,7 @@ export class DataMinimizer {
         retentionPeriod: 2555, // 7 years - excessive!
         isRequired: false,
         dataSource: 'optional_profile',
-        size: 20
+        size: 20,
       },
       {
         name: 'user_browsing_history',
@@ -94,7 +99,7 @@ export class DataMinimizer {
         retentionPeriod: 730, // 2 years - too long for analytics
         isRequired: false,
         dataSource: 'tracking_pixels',
-        size: 5000
+        size: 5000,
       },
       {
         name: 'user_ip_address_history',
@@ -106,7 +111,7 @@ export class DataMinimizer {
         retentionPeriod: 90,
         isRequired: true,
         dataSource: 'security_logs',
-        size: 200
+        size: 200,
       },
       {
         name: 'user_device_fingerprint_detailed',
@@ -118,16 +123,16 @@ export class DataMinimizer {
         retentionPeriod: 1095, // 3 years - excessive for fingerprinting
         isRequired: false,
         dataSource: 'device_tracking',
-        size: 1500
-      }
-    ];
+        size: 1500,
+      },
+    ]
   }
 
   private identifyOverCollection(dataInventory: DataField[]): OverCollectionIssue[] {
-    const issues: OverCollectionIssue[] = [];
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const sixMonthsAgo = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+    const issues: OverCollectionIssue[] = []
+    const now = new Date()
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+    const sixMonthsAgo = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000)
 
     for (const field of dataInventory) {
       // Check for unused data
@@ -139,14 +144,15 @@ export class DataMinimizer {
           description: 'Data field has never been accessed and is over 6 months old',
           dataVolume: field.size,
           costImpact: this.calculateStorageCost(field.size),
-          privacyRisk: field.sensitivity === 'restricted' ? 9 : field.sensitivity === 'confidential' ? 7 : 4,
+          privacyRisk:
+            field.sensitivity === 'restricted' ? 9 : field.sensitivity === 'confidential' ? 7 : 4,
           recommendedAction: 'delete',
           potentialSavings: {
             storage: field.size,
             processing: this.calculateStorageCost(field.size),
-            compliance: field.sensitivity === 'restricted' ? 8 : 5
-          }
-        });
+            compliance: field.sensitivity === 'restricted' ? 8 : 5,
+          },
+        })
       }
 
       // Check for stale data
@@ -163,14 +169,14 @@ export class DataMinimizer {
           potentialSavings: {
             storage: field.size * 0.8, // Archive savings
             processing: this.calculateStorageCost(field.size) * 0.8,
-            compliance: 3
-          }
-        });
+            compliance: 3,
+          },
+        })
       }
 
       // Check for excessive retention
       if (field.retentionPeriod > 365 && !field.isRequired) {
-        const excessiveDays = field.retentionPeriod - 365;
+        const excessiveDays = field.retentionPeriod - 365
         issues.push({
           fieldName: field.name,
           issueType: 'excessive_retention',
@@ -183,13 +189,16 @@ export class DataMinimizer {
           potentialSavings: {
             storage: field.size * (excessiveDays / field.retentionPeriod),
             processing: this.calculateStorageCost(field.size) * (excessiveDays / 365),
-            compliance: 6
-          }
-        });
+            compliance: 6,
+          },
+        })
       }
 
       // Check for unnecessary collection based on purpose
-      if (field.purpose.length === 0 || (field.purpose.includes('analytics') && field.retentionPeriod > 90)) {
+      if (
+        field.purpose.length === 0 ||
+        (field.purpose.includes('analytics') && field.retentionPeriod > 90)
+      ) {
         issues.push({
           fieldName: field.name,
           issueType: 'unnecessary_collection',
@@ -202,19 +211,19 @@ export class DataMinimizer {
           potentialSavings: {
             storage: field.size * 0.5,
             processing: this.calculateStorageCost(field.size) * 0.5,
-            compliance: 4
-          }
-        });
+            compliance: 4,
+          },
+        })
       }
     }
 
-    return issues;
+    return issues
   }
 
   private calculateStorageCost(bytes: number): number {
     // Estimate: $0.023 per GB per month for cloud storage
-    const gbSize = bytes / (1024 * 1024 * 1024);
-    return gbSize * 0.023;
+    const gbSize = bytes / (1024 * 1024 * 1024)
+    return gbSize * 0.023
   }
 
   private calculatePotentialSavings(issues: OverCollectionIssue[]) {
@@ -222,18 +231,20 @@ export class DataMinimizer {
       (acc, issue) => ({
         storage: acc.storage + issue.potentialSavings.storage,
         cost: acc.cost + issue.potentialSavings.processing,
-        riskReduction: acc.riskReduction + issue.potentialSavings.compliance
+        riskReduction: acc.riskReduction + issue.potentialSavings.compliance,
       }),
       { storage: 0, cost: 0, riskReduction: 0 }
-    );
+    )
   }
 
   private generateXMLReport(
-    dataInventory: DataField[], 
-    issues: OverCollectionIssue[], 
+    dataInventory: DataField[],
+    issues: OverCollectionIssue[],
     savings: { storage: number; cost: number; riskReduction: number }
   ): string {
-    const overXML = issues.map(issue => `
+    const overXML = issues
+      .map(
+        (issue) => `
       <issue>
         <field>${issue.fieldName}</field>
         <type>${issue.issueType}</type>
@@ -247,7 +258,9 @@ export class DataMinimizer {
           <compliance>${issue.potentialSavings.compliance}</compliance>
         </savings>
       </issue>
-    `).join('');
+    `
+      )
+      .join('')
 
     return `
       <data>
@@ -263,6 +276,6 @@ export class DataMinimizer {
           <recommendation>Implement data minimization practices to reduce storage costs by ${Math.round(savings.cost * 100) / 100} monthly and improve privacy compliance</recommendation>
         </summary>
       </data>
-    `;
+    `
   }
 }

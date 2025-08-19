@@ -1,70 +1,76 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export interface DataExportRequest {
-  userId: string;
-  requestDate: Date;
-  requestType: 'data_portability' | 'subject_access' | 'deletion_verification';
-  dataCategories: string[];
-  format: 'json' | 'csv' | 'xml' | 'pdf';
-  includeMetadata: boolean;
-  thirdPartyData: boolean;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  userId: string
+  requestDate: Date
+  requestType: 'data_portability' | 'subject_access' | 'deletion_verification'
+  dataCategories: string[]
+  format: 'json' | 'csv' | 'xml' | 'pdf'
+  includeMetadata: boolean
+  thirdPartyData: boolean
+  status: 'pending' | 'processing' | 'completed' | 'failed'
 }
 
 export interface ExportIssue {
-  type: 'missing_data' | 'format_error' | 'incomplete_export' | 'metadata_missing' | 'third_party_unavailable' | 'encryption_failure';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  description: string;
-  dataCategory: string;
-  affectedRecords: number;
-  recommendation: string;
-  complianceImpact: 'none' | 'minor' | 'major' | 'critical';
+  type:
+    | 'missing_data'
+    | 'format_error'
+    | 'incomplete_export'
+    | 'metadata_missing'
+    | 'third_party_unavailable'
+    | 'encryption_failure'
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  description: string
+  dataCategory: string
+  affectedRecords: number
+  recommendation: string
+  complianceImpact: 'none' | 'minor' | 'major' | 'critical'
 }
 
 export interface CCPACompliance {
-  rightToKnow: boolean;
-  rightToDelete: boolean;
-  rightToOptOut: boolean;
-  rightToNonDiscrimination: boolean;
-  verificationMechanism: 'email' | 'sms' | 'identity_verification' | 'multi_factor';
-  responseTime: number; // days
-  feeCharged: boolean;
-  automatedResponse: boolean;
+  rightToKnow: boolean
+  rightToDelete: boolean
+  rightToOptOut: boolean
+  rightToNonDiscrimination: boolean
+  verificationMechanism: 'email' | 'sms' | 'identity_verification' | 'multi_factor'
+  responseTime: number // days
+  feeCharged: boolean
+  automatedResponse: boolean
 }
 
 export interface GDPRCompliance {
-  rightToAccess: boolean;
-  rightToRectification: boolean;
-  rightToErasure: boolean;
-  rightToRestriction: boolean;
-  rightToPortability: boolean;
-  rightToObject: boolean;
-  responseTime: number; // days
-  identityVerification: boolean;
-  freeOfCharge: boolean;
-  machineReadableFormat: boolean;
+  rightToAccess: boolean
+  rightToRectification: boolean
+  rightToErasure: boolean
+  rightToRestriction: boolean
+  rightToPortability: boolean
+  rightToObject: boolean
+  responseTime: number // days
+  identityVerification: boolean
+  freeOfCharge: boolean
+  machineReadableFormat: boolean
 }
 
 export class DataExporter {
   constructor(private tenantId: string) {}
 
   async auditDataPortability(): Promise<{
-    exportRequests: DataExportRequest[];
-    issues: ExportIssue[];
-    ccpaCompliance: CCPACompliance;
-    gdprCompliance: GDPRCompliance;
-    overallScore: number;
-    report: string;
+    exportRequests: DataExportRequest[]
+    issues: ExportIssue[]
+    ccpaCompliance: CCPACompliance
+    gdprCompliance: GDPRCompliance
+    overallScore: number
+    report: string
   }> {
     // 1) Test data export downloads
-    const exportRequests = await this.testDataExports();
-    const issues = this.identifyExportIssues(exportRequests);
-    
+    const exportRequests = await this.testDataExports()
+    const issues = this.identifyExportIssues(exportRequests)
+
     // 2) Ensure compliance standards
-    const ccpaCompliance = this.assessCCPACompliance(exportRequests);
-    const gdprCompliance = this.assessGDPRCompliance(exportRequests);
-    
-    const overallScore = this.calculateComplianceScore(issues, ccpaCompliance, gdprCompliance);
+    const ccpaCompliance = this.assessCCPACompliance(exportRequests)
+    const gdprCompliance = this.assessGDPRCompliance(exportRequests)
+
+    const overallScore = this.calculateComplianceScore(issues, ccpaCompliance, gdprCompliance)
 
     return {
       exportRequests,
@@ -72,8 +78,8 @@ export class DataExporter {
       ccpaCompliance,
       gdprCompliance,
       overallScore,
-      report: this.generateXMLReport(exportRequests, issues, ccpaCompliance, gdprCompliance)
-    };
+      report: this.generateXMLReport(exportRequests, issues, ccpaCompliance, gdprCompliance),
+    }
   }
 
   private async testDataExports(): Promise<DataExportRequest[]> {
@@ -87,7 +93,7 @@ export class DataExporter {
         format: 'json',
         includeMetadata: true,
         thirdPartyData: true,
-        status: 'completed'
+        status: 'completed',
       },
       {
         userId: 'user2',
@@ -97,7 +103,7 @@ export class DataExporter {
         format: 'pdf',
         includeMetadata: false,
         thirdPartyData: false,
-        status: 'failed' // ISSUE!
+        status: 'failed', // ISSUE!
       },
       {
         userId: 'user3',
@@ -107,7 +113,7 @@ export class DataExporter {
         format: 'csv',
         includeMetadata: true,
         thirdPartyData: true,
-        status: 'processing' // Taking too long!
+        status: 'processing', // Taking too long!
       },
       {
         userId: 'user4',
@@ -117,17 +123,19 @@ export class DataExporter {
         format: 'json',
         includeMetadata: false,
         thirdPartyData: false,
-        status: 'completed'
-      }
-    ];
+        status: 'completed',
+      },
+    ]
   }
 
   private identifyExportIssues(exportRequests: DataExportRequest[]): ExportIssue[] {
-    const issues: ExportIssue[] = [];
-    const now = new Date();
+    const issues: ExportIssue[] = []
+    const now = new Date()
 
     for (const request of exportRequests) {
-      const requestAge = Math.floor((now.getTime() - request.requestDate.getTime()) / (1000 * 60 * 60 * 24));
+      const requestAge = Math.floor(
+        (now.getTime() - request.requestDate.getTime()) / (1000 * 60 * 60 * 24)
+      )
 
       // Check for failed exports
       if (request.status === 'failed') {
@@ -138,8 +146,8 @@ export class DataExporter {
           dataCategory: request.dataCategories.join(', '),
           affectedRecords: 1,
           recommendation: 'Fix export processing pipeline and retry failed requests',
-          complianceImpact: 'major'
-        });
+          complianceImpact: 'major',
+        })
       }
 
       // Check for delayed processing (GDPR: 30 days, CCPA: 45 days)
@@ -151,8 +159,8 @@ export class DataExporter {
           dataCategory: request.dataCategories.join(', '),
           affectedRecords: 1,
           recommendation: 'Implement automated export processing with shorter SLA',
-          complianceImpact: requestAge > 30 ? 'critical' : 'major'
-        });
+          complianceImpact: requestAge > 30 ? 'critical' : 'major',
+        })
       }
 
       // Check for missing metadata in machine-readable formats
@@ -164,8 +172,8 @@ export class DataExporter {
           dataCategory: request.dataCategories.join(', '),
           affectedRecords: 1,
           recommendation: 'Include data provenance and processing metadata in exports',
-          complianceImpact: 'minor'
-        });
+          complianceImpact: 'minor',
+        })
       }
 
       // Check for third-party data availability
@@ -177,8 +185,8 @@ export class DataExporter {
           dataCategory: 'analytics',
           affectedRecords: 1,
           recommendation: 'Establish data portability agreements with third-party processors',
-          complianceImpact: 'minor'
-        });
+          complianceImpact: 'minor',
+        })
       }
 
       // Simulate missing data categories
@@ -190,86 +198,90 @@ export class DataExporter {
           dataCategory: 'communications',
           affectedRecords: Math.floor(Math.random() * 50) + 10,
           recommendation: 'Audit data retention policies and export completeness',
-          complianceImpact: 'major'
-        });
+          complianceImpact: 'major',
+        })
       }
     }
 
-    return issues;
+    return issues
   }
 
   private assessCCPACompliance(exportRequests: DataExportRequest[]): CCPACompliance {
-    const completedRequests = exportRequests.filter(r => r.status === 'completed');
-    const avgResponseTime = this.calculateAverageResponseTime(completedRequests);
+    const completedRequests = exportRequests.filter((r) => r.status === 'completed')
+    const avgResponseTime = this.calculateAverageResponseTime(completedRequests)
 
     return {
-      rightToKnow: completedRequests.some(r => r.requestType === 'subject_access'),
-      rightToDelete: completedRequests.some(r => r.requestType === 'deletion_verification'),
+      rightToKnow: completedRequests.some((r) => r.requestType === 'subject_access'),
+      rightToDelete: completedRequests.some((r) => r.requestType === 'deletion_verification'),
       rightToOptOut: true, // Assume implemented
       rightToNonDiscrimination: true, // Assume implemented
       verificationMechanism: 'multi_factor',
       responseTime: avgResponseTime,
       feeCharged: false, // Must be free under CCPA
-      automatedResponse: exportRequests.length > 0 // Some automation exists
-    };
+      automatedResponse: exportRequests.length > 0, // Some automation exists
+    }
   }
 
   private assessGDPRCompliance(exportRequests: DataExportRequest[]): GDPRCompliance {
-    const completedRequests = exportRequests.filter(r => r.status === 'completed');
-    const avgResponseTime = this.calculateAverageResponseTime(completedRequests);
-    const machineReadableCount = completedRequests.filter(r => ['json', 'csv', 'xml'].includes(r.format)).length;
+    const completedRequests = exportRequests.filter((r) => r.status === 'completed')
+    const avgResponseTime = this.calculateAverageResponseTime(completedRequests)
+    const machineReadableCount = completedRequests.filter((r) =>
+      ['json', 'csv', 'xml'].includes(r.format)
+    ).length
 
     return {
-      rightToAccess: completedRequests.some(r => r.requestType === 'subject_access'),
+      rightToAccess: completedRequests.some((r) => r.requestType === 'subject_access'),
       rightToRectification: true, // Assume implemented
-      rightToErasure: completedRequests.some(r => r.requestType === 'deletion_verification'),
+      rightToErasure: completedRequests.some((r) => r.requestType === 'deletion_verification'),
       rightToRestriction: true, // Assume implemented
-      rightToPortability: completedRequests.some(r => r.requestType === 'data_portability'),
+      rightToPortability: completedRequests.some((r) => r.requestType === 'data_portability'),
       rightToObject: true, // Assume implemented
       responseTime: avgResponseTime,
       identityVerification: true,
       freeOfCharge: true,
-      machineReadableFormat: machineReadableCount > 0
-    };
+      machineReadableFormat: machineReadableCount > 0,
+    }
   }
 
   private calculateAverageResponseTime(completedRequests: DataExportRequest[]): number {
-    if (completedRequests.length === 0) return 0;
+    if (completedRequests.length === 0) return 0
 
     const totalDays = completedRequests.reduce((sum, request) => {
-      const now = new Date();
-      const days = Math.floor((now.getTime() - request.requestDate.getTime()) / (1000 * 60 * 60 * 24));
-      return sum + days;
-    }, 0);
+      const now = new Date()
+      const days = Math.floor(
+        (now.getTime() - request.requestDate.getTime()) / (1000 * 60 * 60 * 24)
+      )
+      return sum + days
+    }, 0)
 
-    return Math.round(totalDays / completedRequests.length);
+    return Math.round(totalDays / completedRequests.length)
   }
 
   private calculateComplianceScore(
-    issues: ExportIssue[], 
-    ccpaCompliance: CCPACompliance, 
+    issues: ExportIssue[],
+    ccpaCompliance: CCPACompliance,
     gdprCompliance: GDPRCompliance
   ): number {
-    let score = 100;
+    let score = 100
 
     // Deduct points for issues
     for (const issue of issues) {
       const deduction = {
-        'critical': 25,
-        'high': 15,
-        'medium': 8,
-        'low': 3
-      }[issue.severity];
-      score -= deduction;
+        critical: 25,
+        high: 15,
+        medium: 8,
+        low: 3,
+      }[issue.severity]
+      score -= deduction
     }
 
     // Deduct points for compliance gaps
-    if (ccpaCompliance.responseTime > 45) score -= 20;
-    if (gdprCompliance.responseTime > 30) score -= 20;
-    if (!gdprCompliance.machineReadableFormat) score -= 15;
-    if (!ccpaCompliance.automatedResponse) score -= 10;
+    if (ccpaCompliance.responseTime > 45) score -= 20
+    if (gdprCompliance.responseTime > 30) score -= 20
+    if (!gdprCompliance.machineReadableFormat) score -= 15
+    if (!ccpaCompliance.automatedResponse) score -= 10
 
-    return Math.max(0, score);
+    return Math.max(0, score)
   }
 
   private generateXMLReport(
@@ -278,7 +290,9 @@ export class DataExporter {
     ccpaCompliance: CCPACompliance,
     gdprCompliance: GDPRCompliance
   ): string {
-    const issuesXML = issues.map(issue => `
+    const issuesXML = issues
+      .map(
+        (issue) => `
       <issue>
         <type>${issue.type}</type>
         <severity>${issue.severity}</severity>
@@ -288,15 +302,19 @@ export class DataExporter {
         <recommendation>${issue.recommendation}</recommendation>
         <complianceImpact>${issue.complianceImpact}</complianceImpact>
       </issue>
-    `).join('');
+    `
+      )
+      .join('')
 
     const requestStats = {
       total: exportRequests.length,
-      completed: exportRequests.filter(r => r.status === 'completed').length,
-      failed: exportRequests.filter(r => r.status === 'failed').length,
-      processing: exportRequests.filter(r => r.status === 'processing').length,
-      avgResponseTime: this.calculateAverageResponseTime(exportRequests.filter(r => r.status === 'completed'))
-    };
+      completed: exportRequests.filter((r) => r.status === 'completed').length,
+      failed: exportRequests.filter((r) => r.status === 'failed').length,
+      processing: exportRequests.filter((r) => r.status === 'processing').length,
+      avgResponseTime: this.calculateAverageResponseTime(
+        exportRequests.filter((r) => r.status === 'completed')
+      ),
+    }
 
     return `
       <export>
@@ -333,6 +351,6 @@ export class DataExporter {
           <improvement>Establish data portability agreements with all third-party processors</improvement>
         </recommendations>
       </export>
-    `;
+    `
   }
 }

@@ -32,14 +32,14 @@ export interface EmailConfig {
  * Get email configuration
  */
 function getEmailConfig(): EmailConfig {
-  const provider = process.env.EMAIL_PROVIDER as 'sendgrid' | 'resend' || 'development'
-  
+  const provider = (process.env.EMAIL_PROVIDER as 'sendgrid' | 'resend') || 'development'
+
   return {
     provider,
     apiKey: process.env.SENDGRID_API_KEY || process.env.RESEND_API_KEY,
     fromEmail: process.env.EMAIL_FROM || 'noreply@coreflow360.com',
     fromName: process.env.EMAIL_FROM_NAME || 'CoreFlow360',
-    trackingEnabled: process.env.EMAIL_TRACKING_ENABLED === 'true'
+    trackingEnabled: process.env.EMAIL_TRACKING_ENABLED === 'true',
   }
 }
 
@@ -48,12 +48,12 @@ function getEmailConfig(): EmailConfig {
  */
 export async function sendEmail(options: EmailOptions): Promise<void> {
   const config = getEmailConfig()
-  
+
   try {
     console.log(`Sending email via ${config.provider}:`, {
       to: options.to,
       subject: options.subject,
-      provider: config.provider
+      provider: config.provider,
     })
 
     if (config.provider === 'sendgrid') {
@@ -62,19 +62,18 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
       await sendEmailViaResend(options, config)
     } else {
       // Development mode - log email
-      console.log('📧 EMAIL (Development Mode):', {
+      console.log('📧 Development mode - email sent:', {
         to: options.to,
         cc: options.cc,
         bcc: options.bcc,
         subject: options.subject,
         preview: options.html.substring(0, 200) + '...',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
     }
-    
-  } catch (error) {
-    console.error('Email sending error:', error)
+  } catch (error: any) {
+    console.error('❌ Failed to send email:', error)
     throw new Error(`Failed to send email: ${error.message}`)
   }
 }
@@ -88,39 +87,39 @@ async function sendEmailViaSendGrid(options: EmailOptions, config: EmailConfig):
   }
 
   try {
-    const sgMail = require('@sendgrid/mail')
-    sgMail.setApiKey(config.apiKey)
+    const sgMail = await import('@sendgrid/mail')
+    sgMail.default.setApiKey(config.apiKey)
 
-  const message = {
-    to: options.to,
-    cc: options.cc,
-    bcc: options.bcc,
-    from: {
-      email: config.fromEmail,
-      name: config.fromName
-    },
-    subject: options.subject,
-    html: options.html,
-    text: options.text,
-    attachments: options.attachments?.map(att => ({
-      filename: att.filename,
-      content: Buffer.isBuffer(att.content) ? att.content.toString('base64') : att.content,
-      type: att.contentType || 'application/octet-stream'
-    })),
-    trackingSettings: {
-      clickTracking: {
-        enable: config.trackingEnabled && (options.trackingEnabled ?? true)
+    const message = {
+      to: options.to,
+      cc: options.cc,
+      bcc: options.bcc,
+      from: {
+        email: config.fromEmail,
+        name: config.fromName,
       },
-      openTracking: {
-        enable: config.trackingEnabled && (options.trackingEnabled ?? true)
-      }
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+      attachments: options.attachments?.map((att) => ({
+        filename: att.filename,
+        content: Buffer.isBuffer(att.content) ? att.content.toString('base64') : att.content,
+        type: att.contentType || 'application/octet-stream',
+      })),
+      trackingSettings: {
+        clickTracking: {
+          enable: config.trackingEnabled && (options.trackingEnabled ?? true),
+        },
+        openTracking: {
+          enable: config.trackingEnabled && (options.trackingEnabled ?? true),
+        },
+      },
     }
-  }
 
-  await sgMail.send(message)
-  } catch (error) {
+    await sgMail.default.send(message)
+  } catch (error: any) {
     // If SendGrid module is not installed or other errors occur
-    console.error('SendGrid email error:', error)
+    console.error('❌ SendGrid error:', error)
     throw new Error(`Failed to send email via SendGrid: ${error.message}`)
   }
 }
@@ -137,24 +136,24 @@ async function sendEmailViaResend(options: EmailOptions, config: EmailConfig): P
     const { Resend } = require('resend')
     const resend = new Resend(config.apiKey)
 
-  const message = {
-    from: `${config.fromName} <${config.fromEmail}>`,
-    to: options.to,
-    cc: options.cc,
-    bcc: options.bcc,
-    subject: options.subject,
-    html: options.html,
-    text: options.text,
-    attachments: options.attachments?.map(att => ({
-      filename: att.filename,
-      content: att.content
-    }))
-  }
+    const message = {
+      from: `${config.fromName} <${config.fromEmail}>`,
+      to: options.to,
+      cc: options.cc,
+      bcc: options.bcc,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+      attachments: options.attachments?.map((att) => ({
+        filename: att.filename,
+        content: att.content,
+      })),
+    }
 
-  await resend.emails.send(message)
-  } catch (error) {
+    await resend.emails.send(message)
+  } catch (error: any) {
     // If Resend module is not installed or other errors occur
-    console.error('Resend email error:', error)
+    console.error('❌ Resend error:', error)
     throw new Error(`Failed to send email via Resend: ${error.message}`)
   }
 }
@@ -165,16 +164,16 @@ async function sendEmailViaResend(options: EmailOptions, config: EmailConfig): P
 export async function sendTemplatedEmail(
   templateName: string,
   to: string[],
-  variables: Record<string, any>
+  variables: Record<string, unknown>
 ): Promise<void> {
   const template = await getEmailTemplate(templateName)
   const html = replaceTemplateVariables(template.html, variables)
   const subject = replaceTemplateVariables(template.subject, variables)
-  
+
   await sendEmail({
     to,
     subject,
-    html
+    html,
   })
 }
 
@@ -191,7 +190,7 @@ async function getEmailTemplate(name: string): Promise<{ subject: string; html: 
         <p>We noticed it's been a while since we connected. Your success is our priority.</p>
         <p>Is there anything we can help you with? We'd love to schedule a call to discuss how we can better support your goals.</p>
         <p>Best regards,<br>Your Success Team</p>
-      `
+      `,
     },
     lead_nurture_template: {
       subject: 'Following up on your interest in {{productName}}',
@@ -201,7 +200,7 @@ async function getEmailTemplate(name: string): Promise<{ subject: string; html: 
         <p>We've helped companies like yours achieve {{benefit}}. I'd love to show you how.</p>
         <p>Do you have 15 minutes this week for a quick call?</p>
         <p>Best,<br>{{senderName}}</p>
-      `
+      `,
     },
     welcome_template: {
       subject: 'Welcome to {{companyName}}!',
@@ -216,22 +215,22 @@ async function getEmailTemplate(name: string): Promise<{ subject: string; html: 
         </ul>
         <p>If you have any questions, don't hesitate to reach out.</p>
         <p>Best regards,<br>The {{companyName}} Team</p>
-      `
-    }
+      `,
+    },
   }
-  
+
   const template = templates[name]
   if (!template) {
     throw new Error(`Email template not found: ${name}`)
   }
-  
+
   return template
 }
 
 /**
  * Replace template variables
  */
-function replaceTemplateVariables(template: string, variables: Record<string, any>): string {
+function replaceTemplateVariables(template: string, variables: Record<string, unknown>): string {
   return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
     return variables[key] !== undefined ? String(variables[key]) : match
   })

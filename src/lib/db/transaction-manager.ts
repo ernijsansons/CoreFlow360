@@ -13,11 +13,11 @@ import { EVENT_TYPES } from '@/lib/events/domain-events'
 export interface TransactionStep {
   stepId: string
   stepType: string
-  operation: () => Promise<any>
+  operation: () => Promise<unknown>
   compensation?: () => Promise<void>
-  data?: any
+  data?: unknown
   status?: 'pending' | 'completed' | 'failed' | 'compensated'
-  result?: any
+  result?: unknown
   error?: string
   attemptCount?: number
 }
@@ -30,7 +30,7 @@ export interface TransactionContext {
   entityType: string
   entityId?: string
   steps: TransactionStep[]
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface TransactionOptions {
@@ -46,7 +46,7 @@ const DEFAULT_OPTIONS: Required<TransactionOptions> = {
   retryAttempts: 3,
   enableCompensation: true,
   isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
-  maxWait: 5000
+  maxWait: 5000,
 }
 
 /**
@@ -71,14 +71,14 @@ export class TransactionManager {
     options: TransactionOptions = {}
   ): Promise<T> {
     const config = { ...DEFAULT_OPTIONS, ...options }
-    
+
     return withRetry(
       async () => {
         return withCircuitBreakerProtection('database', async () => {
           return prisma.$transaction(operation, {
             timeout: config.timeout,
             isolationLevel: config.isolationLevel,
-            maxWait: config.maxWait
+            maxWait: config.maxWait,
           })
         })
       },
@@ -93,18 +93,18 @@ export class TransactionManager {
   async executeSaga(
     context: Omit<TransactionContext, 'transactionId'>,
     options: TransactionOptions = {}
-  ): Promise<any> {
+  ): Promise<unknown> {
     const config = { ...DEFAULT_OPTIONS, ...options }
     const transactionId = this.generateTransactionId()
-    
+
     const fullContext: TransactionContext = {
       ...context,
       transactionId,
-      steps: context.steps.map(step => ({
+      steps: context.steps.map((step) => ({
         ...step,
         status: 'pending',
-        attemptCount: 0
-      }))
+        attemptCount: 0,
+      })),
     }
 
     this.activeTransactions.set(transactionId, fullContext)
@@ -118,11 +118,9 @@ export class TransactionManager {
 
       // Mark transaction as committed
       await this.logTransactionCommit(transactionId, result)
-      
+
       return result
     } catch (error) {
-      console.error(`Saga transaction ${transactionId} failed:`, error)
-
       // Execute compensation if enabled
       if (config.enableCompensation) {
         await this.executeCompensation(fullContext)
@@ -130,7 +128,7 @@ export class TransactionManager {
 
       // Log transaction failure
       await this.logTransactionFailure(
-        transactionId, 
+        transactionId,
         error instanceof Error ? error.message : 'Unknown error'
       )
 
@@ -146,12 +144,12 @@ export class TransactionManager {
   private async executeSagaSteps(
     context: TransactionContext,
     options: Required<TransactionOptions>
-  ): Promise<any> {
-    let lastResult: any = null
+  ): Promise<unknown> {
+    let lastResult: unknown = null
 
     for (let i = 0; i < context.steps.length; i++) {
       const step = context.steps[i]
-      
+
       try {
         // Execute step with retry
         step.status = 'pending'
@@ -170,11 +168,13 @@ export class TransactionManager {
             retryCondition: (error: Error) => {
               // Retry on connection errors, timeouts, but not on business logic errors
               const message = error.message.toLowerCase()
-              return message.includes('connection') ||
-                     message.includes('timeout') ||
-                     message.includes('lock') ||
-                     message.includes('deadlock')
-            }
+              return (
+                message.includes('connection') ||
+                message.includes('timeout') ||
+                message.includes('lock') ||
+                message.includes('deadlock')
+              )
+            },
           },
           `saga_step_${step.stepId}`
         )
@@ -185,7 +185,6 @@ export class TransactionManager {
 
         // Update transaction log
         await this.updateTransactionStep(context.transactionId, i, step)
-
       } catch (error) {
         step.error = error instanceof Error ? error.message : 'Unknown error'
         step.status = 'failed'
@@ -204,12 +203,10 @@ export class TransactionManager {
    * Execute compensation logic for failed saga
    */
   private async executeCompensation(context: TransactionContext): Promise<void> {
-    console.log(`Starting compensation for transaction ${context.transactionId}`)
-
     // Execute compensation in reverse order
     for (let i = context.steps.length - 1; i >= 0; i--) {
       const step = context.steps[i]
-      
+
       // Only compensate completed steps
       if (step.status !== 'completed' || !step.compensation) {
         continue
@@ -218,15 +215,10 @@ export class TransactionManager {
       try {
         await step.compensation()
         step.status = 'compensated'
-        
-        console.log(`Compensated step ${step.stepId}`)
-        
+
         // Update transaction log
         await this.updateTransactionStep(context.transactionId, i, step)
-        
       } catch (error) {
-        console.error(`Compensation failed for step ${step.stepId}:`, error)
-        
         // Log compensation failure but continue with other steps
         step.error = `Compensation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
         await this.updateTransactionStep(context.transactionId, i, step)
@@ -251,20 +243,19 @@ export class TransactionManager {
             entityType: context.entityType,
             entityId: context.entityId,
             status: 'started',
-            steps: context.steps.map(step => ({
+            steps: context.steps.map((step) => ({
               stepId: step.stepId,
               stepType: step.stepType,
               status: step.status,
-              data: step.data
+              data: step.data,
             })),
             currentStep: 0,
             transactionData: {},
-            metadata: context.metadata || {}
-          }
+            metadata: context.metadata || {},
+          },
         })
       })
     } catch (error) {
-      console.error('Failed to log transaction start:', error)
       // Don't fail the transaction for logging errors
     }
   }
@@ -283,28 +274,27 @@ export class TransactionManager {
           where: { transactionId },
           data: {
             currentStep: stepIndex + 1,
-            steps: this.activeTransactions.get(transactionId)?.steps.map(s => ({
-              stepId: s.stepId,
-              stepType: s.stepType,
-              status: s.status,
-              data: s.data,
-              result: s.result,
-              error: s.error,
-              attemptCount: s.attemptCount
-            })) || [],
-            updatedAt: new Date()
-          }
+            steps:
+              this.activeTransactions.get(transactionId)?.steps.map((s) => ({
+                stepId: s.stepId,
+                stepType: s.stepType,
+                status: s.status,
+                data: s.data,
+                result: s.result,
+                error: s.error,
+                attemptCount: s.attemptCount,
+              })) || [],
+            updatedAt: new Date(),
+          },
         })
       })
-    } catch (error) {
-      console.error('Failed to update transaction step:', error)
-    }
+    } catch (error) {}
   }
 
   /**
    * Log transaction commit
    */
-  private async logTransactionCommit(transactionId: string, result: any): Promise<void> {
+  private async logTransactionCommit(transactionId: string, result: unknown): Promise<void> {
     try {
       await withCircuitBreakerProtection('database', async () => {
         await prisma.transactionLog.update({
@@ -312,13 +302,11 @@ export class TransactionManager {
           data: {
             status: 'committed',
             completedAt: new Date(),
-            transactionData: { result }
-          }
+            transactionData: { result },
+          },
         })
       })
-    } catch (error) {
-      console.error('Failed to log transaction commit:', error)
-    }
+    } catch (error) {}
   }
 
   /**
@@ -332,13 +320,11 @@ export class TransactionManager {
           data: {
             status: 'failed',
             completedAt: new Date(),
-            rollbackReason: error
-          }
+            rollbackReason: error,
+          },
         })
       })
-    } catch (err) {
-      console.error('Failed to log transaction failure:', err)
-    }
+    } catch (err) {}
   }
 
   /**
@@ -351,13 +337,11 @@ export class TransactionManager {
           where: { transactionId },
           data: {
             status: 'rolled_back',
-            completedAt: new Date()
-          }
+            completedAt: new Date(),
+          },
         })
       })
-    } catch (error) {
-      console.error('Failed to log transaction rollback:', error)
-    }
+    } catch (error) {}
   }
 
   /**
@@ -370,15 +354,14 @@ export class TransactionManager {
   /**
    * Get transaction status
    */
-  async getTransactionStatus(transactionId: string): Promise<any> {
+  async getTransactionStatus(transactionId: string): Promise<unknown> {
     try {
       return await withCircuitBreakerProtection('database', async () => {
         return prisma.transactionLog.findUnique({
-          where: { transactionId }
+          where: { transactionId },
         })
       })
     } catch (error) {
-      console.error('Failed to get transaction status:', error)
       return null
     }
   }
@@ -395,18 +378,17 @@ export class TransactionManager {
         return prisma.transactionLog.deleteMany({
           where: {
             startedAt: {
-              lt: cutoffDate
+              lt: cutoffDate,
             },
             status: {
-              in: ['committed', 'rolled_back', 'failed']
-            }
-          }
+              in: ['committed', 'rolled_back', 'failed'],
+            },
+          },
         })
       })
 
       return result.count
     } catch (error) {
-      console.error('Failed to cleanup old transactions:', error)
       return 0
     }
   }
@@ -430,12 +412,14 @@ export class TransactionManager {
   }> {
     try {
       const [stats] = await withCircuitBreakerProtection('database', async () => {
-        return prisma.$queryRaw<Array<{
-          total_transactions: bigint
-          successful_transactions: bigint
-          failed_transactions: bigint
-          rolled_back_transactions: bigint
-        }>>`
+        return prisma.$queryRaw<
+          Array<{
+            total_transactions: bigint
+            successful_transactions: bigint
+            failed_transactions: bigint
+            rolled_back_transactions: bigint
+          }>
+        >`
           SELECT 
             COUNT(*) as total_transactions,
             COUNT(CASE WHEN status = 'committed' THEN 1 END) as successful_transactions,
@@ -451,16 +435,15 @@ export class TransactionManager {
         totalTransactions: Number(stats?.total_transactions || 0),
         successfulTransactions: Number(stats?.successful_transactions || 0),
         failedTransactions: Number(stats?.failed_transactions || 0),
-        rolledBackTransactions: Number(stats?.rolled_back_transactions || 0)
+        rolledBackTransactions: Number(stats?.rolled_back_transactions || 0),
       }
     } catch (error) {
-      console.error('Failed to get transaction stats:', error)
       return {
         activeTransactions: this.activeTransactions.size,
         totalTransactions: 0,
         successfulTransactions: 0,
         failedTransactions: 0,
-        rolledBackTransactions: 0
+        rolledBackTransactions: 0,
       }
     }
   }
@@ -485,12 +468,12 @@ export async function withTransaction<T>(
  * Helper function to create customer with transaction
  */
 export async function createCustomerTransaction(
-  customerData: any,
+  customerData: unknown,
   tenantId: string,
   userId: string
-): Promise<any> {
-  let createdCustomer: any = null
-  
+): Promise<unknown> {
+  let createdCustomer: unknown = null
+
   const result = await transactionManager.executeSaga({
     transactionType: 'customer_creation',
     tenantId,
@@ -507,14 +490,14 @@ export async function createCustomerTransaction(
           }
           if (customerData.email) {
             const existing = await prisma.customer.findFirst({
-              where: { email: customerData.email, tenantId }
+              where: { email: customerData.email, tenantId },
             })
             if (existing) {
               throw new Error('Customer with this email already exists')
             }
           }
           return { valid: true }
-        }
+        },
       },
       {
         stepId: 'create_customer',
@@ -525,7 +508,9 @@ export async function createCustomerTransaction(
               ...customerData,
               tenantId,
               version: 1,
-              industryData: customerData.industryData ? JSON.stringify(customerData.industryData) : undefined
+              industryData: customerData.industryData
+                ? JSON.stringify(customerData.industryData)
+                : undefined,
             },
             select: {
               id: true,
@@ -548,10 +533,10 @@ export async function createCustomerTransaction(
                 select: {
                   id: true,
                   name: true,
-                  email: true
-                }
-              }
-            }
+                  email: true,
+                },
+              },
+            },
           })
           return createdCustomer
         },
@@ -559,10 +544,10 @@ export async function createCustomerTransaction(
           // Delete created customer if transaction fails
           if (createdCustomer?.id) {
             await prisma.customer.deleteMany({
-              where: { id: createdCustomer.id, tenantId }
+              where: { id: createdCustomer.id, tenantId },
             })
           }
-        }
+        },
       },
       {
         stepId: 'create_audit_log',
@@ -578,14 +563,14 @@ export async function createCustomerTransaction(
                 newValues: JSON.stringify(createdCustomer),
                 metadata: JSON.stringify({
                   createdBy: userId,
-                  customerName: `${createdCustomer.firstName} ${createdCustomer.lastName}`
+                  customerName: `${createdCustomer.firstName} ${createdCustomer.lastName}`,
                 }),
                 tenantId,
-                userId
-              }
+                userId,
+              },
             })
           }
-        }
+        },
       },
       {
         stepId: 'create_domain_event',
@@ -604,23 +589,22 @@ export async function createCustomerTransaction(
                 company: createdCustomer.company,
                 industry: createdCustomer.industry,
                 source: createdCustomer.source,
-                customFields: customerData.customFields || {}
+                customFields: customerData.customFields || {},
               },
               {
                 tenantId,
                 userId,
                 source: 'customer-api',
                 correlationId: `customer-create-${createdCustomer.id}`,
-                schemaVersion: '1.0.0'
+                schemaVersion: '1.0.0',
               }
             )
-            console.log(`📝 Domain event created for customer: ${createdCustomer.id}`)
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   })
-  
+
   // Return the created customer from the saga result
   return createdCustomer || result
 }
@@ -630,16 +614,16 @@ export async function createCustomerTransaction(
  */
 export async function updateCustomerWithOptimisticLock(
   customerId: string,
-  updateData: any,
+  updateData: unknown,
   expectedVersion: number,
   tenantId: string,
   userId: string
-): Promise<any> {
+): Promise<unknown> {
   return transactionManager.executeTransaction(async (tx) => {
     // Get current customer with version
     const currentCustomer = await tx.customer.findUnique({
       where: { id: customerId },
-      select: { version: true, tenantId: true }
+      select: { version: true, tenantId: true },
     })
 
     if (!currentCustomer) {
@@ -651,20 +635,22 @@ export async function updateCustomerWithOptimisticLock(
     }
 
     if (currentCustomer.version !== expectedVersion) {
-      throw new Error(`Optimistic lock failure. Expected version ${expectedVersion}, got ${currentCustomer.version}`)
+      throw new Error(
+        `Optimistic lock failure. Expected version ${expectedVersion}, got ${currentCustomer.version}`
+      )
     }
 
     // Update with incremented version
     const updatedCustomer = await tx.customer.update({
-      where: { 
+      where: {
         id: customerId,
-        version: expectedVersion
+        version: expectedVersion,
       },
       data: {
         ...updateData,
         version: expectedVersion + 1,
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     })
 
     // Create audit log
@@ -675,12 +661,12 @@ export async function updateCustomerWithOptimisticLock(
         resourceId: customerId,
         tenantId,
         userId,
-        details: JSON.stringify({ 
-          updateData, 
-          oldVersion: expectedVersion, 
-          newVersion: expectedVersion + 1 
-        })
-      }
+        details: JSON.stringify({
+          updateData,
+          oldVersion: expectedVersion,
+          newVersion: expectedVersion + 1,
+        }),
+      },
     })
 
     // Create domain event for customer update (outside transaction for async processing)
@@ -693,20 +679,17 @@ export async function updateCustomerWithOptimisticLock(
           {
             previousValues: currentCustomer,
             updatedValues: updateData,
-            changeReason: 'api_update'
+            changeReason: 'api_update',
           },
           {
             tenantId,
             userId,
             source: 'customer-api',
             correlationId: `customer-update-${customerId}-${Date.now()}`,
-            schemaVersion: '1.0.0'
+            schemaVersion: '1.0.0',
           }
         )
-        console.log(`📝 Domain event created for customer update: ${customerId}`)
-      } catch (error) {
-        console.error('Failed to create domain event for customer update:', error)
-      }
+      } catch (error) {}
     })
 
     return updatedCustomer

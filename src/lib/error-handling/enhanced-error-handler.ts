@@ -7,7 +7,15 @@ import { circuitBreakers } from '@/lib/resilience/circuit-breaker'
 import { withRetry, RetryConfig } from '@/lib/resilience/timeout-handler'
 
 export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical'
-export type ErrorCategory = 'network' | 'authentication' | 'authorization' | 'validation' | 'business' | 'system' | 'external' | 'unknown'
+export type ErrorCategory =
+  | 'network'
+  | 'authentication'
+  | 'authorization'
+  | 'validation'
+  | 'business'
+  | 'system'
+  | 'external'
+  | 'unknown'
 export type RecoveryStrategy = 'retry' | 'fallback' | 'circuit_breaker' | 'escalate' | 'ignore'
 
 export interface ErrorContext {
@@ -17,7 +25,7 @@ export interface ErrorContext {
   tenantId?: string
   requestId?: string
   timestamp: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface ErrorClassification {
@@ -41,7 +49,7 @@ export interface ErrorRecoveryResult {
 
 export interface FallbackConfig {
   enabled: boolean
-  handler: () => Promise<any> | any
+  handler: () => Promise<unknown> | unknown
   condition?: (error: Error) => boolean
   timeout?: number
 }
@@ -71,7 +79,7 @@ export class ErrorClassifier {
         retryable: true,
         recoveryStrategy: 'retry',
         estimatedRecoveryTime: 5000,
-        fallbackAvailable: true
+        fallbackAvailable: true,
       }
     }
 
@@ -82,7 +90,7 @@ export class ErrorClassifier {
         severity: 'high',
         retryable: false,
         recoveryStrategy: 'escalate',
-        fallbackAvailable: false
+        fallbackAvailable: false,
       }
     }
 
@@ -93,7 +101,7 @@ export class ErrorClassifier {
         severity: 'medium',
         retryable: false,
         recoveryStrategy: 'escalate',
-        fallbackAvailable: true
+        fallbackAvailable: true,
       }
     }
 
@@ -104,7 +112,7 @@ export class ErrorClassifier {
         severity: 'low',
         retryable: false,
         recoveryStrategy: 'escalate',
-        fallbackAvailable: false
+        fallbackAvailable: false,
       }
     }
 
@@ -116,7 +124,7 @@ export class ErrorClassifier {
         retryable: true,
         recoveryStrategy: 'circuit_breaker',
         estimatedRecoveryTime: 30000,
-        fallbackAvailable: true
+        fallbackAvailable: true,
       }
     }
 
@@ -127,7 +135,7 @@ export class ErrorClassifier {
         severity: 'medium',
         retryable: false,
         recoveryStrategy: 'escalate',
-        fallbackAvailable: true
+        fallbackAvailable: true,
       }
     }
 
@@ -139,7 +147,7 @@ export class ErrorClassifier {
         retryable: true,
         recoveryStrategy: 'escalate',
         estimatedRecoveryTime: 60000,
-        fallbackAvailable: true
+        fallbackAvailable: true,
       }
     }
 
@@ -150,53 +158,89 @@ export class ErrorClassifier {
       retryable: true,
       recoveryStrategy: 'retry',
       estimatedRecoveryTime: 10000,
-      fallbackAvailable: false
+      fallbackAvailable: false,
     }
   }
 
   private static isNetworkError(message: string, name: string, stack: string): boolean {
     const networkIndicators = [
-      'connection', 'timeout', 'network', 'econnreset', 'enotfound', 'socket',
-      'dns', 'host', 'port', 'tcp', 'ssl', 'tls', 'certificate'
+      'connection',
+      'timeout',
+      'network',
+      'econnreset',
+      'enotfound',
+      'socket',
+      'dns',
+      'host',
+      'port',
+      'tcp',
+      'ssl',
+      'tls',
+      'certificate',
     ]
-    return networkIndicators.some(indicator => 
-      message.includes(indicator) || name.includes(indicator) || stack.includes(indicator)
+    return networkIndicators.some(
+      (indicator) =>
+        message.includes(indicator) || name.includes(indicator) || stack.includes(indicator)
     )
   }
 
   private static isAuthenticationError(message: string, name: string): boolean {
-    const authIndicators = ['unauthorized', 'authentication', 'login', 'token', 'session', 'credential']
-    return authIndicators.some(indicator => message.includes(indicator) || name.includes(indicator))
+    const authIndicators = [
+      'unauthorized',
+      'authentication',
+      'login',
+      'token',
+      'session',
+      'credential',
+    ]
+    return authIndicators.some(
+      (indicator) => message.includes(indicator) || name.includes(indicator)
+    )
   }
 
   private static isAuthorizationError(message: string, name: string): boolean {
     const authzIndicators = ['forbidden', 'permission', 'access', 'privilege', 'role', 'scope']
-    return authzIndicators.some(indicator => message.includes(indicator) || name.includes(indicator))
+    return authzIndicators.some(
+      (indicator) => message.includes(indicator) || name.includes(indicator)
+    )
   }
 
   private static isValidationError(message: string, name: string): boolean {
-    const validationIndicators = ['validation', 'invalid', 'required', 'format', 'schema', 'constraint']
-    return validationIndicators.some(indicator => message.includes(indicator) || name.includes(indicator))
+    const validationIndicators = [
+      'validation',
+      'invalid',
+      'required',
+      'format',
+      'schema',
+      'constraint',
+    ]
+    return validationIndicators.some(
+      (indicator) => message.includes(indicator) || name.includes(indicator)
+    )
   }
 
   private static isExternalServiceError(context: ErrorContext, message: string): boolean {
     const externalServices = ['stripe', 'openai', 'anthropic', 'sendgrid', 'google', 'aws']
-    return externalServices.some(service => 
-      context.service?.toLowerCase().includes(service) || 
-      context.operation.toLowerCase().includes(service) ||
-      message.includes(service)
+    return externalServices.some(
+      (service) =>
+        context.service?.toLowerCase().includes(service) ||
+        context.operation.toLowerCase().includes(service) ||
+        message.includes(service)
     )
   }
 
   private static isBusinessLogicError(message: string, name: string): boolean {
     const businessIndicators = ['business', 'rule', 'policy', 'constraint', 'violation', 'conflict']
-    return businessIndicators.some(indicator => message.includes(indicator) || name.includes(indicator))
+    return businessIndicators.some(
+      (indicator) => message.includes(indicator) || name.includes(indicator)
+    )
   }
 
   private static isSystemError(message: string, name: string, stack: string): boolean {
     const systemIndicators = ['memory', 'disk', 'cpu', 'resource', 'limit', 'quota', 'capacity']
-    return systemIndicators.some(indicator => 
-      message.includes(indicator) || name.includes(indicator) || stack.includes(indicator)
+    return systemIndicators.some(
+      (indicator) =>
+        message.includes(indicator) || name.includes(indicator) || stack.includes(indicator)
     )
   }
 }
@@ -219,10 +263,10 @@ export class ErrorRecoveryEngine {
   ): Promise<ErrorRecoveryResult> {
     const startTime = Date.now()
     const classification = ErrorClassifier.classify(error, context)
-    
-    let attemptCount = 0
-    let fallbackUsed = false
-    let finalError = error
+
+    const attemptCount = 0
+    const fallbackUsed = false
+    const finalError = error
 
     try {
       switch (classification.recoveryStrategy) {
@@ -241,7 +285,10 @@ export class ErrorRecoveryEngine {
 
         case 'ignore':
           // Log but don't throw
-          console.warn(`Ignoring ${classification.category} error in ${context.operation}:`, error.message)
+          console.warn(
+            `Ignoring ${classification.category} error in ${context.operation}:`,
+            error.message
+          )
           break
       }
 
@@ -252,7 +299,7 @@ export class ErrorRecoveryEngine {
         recoveryTime: Date.now() - startTime,
         fallbackUsed,
         originalError: error,
-        finalError
+        finalError,
       }
     } catch (recoveryError) {
       return {
@@ -262,7 +309,7 @@ export class ErrorRecoveryEngine {
         recoveryTime: Date.now() - startTime,
         fallbackUsed,
         originalError: error,
-        finalError: recoveryError as Error
+        finalError: recoveryError as Error,
       }
     }
   }
@@ -274,36 +321,36 @@ export class ErrorRecoveryEngine {
     classification: ErrorClassification
   ): Promise<ErrorRecoveryResult> {
     const startTime = Date.now()
-    
+
     if (!config.retryConfig) {
       config.retryConfig = {
         timeout: classification.estimatedRecoveryTime || 10000,
         retries: classification.severity === 'critical' ? 5 : 3,
         retryDelay: 1000,
         exponentialBackoff: true,
-        maxRetryDelay: 30000
+        maxRetryDelay: 30000,
       }
     }
 
     try {
       // This would need the actual operation to retry
       // For now, we'll simulate the retry logic
-      await new Promise(resolve => setTimeout(resolve, config.retryConfig!.retryDelay || 1000))
-      
+      await new Promise((resolve) => setTimeout(resolve, config.retryConfig!.retryDelay || 1000))
+
       return {
         success: true,
         strategy: 'retry',
         attemptCount: 1,
         recoveryTime: Date.now() - startTime,
         fallbackUsed: false,
-        originalError: error
+        originalError: error,
       }
     } catch (retryError) {
       // Try fallback if available
       if (classification.fallbackAvailable && config.fallbackConfig?.enabled) {
         return await this.handleFallbackStrategy(error, context, config, classification)
       }
-      
+
       throw retryError
     }
   }
@@ -316,14 +363,18 @@ export class ErrorRecoveryEngine {
   ): Promise<ErrorRecoveryResult> {
     const startTime = Date.now()
     const breakerName = config.circuitBreakerName || context.service || 'default'
-    
+
     try {
       // Circuit breaker will handle the retry logic
       const breaker = circuitBreakers[breakerName as keyof typeof circuitBreakers]
       if (breaker) {
         // Circuit breaker stats can tell us if we should try fallback
         const stats = breaker.getStats()
-        if (stats.state === 'OPEN' && classification.fallbackAvailable && config.fallbackConfig?.enabled) {
+        if (
+          stats.state === 'OPEN' &&
+          classification.fallbackAvailable &&
+          config.fallbackConfig?.enabled
+        ) {
           return await this.handleFallbackStrategy(error, context, config, classification)
         }
       }
@@ -334,14 +385,14 @@ export class ErrorRecoveryEngine {
         attemptCount: 1,
         recoveryTime: Date.now() - startTime,
         fallbackUsed: false,
-        originalError: error
+        originalError: error,
       }
     } catch (breakerError) {
       // Try fallback if circuit breaker fails
       if (classification.fallbackAvailable && config.fallbackConfig?.enabled) {
         return await this.handleFallbackStrategy(error, context, config, classification)
       }
-      
+
       throw breakerError
     }
   }
@@ -354,7 +405,7 @@ export class ErrorRecoveryEngine {
   ): Promise<ErrorRecoveryResult> {
     const startTime = Date.now()
     const fallbackConfig = config.fallbackConfig || this.fallbacks.get(context.operation)
-    
+
     if (!fallbackConfig?.enabled) {
       throw new Error('Fallback not available or disabled')
     }
@@ -366,9 +417,9 @@ export class ErrorRecoveryEngine {
     try {
       const fallbackResult = await Promise.race([
         Promise.resolve(fallbackConfig.handler()),
-        new Promise((_, reject) => 
+        new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Fallback timeout')), fallbackConfig.timeout || 5000)
-        )
+        ),
       ])
 
       return {
@@ -377,7 +428,7 @@ export class ErrorRecoveryEngine {
         attemptCount: 1,
         recoveryTime: Date.now() - startTime,
         fallbackUsed: true,
-        originalError: error
+        originalError: error,
       }
     } catch (fallbackError) {
       throw new Error(`Fallback failed: ${fallbackError}`)
@@ -394,16 +445,23 @@ export class ErrorRecoveryEngine {
     this.errorCounts.set(errorKey, currentCount + 1)
 
     // Log error with appropriate severity
-    const logLevel = classification.severity === 'critical' ? 'error' : 
-                    classification.severity === 'high' ? 'warn' : 'info'
-    
-    console[logLevel](`[${classification.severity.toUpperCase()}] ${classification.category} error in ${context.operation}:`, {
-      error: error.message,
-      context,
-      classification,
-      count: currentCount + 1,
-      stack: error.stack
-    })
+    const logLevel =
+      classification.severity === 'critical'
+        ? 'error'
+        : classification.severity === 'high'
+          ? 'warn'
+          : 'info'
+
+    console[logLevel](
+      `[${classification.severity.toUpperCase()}] ${classification.category} error in ${context.operation}:`,
+      {
+        error: error.message,
+        context,
+        classification,
+        count: currentCount + 1,
+        stack: error.stack,
+      }
+    )
 
     // Send alerts for critical errors or repeated errors
     if (classification.severity === 'critical' || currentCount >= 5) {
@@ -424,7 +482,7 @@ export class ErrorRecoveryEngine {
       error: error.message,
       count,
       context,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
   }
 
@@ -449,11 +507,11 @@ export async function handleErrorWithRecovery<T>(
     return await operation()
   } catch (error) {
     const recoveryResult = await ErrorRecoveryEngine.recover(error as Error, context, config)
-    
+
     if (recoveryResult.success && recoveryResult.fallbackUsed && config.fallbackConfig?.handler) {
       return config.fallbackConfig.handler()
     }
-    
+
     // If recovery didn't succeed, throw the final error
     throw recoveryResult.finalError || recoveryResult.originalError
   }
@@ -463,21 +521,17 @@ export async function handleErrorWithRecovery<T>(
  * Decorator for automatic error handling with recovery
  */
 export function withErrorRecovery(config: ErrorHandlingConfig = {}) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const context: ErrorContext = {
         operation: `${target.constructor.name}.${propertyKey}`,
         timestamp: Date.now(),
-        metadata: { args }
+        metadata: { args },
       }
 
-      return handleErrorWithRecovery(
-        () => originalMethod.apply(this, args),
-        context,
-        config
-      )
+      return handleErrorWithRecovery(() => originalMethod.apply(this, args), context, config)
     }
 
     return descriptor

@@ -6,7 +6,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ModelRetrainingPipeline, type ModelConfig, type RetrainingJob } from '@/lib/ml/model-retraining-pipeline'
+import {
+  ModelRetrainingPipeline,
+  type ModelConfig,
+  type RetrainingJob,
+} from '@/lib/ml/model-retraining-pipeline'
 
 interface PipelineMetrics {
   models: number
@@ -80,7 +84,6 @@ export function useMLPipeline(): UseMLPipelineReturn {
 
       // Load initial data
       await loadPipelineData(pipelineInstance)
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to initialize ML pipeline')
     } finally {
@@ -94,7 +97,7 @@ export function useMLPipeline(): UseMLPipelineReturn {
       const pipelineMetrics = pipelineInstance.getPipelineStatus()
       setMetrics({
         ...pipelineMetrics,
-        lastUpdate: new Date()
+        lastUpdate: new Date(),
       })
 
       // Get all models
@@ -116,94 +119,110 @@ export function useMLPipeline(): UseMLPipelineReturn {
         const updatedJob = pipelineInstance.getTrainingJob(selectedJob.id)
         setSelectedJob(updatedJob || null)
       }
-
     } catch (err) {
-      console.error('Failed to load pipeline data:', err)
       setError('Failed to load pipeline data')
     }
   }
 
-  const registerModel = useCallback(async (config: ModelConfig) => {
-    if (!pipeline) {
-      throw new Error('Pipeline not initialized')
-    }
+  const registerModel = useCallback(
+    async (config: ModelConfig) => {
+      if (!pipeline) {
+        throw new Error('Pipeline not initialized')
+      }
 
-    try {
-      pipeline.registerModel(config)
-      await refreshData()
-    } catch (err) {
-      const error = err instanceof Error ? err.message : 'Failed to register model'
-      setError(error)
-      throw new Error(error)
-    }
-  }, [pipeline])
+      try {
+        pipeline.registerModel(config)
+        await refreshData()
+      } catch (err) {
+        const error = err instanceof Error ? err.message : 'Failed to register model'
+        setError(error)
+        throw new Error(error)
+      }
+    },
+    [pipeline]
+  )
 
-  const startRetraining = useCallback(async (modelId: string, optimize: boolean = false): Promise<string> => {
-    if (!pipeline) {
-      throw new Error('Pipeline not initialized')
-    }
+  const startRetraining = useCallback(
+    async (modelId: string, optimize: boolean = false): Promise<string> => {
+      if (!pipeline) {
+        throw new Error('Pipeline not initialized')
+      }
 
-    try {
-      const jobId = await pipeline.startRetraining(modelId, 'manual', optimize)
-      await refreshData()
-      return jobId
-    } catch (err) {
-      const error = err instanceof Error ? err.message : 'Failed to start retraining'
-      setError(error)
-      throw new Error(error)
-    }
-  }, [pipeline])
+      try {
+        const jobId = await pipeline.startRetraining(modelId, 'manual', optimize)
+        await refreshData()
+        return jobId
+      } catch (err) {
+        const error = err instanceof Error ? err.message : 'Failed to start retraining'
+        setError(error)
+        throw new Error(error)
+      }
+    },
+    [pipeline]
+  )
 
-  const checkDataDrift = useCallback(async (modelId: string): Promise<boolean> => {
-    if (!pipeline) {
-      throw new Error('Pipeline not initialized')
-    }
+  const checkDataDrift = useCallback(
+    async (modelId: string): Promise<boolean> => {
+      if (!pipeline) {
+        throw new Error('Pipeline not initialized')
+      }
 
-    try {
-      const hasDrift = await pipeline.checkDataDrift(modelId)
-      await refreshData()
-      return hasDrift
-    } catch (err) {
-      const error = err instanceof Error ? err.message : 'Failed to check data drift'
-      setError(error)
-      throw new Error(error)
-    }
-  }, [pipeline])
+      try {
+        const hasDrift = await pipeline.checkDataDrift(modelId)
+        await refreshData()
+        return hasDrift
+      } catch (err) {
+        const error = err instanceof Error ? err.message : 'Failed to check data drift'
+        setError(error)
+        throw new Error(error)
+      }
+    },
+    [pipeline]
+  )
 
-  const monitorPerformance = useCallback(async (modelId: string) => {
-    if (!pipeline) {
-      throw new Error('Pipeline not initialized')
-    }
+  const monitorPerformance = useCallback(
+    async (modelId: string) => {
+      if (!pipeline) {
+        throw new Error('Pipeline not initialized')
+      }
 
-    try {
-      await pipeline.monitorPerformance(modelId)
-      await refreshData()
-    } catch (err) {
-      const error = err instanceof Error ? err.message : 'Failed to monitor performance'
-      setError(error)
-      throw new Error(error)
-    }
-  }, [pipeline])
+      try {
+        await pipeline.monitorPerformance(modelId)
+        await refreshData()
+      } catch (err) {
+        const error = err instanceof Error ? err.message : 'Failed to monitor performance'
+        setError(error)
+        throw new Error(error)
+      }
+    },
+    [pipeline]
+  )
 
-  const selectModel = useCallback((modelId: string | null) => {
-    if (!pipeline || !modelId) {
-      setSelectedModel(null)
-      return
-    }
+  const selectModel = useCallback(
+    (modelId: string | null) => {
+      if (!pipeline || !modelId) {
+        setSelectedModel(null)
+        return
+      }
 
-    const model = pipeline.getModelConfig(modelId)
-    setSelectedModel(model || null)
-  }, [pipeline])
+      const model = pipeline.getModelConfig(modelId)
+      setSelectedModel(model || null)
+    },
+    [pipeline]
+  )
 
-  const selectJob = useCallback((jobId: string | null) => {
-    if (!pipeline || !jobId) {
-      setSelectedJob(null)
-      return
-    }
+  const selectJob = useCallback(
+    (jobId: string | null) => {
+      if (!pipeline || !jobId) {
+        setSelectedJob(null)
+        return
+      }
 
-    const job = pipeline.getTrainingJob(jobId)
-    setSelectedJob(job || null)
-  }, [pipeline])
+      const job = pipeline.getTrainingJob(jobId)
+      setSelectedJob(job || null)
+    },
+    [pipeline]
+  )
 
   const refreshData = useCallback(async () => {
     if (!pipeline) return
@@ -211,9 +230,7 @@ export function useMLPipeline(): UseMLPipelineReturn {
     try {
       await loadPipelineData(pipeline)
       setError(null)
-    } catch (err) {
-      console.error('Failed to refresh pipeline data:', err)
-    }
+    } catch (err) {}
   }, [pipeline, selectedModel, selectedJob])
 
   return {
@@ -238,7 +255,7 @@ export function useMLPipeline(): UseMLPipelineReturn {
     monitorPerformance,
     selectModel,
     selectJob,
-    refreshData
+    refreshData,
   }
 }
 

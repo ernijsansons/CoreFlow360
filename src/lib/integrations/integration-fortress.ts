@@ -1,6 +1,6 @@
 /**
  * CoreFlow360 Integration Fortress
- * 
+ *
  * Manages 500+ pre-built integrations with enterprise-grade security,
  * real-time sync, and intelligent data mapping
  */
@@ -79,11 +79,11 @@ export interface ActiveIntegration {
 }
 
 export interface IntegrationConfig {
-  credentials: Record<string, any>
-  settings: Record<string, any>
+  credentials: Record<string, unknown>
+  settings: Record<string, unknown>
   fieldMappings: Record<string, string>
   syncFrequency: 'realtime' | 'hourly' | 'daily' | 'weekly'
-  filters: Record<string, any>
+  filters: Record<string, unknown>
   notifications: {
     success: boolean
     errors: boolean
@@ -103,9 +103,8 @@ export class IntegrationFortress {
     this.syncManager = new SyncManager()
     this.authManager = new AuthManager()
     this.webhookManager = new WebhookManager()
-    
+
     this.initializeIntegrations()
-    console.log('🏰 Integration Fortress initialized with', this.integrations.size, 'integrations')
   }
 
   private initializeIntegrations(): void {
@@ -128,19 +127,19 @@ export class IntegrationFortress {
           sync: ['bidirectional'],
           triggers: ['lead_created', 'opportunity_updated', 'account_modified'],
           actions: ['create_lead', 'update_opportunity', 'send_email'],
-          webhooks: ['opportunity_closed', 'lead_converted']
+          webhooks: ['opportunity_closed', 'lead_converted'],
         },
         dataMappings: [
           { sourceField: 'Name', targetField: 'customerName', required: true, dataType: 'string' },
           { sourceField: 'Email', targetField: 'email', required: true, dataType: 'email' },
-          { sourceField: 'Phone', targetField: 'phone', required: false, dataType: 'phone' }
+          { sourceField: 'Phone', targetField: 'phone', required: false, dataType: 'phone' },
         ],
         webhookSupport: true,
         realTimeSync: true,
         rateLimit: { requestsPerSecond: 20, requestsPerDay: 100000, burstAllowance: 50 },
         regions: ['US', 'EU', 'APAC'],
         compliance: ['GDPR', 'SOC2', 'HIPAA'],
-        pricing: { model: 'free', freeLimit: 10000 }
+        pricing: { model: 'free', freeLimit: 10000 },
       },
 
       // Accounting Software
@@ -161,19 +160,29 @@ export class IntegrationFortress {
           sync: ['bidirectional'],
           triggers: ['invoice_created', 'payment_received', 'expense_added'],
           actions: ['create_invoice', 'record_payment', 'create_expense'],
-          webhooks: ['payment_received', 'invoice_sent']
+          webhooks: ['payment_received', 'invoice_sent'],
         },
         dataMappings: [
           { sourceField: 'Name', targetField: 'customerName', required: true, dataType: 'string' },
-          { sourceField: 'CompanyName', targetField: 'companyName', required: false, dataType: 'string' },
-          { sourceField: 'Balance', targetField: 'accountBalance', required: false, dataType: 'currency' }
+          {
+            sourceField: 'CompanyName',
+            targetField: 'companyName',
+            required: false,
+            dataType: 'string',
+          },
+          {
+            sourceField: 'Balance',
+            targetField: 'accountBalance',
+            required: false,
+            dataType: 'currency',
+          },
         ],
         webhookSupport: true,
         realTimeSync: true,
         rateLimit: { requestsPerSecond: 10, requestsPerDay: 10000, burstAllowance: 20 },
         regions: ['US', 'CA', 'UK', 'AU'],
         compliance: ['PCI-DSS', 'SOC2'],
-        pricing: { model: 'free', freeLimit: 5000 }
+        pricing: { model: 'free', freeLimit: 5000 },
       },
 
       // Communication Platforms
@@ -194,19 +203,24 @@ export class IntegrationFortress {
           sync: ['unidirectional'],
           triggers: ['message_posted', 'channel_created', 'user_joined'],
           actions: ['send_message', 'create_channel', 'invite_user'],
-          webhooks: ['message_posted', 'app_mention']
+          webhooks: ['message_posted', 'app_mention'],
         },
         dataMappings: [
           { sourceField: 'user.name', targetField: 'username', required: true, dataType: 'string' },
-          { sourceField: 'channel.name', targetField: 'channelName', required: true, dataType: 'string' },
-          { sourceField: 'text', targetField: 'messageContent', required: true, dataType: 'text' }
+          {
+            sourceField: 'channel.name',
+            targetField: 'channelName',
+            required: true,
+            dataType: 'string',
+          },
+          { sourceField: 'text', targetField: 'messageContent', required: true, dataType: 'text' },
         ],
         webhookSupport: true,
         realTimeSync: true,
         rateLimit: { requestsPerSecond: 50, requestsPerDay: 1000000, burstAllowance: 100 },
         regions: ['Global'],
         compliance: ['GDPR', 'SOC2', 'HIPAA'],
-        pricing: { model: 'free', freeLimit: 10000 }
+        pricing: { model: 'free', freeLimit: 10000 },
       },
 
       // E-commerce Platforms
@@ -227,19 +241,29 @@ export class IntegrationFortress {
           sync: ['bidirectional'],
           triggers: ['order_created', 'order_updated', 'inventory_low'],
           actions: ['fulfill_order', 'update_inventory', 'create_product'],
-          webhooks: ['orders/create', 'orders/updated', 'inventory_levels/update']
+          webhooks: ['orders/create', 'orders/updated', 'inventory_levels/update'],
         },
         dataMappings: [
           { sourceField: 'email', targetField: 'customerEmail', required: true, dataType: 'email' },
-          { sourceField: 'total_price', targetField: 'orderTotal', required: true, dataType: 'currency' },
-          { sourceField: 'line_items', targetField: 'orderItems', required: true, dataType: 'array' }
+          {
+            sourceField: 'total_price',
+            targetField: 'orderTotal',
+            required: true,
+            dataType: 'currency',
+          },
+          {
+            sourceField: 'line_items',
+            targetField: 'orderItems',
+            required: true,
+            dataType: 'array',
+          },
         ],
         webhookSupport: true,
         realTimeSync: true,
         rateLimit: { requestsPerSecond: 4, requestsPerDay: 10000, burstAllowance: 10 },
         regions: ['Global'],
         compliance: ['PCI-DSS', 'GDPR'],
-        pricing: { model: 'free', freeLimit: 2500 }
+        pricing: { model: 'free', freeLimit: 2500 },
       },
 
       // Marketing Automation
@@ -260,26 +284,36 @@ export class IntegrationFortress {
           sync: ['bidirectional'],
           triggers: ['subscriber_added', 'campaign_sent', 'list_updated'],
           actions: ['add_subscriber', 'send_campaign', 'create_list'],
-          webhooks: ['subscribe', 'unsubscribe', 'campaign']
+          webhooks: ['subscribe', 'unsubscribe', 'campaign'],
         },
         dataMappings: [
           { sourceField: 'email_address', targetField: 'email', required: true, dataType: 'email' },
-          { sourceField: 'status', targetField: 'subscriptionStatus', required: true, dataType: 'string' },
-          { sourceField: 'merge_fields', targetField: 'customFields', required: false, dataType: 'object' }
+          {
+            sourceField: 'status',
+            targetField: 'subscriptionStatus',
+            required: true,
+            dataType: 'string',
+          },
+          {
+            sourceField: 'merge_fields',
+            targetField: 'customFields',
+            required: false,
+            dataType: 'object',
+          },
         ],
         webhookSupport: true,
         realTimeSync: false,
         rateLimit: { requestsPerSecond: 10, requestsPerDay: 50000, burstAllowance: 20 },
         regions: ['US', 'EU'],
         compliance: ['GDPR', 'CAN-SPAM'],
-        pricing: { model: 'free', freeLimit: 10000 }
-      }
+        pricing: { model: 'free', freeLimit: 10000 },
+      },
 
       // Add 495 more integrations here in production...
       // This is a representative sample of the full integration catalog
     ]
 
-    integrations.forEach(integration => {
+    integrations.forEach((integration) => {
       this.integrations.set(integration.id, integration)
     })
   }
@@ -287,43 +321,46 @@ export class IntegrationFortress {
   /**
    * Get all available integrations with filtering and search
    */
-  getIntegrations(filters: {
-    category?: string
-    provider?: string
-    authType?: string
-    search?: string
-    status?: string
-    popular?: boolean
-  } = {}): IntegrationDefinition[] {
+  getIntegrations(
+    filters: {
+      category?: string
+      provider?: string
+      authType?: string
+      search?: string
+      status?: string
+      popular?: boolean
+    } = {}
+  ): IntegrationDefinition[] {
     let results = Array.from(this.integrations.values())
 
     if (filters.category) {
-      results = results.filter(i => i.category === filters.category)
+      results = results.filter((i) => i.category === filters.category)
     }
 
     if (filters.provider) {
-      results = results.filter(i => i.provider === filters.provider)
+      results = results.filter((i) => i.provider === filters.provider)
     }
 
     if (filters.authType) {
-      results = results.filter(i => i.authType === filters.authType)
+      results = results.filter((i) => i.authType === filters.authType)
     }
 
     if (filters.status) {
-      results = results.filter(i => i.status === filters.status)
+      results = results.filter((i) => i.status === filters.status)
     }
 
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase()
-      results = results.filter(i => 
-        i.name.toLowerCase().includes(searchTerm) ||
-        i.description.toLowerCase().includes(searchTerm) ||
-        i.provider.toLowerCase().includes(searchTerm)
+      results = results.filter(
+        (i) =>
+          i.name.toLowerCase().includes(searchTerm) ||
+          i.description.toLowerCase().includes(searchTerm) ||
+          i.provider.toLowerCase().includes(searchTerm)
       )
     }
 
     if (filters.popular) {
-      results = results.filter(i => i.popularity >= 80)
+      results = results.filter((i) => i.popularity >= 80)
     }
 
     // Sort by popularity by default
@@ -335,29 +372,29 @@ export class IntegrationFortress {
    */
   getCategories(): { name: string; count: number; icon: string }[] {
     const categories = new Map<string, number>()
-    
+
     for (const integration of this.integrations.values()) {
       categories.set(integration.category, (categories.get(integration.category) || 0) + 1)
     }
 
     const categoryIcons: Record<string, string> = {
-      'CRM': '👥',
-      'Accounting': '💰',
-      'Communication': '💬',
+      CRM: '👥',
+      Accounting: '💰',
+      Communication: '💬',
       'E-commerce': '🛒',
-      'Marketing': '📢',
-      'HR': '🧑‍💼',
+      Marketing: '📢',
+      HR: '🧑‍💼',
       'Project Management': '📊',
-      'Storage': '📁',
-      'Analytics': '📈',
-      'Social Media': '📱'
+      Storage: '📁',
+      Analytics: '📈',
+      'Social Media': '📱',
     }
 
     return Array.from(categories.entries())
       .map(([name, count]) => ({
         name,
         count,
-        icon: categoryIcons[name] || '🔗'
+        icon: categoryIcons[name] || '🔗',
       }))
       .sort((a, b) => b.count - a.count)
   }
@@ -376,8 +413,6 @@ export class IntegrationFortress {
       if (!integration) {
         throw new Error(`Integration ${integrationId} not found`)
       }
-
-      console.log(`🔗 Connecting integration: ${integration.name} for user ${userId}`)
 
       // Validate configuration
       await this.validateIntegrationConfig(integration, config)
@@ -406,8 +441,8 @@ export class IntegrationFortress {
             success: true,
             errors: true,
             warnings: true,
-            channels: ['email']
-          }
+            channels: ['email'],
+          },
         },
         status: 'connected',
         lastSync: new Date(),
@@ -415,10 +450,10 @@ export class IntegrationFortress {
           totalRecords: 0,
           successfulSyncs: 0,
           failedSyncs: 0,
-          averageSyncTime: 0
+          averageSyncTime: 0,
         },
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       }
 
       this.activeIntegrations.set(activeIntegrationId, activeIntegration)
@@ -431,11 +466,8 @@ export class IntegrationFortress {
       // Start initial sync
       await this.syncManager.scheduleSync(activeIntegration)
 
-      console.log(`✅ Integration ${integration.name} connected successfully`)
       return activeIntegrationId
-
     } catch (error) {
-      console.error(`❌ Failed to connect integration:`, error)
       throw error
     }
   }
@@ -445,7 +477,7 @@ export class IntegrationFortress {
    */
   getUserIntegrations(userId: string): ActiveIntegration[] {
     return Array.from(this.activeIntegrations.values())
-      .filter(integration => integration.userId === userId)
+      .filter((integration) => integration.userId === userId)
       .sort((a, b) => b.lastSync.getTime() - a.lastSync.getTime())
   }
 
@@ -472,18 +504,23 @@ export class IntegrationFortress {
     errorRate: number
   } {
     const activeIntegrations = Array.from(this.activeIntegrations.values())
-    const totalSyncs = activeIntegrations.reduce((sum, i) => sum + i.syncStats.successfulSyncs + i.syncStats.failedSyncs, 0)
+    const totalSyncs = activeIntegrations.reduce(
+      (sum, i) => sum + i.syncStats.successfulSyncs + i.syncStats.failedSyncs,
+      0
+    )
     const totalErrors = activeIntegrations.reduce((sum, i) => sum + i.syncStats.failedSyncs, 0)
-    const avgSyncTime = activeIntegrations.length > 0
-      ? activeIntegrations.reduce((sum, i) => sum + i.syncStats.averageSyncTime, 0) / activeIntegrations.length
-      : 0
+    const avgSyncTime =
+      activeIntegrations.length > 0
+        ? activeIntegrations.reduce((sum, i) => sum + i.syncStats.averageSyncTime, 0) /
+          activeIntegrations.length
+        : 0
 
     return {
       totalIntegrations: this.integrations.size,
       activeIntegrations: activeIntegrations.length,
       totalSyncs,
       averageSyncTime: avgSyncTime,
-      errorRate: totalSyncs > 0 ? (totalErrors / totalSyncs) * 100 : 0
+      errorRate: totalSyncs > 0 ? (totalErrors / totalSyncs) * 100 : 0,
     }
   }
 
@@ -502,14 +539,13 @@ export class IntegrationFortress {
   }
 
   private async testConnection(
-    integration: IntegrationDefinition,
-    credentials: Record<string, any>
+    _integration: IntegrationDefinition,
+    _credentials: Record<string, unknown>
   ): Promise<void> {
     // Test the connection to ensure credentials are valid
-    console.log(`🔍 Testing connection for ${integration.name}`)
-    
+
     // In production, this would make actual API calls to test connectivity
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000))
   }
 
   private generateIntegrationId(integrationId: string, userId: string): string {
@@ -521,8 +557,6 @@ export class IntegrationFortress {
 
 class SyncManager {
   async scheduleSync(activeIntegration: ActiveIntegration): Promise<void> {
-    console.log(`📅 Scheduling sync for ${activeIntegration.name}`)
-    
     // Set up recurring sync based on frequency
     switch (activeIntegration.config.syncFrequency) {
       case 'realtime':
@@ -542,35 +576,34 @@ class SyncManager {
 
   async performSync(activeIntegration: ActiveIntegration): Promise<void> {
     const startTime = Date.now()
-    
+
     try {
-      console.log(`🔄 Syncing ${activeIntegration.name}`)
-      
       // Perform the actual data sync
       await this.syncData(activeIntegration)
-      
+
       // Update sync statistics
       const syncTime = Date.now() - startTime
       activeIntegration.syncStats.successfulSyncs++
-      activeIntegration.syncStats.averageSyncTime = 
-        (activeIntegration.syncStats.averageSyncTime * (activeIntegration.syncStats.successfulSyncs - 1) + syncTime) / 
+      activeIntegration.syncStats.averageSyncTime =
+        (activeIntegration.syncStats.averageSyncTime *
+          (activeIntegration.syncStats.successfulSyncs - 1) +
+          syncTime) /
         activeIntegration.syncStats.successfulSyncs
-      
+
       activeIntegration.lastSync = new Date()
       activeIntegration.status = 'connected'
-      
     } catch (error) {
       activeIntegration.syncStats.failedSyncs++
       activeIntegration.status = 'error'
-      console.error(`❌ Sync failed for ${activeIntegration.name}:`, error)
+
       throw error
     }
   }
 
-  private async syncData(activeIntegration: ActiveIntegration): Promise<void> {
+  private async syncData(_activeIntegration: ActiveIntegration): Promise<void> {
     // Simulate data synchronization
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
     // In production, this would:
     // 1. Fetch data from external API
     // 2. Apply field mappings and transformations
@@ -582,10 +615,8 @@ class SyncManager {
 class AuthManager {
   async authenticate(
     integration: IntegrationDefinition,
-    providedCredentials: Record<string, any>
-  ): Promise<Record<string, any>> {
-    console.log(`🔐 Authenticating ${integration.name}`)
-    
+    providedCredentials: Record<string, unknown>
+  ): Promise<Record<string, unknown>> {
     switch (integration.authType) {
       case 'oauth2':
         return this.handleOAuth2(integration, providedCredentials)
@@ -600,45 +631,43 @@ class AuthManager {
 
   private async handleOAuth2(
     integration: IntegrationDefinition,
-    credentials: Record<string, any>
-  ): Promise<Record<string, any>> {
+    credentials: Record<string, unknown>
+  ): Promise<Record<string, unknown>> {
     // Handle OAuth2 flow
     return {
       accessToken: credentials.accessToken,
       refreshToken: credentials.refreshToken,
-      expiresAt: credentials.expiresAt || Date.now() + 3600000 // 1 hour default
+      expiresAt: credentials.expiresAt || Date.now() + 3600000, // 1 hour default
     }
   }
 
   private async handleApiKey(
     integration: IntegrationDefinition,
-    credentials: Record<string, any>
-  ): Promise<Record<string, any>> {
+    credentials: Record<string, unknown>
+  ): Promise<Record<string, unknown>> {
     // Validate and store API key
     return {
       apiKey: credentials.apiKey,
-      apiSecret: credentials.apiSecret
+      apiSecret: credentials.apiSecret,
     }
   }
 
   private async handleBasicAuth(
     integration: IntegrationDefinition,
-    credentials: Record<string, any>
-  ): Promise<Record<string, any>> {
+    credentials: Record<string, unknown>
+  ): Promise<Record<string, unknown>> {
     // Handle basic authentication
     return {
       username: credentials.username,
-      password: credentials.password
+      password: credentials.password,
     }
   }
 }
 
 class WebhookManager {
   async setupWebhooks(activeIntegration: ActiveIntegration): Promise<void> {
-    console.log(`🪝 Setting up webhooks for ${activeIntegration.name}`)
-    
     const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/${activeIntegration.id}`
-    
+
     // In production, register webhook URL with the external service
     // This would vary by integration type
   }

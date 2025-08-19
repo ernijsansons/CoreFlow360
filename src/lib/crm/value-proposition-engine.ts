@@ -7,40 +7,40 @@ export interface ValueProposition {
   id: string
   tenantId: string
   userId: string
-  
+
   // Core value proposition
   title: string
   description: string
   category: ValuePropCategory
-  
+
   // Problem it solves
   problemStatement: string
   targetPainPoints: string[]
-  
+
   // Solution details
   solutionDescription: string
   keyBenefits: string[]
   quantifiableBenefits: QuantifiableBenefit[]
-  
+
   // Supporting elements
   useCase: string
   targetPersona: string[]
   industry: string[]
-  
+
   // Social proof
   testimonials: Testimonial[]
   caseStudies: string[]
   metrics: ValueMetric[]
-  
+
   // Visual elements
   iconUrl?: string
   colorScheme?: string
   visualStyle: 'CORPORATE' | 'MODERN' | 'PLAYFUL' | 'TECHNICAL' | 'MINIMALIST'
-  
+
   // AI optimization
   aiOptimizationScore: number
   aiSuggestions: string[]
-  
+
   isActive: boolean
   createdAt: Date
   updatedAt: Date
@@ -51,14 +51,14 @@ export interface CustomerProblem {
   tenantId: string
   customerId?: string
   linkedinProfileId?: string
-  
+
   // Problem identification
   problemTitle: string
   problemDescription: string
   problemCategory: ProblemCategory
   severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
   urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
-  
+
   // Impact assessment
   businessImpact: string
   financialImpact?: {
@@ -66,13 +66,13 @@ export interface CustomerProblem {
     timeWasted?: number
     inefficiencyFactor?: number
   }
-  
+
   // Current situation
   currentSolution?: string
   currentSolutionLimitations: string[]
   hasTriedAlternatives: boolean
   alternatives: string[]
-  
+
   // Decision factors
   decisionCriteria: string[]
   budget?: {
@@ -82,15 +82,15 @@ export interface CustomerProblem {
   }
   timeline: string
   decisionMakers: string[]
-  
+
   // Solution matching
   matchedValueProps: string[] // ValueProposition IDs
   confidenceScore: number
-  
+
   // Source tracking
   identifiedFrom: 'LINKEDIN' | 'CALL' | 'EMAIL' | 'MEETING' | 'SURVEY' | 'SOCIAL' | 'AI_ANALYSIS'
-  sourceData?: any
-  
+  sourceData?: unknown
+
   createdAt: Date
   updatedAt: Date
 }
@@ -100,16 +100,16 @@ export interface InfographicTemplate {
   name: string
   description: string
   category: InfographicCategory
-  
+
   // Template structure
   layout: InfographicLayout
   sections: InfographicSection[]
-  
+
   // Customization options
   colorSchemes: ColorScheme[]
   fonts: FontOption[]
   iconSets: IconSet[]
-  
+
   // Compatibility
   supportedFormats: ('PNG' | 'PDF' | 'SVG' | 'JPEG')[]
   dimensions: {
@@ -117,11 +117,11 @@ export interface InfographicTemplate {
     height: number
     dpi: number
   }[]
-  
+
   // Usage tracking
   usageCount: number
   rating: number
-  
+
   isPremium: boolean
   tags: string[]
 }
@@ -131,23 +131,23 @@ export interface GeneratedInfographic {
   tenantId: string
   userId: string
   customerId?: string
-  
+
   // Generation context
   valuePropIds: string[]
   customerProblems: string[]
   templateId: string
-  
+
   // Content
   title: string
   subtitle?: string
   sections: GeneratedSection[]
-  
+
   // Visual settings
   colorScheme: ColorScheme
   font: FontOption
   iconSet: IconSet
   brandElements: BrandElements
-  
+
   // Generated assets
   previewUrl: string
   finalAssets: {
@@ -155,23 +155,23 @@ export interface GeneratedInfographic {
     url: string
     size: string
   }[]
-  
+
   // AI generation metadata
   aiPrompt: string
   generationModel: string
   generationTime: number
   qualityScore: number
-  
+
   // Sharing and usage
   isShared: boolean
   sharedUrl?: string
   viewCount: number
   downloadCount: number
-  
+
   // Feedback
   rating?: number
   feedback?: string
-  
+
   generatedAt: Date
   lastModified: Date
 }
@@ -180,9 +180,15 @@ export interface PersonalizedMarketingMaterial {
   id: string
   tenantId: string
   customerId: string
-  
-  materialType: 'INFOGRAPHIC' | 'PROPOSAL' | 'CASE_STUDY' | 'EMAIL_TEMPLATE' | 'PRESENTATION' | 'ONE_PAGER'
-  
+
+  materialType:
+    | 'INFOGRAPHIC'
+    | 'PROPOSAL'
+    | 'CASE_STUDY'
+    | 'EMAIL_TEMPLATE'
+    | 'PRESENTATION'
+    | 'ONE_PAGER'
+
   // Personalization context
   customerProblems: CustomerProblem[]
   selectedValueProps: ValueProposition[]
@@ -193,16 +199,16 @@ export interface PersonalizedMarketingMaterial {
     role: string
     painPoints: string[]
   }
-  
+
   // Generated content
-  content: any // JSON structure based on materialType
+  content: unknown // JSON structure based on materialType
   assets: {
     thumbnailUrl: string
     previewUrl: string
     finalUrl: string
     format: string
   }[]
-  
+
   // Performance tracking
   sent: boolean
   sentAt?: Date
@@ -212,7 +218,7 @@ export interface PersonalizedMarketingMaterial {
   clickedAt?: Date
   converted: boolean
   convertedAt?: Date
-  
+
   createdAt: Date
   updatedAt: Date
 }
@@ -225,7 +231,7 @@ export enum ValuePropCategory {
   COMPLIANCE = 'COMPLIANCE',
   INNOVATION = 'INNOVATION',
   CUSTOMER_EXPERIENCE = 'CUSTOMER_EXPERIENCE',
-  AUTOMATION = 'AUTOMATION'
+  AUTOMATION = 'AUTOMATION',
 }
 
 export enum ProblemCategory {
@@ -238,7 +244,7 @@ export enum ProblemCategory {
   SCALABILITY = 'SCALABILITY',
   INTEGRATION_ISSUES = 'INTEGRATION_ISSUES',
   SECURITY_CONCERNS = 'SECURITY_CONCERNS',
-  REPORTING_VISIBILITY = 'REPORTING_VISIBILITY'
+  REPORTING_VISIBILITY = 'REPORTING_VISIBILITY',
 }
 
 export enum InfographicCategory {
@@ -249,7 +255,7 @@ export enum InfographicCategory {
   COMPARISON_CHART = 'COMPARISON_CHART',
   BENEFITS_OVERVIEW = 'BENEFITS_OVERVIEW',
   CASE_STUDY = 'CASE_STUDY',
-  TIMELINE = 'TIMELINE'
+  TIMELINE = 'TIMELINE',
 }
 
 export interface QuantifiableBenefit {
@@ -291,7 +297,15 @@ export interface InfographicLayout {
 
 export interface InfographicSection {
   id: string
-  type: 'HEADER' | 'PROBLEM' | 'SOLUTION' | 'BENEFITS' | 'METRICS' | 'TESTIMONIAL' | 'CTA' | 'FOOTER'
+  type:
+    | 'HEADER'
+    | 'PROBLEM'
+    | 'SOLUTION'
+    | 'BENEFITS'
+    | 'METRICS'
+    | 'TESTIMONIAL'
+    | 'CTA'
+    | 'FOOTER'
   title: string
   position: number
   required: boolean
@@ -347,7 +361,7 @@ export interface BrandElements {
 
 export interface GeneratedSection {
   type: InfographicSection['type']
-  content: any
+  content: unknown
   position: {
     x: number
     y: number
@@ -381,14 +395,14 @@ export class ValuePropositionEngine {
       - Target Role: ${targetRole}
       
       Existing value props to differentiate from:
-      ${existingValueProps.map(vp => `- ${vp.title}: ${vp.description}`).join('\n')}
+      ${existingValueProps.map((vp) => `- ${vp.title}: ${vp.description}`).join('\n')}
       
       Return a unique, specific, and quantifiable value proposition.
     `
 
     // This would call GPT-4 or Claude
     const aiResponse = await this.generateWithAI(aiPrompt)
-    
+
     return {
       id: this.generateId(),
       tenantId: '', // Would be set by caller
@@ -412,7 +426,7 @@ export class ValuePropositionEngine {
       aiSuggestions: aiResponse.suggestions,
       isActive: true,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }
   }
 
@@ -422,9 +436,9 @@ export class ValuePropositionEngine {
   async analyzeCustomerProblems(
     customerId: string,
     sources: {
-      linkedinActivity?: any[]
-      conversationHistory?: any[]
-      surveyResponses?: any[]
+      linkedinActivity?: unknown[]
+      conversationHistory?: unknown[]
+      surveyResponses?: unknown[]
       callNotes?: string[]
     }
   ): Promise<CustomerProblem[]> {
@@ -438,7 +452,9 @@ export class ValuePropositionEngine {
 
     // Conversation analysis
     if (sources.conversationHistory) {
-      const conversationProblems = await this.extractProblemsFromConversations(sources.conversationHistory)
+      const conversationProblems = await this.extractProblemsFromConversations(
+        sources.conversationHistory
+      )
       problems.push(...conversationProblems)
     }
 
@@ -464,14 +480,16 @@ export class ValuePropositionEngine {
   async matchProblemsToValueProps(
     problems: CustomerProblem[],
     valueProps: ValueProposition[]
-  ): Promise<Array<{
-    problem: CustomerProblem
-    matchedValueProps: Array<{
-      valueProp: ValueProposition
-      matchScore: number
-      relevanceReason: string
+  ): Promise<
+    Array<{
+      problem: CustomerProblem
+      matchedValueProps: Array<{
+        valueProp: ValueProposition
+        matchScore: number
+        relevanceReason: string
+      }>
     }>
-  }>> {
+  > {
     const matches = []
 
     for (const problem of problems) {
@@ -479,13 +497,14 @@ export class ValuePropositionEngine {
 
       for (const valueProp of valueProps) {
         const matchScore = await this.calculateMatchScore(problem, valueProp)
-        
-        if (matchScore > 0.3) { // Minimum relevance threshold
+
+        if (matchScore > 0.3) {
+          // Minimum relevance threshold
           const relevanceReason = await this.generateRelevanceReason(problem, valueProp)
           problemMatches.push({
             valueProp,
             matchScore,
-            relevanceReason
+            relevanceReason,
           })
         }
       }
@@ -495,7 +514,7 @@ export class ValuePropositionEngine {
 
       matches.push({
         problem,
-        matchedValueProps: problemMatches.slice(0, 3) // Top 3 matches
+        matchedValueProps: problemMatches.slice(0, 3), // Top 3 matches
       })
     }
 
@@ -513,10 +532,10 @@ export class ValuePropositionEngine {
     brandElements: BrandElements
   ): Promise<GeneratedInfographic> {
     const template = await this.getInfographicTemplate(templateId)
-    
+
     // Generate AI-powered content for each section
     const sections: GeneratedSection[] = []
-    
+
     for (const section of template.sections) {
       const sectionContent = await this.generateSectionContent(
         section,
@@ -533,7 +552,7 @@ export class ValuePropositionEngine {
       sections,
       brandElements,
       colorScheme: template.colorSchemes[0], // Default or AI-selected
-      font: template.fonts[0]
+      font: template.fonts[0],
     })
 
     return {
@@ -541,8 +560,8 @@ export class ValuePropositionEngine {
       tenantId: '', // Set by caller
       userId: '',
       customerId,
-      valuePropIds: valueProps.map(vp => vp.id),
-      customerProblems: problems.map(p => p.id),
+      valuePropIds: valueProps.map((vp) => vp.id),
+      customerProblems: problems.map((p) => p.id),
       templateId,
       title: `Personalized Solution for ${brandElements.companyName}`,
       sections,
@@ -560,7 +579,7 @@ export class ValuePropositionEngine {
       viewCount: 0,
       downloadCount: 0,
       generatedAt: new Date(),
-      lastModified: new Date()
+      lastModified: new Date(),
     }
   }
 
@@ -599,7 +618,7 @@ export class ValuePropositionEngine {
       clicked: false,
       converted: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     })
 
     // Generate one-pager
@@ -653,37 +672,43 @@ export class ValuePropositionEngine {
       keyBenefits: optimization.improvedBenefits || valueProp.keyBenefits,
       aiOptimizationScore: optimization.newScore,
       aiSuggestions: optimization.suggestions,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }
   }
 
   // Private helper methods
-  private async generateWithAI(prompt: string): Promise<any> {
+  private async generateWithAI(_prompt: string): Promise<unknown> {
     // This would integrate with OpenAI GPT-4 or Anthropic Claude
     // For now, return mock response
     return {
-      title: "AI-Generated Value Proposition",
-      description: "Compelling description based on customer needs",
+      title: 'AI-Generated Value Proposition',
+      description: 'Compelling description based on customer needs',
       category: ValuePropCategory.EFFICIENCY_GAIN,
-      painPoints: ["Manual processes", "Time waste", "Error rates"],
-      solution: "Automated solution that saves time and reduces errors",
-      benefits: ["50% time savings", "99% accuracy", "Better employee satisfaction"],
+      painPoints: ['Manual processes', 'Time waste', 'Error rates'],
+      solution: 'Automated solution that saves time and reduces errors',
+      benefits: ['50% time savings', '99% accuracy', 'Better employee satisfaction'],
       quantifiableBenefits: [
-        { metric: "Time Savings", value: 50, unit: "%", timeframe: "monthly", confidence: 0.9 }
+        { metric: 'Time Savings', value: 50, unit: '%', timeframe: 'monthly', confidence: 0.9 },
       ],
-      useCase: "Perfect for companies with high-volume manual processes",
+      useCase: 'Perfect for companies with high-volume manual processes',
       score: 0.85,
-      suggestions: ["Add more specific metrics", "Include customer testimonial"]
+      suggestions: ['Add more specific metrics', 'Include customer testimonial'],
     }
   }
 
-  private async calculateMatchScore(problem: CustomerProblem, valueProp: ValueProposition): Promise<number> {
+  private async calculateMatchScore(
+    _problem: CustomerProblem,
+    valueProp: ValueProposition
+  ): Promise<number> {
     // AI-based semantic matching
     // For now, return mock score
     return Math.random() * 0.5 + 0.5 // 0.5-1.0 range
   }
 
-  private async generateRelevanceReason(problem: CustomerProblem, valueProp: ValueProposition): Promise<string> {
+  private async generateRelevanceReason(
+    problem: CustomerProblem,
+    valueProp: ValueProposition
+  ): Promise<string> {
     return `This solution directly addresses your ${problem.problemCategory.toLowerCase().replace('_', ' ')} by ${valueProp.solutionDescription.toLowerCase()}`
   }
 
@@ -699,7 +724,7 @@ export class ValuePropositionEngine {
         sections: 5,
         headerHeight: 100,
         footerHeight: 80,
-        margins: { top: 20, bottom: 20, left: 30, right: 30 }
+        margins: { top: 20, bottom: 20, left: 30, right: 30 },
       },
       sections: [
         {
@@ -709,7 +734,7 @@ export class ValuePropositionEngine {
           position: 1,
           required: true,
           maxElements: 3,
-          supportedElements: ['title', 'subtitle', 'logo']
+          supportedElements: ['title', 'subtitle', 'logo'],
         },
         {
           id: 'problem',
@@ -718,8 +743,8 @@ export class ValuePropositionEngine {
           position: 2,
           required: true,
           maxElements: 5,
-          supportedElements: ['title', 'description', 'bullet-points', 'icon']
-        }
+          supportedElements: ['title', 'description', 'bullet-points', 'icon'],
+        },
       ],
       colorSchemes: [this.getDefaultColorScheme()],
       fonts: [this.getDefaultFont()],
@@ -729,7 +754,7 @@ export class ValuePropositionEngine {
       usageCount: 0,
       rating: 0,
       isPremium: false,
-      tags: ['modern', 'problem-solution', 'business']
+      tags: ['modern', 'problem-solution', 'business'],
     }
   }
 
@@ -743,7 +768,7 @@ export class ValuePropositionEngine {
       text: '#1F2937',
       success: '#10B981',
       warning: '#F59E0B',
-      error: '#EF4444'
+      error: '#EF4444',
     }
   }
 
@@ -752,7 +777,7 @@ export class ValuePropositionEngine {
       name: 'Inter',
       family: 'Inter, sans-serif',
       weights: [400, 500, 600, 700],
-      styles: ['normal', 'italic']
+      styles: ['normal', 'italic'],
     }
   }
 
@@ -764,8 +789,8 @@ export class ValuePropositionEngine {
       icons: [
         { name: 'problem', keywords: ['issue', 'challenge', 'difficulty'] },
         { name: 'solution', keywords: ['fix', 'resolve', 'answer'] },
-        { name: 'benefit', keywords: ['advantage', 'value', 'gain'] }
-      ]
+        { name: 'benefit', keywords: ['advantage', 'value', 'gain'] },
+      ],
     }
   }
 
@@ -773,35 +798,39 @@ export class ValuePropositionEngine {
     return Math.random().toString(36).substr(2, 9)
   }
 
-  private async extractProblemsFromLinkedIn(activity: any[]): Promise<CustomerProblem[]> {
+  private async extractProblemsFromLinkedIn(_activity: unknown[]): Promise<CustomerProblem[]> {
     // AI analysis of LinkedIn posts, comments, shares to identify pain points
     return []
   }
 
-  private async extractProblemsFromConversations(conversations: any[]): Promise<CustomerProblem[]> {
+  private async extractProblemsFromConversations(
+    _conversations: unknown[]
+  ): Promise<CustomerProblem[]> {
     // AI analysis of email/chat conversations to identify mentioned problems
     return []
   }
 
-  private async extractProblemsFromSurveys(surveys: any[]): Promise<CustomerProblem[]> {
+  private async extractProblemsFromSurveys(_surveys: unknown[]): Promise<CustomerProblem[]> {
     // Extract problems from survey responses
     return []
   }
 
-  private async extractProblemsFromCallNotes(notes: string[]): Promise<CustomerProblem[]> {
+  private async extractProblemsFromCallNotes(_notes: string[]): Promise<CustomerProblem[]> {
     // AI analysis of call transcripts/notes to identify problems
     return []
   }
 
-  private async deduplicateAndScoreProblems(problems: CustomerProblem[]): Promise<CustomerProblem[]> {
+  private async deduplicateAndScoreProblems(
+    problems: CustomerProblem[]
+  ): Promise<CustomerProblem[]> {
     // Remove duplicates and score problems by severity/confidence
     return problems
   }
 
   private async generateSectionContent(
     section: InfographicSection,
-    problems: CustomerProblem[],
-    valueProps: ValueProposition[],
+    _problems: CustomerProblem[],
+    _valueProps: ValueProposition[],
     brandElements: BrandElements
   ): Promise<GeneratedSection> {
     // Generate AI-powered content for each infographic section
@@ -809,38 +838,36 @@ export class ValuePropositionEngine {
       type: section.type,
       content: {},
       position: { x: 0, y: 0, width: 800, height: 200 },
-      styling: {}
+      styling: {},
     }
   }
 
-  private async renderInfographic(config: any): Promise<any> {
+  private async renderInfographic(_config: unknown): Promise<unknown> {
     // Render the infographic using design tools/APIs
     return {
       previewUrl: 'https://example.com/preview.png',
-      assets: [
-        { format: 'PNG', url: 'https://example.com/final.png', size: '800x1200' }
-      ],
-      generationTime: 5000
+      assets: [{ format: 'PNG', url: 'https://example.com/final.png', size: '800x1200' }],
+      generationTime: 5000,
     }
   }
 
   private buildAIPrompt(problems: CustomerProblem[], valueProps: ValueProposition[]): string {
-    return `Generate infographic for problems: ${problems.map(p => p.problemTitle).join(', ')} with solutions: ${valueProps.map(vp => vp.title).join(', ')}`
+    return `Generate infographic for problems: ${problems.map((p) => p.problemTitle).join(', ')} with solutions: ${valueProps.map((vp) => vp.title).join(', ')}`
   }
 
-  private async calculateQualityScore(infographic: any): Promise<number> {
+  private async calculateQualityScore(_infographic: unknown): Promise<number> {
     // AI-based quality assessment
     return 0.85
   }
 
-  private async getCustomerProfile(customerId: string): Promise<any> {
+  private async getCustomerProfile(_customerId: string): Promise<unknown> {
     // Get customer profile data
     return {
       company: 'Example Corp',
       industry: 'Technology',
       size: '100-500',
       role: 'VP of Sales',
-      painPoints: ['Manual processes', 'Low conversion rates']
+      painPoints: ['Manual processes', 'Low conversion rates'],
     }
   }
 
@@ -856,7 +883,7 @@ export class ValuePropositionEngine {
       materialType: 'ONE_PAGER',
       customerProblems: problems,
       selectedValueProps: valueProps,
-      customerProfile: {} as any,
+      customerProfile: {} as unknown,
       content: {},
       assets: [],
       sent: false,
@@ -864,7 +891,7 @@ export class ValuePropositionEngine {
       clicked: false,
       converted: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }
   }
 
@@ -879,7 +906,7 @@ export class ValuePropositionEngine {
       materialType: 'EMAIL_TEMPLATE',
       customerProblems: problems,
       selectedValueProps: valueProps,
-      customerProfile: {} as any,
+      customerProfile: {} as unknown,
       content: {},
       assets: [],
       sent: false,
@@ -887,7 +914,7 @@ export class ValuePropositionEngine {
       clicked: false,
       converted: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }
   }
 
@@ -903,7 +930,7 @@ export class ValuePropositionEngine {
       materialType: 'PROPOSAL',
       customerProblems: problems,
       selectedValueProps: valueProps,
-      customerProfile: {} as any,
+      customerProfile: {} as unknown,
       content: {},
       assets: [],
       sent: false,
@@ -911,7 +938,7 @@ export class ValuePropositionEngine {
       clicked: false,
       converted: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }
   }
 }

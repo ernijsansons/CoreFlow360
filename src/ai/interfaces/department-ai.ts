@@ -1,7 +1,7 @@
 /**
  * CoreFlow360 - Department AI Interfaces
  * MATHEMATICALLY PERFECT, ALGORITHMICALLY OPTIMAL, PROVABLY CORRECT
- * 
+ *
  * Specialized AI agents for each business department
  */
 
@@ -15,16 +15,16 @@ export interface DepartmentAI {
   capabilities: string[]
   modelConfiguration: AIConfiguration
   isActive: boolean
-  
+
   // Core AI Methods
   analyze(context: DepartmentAnalysisContext): Promise<DepartmentAnalysisResult>
   predict(context: DepartmentPredictionContext): Promise<DepartmentPredictionResult>
   recommend(context: DepartmentRecommendationContext): Promise<DepartmentRecommendationResult>
   automate(context: DepartmentAutomationContext): Promise<DepartmentAutomationResult>
-  
+
   // Department-specific health check
   healthCheck(): Promise<DepartmentHealthStatus>
-  
+
   // Configuration and learning
   updateConfiguration(config: Partial<AIConfiguration>): Promise<void>
   learn(feedback: DepartmentAIFeedback): Promise<void>
@@ -172,29 +172,33 @@ export interface DepartmentAIFeedback {
 // CRM AI Agent
 export interface CRMAI extends DepartmentAI {
   // CRM-specific methods
-  scoreLeads(leads: Array<Record<string, unknown>>): Promise<Array<{
-    leadId: string
-    score: number
-    reasoning: string[]
-    nextBestAction: string
-  }>>
-  
+  scoreLeads(leads: Array<Record<string, unknown>>): Promise<
+    Array<{
+      leadId: string
+      score: number
+      reasoning: string[]
+      nextBestAction: string
+    }>
+  >
+
   predictChurn(customerId: string): Promise<{
     churnProbability: number
     riskFactors: string[]
     retentionStrategies: string[]
     timeframe: string
   }>
-  
-  segmentCustomers(criteria: Record<string, unknown>): Promise<Array<{
-    segmentId: string
-    name: string
-    characteristics: string[]
-    size: number
-    value: number
-    growthPotential: number
-  }>>
-  
+
+  segmentCustomers(criteria: Record<string, unknown>): Promise<
+    Array<{
+      segmentId: string
+      name: string
+      characteristics: string[]
+      size: number
+      value: number
+      growthPotential: number
+    }>
+  >
+
   optimizeOutreach(campaignData: Record<string, unknown>): Promise<{
     recommendations: Array<{
       channel: string
@@ -219,23 +223,28 @@ export interface SalesAI extends DepartmentAI {
     }>
     riskFactors: string[]
   }>
-  
-  optimizePricing(productId: string, context: Record<string, unknown>): Promise<{
+
+  optimizePricing(
+    productId: string,
+    context: Record<string, unknown>
+  ): Promise<{
     recommendedPrice: number
     priceRange: { min: number; max: number }
     competitiveAnalysis: Record<string, unknown>
     demandElasticity: number
     revenueImpact: number
   }>
-  
-  prioritizeDeals(deals: Array<Record<string, unknown>>): Promise<Array<{
-    dealId: string
-    priority: number
-    winProbability: number
-    expectedValue: number
-    recommendedActions: string[]
-    timeline: string
-  }>>
+
+  prioritizeDeals(deals: Array<Record<string, unknown>>): Promise<
+    Array<{
+      dealId: string
+      priority: number
+      winProbability: number
+      expectedValue: number
+      recommendedActions: string[]
+      timeline: string
+    }>
+  >
 }
 
 // Finance AI Agent
@@ -256,15 +265,17 @@ export interface FinanceAI extends DepartmentAI {
       mitigation: string
     }>
   }>
-  
-  detectAnomalies(transactionData: Array<Record<string, unknown>>): Promise<Array<{
-    transactionId: string
-    anomalyType: string
-    severity: number
-    description: string
-    suggestedAction: string
-  }>>
-  
+
+  detectAnomalies(transactionData: Array<Record<string, unknown>>): Promise<
+    Array<{
+      transactionId: string
+      anomalyType: string
+      severity: number
+      description: string
+      suggestedAction: string
+    }>
+  >
+
   optimizeBudget(departmentBudgets: Record<string, number>): Promise<{
     recommendations: Array<{
       department: string
@@ -290,15 +301,17 @@ export interface HRAI extends DepartmentAI {
     retentionStrategies: string[]
     timeline: string
   }>
-  
-  matchTalent(jobRequirements: Record<string, unknown>): Promise<Array<{
-    candidateId: string
-    matchScore: number
-    strengths: string[]
-    gaps: string[]
-    interviewRecommendations: string[]
-  }>>
-  
+
+  matchTalent(jobRequirements: Record<string, unknown>): Promise<
+    Array<{
+      candidateId: string
+      matchScore: number
+      strengths: string[]
+      gaps: string[]
+      interviewRecommendations: string[]
+    }>
+  >
+
   optimizeWorkforce(requirements: Record<string, unknown>): Promise<{
     currentState: Record<string, number>
     recommendations: Array<{
@@ -314,7 +327,7 @@ export interface HRAI extends DepartmentAI {
   }>
 }
 
-// Operations AI Agent  
+// Operations AI Agent
 export interface OperationsAI extends DepartmentAI {
   // Operations-specific methods
   optimizeSupplyChain(constraints: Record<string, unknown>): Promise<{
@@ -328,16 +341,18 @@ export interface OperationsAI extends DepartmentAI {
     totalSavings: number
     riskAssessment: Record<string, unknown>
   }>
-  
-  predictMaintenance(assets: Array<Record<string, unknown>>): Promise<Array<{
-    assetId: string
-    maintenanceType: string
-    predictedDate: Date
-    confidence: number
-    costEstimate: number
-    urgency: 'low' | 'medium' | 'high' | 'critical'
-  }>>
-  
+
+  predictMaintenance(assets: Array<Record<string, unknown>>): Promise<
+    Array<{
+      assetId: string
+      maintenanceType: string
+      predictedDate: Date
+      confidence: number
+      costEstimate: number
+      urgency: 'low' | 'medium' | 'high' | 'critical'
+    }>
+  >
+
   optimizeWorkflow(processData: Record<string, unknown>): Promise<{
     currentEfficiency: number
     optimizedEfficiency: number
@@ -374,7 +389,7 @@ export interface AnalyticsAI extends DepartmentAI {
     }
     recommendations: string[]
   }>
-  
+
   buildPredictiveModel(specification: Record<string, unknown>): Promise<{
     modelId: string
     type: string
@@ -391,7 +406,7 @@ export interface AnalyticsAI extends DepartmentAI {
       scalability: Record<string, unknown>
     }
   }>
-  
+
   optimizeKPIs(currentMetrics: Record<string, number>): Promise<{
     recommendations: Array<{
       metric: string
@@ -428,7 +443,7 @@ export interface HVACSpecificAI {
       benefit: string
     }>
   }>
-  
+
   optimizeServiceRoutes(serviceRequests: Array<Record<string, unknown>>): Promise<{
     optimizedRoutes: Array<{
       technicianId: string
@@ -465,7 +480,7 @@ export interface LegalSpecificAI {
     }>
     crossDocumentInsights: string[]
   }>
-  
+
   predictLitigation(caseFactors: Record<string, unknown>): Promise<{
     litigationProbability: number
     riskFactors: Array<{
@@ -491,15 +506,23 @@ export interface DepartmentAIFactory {
 
 // Cross-department AI coordination
 export interface CrossDepartmentAI {
-  analyzeImpact(action: string, originDepartment: string): Promise<Array<{
-    department: string
-    impact: 'positive' | 'negative' | 'neutral'
-    magnitude: number
-    description: string
-    recommendations: string[]
-  }>>
-  
-  coordinateWorkflow(workflow: string, departments: string[]): Promise<{
+  analyzeImpact(
+    action: string,
+    originDepartment: string
+  ): Promise<
+    Array<{
+      department: string
+      impact: 'positive' | 'negative' | 'neutral'
+      magnitude: number
+      description: string
+      recommendations: string[]
+    }>
+  >
+
+  coordinateWorkflow(
+    workflow: string,
+    departments: string[]
+  ): Promise<{
     coordination: Array<{
       department: string
       role: string
@@ -509,7 +532,7 @@ export interface CrossDepartmentAI {
     risks: string[]
     success_probability: number
   }>
-  
+
   optimizeResources(constraints: Record<string, unknown>): Promise<{
     allocation: Record<string, Record<string, number>>
     efficiency: number
@@ -542,5 +565,5 @@ export type {
   DepartmentRecommendationResult,
   DepartmentAutomationResult,
   DepartmentHealthStatus,
-  DepartmentAIFeedback
+  DepartmentAIFeedback,
 }

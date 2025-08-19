@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
+import {
   CreditCardIcon,
   UsersIcon,
   ChartBarIcon,
@@ -25,7 +25,7 @@ import {
   ArrowPathIcon,
   BellIcon,
   EnvelopeIcon,
-  PhoneIcon
+  PhoneIcon,
 } from '@heroicons/react/24/outline'
 import { MetricCard } from '@/components/ui/MetricCard'
 
@@ -80,7 +80,7 @@ const statusColors = {
   ACTIVE: 'text-green-700 bg-green-100',
   PAST_DUE: 'text-orange-700 bg-orange-100',
   CANCELLED: 'text-gray-700 bg-gray-100',
-  EXPIRED: 'text-red-700 bg-red-100'
+  EXPIRED: 'text-red-700 bg-red-100',
 }
 
 const getHealthColor = (score: number) => {
@@ -99,7 +99,7 @@ export default function SubscriptionManager({
   onSubscriptionSelect,
   onCreateSubscription,
   onUpgradeSubscription,
-  onCancelSubscription
+  onCancelSubscription,
 }: SubscriptionManagerProps) {
   const [subscriptions, setSubscriptions] = useState<SaaSSubscription[]>([])
   const [metrics, setMetrics] = useState<SubscriptionMetrics | null>(null)
@@ -117,7 +117,7 @@ export default function SubscriptionManager({
   const loadSubscriptions = async () => {
     try {
       setLoading(true)
-      
+
       // Mock data for demonstration
       const mockSubscriptions: SaaSSubscription[] = [
         {
@@ -145,10 +145,10 @@ export default function SubscriptionManager({
             dashboard: 0.95,
             reports: 0.78,
             integrations: 0.65,
-            automation: 0.45
+            automation: 0.45,
           },
           mrr: 299,
-          ltv: 3588
+          ltv: 3588,
         },
         {
           id: 'sub-2',
@@ -177,10 +177,10 @@ export default function SubscriptionManager({
             integrations: 0.92,
             automation: 0.78,
             api: 0.65,
-            sso: 0.88
+            sso: 0.88,
           },
           mrr: 999,
-          ltv: 11988
+          ltv: 11988,
         },
         {
           id: 'sub-3',
@@ -208,9 +208,9 @@ export default function SubscriptionManager({
             dashboard: 0.25,
             reports: 0.05,
             integrations: 0.0,
-            automation: 0.0
+            automation: 0.0,
           },
-          mrr: 0
+          mrr: 0,
         },
         {
           id: 'sub-4',
@@ -237,64 +237,67 @@ export default function SubscriptionManager({
             dashboard: 0.45,
             reports: 0.25,
             integrations: 0.0,
-            automation: 0.0
+            automation: 0.0,
           },
-          mrr: 299
-        }
+          mrr: 299,
+        },
       ]
 
       const mockMetrics: SubscriptionMetrics = {
         totalSubscriptions: mockSubscriptions.length,
-        activeSubscriptions: mockSubscriptions.filter(s => s.status === 'ACTIVE').length,
-        trialSubscriptions: mockSubscriptions.filter(s => s.status === 'TRIAL').length,
+        activeSubscriptions: mockSubscriptions.filter((s) => s.status === 'ACTIVE').length,
+        trialSubscriptions: mockSubscriptions.filter((s) => s.status === 'TRIAL').length,
         monthlyRevenue: mockSubscriptions.reduce((sum, s) => sum + s.mrr, 0),
         annualRevenue: mockSubscriptions.reduce((sum, s) => sum + s.mrr * 12, 0),
-        averageHealthScore: mockSubscriptions.reduce((sum, s) => sum + s.healthScore, 0) / mockSubscriptions.length,
+        averageHealthScore:
+          mockSubscriptions.reduce((sum, s) => sum + s.healthScore, 0) / mockSubscriptions.length,
         churnRateMonth: 5.2,
         conversionRate: 24.8,
-        averageLTV: 5000
+        averageLTV: 5000,
       }
 
       setSubscriptions(mockSubscriptions)
       setMetrics(mockMetrics)
     } catch (error) {
-      console.error('Failed to load subscriptions:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const filteredSubscriptions = subscriptions.filter(sub => {
-    const matchesSearch = searchTerm === '' || 
+  const filteredSubscriptions = subscriptions.filter((sub) => {
+    const matchesSearch =
+      searchTerm === '' ||
       sub.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sub.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sub.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sub.subscriptionKey.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesStatus = selectedStatus === 'all' || sub.status === selectedStatus
     const matchesPlan = selectedPlan === 'all' || sub.planName === selectedPlan
-    
+
     return matchesSearch && matchesStatus && matchesPlan
   })
 
-  const highRiskSubscriptions = subscriptions.filter(s => s.churnRisk > 0.7)
-  const trialEndingSoon = subscriptions.filter(s => 
-    s.status === 'TRIAL' && s.trialEndDate && 
-    new Date(s.trialEndDate).getTime() - new Date().getTime() <= 7 * 24 * 60 * 60 * 1000
+  const highRiskSubscriptions = subscriptions.filter((s) => s.churnRisk > 0.7)
+  const trialEndingSoon = subscriptions.filter(
+    (s) =>
+      s.status === 'TRIAL' &&
+      s.trialEndDate &&
+      new Date(s.trialEndDate).getTime() - new Date().getTime() <= 7 * 24 * 60 * 60 * 1000
   )
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount)
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -302,16 +305,16 @@ export default function SubscriptionManager({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Subscription Management</h1>
-          <p className="text-gray-600 mt-1">Monitor and manage SaaS customer subscriptions</p>
+          <p className="mt-1 text-gray-600">Monitor and manage SaaS customer subscriptions</p>
         </div>
         <button
           onClick={onCreateSubscription}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+          className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
         >
-          <PlusIcon className="h-4 w-4 mr-2" />
+          <PlusIcon className="mr-2 h-4 w-4" />
           Add Subscription
         </button>
       </div>
@@ -321,21 +324,23 @@ export default function SubscriptionManager({
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-red-50 border border-red-200 rounded-lg p-4"
+          className="rounded-lg border border-red-200 bg-red-50 p-4"
         >
           <div className="flex items-start">
-            <ExclamationTriangleIcon className="h-5 w-5 text-red-400 mt-0.5" />
+            <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 text-red-400" />
             <div className="ml-3 flex-1">
               <h3 className="text-sm font-medium text-red-800">Action Required</h3>
               <div className="mt-2 text-sm text-red-700">
                 {highRiskSubscriptions.length > 0 && (
                   <p className="mb-1">
-                    {highRiskSubscriptions.length} subscription{highRiskSubscriptions.length > 1 ? 's' : ''} at high churn risk
+                    {highRiskSubscriptions.length} subscription
+                    {highRiskSubscriptions.length > 1 ? 's' : ''} at high churn risk
                   </p>
                 )}
                 {trialEndingSoon.length > 0 && (
                   <p>
-                    {trialEndingSoon.length} trial{trialEndingSoon.length > 1 ? 's' : ''} ending within 7 days
+                    {trialEndingSoon.length} trial{trialEndingSoon.length > 1 ? 's' : ''} ending
+                    within 7 days
                   </p>
                 )}
               </div>
@@ -385,23 +390,23 @@ export default function SubscriptionManager({
       )}
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="rounded-lg bg-white p-4 shadow">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <MagnifyingGlassIcon className="absolute top-3 left-3 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search subscriptions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full rounded-md border-gray-300 pl-10 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
-          
+
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="all">All Statuses</option>
             <option value="TRIAL">Trial</option>
@@ -409,22 +414,22 @@ export default function SubscriptionManager({
             <option value="PAST_DUE">Past Due</option>
             <option value="CANCELLED">Cancelled</option>
           </select>
-          
+
           <select
             value={selectedPlan}
             onChange={(e) => setSelectedPlan(e.target.value)}
-            className="block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="all">All Plans</option>
             <option value="Basic">Basic</option>
             <option value="Professional">Professional</option>
             <option value="Enterprise">Enterprise</option>
           </select>
-          
+
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="healthScore">Health Score</option>
             <option value="churnRisk">Churn Risk</option>
@@ -435,7 +440,7 @@ export default function SubscriptionManager({
       </div>
 
       {/* Subscriptions List */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="overflow-hidden bg-white shadow sm:rounded-md">
         <ul className="divide-y divide-gray-200">
           {filteredSubscriptions.map((subscription, index) => (
             <motion.li
@@ -443,14 +448,14 @@ export default function SubscriptionManager({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="hover:bg-gray-50 cursor-pointer"
+              className="cursor-pointer hover:bg-gray-50"
               onClick={() => onSubscriptionSelect?.(subscription)}
             >
               <div className="px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0">
-                      <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
                         <CreditCardIcon className="h-5 w-5 text-blue-600" />
                       </div>
                     </div>
@@ -459,28 +464,34 @@ export default function SubscriptionManager({
                         <p className="text-sm font-medium text-gray-900">
                           {subscription.companyName || subscription.customerName}
                         </p>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[subscription.status]}`}>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[subscription.status]}`}
+                        >
                           {subscription.status}
                         </span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-purple-800 bg-purple-100">
+                        <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">
                           {subscription.planName}
                         </span>
                       </div>
-                      <div className="flex items-center mt-1">
+                      <div className="mt-1 flex items-center">
                         <p className="text-sm text-gray-500">
                           {subscription.customerEmail} • {subscription.userCount} users
                         </p>
                       </div>
-                      <div className="flex items-center space-x-4 mt-2">
+                      <div className="mt-2 flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
                           <span className="text-xs text-gray-500">Health:</span>
-                          <span className={`text-xs font-medium ${getHealthColor(subscription.healthScore)}`}>
+                          <span
+                            className={`text-xs font-medium ${getHealthColor(subscription.healthScore)}`}
+                          >
                             {subscription.healthScore}%
                           </span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <span className="text-xs text-gray-500">Churn Risk:</span>
-                          <span className={`text-xs font-medium ${getChurnRiskColor(subscription.churnRisk)}`}>
+                          <span
+                            className={`text-xs font-medium ${getChurnRiskColor(subscription.churnRisk)}`}
+                          >
                             {(subscription.churnRisk * 100).toFixed(0)}%
                           </span>
                         </div>
@@ -493,17 +504,19 @@ export default function SubscriptionManager({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
                       <p className="text-sm font-medium text-gray-900">
                         {formatCurrency(subscription.mrr)}/mo
                       </p>
                       <p className="text-sm text-gray-500">
-                        {subscription.ltv ? `${formatCurrency(subscription.ltv)} LTV` : 'New customer'}
+                        {subscription.ltv
+                          ? `${formatCurrency(subscription.ltv)} LTV`
+                          : 'New customer'}
                       </p>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       {subscription.churnRisk > 0.7 && (
                         <button
@@ -511,7 +524,7 @@ export default function SubscriptionManager({
                             e.stopPropagation()
                             // Handle intervention
                           }}
-                          className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md"
+                          className="rounded-md p-2 text-red-400 hover:bg-red-50 hover:text-red-600"
                           title="High Churn Risk - Take Action"
                         >
                           <ExclamationTriangleIcon className="h-4 w-4" />
@@ -523,14 +536,14 @@ export default function SubscriptionManager({
                             e.stopPropagation()
                             onUpgradeSubscription?.(subscription)
                           }}
-                          className="p-2 text-green-400 hover:text-green-600 hover:bg-green-50 rounded-md"
+                          className="rounded-md p-2 text-green-400 hover:bg-green-50 hover:text-green-600"
                           title="Convert Trial"
                         >
                           <TrendingUpIcon className="h-4 w-4" />
                         </button>
                       )}
                       <button
-                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md"
+                        className="rounded-md p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
                         title="Contact Customer"
                       >
                         <EnvelopeIcon className="h-4 w-4" />
@@ -546,7 +559,7 @@ export default function SubscriptionManager({
 
       {/* Empty State */}
       {filteredSubscriptions.length === 0 && (
-        <div className="text-center py-12">
+        <div className="py-12 text-center">
           <CreditCardIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No subscriptions found</h3>
           <p className="mt-1 text-sm text-gray-500">
@@ -555,9 +568,9 @@ export default function SubscriptionManager({
           <div className="mt-6">
             <button
               onClick={onCreateSubscription}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
             >
-              <PlusIcon className="h-4 w-4 mr-2" />
+              <PlusIcon className="mr-2 h-4 w-4" />
               Add Subscription
             </button>
           </div>

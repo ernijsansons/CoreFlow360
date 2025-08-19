@@ -16,14 +16,14 @@ export enum HandoffTrigger {
   TECHNICAL_ERROR = 'technical_error',
   ESCALATION_REQUIRED = 'escalation_required',
   APPOINTMENT_CONFLICT = 'appointment_conflict',
-  BUDGET_DISCUSSION = 'budget_discussion'
+  BUDGET_DISCUSSION = 'budget_discussion',
 }
 
 export enum HandoffUrgency {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export interface HandoffContext {
@@ -34,7 +34,7 @@ export interface HandoffContext {
   urgency: HandoffUrgency
   qualificationScore: number
   conversationSummary: string
-  extractedData: Record<string, any>
+  extractedData: Record<string, unknown>
   customerSentiment: 'positive' | 'neutral' | 'negative'
   transcript: string[]
   appointmentAttempted: boolean
@@ -80,17 +80,17 @@ export class HumanHandoffSystem {
         maxConcurrent: 3,
         available: true,
         averageHandleTime: 480, // 8 minutes
-        specializations: ['HVAC Emergency', 'System Replacement', 'Commercial HVAC']
+        specializations: ['HVAC Emergency', 'System Replacement', 'Commercial HVAC'],
       },
       {
-        id: 'agent_auto_001', 
+        id: 'agent_auto_001',
         name: 'Sarah Davis',
         skills: ['Auto Repair', 'Insurance Claims', 'Customer Service'],
         currentLoad: 0,
         maxConcurrent: 4,
         available: true,
         averageHandleTime: 360, // 6 minutes
-        specializations: ['Insurance Claims', 'Collision Repair', 'Body Work']
+        specializations: ['Insurance Claims', 'Collision Repair', 'Body Work'],
       },
       {
         id: 'agent_general_001',
@@ -100,7 +100,7 @@ export class HumanHandoffSystem {
         maxConcurrent: 5,
         available: true,
         averageHandleTime: 420, // 7 minutes
-        specializations: ['B2B Sales', 'Consultation', 'Lead Qualification']
+        specializations: ['B2B Sales', 'Consultation', 'Lead Qualification'],
       },
       {
         id: 'supervisor_001',
@@ -110,11 +110,11 @@ export class HumanHandoffSystem {
         maxConcurrent: 2,
         available: true,
         averageHandleTime: 600, // 10 minutes
-        specializations: ['Escalation', 'High Value Leads', 'Complex Issues']
-      }
+        specializations: ['Escalation', 'High Value Leads', 'Complex Issues'],
+      },
     ]
 
-    defaultAgents.forEach(agent => {
+    defaultAgents.forEach((agent) => {
       this.availableAgents.set(agent.id, agent)
     })
   }
@@ -129,8 +129,6 @@ export class HumanHandoffSystem {
     error?: string
   }> {
     try {
-      console.log(`🚦 Initiating handoff for call ${context.callSid}, trigger: ${context.trigger}`)
-
       // Find best available agent
       const agent = this.findBestAgent(context)
 
@@ -153,28 +151,25 @@ export class HumanHandoffSystem {
       const handoffResult = await this.executeHandoff(context, agent)
 
       if (handoffResult.success) {
-        console.log(`✅ Handoff successful: ${context.callSid} → ${agent.name}`)
         return {
           success: true,
           agent,
-          estimatedWaitTime: 0
+          estimatedWaitTime: 0,
         }
       } else {
         // Handoff failed, release agent
         agent.currentLoad--
         this.activeHandoffs.delete(context.callSid)
-        
+
         return {
           success: false,
-          error: handoffResult.error
+          error: handoffResult.error,
         }
       }
-
     } catch (error) {
-      console.error('Handoff initiation error:', error)
       return {
         success: false,
-        error: 'System error during handoff'
+        error: 'System error during handoff',
       }
     }
   }
@@ -183,15 +178,16 @@ export class HumanHandoffSystem {
    * Find best available agent for handoff
    */
   private findBestAgent(context: HandoffContext): HumanAgent | null {
-    const availableAgents = Array.from(this.availableAgents.values())
-      .filter(agent => agent.available && agent.currentLoad < agent.maxConcurrent)
+    const availableAgents = Array.from(this.availableAgents.values()).filter(
+      (agent) => agent.available && agent.currentLoad < agent.maxConcurrent
+    )
 
     if (availableAgents.length === 0) {
       return null
     }
 
     // Scoring algorithm for agent selection
-    const scoredAgents = availableAgents.map(agent => {
+    const scoredAgents = availableAgents.map((agent) => {
       let score = 0
 
       // Skill match (40% weight)
@@ -202,14 +198,15 @@ export class HumanHandoffSystem {
 
       // Specialization match (30% weight)
       if (context.extractedData.serviceType) {
-        const specializationMatch = agent.specializations.some(spec => 
+        const specializationMatch = agent.specializations.some((spec) =>
           spec.toLowerCase().includes(context.extractedData.serviceType.toLowerCase())
         )
         if (specializationMatch) score += 30
       }
 
       // Availability score (20% weight) - prefer agents with lower load
-      const availabilityScore = ((agent.maxConcurrent - agent.currentLoad) / agent.maxConcurrent) * 20
+      const availabilityScore =
+        ((agent.maxConcurrent - agent.currentLoad) / agent.maxConcurrent) * 20
       score += availabilityScore
 
       // Urgency match (10% weight)
@@ -233,10 +230,18 @@ export class HumanHandoffSystem {
   private getIndustryFromContext(context: HandoffContext): string {
     // Extract from transcript or lead data
     const transcript = context.transcript.join(' ').toLowerCase()
-    
-    if (transcript.includes('hvac') || transcript.includes('heating') || transcript.includes('cooling')) {
+
+    if (
+      transcript.includes('hvac') ||
+      transcript.includes('heating') ||
+      transcript.includes('cooling')
+    ) {
       return 'HVAC'
-    } else if (transcript.includes('auto') || transcript.includes('car') || transcript.includes('vehicle')) {
+    } else if (
+      transcript.includes('auto') ||
+      transcript.includes('car') ||
+      transcript.includes('vehicle')
+    ) {
       return 'Auto Repair'
     } else {
       return 'General Business'
@@ -267,14 +272,12 @@ export class HumanHandoffSystem {
       return {
         success: false,
         estimatedWaitTime,
-        error: 'No agents available, offered callback'
+        error: 'No agents available, offered callback',
       }
-
     } catch (error) {
-      console.error('Error handling no agents available:', error)
       return {
         success: false,
-        error: 'System error - callback will be arranged'
+        error: 'System error - callback will be arranged',
       }
     }
   }
@@ -284,14 +287,16 @@ export class HumanHandoffSystem {
    */
   private calculateWaitTime(): number {
     const agents = Array.from(this.availableAgents.values())
-    
+
     if (agents.length === 0) return 1800 // 30 minutes default
 
     // Find agent with shortest estimated completion time
-    const shortestWait = Math.min(...agents.map(agent => {
-      if (agent.currentLoad === 0) return 0
-      return agent.averageHandleTime * agent.currentLoad
-    }))
+    const shortestWait = Math.min(
+      ...agents.map((agent) => {
+        if (agent.currentLoad === 0) return 0
+        return agent.averageHandleTime * agent.currentLoad
+      })
+    )
 
     return shortestWait
   }
@@ -303,23 +308,25 @@ export class HumanHandoffSystem {
     try {
       // This would integrate with your Twilio TTS system
       const twiml = new VoiceResponse()
-      twiml.say({
-        voice: 'alice',
-        language: 'en-US'
-      }, message)
+      twiml.say(
+        {
+          voice: 'alice',
+          language: 'en-US',
+        },
+        message
+      )
 
       // Send TwiML response (implementation depends on your Twilio setup)
-      console.log(`📢 Message for ${callSid}: ${message}`)
-
-    } catch (error) {
-      console.error('Error sending customer message:', error)
-    }
+    } catch (error) {}
   }
 
   /**
    * Add to callback queue
    */
-  private async addToCallbackQueue(context: HandoffContext, estimatedWaitTime: number): Promise<void> {
+  private async addToCallbackQueue(
+    context: HandoffContext,
+    estimatedWaitTime: number
+  ): Promise<void> {
     try {
       await db.callbackQueue.create({
         data: {
@@ -334,16 +341,11 @@ export class HumanHandoffSystem {
             qualificationScore: context.qualificationScore,
             extractedData: context.extractedData,
             conversationSummary: context.conversationSummary,
-            customerSentiment: context.customerSentiment
-          }
-        }
+            customerSentiment: context.customerSentiment,
+          },
+        },
       })
-
-      console.log(`📋 Added ${context.callSid} to callback queue`)
-
-    } catch (error) {
-      console.error('Error adding to callback queue:', error)
-    }
+    } catch (error) {}
   }
 
   /**
@@ -354,7 +356,7 @@ export class HumanHandoffSystem {
       [HandoffUrgency.CRITICAL]: 1,
       [HandoffUrgency.HIGH]: 2,
       [HandoffUrgency.MEDIUM]: 3,
-      [HandoffUrgency.LOW]: 4
+      [HandoffUrgency.LOW]: 4,
     }
     return priorities[urgency]
   }
@@ -378,13 +380,10 @@ export class HumanHandoffSystem {
           extractedData: context.extractedData,
           customerSentiment: context.customerSentiment,
           timeInConversation: context.timeInConversation,
-          estimatedValue: context.estimatedValue
-        }
+          estimatedValue: context.estimatedValue,
+        },
       })
-
-    } catch (error) {
-      console.error('Error creating handoff record:', error)
-    }
+    } catch (error) {}
   }
 
   /**
@@ -401,16 +400,15 @@ export class HumanHandoffSystem {
         `Qualification score: ${context.qualificationScore}/10`,
         `Trigger: ${context.trigger}`,
         `Time in conversation: ${Math.round(context.timeInConversation / 60)}min`,
-        `Estimated value: $${context.estimatedValue.toLocaleString()}`
+        `Estimated value: $${context.estimatedValue.toLocaleString()}`,
       ],
       nextBestAction: context.nextBestAction,
       objections: context.objections,
-      transcript: context.transcript.slice(-10) // Last 10 exchanges
+      transcript: context.transcript.slice(-10), // Last 10 exchanges
     }
 
     // Send briefing to agent system
-    console.log(`📋 Agent briefing for ${agent.name}:`, agentBriefing)
-    
+
     // In production, this would integrate with your agent dashboard/CRM
     // await this.sendAgentNotification(agent.id, agentBriefing)
   }
@@ -418,7 +416,10 @@ export class HumanHandoffSystem {
   /**
    * Execute the actual handoff
    */
-  private async executeHandoff(context: HandoffContext, agent: HumanAgent): Promise<{
+  private async executeHandoff(
+    context: HandoffContext,
+    agent: HumanAgent
+  ): Promise<{
     success: boolean
     error?: string
   }> {
@@ -432,25 +433,21 @@ export class HumanHandoffSystem {
             ...context.extractedData,
             handoffToAgent: agent.id,
             handoffReason: context.trigger,
-            agentName: agent.name
-          }
-        }
+            agentName: agent.name,
+          },
+        },
       })
 
       // In production, this would:
       // 1. Connect customer to agent (Twilio Conference, Queue, etc.)
       // 2. Notify agent dashboard
       // 3. Transfer call control
-      
-      console.log(`🔄 Executing handoff: ${context.callSid} → Agent ${agent.name}`)
 
       return { success: true }
-
     } catch (error) {
-      console.error('Error executing handoff:', error)
       return {
         success: false,
-        error: 'Failed to connect to agent'
+        error: 'Failed to connect to agent',
       }
     }
   }
@@ -458,12 +455,15 @@ export class HumanHandoffSystem {
   /**
    * Complete handoff (called when agent takes over)
    */
-  async completeHandoff(callSid: string, outcome: 'successful' | 'failed', notes?: string): Promise<void> {
+  async completeHandoff(
+    callSid: string,
+    outcome: 'successful' | 'failed',
+    notes?: string
+  ): Promise<void> {
     try {
       const context = this.activeHandoffs.get(callSid)
-      
+
       if (!context) {
-        console.warn(`No active handoff found for call ${callSid}`)
         return
       }
 
@@ -473,15 +473,17 @@ export class HumanHandoffSystem {
         data: {
           completedAt: new Date(),
           outcome: outcome,
-          agentNotes: notes
-        }
+          agentNotes: notes,
+        },
       })
 
       // Release agent capacity
-      const agentId = (await db.handoffLog.findFirst({
-        where: { callSid: callSid },
-        orderBy: { handoffAt: 'desc' }
-      }))?.agentId
+      const agentId = (
+        await db.handoffLog.findFirst({
+          where: { callSid: callSid },
+          orderBy: { handoffAt: 'desc' },
+        })
+      )?.agentId
 
       if (agentId) {
         const agent = this.availableAgents.get(agentId)
@@ -492,12 +494,7 @@ export class HumanHandoffSystem {
 
       // Remove from active handoffs
       this.activeHandoffs.delete(callSid)
-
-      console.log(`✅ Handoff completed for ${callSid}: ${outcome}`)
-
-    } catch (error) {
-      console.error('Error completing handoff:', error)
-    }
+    } catch (error) {}
   }
 
   /**
@@ -507,39 +504,45 @@ export class HumanHandoffSystem {
     totalHandoffs: number
     successRate: number
     averageHandoffTime: number
-    topTriggers: Array<{trigger: string, count: number}>
-    agentPerformance: Array<{agentId: string, handoffs: number, successRate: number}>
+    topTriggers: Array<{ trigger: string; count: number }>
+    agentPerformance: Array<{ agentId: string; handoffs: number; successRate: number }>
   }> {
     try {
       const timeWindow = {
         hour: new Date(Date.now() - 60 * 60 * 1000),
         day: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        week: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        week: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
       }[timeframe]
 
       const handoffs = await db.handoffLog.findMany({
         where: {
-          handoffAt: { gte: timeWindow }
-        }
+          handoffAt: { gte: timeWindow },
+        },
       })
 
       const totalHandoffs = handoffs.length
-      const successfulHandoffs = handoffs.filter(h => h.outcome === 'successful').length
+      const successfulHandoffs = handoffs.filter((h) => h.outcome === 'successful').length
       const successRate = totalHandoffs > 0 ? successfulHandoffs / totalHandoffs : 0
 
       // Calculate average handoff time
-      const completedHandoffs = handoffs.filter(h => h.completedAt)
-      const averageHandoffTime = completedHandoffs.length > 0 
-        ? completedHandoffs.reduce((sum, h) => {
-            return sum + (h.completedAt!.getTime() - h.handoffAt.getTime())
-          }, 0) / completedHandoffs.length / 1000
-        : 0
+      const completedHandoffs = handoffs.filter((h) => h.completedAt)
+      const averageHandoffTime =
+        completedHandoffs.length > 0
+          ? completedHandoffs.reduce((sum, h) => {
+              return sum + (h.completedAt!.getTime() - h.handoffAt.getTime())
+            }, 0) /
+            completedHandoffs.length /
+            1000
+          : 0
 
       // Top triggers
-      const triggerCounts = handoffs.reduce((acc, h) => {
-        acc[h.trigger] = (acc[h.trigger] || 0) + 1
-        return acc
-      }, {} as Record<string, number>)
+      const triggerCounts = handoffs.reduce(
+        (acc, h) => {
+          acc[h.trigger] = (acc[h.trigger] || 0) + 1
+          return acc
+        },
+        {} as Record<string, number>
+      )
 
       const topTriggers = Object.entries(triggerCounts)
         .map(([trigger, count]) => ({ trigger, count }))
@@ -547,40 +550,40 @@ export class HumanHandoffSystem {
         .slice(0, 5)
 
       // Agent performance
-      const agentStats = handoffs.reduce((acc, h) => {
-        if (!acc[h.agentId]) {
-          acc[h.agentId] = { total: 0, successful: 0 }
-        }
-        acc[h.agentId].total++
-        if (h.outcome === 'successful') {
-          acc[h.agentId].successful++
-        }
-        return acc
-      }, {} as Record<string, {total: number, successful: number}>)
+      const agentStats = handoffs.reduce(
+        (acc, h) => {
+          if (!acc[h.agentId]) {
+            acc[h.agentId] = { total: 0, successful: 0 }
+          }
+          acc[h.agentId].total++
+          if (h.outcome === 'successful') {
+            acc[h.agentId].successful++
+          }
+          return acc
+        },
+        {} as Record<string, { total: number; successful: number }>
+      )
 
-      const agentPerformance = Object.entries(agentStats)
-        .map(([agentId, stats]) => ({
-          agentId,
-          handoffs: stats.total,
-          successRate: stats.total > 0 ? stats.successful / stats.total : 0
-        }))
+      const agentPerformance = Object.entries(agentStats).map(([agentId, stats]) => ({
+        agentId,
+        handoffs: stats.total,
+        successRate: stats.total > 0 ? stats.successful / stats.total : 0,
+      }))
 
       return {
         totalHandoffs,
         successRate,
         averageHandoffTime,
         topTriggers,
-        agentPerformance
+        agentPerformance,
       }
-
     } catch (error) {
-      console.error('Error getting handoff analytics:', error)
       return {
         totalHandoffs: 0,
         successRate: 0,
         averageHandoffTime: 0,
         topTriggers: [],
-        agentPerformance: []
+        agentPerformance: [],
       }
     }
   }
@@ -592,7 +595,6 @@ export class HumanHandoffSystem {
     const agent = this.availableAgents.get(agentId)
     if (agent) {
       agent.available = available
-      console.log(`👤 Agent ${agent.name} availability: ${available}`)
     }
   }
 
@@ -607,7 +609,9 @@ export class HumanHandoffSystem {
   } {
     const agents = Array.from(this.availableAgents.values())
     const totalAgents = agents.length
-    const availableAgents = agents.filter(a => a.available && a.currentLoad < a.maxConcurrent).length
+    const availableAgents = agents.filter(
+      (a) => a.available && a.currentLoad < a.maxConcurrent
+    ).length
     const activeHandoffs = this.activeHandoffs.size
     const averageWaitTime = this.calculateWaitTime()
 
@@ -615,7 +619,7 @@ export class HumanHandoffSystem {
       totalAgents,
       availableAgents,
       activeHandoffs,
-      averageWaitTime
+      averageWaitTime,
     }
   }
 }

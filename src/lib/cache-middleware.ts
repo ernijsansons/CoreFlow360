@@ -60,22 +60,18 @@ export const cachePresets = {
 /**
  * Generate cache key from request
  */
-function generateCacheKey(
-  req: NextRequest,
-  config: CacheConfig,
-  session?: any
-): string {
+function generateCacheKey(req: NextRequest, config: CacheConfig, session?: unknown): string {
   // Use custom key generator if provided
   if (config.keyGenerator) {
     return config.keyGenerator(req)
   }
 
   const parts: string[] = ['api-cache']
-  
+
   // Add method and pathname
   parts.push(req.method)
   parts.push(req.nextUrl.pathname)
-  
+
   // Add search params
   const searchParams = req.nextUrl.searchParams
   const sortedParams = Array.from(searchParams.entries()).sort()
@@ -87,7 +83,7 @@ function generateCacheKey(
       .substring(0, 8)
     parts.push(`params:${paramsHash}`)
   }
-  
+
   // Add vary-by properties
   if (config.varyBy) {
     for (const prop of config.varyBy) {
@@ -105,11 +101,7 @@ function generateCacheKey(
         case 'query':
           const query = searchParams.get('q') || searchParams.get('query')
           if (query) {
-            const queryHash = crypto
-              .createHash('md5')
-              .update(query)
-              .digest('hex')
-              .substring(0, 8)
+            const queryHash = crypto.createHash('md5').update(query).digest('hex').substring(0, 8)
             parts.push(`query:${queryHash}`)
           }
           break
@@ -120,7 +112,7 @@ function generateCacheKey(
       }
     }
   }
-  
+
   return parts.join(':')
 }
 
@@ -136,43 +128,44 @@ export function withCache(
     if (req.method !== 'GET') {
       return handler(req)
     }
-    
+
     // Get session if needed
     let session = null
-    if (!config.excludeAuth || config.varyBy?.includes('userId') || config.varyBy?.includes('tenantId')) {
+    if (
+      !config.excludeAuth ||
+      config.varyBy?.includes('userId') ||
+      config.varyBy?.includes('tenantId')
+    ) {
       session = await getServerSession()
     }
-    
+
     // Skip caching for authenticated requests if configured
     if (config.excludeAuth && session) {
       return handler(req)
     }
-    
+
     // Generate cache key
     const cacheKey = generateCacheKey(req, config, session)
-    
+
     // Try to get from cache
     const cached = await redis.get(cacheKey, {
       tenantId: session?.user?.tenantId,
     })
-    
+
     if (cached) {
       // Check if we should revalidate
       if (config.revalidate && cached.expires && cached.expires < Date.now()) {
         // Serve stale content while revalidating in background
-        const staleResponse = new NextResponse(
-          JSON.stringify(cached.data),
-          {
-            status: 200,
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Cache': 'HIT-STALE',
-              'X-Cache-Age': String(Math.floor((Date.now() - cached.created) / 1000)),
-              'Cache-Control': `max-age=${config.ttl}, stale-while-revalidate=${config.revalidateTime}`,
-            },
-          }
-        )
-        
+        const staleResponse = new NextResponse(JSON.stringify(cached.data), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Cache': 'HIT-STALE',
+            'X-Cache-Age': String(Math.floor((Date.now() - cached.created) / 1000)),
+            'Cache-Control': `max-age=${config.ttl}, stale-while-revalidate=${config.revalidateTime}`,
+          },
+        })
+
         // Revalidate in background
         setImmediate(async () => {
           try {
@@ -184,7 +177,7 @@ export function withCache(
                 {
                   data,
                   created: Date.now(),
-                  expires: Date.now() + (config.ttl! * 1000),
+                  expires: Date.now() + config.ttl! * 1000,
                 },
                 {
                   ttl: config.ttl! + (config.revalidateTime || 60),
@@ -192,65 +185,57 @@ export function withCache(
                 }
               )
             }
-          } catch (error) {
-            console.error('Cache revalidation error:', error)
-          }
+          } catch (error) {}
         })
-        
+
         return staleResponse
       }
-      
+
       // Serve fresh cached content
-      return new NextResponse(
-        JSON.stringify(cached.data),
-        {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Cache': 'HIT',
-            'X-Cache-Age': String(Math.floor((Date.now() - cached.created) / 1000)),
-            'Cache-Control': `max-age=${config.ttl}, stale-while-revalidate=${config.revalidateTime || 0}`,
-          },
-        }
-      )
+      return new NextResponse(JSON.stringify(cached.data), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Cache': 'HIT',
+          'X-Cache-Age': String(Math.floor((Date.now() - cached.created) / 1000)),
+          'Cache-Control': `max-age=${config.ttl}, stale-while-revalidate=${config.revalidateTime || 0}`,
+        },
+      })
     }
-    
+
     // Cache miss - execute handler
     try {
       const response = await handler(req)
-      
+
       // Only cache successful responses
       if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
         const data = await response.json()
-        
+
         // Store in cache
         await redis.set(
           cacheKey,
           {
             data,
             created: Date.now(),
-            expires: Date.now() + (config.ttl! * 1000),
+            expires: Date.now() + config.ttl! * 1000,
           },
           {
             ttl: config.ttl! + (config.revalidateTime || 60),
             tenantId: session?.user?.tenantId,
           }
         )
-        
+
         // Return new response with cache headers
-        return new NextResponse(
-          JSON.stringify(data),
-          {
-            status: response.status,
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Cache': 'MISS',
-              'Cache-Control': `max-age=${config.ttl}, stale-while-revalidate=${config.revalidateTime || 0}`,
-            },
-          }
-        )
+        return new NextResponse(JSON.stringify(data), {
+          status: response.status,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Cache': 'MISS',
+            'Cache-Control': `max-age=${config.ttl}, stale-while-revalidate=${config.revalidateTime || 0}`,
+          },
+        })
       }
-      
+
       return response
     } catch (error) {
       // Don't cache errors
@@ -263,10 +248,8 @@ export function withCache(
  * Invalidate cache for specific patterns
  */
 export async function invalidateCache(patterns: string[], tenantId?: string) {
-  const promises = patterns.map(pattern => 
-    redis.invalidatePattern(pattern, { tenantId })
-  )
-  
+  const promises = patterns.map((pattern) => redis.invalidatePattern(pattern, { tenantId }))
+
   const results = await Promise.all(promises)
   return results.reduce((sum, count) => sum + count, 0)
 }
@@ -277,31 +260,24 @@ export async function invalidateCache(patterns: string[], tenantId?: string) {
 export const cacheInvalidation = {
   // Invalidate all user-specific caches
   user: async (userId: string, tenantId: string) => {
-    await invalidateCache([
-      `*:user:${userId}:*`,
-      `*:tenant:${tenantId}:*`,
-    ], tenantId)
+    await invalidateCache([`*:user:${userId}:*`, `*:tenant:${tenantId}:*`], tenantId)
   },
-  
+
   // Invalidate all tenant caches
   tenant: async (tenantId: string) => {
     await redis.invalidateTenant(tenantId)
   },
-  
+
   // Invalidate specific endpoint caches
   endpoint: async (pathname: string, tenantId?: string) => {
-    await invalidateCache([
-      `*:${pathname}:*`,
-    ], tenantId)
+    await invalidateCache([`*:${pathname}:*`], tenantId)
   },
-  
+
   // Invalidate search results
   search: async (tenantId: string) => {
-    await invalidateCache([
-      `*:query:*`,
-    ], tenantId)
+    await invalidateCache([`*:query:*`], tenantId)
   },
-  
+
   // Invalidate AI responses
   ai: async (tenantId: string) => {
     await redis.aiCache.invalidateAll(tenantId)
@@ -312,20 +288,13 @@ export const cacheInvalidation = {
  * Express-style cache middleware for Next.js API routes
  */
 export function cacheMiddleware(config: CacheConfig = cachePresets.dynamic) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value
-    
+
     descriptor.value = async function (req: NextRequest) {
-      return withCache(
-        () => originalMethod.call(this, req),
-        config
-      )(req)
+      return withCache(() => originalMethod.call(this, req), config)(req)
     }
-    
+
     return descriptor
   }
 }

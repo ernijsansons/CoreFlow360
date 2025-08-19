@@ -9,7 +9,7 @@ import { register, collectDefaultMetrics, Counter, Histogram, Gauge, Summary } f
 collectDefaultMetrics({
   prefix: 'coreflow360_',
   timeout: 10000,
-  gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5]
+  gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],
 })
 
 /**
@@ -19,27 +19,27 @@ export const httpRequestDuration = new Histogram({
   name: 'coreflow360_http_request_duration_seconds',
   help: 'HTTP request duration in seconds',
   labelNames: ['method', 'route', 'status_code', 'tenant_id'],
-  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10, 30]
+  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10, 30],
 })
 
 export const httpRequestTotal = new Counter({
   name: 'coreflow360_http_requests_total',
   help: 'Total number of HTTP requests',
-  labelNames: ['method', 'route', 'status_code', 'tenant_id']
+  labelNames: ['method', 'route', 'status_code', 'tenant_id'],
 })
 
 export const httpRequestSize = new Summary({
   name: 'coreflow360_http_request_size_bytes',
   help: 'HTTP request size in bytes',
   labelNames: ['method', 'route', 'tenant_id'],
-  percentiles: [0.5, 0.95, 0.99]
+  percentiles: [0.5, 0.95, 0.99],
 })
 
 export const httpResponseSize = new Summary({
   name: 'coreflow360_http_response_size_bytes',
   help: 'HTTP response size in bytes',
   labelNames: ['method', 'route', 'status_code', 'tenant_id'],
-  percentiles: [0.5, 0.95, 0.99]
+  percentiles: [0.5, 0.95, 0.99],
 })
 
 /**
@@ -49,31 +49,31 @@ export const dbQueryDuration = new Histogram({
   name: 'coreflow360_db_query_duration_seconds',
   help: 'Database query duration in seconds',
   labelNames: ['operation', 'table', 'tenant_id'],
-  buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5]
+  buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5],
 })
 
 export const dbQueryTotal = new Counter({
   name: 'coreflow360_db_queries_total',
   help: 'Total number of database queries',
-  labelNames: ['operation', 'table', 'tenant_id', 'status']
+  labelNames: ['operation', 'table', 'tenant_id', 'status'],
 })
 
 export const dbConnectionsActive = new Gauge({
   name: 'coreflow360_db_connections_active',
   help: 'Number of active database connections',
-  labelNames: ['tenant_id']
+  labelNames: ['tenant_id'],
 })
 
 export const dbConnectionsIdle = new Gauge({
   name: 'coreflow360_db_connections_idle',
   help: 'Number of idle database connections',
-  labelNames: ['tenant_id']
+  labelNames: ['tenant_id'],
 })
 
 export const dbPoolSize = new Gauge({
   name: 'coreflow360_db_pool_size',
   help: 'Database connection pool size',
-  labelNames: ['tenant_id']
+  labelNames: ['tenant_id'],
 })
 
 /**
@@ -82,32 +82,32 @@ export const dbPoolSize = new Gauge({
 export const cacheHitTotal = new Counter({
   name: 'coreflow360_cache_hits_total',
   help: 'Total number of cache hits',
-  labelNames: ['cache_type', 'tenant_id', 'key_pattern']
+  labelNames: ['cache_type', 'tenant_id', 'key_pattern'],
 })
 
 export const cacheMissTotal = new Counter({
   name: 'coreflow360_cache_misses_total',
   help: 'Total number of cache misses',
-  labelNames: ['cache_type', 'tenant_id', 'key_pattern']
+  labelNames: ['cache_type', 'tenant_id', 'key_pattern'],
 })
 
 export const cacheOperationDuration = new Histogram({
   name: 'coreflow360_cache_operation_duration_seconds',
   help: 'Cache operation duration in seconds',
   labelNames: ['operation', 'cache_type', 'tenant_id'],
-  buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1]
+  buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
 })
 
 export const cacheMemoryUsage = new Gauge({
   name: 'coreflow360_cache_memory_usage_bytes',
   help: 'Cache memory usage in bytes',
-  labelNames: ['cache_type', 'tenant_id']
+  labelNames: ['cache_type', 'tenant_id'],
 })
 
 export const cacheKeyCount = new Gauge({
   name: 'coreflow360_cache_keys_count',
   help: 'Number of keys in cache',
-  labelNames: ['cache_type', 'tenant_id']
+  labelNames: ['cache_type', 'tenant_id'],
 })
 
 /**
@@ -116,31 +116,31 @@ export const cacheKeyCount = new Gauge({
 export const userSessionsActive = new Gauge({
   name: 'coreflow360_user_sessions_active',
   help: 'Number of active user sessions',
-  labelNames: ['tenant_id']
+  labelNames: ['tenant_id'],
 })
 
 export const userLoginsTotal = new Counter({
   name: 'coreflow360_user_logins_total',
   help: 'Total number of user logins',
-  labelNames: ['tenant_id', 'auth_method', 'status']
+  labelNames: ['tenant_id', 'auth_method', 'status'],
 })
 
 export const apiCallsTotal = new Counter({
   name: 'coreflow360_api_calls_total',
   help: 'Total number of API calls by feature',
-  labelNames: ['feature', 'tenant_id', 'user_id']
+  labelNames: ['feature', 'tenant_id', 'user_id'],
 })
 
 export const subscriptionEvents = new Counter({
   name: 'coreflow360_subscription_events_total',
   help: 'Total number of subscription events',
-  labelNames: ['event_type', 'plan', 'tenant_id']
+  labelNames: ['event_type', 'plan', 'tenant_id'],
 })
 
 export const revenueGenerated = new Counter({
   name: 'coreflow360_revenue_generated_cents',
   help: 'Total revenue generated in cents',
-  labelNames: ['plan', 'tenant_id', 'currency']
+  labelNames: ['plan', 'tenant_id', 'currency'],
 })
 
 /**
@@ -150,19 +150,19 @@ export const aiRequestDuration = new Histogram({
   name: 'coreflow360_ai_request_duration_seconds',
   help: 'AI service request duration in seconds',
   labelNames: ['service', 'model', 'tenant_id'],
-  buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60]
+  buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60],
 })
 
 export const aiTokensUsed = new Counter({
   name: 'coreflow360_ai_tokens_used_total',
   help: 'Total number of AI tokens used',
-  labelNames: ['service', 'model', 'type', 'tenant_id']
+  labelNames: ['service', 'model', 'type', 'tenant_id'],
 })
 
 export const aiCostAccumulated = new Counter({
   name: 'coreflow360_ai_cost_accumulated_cents',
   help: 'Total AI costs accumulated in cents',
-  labelNames: ['service', 'model', 'tenant_id']
+  labelNames: ['service', 'model', 'tenant_id'],
 })
 
 /**
@@ -171,19 +171,19 @@ export const aiCostAccumulated = new Counter({
 export const errorsTotal = new Counter({
   name: 'coreflow360_errors_total',
   help: 'Total number of errors',
-  labelNames: ['error_type', 'severity', 'component', 'tenant_id']
+  labelNames: ['error_type', 'severity', 'component', 'tenant_id'],
 })
 
 export const circuitBreakerState = new Gauge({
   name: 'coreflow360_circuit_breaker_state',
   help: 'Circuit breaker state (0=closed, 1=open, 2=half-open)',
-  labelNames: ['service', 'tenant_id']
+  labelNames: ['service', 'tenant_id'],
 })
 
 export const circuitBreakerTrips = new Counter({
   name: 'coreflow360_circuit_breaker_trips_total',
   help: 'Total number of circuit breaker trips',
-  labelNames: ['service', 'tenant_id']
+  labelNames: ['service', 'tenant_id'],
 })
 
 /**
@@ -192,25 +192,25 @@ export const circuitBreakerTrips = new Counter({
 export const memoryUsage = new Gauge({
   name: 'coreflow360_memory_usage_bytes',
   help: 'Memory usage in bytes',
-  labelNames: ['type']
+  labelNames: ['type'],
 })
 
 export const cpuUsage = new Gauge({
   name: 'coreflow360_cpu_usage_percent',
   help: 'CPU usage percentage',
-  labelNames: ['core']
+  labelNames: ['core'],
 })
 
 export const diskUsage = new Gauge({
   name: 'coreflow360_disk_usage_bytes',
   help: 'Disk usage in bytes',
-  labelNames: ['mount_point', 'type']
+  labelNames: ['mount_point', 'type'],
 })
 
 export const networkBytesTotal = new Counter({
   name: 'coreflow360_network_bytes_total',
   help: 'Total network bytes transferred',
-  labelNames: ['direction', 'interface']
+  labelNames: ['direction', 'interface'],
 })
 
 /**
@@ -219,19 +219,19 @@ export const networkBytesTotal = new Counter({
 export const customerSatisfactionScore = new Gauge({
   name: 'coreflow360_customer_satisfaction_score',
   help: 'Customer satisfaction score (1-10)',
-  labelNames: ['tenant_id', 'survey_type']
+  labelNames: ['tenant_id', 'survey_type'],
 })
 
 export const featureUsage = new Counter({
   name: 'coreflow360_feature_usage_total',
   help: 'Total feature usage events',
-  labelNames: ['feature', 'action', 'tenant_id', 'user_role']
+  labelNames: ['feature', 'action', 'tenant_id', 'user_role'],
 })
 
 export const dataProcessingVolume = new Counter({
   name: 'coreflow360_data_processing_volume_bytes',
   help: 'Total volume of data processed',
-  labelNames: ['operation', 'data_type', 'tenant_id']
+  labelNames: ['operation', 'data_type', 'tenant_id'],
 })
 
 /**
@@ -264,7 +264,7 @@ export class MetricsCollector {
       method,
       route,
       status_code: statusCode.toString(),
-      tenant_id: tenantId || 'unknown'
+      tenant_id: tenantId || 'unknown',
     }
 
     httpRequestDuration.observe(labels, duration / 1000)
@@ -287,7 +287,7 @@ export class MetricsCollector {
       operation,
       table,
       tenant_id: tenantId || 'unknown',
-      status: success ? 'success' : 'error'
+      status: success ? 'success' : 'error',
     }
 
     dbQueryDuration.observe({ operation, table, tenant_id: tenantId || 'unknown' }, duration / 1000)
@@ -307,7 +307,7 @@ export class MetricsCollector {
     const labels = {
       cache_type: cacheType,
       tenant_id: tenantId || 'unknown',
-      key_pattern: keyPattern || 'unknown'
+      key_pattern: keyPattern || 'unknown',
     }
 
     if (operation === 'hit') {
@@ -316,11 +316,14 @@ export class MetricsCollector {
       cacheMissTotal.inc(labels)
     }
 
-    cacheOperationDuration.observe({
-      operation,
-      cache_type: cacheType,
-      tenant_id: tenantId || 'unknown'
-    }, duration / 1000)
+    cacheOperationDuration.observe(
+      {
+        operation,
+        cache_type: cacheType,
+        tenant_id: tenantId || 'unknown',
+      },
+      duration / 1000
+    )
   }
 
   /**
@@ -337,7 +340,7 @@ export class MetricsCollector {
     const labels = {
       service,
       model,
-      tenant_id: tenantId || 'unknown'
+      tenant_id: tenantId || 'unknown',
     }
 
     aiRequestDuration.observe(labels, duration / 1000)
@@ -358,7 +361,7 @@ export class MetricsCollector {
       error_type: errorType,
       severity,
       component,
-      tenant_id: tenantId || 'unknown'
+      tenant_id: tenantId || 'unknown',
     })
   }
 
@@ -388,7 +391,7 @@ export class MetricsCollector {
   /**
    * Get metrics as JSON
    */
-  async getMetricsAsJson(): Promise<any[]> {
+  async getMetricsAsJson(): Promise<unknown[]> {
     this.updateSystemMetrics()
     return register.getMetricsAsJSON()
   }
@@ -405,7 +408,8 @@ export class MetricsCollector {
 export const metricsCollector = MetricsCollector.getInstance()
 
 // Auto-update system metrics every 30 seconds
-if (typeof window === 'undefined') { // Server-side only
+if (typeof window === 'undefined') {
+  // Server-side only
   setInterval(() => {
     metricsCollector.updateSystemMetrics()
   }, 30000)

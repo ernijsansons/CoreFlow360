@@ -7,11 +7,11 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  MessageSquare, 
-  Users, 
-  Star, 
-  CheckCircle, 
+import {
+  MessageSquare,
+  Users,
+  Star,
+  CheckCircle,
   ArrowRight,
   Calendar,
   FileText,
@@ -21,7 +21,7 @@ import {
   Heart,
   Lightbulb,
   AlertTriangle,
-  ThumbsUp
+  ThumbsUp,
 } from 'lucide-react'
 import { GlowingButton } from '@/components/ui/GlowingButton'
 import { useTrackEvent } from '@/components/analytics/AnalyticsProvider'
@@ -36,7 +36,7 @@ const feedbackTypes = [
     icon: Lightbulb,
     color: 'text-yellow-400',
     bgColor: 'bg-yellow-900/20',
-    borderColor: 'border-yellow-500/30'
+    borderColor: 'border-yellow-500/30',
   },
   {
     id: 'bug_report',
@@ -45,7 +45,7 @@ const feedbackTypes = [
     icon: AlertTriangle,
     color: 'text-red-400',
     bgColor: 'bg-red-900/20',
-    borderColor: 'border-red-500/30'
+    borderColor: 'border-red-500/30',
   },
   {
     id: 'general_feedback',
@@ -54,7 +54,7 @@ const feedbackTypes = [
     icon: MessageSquare,
     color: 'text-blue-400',
     bgColor: 'bg-blue-900/20',
-    borderColor: 'border-blue-500/30'
+    borderColor: 'border-blue-500/30',
   },
   {
     id: 'testimonial',
@@ -63,8 +63,8 @@ const feedbackTypes = [
     icon: Heart,
     color: 'text-pink-400',
     bgColor: 'bg-pink-900/20',
-    borderColor: 'border-pink-500/30'
-  }
+    borderColor: 'border-pink-500/30',
+  },
 ]
 
 const interviewTypes = [
@@ -74,15 +74,15 @@ const interviewTypes = [
     duration: '30 minutes',
     description: 'Deep dive into your usage patterns and pain points',
     incentive: '$50 Amazon gift card',
-    slots: 12
+    slots: 12,
   },
   {
     id: 'feature_feedback',
     title: 'Feature Feedback Session',
-    duration: '20 minutes', 
+    duration: '20 minutes',
     description: 'Preview upcoming features and provide input',
     incentive: 'Early access to new features',
-    slots: 8
+    slots: 8,
   },
   {
     id: 'industry_expert',
@@ -90,8 +90,8 @@ const interviewTypes = [
     duration: '45 minutes',
     description: 'Share your industry expertise to shape our roadmap',
     incentive: '$100 Amazon gift card',
-    slots: 5
-  }
+    slots: 5,
+  },
 ]
 
 export default function FeedbackPage() {
@@ -101,39 +101,39 @@ export default function FeedbackPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
-      
+
       <div className="pt-20 pb-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-16"
+            className="mb-16 text-center"
           >
-            <div className="inline-flex items-center gap-2 bg-violet-900/30 border border-violet-500/50 px-6 py-3 rounded-full mb-8">
-              <Users className="w-5 h-5 text-violet-400" />
-              <span className="text-violet-300 font-semibold">Your Voice Matters</span>
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-violet-500/50 bg-violet-900/30 px-6 py-3">
+              <Users className="h-5 w-5 text-violet-400" />
+              <span className="font-semibold text-violet-300">Your Voice Matters</span>
             </div>
-            
+
             <h1 className="heading-hero gradient-text-ai mb-6">
               Help Shape the Future of
               <br />
               AI-Powered Business
             </h1>
-            
-            <p className="text-body-large text-gray-300 mb-12 max-w-3xl mx-auto">
-              Your feedback directly influences our product roadmap. Share your insights, 
-              report issues, request features, or join our research program to make 
-              CoreFlow360 even better for your business.
+
+            <p className="text-body-large mx-auto mb-12 max-w-3xl text-gray-300">
+              Your feedback directly influences our product roadmap. Share your insights, report
+              issues, request features, or join our research program to make CoreFlow360 even better
+              for your business.
             </p>
           </motion.div>
 
           {/* Tab Navigation */}
-          <div className="flex justify-center mb-12">
-            <div className="flex space-x-1 bg-gray-900 rounded-lg p-1">
+          <div className="mb-12 flex justify-center">
+            <div className="flex space-x-1 rounded-lg bg-gray-900 p-1">
               <button
                 onClick={() => setActiveTab('feedback')}
-                className={`px-6 py-3 rounded-md transition-all duration-200 ${
+                className={`rounded-md px-6 py-3 transition-all duration-200 ${
                   activeTab === 'feedback'
                     ? 'bg-violet-600 text-white'
                     : 'text-gray-400 hover:text-white'
@@ -143,7 +143,7 @@ export default function FeedbackPage() {
               </button>
               <button
                 onClick={() => setActiveTab('interview')}
-                className={`px-6 py-3 rounded-md transition-all duration-200 ${
+                className={`rounded-md px-6 py-3 transition-all duration-200 ${
                   activeTab === 'interview'
                     ? 'bg-violet-600 text-white'
                     : 'text-gray-400 hover:text-white'
@@ -153,7 +153,7 @@ export default function FeedbackPage() {
               </button>
               <button
                 onClick={() => setActiveTab('survey')}
-                className={`px-6 py-3 rounded-md transition-all duration-200 ${
+                className={`rounded-md px-6 py-3 transition-all duration-200 ${
                   activeTab === 'survey'
                     ? 'bg-violet-600 text-white'
                     : 'text-gray-400 hover:text-white'
@@ -177,7 +177,7 @@ export default function FeedbackPage() {
           </motion.div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   )
@@ -190,10 +190,10 @@ function FeedbackTab() {
     <div className="space-y-12">
       {/* Quick Feedback Options */}
       <div>
-        <h2 className="text-2xl font-bold text-white mb-8 text-center">
+        <h2 className="mb-8 text-center text-2xl font-bold text-white">
           What would you like to share?
         </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {feedbackTypes.map((type) => (
             <FeedbackTypeCard key={type.id} type={type} />
           ))}
@@ -201,15 +201,15 @@ function FeedbackTab() {
       </div>
 
       {/* Feature Request Board */}
-      <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-8">
-        <div className="text-center mb-8">
-          <h3 className="text-2xl font-bold text-white mb-4">Public Feature Board</h3>
+      <div className="rounded-2xl border border-gray-800/50 bg-gray-900/60 p-8">
+        <div className="mb-8 text-center">
+          <h3 className="mb-4 text-2xl font-bold text-white">Public Feature Board</h3>
           <p className="text-gray-400">
             Vote on features, see what's coming next, and suggest new ideas
           </p>
         </div>
-        
-        <div className="grid md:grid-cols-3 gap-6">
+
+        <div className="grid gap-6 md:grid-cols-3">
           <FeatureCard
             title="AI Voice Commands"
             description="Control CoreFlow360 with voice commands"
@@ -232,10 +232,10 @@ function FeedbackTab() {
             statusColor="text-gray-400"
           />
         </div>
-        
-        <div className="text-center mt-8">
-          <GlowingButton 
-            href="/feedback/features" 
+
+        <div className="mt-8 text-center">
+          <GlowingButton
+            href="/feedback/features"
             variant="outline"
             onClick={() => trackEvent('feature_board_clicked')}
           >
@@ -245,22 +245,20 @@ function FeedbackTab() {
       </div>
 
       {/* Quick Rating */}
-      <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-8 text-center">
-        <h3 className="text-xl font-bold text-white mb-4">
-          How would you rate CoreFlow360?
-        </h3>
-        <div className="flex justify-center space-x-2 mb-6">
+      <div className="rounded-2xl border border-gray-800/50 bg-gray-900/60 p-8 text-center">
+        <h3 className="mb-4 text-xl font-bold text-white">How would you rate CoreFlow360?</h3>
+        <div className="mb-6 flex justify-center space-x-2">
           {[1, 2, 3, 4, 5].map((rating) => (
             <button
               key={rating}
               onClick={() => trackEvent('quick_rating_submitted', { rating })}
-              className="w-12 h-12 rounded-full bg-gray-800 hover:bg-yellow-500 transition-colors duration-200 flex items-center justify-center"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-800 transition-colors duration-200 hover:bg-yellow-500"
             >
-              <Star className="w-6 h-6 text-gray-400 hover:text-white" />
+              <Star className="h-6 w-6 text-gray-400 hover:text-white" />
             </button>
           ))}
         </div>
-        <p className="text-gray-400 text-sm">Your feedback helps us improve</p>
+        <p className="text-sm text-gray-400">Your feedback helps us improve</p>
       </div>
     </div>
   )
@@ -273,15 +271,15 @@ function InterviewTab() {
     <div className="space-y-12">
       {/* Interview Types */}
       <div>
-        <h2 className="text-2xl font-bold text-white mb-8 text-center">
+        <h2 className="mb-8 text-center text-2xl font-bold text-white">
           Join Our Research Program
         </h2>
-        <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-          Help us build better products by sharing your insights. All interviews 
-          are conducted by our product team and come with thank-you incentives.
+        <p className="mx-auto mb-12 max-w-2xl text-center text-gray-400">
+          Help us build better products by sharing your insights. All interviews are conducted by
+          our product team and come with thank-you incentives.
         </p>
-        
-        <div className="grid md:grid-cols-3 gap-8">
+
+        <div className="grid gap-8 md:grid-cols-3">
           {interviewTypes.map((interview) => (
             <InterviewCard key={interview.id} interview={interview} />
           ))}
@@ -289,12 +287,12 @@ function InterviewTab() {
       </div>
 
       {/* Why Participate */}
-      <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-8">
-        <h3 className="text-2xl font-bold text-white mb-6 text-center">
+      <div className="rounded-2xl border border-gray-800/50 bg-gray-900/60 p-8">
+        <h3 className="mb-6 text-center text-2xl font-bold text-white">
           Why Participate in Our Research?
         </h3>
-        
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <BenefitCard
             icon={Lightbulb}
             title="Shape the Product"
@@ -319,11 +317,9 @@ function InterviewTab() {
       </div>
 
       {/* Interview Schedule */}
-      <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-8">
-        <h3 className="text-xl font-bold text-white mb-6">
-          Upcoming Interview Sessions
-        </h3>
-        
+      <div className="rounded-2xl border border-gray-800/50 bg-gray-900/60 p-8">
+        <h3 className="mb-6 text-xl font-bold text-white">Upcoming Interview Sessions</h3>
+
         <div className="space-y-4">
           <InterviewSlot
             date="January 15, 2024"
@@ -356,11 +352,9 @@ function SurveyTab() {
     <div className="space-y-12">
       {/* Active Surveys */}
       <div>
-        <h2 className="text-2xl font-bold text-white mb-8 text-center">
-          Active Surveys
-        </h2>
-        
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <h2 className="mb-8 text-center text-2xl font-bold text-white">Active Surveys</h2>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <SurveyCard
             title="Q1 2024 Product Priorities"
             description="Help us prioritize features for the next quarter"
@@ -392,15 +386,13 @@ function SurveyTab() {
       </div>
 
       {/* Survey Templates */}
-      <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-8">
-        <h3 className="text-2xl font-bold text-white mb-6 text-center">
-          Survey Templates Library
-        </h3>
-        <p className="text-gray-400 text-center mb-8">
+      <div className="rounded-2xl border border-gray-800/50 bg-gray-900/60 p-8">
+        <h3 className="mb-6 text-center text-2xl font-bold text-white">Survey Templates Library</h3>
+        <p className="mb-8 text-center text-gray-400">
           Free survey templates you can use for your own customer research
         </p>
-        
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <TemplateCard
             title="Net Promoter Score (NPS)"
             description="Measure customer loyalty and satisfaction"
@@ -441,51 +433,49 @@ function SurveyTab() {
       </div>
 
       {/* Survey Best Practices */}
-      <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-8">
-        <h3 className="text-xl font-bold text-white mb-6">
-          Survey Best Practices
-        </h3>
-        
-        <div className="grid md:grid-cols-2 gap-8">
+      <div className="rounded-2xl border border-gray-800/50 bg-gray-900/60 p-8">
+        <h3 className="mb-6 text-xl font-bold text-white">Survey Best Practices</h3>
+
+        <div className="grid gap-8 md:grid-cols-2">
           <div>
-            <h4 className="font-semibold text-white mb-4">Design Tips</h4>
+            <h4 className="mb-4 font-semibold text-white">Design Tips</h4>
             <ul className="space-y-2 text-gray-300">
               <li className="flex items-start">
-                <CheckCircle className="w-4 h-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 text-green-400" />
                 Keep surveys under 10 questions when possible
               </li>
               <li className="flex items-start">
-                <CheckCircle className="w-4 h-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 text-green-400" />
                 Use a mix of multiple choice and open-ended questions
               </li>
               <li className="flex items-start">
-                <CheckCircle className="w-4 h-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 text-green-400" />
                 Test your survey with a small group first
               </li>
               <li className="flex items-start">
-                <CheckCircle className="w-4 h-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 text-green-400" />
                 Provide clear context for why you're asking
               </li>
             </ul>
           </div>
-          
+
           <div>
-            <h4 className="font-semibold text-white mb-4">Distribution Strategy</h4>
+            <h4 className="mb-4 font-semibold text-white">Distribution Strategy</h4>
             <ul className="space-y-2 text-gray-300">
               <li className="flex items-start">
-                <CheckCircle className="w-4 h-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 text-green-400" />
                 Send at optimal times (Tuesday-Thursday, 10am-2pm)
               </li>
               <li className="flex items-start">
-                <CheckCircle className="w-4 h-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 text-green-400" />
                 Follow up once after 1 week
               </li>
               <li className="flex items-start">
-                <CheckCircle className="w-4 h-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 text-green-400" />
                 Offer incentives for completion
               </li>
               <li className="flex items-start">
-                <CheckCircle className="w-4 h-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 text-green-400" />
                 Share results with participants
               </li>
             </ul>
@@ -496,74 +486,74 @@ function SurveyTab() {
   )
 }
 
-function FeedbackTypeCard({ type }: { type: any }) {
+function FeedbackTypeCard({ type }: { type: unknown }) {
   const { trackEvent } = useTrackEvent()
 
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -4 }}
-      className={`${type.bgColor} border ${type.borderColor} rounded-xl p-6 cursor-pointer transition-all duration-200`}
+      className={`${type.bgColor} border ${type.borderColor} cursor-pointer rounded-xl p-6 transition-all duration-200`}
       onClick={() => {
         trackEvent('feedback_type_selected', { type: type.id })
         // In production, this would navigate to the specific feedback form
       }}
     >
-      <type.icon className={`w-8 h-8 ${type.color} mb-4`} />
-      <h3 className="font-semibold text-white mb-2">{type.title}</h3>
-      <p className="text-gray-400 text-sm mb-4">{type.description}</p>
-      <div className="flex items-center text-violet-400 text-sm">
-        Get Started <ArrowRight className="w-4 h-4 ml-1" />
+      <type.icon className={`h-8 w-8 ${type.color} mb-4`} />
+      <h3 className="mb-2 font-semibold text-white">{type.title}</h3>
+      <p className="mb-4 text-sm text-gray-400">{type.description}</p>
+      <div className="flex items-center text-sm text-violet-400">
+        Get Started <ArrowRight className="ml-1 h-4 w-4" />
       </div>
     </motion.div>
   )
 }
 
-function FeatureCard({ title, description, votes, status, statusColor }: any) {
+function FeatureCard({ title, description, votes, status, statusColor }: unknown) {
   const { trackEvent } = useTrackEvent()
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4">
-      <div className="flex justify-between items-start mb-3">
+    <div className="rounded-lg bg-gray-800 p-4">
+      <div className="mb-3 flex items-start justify-between">
         <h4 className="font-semibold text-white">{title}</h4>
-        <button 
+        <button
           onClick={() => trackEvent('feature_voted', { feature: title })}
-          className="flex items-center space-x-1 text-violet-400 hover:text-violet-300 transition-colors"
+          className="flex items-center space-x-1 text-violet-400 transition-colors hover:text-violet-300"
         >
-          <ThumbsUp className="w-4 h-4" />
+          <ThumbsUp className="h-4 w-4" />
           <span className="text-sm">{votes}</span>
         </button>
       </div>
-      <p className="text-gray-400 text-sm mb-3">{description}</p>
+      <p className="mb-3 text-sm text-gray-400">{description}</p>
       <div className={`text-xs ${statusColor} font-medium`}>{status}</div>
     </div>
   )
 }
 
-function InterviewCard({ interview }: { interview: any }) {
+function InterviewCard({ interview }: { interview: unknown }) {
   const { trackEvent } = useTrackEvent()
 
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className="bg-gray-900/60 border border-gray-800/50 rounded-xl p-6"
+      className="rounded-xl border border-gray-800/50 bg-gray-900/60 p-6"
     >
-      <h3 className="font-semibold text-white mb-3">{interview.title}</h3>
-      <div className="space-y-2 mb-6">
-        <div className="flex items-center text-gray-400 text-sm">
-          <Clock className="w-4 h-4 mr-2" />
+      <h3 className="mb-3 font-semibold text-white">{interview.title}</h3>
+      <div className="mb-6 space-y-2">
+        <div className="flex items-center text-sm text-gray-400">
+          <Clock className="mr-2 h-4 w-4" />
           {interview.duration}
         </div>
-        <div className="flex items-center text-gray-400 text-sm">
-          <Users className="w-4 h-4 mr-2" />
+        <div className="flex items-center text-sm text-gray-400">
+          <Users className="mr-2 h-4 w-4" />
           {interview.slots} slots available
         </div>
       </div>
-      <p className="text-gray-300 text-sm mb-4">{interview.description}</p>
-      <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 mb-4">
-        <div className="text-green-400 text-sm font-medium">Thank You:</div>
-        <div className="text-green-300 text-sm">{interview.incentive}</div>
+      <p className="mb-4 text-sm text-gray-300">{interview.description}</p>
+      <div className="mb-4 rounded-lg border border-green-500/30 bg-green-900/20 p-3">
+        <div className="text-sm font-medium text-green-400">Thank You:</div>
+        <div className="text-sm text-green-300">{interview.incentive}</div>
       </div>
-      <GlowingButton 
+      <GlowingButton
         href={`/feedback/interview/${interview.id}`}
         className="w-full"
         onClick={() => trackEvent('interview_signup_clicked', { type: interview.id })}
@@ -574,26 +564,28 @@ function InterviewCard({ interview }: { interview: any }) {
   )
 }
 
-function BenefitCard({ icon: Icon, title, description }: any) {
+function BenefitCard({ icon: Icon, title, description }: unknown) {
   return (
     <div className="text-center">
-      <Icon className="w-8 h-8 text-violet-400 mx-auto mb-3" />
-      <h4 className="font-semibold text-white mb-2">{title}</h4>
-      <p className="text-gray-400 text-sm">{description}</p>
+      <Icon className="mx-auto mb-3 h-8 w-8 text-violet-400" />
+      <h4 className="mb-2 font-semibold text-white">{title}</h4>
+      <p className="text-sm text-gray-400">{description}</p>
     </div>
   )
 }
 
-function InterviewSlot({ date, time, type, available }: any) {
+function InterviewSlot({ date, time, type, available }: unknown) {
   return (
-    <div className="flex items-center justify-between bg-gray-800 rounded-lg p-4">
+    <div className="flex items-center justify-between rounded-lg bg-gray-800 p-4">
       <div>
         <div className="font-medium text-white">{type}</div>
-        <div className="text-gray-400 text-sm">{date} • {time}</div>
+        <div className="text-sm text-gray-400">
+          {date} • {time}
+        </div>
       </div>
       <div className="text-right">
-        <div className="text-green-400 text-sm">{available} spots left</div>
-        <button className="text-violet-400 hover:text-violet-300 text-sm transition-colors">
+        <div className="text-sm text-green-400">{available} spots left</div>
+        <button className="text-sm text-violet-400 transition-colors hover:text-violet-300">
           Book Now →
         </button>
       </div>
@@ -601,26 +593,36 @@ function InterviewSlot({ date, time, type, available }: any) {
   )
 }
 
-function SurveyCard({ title, description, duration, responses, deadline, incentive, status }: any) {
+function SurveyCard({
+  title,
+  description,
+  duration,
+  responses,
+  deadline,
+  incentive,
+  status,
+}: unknown) {
   const { trackEvent } = useTrackEvent()
 
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className="bg-gray-900/60 border border-gray-800/50 rounded-xl p-6"
+      className="rounded-xl border border-gray-800/50 bg-gray-900/60 p-6"
     >
-      <div className="flex justify-between items-start mb-3">
+      <div className="mb-3 flex items-start justify-between">
         <h3 className="font-semibold text-white">{title}</h3>
-        <div className={`px-2 py-1 rounded text-xs font-medium ${
-          status === 'active' ? 'bg-green-900/30 text-green-400' : 'bg-gray-700 text-gray-400'
-        }`}>
+        <div
+          className={`rounded px-2 py-1 text-xs font-medium ${
+            status === 'active' ? 'bg-green-900/30 text-green-400' : 'bg-gray-700 text-gray-400'
+          }`}
+        >
           {status}
         </div>
       </div>
-      
-      <p className="text-gray-400 text-sm mb-4">{description}</p>
-      
-      <div className="space-y-2 mb-4 text-sm">
+
+      <p className="mb-4 text-sm text-gray-400">{description}</p>
+
+      <div className="mb-4 space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-gray-400">Duration:</span>
           <span className="text-white">{duration}</span>
@@ -634,13 +636,13 @@ function SurveyCard({ title, description, duration, responses, deadline, incenti
           <span className="text-white">{deadline}</span>
         </div>
       </div>
-      
-      <div className="bg-violet-900/20 border border-violet-500/30 rounded-lg p-3 mb-4">
-        <div className="text-violet-400 text-sm font-medium">Reward:</div>
-        <div className="text-violet-300 text-sm">{incentive}</div>
+
+      <div className="mb-4 rounded-lg border border-violet-500/30 bg-violet-900/20 p-3">
+        <div className="text-sm font-medium text-violet-400">Reward:</div>
+        <div className="text-sm text-violet-300">{incentive}</div>
       </div>
-      
-      <GlowingButton 
+
+      <GlowingButton
         href={`/feedback/survey/${title.toLowerCase().replace(/\s+/g, '-')}`}
         className="w-full"
         onClick={() => trackEvent('survey_started', { survey: title })}
@@ -651,18 +653,18 @@ function SurveyCard({ title, description, duration, responses, deadline, incenti
   )
 }
 
-function TemplateCard({ title, description, questions, downloadUrl }: any) {
+function TemplateCard({ title, description, questions, downloadUrl }: unknown) {
   const { trackEvent } = useTrackEvent()
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4">
-      <h4 className="font-semibold text-white mb-2">{title}</h4>
-      <p className="text-gray-400 text-sm mb-3">{description}</p>
-      <div className="flex justify-between items-center">
-        <span className="text-gray-500 text-xs">{questions} questions</span>
-        <button 
+    <div className="rounded-lg bg-gray-800 p-4">
+      <h4 className="mb-2 font-semibold text-white">{title}</h4>
+      <p className="mb-3 text-sm text-gray-400">{description}</p>
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-gray-500">{questions} questions</span>
+        <button
           onClick={() => trackEvent('template_downloaded', { template: title })}
-          className="text-violet-400 hover:text-violet-300 text-sm transition-colors"
+          className="text-sm text-violet-400 transition-colors hover:text-violet-300"
         >
           Download →
         </button>

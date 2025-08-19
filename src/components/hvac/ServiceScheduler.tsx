@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
+import {
   CalendarIcon,
   ClockIcon,
   UserIcon,
@@ -23,7 +23,7 @@ import {
   PhoneIcon,
   BuildingOfficeIcon,
   FireIcon,
-  BoltIcon
+  BoltIcon,
 } from '@heroicons/react/24/outline'
 
 interface WorkOrder {
@@ -86,7 +86,7 @@ const priorityColors = {
   LOW: 'text-green-700 bg-green-100',
   MEDIUM: 'text-yellow-700 bg-yellow-100',
   HIGH: 'text-orange-700 bg-orange-100',
-  EMERGENCY: 'text-red-700 bg-red-100'
+  EMERGENCY: 'text-red-700 bg-red-100',
 }
 
 const statusColors = {
@@ -94,14 +94,14 @@ const statusColors = {
   IN_PROGRESS: 'text-purple-700 bg-purple-100',
   COMPLETED: 'text-green-700 bg-green-100',
   CANCELLED: 'text-gray-700 bg-gray-100',
-  ON_HOLD: 'text-orange-700 bg-orange-100'
+  ON_HOLD: 'text-orange-700 bg-orange-100',
 }
 
 export default function ServiceScheduler({
   onWorkOrderSelect,
   onCreateWorkOrder,
   onEditWorkOrder,
-  onAssignTechnician
+  onAssignTechnician,
 }: ServiceSchedulerProps) {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([])
   const [technicians, setTechnicians] = useState<Technician[]>([])
@@ -119,7 +119,7 @@ export default function ServiceScheduler({
   const loadScheduleData = async () => {
     try {
       setLoading(true)
-      
+
       // Mock technicians
       const mockTechnicians: Technician[] = [
         {
@@ -130,7 +130,7 @@ export default function ServiceScheduler({
           skills: ['HVAC', 'Electrical', 'Plumbing'],
           availability: 'AVAILABLE',
           workloadToday: 6,
-          rating: 4.8
+          rating: 4.8,
         },
         {
           id: 'tech-2',
@@ -140,7 +140,7 @@ export default function ServiceScheduler({
           skills: ['HVAC', 'Refrigeration'],
           availability: 'BUSY',
           workloadToday: 8,
-          rating: 4.6
+          rating: 4.6,
         },
         {
           id: 'tech-3',
@@ -150,8 +150,8 @@ export default function ServiceScheduler({
           skills: ['HVAC', 'Controls', 'Electrical'],
           availability: 'AVAILABLE',
           workloadToday: 4,
-          rating: 4.9
-        }
+          rating: 4.9,
+        },
       ]
 
       // Mock work orders
@@ -177,7 +177,7 @@ export default function ServiceScheduler({
           equipmentType: 'FURNACE',
           serviceType: 'PREVENTIVE',
           estimatedDuration: 120,
-          urgencyScore: 5
+          urgencyScore: 5,
         },
         {
           id: 'wo-2',
@@ -200,7 +200,7 @@ export default function ServiceScheduler({
           equipmentType: 'AC_UNIT',
           serviceType: 'CORRECTIVE',
           estimatedDuration: 180,
-          urgencyScore: 8
+          urgencyScore: 8,
         },
         {
           id: 'wo-3',
@@ -223,7 +223,7 @@ export default function ServiceScheduler({
           equipmentType: 'HEAT_PUMP',
           serviceType: 'INSTALLATION',
           estimatedDuration: 480,
-          urgencyScore: 6
+          urgencyScore: 6,
         },
         {
           id: 'wo-4',
@@ -244,34 +244,32 @@ export default function ServiceScheduler({
           equipmentType: 'THERMOSTAT',
           serviceType: 'INSTALLATION',
           estimatedDuration: 60,
-          urgencyScore: 3
-        }
+          urgencyScore: 3,
+        },
       ]
 
       // Build schedule view
       const scheduleData: ScheduleView = {
         date: selectedDate,
-        technicians: {}
+        technicians: {},
       }
 
-      mockTechnicians.forEach(tech => {
-        const techWorkOrders = mockWorkOrders.filter(wo => wo.technicianId === tech.id)
+      mockTechnicians.forEach((tech) => {
+        const techWorkOrders = mockWorkOrders.filter((wo) => wo.technicianId === tech.id)
         const totalHours = techWorkOrders.reduce((sum, wo) => sum + (wo.duration || 0), 0) / 60
-        
+
         scheduleData.technicians[tech.id] = {
           technician: tech,
           workOrders: techWorkOrders,
           totalHours,
-          efficiency: Math.min((totalHours / 8) * 100, 100)
+          efficiency: Math.min((totalHours / 8) * 100, 100),
         }
       })
 
       setWorkOrders(mockWorkOrders)
       setTechnicians(mockTechnicians)
       setScheduleView(scheduleData)
-      
     } catch (error) {
-      console.error('Failed to load schedule data:', error)
     } finally {
       setLoading(false)
     }
@@ -289,10 +287,10 @@ export default function ServiceScheduler({
   }
 
   const formatTime = (time: string) => {
-    return new Date(`2024-01-01T${time}`).toLocaleTimeString([], { 
-      hour: 'numeric', 
+    return new Date(`2024-01-01T${time}`).toLocaleTimeString([], {
+      hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
+      hour12: true,
     })
   }
 
@@ -307,7 +305,7 @@ export default function ServiceScheduler({
     }
   }
 
-  const filteredWorkOrders = workOrders.filter(wo => {
+  const filteredWorkOrders = workOrders.filter((wo) => {
     const matchesTech = filterTechnician === 'all' || wo.technicianId === filterTechnician
     const matchesStatus = filterStatus === 'all' || wo.status === filterStatus
     return matchesTech && matchesStatus
@@ -315,8 +313,8 @@ export default function ServiceScheduler({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -324,24 +322,24 @@ export default function ServiceScheduler({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Service Scheduler</h1>
-          <p className="text-gray-600 mt-1">Manage work orders and technician schedules</p>
+          <p className="mt-1 text-gray-600">Manage work orders and technician schedules</p>
         </div>
         <div className="flex items-center space-x-3">
           <button
             onClick={onCreateWorkOrder}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
           >
-            <PlusIcon className="h-4 w-4 mr-2" />
+            <PlusIcon className="mr-2 h-4 w-4" />
             Create Work Order
           </button>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="rounded-lg bg-white p-4 shadow">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
@@ -350,25 +348,27 @@ export default function ServiceScheduler({
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
 
             <select
               value={filterTechnician}
               onChange={(e) => setFilterTechnician(e.target.value)}
-              className="border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
             >
               <option value="all">All Technicians</option>
-              {technicians.map(tech => (
-                <option key={tech.id} value={tech.id}>{tech.name}</option>
+              {technicians.map((tech) => (
+                <option key={tech.id} value={tech.id}>
+                  {tech.name}
+                </option>
               ))}
             </select>
 
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
             >
               <option value="all">All Statuses</option>
               <option value="SCHEDULED">Scheduled</option>
@@ -381,7 +381,7 @@ export default function ServiceScheduler({
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setViewMode('list')}
-              className={`px-3 py-2 text-sm font-medium rounded-md ${
+              className={`rounded-md px-3 py-2 text-sm font-medium ${
                 viewMode === 'list'
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-gray-500 hover:text-gray-700'
@@ -391,7 +391,7 @@ export default function ServiceScheduler({
             </button>
             <button
               onClick={() => setViewMode('board')}
-              className={`px-3 py-2 text-sm font-medium rounded-md ${
+              className={`rounded-md px-3 py-2 text-sm font-medium ${
                 viewMode === 'board'
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-gray-500 hover:text-gray-700'
@@ -401,7 +401,7 @@ export default function ServiceScheduler({
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`px-3 py-2 text-sm font-medium rounded-md ${
+              className={`rounded-md px-3 py-2 text-sm font-medium ${
                 viewMode === 'calendar'
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-gray-500 hover:text-gray-700'
@@ -422,13 +422,13 @@ export default function ServiceScheduler({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-lg shadow overflow-hidden"
+              className="overflow-hidden rounded-lg bg-white shadow"
             >
               {/* Technician Header */}
-              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+              <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
                       <UserIcon className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
@@ -438,11 +438,13 @@ export default function ServiceScheduler({
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
                         <span>★ {techSchedule.technician.rating}</span>
                         <span>{techSchedule.totalHours.toFixed(1)}h scheduled</span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          techSchedule.technician.availability === 'AVAILABLE' 
-                            ? 'text-green-700 bg-green-100'
-                            : 'text-orange-700 bg-orange-100'
-                        }`}>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                            techSchedule.technician.availability === 'AVAILABLE'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-orange-100 text-orange-700'
+                          }`}
+                        >
                           {techSchedule.technician.availability}
                         </span>
                       </div>
@@ -460,7 +462,7 @@ export default function ServiceScheduler({
               {/* Work Orders */}
               <div className="p-6">
                 {techSchedule.workOrders.length === 0 ? (
-                  <div className="text-center py-8">
+                  <div className="py-8 text-center">
                     <CalendarIcon className="mx-auto h-8 w-8 text-gray-400" />
                     <p className="mt-2 text-sm text-gray-500">No work orders scheduled</p>
                   </div>
@@ -470,7 +472,7 @@ export default function ServiceScheduler({
                       <div
                         key={wo.id}
                         onClick={() => onWorkOrderSelect?.(wo)}
-                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                        className="cursor-pointer rounded-lg border p-4 transition-colors hover:bg-gray-50"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-start space-x-3">
@@ -479,14 +481,16 @@ export default function ServiceScheduler({
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center space-x-2">
-                                <p className="text-sm font-medium text-gray-900">
-                                  {wo.title}
-                                </p>
+                                <p className="text-sm font-medium text-gray-900">{wo.title}</p>
                                 {getPriorityIcon(wo.priority)}
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${priorityColors[wo.priority]}`}>
+                                <span
+                                  className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${priorityColors[wo.priority]}`}
+                                >
                                   {wo.priority}
                                 </span>
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColors[wo.status]}`}>
+                                <span
+                                  className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${statusColors[wo.status]}`}
+                                >
                                   {wo.status}
                                 </span>
                               </div>
@@ -495,21 +499,23 @@ export default function ServiceScheduler({
                               </div>
                               <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
                                 <div className="flex items-center">
-                                  <ClockIcon className="h-4 w-4 mr-1" />
-                                  {wo.scheduledStartTime && formatTime(wo.scheduledStartTime)} - {wo.scheduledEndTime && formatTime(wo.scheduledEndTime)}
+                                  <ClockIcon className="mr-1 h-4 w-4" />
+                                  {wo.scheduledStartTime &&
+                                    formatTime(wo.scheduledStartTime)} -{' '}
+                                  {wo.scheduledEndTime && formatTime(wo.scheduledEndTime)}
                                 </div>
                                 <div className="flex items-center">
-                                  <BuildingOfficeIcon className="h-4 w-4 mr-1" />
+                                  <BuildingOfficeIcon className="mr-1 h-4 w-4" />
                                   {wo.customerName}
                                 </div>
                                 <div className="flex items-center">
-                                  <MapIcon className="h-4 w-4 mr-1" />
+                                  <MapIcon className="mr-1 h-4 w-4" />
                                   {wo.customerAddress.split(',')[0]}
                                 </div>
                               </div>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center space-x-2">
                             {wo.customerPhone && (
                               <button className="p-1 text-gray-400 hover:text-blue-600">
@@ -539,7 +545,7 @@ export default function ServiceScheduler({
 
       {/* List View */}
       {viewMode === 'list' && (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+        <div className="overflow-hidden bg-white shadow sm:rounded-md">
           <ul className="divide-y divide-gray-200">
             {filteredWorkOrders.map((wo, index) => (
               <motion.li
@@ -548,21 +554,21 @@ export default function ServiceScheduler({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
                 onClick={() => onWorkOrderSelect?.(wo)}
-                className="hover:bg-gray-50 cursor-pointer"
+                className="cursor-pointer hover:bg-gray-50"
               >
                 <div className="px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0">
-                        {getServiceIcon(wo.equipmentType || '')}
-                      </div>
+                      <div className="flex-shrink-0">{getServiceIcon(wo.equipmentType || '')}</div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center space-x-2">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="truncate text-sm font-medium text-gray-900">
                             {wo.workOrderNumber} - {wo.title}
                           </p>
                           {getPriorityIcon(wo.priority)}
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${priorityColors[wo.priority]}`}>
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${priorityColors[wo.priority]}`}
+                          >
                             {wo.priority}
                           </span>
                         </div>
@@ -576,7 +582,9 @@ export default function ServiceScheduler({
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColors[wo.status]}`}>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${statusColors[wo.status]}`}
+                      >
                         {wo.status}
                       </span>
                     </div>
@@ -590,7 +598,7 @@ export default function ServiceScheduler({
 
       {/* Empty State */}
       {filteredWorkOrders.length === 0 && (
-        <div className="text-center py-12">
+        <div className="py-12 text-center">
           <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No work orders found</h3>
           <p className="mt-1 text-sm text-gray-500">
@@ -599,9 +607,9 @@ export default function ServiceScheduler({
           <div className="mt-6">
             <button
               onClick={onCreateWorkOrder}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
             >
-              <PlusIcon className="h-4 w-4 mr-2" />
+              <PlusIcon className="mr-2 h-4 w-4" />
               Create Work Order
             </button>
           </div>

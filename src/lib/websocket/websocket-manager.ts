@@ -3,7 +3,7 @@
 
 export interface WebSocketMessage {
   type: string
-  payload: any
+  payload: unknown
   timestamp: number
   userId?: string
   tenantId?: string
@@ -30,7 +30,7 @@ export type MetricsType = 'performance' | 'business' | 'ai-insights' | 'notifica
 
 class WebSocketManager {
   private connections: Map<string, WebSocket> = new Map()
-  private subscribers: Map<string, Set<(data: any) => void>> = new Map()
+  private subscribers: Map<string, Set<(data: unknown) => void>> = new Map()
   private reconnectAttempts: Map<string, number> = new Map()
   private maxReconnectAttempts = 5
   private reconnectDelay = 1000 // Start with 1 second
@@ -48,7 +48,7 @@ class WebSocketManager {
    * Connect to a specific WebSocket endpoint
    */
   async connect(
-    type: MetricsType, 
+    type: MetricsType,
     url?: string,
     options: {
       userId?: string
@@ -91,21 +91,21 @@ class WebSocketManager {
 
         ws.onopen = () => {
           clearTimeout(timeout)
-          console.log(`✅ WebSocket connected: ${type}`)
+          
           this.connections.set(type, ws)
           this.reconnectAttempts.set(type, 0)
           this.isConnecting.delete(type)
-          
+
           // Send authentication if provided
           if (options.authToken) {
             this.send(type, {
               type: 'authenticate',
-              payload: { 
+              payload: {
                 token: options.authToken,
                 userId: options.userId,
-                tenantId: options.tenantId
+                tenantId: options.tenantId,
               },
-              timestamp: Date.now()
+              timestamp: Date.now(),
             })
           }
 
@@ -114,7 +114,7 @@ class WebSocketManager {
 
         ws.onerror = (error) => {
           clearTimeout(timeout)
-          console.error(`❌ WebSocket error (${type}):`, error)
+          :`, error)
           this.isConnecting.delete(type)
           reject(error)
         }
@@ -126,24 +126,24 @@ class WebSocketManager {
           const message: WebSocketMessage = JSON.parse(event.data)
           this.handleMessage(type, message)
         } catch (error) {
-          console.error(`Failed to parse WebSocket message (${type}):`, error)
+          :`, error)
         }
       }
 
       // Handle disconnection
       ws.onclose = (event) => {
-        console.log(`🔌 WebSocket closed (${type}):`, event.code, event.reason)
+        :`, event.code, event.reason)
         this.connections.delete(type)
         this.isConnecting.delete(type)
 
         // Attempt reconnection unless it was intentional
-        if (event.code !== 1000) { // 1000 = normal closure
+        if (event.code !== 1000) {
+          // 1000 = normal closure
           this.scheduleReconnect(type, url, options)
         }
       }
 
       return await connectionPromise
-
     } catch (error) {
       this.isConnecting.delete(type)
       throw error
@@ -153,7 +153,7 @@ class WebSocketManager {
   /**
    * Subscribe to WebSocket messages of a specific type
    */
-  subscribe(type: MetricsType, callback: (data: any) => void): () => void {
+  subscribe(type: MetricsType, callback: (data: unknown) => void): () => void {
     const subscribers = this.subscribers.get(type)
     if (subscribers) {
       subscribers.add(callback)
@@ -205,21 +205,22 @@ class WebSocketManager {
    */
   getConnectionStatus(type: MetricsType): 'connected' | 'connecting' | 'disconnected' {
     if (this.isConnecting.has(type)) return 'connecting'
-    
+
     const ws = this.connections.get(type)
     if (ws && ws.readyState === WebSocket.OPEN) return 'connected'
-    
+
     return 'disconnected'
   }
 
   /**
    * Generate WebSocket URL based on environment and type
    */
-  private getWebSocketUrl(type: MetricsType, options: any): string {
+  private getWebSocketUrl(type: MetricsType, options: unknown): string {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const host = process.env.NODE_ENV === 'production' 
-      ? process.env.NEXT_PUBLIC_WS_HOST || window.location.host
-      : 'localhost:3000'
+    const host =
+      process.env.NODE_ENV === 'production'
+        ? process.env.NEXT_PUBLIC_WS_HOST || window.location.host
+        : 'localhost:3000'
 
     let endpoint = ''
     switch (type) {
@@ -253,11 +254,11 @@ class WebSocketManager {
   private handleMessage(type: MetricsType, message: WebSocketMessage): void {
     const subscribers = this.subscribers.get(type)
     if (subscribers) {
-      subscribers.forEach(callback => {
+      subscribers.forEach((callback) => {
         try {
           callback(message.payload)
         } catch (error) {
-          console.error(`Error in WebSocket subscriber (${type}):`, error)
+          :`, error)
         }
       })
     }
@@ -266,22 +267,22 @@ class WebSocketManager {
   /**
    * Schedule reconnection with exponential backoff
    */
-  private scheduleReconnect(type: MetricsType, url?: string, options: any = {}): void {
+  private scheduleReconnect(type: MetricsType, url?: string, options: unknown = {}): void {
     const attempts = this.reconnectAttempts.get(type) || 0
-    
+
     if (attempts >= this.maxReconnectAttempts) {
-      console.error(`❌ Max reconnection attempts reached for ${type}`)
+      
       return
     }
 
     const delay = Math.min(this.reconnectDelay * Math.pow(2, attempts), 30000) // Max 30 seconds
     this.reconnectAttempts.set(type, attempts + 1)
 
-    console.log(`🔄 Reconnecting ${type} in ${delay}ms (attempt ${attempts + 1})`)
+    `)
 
     setTimeout(() => {
-      this.connect(type, url, options).catch(error => {
-        console.error(`Reconnection failed for ${type}:`, error)
+      this.connect(type, url, options).catch((error) => {
+        
       })
     }, delay)
   }
@@ -294,7 +295,7 @@ import { useState, useEffect } from 'react'
 
 // React hook for WebSocket connections
 export function useWebSocket(
-  type: MetricsType, 
+  type: MetricsType,
   options?: {
     url?: string
     userId?: string
@@ -303,21 +304,25 @@ export function useWebSocket(
     autoConnect?: boolean
   }
 ) {
-  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected')
-  const [data, setData] = useState<any>(null)
+  const [connectionStatus, setConnectionStatus] = useState<
+    'connected' | 'connecting' | 'disconnected'
+  >('disconnected')
+  const [data, setData] = useState<unknown>(null)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
     if (options?.autoConnect !== false) {
       // Auto-connect on mount
-      websocketManager.connect(type, options?.url, {
-        userId: options?.userId,
-        tenantId: options?.tenantId,
-        authToken: options?.authToken
-      }).catch(err => {
-        setError(err)
-        setConnectionStatus('disconnected')
-      })
+      websocketManager
+        .connect(type, options?.url, {
+          userId: options?.userId,
+          tenantId: options?.tenantId,
+          authToken: options?.authToken,
+        })
+        .catch((err) => {
+          setError(err)
+          setConnectionStatus('disconnected')
+        })
     }
 
     // Subscribe to messages
@@ -335,28 +340,36 @@ export function useWebSocket(
       unsubscribe()
       clearInterval(statusInterval)
     }
-  }, [type, options?.url, options?.userId, options?.tenantId, options?.authToken, options?.autoConnect])
+  }, [
+    type,
+    options?.url,
+    options?.userId,
+    options?.tenantId,
+    options?.authToken,
+    options?.autoConnect,
+  ])
 
   return {
     data,
     connectionStatus,
     error,
-    send: (message: any) => websocketManager.send(type, {
-      type: 'client_message',
-      payload: message,
-      timestamp: Date.now(),
-      userId: options?.userId,
-      tenantId: options?.tenantId
-    }),
+    send: (message: unknown) =>
+      websocketManager.send(type, {
+        type: 'client_message',
+        payload: message,
+        timestamp: Date.now(),
+        userId: options?.userId,
+        tenantId: options?.tenantId,
+      }),
     connect: () => websocketManager.connect(type, options?.url, options),
-    disconnect: () => websocketManager.disconnect(type)
+    disconnect: () => websocketManager.disconnect(type),
   }
 }
 
 // Performance metrics mock data generator (for development)
 export function startMockPerformanceStream(): () => void {
   if (process.env.NODE_ENV !== 'development') {
-    console.warn('Mock performance stream should only be used in development')
+    
     return () => {}
   }
 
@@ -367,13 +380,13 @@ export function startMockPerformanceStream(): () => void {
       successRate: 98.5 + Math.random() * 1.4, // 98.5-99.9%
       uptime: 99.97 + Math.random() * 0.03,
       aiProcessesPerSecond: 180 + Math.floor(Math.random() * 40),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }
 
     // Simulate WebSocket message to subscribers
     const subscribers = websocketManager['subscribers'].get('performance')
     if (subscribers) {
-      subscribers.forEach(callback => callback(mockMetrics))
+      subscribers.forEach((callback) => callback(mockMetrics))
     }
   }, 2000)
 

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     method: 'POST',
     userAgent: request.headers.get('user-agent') || undefined,
     ip: request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || undefined,
-    requestId: request.headers.get('x-request-id') || undefined
+    requestId: request.headers.get('x-request-id') || undefined,
   }
 
   try {
@@ -24,10 +24,7 @@ export async function POST(request: NextRequest) {
     const signature = headers().get('stripe-signature')
 
     if (!signature) {
-      return NextResponse.json(
-        { error: 'Missing stripe-signature header' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 })
     }
 
     // Construct webhook event
@@ -60,13 +57,10 @@ export async function POST(request: NextRequest) {
         break
 
       default:
-        console.log(`Unhandled event type: ${event.type}`)
     }
 
     return NextResponse.json({ received: true })
-
   } catch (error) {
-    console.error('Webhook error:', error)
     return handleError(error, context)
   }
 }
@@ -76,13 +70,11 @@ export async function POST(request: NextRequest) {
  */
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   if (!session.customer || !session.subscription) {
-    console.error('Missing customer or subscription in checkout session')
     return
   }
 
   const tenantId = session.metadata?.tenantId
   if (!tenantId) {
-    console.error('Missing tenantId in checkout session metadata')
     return
   }
 
@@ -90,16 +82,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   await prisma.tenantSubscription.updateMany({
     where: {
       tenantId,
-      status: 'PENDING'
+      status: 'PENDING',
     },
     data: {
       stripeCustomerId: session.customer as string,
       stripeSubscriptionId: session.subscription as string,
-      status: 'ACTIVE'
-    }
+      status: 'ACTIVE',
+    },
   })
-
-  console.log(`Checkout completed for tenant: ${tenantId}`)
 }
 
 /**
@@ -110,32 +100,29 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   const tenantId = subscription.metadata?.tenantId
 
   if (!tenantId) {
-    console.error('Missing tenantId in subscription metadata')
     return
   }
 
   // Ensure subscription exists in database
   const existingSubscription = await prisma.tenantSubscription.findFirst({
     where: {
-      stripeSubscriptionId: subscription.id
-    }
+      stripeSubscriptionId: subscription.id,
+    },
   })
 
   if (!existingSubscription) {
     // Get bundle information from metadata or subscription items
     const bundleId = subscription.metadata?.bundleId
-    
+
     if (!bundleId) {
-      console.error('Missing bundleId in subscription metadata')
       return
     }
 
     const bundle = await prisma.bundle.findUnique({
-      where: { id: bundleId }
+      where: { id: bundleId },
     })
 
     if (!bundle) {
-      console.error(`Bundle not found: ${bundleId}`)
       return
     }
 
@@ -146,24 +133,23 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
         stripeCustomerId: customerId,
         stripeSubscriptionId: subscription.id,
         status: 'ACTIVE',
-        billingCycle: subscription.items.data[0].price.recurring?.interval === 'year' ? 'ANNUAL' : 'MONTHLY',
+        billingCycle:
+          subscription.items.data[0].price.recurring?.interval === 'year' ? 'ANNUAL' : 'MONTHLY',
         users: parseInt(subscription.metadata?.users || '1'),
         price: (subscription.items.data[0].price.unit_amount || 0) / 100,
         startDate: new Date(subscription.current_period_start * 1000),
         endDate: new Date(subscription.current_period_end * 1000),
-        nextBillingDate: new Date(subscription.current_period_end * 1000)
-      }
+        nextBillingDate: new Date(subscription.current_period_end * 1000),
+      },
     })
   }
-
-  console.log(`Subscription created: ${subscription.id}`)
 }
 
 /**
  * Handle subscription updates
  */
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  const updates: any = {
+  const updates: unknown = {
     status: mapStripeStatus(subscription.status),
     startDate: new Date(subscription.current_period_start * 1000),
     endDate: new Date(subscription.current_period_end * 1000),
@@ -177,7 +163,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
   // Update billing cycle if changed
   if (subscription.items.data[0]?.price.recurring?.interval) {
-    updates.billingCycle = subscription.items.data[0].price.recurring.interval === 'year' ? 'ANNUAL' : 'MONTHLY'
+    updates.billingCycle =
+      subscription.items.data[0].price.recurring.interval === 'year' ? 'ANNUAL' : 'MONTHLY'
   }
 
   // Update cancellation date if subscription is cancelled
@@ -187,12 +174,10 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
   await prisma.tenantSubscription.updateMany({
     where: {
-      stripeSubscriptionId: subscription.id
+      stripeSubscriptionId: subscription.id,
     },
-    data: updates
+    data: updates,
   })
-
-  console.log(`Subscription updated: ${subscription.id}`)
 }
 
 /**
@@ -201,15 +186,13 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   await prisma.tenantSubscription.updateMany({
     where: {
-      stripeSubscriptionId: subscription.id
+      stripeSubscriptionId: subscription.id,
     },
     data: {
       status: 'CANCELLED',
-      cancelledAt: new Date()
-    }
+      cancelledAt: new Date(),
+    },
   })
-
-  console.log(`Subscription deleted: ${subscription.id}`)
 }
 
 /**
@@ -221,14 +204,14 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   // Record successful payment
   const subscription = await prisma.tenantSubscription.findFirst({
     where: {
-      stripeSubscriptionId: invoice.subscription as string
-    }
+      stripeSubscriptionId: invoice.subscription as string,
+    },
   })
 
   if (subscription) {
     await prisma.subscriptionInvoice.upsert({
       where: {
-        stripeInvoiceId: invoice.id
+        stripeInvoiceId: invoice.id,
       },
       create: {
         subscriptionId: subscription.id,
@@ -238,24 +221,30 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
         currency: invoice.currency.toUpperCase(),
         status: 'paid',
         dueDate: new Date(invoice.due_date ? invoice.due_date * 1000 : Date.now()),
-        paidAt: new Date(invoice.status_transitions.paid_at ? invoice.status_transitions.paid_at * 1000 : Date.now())
+        paidAt: new Date(
+          invoice.status_transitions.paid_at
+            ? invoice.status_transitions.paid_at * 1000
+            : Date.now()
+        ),
       },
       update: {
         status: 'paid',
-        paidAt: new Date(invoice.status_transitions.paid_at ? invoice.status_transitions.paid_at * 1000 : Date.now())
-      }
+        paidAt: new Date(
+          invoice.status_transitions.paid_at
+            ? invoice.status_transitions.paid_at * 1000
+            : Date.now()
+        ),
+      },
     })
 
     // Update last billed date
     await prisma.tenantSubscription.update({
       where: { id: subscription.id },
       data: {
-        lastBilledAt: new Date()
-      }
+        lastBilledAt: new Date(),
+      },
     })
   }
-
-  console.log(`Invoice payment succeeded: ${invoice.id}`)
 }
 
 /**
@@ -267,14 +256,14 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   // Update invoice status
   const subscription = await prisma.tenantSubscription.findFirst({
     where: {
-      stripeSubscriptionId: invoice.subscription as string
-    }
+      stripeSubscriptionId: invoice.subscription as string,
+    },
   })
 
   if (subscription) {
     await prisma.subscriptionInvoice.upsert({
       where: {
-        stripeInvoiceId: invoice.id
+        stripeInvoiceId: invoice.id,
       },
       create: {
         subscriptionId: subscription.id,
@@ -283,11 +272,11 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
         amount: (invoice.amount_due || 0) / 100,
         currency: invoice.currency.toUpperCase(),
         status: 'failed',
-        dueDate: new Date(invoice.due_date ? invoice.due_date * 1000 : Date.now())
+        dueDate: new Date(invoice.due_date ? invoice.due_date * 1000 : Date.now()),
       },
       update: {
-        status: 'failed'
-      }
+        status: 'failed',
+      },
     })
 
     // Consider suspending subscription after multiple failed payments
@@ -296,22 +285,20 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
         subscriptionId: subscription.id,
         status: 'failed',
         createdAt: {
-          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
-        }
-      }
+          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+        },
+      },
     })
 
     if (failedInvoices >= 3) {
       await prisma.tenantSubscription.update({
         where: { id: subscription.id },
         data: {
-          status: 'SUSPENDED'
-        }
+          status: 'SUSPENDED',
+        },
       })
     }
   }
-
-  console.log(`Invoice payment failed: ${invoice.id}`)
 }
 
 /**

@@ -5,42 +5,52 @@
 
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 
-const SubscriptionSuccessPage: React.FC = () => {
+const SubscriptionSuccessContent: React.FC = () => {
   const searchParams = useSearchParams()
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [sessionDetails, setSessionDetails] = useState<any>(null)
+  const [sessionDetails, setSessionDetails] = useState<unknown>(null)
 
   useEffect(() => {
     const session_id = searchParams.get('session_id')
     setSessionId(session_id)
 
-    if (session_id) {
-      // In a real implementation, you might want to verify the session
-      // and get the subscription details from your backend
-      setTimeout(() => {
-        setSessionDetails({
-          customer_email: 'demo@coreflow360.com',
-          subscription_status: 'active',
-          modules_activated: ['crm', 'accounting'],
-          next_billing_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-        })
+    const loadSubscriptionDetails = async () => {
+      try {
+        // Get current subscription details
+        const response = await fetch('/api/subscriptions/current')
+        if (response.ok) {
+          const data = await response.json()
+          setSessionDetails({
+            customer_email: data.email || 'Subscription Active',
+            subscription_status: data.status,
+            tier: data.tier,
+            users: data.users,
+            next_billing_date: new Date(data.nextBillingDate),
+            modules_activated: data.tier === 'starter' ? ['CRM', 'Basic Reporting'] :
+                             data.tier === 'professional' ? ['CRM', 'Accounting', 'AI Analytics'] :
+                             ['All Modules', 'Custom Integrations', 'Priority Support']
+          })
+        }
+      } catch (error) {
+        console.error('Failed to load subscription details:', error)
+      } finally {
         setLoading(false)
-      }, 2000)
-    } else {
-      setLoading(false)
+      }
     }
+
+    loadSubscriptionDetails()
   }, [searchParams])
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-6"></div>
+          <div className="mx-auto mb-6 h-16 w-16 animate-spin rounded-full border-b-2 border-blue-500"></div>
           <h2 className="text-xl font-bold text-gray-900">Processing Your Subscription...</h2>
           <p className="text-gray-600">Please wait while we activate your modules.</p>
         </div>
@@ -49,20 +59,25 @@ const SubscriptionSuccessPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-2xl mx-auto text-center"
+        className="mx-auto max-w-2xl text-center"
       >
         {/* Success Icon */}
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-          className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-8"
+          className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-green-500"
         >
-          <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="h-12 w-12 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </motion.div>
@@ -72,9 +87,9 @@ const SubscriptionSuccessPage: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="space-y-4 mb-8"
+          className="mb-8 space-y-4"
         >
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-4xl font-bold text-transparent">
             Welcome to CoreFlow360!
           </h1>
           <p className="text-xl text-gray-600">
@@ -88,41 +103,44 @@ const SubscriptionSuccessPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-xl shadow-lg p-8 mb-8"
+            className="mb-8 rounded-xl bg-white p-8 shadow-lg"
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Subscription Details</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+            <h2 className="mb-6 text-2xl font-bold text-gray-900">Subscription Details</h2>
+
+            <div className="grid grid-cols-1 gap-6 text-left md:grid-cols-2">
               <div>
-                <h3 className="font-medium text-gray-700 mb-2">Account Email</h3>
+                <h3 className="mb-2 font-medium text-gray-700">Account Email</h3>
                 <p className="text-gray-900">{sessionDetails.customer_email}</p>
               </div>
-              
+
               <div>
-                <h3 className="font-medium text-gray-700 mb-2">Status</h3>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                <h3 className="mb-2 font-medium text-gray-700">Status</h3>
+                <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
                   ✅ {sessionDetails.subscription_status}
                 </span>
               </div>
-              
+
               <div>
-                <h3 className="font-medium text-gray-700 mb-2">Activated Modules</h3>
+                <h3 className="mb-2 font-medium text-gray-700">Activated Modules</h3>
                 <div className="space-y-1">
                   {sessionDetails.modules_activated?.map((module: string) => (
-                    <span key={module} className="inline-flex items-center px-2 py-1 rounded text-sm bg-blue-100 text-blue-800 mr-2">
+                    <span
+                      key={module}
+                      className="mr-2 inline-flex items-center rounded bg-blue-100 px-2 py-1 text-sm text-blue-800"
+                    >
                       {module.toUpperCase()}
                     </span>
                   ))}
                 </div>
               </div>
-              
+
               <div>
-                <h3 className="font-medium text-gray-700 mb-2">Next Billing</h3>
+                <h3 className="mb-2 font-medium text-gray-700">Next Billing</h3>
                 <p className="text-gray-900">
                   {sessionDetails.next_billing_date?.toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
-                    day: 'numeric'
+                    day: 'numeric',
                   })}
                 </p>
               </div>
@@ -135,10 +153,10 @@ const SubscriptionSuccessPage: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="bg-blue-50 rounded-xl p-6 mb-8"
+          className="mb-8 rounded-xl bg-blue-50 p-6"
         >
-          <h2 className="text-xl font-bold text-blue-900 mb-4">What's Next?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+          <h2 className="mb-4 text-xl font-bold text-blue-900">What's Next?</h2>
+          <div className="grid grid-cols-1 gap-4 text-left md:grid-cols-3">
             <div className="space-y-2">
               <div className="text-2xl">📧</div>
               <h3 className="font-medium text-blue-900">Check Your Email</h3>
@@ -146,7 +164,7 @@ const SubscriptionSuccessPage: React.FC = () => {
                 We've sent you a welcome email with login instructions and setup guide.
               </p>
             </div>
-            
+
             <div className="space-y-2">
               <div className="text-2xl">⚙️</div>
               <h3 className="font-medium text-blue-900">Configure Your Modules</h3>
@@ -154,7 +172,7 @@ const SubscriptionSuccessPage: React.FC = () => {
                 Set up your activated modules and customize them for your business.
               </p>
             </div>
-            
+
             <div className="space-y-2">
               <div className="text-2xl">🚀</div>
               <h3 className="font-medium text-blue-900">Start Using CoreFlow360</h3>
@@ -170,25 +188,25 @@ const SubscriptionSuccessPage: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
+          className="flex flex-col justify-center gap-4 sm:flex-row"
         >
           <button
-            onClick={() => window.location.href = '/dashboard'}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg"
+            onClick={() => (window.location.href = '/dashboard')}
+            className="rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 font-medium text-white shadow-lg transition-all hover:from-blue-700 hover:to-purple-700"
           >
             Go to Dashboard
           </button>
-          
+
           <button
-            onClick={() => window.location.href = '/demo'}
-            className="border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-blue-50 transition-all"
+            onClick={() => (window.location.href = '/demo')}
+            className="rounded-lg border-2 border-blue-600 px-8 py-3 font-medium text-blue-600 transition-all hover:bg-blue-50"
           >
             View Demo
           </button>
-          
+
           <button
-            onClick={() => window.location.href = '/support'}
-            className="text-gray-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-all"
+            onClick={() => (window.location.href = '/support')}
+            className="rounded-lg px-8 py-3 font-medium text-gray-600 transition-all hover:bg-gray-100"
           >
             Need Help?
           </button>
@@ -202,13 +220,26 @@ const SubscriptionSuccessPage: React.FC = () => {
             transition={{ delay: 0.7 }}
             className="mt-8 text-center"
           >
-            <p className="text-xs text-gray-400">
-              Session ID: {sessionId}
-            </p>
+            <p className="text-xs text-gray-400">Session ID: {sessionId}</p>
           </motion.div>
         )}
       </motion.div>
     </div>
+  )
+}
+
+const SubscriptionSuccessPage: React.FC = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="text-center">
+          <div className="mx-auto mb-6 h-16 w-16 animate-spin rounded-full border-b-2 border-blue-500"></div>
+          <h2 className="text-xl font-bold text-gray-900">Loading...</h2>
+        </div>
+      </div>
+    }>
+      <SubscriptionSuccessContent />
+    </Suspense>
   )
 }
 

@@ -3,24 +3,30 @@
  * Admin interface for managing enterprise SSO configurations
  */
 
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/components/ui/use-toast';
-import { 
-  ShieldCheckIcon, 
-  PlusIcon, 
-  TrashIcon, 
+import React, { useState, useEffect } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useToast } from '@/components/ui/use-toast'
+import {
+  ShieldCheckIcon,
+  PlusIcon,
+  TrashIcon,
   EditIcon,
   DownloadIcon,
   CheckCircleIcon,
@@ -30,46 +36,46 @@ import {
   ClockIcon,
   GlobeIcon,
   KeyIcon,
-  LinkIcon
-} from '@heroicons/react/24/outline';
+  LinkIcon,
+} from '@heroicons/react/24/outline'
 
 interface SAMLConfig {
-  id?: string;
-  idpName: string;
-  displayName: string;
-  entryPoint: string;
-  certificate: string;
-  signatureAlgorithm?: 'sha1' | 'sha256' | 'sha512';
-  identifierFormat?: string;
-  acceptedClockSkewMs?: number;
+  id?: string
+  idpName: string
+  displayName: string
+  entryPoint: string
+  certificate: string
+  signatureAlgorithm?: 'sha1' | 'sha256' | 'sha512'
+  identifierFormat?: string
+  acceptedClockSkewMs?: number
   attributeMapping?: {
-    email?: string;
-    firstName?: string;
-    lastName?: string;
-    displayName?: string;
-    department?: string;
-    title?: string;
-    groups?: string;
-  };
-  allowedDomains?: string[];
-  autoProvisionUsers?: boolean;
-  defaultRole?: 'USER' | 'MANAGER' | 'ADMIN';
-  isActive?: boolean;
+    email?: string
+    firstName?: string
+    lastName?: string
+    displayName?: string
+    department?: string
+    title?: string
+    groups?: string
+  }
+  allowedDomains?: string[]
+  autoProvisionUsers?: boolean
+  defaultRole?: 'USER' | 'MANAGER' | 'ADMIN'
+  isActive?: boolean
   stats?: {
-    activeUsers: number;
-    lastLogin: string | null;
-  };
-  metadataUrl?: string;
-  loginUrl?: string;
+    activeUsers: number
+    lastLogin: string | null
+  }
+  metadataUrl?: string
+  loginUrl?: string
 }
 
 export function SAMLConfiguration() {
-  const [configurations, setConfigurations] = useState<SAMLConfig[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isCreating, setIsCreating] = useState(false);
-  const [editingConfig, setEditingConfig] = useState<SAMLConfig | null>(null);
-  const [testResults, setTestResults] = useState<Record<string, any>>({});
-  const { toast } = useToast();
+  const [configurations, setConfigurations] = useState<SAMLConfig[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isCreating, setIsCreating] = useState(false)
+  const [editingConfig, setEditingConfig] = useState<SAMLConfig | null>(null)
+  const [testResults, setTestResults] = useState<Record<string, unknown>>({})
+  const { toast } = useToast()
 
   // Form state
   const [formData, setFormData] = useState<SAMLConfig>({
@@ -87,117 +93,113 @@ export function SAMLConfiguration() {
       displayName: 'displayName',
       department: 'department',
       title: 'title',
-      groups: 'groups'
+      groups: 'groups',
     },
     allowedDomains: [],
     autoProvisionUsers: true,
-    defaultRole: 'USER'
-  });
+    defaultRole: 'USER',
+  })
 
   useEffect(() => {
-    fetchConfigurations();
-  }, []);
+    fetchConfigurations()
+  }, [])
 
   const fetchConfigurations = async () => {
     try {
       const response = await fetch('/api/admin/saml', {
         headers: {
-          'x-api-version': 'v2'
-        }
-      });
+          'x-api-version': 'v2',
+        },
+      })
 
-      if (!response.ok) throw new Error('Failed to fetch configurations');
+      if (!response.ok) throw new Error('Failed to fetch configurations')
 
-      const data = await response.json();
-      setConfigurations(data.data);
+      const data = await response.json()
+      setConfigurations(data.data)
     } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to load SAML configurations',
-        variant: 'destructive'
-      });
+        variant: 'destructive',
+      })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     try {
-      const method = editingConfig ? 'PATCH' : 'POST';
-      const body = editingConfig 
-        ? { idpName: editingConfig.idpName, ...formData }
-        : formData;
+      const method = editingConfig ? 'PATCH' : 'POST'
+      const body = editingConfig ? { idpName: editingConfig.idpName, ...formData } : formData
 
       const response = await fetch('/api/admin/saml', {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'x-api-version': 'v2'
+          'x-api-version': 'v2',
         },
-        body: JSON.stringify(body)
-      });
+        body: JSON.stringify(body),
+      })
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to save configuration');
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to save configuration')
       }
 
-      const data = await response.json();
-      
+      const data = await response.json()
+
       toast({
         title: 'Success',
-        description: editingConfig 
+        description: editingConfig
           ? 'SAML configuration updated successfully'
-          : 'SAML configuration created successfully'
-      });
+          : 'SAML configuration created successfully',
+      })
 
-      setIsCreating(false);
-      setEditingConfig(null);
-      resetForm();
-      fetchConfigurations();
-
+      setIsCreating(false)
+      setEditingConfig(null)
+      resetForm()
+      fetchConfigurations()
     } catch (error) {
       toast({
         title: 'Error',
         description: error.message,
-        variant: 'destructive'
-      });
+        variant: 'destructive',
+      })
     }
-  };
+  }
 
   const handleDelete = async (idpName: string) => {
-    if (!confirm('Are you sure you want to delete this configuration?')) return;
+    if (!confirm('Are you sure you want to delete this configuration?')) return
 
     try {
       const response = await fetch(`/api/admin/saml?idpName=${idpName}`, {
         method: 'DELETE',
         headers: {
-          'x-api-version': 'v2'
-        }
-      });
+          'x-api-version': 'v2',
+        },
+      })
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete configuration');
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete configuration')
       }
 
       toast({
         title: 'Success',
-        description: 'SAML configuration deleted successfully'
-      });
+        description: 'SAML configuration deleted successfully',
+      })
 
-      fetchConfigurations();
-
+      fetchConfigurations()
     } catch (error) {
       toast({
         title: 'Error',
         description: error.message,
-        variant: 'destructive'
-      });
+        variant: 'destructive',
+      })
     }
-  };
+  }
 
   const handleTest = async (config: SAMLConfig) => {
     try {
@@ -205,33 +207,32 @@ export function SAMLConfiguration() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-version': 'v2'
+          'x-api-version': 'v2',
         },
-        body: JSON.stringify({ idpName: config.idpName })
-      });
+        body: JSON.stringify({ idpName: config.idpName }),
+      })
 
-      const result = await response.json();
+      const result = await response.json()
       setTestResults({
         ...testResults,
-        [config.idpName]: result
-      });
+        [config.idpName]: result,
+      })
 
       toast({
         title: result.success ? 'Connection Successful' : 'Connection Failed',
-        description: result.success 
-          ? 'IdP is reachable' 
+        description: result.success
+          ? 'IdP is reachable'
           : `Failed to reach IdP: ${result.data?.error}`,
-        variant: result.success ? 'default' : 'destructive'
-      });
-
+        variant: result.success ? 'default' : 'destructive',
+      })
     } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to test connection',
-        variant: 'destructive'
-      });
+        variant: 'destructive',
+      })
     }
-  };
+  }
 
   const resetForm = () => {
     setFormData({
@@ -249,33 +250,33 @@ export function SAMLConfiguration() {
         displayName: 'displayName',
         department: 'department',
         title: 'title',
-        groups: 'groups'
+        groups: 'groups',
       },
       allowedDomains: [],
       autoProvisionUsers: true,
-      defaultRole: 'USER'
-    });
-  };
+      defaultRole: 'USER',
+    })
+  }
 
   const downloadMetadata = (config: SAMLConfig) => {
     if (config.metadataUrl) {
-      window.open(config.metadataUrl, '_blank');
+      window.open(config.metadataUrl, '_blank')
     }
-  };
+  }
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2"></div>
       </div>
-    );
+    )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
+          <h2 className="flex items-center gap-2 text-2xl font-bold">
             <ShieldCheckIcon className="h-6 w-6" />
             SAML SSO Configuration
           </h2>
@@ -285,7 +286,7 @@ export function SAMLConfiguration() {
         </div>
         {!isCreating && !editingConfig && (
           <Button onClick={() => setIsCreating(true)}>
-            <PlusIcon className="h-4 w-4 mr-2" />
+            <PlusIcon className="mr-2 h-4 w-4" />
             Add SAML Provider
           </Button>
         )}
@@ -298,9 +299,7 @@ export function SAMLConfiguration() {
             <CardTitle>
               {editingConfig ? 'Edit SAML Configuration' : 'New SAML Configuration'}
             </CardTitle>
-            <CardDescription>
-              Configure SAML 2.0 identity provider settings
-            </CardDescription>
+            <CardDescription>Configure SAML 2.0 identity provider settings</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -323,7 +322,7 @@ export function SAMLConfiguration() {
                         disabled={!!editingConfig}
                         required
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-muted-foreground mt-1 text-xs">
                         Unique identifier for this IdP (lowercase, no spaces)
                       </p>
                     </div>
@@ -363,7 +362,7 @@ export function SAMLConfiguration() {
                       className="font-mono text-xs"
                       required
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-muted-foreground mt-1 text-xs">
                       Paste the IdP's public certificate including BEGIN/END tags
                     </p>
                   </div>
@@ -372,7 +371,7 @@ export function SAMLConfiguration() {
                 <TabsContent value="attributes" className="space-y-4">
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium">SAML Attribute Mapping</h3>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-xs">
                       Map SAML attributes from your IdP to user fields
                     </p>
 
@@ -385,13 +384,15 @@ export function SAMLConfiguration() {
                           <Input
                             id={`attr-${key}`}
                             value={value}
-                            onChange={(e) => setFormData({
-                              ...formData,
-                              attributeMapping: {
-                                ...formData.attributeMapping,
-                                [key]: e.target.value
-                              }
-                            })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                attributeMapping: {
+                                  ...formData.attributeMapping,
+                                  [key]: e.target.value,
+                                },
+                              })
+                            }
                             placeholder={`SAML attribute for ${key}`}
                           />
                         </div>
@@ -404,13 +405,18 @@ export function SAMLConfiguration() {
                     <Input
                       id="allowedDomains"
                       value={formData.allowedDomains?.join(', ')}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        allowedDomains: e.target.value.split(',').map(d => d.trim()).filter(Boolean)
-                      })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          allowedDomains: e.target.value
+                            .split(',')
+                            .map((d) => d.trim())
+                            .filter(Boolean),
+                        })
+                      }
                       placeholder="company.com, subsidiary.com"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-muted-foreground mt-1 text-xs">
                       Comma-separated list of allowed email domains (leave empty to allow all)
                     </p>
                   </div>
@@ -422,7 +428,9 @@ export function SAMLConfiguration() {
                       <Label htmlFor="signatureAlgorithm">Signature Algorithm</Label>
                       <Select
                         value={formData.signatureAlgorithm}
-                        onValueChange={(value: any) => setFormData({ ...formData, signatureAlgorithm: value })}
+                        onValueChange={(value: unknown) =>
+                          setFormData({ ...formData, signatureAlgorithm: value })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -441,10 +449,12 @@ export function SAMLConfiguration() {
                         id="clockSkew"
                         type="number"
                         value={formData.acceptedClockSkewMs}
-                        onChange={(e) => setFormData({ 
-                          ...formData, 
-                          acceptedClockSkewMs: parseInt(e.target.value) 
-                        })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            acceptedClockSkewMs: parseInt(e.target.value),
+                          })
+                        }
                         min="0"
                         max="300000"
                       />
@@ -454,13 +464,15 @@ export function SAMLConfiguration() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>Auto-provision Users</Label>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         Automatically create users on first login
                       </p>
                     </div>
                     <Switch
                       checked={formData.autoProvisionUsers}
-                      onCheckedChange={(checked) => setFormData({ ...formData, autoProvisionUsers: checked })}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, autoProvisionUsers: checked })
+                      }
                     />
                   </div>
 
@@ -469,7 +481,9 @@ export function SAMLConfiguration() {
                       <Label htmlFor="defaultRole">Default Role for New Users</Label>
                       <Select
                         value={formData.defaultRole}
-                        onValueChange={(value: any) => setFormData({ ...formData, defaultRole: value })}
+                        onValueChange={(value: unknown) =>
+                          setFormData({ ...formData, defaultRole: value })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -485,14 +499,14 @@ export function SAMLConfiguration() {
                 </TabsContent>
               </Tabs>
 
-              <div className="flex gap-2 justify-end">
+              <div className="flex justify-end gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => {
-                    setIsCreating(false);
-                    setEditingConfig(null);
-                    resetForm();
+                    setIsCreating(false)
+                    setEditingConfig(null)
+                    resetForm()
                   }}
                 >
                   Cancel
@@ -509,14 +523,14 @@ export function SAMLConfiguration() {
       {/* Configurations List */}
       {configurations.length === 0 && !isCreating ? (
         <Card>
-          <CardContent className="text-center py-12">
-            <ShieldCheckIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No SAML Configurations</h3>
+          <CardContent className="py-12 text-center">
+            <ShieldCheckIcon className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+            <h3 className="mb-2 text-lg font-semibold">No SAML Configurations</h3>
             <p className="text-muted-foreground mb-4">
               Get started by adding your first SAML identity provider
             </p>
             <Button onClick={() => setIsCreating(true)}>
-              <PlusIcon className="h-4 w-4 mr-2" />
+              <PlusIcon className="mr-2 h-4 w-4" />
               Add SAML Provider
             </Button>
           </CardContent>
@@ -526,7 +540,7 @@ export function SAMLConfiguration() {
           {configurations.map((config) => (
             <Card key={config.idpName}>
               <CardHeader>
-                <div className="flex justify-between items-start">
+                <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
                       {config.displayName}
@@ -539,26 +553,18 @@ export function SAMLConfiguration() {
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleTest(config)}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => handleTest(config)}>
                       Test Connection
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => downloadMetadata(config)}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => downloadMetadata(config)}>
                       <DownloadIcon className="h-4 w-4" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        setEditingConfig(config);
-                        setFormData(config);
+                        setEditingConfig(config)
+                        setFormData(config)
                       }}
                     >
                       <EditIcon className="h-4 w-4" />
@@ -576,31 +582,33 @@ export function SAMLConfiguration() {
               <CardContent>
                 <div className="grid grid-cols-4 gap-4 text-sm">
                   <div className="flex items-center gap-2">
-                    <UsersIcon className="h-4 w-4 text-muted-foreground" />
+                    <UsersIcon className="text-muted-foreground h-4 w-4" />
                     <span>{config.stats?.activeUsers || 0} active users</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <ClockIcon className="h-4 w-4 text-muted-foreground" />
+                    <ClockIcon className="text-muted-foreground h-4 w-4" />
                     <span>
-                      Last login: {config.stats?.lastLogin 
+                      Last login:{' '}
+                      {config.stats?.lastLogin
                         ? new Date(config.stats.lastLogin).toLocaleDateString()
                         : 'Never'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <GlobeIcon className="h-4 w-4 text-muted-foreground" />
-                    <span>
-                      {config.allowedDomains?.length || 0} allowed domains
-                    </span>
+                    <GlobeIcon className="text-muted-foreground h-4 w-4" />
+                    <span>{config.allowedDomains?.length || 0} allowed domains</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <KeyIcon className="h-4 w-4 text-muted-foreground" />
+                    <KeyIcon className="text-muted-foreground h-4 w-4" />
                     <span>{config.signatureAlgorithm?.toUpperCase()}</span>
                   </div>
                 </div>
 
                 {testResults[config.idpName] && (
-                  <Alert className="mt-4" variant={testResults[config.idpName].success ? 'default' : 'destructive'}>
+                  <Alert
+                    className="mt-4"
+                    variant={testResults[config.idpName].success ? 'default' : 'destructive'}
+                  >
                     <AlertDescription className="flex items-center gap-2">
                       {testResults[config.idpName].success ? (
                         <>
@@ -618,11 +626,11 @@ export function SAMLConfiguration() {
                 )}
 
                 {config.loginUrl && (
-                  <div className="mt-4 p-3 bg-muted rounded-lg">
+                  <div className="bg-muted mt-4 rounded-lg p-3">
                     <div className="flex items-center gap-2 text-sm">
-                      <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                      <LinkIcon className="text-muted-foreground h-4 w-4" />
                       <span className="font-medium">Login URL:</span>
-                      <code className="text-xs bg-background px-2 py-1 rounded">
+                      <code className="bg-background rounded px-2 py-1 text-xs">
                         {config.loginUrl}
                       </code>
                     </div>
@@ -634,5 +642,5 @@ export function SAMLConfiguration() {
         </div>
       )}
     </div>
-  );
+  )
 }

@@ -1,7 +1,7 @@
 /**
  * CoreFlow360 - Shared Event Bus Architecture
  * MATHEMATICALLY PERFECT, ALGORITHMICALLY OPTIMAL, PROVABLY CORRECT
- * 
+ *
  * Real-time inter-module synchronization and event-driven architecture
  */
 
@@ -18,17 +18,17 @@ export enum EventType {
   ENTITY_CREATED = 'entity.created',
   ENTITY_UPDATED = 'entity.updated',
   ENTITY_DELETED = 'entity.deleted',
-  
+
   // Module Events
   MODULE_SYNC = 'module.sync',
   MODULE_WORKFLOW = 'module.workflow',
-  
+
   // AI Events
   AI_ANALYSIS_COMPLETE = 'ai.analysis.complete',
   AI_PREDICTION_READY = 'ai.prediction.ready',
   AI_RECOMMENDATION_GENERATED = 'ai.recommendation.generated',
   AI_ANOMALY_DETECTED = 'ai.anomaly.detected',
-  
+
   // Business Events
   CUSTOMER_INTERACTION = 'customer.interaction',
   DEAL_STAGE_CHANGED = 'deal.stage.changed',
@@ -36,22 +36,22 @@ export enum EventType {
   PROJECT_MILESTONE = 'project.milestone',
   TASK_COMPLETED = 'task.completed',
   EMPLOYEE_PERFORMANCE = 'employee.performance',
-  
+
   // System Events
   SYSTEM_HEALTH = 'system.health',
   SECURITY_EVENT = 'security.event',
   PERFORMANCE_ALERT = 'performance.alert',
-  
+
   // Integration Events
   EXTERNAL_SYNC = 'external.sync',
-  WEBHOOK_RECEIVED = 'webhook.received'
+  WEBHOOK_RECEIVED = 'webhook.received',
 }
 
 export enum EventPriority {
   CRITICAL = 1,
   HIGH = 2,
   MEDIUM = 3,
-  LOW = 4
+  LOW = 4,
 }
 
 export enum EventChannel {
@@ -61,21 +61,21 @@ export enum EventChannel {
   HR = 'hr',
   PROJECT_MANAGEMENT = 'project_management',
   INVENTORY = 'inventory',
-  
+
   // AI Channels
   AI_INTELLIGENCE = 'ai_intelligence',
   AI_PREDICTIONS = 'ai_predictions',
   AI_RECOMMENDATIONS = 'ai_recommendations',
-  
+
   // System Channels
   SYSTEM = 'system',
   SECURITY = 'security',
   PERFORMANCE = 'performance',
   AUDIT = 'audit',
-  
+
   // Cross-Module
   CROSS_MODULE = 'cross_module',
-  WORKFLOW = 'workflow'
+  WORKFLOW = 'workflow',
 }
 
 // Event Structure
@@ -84,7 +84,7 @@ export interface CoreFlowEvent {
   type: EventType
   channel: EventChannel
   priority: EventPriority
-  
+
   // Source Information
   source: {
     module: ModuleType
@@ -93,7 +93,7 @@ export interface CoreFlowEvent {
     entityType?: string
     entityId?: string
   }
-  
+
   // Event Data
   data: Record<string, unknown>
   metadata: {
@@ -103,7 +103,7 @@ export interface CoreFlowEvent {
     causationId?: string
     retryCount?: number
   }
-  
+
   // Delivery Configuration
   delivery: {
     persistent: boolean
@@ -111,7 +111,7 @@ export interface CoreFlowEvent {
     maxRetries?: number
     delayMs?: number
   }
-  
+
   // Targeting
   targets?: EventTarget[]
 }
@@ -171,20 +171,20 @@ export class CoreFlowEventBus extends EventEmitter {
   private redis: Redis
   private prisma: PrismaClient
   private auditLogger: AuditLogger
-  
+
   private handlers: Map<string, EventHandler> = new Map()
   private processingQueues: Map<EventChannel, EventQueue> = new Map()
-  
+
   private isRunning = false
   private processingInterval?: NodeJS.Timeout
-  
+
   constructor(redis: Redis, prisma: PrismaClient, auditLogger: AuditLogger) {
     super()
-    
+
     this.redis = redis
     this.prisma = prisma
     this.auditLogger = auditLogger
-    
+
     this.initializeChannels()
     this.setupRedisSubscriptions()
   }
@@ -194,17 +194,17 @@ export class CoreFlowEventBus extends EventEmitter {
    */
   async start(): Promise<void> {
     if (this.isRunning) return
-    
+
     this.isRunning = true
-    console.log('🚀 Starting CoreFlow360 Event Bus...')
     
+
     // Start processing queues
     this.processingInterval = setInterval(
       () => this.processEventQueues(),
       100 // Process every 100ms for real-time performance
     )
+
     
-    console.log('✅ Event Bus started')
     this.emit('started')
   }
 
@@ -213,18 +213,18 @@ export class CoreFlowEventBus extends EventEmitter {
    */
   async stop(): Promise<void> {
     if (!this.isRunning) return
-    
+
     this.isRunning = false
-    console.log('⏹️ Stopping Event Bus...')
     
+
     if (this.processingInterval) {
       clearInterval(this.processingInterval)
     }
-    
+
     // Wait for queues to drain
     await this.drainEventQueues()
+
     
-    console.log('✅ Event Bus stopped')
     this.emit('stopped')
   }
 
@@ -252,7 +252,7 @@ export class CoreFlowEventBus extends EventEmitter {
         eventType: type,
         channel,
         tenantId: source.tenantId,
-        userId: source.userId
+        userId: source.userId,
       },
       async () => {
         const event: CoreFlowEvent = {
@@ -267,14 +267,14 @@ export class CoreFlowEventBus extends EventEmitter {
             version: '1.0.0',
             correlationId: options.correlationId,
             causationId: options.causationId,
-            retryCount: 0
+            retryCount: 0,
           },
           delivery: {
             persistent: options.persistent || true,
             ttl: options.ttl,
-            maxRetries: 3
+            maxRetries: 3,
           },
-          targets: options.targets
+          targets: options.targets,
         }
 
         // Add to processing queue
@@ -284,10 +284,7 @@ export class CoreFlowEventBus extends EventEmitter {
         }
 
         // Publish to Redis for distributed processing
-        await this.redis.publish(
-          `coreflow:events:${channel}`,
-          JSON.stringify(event)
-        )
+        await this.redis.publish(`coreflow:events:${channel}`, JSON.stringify(event))
 
         // Store persistent events
         if (event.delivery.persistent) {
@@ -304,13 +301,13 @@ export class CoreFlowEventBus extends EventEmitter {
           metadata: {
             eventType: type,
             channel,
-            priority: event.priority
-          }
+            priority: event.priority,
+          },
         })
 
-        console.log(`📡 Event published: ${event.id} (${type})`)
+        `)
         this.emit('eventPublished', event)
-        
+
         return event.id
       }
     )
@@ -345,12 +342,12 @@ export class CoreFlowEventBus extends EventEmitter {
         maxRetries: options.retryPolicy?.maxRetries || 3,
         backoffStrategy: options.retryPolicy?.backoffStrategy || 'exponential',
         baseDelayMs: options.retryPolicy?.baseDelayMs || 1000,
-        maxDelayMs: options.retryPolicy?.maxDelayMs || 60000
-      }
+        maxDelayMs: options.retryPolicy?.maxDelayMs || 60000,
+      },
     }
 
     this.handlers.set(id, handlerConfig)
-    console.log(`🔧 Registered handler: ${name} for ${channel}`)
+    
   }
 
   /**
@@ -358,7 +355,7 @@ export class CoreFlowEventBus extends EventEmitter {
    */
   unregisterHandler(handlerId: string): void {
     this.handlers.delete(handlerId)
-    console.log(`🗑️ Unregistered handler: ${handlerId}`)
+    
   }
 
   /**
@@ -368,7 +365,7 @@ export class CoreFlowEventBus extends EventEmitter {
     await withPerformanceTracking('event_queue_processing', async () => {
       for (const [channel, queue] of this.processingQueues.entries()) {
         const events = await queue.dequeueMultiple(10) // Process up to 10 events per cycle
-        
+
         if (events.length > 0) {
           await this.processEvents(channel, events)
         }
@@ -379,24 +376,21 @@ export class CoreFlowEventBus extends EventEmitter {
   /**
    * Process events for a specific channel
    */
-  private async processEvents(
-    channel: EventChannel,
-    events: CoreFlowEvent[]
-  ): Promise<void> {
+  private async processEvents(channel: EventChannel, events: CoreFlowEvent[]): Promise<void> {
     const startTime = Date.now()
-    
+
     // Get handlers for this channel
     const channelHandlers = Array.from(this.handlers.values())
-      .filter(h => h.channel === channel)
+      .filter((h) => h.channel === channel)
       .sort((a, b) => a.priority - b.priority)
 
     for (const event of events) {
       try {
         const results: HandlerResult[] = []
-        
+
         // Execute handlers in parallel with concurrency control
         const handlerPromises = channelHandlers
-          .filter(h => this.shouldHandleEvent(h, event))
+          .filter((h) => this.shouldHandleEvent(h, event))
           .map(async (handler) => {
             const result = await this.executeHandler(handler, event)
             results.push(result)
@@ -406,9 +400,9 @@ export class CoreFlowEventBus extends EventEmitter {
         await Promise.allSettled(handlerPromises)
 
         const processingResult: EventProcessingResult = {
-          success: results.every(r => r.success),
+          success: results.every((r) => r.success),
           handlerResults: results,
-          duration: Date.now() - startTime
+          duration: Date.now() - startTime,
         }
 
         // Emit processing complete
@@ -423,14 +417,13 @@ export class CoreFlowEventBus extends EventEmitter {
         if (event.delivery.persistent) {
           await this.updateEventStatus(event.id, 'processed')
         }
-
       } catch (error) {
-        console.error(`❌ Error processing event ${event.id}:`, error)
         
+
         // Retry logic
         if (event.metadata.retryCount! < (event.delivery.maxRetries || 3)) {
           event.metadata.retryCount = (event.metadata.retryCount || 0) + 1
-          
+
           // Re-queue with delay
           setTimeout(() => {
             const queue = this.processingQueues.get(channel)
@@ -451,25 +444,25 @@ export class CoreFlowEventBus extends EventEmitter {
     event: CoreFlowEvent
   ): Promise<HandlerResult> {
     const startTime = Date.now()
-    
+
     try {
       await handler.handler(event)
-      
+
       return {
         handlerId: handler.id,
         success: true,
         duration: Date.now() - startTime,
-        retryCount: 0
+        retryCount: 0,
       }
     } catch (error) {
-      console.error(`❌ Handler ${handler.id} failed:`, error)
       
+
       return {
         handlerId: handler.id,
         success: false,
         duration: Date.now() - startTime,
         error: error.message,
-        retryCount: event.metadata.retryCount || 0
+        retryCount: event.metadata.retryCount || 0,
       }
     }
   }
@@ -479,12 +472,12 @@ export class CoreFlowEventBus extends EventEmitter {
    */
   private initializeChannels(): void {
     const channels = Object.values(EventChannel)
-    
+
     for (const channel of channels) {
       this.processingQueues.set(channel, new EventQueue(channel))
     }
+
     
-    console.log(`📋 Initialized ${channels.length} event channels`)
   }
 
   /**
@@ -492,23 +485,23 @@ export class CoreFlowEventBus extends EventEmitter {
    */
   private setupRedisSubscriptions(): void {
     const channels = Object.values(EventChannel)
-    
+
     for (const channel of channels) {
       this.redis.subscribe(`coreflow:events:${channel}`)
     }
-    
+
     this.redis.on('message', async (channel: string, message: string) => {
       try {
         const eventChannel = channel.replace('coreflow:events:', '') as EventChannel
         const event: CoreFlowEvent = JSON.parse(message)
-        
+
         // Add to processing queue if not already present
         const queue = this.processingQueues.get(eventChannel)
-        if (queue && !await queue.contains(event.id)) {
+        if (queue && !(await queue.contains(event.id))) {
           await queue.enqueue(event)
         }
       } catch (error) {
-        console.error('❌ Error processing Redis message:', error)
+        
       }
     })
   }
@@ -519,20 +512,20 @@ export class CoreFlowEventBus extends EventEmitter {
   private async handleCrossModuleEvent(event: CoreFlowEvent): Promise<void> {
     // Implement cross-module data synchronization
     const { source, data } = event
-    
+
     switch (event.type) {
       case EventType.ENTITY_CREATED:
         await this.syncEntityAcrossModules('create', source, data)
         break
-        
+
       case EventType.ENTITY_UPDATED:
         await this.syncEntityAcrossModules('update', source, data)
         break
-        
+
       case EventType.ENTITY_DELETED:
         await this.syncEntityAcrossModules('delete', source, data)
         break
-        
+
       case EventType.MODULE_SYNC:
         await this.performModuleSync(source, data)
         break
@@ -558,11 +551,11 @@ export class CoreFlowEventBus extends EventEmitter {
         sourceData: data,
         syncRules: {},
         mapping: {},
-        tenantId: source.tenantId
-      }
+        tenantId: source.tenantId,
+      },
     })
+
     
-    console.log(`🔄 Cross-module sync initiated: ${operation} ${source.entityType}`)
   }
 
   /**
@@ -570,10 +563,10 @@ export class CoreFlowEventBus extends EventEmitter {
    */
   private async performModuleSync(
     source: CoreFlowEvent['source'],
-    data: Record<string, unknown>
+    _data: Record<string, unknown>
   ): Promise<void> {
     // Implement module-to-module data synchronization
-    console.log(`🔄 Module sync: ${source.module}`)
+    
   }
 
   /**
@@ -591,21 +584,20 @@ export class CoreFlowEventBus extends EventEmitter {
     return Math.min(1000 * Math.pow(2, retryCount), 60000)
   }
 
-  private async storeEvent(event: CoreFlowEvent): Promise<void> {
+  private async storeEvent(_event: CoreFlowEvent): Promise<void> {
     // Store event in database for persistence and replay
     // Implementation would depend on your event store design
   }
 
-  private async updateEventStatus(eventId: string, status: string): Promise<void> {
+  private async updateEventStatus(_eventId: string, _status: string): Promise<void> {
     // Update event processing status
     // Implementation would depend on your event store design
   }
 
   private async drainEventQueues(): Promise<void> {
     // Wait for all queues to process remaining events
-    const drainPromises = Array.from(this.processingQueues.values())
-      .map(queue => queue.drain())
-    
+    const drainPromises = Array.from(this.processingQueues.values()).map((queue) => queue.drain())
+
     await Promise.all(drainPromises)
   }
 }
@@ -616,15 +608,13 @@ export class CoreFlowEventBus extends EventEmitter {
 class EventQueue {
   private queue: CoreFlowEvent[] = []
   private processing = false
-  
+
   constructor(private channel: EventChannel) {}
 
   async enqueue(event: CoreFlowEvent): Promise<void> {
     // Insert maintaining priority order
-    const insertIndex = this.queue.findIndex(
-      existing => existing.priority > event.priority
-    )
-    
+    const insertIndex = this.queue.findIndex((existing) => existing.priority > event.priority)
+
     if (insertIndex === -1) {
       this.queue.push(event)
     } else {
@@ -634,21 +624,21 @@ class EventQueue {
 
   async dequeueMultiple(count: number): Promise<CoreFlowEvent[]> {
     if (this.processing) return []
-    
+
     this.processing = true
     const events = this.queue.splice(0, count)
     this.processing = false
-    
+
     return events
   }
 
   async contains(eventId: string): Promise<boolean> {
-    return this.queue.some(event => event.id === eventId)
+    return this.queue.some((event) => event.id === eventId)
   }
 
   async drain(): Promise<void> {
     while (this.queue.length > 0) {
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
     }
   }
 
@@ -675,14 +665,14 @@ export class CRMEventPublisher {
       {
         entityType: 'customer',
         entityId: customerId,
-        customerData
+        customerData,
       },
       {
         module: ModuleType.CRM,
         tenantId,
         userId,
         entityType: 'customer',
-        entityId: customerId
+        entityId: customerId,
       },
       {
         priority: EventPriority.HIGH,
@@ -690,8 +680,8 @@ export class CRMEventPublisher {
         targets: [
           { module: ModuleType.ACCOUNTING },
           { module: ModuleType.PROJECT_MANAGEMENT },
-          { module: ModuleType.AI_ENGINE }
-        ]
+          { module: ModuleType.AI_ENGINE },
+        ],
       }
     )
   }
@@ -712,22 +702,19 @@ export class CRMEventPublisher {
         entityId: dealId,
         oldStage,
         newStage,
-        dealData
+        dealData,
       },
       {
         module: ModuleType.CRM,
         tenantId,
         userId,
         entityType: 'deal',
-        entityId: dealId
+        entityId: dealId,
       },
       {
         priority: EventPriority.HIGH,
         persistent: true,
-        targets: [
-          { module: ModuleType.AI_ENGINE },
-          { module: ModuleType.ANALYTICS }
-        ]
+        targets: [{ module: ModuleType.AI_ENGINE }, { module: ModuleType.ANALYTICS }],
       }
     )
   }
@@ -750,14 +737,14 @@ export class AccountingEventPublisher {
         entityType: 'invoice',
         entityId: invoiceId,
         paymentAmount,
-        invoiceData
+        invoiceData,
       },
       {
         module: ModuleType.ACCOUNTING,
         tenantId,
         userId,
         entityType: 'invoice',
-        entityId: invoiceId
+        entityId: invoiceId,
       },
       {
         priority: EventPriority.CRITICAL,
@@ -765,8 +752,8 @@ export class AccountingEventPublisher {
         targets: [
           { module: ModuleType.CRM },
           { module: ModuleType.PROJECT_MANAGEMENT },
-          { module: ModuleType.AI_ENGINE }
-        ]
+          { module: ModuleType.AI_ENGINE },
+        ],
       }
     )
   }
@@ -791,13 +778,13 @@ export class AIEventPublisher {
         severity,
         entityType,
         entityId,
-        anomalyData
+        anomalyData,
       },
       {
         module: ModuleType.AI_ENGINE,
         tenantId,
         entityType,
-        entityId
+        entityId,
       },
       {
         priority: severity === 'CRITICAL' ? EventPriority.CRITICAL : EventPriority.HIGH,
@@ -805,8 +792,8 @@ export class AIEventPublisher {
         targets: [
           { module: ModuleType.CRM },
           { module: ModuleType.ACCOUNTING },
-          { module: ModuleType.HR }
-        ]
+          { module: ModuleType.HR },
+        ],
       }
     )
   }
@@ -825,17 +812,17 @@ export class AIEventPublisher {
         predictionType,
         entityType,
         entityId,
-        prediction
+        prediction,
       },
       {
         module: ModuleType.AI_ENGINE,
         tenantId,
         entityType,
-        entityId
+        entityId,
       },
       {
         priority: EventPriority.HIGH,
-        persistent: true
+        persistent: true,
       }
     )
   }

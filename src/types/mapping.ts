@@ -10,27 +10,27 @@ export interface CustomerLocation {
     phone?: string
     company?: string
   }
-  
+
   // Address information
   address: string
   city: string
   state: string
   zipCode: string
   country: string
-  
+
   // Geographic coordinates
   latitude: number
   longitude: number
-  
+
   // Location metadata
   locationType: 'primary' | 'billing' | 'shipping' | 'service'
   isVerified: boolean
   lastVerifiedAt?: string
-  
+
   // Territory assignment
   salesRep?: string
   territory?: string
-  
+
   createdAt: string
   updatedAt: string
 }
@@ -42,7 +42,7 @@ export interface GoogleMapsUsage {
   requestCount: number
   creditsUsed: number
   endpoint?: string
-  requestData?: Record<string, any>
+  requestData?: Record<string, unknown>
   responseTime?: number
   billingMonth: number
   billingYear: number
@@ -80,28 +80,28 @@ export interface VisitSchedule {
     name?: string
     email: string
   }
-  
+
   // Schedule details
   scheduledDate: string
   scheduledTime: string
   duration: number
   visitType: 'sales' | 'service' | 'follow_up' | 'demo'
-  
+
   // Status tracking
   status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
   actualStartTime?: string
   actualEndTime?: string
-  
+
   // Visit notes
   notes?: string
   outcome?: string
   nextSteps?: string
-  
+
   // Route optimization
   routeOptimized: boolean
   routePosition?: number
   estimatedTravelTime?: number
-  
+
   createdAt: string
   updatedAt: string
 }
@@ -113,21 +113,21 @@ export interface RouteStop {
   customerLocation: CustomerLocation
   visitScheduleId?: string
   visitSchedule?: VisitSchedule
-  
+
   // Route details
   stopNumber: number
   estimatedArrival: string
   actualArrival?: string
   estimatedDuration: number
   actualDuration?: number
-  
+
   // Navigation
   distanceFromPrevious?: number
   travelTimeFromPrevious?: number
-  
+
   // Status
   status: 'planned' | 'in_progress' | 'completed' | 'skipped'
-  
+
   createdAt: string
   updatedAt: string
 }

@@ -7,7 +7,7 @@ import Redis from 'ioredis'
 import { EventEmitter } from 'events'
 
 // Build-time detection
-const isBuildTime = 
+const isBuildTime =
   process.env.VERCEL === '1' ||
   process.env.CI === 'true' ||
   process.env.NEXT_PHASE === 'phase-production-build' ||
@@ -16,7 +16,7 @@ const isBuildTime =
 
 // Singleton instances
 let _redisClient: Redis | null = null
-let _mockClient: any | null = null
+let _mockClient: unknown | null = null
 
 /**
  * In-memory mock Redis client for build time and environments without Redis
@@ -61,8 +61,12 @@ class MockRedisClient extends EventEmitter {
   async exists(...keys: string[]): Promise<number> {
     let count = 0
     for (const key of keys) {
-      if (this.store.has(key) || this.lists.has(key) || 
-          this.sets.has(key) || this.hashes.has(key)) {
+      if (
+        this.store.has(key) ||
+        this.lists.has(key) ||
+        this.sets.has(key) ||
+        this.hashes.has(key)
+      ) {
         count++
       }
     }
@@ -104,7 +108,7 @@ class MockRedisClient extends EventEmitter {
     return list.slice(start, stop + 1)
   }
 
-  async brpop(timeout: number, ...keys: string[]): Promise<[string, string] | null> {
+  async brpop(_timeout: number, ..._keys: string[]): Promise<[string, string] | null> {
     return null // Mock timeout
   }
 
@@ -154,7 +158,7 @@ class MockRedisClient extends EventEmitter {
   async publish(channel: string, message: string): Promise<number> {
     const subscribers = this.pubsubChannels.get(channel)
     if (subscribers) {
-      subscribers.forEach(callback => callback(message))
+      subscribers.forEach((callback) => callback(message))
       return subscribers.size
     }
     return 0
@@ -174,11 +178,13 @@ class MockRedisClient extends EventEmitter {
   async ping(): Promise<'PONG'> {
     return 'PONG'
   }
-  
+
   async connect(): Promise<void> {}
   async disconnect(): Promise<void> {}
-  async quit(): Promise<'OK'> { return 'OK' }
-  
+  async quit(): Promise<'OK'> {
+    return 'OK'
+  }
+
   status = 'ready'
 }
 
@@ -193,9 +199,9 @@ export function getRedisClient(): Redis | MockRedisClient | null {
     }
     return _mockClient
   }
-  
+
   const redisUrl = process.env.REDIS_URL
-  
+
   // No Redis URL - return mock
   if (!redisUrl) {
     if (!_mockClient) {
@@ -203,7 +209,7 @@ export function getRedisClient(): Redis | MockRedisClient | null {
     }
     return _mockClient
   }
-  
+
   // Create real Redis client
   if (!_redisClient) {
     try {
@@ -216,24 +222,17 @@ export function getRedisClient(): Redis | MockRedisClient | null {
         },
         reconnectOnError: (err) => {
           const targetErrors = ['READONLY', 'ECONNREFUSED', 'ETIMEDOUT']
-          return targetErrors.some(e => err.message.includes(e))
-        }
+          return targetErrors.some((e) => err.message.includes(e))
+        },
       })
 
-      _redisClient.on('error', (error) => {
-        console.error('[Redis] Connection error:', error.message)
-      })
+      _redisClient.on('error', (error) => {})
 
-      _redisClient.on('connect', () => {
-        console.log('[Redis] Connected successfully')
-      })
+      _redisClient.on('connect', () => {})
 
       // Attempt connection but don't fail if it doesn't work
-      _redisClient.connect().catch((error) => {
-        console.error('[Redis] Failed to connect:', error.message)
-      })
+      _redisClient.connect().catch((error) => {})
     } catch (error) {
-      console.error('[Redis] Failed to create client:', error)
       // Fall back to mock
       if (!_mockClient) {
         _mockClient = new MockRedisClient()
@@ -241,7 +240,7 @@ export function getRedisClient(): Redis | MockRedisClient | null {
       return _mockClient
     }
   }
-  
+
   return _redisClient
 }
 
@@ -281,7 +280,7 @@ export const CACHE_PREFIXES = {
   RATE_LIMIT: 'rl:',
   FEATURE_FLAG: 'ff:',
   SUBSCRIPTION: 'sub:',
-  ANALYTICS: 'analytics:'
+  ANALYTICS: 'analytics:',
 } as const
 
 /**
@@ -292,7 +291,7 @@ export const CACHE_TTL = {
   MEDIUM: 300, // 5 minutes
   LONG: 3600, // 1 hour
   DAY: 86400, // 24 hours
-  WEEK: 604800 // 7 days
+  WEEK: 604800, // 7 days
 } as const
 
 /**
@@ -302,14 +301,14 @@ export const redis = {
   /**
    * Get value with automatic JSON parsing
    */
-  async get<T = any>(key: string): Promise<T | null> {
+  async get<T = unknown>(key: string): Promise<T | null> {
     const client = getRedisClient()
     if (!client) return null
-    
+
     try {
       const value = await client.get(key)
       if (!value) return null
-      
+
       try {
         return JSON.parse(value) as T
       } catch {
@@ -317,171 +316,161 @@ export const redis = {
         return value as unknown as T
       }
     } catch (error) {
-      console.error(`Redis GET error for key ${key}:`, error)
       return null
     }
   },
-  
+
   /**
    * Set value with automatic JSON stringification
    */
-  async set(key: string, value: any, ttl?: number): Promise<boolean> {
+  async set(key: string, value: unknown, ttl?: number): Promise<boolean> {
     const client = getRedisClient()
     if (!client) return false
-    
+
     try {
       const serialized = typeof value === 'string' ? value : JSON.stringify(value)
-      
+
       if (ttl) {
         await client.setex(key, ttl, serialized)
       } else {
         await client.set(key, serialized)
       }
-      
+
       return true
     } catch (error) {
-      console.error(`Redis SET error for key ${key}:`, error)
       return false
     }
   },
-  
+
   /**
    * Delete key(s)
    */
   async del(...keys: string[]): Promise<number> {
     const client = getRedisClient()
     if (!client) return 0
-    
+
     try {
       return await client.del(...keys)
     } catch (error) {
-      console.error('Redis DEL error:', error)
       return 0
     }
   },
-  
+
   /**
    * Check if key exists
    */
   async exists(...keys: string[]): Promise<boolean> {
     const client = getRedisClient()
     if (!client) return false
-    
+
     try {
       const count = await client.exists(...keys)
       return count > 0
     } catch (error) {
-      console.error('Redis EXISTS error:', error)
       return false
     }
   },
-  
+
   /**
    * Set expiration on key
    */
   async expire(key: string, seconds: number): Promise<boolean> {
     const client = getRedisClient()
     if (!client) return false
-    
+
     try {
       const result = await client.expire(key, seconds)
       return result === 1
     } catch (error) {
-      console.error(`Redis EXPIRE error for key ${key}:`, error)
       return false
     }
   },
-  
+
   /**
    * Increment counter
    */
   async incr(key: string): Promise<number | null> {
     const client = getRedisClient()
     if (!client) return null
-    
+
     try {
       return await client.incr(key)
     } catch (error) {
-      console.error(`Redis INCR error for key ${key}:`, error)
       return null
     }
   },
-  
+
   /**
    * Add to set
    */
   async sadd(key: string, ...members: string[]): Promise<number> {
     const client = getRedisClient()
     if (!client) return 0
-    
+
     try {
       return await client.sadd(key, ...members)
     } catch (error) {
-      console.error(`Redis SADD error for key ${key}:`, error)
       return 0
     }
   },
-  
+
   /**
    * Get set members
    */
   async smembers(key: string): Promise<string[]> {
     const client = getRedisClient()
     if (!client) return []
-    
+
     try {
       return await client.smembers(key)
     } catch (error) {
-      console.error(`Redis SMEMBERS error for key ${key}:`, error)
       return []
     }
   },
-  
+
   /**
    * Hash operations
    */
   hash: {
-    async set(key: string, field: string, value: any): Promise<boolean> {
+    async set(key: string, field: string, value: unknown): Promise<boolean> {
       const client = getRedisClient()
       if (!client) return false
-      
+
       try {
         const serialized = typeof value === 'string' ? value : JSON.stringify(value)
         await client.hset(key, field, serialized)
         return true
       } catch (error) {
-        console.error(`Redis HSET error for ${key}:${field}:`, error)
         return false
       }
     },
-    
-    async get<T = any>(key: string, field: string): Promise<T | null> {
+
+    async get<T = unknown>(key: string, field: string): Promise<T | null> {
       const client = getRedisClient()
       if (!client) return null
-      
+
       try {
         const value = await client.hget(key, field)
         if (!value) return null
-        
+
         try {
           return JSON.parse(value) as T
         } catch {
           return value as unknown as T
         }
       } catch (error) {
-        console.error(`Redis HGET error for ${key}:${field}:`, error)
         return null
       }
     },
-    
-    async getAll<T = any>(key: string): Promise<Record<string, T>> {
+
+    async getAll<T = unknown>(key: string): Promise<Record<string, T>> {
       const client = getRedisClient()
       if (!client) return {}
-      
+
       try {
         const hash = await client.hgetall(key)
         const result: Record<string, T> = {}
-        
+
         for (const [field, value] of Object.entries(hash)) {
           try {
             result[field] = JSON.parse(value) as T
@@ -489,12 +478,11 @@ export const redis = {
             result[field] = value as unknown as T
           }
         }
-        
+
         return result
       } catch (error) {
-        console.error(`Redis HGETALL error for ${key}:`, error)
         return {}
       }
-    }
-  }
+    },
+  },
 }
