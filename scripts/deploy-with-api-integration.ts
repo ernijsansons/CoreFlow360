@@ -266,7 +266,7 @@ class DeploymentManager {
   private async triggerVercelDeployHook(): Promise<DeploymentStatus & { deploymentUrl?: string }> {
     try {
       // Use the deploy hook from documentation
-      const deployHook = 'https://api.vercel.com/v1/integrations/deploy/prj_A09SK4Bp6C6TYcJXedNtZA2UvCs9/Emwdczu7Uz'
+      const deployHook = 'https://api.vercel.com/v1/integrations/deploy/prj_kUGJj9DBuYXpjA9od4YSJdEIVkFJ/Emwdczu7Uz'
       
       const response = await fetch(deployHook, {
         method: 'POST',

@@ -51,7 +51,7 @@
 
 ### Force Rebuild (with cache clear):
 ```bash
-curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_A09SK4Bp6C6TYcJXedNtZA2UvCs9/Emwdczu7Uz" \
+curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_kUGJj9DBuYXpjA9od4YSJdEIVkFJ/Emwdczu7Uz" \
   -H "Content-Type: application/json" \
   -d '{"force": true, "target": "production", "gitBranch": "main"}'
 ```

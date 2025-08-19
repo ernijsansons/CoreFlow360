@@ -66,7 +66,7 @@ fi
 
 echo ""
 echo "📋 Deployment Commands:"
-echo "   - Force rebuild: curl -X POST 'https://api.vercel.com/v1/integrations/deploy/prj_A09SK4Bp6C6TYcJXedNtZA2UvCs9/Emwdczu7Uz' -H 'Content-Type: application/json' -d '{\"force\": true}'"
+echo "   - Force rebuild: curl -X POST 'https://api.vercel.com/v1/integrations/deploy/prj_kUGJj9DBuYXpjA9od4YSJdEIVkFJ/Emwdczu7Uz' -H 'Content-Type: application/json' -d '{\"force\": true}'"
 echo "   - Push changes: git push origin main"
 echo "   - Check logs: Visit https://vercel.com/ernijsansons-projects/core-flow360"
 echo ""

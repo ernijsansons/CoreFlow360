@@ -101,7 +101,7 @@ ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 ### Step 2: Trigger Fresh Deployment
 ```bash
-curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_A09SK4Bp6C6TYcJXedNtZA2UvCs9/Emwdczu7Uz" \
+curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_kUGJj9DBuYXpjA9od4YSJdEIVkFJ/Emwdczu7Uz" \
   -H "Content-Type: application/json" \
   -d '{"force": true, "target": "production", "gitBranch": "main"}'
 ```
@@ -133,7 +133,7 @@ curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_A09SK4Bp6C6TYcJX
 git log -1 --oneline
 
 # Force new deployment
-curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_A09SK4Bp6C6TYcJXedNtZA2UvCs9/Emwdczu7Uz" -H "Content-Type: application/json" -d '{"force": true}'
+curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_kUGJj9DBuYXpjA9od4YSJdEIVkFJ/Emwdczu7Uz" -H "Content-Type: application/json" -d '{"force": true}'
 ```
 
 ---
