@@ -5,20 +5,9 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   
-  // Disable static generation for API routes during build
-  experimental: {
-    serverActions: {
-      allowedOrigins: ['localhost:3000'],
-      bodySizeLimit: '2mb',
-    },
-    optimizeCss: true,
-    optimizePackageImports: [
-      'lucide-react',
-      'framer-motion',
-      '@radix-ui/react-slider',
-      'recharts'
-    ],
-  },
+  // Optimize build performance
+  swcMinify: true,
+  compress: true,
   
   serverExternalPackages: ['prisma'],
   
@@ -39,6 +28,23 @@ const nextConfig: NextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true, // Temporarily ignore for deployment
+  },
+  
+  // Optimized experimental features
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['localhost:3000'],
+      bodySizeLimit: '2mb',
+    },
+    optimizeCss: true,
+    optimizePackageImports: [
+      'lucide-react',
+      'framer-motion',
+      '@radix-ui/react-slider',
+      'recharts'
+    ],
+    // Reduce static generation during build
+    staticPageGenerationTimeout: 60,
   },
   
   // EMERGENCY: Build-time environment variables
