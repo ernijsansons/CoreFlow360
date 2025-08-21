@@ -3,7 +3,7 @@
  * Prevents abuse and ensures fair API usage across tenants
  */
 
-import rateLimit from 'express-rate-limit'
+import rateLimit from './rate-limit-compat'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Rate limiter for authentication endpoints

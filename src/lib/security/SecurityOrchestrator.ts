@@ -7,7 +7,7 @@ import { EventEmitter } from 'events'
 import { createHash, createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto'
 import { Redis } from 'ioredis'
 import { SignJWT, jwtVerify } from 'jose'
-import { rateLimit } from 'express-rate-limit'
+import { rateLimit } from '@/middleware/rate-limit-compat'
 
 export interface SecurityConfig {
   encryption: {
