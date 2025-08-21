@@ -5,6 +5,8 @@
 
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState } from 'react'
 import DashboardLayout from '@/components/layouts/DashboardLayout'
 import SubscriptionManager from '@/components/saas/SubscriptionManager'

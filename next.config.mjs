@@ -3,11 +3,19 @@ import { withSentryConfig } from '@sentry/nextjs'
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   
   // Disable static generation for problematic pages during build issues
   experimental: {
     optimizeCss: true,
+  },
+  
+  // Exclude backup folder from webpack
+  webpack: (config, { isServer }) => {
+    config.watchOptions = {
+      ...config.watchOptions,
+      ignored: ['**/.v0-deployed-backup/**', '**/node_modules/**'],
+    }
+    return config
   },
 
   // Force dynamic rendering for certain pages to avoid SSG issues

@@ -82,7 +82,7 @@ export default function WorkflowManager({ onWorkflowEdit, onWorkflowTest }: Work
           id: 'wf-001',
           name: 'High-Value Lead Alert',
           description: 'Notify sales manager when high-value lead is created',
-          event: CRMEvent.LEAD_CREATED,
+          event: 'lead_created' as CRMEvent,
           conditions: [{ field: 'aiScore', operator: 'greater_than', value: 80 }],
           actions: [
             { type: 'create_notification', config: {} },
@@ -97,7 +97,7 @@ export default function WorkflowManager({ onWorkflowEdit, onWorkflowTest }: Work
           id: 'wf-002',
           name: 'Deal Stage Progression',
           description: 'Update deal probability and notify team on stage change',
-          event: CRMEvent.DEAL_STAGE_CHANGED,
+          event: 'deal_stage_changed' as CRMEvent,
           conditions: [],
           actions: [
             { type: 'update_field', config: {} },
@@ -112,7 +112,7 @@ export default function WorkflowManager({ onWorkflowEdit, onWorkflowTest }: Work
           id: 'wf-003',
           name: 'Churn Prevention',
           description: 'Trigger retention workflow when customer shows churn signals',
-          event: CRMEvent.CUSTOMER_LIFECYCLE_CHANGED,
+          event: 'customer_lifecycle_changed' as CRMEvent,
           conditions: [{ field: 'lifecycle', operator: 'equals', value: 'at_risk' }],
           actions: [
             { type: 'create_task', config: {} },
@@ -127,7 +127,7 @@ export default function WorkflowManager({ onWorkflowEdit, onWorkflowTest }: Work
           id: 'wf-004',
           name: 'Deal Won Celebration',
           description: 'Celebrate and follow up on won deals',
-          event: CRMEvent.DEAL_WON,
+          event: 'deal_won' as CRMEvent,
           conditions: [],
           actions: [
             { type: 'create_notification', config: {} },
@@ -142,7 +142,7 @@ export default function WorkflowManager({ onWorkflowEdit, onWorkflowTest }: Work
           id: 'wf-005',
           name: 'Lead Nurturing',
           description: 'Automated follow-up for inactive leads',
-          event: CRMEvent.LEAD_INACTIVE,
+          event: 'lead_inactive' as CRMEvent,
           conditions: [{ field: 'daysSinceLastContact', operator: 'greater_than', value: 7 }],
           actions: [
             { type: 'send_email', config: {} },

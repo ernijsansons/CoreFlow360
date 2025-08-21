@@ -5,11 +5,13 @@
 
 'use client'
 
-import dynamic from 'next/dynamic'
+export const dynamic = 'force-dynamic'
+
+import dynamicImport from 'next/dynamic'
 import DashboardLayout from '@/components/layouts/DashboardLayout'
 
 // Dynamic import to prevent SSR issues
-const DealPipeline = dynamic(() => import('@/components/crm/DealPipeline'), {
+const DealPipeline = dynamicImport(() => import('@/components/crm/DealPipeline'), {
   ssr: false,
   loading: () => (
     <div className="flex h-64 items-center justify-center">
