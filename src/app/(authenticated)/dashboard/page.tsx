@@ -3,7 +3,10 @@
 export const dynamic = 'force-dynamic'
 
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/layouts/DashboardLayout'
+import { MultiBusinessCommandCenter } from '@/components/multi-business/MultiBusinessCommandCenter'
 import {
   UsersIcon,
   BriefcaseIcon,
@@ -21,17 +24,46 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
+  const { data: session } = useSession()
+  const router = useRouter()
   const [stats, setStats] = useState<DashboardStats>({
     totalCustomers: 0,
     activeJobs: 0,
     revenue: 0,
     growth: 0,
   })
+  const [userBusinesses, setUserBusinesses] = useState<unknown[]>([])
+  const [isLoadingBusinesses, setIsLoadingBusinesses] = useState(true)
 
   // Get AI-powered insights
   const { insights, isLoading, error } = useDashboardInsights({
     timeRange: '30d',
   })
+
+  // Check if user has multiple businesses
+  useEffect(() => {
+    const checkMultipleBusinesses = async () => {
+      try {
+        if (!session?.user?.tenantId) return
+        
+        // Mock check for multiple businesses - in production, this would be a real API call
+        // For now, simulate based on user email or other criteria
+        const mockBusinesses = [
+          { id: 1, name: 'Phoenix HVAC Services', active: true },
+          { id: 2, name: 'Desert Air Solutions', active: true },
+          { id: 3, name: 'Valley Maintenance Co', active: true }
+        ]
+        
+        setUserBusinesses(mockBusinesses)
+        setIsLoadingBusinesses(false)
+      } catch (error) {
+        console.error('Error checking businesses:', error)
+        setIsLoadingBusinesses(false)
+      }
+    }
+
+    checkMultipleBusinesses()
+  }, [session?.user?.tenantId])
 
   useEffect(() => {
     if (insights) {
@@ -84,9 +116,71 @@ export default function Dashboard() {
     },
   ]
 
+  // Show loading state while checking businesses
+  if (isLoadingBusinesses) {
+    return (
+      <DashboardLayout>
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center min-h-96">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading your business portfolio...</p>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  // If user has multiple businesses, show portfolio dashboard
+  if (userBusinesses.length > 1) {
+    return (
+      <DashboardLayout>
+        <div className="min-h-screen bg-gray-50">
+          {/* Breadcrumb Navigation */}
+          <div className="bg-white border-b border-gray-200">
+            <div className="px-4 sm:px-6 lg:px-8">
+              <div className="py-4">
+                <nav className="flex" aria-label="Breadcrumb">
+                  <ol className="flex items-center space-x-4">
+                    <li>
+                      <div className="flex">
+                        <a href="/dashboard" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                          Portfolio Overview
+                        </a>
+                      </div>
+                    </li>
+                  </ol>
+                </nav>
+              </div>
+            </div>
+          </div>
+          
+          <MultiBusinessCommandCenter />
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  // Single business dashboard
   return (
     <DashboardLayout>
       <div className="px-4 sm:px-6 lg:px-8">
+        {/* Breadcrumb Navigation for Single Business */}
+        <div className="mb-4">
+          <nav className="flex" aria-label="Breadcrumb">
+            <ol className="flex items-center space-x-4">
+              <li>
+                <div className="flex">
+                  <a href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                    Single Business Dashboard
+                  </a>
+                </div>
+              </li>
+            </ol>
+          </nav>
+        </div>
+
         {/* Header */}
         <div className="md:flex md:items-center md:justify-between">
           <div className="min-w-0 flex-1">
@@ -96,6 +190,12 @@ export default function Dashboard() {
             <p className="mt-1 text-sm text-gray-500">
               Welcome back! Here&apos;s what&apos;s happening with your business.
             </p>
+            {/* Hint for multi-business users */}
+            <div className="mt-2">
+              <a href="/add-business" className="text-sm text-blue-600 hover:text-blue-500">
+                Add another business to unlock progressive pricing savings →
+              </a>
+            </div>
           </div>
           {insights && (
             <div className="mt-4 flex items-center space-x-2 md:mt-0">

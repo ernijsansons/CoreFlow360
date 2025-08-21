@@ -109,77 +109,93 @@ export function MultiBusinessCommandCenter() {
         </Link>
       </motion.div>
       
-      {/* Key Metrics Grid */}
+      {/* Enhanced Portfolio Performance Metrics */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         className="grid md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8"
       >
-        <Card>
+        <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Businesses</p>
-                <p className="text-2xl font-bold">{businesses.length}</p>
-                <p className="text-xs text-gray-500 mt-1">{totalLocations} total locations</p>
+                <p className="text-sm text-blue-700 font-medium">Portfolio Health</p>
+                <p className="text-2xl font-bold text-blue-900">{businesses.length}</p>
+                <p className="text-xs text-blue-600 mt-1">{totalLocations} locations</p>
+                <div className="flex items-center mt-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+                  <span className="text-xs text-green-700">All systems operational</span>
+                </div>
               </div>
               <Building className="h-8 w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Portfolio Revenue</p>
-                <p className="text-2xl font-bold">${(totalRevenue / 1000).toFixed(0)}K</p>
+                <p className="text-sm text-green-700 font-medium">Total Portfolio Revenue</p>
+                <p className="text-2xl font-bold text-green-900">${(totalRevenue / 1000).toFixed(0)}K</p>
                 <p className="text-xs text-green-600 mt-1 flex items-center">
                   <ArrowUpRight className="h-3 w-3 mr-1" />
-                  {avgGrowth}% avg growth
+                  {avgGrowth}% portfolio growth
                 </p>
+                <div className="text-xs text-green-600 mt-1">
+                  ${Math.round(totalRevenue / businesses.length / 1000)}K avg per business
+                </div>
               </div>
               <DollarSign className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Monthly Savings</p>
-                <p className="text-2xl font-bold">${totalSavings}</p>
-                <p className="text-xs text-green-600 mt-1">${totalSavings * 12}/year saved</p>
+                <p className="text-sm text-orange-700 font-medium">Progressive Savings</p>
+                <p className="text-2xl font-bold text-orange-900">${totalSavings}</p>
+                <p className="text-xs text-orange-600 mt-1">${totalSavings * 12}/year saved</p>
+                <div className="text-xs text-orange-600 mt-1">
+                  {Math.round((totalSavings * 12) / totalRevenue * 100)}% cost reduction
+                </div>
               </div>
               <TrendingUp className="h-8 w-8 text-orange-600" />
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Team</p>
-                <p className="text-2xl font-bold">{totalUsers}</p>
-                <p className="text-xs text-gray-500 mt-1">Active users</p>
+                <p className="text-sm text-purple-700 font-medium">Unified Team</p>
+                <p className="text-2xl font-bold text-purple-900">{totalUsers}</p>
+                <p className="text-xs text-purple-600 mt-1">Active across portfolio</p>
+                <div className="text-xs text-purple-600 mt-1">
+                  {Math.round(totalUsers / businesses.length)} avg per business
+                </div>
               </div>
               <Users className="h-8 w-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-r from-indigo-50 to-indigo-100 border-indigo-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Next Business</p>
-                <p className="text-2xl font-bold text-green-600">50% off</p>
-                <p className="text-xs text-gray-500 mt-1">Progressive discount</p>
+                <p className="text-sm text-indigo-700 font-medium">Next Business</p>
+                <p className="text-2xl font-bold text-indigo-900">{businesses.length >= 4 ? '50%' : '45%'} off</p>
+                <p className="text-xs text-indigo-600 mt-1">Progressive discount</p>
+                <div className="text-xs text-indigo-600 mt-1">
+                  Add business #{businesses.length + 1}
+                </div>
               </div>
-              <ChartBar className="h-8 w-8 text-gray-600" />
+              <ChartBar className="h-8 w-8 text-indigo-600" />
             </div>
           </CardContent>
         </Card>
@@ -272,6 +288,77 @@ export function MultiBusinessCommandCenter() {
                   </div>
                 </motion.div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+      
+      {/* Cross-Business Opportunities Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="mt-8 grid lg:grid-cols-2 gap-6"
+      >
+        <Card className="bg-gradient-to-r from-cyan-50 to-cyan-100 border-cyan-200">
+          <CardHeader>
+            <CardTitle className="text-cyan-900">Cross-Business Opportunities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="p-3 bg-white/70 rounded-lg">
+                <h4 className="font-medium text-cyan-900 mb-1">Resource Sharing</h4>
+                <p className="text-sm text-cyan-700">Valley Maintenance can share 2 technicians with Phoenix HVAC during peak season</p>
+                <div className="text-xs text-cyan-600 mt-1">Potential: $8,500/month savings</div>
+              </div>
+              <div className="p-3 bg-white/70 rounded-lg">
+                <h4 className="font-medium text-cyan-900 mb-1">Cross-Selling Opportunity</h4>
+                <p className="text-sm text-cyan-700">15 Phoenix HVAC customers need maintenance services</p>
+                <div className="text-xs text-cyan-600 mt-1">Potential: $12,000/month revenue</div>
+              </div>
+              <div className="p-3 bg-white/70 rounded-lg">
+                <h4 className="font-medium text-cyan-900 mb-1">Bulk Purchasing</h4>
+                <p className="text-sm text-cyan-700">Combine HVAC parts orders for 25% discount</p>
+                <div className="text-xs text-cyan-600 mt-1">Potential: $3,200/month savings</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200">
+          <CardHeader>
+            <CardTitle className="text-amber-900">Consolidated KPIs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-amber-700">Portfolio Efficiency Score</span>
+                <div className="text-right">
+                  <span className="text-lg font-bold text-amber-900">87%</span>
+                  <div className="text-xs text-green-600">+5% vs last month</div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-amber-700">Customer Satisfaction</span>
+                <div className="text-right">
+                  <span className="text-lg font-bold text-amber-900">4.7/5</span>
+                  <div className="text-xs text-green-600">+0.2 vs individual</div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-amber-700">Resource Utilization</span>
+                <div className="text-right">
+                  <span className="text-lg font-bold text-amber-900">94%</span>
+                  <div className="text-xs text-green-600">+12% improvement</div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-amber-700">Cross-Business Revenue</span>
+                <div className="text-right">
+                  <span className="text-lg font-bold text-amber-900">$24K</span>
+                  <div className="text-xs text-green-600">18% of portfolio</div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
