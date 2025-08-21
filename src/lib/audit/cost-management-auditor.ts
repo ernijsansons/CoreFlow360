@@ -351,8 +351,8 @@ class CostManagementAuditor {
   private async simulatePricingTiers(_tenantId: string): Promise<PricingOptimization[]> {
     return [
       {
-        currentTier: 'Neural',
-        recommendedTier: 'Synaptic',
+        currentTier: 'INTELLIGENT',
+        recommendedTier: 'INTELLIGENT',
         monthlyImpact: 2500,
         yearlyImpact: 30000,
         churnRisk: 0.12,
@@ -360,7 +360,7 @@ class CostManagementAuditor {
       },
       {
         currentTier: 'Autonomous',
-        recommendedTier: 'Transcendent',
+        recommendedTier: 'ADVANCED',
         monthlyImpact: 5000,
         yearlyImpact: 60000,
         churnRisk: 0.25,

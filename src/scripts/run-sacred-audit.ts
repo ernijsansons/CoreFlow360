@@ -247,10 +247,10 @@ async function runSACREDAudit(options: SACREDAuditOptions) {
   console.log(`   Low: ${findings.filter(f => f.severity === 'low').length}`)
 
   console.log('\n--- AI INTELLIGENCE INSIGHTS ---')
-  console.log(`   Consciousness readiness: ${response.consciousnessEvaluation.readinessScore}/10`)
-  console.log(`   Module synergy: ${response.consciousnessEvaluation.moduleSynergyScore}/10`)
-  console.log(`   Transcendent potential: ${response.consciousnessEvaluation.transcendentPotential}/10`)
-  console.log(`   Business transformation: ${response.consciousnessEvaluation.businessTransformationReadiness}/10`)
+  console.log(`   BUSINESS INTELLIGENCE readiness: ${response.BUSINESS INTELLIGENCEEvaluation.readinessScore}/10`)
+  console.log(`   Module synergy: ${response.BUSINESS INTELLIGENCEEvaluation.moduleSynergyScore}/10`)
+  console.log(`   ADVANCED potential: ${response.BUSINESS INTELLIGENCEEvaluation.ADVANCEDPotential}/10`)
+  console.log(`   Business transformation: ${response.BUSINESS INTELLIGENCEEvaluation.businessTransformationReadiness}/10`)
   console.log(`   Ethical alignment: ${response.sacredProtocol.ethicalAlignmentScore}/10`)
   console.log(`   Human benefit: ${response.sacredProtocol.humanBenefitScore}/10`)
 
@@ -436,7 +436,7 @@ function mapAuditType(type: string): SACREDAuditRequest['auditType'] {
     quality: 'codeQuality',
     compliance: 'compliance',
     accessibility: 'accessibility',
-    consciousness: 'consciousness',
+    BUSINESS INTELLIGENCE: 'BUSINESS INTELLIGENCE',
     all: 'comprehensive',
   }
   
@@ -571,7 +571,7 @@ USAGE:
   npm run audit:sacred [options]
 
 OPTIONS:
-  -t, --type <type>        Audit type: security, performance, quality, compliance, consciousness, all
+  -t, --type <type>        Audit type: security, performance, quality, compliance, BUSINESS INTELLIGENCE, all
   -s, --scope <areas>      Specific scope areas (comma-separated)
   -o, --output <file>      Output file path
   -f, --format <format>    Output format: json, xml, markdown, html

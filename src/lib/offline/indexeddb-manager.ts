@@ -1,17 +1,17 @@
 /**
  * CoreFlow360 - IndexedDB Offline Storage Manager
- * Robust offline-first data persistence with consciousness awareness
+ * Robust offline-first data persistence with BUSINESS INTELLIGENCE awareness
  */
 
 export interface OfflineRecord {
   id: string
-  type: 'customer' | 'deal' | 'insight' | 'voice_note' | 'consciousness_event'
+  type: 'customer' | 'deal' | 'insight' | 'voice_note' | 'business_intelligence_event'
   data: unknown
   timestamp: number
   lastModified: number
   syncStatus: 'pending' | 'synced' | 'conflict' | 'failed'
   retryCount: number
-  consciousness_level?: 'neural' | 'synaptic' | 'autonomous' | 'transcendent'
+  businessIntelligenceLevel?: 'starter' | 'synaptic' | 'autonomous' | 'transcendent'
 }
 
 export interface OfflineAction {
@@ -42,7 +42,7 @@ export interface SyncConflict {
 
 class IndexedDBManager {
   private db: IDBDatabase | null = null
-  private readonly dbName = 'CoreFlow360-Consciousness'
+  private readonly dbName = 'CoreFlow360-BusinessIntelligence'
   private readonly dbVersion = 3
   private initPromise: Promise<void> | null = null
 
@@ -51,7 +51,7 @@ class IndexedDBManager {
     records: 'offline_records',
     actions: 'offline_actions',
     conflicts: 'sync_conflicts',
-    insights: 'consciousness_insights',
+    insights: 'businessIntelligenceInsights',
     cache: 'api_cache',
     metrics: 'performance_metrics',
   }
@@ -95,7 +95,7 @@ class IndexedDBManager {
       recordsStore.createIndex('type', 'type', { unique: false })
       recordsStore.createIndex('syncStatus', 'syncStatus', { unique: false })
       recordsStore.createIndex('timestamp', 'timestamp', { unique: false })
-      recordsStore.createIndex('consciousness_level', 'consciousness_level', { unique: false })
+      recordsStore.createIndex('businessIntelligenceLevel', 'businessIntelligenceLevel', { unique: false })
     }
 
     // Offline Actions Store
@@ -114,7 +114,7 @@ class IndexedDBManager {
       conflictsStore.createIndex('timestamp', 'timestamp', { unique: false })
     }
 
-    // Consciousness Insights Store
+    // Business Intelligence Insights Store
     if (!db.objectStoreNames.contains(this.stores.insights)) {
       const insightsStore = db.createObjectStore(this.stores.insights, { keyPath: 'id' })
       insightsStore.createIndex('category', 'category', { unique: false })
@@ -452,8 +452,8 @@ class IndexedDBManager {
     })
   }
 
-  // Consciousness-specific methods
-  async saveConsciousnessInsight(insight: {
+  // Business Intelligence-specific methods
+  async saveBusinessIntelligenceInsight(insight: {
     category: string
     confidence: number
     data: unknown
@@ -482,7 +482,7 @@ class IndexedDBManager {
     })
   }
 
-  async getConsciousnessInsights(category?: string): Promise<unknown[]> {
+  async getBusinessIntelligenceInsights(category?: string): Promise<unknown[]> {
     await this.init()
     return new Promise((resolve, reject) => {
       if (!this.db) {
@@ -577,6 +577,6 @@ export function createOfflineAction(
   }
 }
 
-export function isConsciousnessEntity(type: string): boolean {
-  return ['consciousness_event', 'insight', 'voice_note'].includes(type)
+export function isBusinessIntelligenceEntity(type: string): boolean {
+  return ['businessIntelligenceEvent', 'insight', 'voice_note'].includes(type)
 }

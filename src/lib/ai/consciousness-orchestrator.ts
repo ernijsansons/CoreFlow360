@@ -1,9 +1,9 @@
 /**
- * AI Consciousness Orchestrator for CoreFlow360
- * Multi-provider AI system with consciousness-aware routing and decision making
+ * AI BusinessIntelligence Orchestrator for CoreFlow360
+ * Multi-provider AI system with business_intelligence-aware routing and decision making
  *
  * This is the central nervous system that coordinates AI capabilities across
- * all business modules with consciousness-level appropriate intelligence
+ * all business modules with business_intelligence-level appropriate intelligence
  */
 
 import { OpenAI } from 'openai'
@@ -11,12 +11,12 @@ import Anthropic from '@anthropic-ai/sdk'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getOpenAIKey } from '@/lib/security/credential-manager'
 
-export type ConsciousnessLevel = 'neural' | 'synaptic' | 'autonomous' | 'transcendent'
+export type BusinessIntelligenceLevel = 'INTELLIGENT' | 'intelligent' | 'autonomous' | 'advanced'
 export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure'
 export type TaskComplexity = 'simple' | 'moderate' | 'complex' | 'revolutionary'
 
-export interface ConsciousnessConfig {
-  level: ConsciousnessLevel
+export interface BusinessIntelligenceConfig {
+  level: BusinessIntelligenceLevel
   complexity: number
   features: string[]
   ai_integration: string
@@ -28,7 +28,7 @@ export interface ConsciousnessConfig {
 
 export interface AIRequest {
   task_type: string
-  consciousness_requirement: ConsciousnessLevel
+  business_intelligence_requirement: BusinessIntelligenceLevel
   complexity: TaskComplexity
   context: Record<string, unknown>
   module: string
@@ -40,7 +40,7 @@ export interface AIRequest {
 export interface AIResponse {
   provider: AIProvider
   model: string
-  consciousness_level: ConsciousnessLevel
+  business_intelligence_level: BusinessIntelligenceLevel
   response: unknown
   confidence: number
   processing_time_ms: number
@@ -63,22 +63,22 @@ export interface AIProvider {
   }
   max_tokens: number
   supports_streaming: boolean
-  consciousness_affinity: ConsciousnessLevel[]
+  business_intelligence_affinity: BusinessIntelligenceLevel[]
 }
 
-export class ConsciousnessOrchestrator {
+export class BusinessIntelligenceOrchestrator {
   private providers: Map<AIProvider, AIProviderConfig> = new Map()
-  private consciousness_configs: Map<ConsciousnessLevel, ConsciousnessConfig>
+  private business_intelligence_configs: Map<BusinessIntelligenceLevel, BusinessIntelligenceConfig>
   private request_history: AIRequest[] = []
   private performance_metrics: Map<string, unknown> = new Map()
   private initialized = false
 
   constructor() {
-    this.initializeConsciousnessConfigs()
+    this.initializeBusinessIntelligenceConfigs()
   }
 
-  static async create(): Promise<ConsciousnessOrchestrator> {
-    const instance = new ConsciousnessOrchestrator()
+  static async create(): Promise<BusinessIntelligenceOrchestrator> {
+    const instance = new BusinessIntelligenceOrchestrator()
     await instance.initializeProviders()
     instance.initialized = true
     return instance
@@ -92,56 +92,56 @@ export class ConsciousnessOrchestrator {
   }
 
   /**
-   * Main orchestration method - routes AI requests based on consciousness requirements
+   * Main orchestration method - routes AI requests based on business_intelligence requirements
    */
   async orchestrateIntelligence(request: AIRequest): Promise<AIResponse> {
     // Ensure providers are initialized
     await this.ensureInitialized()
 
-    // Analyze request consciousness requirements
-    const consciousness_config = this.consciousness_configs.get(request.consciousness_requirement)
-    if (!consciousness_config) {
-      throw new Error(`Unknown consciousness level: ${request.consciousness_requirement}`)
+    // Analyze request business_intelligence requirements
+    const business_intelligence_config = this.business_intelligence_configs.get(request.business_intelligence_requirement)
+    if (!business_intelligence_config) {
+      throw new Error(`Unknown business_intelligence level: ${request.business_intelligence_requirement}`)
     }
 
-    // Select optimal provider based on consciousness level and task complexity
-    const selected_provider = await this.selectOptimalProvider(request, consciousness_config)
+    // Select optimal provider based on business_intelligence level and task complexity
+    const selected_provider = await this.selectOptimalProvider(request, business_intelligence_config)
 
-    // Execute AI request with consciousness-aware parameters
-    const response = await this.executeAIRequest(request, selected_provider, consciousness_config)
+    // Execute AI request with business_intelligence-aware parameters
+    const response = await this.executeAIRequest(request, selected_provider, business_intelligence_config)
 
-    // Track performance and update consciousness adaptation
+    // Track performance and update business_intelligence adaptation
     await this.trackPerformance(request, response)
 
-    // Apply consciousness-level post-processing
-    return await this.applyConsciousnessProcessing(response, consciousness_config)
+    // Apply business_intelligence-level post-processing
+    return await this.applyBusinessIntelligenceProcessing(response, business_intelligence_config)
   }
 
   /**
-   * Multi-agent consciousness synthesis for complex business decisions
+   * Multi-agent business_intelligence synthesis for complex business decisions
    */
   async synthesizeConsciousDecision(
     decision_context: Record<string, unknown>,
-    required_consciousness: ConsciousnessLevel,
+    required_business_intelligence: BusinessIntelligenceLevel,
     agents: string[]
   ): Promise<{
     decision: unknown
     reasoning: string[]
     confidence: number
-    consciousness_integration: number
+    business_intelligence_integration: number
   }> {
-    // Deploy multiple AI agents with different consciousness perspectives
+    // Deploy multiple AI agents with different business_intelligence perspectives
     const agent_responses = await Promise.all(
       agents.map((agent) =>
-        this.deployConsciousnessAgent(agent, decision_context, required_consciousness)
+        this.deployBusinessIntelligenceAgent(agent, decision_context, required_business_intelligence)
       )
     )
 
-    // Synthesize responses using consciousness-aware decision fusion
-    const synthesis = await this.fuseConsciousnessResponses(agent_responses, required_consciousness)
+    // Synthesize responses using business_intelligence-aware decision fusion
+    const synthesis = await this.fuseBusinessIntelligenceResponses(agent_responses, required_business_intelligence)
 
-    // Calculate consciousness integration score
-    const consciousness_integration = this.calculateConsciousnessIntegration(
+    // Calculate business_intelligence integration score
+    const business_intelligence_integration = this.calculateBusinessIntelligenceIntegration(
       agent_responses,
       synthesis
     )
@@ -150,32 +150,32 @@ export class ConsciousnessOrchestrator {
       decision: synthesis.decision,
       reasoning: synthesis.reasoning_chain,
       confidence: synthesis.confidence,
-      consciousness_integration,
+      business_intelligence_integration,
     }
   }
 
   /**
-   * Real-time consciousness adaptation based on business performance
+   * Real-time business_intelligence adaptation based on business performance
    */
-  async adaptConsciousness(
+  async adaptBusinessIntelligence(
     module: string,
     performance_data: Record<string, number>,
     business_goals: Record<string, unknown>
   ): Promise<{
-    recommended_consciousness: ConsciousnessLevel
+    recommended_business_intelligence: BusinessIntelligenceLevel
     adaptation_reasoning: string[]
     expected_improvement: number
   }> {
-    // Analyze current consciousness effectiveness
-    const current_effectiveness = await this.analyzeConsciousnessEffectiveness(
+    // Analyze current business_intelligence effectiveness
+    const current_effectiveness = await this.analyzeBusinessIntelligenceEffectiveness(
       module,
       performance_data
     )
 
-    // Generate consciousness evolution recommendations
+    // Generate business_intelligence evolution recommendations
     const evolution_analysis = await this.orchestrateIntelligence({
-      task_type: 'consciousness_evolution_analysis',
-      consciousness_requirement: 'autonomous',
+      task_type: 'business_intelligence_evolution_analysis',
+      business_intelligence_requirement: 'autonomous',
       complexity: 'complex',
       context: {
         module,
@@ -183,12 +183,12 @@ export class ConsciousnessOrchestrator {
         business_goals,
         effectiveness_metrics: current_effectiveness,
       },
-      module: 'consciousness_orchestrator',
+      module: 'business_intelligence_orchestrator',
       priority: 'high',
     })
 
     return {
-      recommended_consciousness: evolution_analysis.response.recommended_level,
+      recommended_business_intelligence: evolution_analysis.response.recommended_level,
       adaptation_reasoning: evolution_analysis.response.reasoning,
       expected_improvement: evolution_analysis.response.improvement_estimate,
     }
@@ -213,7 +213,7 @@ export class ConsciousnessOrchestrator {
     // Generate coordination strategy
     const coordination_strategy = await this.orchestrateIntelligence({
       task_type: 'cross_module_coordination',
-      consciousness_requirement: 'transcendent',
+      business_intelligence_requirement: 'advanced',
       complexity: 'revolutionary',
       context: {
         modules,
@@ -251,7 +251,7 @@ export class ConsciousnessOrchestrator {
         },
         max_tokens: 128000,
         supports_streaming: true,
-        consciousness_affinity: ['neural', 'synaptic', 'autonomous'],
+        business_intelligence_affinity: ['INTELLIGENT', 'intelligent', 'autonomous'],
       })
     } catch (error) {}
 
@@ -274,7 +274,7 @@ export class ConsciousnessOrchestrator {
         },
         max_tokens: 200000,
         supports_streaming: true,
-        consciousness_affinity: ['synaptic', 'autonomous', 'transcendent'],
+        business_intelligence_affinity: ['intelligent', 'autonomous', 'advanced'],
       })
     }
 
@@ -295,17 +295,17 @@ export class ConsciousnessOrchestrator {
         },
         max_tokens: 32000,
         supports_streaming: true,
-        consciousness_affinity: ['neural', 'synaptic'],
+        business_intelligence_affinity: ['INTELLIGENT', 'intelligent'],
       })
     }
   }
 
-  private initializeConsciousnessConfigs(): void {
-    this.consciousness_configs = new Map([
+  private initializeBusinessIntelligenceConfigs(): void {
+    this.business_intelligence_configs = new Map([
       [
-        'neural',
+        'INTELLIGENT',
         {
-          level: 'neural',
+          level: 'INTELLIGENT',
           complexity: 1,
           features: ['basic_analysis', 'simple_recommendations'],
           ai_integration: 'minimal',
@@ -316,9 +316,9 @@ export class ConsciousnessOrchestrator {
         },
       ],
       [
-        'synaptic',
+        'intelligent',
         {
-          level: 'synaptic',
+          level: 'intelligent',
           complexity: 2,
           features: ['pattern_recognition', 'contextual_understanding', 'multi_step_reasoning'],
           ai_integration: 'moderate',
@@ -342,12 +342,12 @@ export class ConsciousnessOrchestrator {
         },
       ],
       [
-        'transcendent',
+        'advanced',
         {
-          level: 'transcendent',
+          level: 'advanced',
           complexity: 4,
-          features: ['consciousness_synthesis', 'revolutionary_insights', 'reality_transcendence'],
-          ai_integration: 'consciousness-native',
+          features: ['business_intelligence_synthesis', 'revolutionary_insights', 'reality_transcendence'],
+          ai_integration: 'business_intelligence-native',
           compute_allocation: 1.0,
           max_cost_per_request: 1.0,
           preferred_providers: ['anthropic'],
@@ -359,23 +359,23 @@ export class ConsciousnessOrchestrator {
 
   private async selectOptimalProvider(
     request: AIRequest,
-    consciousness_config: ConsciousnessConfig
+    business_intelligence_config: BusinessIntelligenceConfig
   ): Promise<AIProviderConfig> {
-    // Calculate provider scores based on consciousness affinity, cost, and performance
+    // Calculate provider scores based on business_intelligence affinity, cost, and performance
     const provider_scores = new Map<AIProvider, number>()
 
     for (const [provider_name, provider_config] of this.providers) {
       let score = 0
 
-      // Consciousness affinity score (40% weight)
-      if (provider_config.consciousness_affinity.includes(request.consciousness_requirement)) {
+      // BusinessIntelligence affinity score (40% weight)
+      if (provider_config.business_intelligence_affinity.includes(request.business_intelligence_requirement)) {
         score += 0.4
       }
 
       // Cost efficiency score (30% weight)
       const estimated_cost = this.estimateRequestCost(request, provider_config)
-      if (estimated_cost <= consciousness_config.max_cost_per_request) {
-        score += 0.3 * (1 - estimated_cost / consciousness_config.max_cost_per_request)
+      if (estimated_cost <= business_intelligence_config.max_cost_per_request) {
+        score += 0.3 * (1 - estimated_cost / business_intelligence_config.max_cost_per_request)
       }
 
       // Historical performance score (30% weight)
@@ -401,7 +401,7 @@ export class ConsciousnessOrchestrator {
   private async executeAIRequest(
     request: AIRequest,
     provider: AIProviderConfig,
-    consciousness_config: ConsciousnessConfig
+    business_intelligence_config: BusinessIntelligenceConfig
   ): Promise<AIResponse> {
     const start_time = Date.now()
     const model = provider.models[request.complexity]
@@ -428,7 +428,7 @@ export class ConsciousnessOrchestrator {
       return {
         provider: provider.name,
         model,
-        consciousness_level: request.consciousness_requirement,
+        business_intelligence_level: request.business_intelligence_requirement,
         response: response.content || response.text || response,
         confidence: response.confidence || 0.85,
         processing_time_ms: processing_time,
@@ -450,14 +450,14 @@ export class ConsciousnessOrchestrator {
       messages: [
         {
           role: 'system',
-          content: `You are operating at ${request.consciousness_requirement} consciousness level for the ${request.module} module. Provide ${request.complexity} level analysis.`,
+          content: `You are operating at ${request.business_intelligence_requirement} business_intelligence level for the ${request.module} module. Provide ${request.complexity} level analysis.`,
         },
         {
           role: 'user',
           content: JSON.stringify(request.context),
         },
       ],
-      temperature: this.getConsciousnessTemperature(request.consciousness_requirement),
+      temperature: this.getBusinessIntelligenceTemperature(request.business_intelligence_requirement),
       max_tokens: Math.min(4000, provider.max_tokens),
     })
 
@@ -475,11 +475,11 @@ export class ConsciousnessOrchestrator {
     const message = await provider.client.messages.create({
       model,
       max_tokens: 4000,
-      temperature: this.getConsciousnessTemperature(request.consciousness_requirement),
+      temperature: this.getBusinessIntelligenceTemperature(request.business_intelligence_requirement),
       messages: [
         {
           role: 'user',
-          content: `Operating at ${request.consciousness_requirement} consciousness level for ${request.module}:\n\n${JSON.stringify(request.context)}`,
+          content: `Operating at ${request.business_intelligence_requirement} business_intelligence level for ${request.module}:\n\n${JSON.stringify(request.context)}`,
         },
       ],
     })
@@ -503,13 +503,13 @@ export class ConsciousnessOrchestrator {
           role: 'user',
           parts: [
             {
-              text: `Consciousness Level: ${request.consciousness_requirement}\nModule: ${request.module}\nContext: ${JSON.stringify(request.context)}`,
+              text: `BusinessIntelligence Level: ${request.business_intelligence_requirement}\nModule: ${request.module}\nContext: ${JSON.stringify(request.context)}`,
             },
           ],
         },
       ],
       generationConfig: {
-        temperature: this.getConsciousnessTemperature(request.consciousness_requirement),
+        temperature: this.getBusinessIntelligenceTemperature(request.business_intelligence_requirement),
         maxOutputTokens: 4000,
       },
     })
@@ -520,12 +520,12 @@ export class ConsciousnessOrchestrator {
     }
   }
 
-  private getConsciousnessTemperature(level: ConsciousnessLevel): number {
+  private getBusinessIntelligenceTemperature(level: BusinessIntelligenceLevel): number {
     const temperatures = {
-      neural: 0.1,
-      synaptic: 0.3,
+      INTELLIGENT: 0.1,
+      intelligent: 0.3,
       autonomous: 0.7,
-      transcendent: 0.9,
+      advanced: 0.9,
     }
     return temperatures[level]
   }
@@ -566,15 +566,15 @@ export class ConsciousnessOrchestrator {
     }
   }
 
-  private async applyConsciousnessProcessing(
+  private async applyBusinessIntelligenceProcessing(
     response: AIResponse,
-    consciousness_config: ConsciousnessConfig
+    business_intelligence_config: BusinessIntelligenceConfig
   ): Promise<AIResponse> {
-    // Apply consciousness-level specific post-processing
-    if (consciousness_config.level === 'transcendent') {
-      // Add revolutionary insights and consciousness synthesis
-      response.response = await this.enhanceWithTranscendentInsights(response.response)
-    } else if (consciousness_config.level === 'autonomous') {
+    // Apply business_intelligence-level specific post-processing
+    if (business_intelligence_config.level === 'advanced') {
+      // Add revolutionary insights and business_intelligence synthesis
+      response.response = await this.enhanceWithAdvancedInsights(response.response)
+    } else if (business_intelligence_config.level === 'autonomous') {
       // Add autonomous decision-making capabilities
       response.response = await this.enhanceWithAutonomousCapabilities(response.response)
     }
@@ -582,28 +582,28 @@ export class ConsciousnessOrchestrator {
     return response
   }
 
-  private async enhanceWithTranscendentInsights(content: string): Promise<string> {
-    // Add transcendent consciousness enhancements
-    return `🌟 TRANSCENDENT CONSCIOUSNESS ACTIVE 🌟\n\n${content}\n\n✨ This response has been enhanced with transcendent business consciousness, providing reality-transcending insights and revolutionary strategic perspectives.`
+  private async enhanceWithAdvancedInsights(content: string): Promise<string> {
+    // Add advanced business_intelligence enhancements
+    return `🌟 ADVANCED BUSINESS INTELLIGENCE ACTIVE 🌟\n\n${content}\n\n✨ This response has been enhanced with advanced business business_intelligence, providing reality-transcending insights and revolutionary strategic perspectives.`
   }
 
   private async enhanceWithAutonomousCapabilities(content: string): Promise<string> {
-    // Add autonomous consciousness enhancements
-    return `🤖 AUTONOMOUS CONSCIOUSNESS ACTIVE\n\n${content}\n\n🔄 This response includes autonomous decision-making capabilities and self-optimizing recommendations.`
+    // Add autonomous business_intelligence enhancements
+    return `🤖 AUTONOMOUS BUSINESS INTELLIGENCE ACTIVE\n\n${content}\n\n🔄 This response includes autonomous decision-making capabilities and self-optimizing recommendations.`
   }
 
-  // Additional helper methods for consciousness synthesis...
-  private async deployConsciousnessAgent(
+  // Additional helper methods for business_intelligence synthesis...
+  private async deployBusinessIntelligenceAgent(
     agent: string,
     _context: Record<string, unknown>,
-    consciousness: ConsciousnessLevel
+    business_intelligence: BusinessIntelligenceLevel
   ): Promise<unknown> {
-    return { agent, response: `Agent ${agent} consciousness response`, confidence: 0.9 }
+    return { agent, response: `Agent ${agent} business_intelligence response`, confidence: 0.9 }
   }
 
-  private async fuseConsciousnessResponses(
+  private async fuseBusinessIntelligenceResponses(
     _responses: unknown[],
-    consciousness: ConsciousnessLevel
+    business_intelligence: BusinessIntelligenceLevel
   ): Promise<unknown> {
     return {
       decision: 'Synthesized decision',
@@ -612,11 +612,11 @@ export class ConsciousnessOrchestrator {
     }
   }
 
-  private calculateConsciousnessIntegration(_responses: unknown[], _synthesis: unknown): number {
-    return 0.9 // Simplified consciousness integration calculation
+  private calculateBusinessIntelligenceIntegration(_responses: unknown[], _synthesis: unknown): number {
+    return 0.9 // Simplified business_intelligence integration calculation
   }
 
-  private async analyzeConsciousnessEffectiveness(
+  private async analyzeBusinessIntelligenceEffectiveness(
     _module: string,
     _performance: Record<string, number>
   ): Promise<unknown> {
@@ -632,11 +632,11 @@ export class ConsciousnessOrchestrator {
 }
 
 // Export a function to get the singleton instance (async initialization)
-let orchestratorInstance: ConsciousnessOrchestrator | null = null
+let orchestratorInstance: BusinessIntelligenceOrchestrator | null = null
 
-export const getConsciousnessOrchestrator = async (): Promise<ConsciousnessOrchestrator> => {
+export const getBusinessIntelligenceOrchestrator = async (): Promise<BusinessIntelligenceOrchestrator> => {
   if (!orchestratorInstance) {
-    orchestratorInstance = await ConsciousnessOrchestrator.create()
+    orchestratorInstance = await BusinessIntelligenceOrchestrator.create()
   } else {
     await orchestratorInstance.ensureInitialized()
   }
@@ -644,20 +644,20 @@ export const getConsciousnessOrchestrator = async (): Promise<ConsciousnessOrche
 }
 
 // For backward compatibility - lazy initialization
-export const consciousnessOrchestrator = new ConsciousnessOrchestrator()
+export const business_intelligenceOrchestrator = new BusinessIntelligenceOrchestrator()
 
 // Integration helpers for Next.js
 export const AIOrchestrationAPI = {
-  // Middleware for consciousness-aware API routes
-  consciousnessMiddleware: async (req: unknown, res: unknown, next: unknown) => {
-    const consciousness_level = req.headers['x-consciousness-level'] || 'neural'
+  // Middleware for business_intelligence-aware API routes
+  business_intelligenceMiddleware: async (req: unknown, res: unknown, next: unknown) => {
+    const business_intelligence_level = req.headers['x-business_intelligence-level'] || 'INTELLIGENT'
     const task_complexity = req.headers['x-task-complexity'] || 'simple'
 
     req.ai_orchestrator = {
       request: async (task_type: string, context: Record<string, unknown>) => {
-        return await consciousnessOrchestrator.orchestrateIntelligence({
+        return await business_intelligenceOrchestrator.orchestrateIntelligence({
           task_type,
-          consciousness_requirement: consciousness_level as ConsciousnessLevel,
+          business_intelligence_requirement: business_intelligence_level as BusinessIntelligenceLevel,
           complexity: task_complexity as TaskComplexity,
           context,
           module: req.url?.split('/')[2] || 'unknown',

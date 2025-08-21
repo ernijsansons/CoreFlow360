@@ -1,5 +1,5 @@
 /**
- * CoreFlow360 - Theme Context with Consciousness Awareness
+ * CoreFlow360 - Theme Context with BUSINESS INTELLIGENCE Awareness
  * Advanced theme management with user preferences and system detection
  */
 
@@ -8,12 +8,12 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
-export type ConsciousnessTheme = 'neural' | 'synaptic' | 'autonomous' | 'transcendent'
+export type BusinessIntelligenceTheme = 'starter' | 'synaptic' | 'autonomous' | 'transcendent'
 export type AccessibilityMode = 'standard' | 'high-contrast' | 'reduced-motion' | 'enhanced-focus'
 
 export interface ThemePreferences {
   mode: ThemeMode
-  consciousnessTheme: ConsciousnessTheme
+  BusinessIntelligenceTheme: BusinessIntelligenceTheme
   accessibilityMode: AccessibilityMode
   customColors?: {
     primary?: string
@@ -33,12 +33,12 @@ export interface ThemeState {
   preferences: ThemePreferences
   isSystemDark: boolean
   isLoading: boolean
-  consciousnessLevel: number // 0-100 based on subscription tier
+  businessIntelligenceLevel: number // 0-100 based on subscription tier
 }
 
 interface ThemeContextValue extends ThemeState {
   setThemeMode: (mode: ThemeMode) => void
-  setConsciousnessTheme: (theme: ConsciousnessTheme) => void
+  setBusinessIntelligenceTheme: (theme: BusinessIntelligenceTheme) => void
   setAccessibilityMode: (mode: AccessibilityMode) => void
   updatePreferences: (prefs: Partial<ThemePreferences>) => void
   resetToDefaults: () => void
@@ -48,7 +48,7 @@ interface ThemeContextValue extends ThemeState {
 
 const defaultPreferences: ThemePreferences = {
   mode: 'system',
-  consciousnessTheme: 'neural',
+  BusinessIntelligenceTheme: 'starter',
   accessibilityMode: 'standard',
   animations: true,
   autoThemeSwitch: false,
@@ -61,20 +61,20 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 interface ThemeProviderProps {
   children: ReactNode
   userId?: string
-  initialConsciousnessLevel?: number
+  initialBusinessIntelligenceLevel?: number
 }
 
 export function ThemeProvider({
   children,
   userId,
-  initialConsciousnessLevel = 0,
+  initialBusinessIntelligenceLevel = 0,
 }: ThemeProviderProps) {
   const [state, setState] = useState<ThemeState>({
     currentTheme: 'light',
     preferences: defaultPreferences,
     isSystemDark: false,
     isLoading: true,
-    consciousnessLevel: initialConsciousnessLevel,
+    businessIntelligenceLevel: initialBusinessIntelligenceLevel,
   })
 
   // System theme detection
@@ -229,12 +229,12 @@ export function ThemeProvider({
     root.className = root.className.replace(/\b(light|dark)\b/g, '')
     root.classList.add(state.currentTheme)
 
-    // Apply consciousness theme
+    // Apply BUSINESS INTELLIGENCE theme
     root.className = root.className.replace(
-      /\btheme-(neural|synaptic|autonomous|transcendent)\b/g,
+      /\btheme-(starter|synaptic|autonomous|transcendent)\b/g,
       ''
     )
-    root.classList.add(`theme-${state.preferences.consciousnessTheme}`)
+    root.classList.add(`theme-${state.preferences.BusinessIntelligenceTheme}`)
 
     // Apply accessibility mode
     root.className = root.className.replace(
@@ -245,7 +245,7 @@ export function ThemeProvider({
 
     // Apply custom CSS properties
     root.style.setProperty('--theme-mode', state.currentTheme)
-    root.style.setProperty('--consciousness-level', `${state.consciousnessLevel}%`)
+    root.style.setProperty('--business-intelligence-level', `${state.businessIntelligenceLevel}%`)
     root.style.setProperty('--contrast-ratio', state.preferences.contrastRatio.toString())
 
     if (state.preferences.customColors?.primary) {
@@ -266,7 +266,7 @@ export function ThemeProvider({
       root.style.removeProperty('--animation-duration')
       root.style.removeProperty('--transition-duration')
     }
-  }, [state.currentTheme, state.preferences, state.consciousnessLevel])
+  }, [state.currentTheme, state.preferences, state.businessIntelligenceLevel])
 
   const setThemeMode = async (mode: ThemeMode) => {
     const newPreferences = { ...state.preferences, mode }
@@ -281,8 +281,8 @@ export function ThemeProvider({
     await savePreferences(newPreferences)
   }
 
-  const setConsciousnessTheme = async (consciousnessTheme: ConsciousnessTheme) => {
-    const newPreferences = { ...state.preferences, consciousnessTheme }
+  const setBusinessIntelligenceTheme = async (BusinessIntelligenceTheme: BusinessIntelligenceTheme) => {
+    const newPreferences = { ...state.preferences, BusinessIntelligenceTheme }
 
     setState((prev) => ({
       ...prev,
@@ -330,7 +330,7 @@ export function ThemeProvider({
     return JSON.stringify(
       {
         preferences: state.preferences,
-        consciousnessLevel: state.consciousnessLevel,
+        businessIntelligenceLevel: state.businessIntelligenceLevel,
         version: '1.0',
         exported: new Date().toISOString(),
       },
@@ -344,8 +344,8 @@ export function ThemeProvider({
       const data = JSON.parse(themeData)
       if (data.preferences && data.version === '1.0') {
         updatePreferences(data.preferences)
-        if (data.consciousnessLevel) {
-          setState((prev) => ({ ...prev, consciousnessLevel: data.consciousnessLevel }))
+        if (data.businessIntelligenceLevel) {
+          setState((prev) => ({ ...prev, businessIntelligenceLevel: data.businessIntelligenceLevel }))
         }
         return true
       }
@@ -370,7 +370,7 @@ export function ThemeProvider({
   const value: ThemeContextValue = {
     ...state,
     setThemeMode,
-    setConsciousnessTheme,
+    setBusinessIntelligenceTheme,
     setAccessibilityMode,
     updatePreferences,
     resetToDefaults,
@@ -436,34 +436,34 @@ async function saveUserThemePreferences(
   }
 }
 
-// Hook for consciousness-aware theming
-export function useConsciousnessTheme() {
-  const { preferences, consciousnessLevel } = useTheme()
+// Hook for BUSINESS INTELLIGENCE-aware theming
+export function useBusinessIntelligenceTheme() {
+  const { preferences, businessIntelligenceLevel } = useTheme()
 
   const getThemeIntensity = () => {
     const baseIntensity = {
-      neural: 0.3,
+      starter: 0.3,
       synaptic: 0.5,
       autonomous: 0.7,
-      transcendent: 1.0,
+      ADVANCED: 1.0,
     }
 
-    return baseIntensity[preferences.consciousnessTheme] * (consciousnessLevel / 100)
+    return baseIntensity[preferences.BusinessIntelligenceTheme] * (businessIntelligenceLevel / 100)
   }
 
   const getAnimationComplexity = () => {
     if (!preferences.animations) return 'none'
-    if (consciousnessLevel < 25) return 'simple'
-    if (consciousnessLevel < 50) return 'medium'
-    if (consciousnessLevel < 75) return 'complex'
+    if (businessIntelligenceLevel < 25) return 'simple'
+    if (businessIntelligenceLevel < 50) return 'medium'
+    if (businessIntelligenceLevel < 75) return 'complex'
     return 'transcendent'
   }
 
   return {
-    theme: preferences.consciousnessTheme,
+    theme: preferences.BusinessIntelligenceTheme,
     intensity: getThemeIntensity(),
     animationComplexity: getAnimationComplexity(),
-    consciousnessLevel,
+    businessIntelligenceLevel,
   }
 }
 

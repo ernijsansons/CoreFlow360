@@ -26,52 +26,52 @@ export function CTASection() {
           {/* The Question That Changes Everything */}
           <div className="mb-12">
             <h2 className="mb-6 text-5xl leading-tight font-bold text-white md:text-6xl">
-              What's Your Time <span className="gradient-text-ai">Worth?</span>
+              Ready to Build Your <span className="gradient-text-ai">HVAC Empire?</span>
             </h2>
 
             <div className="mx-auto mb-12 grid max-w-4xl gap-8 md:grid-cols-2">
               {/* The Problem */}
               <div className="rounded-2xl border border-red-500/30 bg-red-950/30 p-8">
-                <div className="mb-4 text-xl font-bold text-red-400">Without AI</div>
+                <div className="mb-4 text-xl font-bold text-red-400">Single Location Mindset</div>
                 <div className="space-y-3 text-gray-300">
                   <div className="flex items-center">
                     <Clock className="mr-3 h-5 w-5 text-red-400" />
-                    <span>Work 60+ hour weeks</span>
+                    <span>Stuck managing one location</span>
                   </div>
                   <div className="flex items-center">
                     <DollarSign className="mr-3 h-5 w-5 text-red-400" />
-                    <span>Miss $40K+ opportunities monthly</span>
+                    <span>Can't expand without chaos</span>
                   </div>
                   <div className="flex items-center">
                     <TrendingUp className="mr-3 h-5 w-5 text-red-400" />
-                    <span>Competitors pull ahead daily</span>
+                    <span>Competitors buy you out</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="mr-3 h-5 w-5 text-red-400" />
-                    <span>Lose customers to mistakes</span>
+                    <span>Quality drops with growth</span>
                   </div>
                 </div>
               </div>
 
               {/* The Solution */}
               <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/30 p-8">
-                <div className="mb-4 text-xl font-bold text-emerald-400">With CoreFlow360</div>
+                <div className="mb-4 text-xl font-bold text-emerald-400">Empire Builder Platform</div>
                 <div className="space-y-3 text-gray-300">
                   <div className="flex items-center">
                     <Clock className="mr-3 h-5 w-5 text-emerald-400" />
-                    <span>Work when you want</span>
+                    <span>Manage 100+ locations easily</span>
                   </div>
                   <div className="flex items-center">
                     <DollarSign className="mr-3 h-5 w-5 text-emerald-400" />
-                    <span>AI finds money while you sleep</span>
+                    <span>Each location runs itself</span>
                   </div>
                   <div className="flex items-center">
                     <TrendingUp className="mr-3 h-5 w-5 text-emerald-400" />
-                    <span>Dominate your competition</span>
+                    <span>Dominate multiple markets</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="mr-3 h-5 w-5 text-emerald-400" />
-                    <span>Perfect customer experiences</span>
+                    <span>Consistent quality everywhere</span>
                   </div>
                 </div>
               </div>
@@ -83,12 +83,12 @@ export function CTASection() {
             <div className="mx-auto mb-8 max-w-3xl rounded-2xl border border-yellow-500/30 bg-yellow-950/20 p-6">
               <div className="mb-2 text-lg font-bold text-yellow-400">⚠️ Reality Check</div>
               <div className="text-lg text-white">
-                Every day you wait, your competitors get 47 AI decisions ahead of you.
+                Every month you wait, another HVAC contractor scales past you.
                 <br />
-                <span className="text-yellow-300">The question isn't IF you'll use AI.</span>
+                <span className="text-yellow-300">The market consolidation is happening NOW.</span>
                 <br />
                 <span className="font-semibold text-red-400">
-                  It's whether you'll be the disruptor or the disrupted.
+                  Will you be the acquirer or get acquired?
                 </span>
               </div>
             </div>
@@ -96,34 +96,34 @@ export function CTASection() {
 
           {/* The Transformation Promise */}
           <div className="mb-8 text-3xl leading-tight font-bold text-white md:text-4xl">
-            30 Days From Now, You'll Either Have a
+            90 Days From Now, You'll Either Own
             <br />
-            <span className="gradient-text-ai">Business That Runs Itself</span>
+            <span className="gradient-text-ai">Multiple Profitable Locations</span>
             <br />
-            Or You'll Still Be Its Prisoner
+            Or Still Be Stuck With Just One
           </div>
 
           {/* Social Proof */}
           <div className="mx-auto mb-12 max-w-2xl rounded-2xl border border-gray-700/50 bg-gray-900/40 p-6 backdrop-blur-sm">
             <div className="mb-2 font-semibold text-emerald-400">
-              Join 1,847 businesses already on autopilot:
+              Join 1,847 HVAC contractors building empires:
             </div>
             <div className="grid grid-cols-2 gap-4 text-center text-sm md:grid-cols-4">
               <div>
                 <div className="font-bold text-white">$247K</div>
-                <div className="text-gray-400">Sarah's AI found</div>
+                <div className="text-gray-400">Tom's 3rd location made</div>
               </div>
               <div>
                 <div className="font-bold text-white">78%</div>
-                <div className="text-gray-400">Time Rachel saved</div>
+                <div className="text-gray-400">Less time per location</div>
               </div>
               <div>
                 <div className="font-bold text-white">32%</div>
-                <div className="text-gray-400">Energy Dave cut</div>
+                <div className="text-gray-400">Mike's profit margin</div>
               </div>
               <div>
                 <div className="font-bold text-white">91%</div>
-                <div className="text-gray-400">Alex's accuracy</div>
+                <div className="text-gray-400">Service consistency</div>
               </div>
             </div>
           </div>
@@ -140,7 +140,7 @@ export function CTASection() {
                 size="xl"
                 className="px-12 py-4 text-xl"
               >
-                Start Making More Money
+                Start Your HVAC Empire
                 <DollarSign className="ml-2 h-6 w-6" />
               </GlowingButton>
             </div>
@@ -156,7 +156,7 @@ export function CTASection() {
                 variant="outline"
                 className="px-12 py-4 text-xl"
               >
-                Watch It Work First
+                See Multi-Location Demo
                 <TrendingUp className="ml-2 h-6 w-6" />
               </GlowingButton>
             </div>
@@ -166,12 +166,12 @@ export function CTASection() {
           <div className="text-sm text-gray-400">
             <div className="mb-2 font-semibold text-emerald-400">Your success is guaranteed:</div>
             <div>
-              30-day free trial • Find $10K value or we pay you $500 • Cancel with one click • Keep
-              your data forever
+              30-day free trial • Multi-location discounts • HVAC templates included • White-label
+              ready
             </div>
             <div className="mt-2 text-xs text-gray-500">
-              Your AI starts learning your business in 60 seconds. No credit card. No risk. No
-              excuses.
+              Add your first 3 locations in 60 seconds. Scale from there. No limits. No
+              complexity.
             </div>
           </div>
         </motion.div>

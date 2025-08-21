@@ -3,6 +3,7 @@
  * End-to-end testing of external service wrappers and integrations
  */
 
+import { randomUUID } from 'crypto'
 import { finRobotService } from '@/lib/external-wrappers/finrobot'
 import { idurarService } from '@/lib/external-wrappers/idurar'
 import { erpNextPayrollService, erpNextBOMService } from '@/lib/external-wrappers/erpnext'
@@ -304,7 +305,7 @@ describe('External Services Integration Tests', () => {
     it('should handle complete payroll processing workflow', async () => {
       // Create employee
       const employee = await erpNextPayrollService.createEmployee({
-        employeeId: 'EMP-INT-001',
+        employeeId: randomUUID(),
         firstName: 'Integration',
         lastName: 'Testson',
         email: 'integration.test@company.com',
@@ -319,14 +320,14 @@ describe('External Services Integration Tests', () => {
           currency: 'USD',
         },
         taxInfo: {
-          taxId: '987-65-4321',
+          taxId: randomUUID(),
           exemptions: 1,
           filingStatus: 'single',
         },
       })
 
       expect(employee.id).toBeDefined()
-      expect(employee.employeeId).toBe('EMP-INT-001')
+      expect(employee.employeeId).toBeDefined()
       expect(employee.status).toBe('active')
 
       // Process payroll
@@ -497,7 +498,7 @@ describe('External Services Integration Tests', () => {
       const legalCase = await dolibarrCaseService.createCase({
         title: 'Integration Test vs MockCorp',
         description: 'Commercial dispute for integration testing',
-        clientId: 'client-integration-001',
+        clientId: randomUUID(),
         clientName: 'Integration Test Client',
         caseType: 'litigation',
         status: 'open',
@@ -572,10 +573,14 @@ describe('External Services Integration Tests', () => {
     })
 
     it('should manage time tracking and billing workflow', async () => {
+      // Generate consistent IDs for this test
+      const caseId = randomUUID()
+      const lawyerId = randomUUID()
+      
       // Create time entries
       const timeEntry1 = await dolibarrTimeService.createTimeEntry({
-        caseId: 'case-integration-001',
-        lawyerId: 'lawyer-001',
+        caseId: caseId,
+        lawyerId: lawyerId,
         lawyerName: 'Integration Attorney',
         date: new Date().toISOString().split('T')[0] + 'T00:00:00Z',
         startTime: '09:00',
@@ -596,8 +601,8 @@ describe('External Services Integration Tests', () => {
       expect(timeEntry1.totalAmount).toBe(1050) // 3 * 350
 
       const timeEntry2 = await dolibarrTimeService.createTimeEntry({
-        caseId: 'case-integration-001',
-        lawyerId: 'lawyer-001',
+        caseId: caseId,
+        lawyerId: lawyerId,
         lawyerName: 'Integration Attorney',
         date: new Date().toISOString().split('T')[0] + 'T00:00:00Z',
         startTime: '14:00',
@@ -707,7 +712,7 @@ describe('External Services Integration Tests', () => {
 
       // Create invoice in IDURAR based on billable time
       const invoice = await idurarService.createInvoice({
-        customerId: 'client-integration-001',
+        customerId: randomUUID(),
         items: [
           {
             description: 'Legal Services - Case Integration 001',

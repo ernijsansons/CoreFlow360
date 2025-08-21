@@ -11,7 +11,7 @@ export interface AuditSchedule {
   frequency: 'hourly' | 'daily' | 'weekly' | 'monthly' | 'quarterly'
   cronExpression: string
   isActive: boolean
-  consciousnessLevel?: 'neural' | 'synaptic' | 'autonomous' | 'transcendent'
+  consciousnessLevel?: 'INTELLIGENT' | 'INTELLIGENT' | 'autonomous' | 'ADVANCED'
   triggerConditions: AuditTriggerCondition[]
   notificationSettings: NotificationSettings
   lastRun?: Date
@@ -252,7 +252,7 @@ class AutomatedAuditScheduler {
       case 'usage_spike':
         return await this.checkUsageSpike(condition, tenantId)
       case 'consciousness_evolution':
-        return await this.checkConsciousnessEvolution(condition, tenantId)
+        return await this.checkconsciousnessEvolution(condition, tenantId)
       default:
         return false
     }
@@ -285,12 +285,12 @@ class AutomatedAuditScheduler {
     return this.evaluateCondition(usageMetrics.spikeCount, condition.operator, condition.value)
   }
 
-  private async checkConsciousnessEvolution(
+  private async checkconsciousnessEvolution(
     condition: AuditTriggerCondition,
     tenantId: string
   ): Promise<boolean> {
     // Check consciousness evolution events
-    const evolutionEvents = await this.getConsciousnessEvolution(tenantId)
+    const evolutionEvents = await this.getconsciousnessEvolution(tenantId)
     return evolutionEvents.length > condition.value
   }
 
@@ -383,17 +383,17 @@ class AutomatedAuditScheduler {
 
       case 'consciousness':
         if (!consciousnessLevel) {
-          throw new Error('Consciousness level required for consciousness audit')
+          throw new Error('consciousness level required for consciousness audit')
         }
         const orchestrator = new ConsciousnessCostOrchestrator({
           level: consciousnessLevel as unknown,
           optimizationStrategy: 'balanced',
           autonomousDecisionThreshold: 0.8,
           intelligenceMultiplier: 1.5,
-          synapticConnections: ['CRM', 'ACCOUNTING', 'INVENTORY'],
-          transcendentCapabilities: ['post_human_optimization'],
+          INTELLIGENTConnections: ['CRM', 'ACCOUNTING', 'INVENTORY'],
+          ADVANCEDCapabilities: ['post_human_optimization'],
         })
-        return await orchestrator.executeConsciousnessCostAnalysis(tenantId)
+        return await orchestrator.executeconsciousnessCostAnalysis(tenantId)
 
       case 'predictive':
         const predictions = await predictiveCostEngine.generateCostPredictions(tenantId)
@@ -564,7 +564,7 @@ class AutomatedAuditScheduler {
     return { spikeCount: 0 }
   }
 
-  private async getConsciousnessEvolution(_tenantId: string): Promise<unknown[]> {
+  private async getconsciousnessEvolution(_tenantId: string): Promise<unknown[]> {
     // Mock implementation
     return []
   }

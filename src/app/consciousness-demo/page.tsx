@@ -4,13 +4,13 @@ import React, { useState } from 'react'
 import dynamic from 'next/dynamic'
 
 // Dynamic imports for performance
-const ConsciousnessAwakening = dynamic(
+const BusinessIntelligenceAwakening = dynamic(
   () => import('@/components/consciousness/awakening/ConsciousnessAwakeningSimple'),
   {
     ssr: false,
     loading: () => (
       <div className="flex min-h-screen items-center justify-center bg-black">
-        <div className="text-white">Loading consciousness experience...</div>
+        <div className="text-white">Loading business intelligence experience...</div>
       </div>
     ),
   }
@@ -34,7 +34,7 @@ export default function ConsciousnessDemoPage() {
   if (activeDemo === 'awakening') {
     return (
       <div className="relative">
-        <ConsciousnessAwakening />
+        <BusinessIntelligenceAwakening />
         <button
           onClick={() => setActiveDemo('menu')}
           className="absolute top-4 left-4 z-50 rounded-lg bg-white/10 px-4 py-2 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
@@ -62,34 +62,34 @@ export default function ConsciousnessDemoPage() {
   return (
     <main className="min-h-screen bg-black">
       <div className="flex min-h-screen flex-col items-center justify-center text-white">
-        <h1 className="from-consciousness-neural to-consciousness-synaptic mb-8 bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
-          Consciousness Components Demo
+        <h1 className="from-cyan-400 to-purple-400 mb-8 bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent">
+          Business Intelligence Components Demo
         </h1>
 
         <div className="mx-auto max-w-2xl space-y-8 px-4 text-center">
-          <div className="border-consciousness-synaptic/20 rounded-lg border bg-white/5 p-8 backdrop-blur-sm">
-            <h2 className="text-consciousness-neural mb-4 text-2xl font-semibold">
+          <div className="border-cyan-400/20 rounded-lg border bg-white/5 p-8 backdrop-blur-sm">
+            <h2 className="text-cyan-400 mb-4 text-2xl font-semibold">
               Components Ready!
             </h2>
             <p className="mb-4 text-gray-400">
-              Click on any component below to experience the consciousness evolution.
+              Click on any component below to experience the business intelligence evolution.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <button
               onClick={() => setActiveDemo('awakening')}
-              className="bg-consciousness-neural/10 border-consciousness-neural/30 animate-consciousness-pulse hover:bg-consciousness-neural/20 cursor-pointer rounded-lg border p-6 text-left transition-all"
+              className="bg-cyan-400/10 border-cyan-400/30 animate-pulse hover:bg-cyan-400/20 cursor-pointer rounded-lg border p-6 text-left transition-all"
             >
-              <h3 className="mb-2 text-lg font-medium">Consciousness Awakening</h3>
+              <h3 className="mb-2 text-lg font-medium">Business Intelligence Awakening</h3>
               <p className="text-sm text-gray-400">
-                Interactive 3D particle system - Move your mouse to awaken business consciousness
+                Interactive 3D particle system - Move your mouse to awaken business intelligence
               </p>
             </button>
 
             <button
               onClick={() => setActiveDemo('dashboard')}
-              className="bg-consciousness-synaptic/10 border-consciousness-synaptic/30 animate-consciousness-glow hover:bg-consciousness-synaptic/20 cursor-pointer rounded-lg border p-6 text-left transition-all"
+              className="bg-purple-400/10 border-purple-400/30 animate-bounce hover:bg-purple-400/20 cursor-pointer rounded-lg border p-6 text-left transition-all"
             >
               <h3 className="mb-2 text-lg font-medium">Quantum Dashboard</h3>
               <p className="text-sm text-gray-400">
@@ -97,12 +97,12 @@ export default function ConsciousnessDemoPage() {
               </p>
             </button>
 
-            <div className="bg-consciousness-autonomous/10 border-consciousness-autonomous/30 rounded-lg border p-6 opacity-50">
-              <h3 className="mb-2 text-lg font-medium">Neural Command Center</h3>
+            <div className="bg-green-400/10 border-green-400/30 rounded-lg border p-6 opacity-50">
+              <h3 className="mb-2 text-lg font-medium">Intelligent Command Center</h3>
               <p className="text-sm text-gray-400">Coming soon...</p>
             </div>
 
-            <div className="from-consciousness-neural/10 to-consciousness-synaptic/10 rounded-lg border border-white/20 bg-gradient-to-br p-6 opacity-50">
+            <div className="from-cyan-400/10 to-purple-400/10 rounded-lg border border-white/20 bg-gradient-to-br p-6 opacity-50">
               <h3 className="mb-2 text-lg font-medium">AI Genesis Tree</h3>
               <p className="text-sm text-gray-400">Coming soon...</p>
             </div>

@@ -49,7 +49,7 @@ const VERSIONED_ROUTES: VersionedRoute[] = [
     currentVersion: 'v2',
   },
   {
-    path: '/api/consciousness',
+    path: '/api/BUSINESS INTELLIGENCE',
     versions: [API_VERSIONS.v2],
     currentVersion: 'v2',
   },

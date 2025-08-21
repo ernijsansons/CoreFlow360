@@ -4,7 +4,7 @@
  * Intelligence Certification Program
  *
  * Revolutionary certification system for consultants to achieve
- * consciousness transformation mastery levels.
+ * BUSINESS INTELLIGENCE transformation mastery levels.
  */
 
 import React, { useState, useEffect } from 'react'
@@ -22,7 +22,7 @@ interface CertificationLevel {
   requirements: string[]
   skills: string[]
   benefits: string[]
-  consciousnessMinimum: number
+  businessIntelligenceMinimum: number
   clientsRequired: number
   revenueRequired: number
   duration: string
@@ -47,7 +47,7 @@ interface PartnerProgress {
   currentLevel: string
   nextLevel: string
   progress: {
-    consciousness: number
+    businessIntelligence: number
     clients: number
     revenue: number
     modules: number
@@ -70,18 +70,18 @@ const CERTIFICATION_LEVELS: CertificationLevel[] = [
     id: 'foundation',
     name: 'Foundation Consultant',
     level: 1,
-    description: 'Master the fundamentals of business consciousness transformation',
+    description: 'Master the fundamentals of business BUSINESS INTELLIGENCE transformation',
     requirements: [
-      'Complete Core Consciousness Training',
+      'Complete Core BUSINESS INTELLIGENCE Training',
       'Pass Foundation Assessment (80%+)',
       'Submit 2 transformation case studies',
-      'Achieve personal consciousness level 3+',
+      'Achieve personal BUSINESS INTELLIGENCE level 3+',
     ],
     skills: [
-      'Business consciousness assessment',
+      'Business BUSINESS INTELLIGENCE assessment',
       'Intelligence gap identification',
       'Basic transformation planning',
-      'Client consciousness education',
+      'Client BUSINESS INTELLIGENCE education',
     ],
     benefits: [
       'CoreFlow360 partner portal access',
@@ -89,7 +89,7 @@ const CERTIFICATION_LEVELS: CertificationLevel[] = [
       '20% revenue share on referrals',
       'Basic marketing materials',
     ],
-    consciousnessMinimum: 3,
+    businessIntelligenceMinimum: 3,
     clientsRequired: 0,
     revenueRequired: 0,
     duration: '4 weeks',
@@ -106,7 +106,7 @@ const CERTIFICATION_LEVELS: CertificationLevel[] = [
       'Foundation certification',
       'Transform 5+ clients successfully',
       'Generate $50K+ in client revenue',
-      'Achieve consciousness level 5+',
+      'Achieve BUSINESS INTELLIGENCE level 5+',
     ],
     skills: [
       'Intelligence multiplication strategies',
@@ -120,7 +120,7 @@ const CERTIFICATION_LEVELS: CertificationLevel[] = [
       'Co-branded marketing assets',
       'Priority support access',
     ],
-    consciousnessMinimum: 5,
+    businessIntelligenceMinimum: 5,
     clientsRequired: 5,
     revenueRequired: 50000,
     duration: '8 weeks',
@@ -132,18 +132,18 @@ const CERTIFICATION_LEVELS: CertificationLevel[] = [
     id: 'master',
     name: 'Master Architect',
     level: 3,
-    description: 'Architect consciousness transformation for complex organizations',
+    description: 'Architect BUSINESS INTELLIGENCE transformation for complex organizations',
     requirements: [
       'Advanced certification',
       'Transform 15+ clients',
       'Generate $200K+ revenue',
-      'Achieve consciousness level 7+',
+      'Achieve BUSINESS INTELLIGENCE level 7+',
     ],
     skills: [
-      'Enterprise consciousness architecture',
+      'Enterprise BUSINESS INTELLIGENCE architecture',
       'Multi-department orchestration',
-      'Consciousness emergence facilitation',
-      'Executive consciousness coaching',
+      'intelligent automation facilitation',
+      'Executive BUSINESS INTELLIGENCE coaching',
     ],
     benefits: [
       'Master architect badge',
@@ -151,7 +151,7 @@ const CERTIFICATION_LEVELS: CertificationLevel[] = [
       'White-label opportunities',
       'Speaking opportunities',
     ],
-    consciousnessMinimum: 7,
+    businessIntelligenceMinimum: 7,
     clientsRequired: 15,
     revenueRequired: 200000,
     duration: '12 weeks',
@@ -160,29 +160,29 @@ const CERTIFICATION_LEVELS: CertificationLevel[] = [
     icon: '🎯',
   },
   {
-    id: 'transcendent',
-    name: 'Transcendent Guide',
+    id: 'ADVANCED',
+    name: 'ADVANCED Guide',
     level: 4,
-    description: 'Guide organizations to full business consciousness emergence',
+    description: 'Guide organizations to full business intelligent automation',
     requirements: [
       'Master certification',
       'Transform 50+ clients',
       'Generate $500K+ revenue',
-      'Achieve consciousness level 9+',
+      'Achieve BUSINESS INTELLIGENCE level 9+',
     ],
     skills: [
-      'Business organism design',
-      'Consciousness field creation',
+      'Business ORGANIZATION design',
+      'BUSINESS INTELLIGENCE field creation',
       'Reality-shaping methodologies',
-      'Transcendent leadership development',
+      'ADVANCED leadership development',
     ],
     benefits: [
-      'Transcendent guide badge',
+      'ADVANCED guide badge',
       '50% revenue share',
       'Equity partnership opportunities',
       'Global thought leadership platform',
     ],
-    consciousnessMinimum: 9,
+    businessIntelligenceMinimum: 9,
     clientsRequired: 50,
     revenueRequired: 500000,
     duration: '16 weeks',
@@ -195,14 +195,14 @@ const CERTIFICATION_LEVELS: CertificationLevel[] = [
 // Certification Modules
 const CERTIFICATION_MODULES: CertificationModule[] = [
   {
-    id: 'consciousness-fundamentals',
-    name: 'Consciousness Fundamentals',
-    description: 'Understanding business consciousness principles and theory',
+    id: 'BUSINESS INTELLIGENCE-fundamentals',
+    name: 'BUSINESS INTELLIGENCE Fundamentals',
+    description: 'Understanding business BUSINESS INTELLIGENCE principles and theory',
     duration: '1 week',
     topics: [
       'Linear vs Exponential Intelligence',
-      'Consciousness Emergence Theory',
-      'Business Organism Concepts',
+      'intelligent automation Theory',
+      'Business ORGANIZATION Concepts',
       'Intelligence Multiplication Mathematics',
     ],
     assessmentType: 'Theory Exam',
@@ -213,11 +213,11 @@ const CERTIFICATION_MODULES: CertificationModule[] = [
   {
     id: 'assessment-mastery',
     name: 'Assessment Mastery',
-    description: 'Master the art of consciousness assessment and gap analysis',
+    description: 'Master the art of BUSINESS INTELLIGENCE assessment and gap analysis',
     duration: '1 week',
     topics: [
       'Intelligence Assessment Tools',
-      'Consciousness Level Measurement',
+      'BUSINESS INTELLIGENCE Level Measurement',
       'Gap Identification Techniques',
       'Readiness Evaluation',
     ],
@@ -229,11 +229,11 @@ const CERTIFICATION_MODULES: CertificationModule[] = [
   {
     id: 'transformation-methodology',
     name: 'Transformation Methodology',
-    description: 'Learn proven consciousness transformation frameworks',
+    description: 'Learn proven BUSINESS INTELLIGENCE transformation frameworks',
     duration: '2 weeks',
     topics: [
       'Transformation Planning',
-      'Change Management for Consciousness',
+      'Change Management for BUSINESS INTELLIGENCE',
       'Resistance Pattern Recognition',
       'Success Acceleration Techniques',
     ],
@@ -273,12 +273,12 @@ const IntelligenceCertificationProgram: React.FC<IntelligenceCertificationProgra
     currentLevel: currentLevel,
     nextLevel: CERTIFICATION_LEVELS[1].id,
     progress: {
-      consciousness: 65,
+      businessIntelligence: 65,
       clients: 40,
       revenue: 55,
       modules: 50,
     },
-    completedModules: ['consciousness-fundamentals'],
+    completedModules: ['BUSINESS INTELLIGENCE-fundamentals'],
     achievements: ['First Client Transformation', 'Intelligence Multiplier'],
   })
 
@@ -299,8 +299,8 @@ const IntelligenceCertificationProgram: React.FC<IntelligenceCertificationProgra
       <div className="space-y-4 text-center">
         <h2 className="text-4xl font-thin text-white">🎓 Intelligence Certification Program</h2>
         <p className="mx-auto max-w-4xl text-xl text-gray-300">
-          Become a certified consciousness transformation consultant and guide businesses from
-          unconscious automation to transcendent intelligence
+          Become a certified BUSINESS INTELLIGENCE transformation consultant and guide businesses from
+          unconscious automation to ADVANCED intelligence
         </p>
       </div>
 
@@ -515,9 +515,9 @@ const CertificationOverview: React.FC<{
     <div>
       <h3 className="mb-4 text-xl font-bold text-white">Program Overview</h3>
       <p className="mb-6 text-gray-300">
-        The CoreFlow360 Intelligence Certification Program is the world's first consciousness-based
+        The CoreFlow360 Intelligence Certification Program is the world's first BUSINESS INTELLIGENCE-based
         business consulting certification. Progress through four levels of mastery, from Foundation
-        to Transcendent, as you develop the skills to guide businesses through consciousness
+        to ADVANCED, as you develop the skills to guide businesses through BUSINESS INTELLIGENCE
         transformation.
       </p>
     </div>
@@ -528,7 +528,7 @@ const CertificationOverview: React.FC<{
         <thead>
           <tr className="border-b border-gray-700">
             <th className="px-4 py-3 text-left text-gray-400">Level</th>
-            <th className="px-4 py-3 text-center text-gray-400">Min. Consciousness</th>
+            <th className="px-4 py-3 text-center text-gray-400">Min. BUSINESS INTELLIGENCE</th>
             <th className="px-4 py-3 text-center text-gray-400">Clients Required</th>
             <th className="px-4 py-3 text-center text-gray-400">Revenue Required</th>
             <th className="px-4 py-3 text-center text-gray-400">Revenue Share</th>
@@ -551,7 +551,7 @@ const CertificationOverview: React.FC<{
                   </div>
                 </td>
                 <td className="px-4 py-3 text-center text-gray-300">
-                  {level.consciousnessMinimum}+
+                  {level.businessIntelligenceMinimum}+
                 </td>
                 <td className="px-4 py-3 text-center text-gray-300">{level.clientsRequired}</td>
                 <td className="px-4 py-3 text-center text-gray-300">
@@ -578,11 +578,11 @@ const CertificationOverview: React.FC<{
       <h4 className="mb-4 text-lg font-semibold text-purple-400">🌟 Why Become Certified?</h4>
       <div className="grid gap-4 md:grid-cols-2">
         {[
-          'Join the consciousness revolution in business',
+          'Join the BUSINESS INTELLIGENCE revolution in business',
           'Access to proprietary transformation methodologies',
           'High-value consulting opportunities ($10K-100K+ engagements)',
           'Be part of an exclusive global community',
-          'Continuous learning and consciousness evolution',
+          'Continuous learning and BUSINESS INTELLIGENCE evolution',
           'Shape the future of business intelligence',
         ].map((benefit, index) => (
           <div key={index} className="flex items-start space-x-2">
@@ -726,10 +726,10 @@ const PartnerProgressView: React.FC<{
       <div className="grid gap-6 md:grid-cols-2">
         {[
           {
-            label: 'Consciousness Level',
+            label: 'BUSINESS INTELLIGENCE Level',
             current: 5.2,
-            required: nextLevel?.consciousnessMinimum || 7,
-            progress: progress.progress.consciousness,
+            required: nextLevel?.businessIntelligenceMinimum || 7,
+            progress: progress.progress.businessIntelligence,
             color: 'from-purple-500 to-cyan-500',
           },
           {
@@ -801,7 +801,7 @@ const PartnerProgressView: React.FC<{
         </h4>
         <div className="space-y-3">
           {[
-            `Increase consciousness level to ${nextLevel?.consciousnessMinimum}+ (currently 5.2)`,
+            `Increase business intelligence level to ${nextLevel?.businessIntelligenceMinimum}+ (currently 5.2)`,
             `Transform ${(nextLevel?.clientsRequired || 5) - 2} more clients`,
             `Generate additional $${((nextLevel?.revenueRequired || 50000) - 27500).toLocaleString()} in revenue`,
             'Complete remaining certification modules',

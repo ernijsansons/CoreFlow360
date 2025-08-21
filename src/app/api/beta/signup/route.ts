@@ -1,7 +1,7 @@
 /**
  * Beta Signup API Endpoint
  *
- * Handles beta user registration with consciousness-based prioritization
+ * Handles beta user registration with BUSINESS INTELLIGENCE-based prioritization
  * and automated follow-up sequences.
  */
 
@@ -20,7 +20,7 @@ const betaSignupSchema = z.object({
   industry: z.string().min(1, 'Industry is required'),
   companySize: z.string().min(1, 'Company size is required'),
   currentChallenges: z.array(z.string()).min(1, 'At least one challenge is required'),
-  consciousnessLevel: z.number().min(1).max(10),
+  intelligenceLevel: z.number().min(1).max(10),
   referralSource: z.string().optional(),
   priorityScore: z.number().min(0).max(500),
 })
@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Enhanced consciousness analysis
-    const enhancedConsciousnessData = await calculateEnhancedConsciousness(validatedData)
+    // Enhanced BUSINESS INTELLIGENCE analysis
+    const enhancedIntelligenceData = await calculateEnhancedIntelligence(validatedData)
 
     // Create beta user record (using existing user table structure)
     const betaUser = await prisma.user.create({
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         role: validatedData.role,
         industry: validatedData.industry,
         companySize: validatedData.companySize,
-        consciousnessLevel: validatedData.consciousnessLevel,
+        intelligenceLevel: validatedData.intelligenceLevel,
         referralSource: validatedData.referralSource || 'direct',
         priorityScore: validatedData.priorityScore,
         status: 'beta_pending',
@@ -84,11 +84,11 @@ export async function POST(request: NextRequest) {
         // Store additional data in JSON fields if available
         metadata: {
           currentChallenges: validatedData.currentChallenges,
-          intelligenceGapScore: enhancedConsciousnessData.intelligenceGap,
-          transformationReadiness: enhancedConsciousnessData.readiness,
-          businessComplexity: enhancedConsciousnessData.complexity,
-          expectedROI: enhancedConsciousnessData.expectedROI,
-          signupSource: 'consciousness-awakening-form',
+          intelligenceGapScore: enhancedIntelligenceData.intelligenceGap,
+          transformationReadiness: enhancedIntelligenceData.readiness,
+          businessComplexity: enhancedIntelligenceData.complexity,
+          expectedROI: enhancedIntelligenceData.expectedROI,
+          signupSource: 'BUSINESS INTELLIGENCE-awakening-form',
           userAgent: request.headers.get('user-agent'),
           ipAddress: ip,
           betaTier: determineBetaTier(validatedData.priorityScore),
@@ -100,18 +100,18 @@ export async function POST(request: NextRequest) {
     const betaTier = determineBetaTier(validatedData.priorityScore)
 
     // Track beta signup event
-    await trackBetaSignupEvent(betaUser, enhancedConsciousnessData)
+    await trackBetaSignupEvent(betaUser, enhancedIntelligenceData)
 
     return NextResponse.json({
       success: true,
-      message: 'Welcome to the consciousness revolution!',
+      message: 'Welcome to the BUSINESS INTELLIGENCE revolution!',
       data: {
         id: betaUser.id,
         betaTier,
-        consciousnessLevel: validatedData.consciousnessLevel,
+        intelligenceLevel: validatedData.intelligenceLevel,
         priorityScore: validatedData.priorityScore,
         expectedInviteDate: calculateExpectedInviteDate(betaTier),
-        consciousnessInsights: enhancedConsciousnessData.insights,
+        intelligenceInsights: enhancedIntelligenceData.insights,
       },
     })
   } catch (error) {
@@ -129,9 +129,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper functions for consciousness analysis
-async function calculateEnhancedConsciousness(data: BetaSignupData) {
-  const { currentChallenges, companySize, role, industry, consciousnessLevel } = data
+// Helper functions for BUSINESS INTELLIGENCE analysis
+async function calculateEnhancedIntelligence(data: BetaSignupData) {
+  const { currentChallenges, companySize, role, industry, intelligenceLevel } = data
 
   // Intelligence Gap Analysis
   const challengeComplexity = currentChallenges.length * 10
@@ -145,8 +145,8 @@ async function calculateEnhancedConsciousness(data: BetaSignupData) {
   const executiveLevel = ['CEO/Founder', 'CTO/VP Engineering', 'VP Operations'].includes(role)
     ? 50
     : 30
-  const consciousnessReadiness = consciousnessLevel < 5 ? 40 : 20 // Lower consciousness = higher readiness for change
-  const transformationReadiness = Math.min(executiveLevel + consciousnessReadiness, 100)
+  const intelligenceReadiness = intelligenceLevel < 5 ? 40 : 20 // Lower BUSINESS INTELLIGENCE = higher readiness for change
+  const transformationReadiness = Math.min(executiveLevel + intelligenceReadiness, 100)
 
   // Business Complexity Score
   const complexity = (intelligenceGap + sizeComplexity + industryComplexity) / 3
@@ -156,8 +156,8 @@ async function calculateEnhancedConsciousness(data: BetaSignupData) {
   const challengeROI = currentChallenges.length * 50000 // $50k per challenge area
   const expectedROI = Math.min(baseSizeROI + challengeROI, 5000000) // Cap at $5M
 
-  // Consciousness Insights
-  const insights = generateConsciousnessInsights(data, {
+  // BUSINESS INTELLIGENCE Insights
+  const insights = generateBusinessIntelligenceInsights(data, {
     intelligenceGap,
     transformationReadiness,
     complexity,
@@ -244,7 +244,7 @@ function calculateExpectedInviteDate(betaTier: string): Date {
   return inviteDate
 }
 
-function generateConsciousnessInsights(
+function generateBusinessIntelligenceInsights(
   data: BetaSignupData,
   analysis: { intelligenceGap: number; readiness: number; complexity: number; expectedROI: number }
 ): string[] {
@@ -257,18 +257,18 @@ function generateConsciousnessInsights(
     insights.push('Multiple optimization opportunities identified across departments')
   }
 
-  // Consciousness Level Insights
-  if (data.consciousnessLevel < 4) {
-    insights.push('Perfect timing for consciousness transformation - maximum growth potential')
-  } else if (data.consciousnessLevel > 7) {
-    insights.push('Your advanced awareness positions you for rapid consciousness emergence')
+  // BUSINESS INTELLIGENCE Level Insights
+  if (data.intelligenceLevel < 4) {
+    insights.push('Perfect timing for BUSINESS INTELLIGENCE transformation - maximum growth potential')
+  } else if (data.intelligenceLevel > 7) {
+    insights.push('Your advanced awareness positions you for rapid intelligent automation')
   }
 
   // Industry-Specific Insights
   if (data.industry === 'Manufacturing') {
-    insights.push('Manufacturing consciousness transformation typically yields 15-25x ROI')
+    insights.push('Manufacturing BUSINESS INTELLIGENCE transformation typically yields 15-25x ROI')
   } else if (data.industry === 'Technology/Software') {
-    insights.push('Tech companies experience fastest consciousness evolution')
+    insights.push('Tech companies experience fastest BUSINESS INTELLIGENCE evolution')
   }
 
   // Challenge-Based Insights
@@ -277,17 +277,17 @@ function generateConsciousnessInsights(
   }
 
   if (data.currentChallenges.includes('Manual processes slow us down')) {
-    insights.push('Process consciousness typically saves 40+ hours per employee monthly')
+    insights.push('Process BUSINESS INTELLIGENCE typically saves 40+ hours per employee monthly')
   }
 
   // ROI Insights
   if (analysis.expectedROI > 1000000) {
     insights.push(
-      `Projected first-year consciousness ROI: $${(analysis.expectedROI / 1000000).toFixed(1)}M+`
+      `Projected first-year BUSINESS INTELLIGENCE ROI: $${(analysis.expectedROI / 1000000).toFixed(1)}M+`
     )
   } else {
     insights.push(
-      `Projected first-year consciousness ROI: $${(analysis.expectedROI / 1000).toFixed(0)}K+`
+      `Projected first-year BUSINESS INTELLIGENCE ROI: $${(analysis.expectedROI / 1000).toFixed(0)}K+`
     )
   }
 
@@ -302,7 +302,7 @@ async function trackBetaSignupEvent(betaUser: unknown, analysis: unknown) {
       email: betaUser.email,
       company: betaUser.company,
       industry: betaUser.industry,
-      consciousnessLevel: betaUser.consciousnessLevel,
+      intelligenceLevel: betaUser.intelligenceLevel,
       priorityScore: betaUser.priorityScore,
       intelligenceGap: analysis.intelligenceGap,
       expectedROI: analysis.expectedROI,

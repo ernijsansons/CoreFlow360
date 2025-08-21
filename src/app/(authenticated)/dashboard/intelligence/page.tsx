@@ -84,7 +84,7 @@ const IntelligencePage: React.FC = () => {
           >
             <h1 className="text-5xl font-thin text-white">🧠 Intelligence Center</h1>
             <p className="mx-auto max-w-3xl text-xl text-purple-300">
-              Assess your business consciousness potential and unlock exponential intelligence
+              Assess your business business intelligence potential and unlock exponential intelligence
               multiplication
             </p>
           </motion.div>
@@ -202,7 +202,7 @@ const IntelligencePage: React.FC = () => {
                 <p className="text-lg text-purple-300">
                   Take our revolutionary intelligence assessment to uncover what's preventing
                   exponential growth in your business and get personalized strategies for
-                  consciousness multiplication.
+                  business intelligence multiplication.
                 </p>
 
                 <div className="my-8 grid gap-6 md:grid-cols-3">
@@ -359,7 +359,7 @@ const IntelligencePage: React.FC = () => {
               overallScore: assessmentResult.overallScore,
               dimensionScores: assessmentResult.dimensionScores,
               intelligenceMultiplier: assessmentResult.intelligenceMultiplier,
-              consciousnessLevel: assessmentResult.consciousnessLevel,
+              intelligenceLevel: assessmentResult.intelligenceLevel,
               blockers: assessmentResult.blockers,
             }}
             maxRecommendations={8}

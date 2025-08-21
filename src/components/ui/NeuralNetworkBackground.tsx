@@ -164,7 +164,7 @@ export function NeuralNetworkBackground() {
       {/* Base gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black" />
 
-      {/* Canvas for neural network */}
+      {/* Canvas for SMART AUTOMATION */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 z-10"

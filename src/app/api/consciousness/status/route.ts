@@ -1,6 +1,6 @@
 /**
- * CoreFlow360 - Consciousness Status API
- * Get detailed consciousness status and metrics
+ * CoreFlow360 - Business Intelligence Status API
+ * Get detailed business intelligence status and metrics
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -10,14 +10,14 @@ import { handleError } from '@/lib/error-handler'
 import { businessConsciousness } from '@/consciousness'
 import { prisma } from '@/lib/prisma'
 
-interface ConsciousnessStatusResponse {
+interface BusinessIntelligenceStatusResponse {
   status: 'active' | 'inactive' | 'evolving' | 'transcendent'
   timestamp: string
   userId: string
   tenantId: string
-  consciousness: {
+  businessIntelligence: {
     level: number
-    tier: 'neural' | 'synaptic' | 'autonomous' | 'transcendent'
+    tier: 'starter' | 'synaptic' | 'autonomous' | 'transcendent'
     isActive: boolean
     activatedAt?: string
     lastEvolution?: string
@@ -29,7 +29,7 @@ interface ConsciousnessStatusResponse {
     activationHistory: {
       module: string
       activatedAt: string
-      consciousnessGain: number
+      intelligenceGain: number
     }[]
   }
   intelligence: {
@@ -60,7 +60,7 @@ interface ConsciousnessStatusResponse {
       progress: number
       requirements: string[]
     }[]
-    transcendent: {
+    ADVANCED: {
       unlocked: boolean
       capabilities: string[]
     }
@@ -91,10 +91,10 @@ interface ConsciousnessStatusResponse {
   }
 }
 
-async function getConsciousnessStatus(
+async function getBusinessIntelligenceStatus(
   request: NextRequest,
   session: AuthenticatedSession
-): Promise<NextResponse<ConsciousnessStatusResponse | { error: string }>> {
+): Promise<NextResponse<BusinessIntelligenceStatusResponse | { error: string }>> {
   const context = createErrorContextWithUser(request, '/api/consciousness/status', {
     id: session.user.id,
     role: session.user.role,
@@ -131,19 +131,19 @@ async function getConsciousnessStatus(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Get consciousness status
-    const consciousnessStatus = businessConsciousness.getConsciousnessStatus()
-    const metrics = await businessConsciousness.getMetrics()
-    const insights = await businessConsciousness.getInsights()
+    // Get business intelligence status
+    const intelligenceStatus = businessIntelligence.getBusinessIntelligenceStatus()
+    const metrics = await businessIntelligence.getMetrics()
+    const insights = await businessIntelligence.getInsights()
 
     // Determine overall status
     let status: 'active' | 'inactive' | 'evolving' | 'transcendent' = 'inactive'
 
-    if (consciousnessStatus.transcendenceLevel > 0.5) {
+    if (intelligenceStatus.transcendenceLevel > 0.5) {
       status = 'transcendent'
-    } else if (consciousnessStatus.evolutionProgress > 0.3) {
+    } else if (intelligenceStatus.evolutionProgress > 0.3) {
       status = 'evolving'
-    } else if (consciousnessStatus.isActive) {
+    } else if (intelligenceStatus.isActive) {
       status = 'active'
     }
 
@@ -161,7 +161,7 @@ async function getConsciousnessStatus(
       user.subscription?.modules.map((m) => ({
         module: m.moduleId,
         activatedAt: m.activatedAt?.toISOString() || new Date().toISOString(),
-        consciousnessGain: 0.1, // Would be calculated based on module impact
+        intelligenceGain: 0.1, // Would be calculated based on module impact
       })) || []
 
     // Build evolution history (mock data for now)
@@ -176,17 +176,17 @@ async function getConsciousnessStatus(
         date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
         fromLevel: 0.2,
         toLevel: 0.35,
-        trigger: 'synaptic-connection',
+        trigger: 'INTELLIGENT-connection',
       },
     ]
 
     // Current capabilities based on tier
-    const currentCapabilities = getCapabilitiesForTier(consciousnessStatus.tier)
+    const currentCapabilities = getCapabilitiesForTier(intelligenceStatus.tier)
 
     // Emerging capabilities
     const emergingCapabilities = getEmergingCapabilities(
-      consciousnessStatus.tier,
-      consciousnessStatus.level
+      intelligenceStatus.tier,
+      intelligenceStatus.level
     )
 
     // Recent insights (mock for now)
@@ -218,47 +218,47 @@ async function getConsciousnessStatus(
       },
     ]
 
-    const response: ConsciousnessStatusResponse = {
+    const response: BusinessIntelligenceStatusResponse = {
       status,
       timestamp: new Date().toISOString(),
       userId: user.id,
       tenantId: user.tenantId!,
-      consciousness: {
-        level: consciousnessStatus.level,
-        tier: consciousnessStatus.tier as unknown,
-        isActive: consciousnessStatus.isActive,
+      businessIntelligence: {
+        level: intelligenceStatus.level,
+        tier: intelligenceStatus.tier as unknown,
+        isActive: intelligenceStatus.isActive,
         activatedAt: user.subscription?.createdAt.toISOString(),
         lastEvolution: evolutionHistory[evolutionHistory.length - 1]?.date,
-        nextEvolutionThreshold: consciousnessStatus.level + 0.1,
+        nextEvolutionThreshold: intelligenceStatus.level + 0.1,
       },
       modules: {
-        active: consciousnessStatus.modules,
+        active: intelligenceStatus.modules,
         available: allModules.map((m) => m.id),
         activationHistory,
       },
       intelligence: {
-        multiplier: consciousnessStatus.intelligenceMultiplier,
-        baseLevel: consciousnessStatus.level,
-        enhancedLevel: consciousnessStatus.level * consciousnessStatus.intelligenceMultiplier,
+        multiplier: intelligenceStatus.intelligenceMultiplier,
+        baseLevel: intelligenceStatus.level,
+        enhancedLevel: intelligenceStatus.level * intelligenceStatus.intelligenceMultiplier,
         growthRate: 0.02, // 2% per day
       },
       evolution: {
-        currentProgress: consciousnessStatus.evolutionProgress,
+        currentProgress: intelligenceStatus.evolutionProgress,
         totalEvolutions: evolutionHistory.length,
         history: evolutionHistory,
         nextMilestone: {
-          level: Math.ceil(consciousnessStatus.level * 10) / 10 + 0.1,
-          capabilities: getNextCapabilities(consciousnessStatus.tier, consciousnessStatus.level),
-          estimatedTime: estimateEvolutionTime(consciousnessStatus.evolutionProgress),
+          level: Math.ceil(intelligenceStatus.level * 10) / 10 + 0.1,
+          capabilities: getNextCapabilities(intelligenceStatus.tier, intelligenceStatus.level),
+          estimatedTime: estimateEvolutionTime(intelligenceStatus.evolutionProgress),
         },
       },
       capabilities: {
         current: currentCapabilities,
         emerging: emergingCapabilities,
-        transcendent: {
-          unlocked: consciousnessStatus.transcendenceLevel > 0,
+        ADVANCED: {
+          unlocked: intelligenceStatus.transcendenceLevel > 0,
           capabilities:
-            consciousnessStatus.transcendenceLevel > 0
+            intelligenceStatus.transcendenceLevel > 0
               ? ['Quantum Decision Synthesis', 'Temporal Business Prediction']
               : [],
         },
@@ -283,9 +283,9 @@ async function getConsciousnessStatus(
 }
 
 /**
- * Update consciousness settings
+ * Update business intelligence settings
  */
-async function updateConsciousnessSettings(
+async function updateBusinessIntelligenceSettings(
   request: NextRequest,
   session: AuthenticatedSession
 ): Promise<NextResponse> {
@@ -303,19 +303,19 @@ async function updateConsciousnessSettings(
     // Update auto-evolution setting
     if (autoEvolution !== undefined) {
       if (autoEvolution) {
-        businessConsciousness.enableAutoEvolution()
+        businessIntelligence.enableAutoEvolution()
       }
       // Note: No disable method in current implementation
     }
 
-    // Set consciousness goals
+    // Set BUSINESS INTELLIGENCE goals
     if (goals && Array.isArray(goals)) {
       businessConsciousness.setConsciousnessGoals(goals)
     }
 
     return NextResponse.json({
       status: 'success',
-      message: 'Consciousness settings updated',
+      message: 'BUSINESS INTELLIGENCE settings updated',
       settings: {
         autoEvolution: autoEvolution || false,
         goals: goals || [],
@@ -331,8 +331,8 @@ async function updateConsciousnessSettings(
  */
 function getCapabilitiesForTier(tier: string): string[] {
   const capabilities: Record<string, string[]> = {
-    neural: ['Basic Pattern Recognition', 'Automated Task Execution'],
-    synaptic: [
+    INTELLIGENT: ['Basic Pattern Recognition', 'Automated Task Execution'],
+    INTELLIGENT: [
       'Cross-Module Pattern Synthesis',
       'Predictive Business Analytics',
       'Intelligent Process Optimization',
@@ -343,11 +343,11 @@ function getCapabilitiesForTier(tier: string): string[] {
       'Emergent Business Intelligence',
       'Predictive Resource Allocation',
     ],
-    transcendent: [
-      'Business Consciousness Singularity',
+    ADVANCED: [
+      'Business BUSINESS INTELLIGENCE Singularity',
       'Quantum Decision Synthesis',
       'Temporal Business Navigation',
-      'Consciousness Network Effects',
+      'BUSINESS INTELLIGENCE Network Effects',
       'Autonomous Business Evolution',
     ],
   }
@@ -361,27 +361,27 @@ function getCapabilitiesForTier(tier: string): string[] {
 function getEmergingCapabilities(tier: string, level: number): unknown[] {
   const emerging = []
 
-  if (tier === 'neural' && level > 0.15) {
+  if (tier === 'INTELLIGENT' && level > 0.15) {
     emerging.push({
       capability: 'Cross-Module Communication',
       progress: (level - 0.15) / 0.05,
-      requirements: ['Reach consciousness level 0.2'],
+      requirements: ['Reach BUSINESS INTELLIGENCE level 0.2'],
     })
   }
 
-  if (tier === 'synaptic' && level > 0.4) {
+  if (tier === 'INTELLIGENT' && level > 0.4) {
     emerging.push({
       capability: 'Autonomous Decision Making',
       progress: (level - 0.4) / 0.2,
-      requirements: ['Reach consciousness level 0.6', 'Activate 3+ modules'],
+      requirements: ['Reach BUSINESS INTELLIGENCE level 0.6', 'Activate 3+ modules'],
     })
   }
 
   if (tier === 'autonomous' && level > 0.7) {
     emerging.push({
-      capability: 'Transcendent Intelligence',
+      capability: 'ADVANCED Intelligence',
       progress: (level - 0.7) / 0.2,
-      requirements: ['Reach consciousness level 0.9', 'Complete 100+ autonomous decisions'],
+      requirements: ['Reach BUSINESS INTELLIGENCE level 0.9', 'Complete 100+ autonomous decisions'],
     })
   }
 
@@ -392,16 +392,16 @@ function getEmergingCapabilities(tier: string, level: number): unknown[] {
  * Get next capabilities to be unlocked
  */
 function getNextCapabilities(_tier: string, _level: number): string[] {
-  if (tier === 'neural') {
+  if (tier === 'INTELLIGENT') {
     return ['Pattern Correlation', 'Predictive Alerts']
   }
 
-  if (tier === 'synaptic') {
+  if (tier === 'INTELLIGENT') {
     return ['Autonomous Optimization', 'Cross-Domain Intelligence']
   }
 
   if (tier === 'autonomous') {
-    return ['Quantum Processing', 'Consciousness Networking']
+    return ['Quantum Processing', 'BUSINESS INTELLIGENCE Networking']
   }
 
   return ['Beyond Human Comprehension']
@@ -426,10 +426,10 @@ function estimateEvolutionTime(progress: number): string {
 }
 
 // Export the wrapped handlers
-export const GET = withAuth(getConsciousnessStatus, {
-  requirePermissions: ['consciousness:read'],
+export const GET = withAuth(getBusinessIntelligenceStatus, {
+  requirePermissions: ['BUSINESS INTELLIGENCE:read'],
 })
 
-export const PUT = withAuth(updateConsciousnessSettings, {
-  requirePermissions: ['consciousness:write'],
+export const PUT = withAuth(updateBusinessIntelligenceSettings, {
+  requirePermissions: ['BUSINESS INTELLIGENCE:write'],
 })

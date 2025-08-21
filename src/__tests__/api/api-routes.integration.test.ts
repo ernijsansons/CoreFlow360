@@ -211,15 +211,15 @@ describe('API Routes Integration Tests', () => {
     })
   })
 
-  describe('Consciousness System Endpoints', () => {
-    it('GET /api/consciousness/status - should return consciousness status', async () => {
-      const { GET } = await import('@/app/api/consciousness/status/route')
+  describe('BUSINESS INTELLIGENCE System Endpoints', () => {
+    it('GET /api/BUSINESS INTELLIGENCE/status - should return BUSINESS INTELLIGENCE status', async () => {
+      const { GET } = await import('@/app/api/BUSINESS INTELLIGENCE/status/route')
 
       prisma.user.findUnique.mockResolvedValue({
         id: 'user-123',
         tenantId: 'tenant-123',
         subscription: {
-          tier: 'synaptic',
+          tier: 'INTELLIGENT',
           modules: [
             { moduleId: 'crm', isActive: true },
             { moduleId: 'accounting', isActive: true },
@@ -228,7 +228,7 @@ describe('API Routes Integration Tests', () => {
       })
 
       const request = createAuthenticatedRequest(
-        'http://localhost:3000/api/consciousness/status',
+        'http://localhost:3000/api/BUSINESS INTELLIGENCE/status',
         {
           method: 'GET',
         },
@@ -238,7 +238,7 @@ describe('API Routes Integration Tests', () => {
             email: 'test@example.com',
             tenantId: 'tenant-123',
             role: 'user',
-            permissions: ['consciousness:read'],
+            permissions: ['BUSINESS INTELLIGENCE:read'],
           },
         }
       )
@@ -247,13 +247,13 @@ describe('API Routes Integration Tests', () => {
       const data = await response.json()
 
       expect(response.status).toBe(200)
-      expect(data).toHaveProperty('consciousness')
+      expect(data).toHaveProperty('BUSINESS INTELLIGENCE')
       expect(data).toHaveProperty('modules')
       expect(data).toHaveProperty('intelligence')
     })
 
-    it('GET /api/consciousness/insights - should return AI insights', async () => {
-      const { GET } = await import('@/app/api/consciousness/insights/route')
+    it('GET /api/BUSINESS INTELLIGENCE/insights - should return AI insights', async () => {
+      const { GET } = await import('@/app/api/BUSINESS INTELLIGENCE/insights/route')
 
       prisma.aiInsight.findMany.mockResolvedValue([
         {
@@ -264,7 +264,7 @@ describe('API Routes Integration Tests', () => {
         },
       ])
 
-      const request = createAuthenticatedRequest('http://localhost:3000/api/consciousness/insights')
+      const request = createAuthenticatedRequest('http://localhost:3000/api/BUSINESS INTELLIGENCE/insights')
       const response = await GET(request)
       const data = await response.json()
 
@@ -280,7 +280,7 @@ describe('API Routes Integration Tests', () => {
 
       prisma.subscription.findUnique.mockResolvedValue({
         id: 'sub-123',
-        tier: 'synaptic',
+        tier: 'INTELLIGENT',
         status: 'active',
         modules: [{ moduleId: 'crm', isActive: true }],
       })
@@ -290,7 +290,7 @@ describe('API Routes Integration Tests', () => {
       const data = await response.json()
 
       expect(response.status).toBe(200)
-      expect(data).toHaveProperty('tier', 'synaptic')
+      expect(data).toHaveProperty('tier', 'INTELLIGENT')
       expect(data).toHaveProperty('status', 'active')
     })
 
@@ -390,11 +390,11 @@ describe('API Routes Integration Tests', () => {
     })
 
     it('should handle unauthorized access', async () => {
-      const { GET } = await import('@/app/api/consciousness/status/route')
+      const { GET } = await import('@/app/api/BUSINESS INTELLIGENCE/status/route')
 
       mockGetServerSession.mockResolvedValue(null) // No session
 
-      const request = new NextRequest('http://localhost:3000/api/consciousness/status')
+      const request = new NextRequest('http://localhost:3000/api/BUSINESS INTELLIGENCE/status')
       const response = await GET(request)
       const data = await response.json()
 

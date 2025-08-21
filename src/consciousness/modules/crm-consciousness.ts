@@ -1,5 +1,5 @@
 /**
- * CoreFlow360 CRM Consciousness Module
+ * CoreFlow360 CRM Business Intelligence Module
  * Self-aware customer relationship management with autonomous capabilities
  */
 
@@ -46,10 +46,10 @@ export class CRMConsciousnessModule extends BaseConsciousnessModule {
 
   constructor() {
     super('crm')
-    this.initializeCRMConsciousness()
+    this.initializeCRMBusinessIntelligence()
   }
 
-  private initializeCRMConsciousness(): void {
+  private initializeCRMBusinessIntelligence(): void {
     // Start pattern recognition
     setInterval(() => {
       this.recognizeCustomerPatterns()
@@ -242,7 +242,7 @@ export class CRMConsciousnessModule extends BaseConsciousnessModule {
   }
 
   /**
-   * Generate shared patterns for synaptic connections
+   * Generate shared patterns for intelligent connections
    */
   protected async generateSharedPatterns(): Promise<unknown> {
     const topPatterns = Array.from(this.customerPatterns.values())

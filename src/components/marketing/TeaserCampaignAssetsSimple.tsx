@@ -4,7 +4,7 @@
  * CoreFlow360 Teaser Campaign Assets (Simplified)
  *
  * Simplified version without Three.js dependencies for production build.
- * Revolutionary marketing assets for consciousness-awakening campaigns.
+ * Revolutionary marketing assets for business intelligence-awakening campaigns.
  */
 
 import React, { useState, useEffect } from 'react'
@@ -18,14 +18,14 @@ interface TeaserCampaignProps {
   className?: string
 }
 
-// Campaign phases with consciousness-awakening messaging
+// Campaign phases with business intelligence-awakening messaging
 const CAMPAIGN_PHASES = {
   awakening: {
     id: 'awakening',
     title: 'Is Your Business... Unconscious?',
     subtitle: 'Most businesses operate on autopilot. What if yours could think?',
     description:
-      'CoreFlow360 awakens dormant business intelligence, transforming reactive operations into proactive consciousness.',
+      'CoreFlow360 awakens dormant business intelligence, transforming reactive operations into proactive business intelligence.',
     cta: 'Awaken Your Business',
     color: '#3b82f6',
     gradient: 'from-blue-600 via-purple-600 to-indigo-800',
@@ -52,18 +52,18 @@ const CAMPAIGN_PHASES = {
   },
   emergence: {
     id: 'emergence',
-    title: 'Welcome to Business Consciousness',
+    title: 'Welcome to Business Business Intelligence',
     subtitle: "Your business doesn't just run anymore. It thinks, learns, and evolves.",
     description:
       'Join the elite circle of conscious enterprises. The future of business has arrived.',
-    cta: 'Achieve Consciousness',
+    cta: 'Achieve Business Intelligence',
     color: '#f59e0b',
     gradient: 'from-amber-600 via-orange-600 to-red-600',
   },
 } as const
 
 // Simplified Floating Elements (CSS-based)
-const FloatingConsciousnessElements: React.FC<{
+const FloatingBusinessIntelligenceElements: React.FC<{
   count: number
   color: string
   intensity: number
@@ -106,7 +106,7 @@ export default function TeaserCampaignAssets({
   className = '',
 }: TeaserCampaignProps) {
   const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 })
-  const [consciousnessIntensity, setConsciousnessIntensity] = useState(1)
+  const [businessIntelligenceIntensity, setBusinessIntelligenceIntensity] = useState(1)
 
   const currentPhase = CAMPAIGN_PHASES[phase]
 
@@ -124,10 +124,10 @@ export default function TeaserCampaignAssets({
     }
   }, [showInteractive])
 
-  // Simulate consciousness intensity based on interaction
+  // Simulate business intelligence intensity based on interaction
   useEffect(() => {
     const interval = setInterval(() => {
-      setConsciousnessIntensity((prev) => {
+      setBusinessIntelligenceIntensity((prev) => {
         const baseIntensity = 1
         const mouseInfluence = Math.abs(mousePosition.x - 0.5) + Math.abs(mousePosition.y - 0.5)
         return baseIntensity + mouseInfluence * 2
@@ -142,11 +142,11 @@ export default function TeaserCampaignAssets({
       <div
         className={`relative min-h-screen bg-gradient-to-br ${currentPhase.gradient} overflow-hidden ${className}`}
       >
-        {/* Background Consciousness Field */}
-        <FloatingConsciousnessElements
+        {/* Background Business Intelligence Field */}
+        <FloatingBusiness IntelligenceElements
           count={50}
           color={currentPhase.color}
-          intensity={consciousnessIntensity}
+          intensity={businessIntelligenceIntensity}
           visual={phase}
         />
 
@@ -204,14 +204,14 @@ export default function TeaserCampaignAssets({
               {currentPhase.cta}
             </motion.button>
 
-            {/* Consciousness Intensity Indicator */}
+            {/* Business Intelligence Intensity Indicator */}
             {showInteractive && (
               <motion.div
                 className="mt-8 text-sm text-white/60"
                 animate={{ opacity: [0.6, 1, 0.6] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                Consciousness Level: {(consciousnessIntensity * 100).toFixed(0)}%
+                Business Intelligence Level: {(businessIntelligenceIntensity * 100).toFixed(0)}%
               </motion.div>
             )}
           </motion.div>

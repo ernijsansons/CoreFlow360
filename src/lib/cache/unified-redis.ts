@@ -487,12 +487,6 @@ export class UnifiedRedisCache {
     return total > 0 ? (this.stats.hits / total) * 100 : 0
   }
 
-  /**
-   * Check if cache is available
-   */
-  isAvailable(): boolean {
-    return this.getRedisClient() !== null
-  }
 
   /**
    * Gracefully shutdown cache connections

@@ -248,7 +248,7 @@ const IntelligenceMultiplicationCalculator: React.FC<IntelligenceMultiplicationC
     } else if (selectedDepartments.size >= 2) {
       setAnimationPhase('multiplying')
 
-      // Trigger synaptic connection sound for multiple departments
+      // Trigger intelligent connection sound for multiple departments
       if (selectedDepartments.size === 2) {
         const depts = Array.from(selectedDepartments)
         consciousnessAudio.triggerSynapseForm(depts[0], depts[1])

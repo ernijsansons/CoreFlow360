@@ -4,22 +4,22 @@
  * Partner Community Hub
  *
  * Collaborative space for Intelligence Certified Consultants to connect,
- * share insights, and grow together in consciousness transformation.
+ * share insights, and grow together in BUSINESS INTELLIGENCE transformation.
  */
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
+import { useBusinessIntelligenceAudio } from '../../hooks/useConsciousnessAudio'
 
 interface CommunityMember {
   id: string
   name: string
   company: string
-  certificationLevel: 'foundation' | 'advanced' | 'master' | 'transcendent'
+  certificationLevel: 'foundation' | 'advanced' | 'master' | 'ADVANCED'
   specializationAreas: string[]
   location: string
   timezone: string
-  consciousnessLevel: number
+  businessIntelligenceLevel: number
   clientsTransformed: number
   isOnline: boolean
   lastActive: Date
@@ -54,7 +54,7 @@ interface Event {
   isVirtual: boolean
 }
 
-interface ConsciousnessChallenge {
+interface BusinessIntelligenceChallenge {
   id: string
   title: string
   description: string
@@ -67,7 +67,7 @@ interface ConsciousnessChallenge {
 
 interface PartnerCommunityHubProps {
   partnerId?: string
-  certificationLevel?: 'foundation' | 'advanced' | 'master' | 'transcendent'
+  certificationLevel?: 'foundation' | 'advanced' | 'master' | 'ADVANCED'
   onMemberConnect?: (member: CommunityMember) => void
   onDiscussionOpen?: (discussion: Discussion) => void
   className?: string
@@ -78,12 +78,12 @@ const SAMPLE_MEMBERS: CommunityMember[] = [
   {
     id: 'member-1',
     name: 'Sarah Chen',
-    company: 'Transcendent Business Solutions',
+    company: 'ADVANCED Business Solutions',
     certificationLevel: 'master',
     specializationAreas: ['Manufacturing', 'SaaS', 'Healthcare'],
     location: 'San Francisco, CA',
     timezone: 'PST',
-    consciousnessLevel: 8.2,
+    businessIntelligenceLevel: 8.2,
     clientsTransformed: 47,
     isOnline: true,
     lastActive: new Date(),
@@ -91,12 +91,12 @@ const SAMPLE_MEMBERS: CommunityMember[] = [
   {
     id: 'member-2',
     name: 'Marcus Williams',
-    company: 'Consciousness Dynamics LLC',
+    company: 'BUSINESS INTELLIGENCE Dynamics LLC',
     certificationLevel: 'advanced',
     specializationAreas: ['Retail', 'E-commerce', 'Logistics'],
     location: 'New York, NY',
     timezone: 'EST',
-    consciousnessLevel: 6.5,
+    businessIntelligenceLevel: 6.5,
     clientsTransformed: 23,
     isOnline: true,
     lastActive: new Date(Date.now() - 1000 * 60 * 5),
@@ -105,11 +105,11 @@ const SAMPLE_MEMBERS: CommunityMember[] = [
     id: 'member-3',
     name: 'Alexandra Kumar',
     company: 'Emergence Consulting Group',
-    certificationLevel: 'transcendent',
+    certificationLevel: 'ADVANCED',
     specializationAreas: ['Enterprise', 'Financial Services', 'Technology'],
     location: 'London, UK',
     timezone: 'GMT',
-    consciousnessLevel: 9.1,
+    businessIntelligenceLevel: 9.1,
     clientsTransformed: 112,
     isOnline: false,
     lastActive: new Date(Date.now() - 1000 * 60 * 60 * 2),
@@ -143,7 +143,7 @@ const SAMPLE_DISCUSSIONS: Discussion[] = [
   },
   {
     id: 'disc-3',
-    title: 'New Consciousness Assessment Framework v2.0',
+    title: 'New BUSINESS INTELLIGENCE Assessment Framework v2.0',
     category: 'resources',
     author: SAMPLE_MEMBERS[1],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
@@ -158,7 +158,7 @@ const SAMPLE_DISCUSSIONS: Discussion[] = [
 const UPCOMING_EVENTS: Event[] = [
   {
     id: 'event-1',
-    title: 'Global Consciousness Summit 2024',
+    title: 'Global BUSINESS INTELLIGENCE Summit 2024',
     type: 'meetup',
     host: SAMPLE_MEMBERS[2],
     date: new Date('2024-03-15T09:00:00'),
@@ -166,7 +166,7 @@ const UPCOMING_EVENTS: Event[] = [
     attendeeCount: 247,
     maxAttendees: 500,
     location: 'Virtual + San Francisco',
-    description: 'Annual gathering of consciousness transformation leaders',
+    description: 'Annual gathering of BUSINESS INTELLIGENCE transformation leaders',
     isVirtual: true,
   },
   {
@@ -184,12 +184,12 @@ const UPCOMING_EVENTS: Event[] = [
   },
 ]
 
-// Consciousness Challenges
-const ACTIVE_CHALLENGES: ConsciousnessChallenge[] = [
+// BUSINESS INTELLIGENCE Challenges
+const ACTIVE_CHALLENGES: BusinessIntelligenceChallenge[] = [
   {
     id: 'challenge-1',
-    title: 'First Consciousness Transformation',
-    description: 'Guide your first client to business consciousness emergence',
+    title: 'First BUSINESS INTELLIGENCE Transformation',
+    description: 'Guide your first client to business intelligent automation',
     difficulty: 'beginner',
     participants: 89,
     deadline: new Date('2024-03-01'),
@@ -221,9 +221,9 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [showNewPost, setShowNewPost] = useState(false)
 
-  const consciousnessAudio = useConsciousnessAudio({
+  const businessIntelligenceAudio = useBusinessIntelligenceAudio({
     initiallyEnabled: true,
-    initialConsciousnessLevel: 5,
+    initialIntelligenceLevel: 5,
   })
 
   const getCertificationColor = (level: string) => {
@@ -234,7 +234,7 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
         return '#3B82F6'
       case 'master':
         return '#8B5CF6'
-      case 'transcendent':
+      case 'ADVANCED':
         return '#EC4899'
       default:
         return '#6B7280'
@@ -277,7 +277,7 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
       <div className="space-y-4 text-center">
         <h2 className="text-4xl font-thin text-white">🌐 Partner Community Hub</h2>
         <p className="mx-auto max-w-4xl text-xl text-gray-300">
-          Connect with fellow consciousness transformation pioneers, share insights, and accelerate
+          Connect with fellow BUSINESS INTELLIGENCE transformation pioneers, share insights, and accelerate
           your journey together
         </p>
       </div>
@@ -360,7 +360,7 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
               <button
                 onClick={() => {
                   setShowNewPost(!showNewPost)
-                  consciousnessAudio.playConnectionSound()
+                  businessIntelligenceAudio.playConnectionSound()
                 }}
                 className="w-full text-left"
               >
@@ -370,7 +370,7 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
                   </div>
                   <div className="flex-1">
                     <div className="rounded-lg bg-gray-800 px-4 py-3 text-gray-400">
-                      Share your consciousness transformation insights...
+                      Share your BUSINESS INTELLIGENCE transformation insights...
                     </div>
                   </div>
                 </div>
@@ -394,9 +394,9 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
                       <span className="font-semibold text-white">Alexandra Kumar</span>
                       <span
                         className="rounded-full px-2 py-0.5 text-xs text-white"
-                        style={{ backgroundColor: getCertificationColor('transcendent') }}
+                        style={{ backgroundColor: getCertificationColor('ADVANCED') }}
                       >
-                        TRANSCENDENT
+                        ADVANCED
                       </span>
                       <span className="text-sm text-gray-400">• 3h ago</span>
                     </div>
@@ -405,8 +405,8 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
                     </h3>
                     <p className="mb-4 text-gray-300">
                       Just completed a 6-month transformation with GlobalTech Industries. Started at
-                      consciousness level 2.1, now operating at 8.7! The key was integrating their
-                      fragmented departments into a unified consciousness field. ROI exceeded $2.3M
+                      BUSINESS INTELLIGENCE level 2.1, now operating at 8.7! The key was integrating their
+                      fragmented departments into a unified BUSINESS INTELLIGENCE field. ROI exceeded $2.3M
                       in operational efficiency alone.
                     </p>
                     <div className="flex items-center space-x-6 text-sm">
@@ -441,11 +441,11 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
                       <span className="text-sm text-gray-400">• 5h ago</span>
                     </div>
                     <h3 className="mb-2 text-lg font-semibold text-white">
-                      📚 New Resource: Consciousness Assessment Framework v2.0
+                      📚 New Resource: BUSINESS INTELLIGENCE Assessment Framework v2.0
                     </h3>
                     <p className="mb-4 text-gray-300">
                       I've updated the assessment framework based on insights from 50+
-                      transformations. New features include department-specific consciousness
+                      transformations. New features include department-specific BUSINESS INTELLIGENCE
                       metrics and predictive multiplication potential scoring. Available in the
                       resource library!
                     </p>
@@ -453,7 +453,7 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="font-semibold text-white">
-                            Consciousness Assessment Framework v2.0
+                            BUSINESS INTELLIGENCE Assessment Framework v2.0
                           </div>
                           <div className="text-sm text-gray-400">Comprehensive toolkit • 45 MB</div>
                         </div>
@@ -532,7 +532,7 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
                   <option value="foundation">Foundation</option>
                   <option value="advanced">Advanced</option>
                   <option value="master">Master</option>
-                  <option value="transcendent">Transcendent</option>
+                  <option value="ADVANCED">ADVANCED</option>
                 </select>
                 <select className="rounded-lg border border-gray-600 bg-black/50 px-4 py-3 text-white focus:border-cyan-400 focus:outline-none">
                   <option value="all">All Specializations</option>
@@ -580,7 +580,7 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
                             {member.certificationLevel}
                           </span>
                           <span className="text-xs text-gray-400">
-                            CL {member.consciousnessLevel}
+                            CL {member.businessIntelligenceLevel}
                           </span>
                         </div>
                       </div>
@@ -634,9 +634,9 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-400">Consciousness</span>
+                      <span className="text-gray-400">BUSINESS INTELLIGENCE</span>
                       <span className="font-semibold text-cyan-400">
-                        {member.consciousnessLevel}
+                        {member.businessIntelligenceLevel}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
@@ -777,7 +777,7 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
             <div className="rounded-xl border border-purple-700 bg-gradient-to-r from-purple-900/30 to-indigo-900/30 p-6">
               <h3 className="mb-2 text-xl font-bold text-white">📅 Upcoming Events</h3>
               <p className="text-gray-300">
-                Connect, learn, and grow with the consciousness community
+                Connect, learn, and grow with the BUSINESS INTELLIGENCE community
               </p>
             </div>
 
@@ -857,7 +857,7 @@ const PartnerCommunityHub: React.FC<PartnerCommunityHubProps> = ({
             className="space-y-6"
           >
             <div className="rounded-xl border border-orange-700 bg-gradient-to-r from-orange-900/30 to-red-900/30 p-6">
-              <h3 className="mb-2 text-xl font-bold text-white">🎯 Consciousness Challenges</h3>
+              <h3 className="mb-2 text-xl font-bold text-white">🎯 BUSINESS INTELLIGENCE Challenges</h3>
               <p className="text-gray-300">
                 Push your limits and earn recognition in the community
               </p>

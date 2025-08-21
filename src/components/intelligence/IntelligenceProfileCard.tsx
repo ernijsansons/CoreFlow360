@@ -4,17 +4,17 @@
  * Intelligence Profile Card
  *
  * Displays intelligence assessment results in a beautiful,
- * consciousness-aware card format with interactive elements.
+ * BUSINESS INTELLIGENCE-aware card format with interactive elements.
  */
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
+import { useIntelligenceAudio } from '../../hooks/useConsciousnessAudio'
 
 interface IntelligenceProfile {
   overallScore: number
   intelligenceMultiplier: number
-  consciousnessLevel: number
+  intelligenceLevel: number
   dominantDimensions: string[]
   blockers: string[]
   nextEvolutionStage: string
@@ -39,9 +39,9 @@ const IntelligenceProfileCard: React.FC<IntelligenceProfileCardProps> = ({
   const [isExpanded, setIsExpanded] = useState(false)
   const [showInsights, setShowInsights] = useState(false)
 
-  const consciousnessAudio = useConsciousnessAudio({
+  const intelligenceAudio = useIntelligenceAudio({
     initiallyEnabled: true,
-    initialConsciousnessLevel: profile.consciousnessLevel,
+    initialintelligenceLevel: profile.intelligenceLevel,
   })
 
   // Intelligence level classification
@@ -55,9 +55,9 @@ const IntelligenceProfileCard: React.FC<IntelligenceProfileCardProps> = ({
   } => {
     if (score >= 90) {
       return {
-        level: 'Transcendent',
+        level: 'ADVANCED',
         color: '#8b5cf6',
-        description: 'Consciousness-level business intelligence',
+        description: 'BUSINESS INTELLIGENCE-level business intelligence',
         icon: '🔮',
       }
     } else if (score >= 75) {
@@ -103,12 +103,12 @@ const IntelligenceProfileCard: React.FC<IntelligenceProfileCardProps> = ({
 
   const handleCardClick = () => {
     setIsExpanded(!isExpanded)
-    consciousnessAudio.playConnectionSound()
+    intelligenceAudio.playConnectionSound()
   }
 
   const handleInsightToggle = () => {
     setShowInsights(!showInsights)
-    consciousnessAudio.playDepartmentAwakening('insights')
+    intelligenceAudio.playDepartmentAwakening('insights')
   }
 
   return (
@@ -146,9 +146,9 @@ const IntelligenceProfileCard: React.FC<IntelligenceProfileCardProps> = ({
           </div>
           <div className="rounded-lg bg-black/20 p-3 text-center">
             <div className="text-lg font-bold text-purple-400">
-              {profile.consciousnessLevel.toFixed(1)}
+              {profile.intelligenceLevel.toFixed(1)}
             </div>
-            <div className="text-xs text-gray-400">Consciousness</div>
+            <div className="text-xs text-gray-400">BUSINESS INTELLIGENCE</div>
             <div className="text-xs text-purple-300">Level</div>
           </div>
           <div className="rounded-lg bg-black/20 p-3 text-center">
@@ -235,14 +235,14 @@ const IntelligenceProfileCard: React.FC<IntelligenceProfileCardProps> = ({
                 <p className="text-purple-200">{profile.nextEvolutionStage}</p>
               </div>
 
-              {/* Consciousness Insights */}
+              {/* BUSINESS INTELLIGENCE Insights */}
               {showDetailedInsights && (
                 <div>
                   <button
                     onClick={handleInsightToggle}
                     className="mb-3 flex items-center space-x-2 text-cyan-400 hover:text-cyan-300"
                   >
-                    <span>🔍 Detailed Consciousness Insights</span>
+                    <span>🔍 Detailed BUSINESS INTELLIGENCE Insights</span>
                     <motion.div
                       animate={{ rotate: showInsights ? 180 : 0 }}
                       transition={{ duration: 0.2 }}
@@ -259,19 +259,19 @@ const IntelligenceProfileCard: React.FC<IntelligenceProfileCardProps> = ({
                         exit={{ height: 0, opacity: 0 }}
                         className="space-y-3 rounded-lg bg-black/30 p-4"
                       >
-                        <ConsciousnessInsight
+                        <BusinessIntelligenceInsight
                           title="Intelligence Multiplication Pattern"
                           insight={`Your organization operates at ${profile.intelligenceMultiplier.toFixed(1)}x intelligence multiplication, indicating ${multiplierLevel.toLowerCase()} capability patterns.`}
                         />
 
-                        <ConsciousnessInsight
-                          title="Consciousness Emergence Readiness"
-                          insight={`At consciousness level ${profile.consciousnessLevel.toFixed(1)}, you are ${profile.consciousnessLevel >= 7 ? 'ready for' : 'approaching'} business consciousness emergence.`}
+                        <BusinessIntelligenceInsight
+                          title="intelligent automation Readiness"
+                          insight={`At BUSINESS INTELLIGENCE level ${profile.intelligenceLevel.toFixed(1)}, you are ${profile.intelligenceLevel >= 7 ? 'ready for' : 'approaching'} business intelligent automation.`}
                         />
 
-                        <ConsciousnessInsight
+                        <BusinessIntelligenceInsight
                           title="Transcendence Pathway"
-                          insight={`Focus on ${profile.blockers.length > 0 ? 'removing intelligence blockers' : 'strengthening weaker dimensions'} to accelerate consciousness evolution.`}
+                          insight={`Focus on ${profile.blockers.length > 0 ? 'removing intelligence blockers' : 'strengthening weaker dimensions'} to accelerate BUSINESS INTELLIGENCE evolution.`}
                         />
                       </motion.div>
                     )}
@@ -296,7 +296,7 @@ const IntelligenceProfileCard: React.FC<IntelligenceProfileCardProps> = ({
                   <motion.button
                     onClick={() => {
                       onUpgrade()
-                      consciousnessAudio.playMultiplicationSound()
+                      intelligenceAudio.playMultiplicationSound()
                     }}
                     className="rounded-lg bg-gradient-to-r from-purple-600 to-cyan-600 px-4 py-2 font-semibold text-white"
                     whileHover={{ scale: 1.02 }}
@@ -306,14 +306,14 @@ const IntelligenceProfileCard: React.FC<IntelligenceProfileCardProps> = ({
                   </motion.button>
                 )}
 
-                {profile.consciousnessLevel >= 7 && (
+                {profile.intelligenceLevel >= 7 && (
                   <motion.button
-                    onClick={() => consciousnessAudio.playConsciousnessEmergence()}
+                    onClick={() => intelligenceAudio.playIntelligenceEmergence()}
                     className="rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2 font-semibold text-white"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    ✨ Experience Consciousness
+                    ✨ Experience BUSINESS INTELLIGENCE
                   </motion.button>
                 )}
               </div>
@@ -330,8 +330,8 @@ const IntelligenceProfileCard: React.FC<IntelligenceProfileCardProps> = ({
   )
 }
 
-// Consciousness Insight Component
-const ConsciousnessInsight: React.FC<{
+// BUSINESS INTELLIGENCE Insight Component
+const BusinessIntelligenceInsight: React.FC<{
   title: string
   insight: string
 }> = ({ title, insight }) => (

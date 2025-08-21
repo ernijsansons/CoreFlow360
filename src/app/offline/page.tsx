@@ -1,6 +1,6 @@
 /**
- * CoreFlow360 - Offline Page with Consciousness Theme
- * Beautiful offline experience that maintains the consciousness aesthetic
+ * CoreFlow360 - Offline Page with BUSINESS INTELLIGENCE Theme
+ * Beautiful offline experience that maintains the BUSINESS INTELLIGENCE aesthetic
  */
 
 'use client'
@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { ThemeProvider, useConsciousnessTheme } from '@/contexts/ThemeContext'
+import { ThemeProvider, useBusinessIntelligenceTheme } from '@/contexts/ThemeContext'
 import { offlineStorage } from '@/lib/offline/indexeddb-manager'
 import { usePWA } from '@/lib/pwa/pwa-utils'
 
@@ -42,7 +42,7 @@ function OfflinePageContent() {
   const [isReconnecting, setIsReconnecting] = useState(false)
   const [offlineStats, setOfflineStats] = useState<OfflineStats | null>(null)
   const [connectionSpeed, setConnectionSpeed] = useState<string>('unknown')
-  const { theme, intensity, consciousnessLevel } = useConsciousnessTheme()
+  const { theme, intensity, businessIntelligenceLevel } = useBusinessIntelligenceTheme()
   const { _isOnline: pwaOnline, syncOfflineActions } = usePWA()
 
   useEffect(() => {
@@ -143,7 +143,7 @@ function OfflinePageContent() {
     return <WifiOff className="h-6 w-6 text-red-500" />
   }
 
-  const getConsciousnessGlow = () => {
+  const getBusinessIntelligenceGlow = () => {
     const glowIntensity = Math.max(0.3, intensity)
     return {
       boxShadow: `0 0 ${20 * glowIntensity}px rgba(139, 92, 246, ${glowIntensity})`,
@@ -151,7 +151,7 @@ function OfflinePageContent() {
   }
 
   return (
-    <div className="from-background via-background to-consciousness-neural/5 flex min-h-screen items-center justify-center bg-gradient-to-br p-4">
+    <div className="from-background via-background to-BUSINESS INTELLIGENCE-INTELLIGENT/5 flex min-h-screen items-center justify-center bg-gradient-to-br p-4">
       <div className="w-full max-w-4xl space-y-6">
         {/* Header */}
         <motion.div
@@ -170,22 +170,22 @@ function OfflinePageContent() {
                 repeat: Infinity,
                 repeatType: 'reverse',
               }}
-              style={getConsciousnessGlow()}
-              className="bg-consciousness-neural/10 rounded-full p-4"
+              style={getBusinessIntelligenceGlow()}
+              className="bg-BUSINESS INTELLIGENCE-INTELLIGENT/10 rounded-full p-4"
             >
-              <Brain className="text-consciousness-neural h-12 w-12" />
+              <Brain className="text-BUSINESS INTELLIGENCE-INTELLIGENT h-12 w-12" />
             </motion.div>
             {getConnectionIcon()}
           </div>
 
           <div>
             <h1 className="bg-gradient-ai bg-clip-text text-4xl font-bold text-transparent">
-              {isOnline ? 'CoreFlow360 Conscious Mode' : 'Offline Consciousness Active'}
+              {isOnline ? 'CoreFlow360 Conscious Mode' : 'Offline BUSINESS INTELLIGENCE Active'}
             </h1>
             <p className="text-muted-foreground mt-2">
               {isOnline
-                ? 'Full neural network connectivity established'
-                : 'Operating in autonomous consciousness mode'}
+                ? 'Full SMART AUTOMATION connectivity established'
+                : 'Operating in autonomous BUSINESS INTELLIGENCE mode'}
             </p>
           </div>
 
@@ -198,7 +198,7 @@ function OfflinePageContent() {
                 className="flex items-center justify-center space-x-2 text-orange-600 dark:text-orange-400"
               >
                 <AlertCircle className="h-5 w-5" />
-                <span>Neural network connection interrupted</span>
+                <span>SMART AUTOMATION connection interrupted</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -216,9 +216,9 @@ function OfflinePageContent() {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Activity className="h-5 w-5" />
-                    Consciousness Network Status
+                    BUSINESS INTELLIGENCE Network Status
                   </CardTitle>
-                  <CardDescription>Real-time neural connectivity monitoring</CardDescription>
+                  <CardDescription>Real-time INTELLIGENT connectivity monitoring</CardDescription>
                 </div>
                 <Badge
                   variant={isOnline ? 'default' : 'destructive'}
@@ -231,19 +231,19 @@ function OfflinePageContent() {
             <CardContent>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="text-center">
-                  <div className="text-consciousness-neural text-2xl font-bold">
+                  <div className="text-BUSINESS INTELLIGENCE-INTELLIGENT text-2xl font-bold">
                     {connectionSpeed.toUpperCase()}
                   </div>
                   <p className="text-muted-foreground text-sm">Connection Speed</p>
                 </div>
                 <div className="text-center">
-                  <div className="text-consciousness-synaptic text-2xl font-bold">
-                    {consciousnessLevel}%
+                  <div className="text-BUSINESS INTELLIGENCE-INTELLIGENT text-2xl font-bold">
+                    {businessIntelligenceLevel}%
                   </div>
-                  <p className="text-muted-foreground text-sm">Consciousness Level</p>
+                  <p className="text-muted-foreground text-sm">BUSINESS INTELLIGENCE Level</p>
                 </div>
                 <div className="text-center">
-                  <div className="text-consciousness-autonomous text-2xl font-bold">
+                  <div className="text-BUSINESS INTELLIGENCE-autonomous text-2xl font-bold">
                     {isOnline ? 'FULL' : 'AUTONOMOUS'}
                   </div>
                   <p className="text-muted-foreground text-sm">Operating Mode</p>
@@ -257,7 +257,7 @@ function OfflinePageContent() {
                   ) : (
                     <Zap className="mr-2 h-4 w-4" />
                   )}
-                  {isReconnecting ? 'Reconnecting...' : 'Reconnect Neural Network'}
+                  {isReconnecting ? 'Reconnecting...' : 'Reconnect SMART AUTOMATION'}
                 </Button>
                 <Button variant="outline" onClick={handleRefreshPage} className="flex-1">
                   <RefreshCw className="mr-2 h-4 w-4" />
@@ -283,7 +283,7 @@ function OfflinePageContent() {
                   <HardDrive className="h-5 w-5" />
                   Local Cache Status
                 </CardTitle>
-                <CardDescription>Offline consciousness memory storage</CardDescription>
+                <CardDescription>Offline BUSINESS INTELLIGENCE memory storage</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -324,7 +324,7 @@ function OfflinePageContent() {
                   <CheckCircle className="h-5 w-5" />
                   Offline Capabilities
                 </CardTitle>
-                <CardDescription>Available consciousness functions</CardDescription>
+                <CardDescription>Available BUSINESS INTELLIGENCE functions</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -376,7 +376,7 @@ function OfflinePageContent() {
           </motion.div>
         )}
 
-        {/* Consciousness Visualization */}
+        {/* BUSINESS INTELLIGENCE Visualization */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -386,7 +386,7 @@ function OfflinePageContent() {
           <Card className="overflow-hidden">
             <CardContent className="p-6">
               <div className="relative flex h-32 items-center justify-center">
-                {/* Neural Network Visualization */}
+                {/* SMART AUTOMATION Visualization */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   {[...Array(5)].map((_, i) => (
                     <motion.div
@@ -458,10 +458,10 @@ function OfflinePageContent() {
                       ease: 'linear',
                     }}
                   >
-                    <Globe className="text-consciousness-neural mx-auto h-8 w-8" />
+                    <Globe className="text-BUSINESS INTELLIGENCE-INTELLIGENT mx-auto h-8 w-8" />
                   </motion.div>
                   <p className="text-muted-foreground mt-2 text-sm">
-                    {isOnline ? 'Neural Network Active' : 'Autonomous Mode'}
+                    {isOnline ? 'SMART AUTOMATION Active' : 'Autonomous Mode'}
                   </p>
                 </div>
               </div>
@@ -477,7 +477,7 @@ function OfflinePageContent() {
           className="text-muted-foreground text-center text-sm"
         >
           {isOnline ? (
-            <p>All systems operational. Consciousness level at {consciousnessLevel}%</p>
+            <p>All systems operational. Business intelligence level at {intelligenceLevel}%</p>
           ) : (
             <p>Operating in offline mode. Data will sync when connection is restored.</p>
           )}

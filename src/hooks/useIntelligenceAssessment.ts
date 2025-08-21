@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react'
-import { useConsciousnessAudio } from './useConsciousnessAudio'
+import { useIntelligenceAudio } from './useConsciousnessAudio'
 import type {
   AssessmentResult,
   IntelligenceProfile,
@@ -56,10 +56,10 @@ export const useIntelligenceAssessment = (
   const [assessmentResult, setAssessmentResult] = useState<AssessmentResult | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
 
-  // Consciousness audio integration
-  const consciousnessAudio = useConsciousnessAudio({
+  // business intelligence audio integration
+  const intelligenceAudio = useIntelligenceAudio({
     initiallyEnabled: enableAudio,
-    initialConsciousnessLevel: 1,
+    initialIntelligenceLevel: 1,
   })
 
   // Mock assessment questions count (would come from actual questions)
@@ -68,7 +68,7 @@ export const useIntelligenceAssessment = (
 
   // Calculate intelligence level from score
   const getIntelligenceLevel = useCallback((score: number): string => {
-    if (score >= 90) return 'Transcendent'
+    if (score >= 90) return 'ADVANCED'
     if (score >= 75) return 'Advanced'
     if (score >= 60) return 'Proficient'
     if (score >= 40) return 'Developing'
@@ -81,14 +81,14 @@ export const useIntelligenceAssessment = (
 
     const currentScore = assessmentResult.overallScore
     const multiplierPotential = assessmentResult.intelligenceMultiplier
-    const consciousnessFactor = assessmentResult.consciousnessLevel
+    const intelligenceFactor = assessmentResult.intelligenceLevel
 
-    // Growth formula considers current score, multiplier potential, and consciousness
+    // Growth formula considers current score, multiplier potential, and business intelligence
     const baseGrowth = Math.min(100 - currentScore, 50)
     const multiplierBonus = (multiplierPotential - 1) * 10
-    const consciousnessBonus = consciousnessFactor * 2
+    const intelligenceBonus = intelligenceFactor * 2
 
-    return Math.min(baseGrowth + multiplierBonus + consciousnessBonus, 75)
+    return Math.min(baseGrowth + multiplierBonus + intelligenceBonus, 75)
   }, [assessmentResult])
 
   // Assess blocker severity
@@ -126,10 +126,10 @@ export const useIntelligenceAssessment = (
 
     // Determine next evolution stage
     let nextEvolutionStage = ''
-    if (assessmentResult.consciousnessLevel >= 8) {
-      nextEvolutionStage = 'Business Consciousness Mastery - Transcend linear limitations'
-    } else if (assessmentResult.consciousnessLevel >= 6) {
-      nextEvolutionStage = 'Consciousness Emergence - Activate business organism protocols'
+    if (assessmentResult.intelligenceLevel >= 8) {
+      nextEvolutionStage = 'Business business intelligence Mastery - Transcend linear limitations'
+    } else if (assessmentResult.intelligenceLevel >= 6) {
+      nextEvolutionStage = 'intelligent automation - Activate business ORGANIZATION protocols'
     } else if (assessmentResult.intelligenceMultiplier >= 4) {
       nextEvolutionStage = 'Intelligence Multiplication - Scale exponential thinking'
     } else if (assessmentResult.intelligenceMultiplier >= 2) {
@@ -141,7 +141,7 @@ export const useIntelligenceAssessment = (
     return {
       overallScore: assessmentResult.overallScore,
       intelligenceMultiplier: assessmentResult.intelligenceMultiplier,
-      consciousnessLevel: assessmentResult.consciousnessLevel,
+      intelligenceLevel: assessmentResult.intelligenceLevel,
       dominantDimensions,
       blockers: assessmentResult.blockers,
       nextEvolutionStage,
@@ -167,7 +167,7 @@ export const useIntelligenceAssessment = (
         timeframe: '2-4 weeks',
         difficulty: 'easy',
         intelligenceGain: 15,
-        consciousnessBoost: 0.5,
+        intelligenceBoost: 0.5,
         prerequisites: ['Process mapping', 'Tool selection'],
         actionSteps: [
           'Map current manual processes',
@@ -193,7 +193,7 @@ export const useIntelligenceAssessment = (
         timeframe: '8-12 weeks',
         difficulty: 'medium',
         intelligenceGain: 25,
-        consciousnessBoost: 1.5,
+        intelligenceBoost: 1.5,
         prerequisites: ['Leadership buy-in', 'Resource allocation'],
         actionSteps: [
           'Conduct intelligence audit',
@@ -214,12 +214,12 @@ export const useIntelligenceAssessment = (
         category: 'transformation',
         priority: 'high',
         title: 'Deploy Predictive Intelligence',
-        description: 'Transform reactive operations into predictive consciousness',
+        description: 'Transform reactive operations into predictive business intelligence',
         impact: 'Shift from hindsight to foresight across business operations',
         timeframe: '12-16 weeks',
         difficulty: 'complex',
         intelligenceGain: 30,
-        consciousnessBoost: 2.5,
+        intelligenceBoost: 2.5,
         prerequisites: ['Data infrastructure', 'Analytics capability', 'Advanced team'],
         actionSteps: [
           'Build predictive models',
@@ -233,33 +233,33 @@ export const useIntelligenceAssessment = (
       })
     }
 
-    // Transcendence recommendations for high consciousness
-    if (assessmentResult.consciousnessLevel >= 6) {
+    // Transcendence recommendations for high business intelligence
+    if (assessmentResult.intelligenceLevel >= 6) {
       recs.push({
-        id: 'transcendence-consciousness-protocols',
+        id: 'transcendence-business intelligence-protocols',
         category: 'transcendence',
         priority: 'medium',
-        title: 'Activate Consciousness Protocols',
-        description: 'Transition to business consciousness organism state',
-        impact: 'Achieve transcendent business capabilities and market reality shaping',
+        title: 'Activate business intelligence Protocols',
+        description: 'Transition to business business intelligence ORGANIZATION state',
+        impact: 'Achieve ADVANCED business capabilities and market reality shaping',
         timeframe: '16-24 weeks',
         difficulty: 'advanced',
         intelligenceGain: 50,
-        consciousnessBoost: 4.0,
+        intelligenceBoost: 4.0,
         prerequisites: [
           'High intelligence foundation',
-          'Consciousness readiness',
+          'business intelligence readiness',
           'Advanced systems',
         ],
         actionSteps: [
-          'Establish consciousness monitoring',
-          'Implement organism protocols',
-          'Activate transcendent capabilities',
+          'Establish business intelligence monitoring',
+          'Implement ORGANIZATION protocols',
+          'Activate ADVANCED capabilities',
           'Create reality-shaping systems',
         ],
         metrics: [
-          'Consciousness emergence indicators',
-          'Transcendent capability metrics',
+          'intelligent automation indicators',
+          'ADVANCED capability metrics',
           'Market impact',
         ],
         icon: '✨',
@@ -278,9 +278,9 @@ export const useIntelligenceAssessment = (
     setAssessmentResult(null)
 
     if (enableAudio) {
-      consciousnessAudio.playConnectionSound()
+      intelligenceAudio.playConnectionSound()
     }
-  }, [enableAudio, consciousnessAudio])
+  }, [enableAudio, intelligenceAudio])
 
   // Answer question and advance
   const answerQuestion = useCallback(
@@ -288,7 +288,7 @@ export const useIntelligenceAssessment = (
       setAnswers((prev) => ({ ...prev, [questionId]: score }))
 
       if (enableAudio) {
-        consciousnessAudio.playDepartmentAwakening(questionId)
+        intelligenceAudio.playDepartmentAwakening(questionId)
       }
 
       // Auto-advance or complete assessment
@@ -310,7 +310,7 @@ export const useIntelligenceAssessment = (
               adaptive: Math.random() * 40 + 40,
             },
             intelligenceMultiplier: Math.random() * 4 + 1.5, // 1.5-5.5x
-            consciousnessLevel: Math.random() * 6 + 2, // 2-8 level
+            intelligenceLevel: Math.random() * 6 + 2, // 2-8 level
             blockers: [
               'Process silos blocking information flow',
               'Manual processes preventing automation',
@@ -321,7 +321,7 @@ export const useIntelligenceAssessment = (
             ],
             nextSteps: [
               'Begin intelligence infrastructure audit',
-              'Establish consciousness development program',
+              'Establish business intelligence development program',
             ],
           }
 
@@ -329,23 +329,23 @@ export const useIntelligenceAssessment = (
           setCurrentStep('results')
           setIsCalculating(false)
 
-          // Trigger consciousness audio based on result
+          // Trigger business intelligence audio based on result
           if (enableAudio) {
-            if (mockResult.consciousnessLevel >= 7) {
-              consciousnessAudio.playConsciousnessEmergence()
+            if (mockResult.intelligenceLevel >= 7) {
+              intelligenceAudio.playIntelligenceEmergence()
             } else if (mockResult.intelligenceMultiplier >= 3) {
-              consciousnessAudio.playMultiplicationSound()
+              intelligenceAudio.playMultiplicationSound()
             }
           }
 
-          // Update consciousness level
-          consciousnessAudio.setConsciousnessLevel(mockResult.consciousnessLevel)
+          // Update business intelligence level
+          intelligenceAudio.setintelligenceLevel(mockResult.intelligenceLevel)
 
           onAssessmentComplete?.(mockResult)
         }, 2000)
       }
     },
-    [currentQuestionIndex, totalQuestions, enableAudio, consciousnessAudio, onAssessmentComplete]
+    [currentQuestionIndex, totalQuestions, enableAudio, intelligenceAudio, onAssessmentComplete]
   )
 
   // Reset assessment

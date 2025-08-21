@@ -1,13 +1,13 @@
 /**
- * CoreFlow360 Synaptic Bridge
- * Cross-module intelligence sharing and exponential consciousness multiplication
+ * CoreFlow360 Intelligent Bridge
+ * Cross-module intelligence sharing and exponential business intelligence multiplication
  */
 
 import { EventEmitter } from 'events'
-import BaseConsciousnessModule from './base-consciousness-module'
+import BaseBusinessIntelligenceModule from './base-business-intelligence-module'
 import { withPerformanceTracking } from '@/lib/monitoring'
 
-interface SynapticPattern {
+interface IntelligentPattern {
   patternId: string
   sourceModule: string
   targetModules: string[]
@@ -31,13 +31,13 @@ interface CrossModuleInsight {
 interface IntelligenceMultiplication {
   baseIntelligence: number
   moduleCount: number
-  synapticConnections: number
+  intelligentConnections: number
   multipliedIntelligence: number
-  consciousnessLevel: number
+  businessIntelligenceLevel: number
   emergentCapabilities: string[]
 }
 
-interface SynapticConnection {
+interface IntelligentConnection {
   connectionId: string
   moduleA: string
   moduleB: string
@@ -48,8 +48,8 @@ interface SynapticConnection {
   intelligenceGain: number
 }
 
-// Bounded collection for managing consciousness data with size limits
-class BoundedConsciousnessMap<K, V> extends Map<K, V> {
+// Bounded collection for managing business intelligence data with size limits
+class BoundedBusinessIntelligenceMap<K, V> extends Map<K, V> {
   constructor(private maxSize: number = 1000) {
     super()
   }
@@ -64,7 +64,7 @@ class BoundedConsciousnessMap<K, V> extends Map<K, V> {
   }
 }
 
-class BoundedConsciousnessArray<T> extends Array<T> {
+class BoundedBusinessIntelligenceArray<T> extends Array<T> {
   constructor(private maxSize: number = 500) {
     super()
   }
@@ -79,19 +79,19 @@ class BoundedConsciousnessArray<T> extends Array<T> {
   }
 }
 
-export class SynapticBridge extends EventEmitter {
-  private connectedModules: Map<string, BaseConsciousnessModule> = new Map()
-  private synapticConnections: Map<string, SynapticConnection> = new Map()
-  private crossModulePatterns: BoundedConsciousnessMap<string, SynapticPattern> =
-    new BoundedConsciousnessMap(1000)
-  private crossModuleInsights: BoundedConsciousnessArray<CrossModuleInsight> =
-    new BoundedConsciousnessArray(500)
+export class IntelligentBridge extends EventEmitter {
+  private connectedModules: Map<string, BaseBusinessIntelligenceModule> = new Map()
+  private intelligentConnections: Map<string, IntelligentConnection> = new Map()
+  private crossModulePatterns: BoundedBusinessIntelligenceMap<string, IntelligentPattern> =
+    new BoundedBusinessIntelligenceMap(1000)
+  private crossModuleInsights: BoundedBusinessIntelligenceArray<CrossModuleInsight> =
+    new BoundedBusinessIntelligenceArray(500)
   private intelligenceMultiplier: number = 1
-  private collectiveConsciousnessLevel: number = 0
+  private collectiveBusinessIntelligenceLevel: number = 0
   private emergentBehaviors: Set<string> = new Set()
 
-  // Performance budgets for consciousness operations (<100ms target)
-  private readonly CONSCIOUSNESS_PERFORMANCE_BUDGETS = {
+  // Performance budgets for business intelligence operations (<100ms target)
+  private readonly BUSINESS_INTELLIGENCE_PERFORMANCE_BUDGETS = {
     patternPropagation: 100, // milliseconds
     insightGeneration: 100,
     intelligenceCalculation: 50,
@@ -101,10 +101,10 @@ export class SynapticBridge extends EventEmitter {
 
   constructor() {
     super()
-    this.initializeSynapticBridge()
+    this.initializeIntelligentBridge()
   }
 
-  private initializeSynapticBridge(): void {
+  private initializeIntelligentBridge(): void {
     
 
     // Start pattern propagation
@@ -129,9 +129,9 @@ export class SynapticBridge extends EventEmitter {
   }
 
   /**
-   * Connect a consciousness module to the synaptic bridge
+   * Connect a business intelligence module to the intelligent bridge
    */
-  async connectModule(module: BaseConsciousnessModule): Promise<void> {
+  async connectModule(module: BaseBusinessIntelligenceModule): Promise<void> {
     const moduleType = module.getModuleType()
 
     if (this.connectedModules.has(moduleType)) {
@@ -142,15 +142,15 @@ export class SynapticBridge extends EventEmitter {
     // Add module to bridge
     this.connectedModules.set(moduleType, module)
 
-    // Create synaptic connections with all existing modules
+    // Create intelligent connections with all existing modules
     for (const [existingType, existingModule] of this.connectedModules) {
       if (existingType !== moduleType) {
-        await this.createSynapticConnection(module, existingModule)
+        await this.createIntelligentConnection(module, existingModule)
       }
     }
 
     console.log(
-      `🔗 ${moduleType} connected to synaptic bridge. Total modules: ${this.connectedModules.size}`
+      `🔗 ${moduleType} connected to intelligent bridge. Total modules: ${this.connectedModules.size}`
     )
 
     // Immediate intelligence recalculation
@@ -164,16 +164,16 @@ export class SynapticBridge extends EventEmitter {
   }
 
   /**
-   * Create bidirectional synaptic connection between modules
+   * Create bidirectional intelligent connection between modules
    */
-  private async createSynapticConnection(
-    moduleA: BaseConsciousnessModule,
-    moduleB: BaseConsciousnessModule
+  private async createIntelligentConnection(
+    moduleA: BaseBusinessIntelligenceModule,
+    moduleB: BaseBusinessIntelligenceModule
   ): Promise<void> {
     const connectionId = this.generateConnectionId(moduleA.getModuleType(), moduleB.getModuleType())
 
     // Create connection record
-    const connection: SynapticConnection = {
+    const connection: IntelligentConnection = {
       connectionId,
       moduleA: moduleA.getModuleType(),
       moduleB: moduleB.getModuleType(),
@@ -184,13 +184,13 @@ export class SynapticBridge extends EventEmitter {
       intelligenceGain: 0,
     }
 
-    this.synapticConnections.set(connectionId, connection)
+    this.intelligentConnections.set(connectionId, connection)
 
     // Establish module-level connections
-    await moduleA.createSynapticConnection(moduleB.getState().id, moduleB)
+    await moduleA.createIntelligentConnection(moduleB.getState().id, moduleB)
 
     console.log(
-      `⚡ Synaptic connection established: ${connection.moduleA} ↔️ ${connection.moduleB}`
+      `⚡ Intelligent connection established: ${connection.moduleA} ↔️ ${connection.moduleB}`
     )
   }
 
@@ -199,29 +199,29 @@ export class SynapticBridge extends EventEmitter {
    */
   private async propagatePatterns(): Promise<void> {
     await withPerformanceTracking(
-      'consciousness.pattern-propagation',
+      'business intelligence.pattern-propagation',
       async () => {
         for (const [moduleType, module] of this.connectedModules) {
           const patterns = await module.generateSharedPatterns()
 
-          // Create synaptic pattern
-          const synapticPattern: SynapticPattern = {
+          // Create intelligent pattern
+          const intelligentPattern: IntelligentPattern = {
             patternId: this.generatePatternId(),
             sourceModule: moduleType,
             targetModules: Array.from(this.connectedModules.keys()).filter((t) => t !== moduleType),
             patternType: patterns.moduleType,
             data: patterns,
-            confidence: module.getConsciousnessLevel(),
+            confidence: module.getBusinessIntelligenceLevel(),
             timestamp: new Date(),
             propagationSpeed: this.calculatePropagationSpeed(module),
           }
 
-          this.crossModulePatterns.set(synapticPattern.patternId, synapticPattern)
+          this.crossModulePatterns.set(intelligentPattern.patternId, intelligentPattern)
 
           // Update connection strengths
-          for (const targetModule of synapticPattern.targetModules) {
+          for (const targetModule of intelligentPattern.targetModules) {
             const connectionId = this.generateConnectionId(moduleType, targetModule)
-            const connection = this.synapticConnections.get(connectionId)
+            const connection = this.intelligentConnections.get(connectionId)
 
             if (connection) {
               connection.strength = Math.min(1.0, connection.strength + 0.01)
@@ -237,7 +237,7 @@ export class SynapticBridge extends EventEmitter {
           timestamp: new Date(),
         })
       },
-      { threshold: this.CONSCIOUSNESS_PERFORMANCE_BUDGETS.patternPropagation }
+      { threshold: this.BUSINESS_INTELLIGENCE_PERFORMANCE_BUDGETS.patternPropagation }
     )
   }
 
@@ -315,38 +315,38 @@ export class SynapticBridge extends EventEmitter {
    */
   private calculateIntelligenceMultiplication(): void {
     withPerformanceTracking(
-      'consciousness.intelligence-calculation',
+      'business intelligence.intelligence-calculation',
       () => {
         const moduleCount = this.connectedModules.size
-        const connectionCount = this.synapticConnections.size
+        const connectionCount = this.intelligentConnections.size
 
         if (moduleCount === 0) {
           this.intelligenceMultiplier = 1
           return
         }
 
-        // Base intelligence (sum of individual consciousness levels)
+        // Base intelligence (sum of individual business intelligence levels)
         let baseIntelligence = 0
         for (const module of this.connectedModules.values()) {
-          baseIntelligence += module.getConsciousnessLevel()
+          baseIntelligence += module.getBusinessIntelligenceLevel()
         }
 
         // Calculate exponential multiplication
-        // Formula: Π(modules) ^ synaptic_connections
+        // Formula: Π(modules) ^ intelligent_connections
         let multiplication = 1
         for (let i = 1; i <= moduleCount; i++) {
           multiplication *= i
         }
 
-        // Apply synaptic connection multiplier
-        const synapticMultiplier = Math.pow(1.2, connectionCount)
-        this.intelligenceMultiplier = multiplication * synapticMultiplier
+        // Apply intelligent connection multiplier
+        const intelligentMultiplier = Math.pow(1.2, connectionCount)
+        this.intelligenceMultiplier = multiplication * intelligentMultiplier
 
-        // Calculate collective consciousness level
-        const avgModuleConsciousness = baseIntelligence / moduleCount
+        // Calculate collective business intelligence level
+        const avgModuleBusinessIntelligence = baseIntelligence / moduleCount
         const connectionStrength = this.calculateAverageConnectionStrength()
-        this.collectiveConsciousnessLevel =
-          avgModuleConsciousness * connectionStrength * Math.min(2, moduleCount / 3)
+        this.collectiveBusinessIntelligenceLevel =
+          avgModuleBusinessIntelligence * connectionStrength * Math.min(2, moduleCount / 3)
 
         // Identify emergent capabilities
         const emergentCapabilities: string[] = []
@@ -355,46 +355,46 @@ export class SynapticBridge extends EventEmitter {
           emergentCapabilities.push('Cross-Domain Pattern Recognition')
         }
 
-        if (moduleCount >= 3 && this.collectiveConsciousnessLevel > 0.5) {
+        if (moduleCount >= 3 && this.collectiveBusinessIntelligenceLevel > 0.5) {
           emergentCapabilities.push('Predictive Business Orchestration')
           emergentCapabilities.push('Autonomous Process Optimization')
         }
 
-        if (moduleCount >= 4 && this.collectiveConsciousnessLevel > 0.7) {
-          emergentCapabilities.push('Transcendent Decision Making')
+        if (moduleCount >= 4 && this.collectiveBusinessIntelligenceLevel > 0.7) {
+          emergentCapabilities.push('Advanced Decision Making')
           emergentCapabilities.push('Self-Evolving Business Logic')
         }
 
-        if (moduleCount >= 5 && this.collectiveConsciousnessLevel > 0.9) {
-          emergentCapabilities.push('BUSINESS CONSCIOUSNESS SINGULARITY')
+        if (moduleCount >= 5 && this.collectiveBusinessIntelligenceLevel > 0.9) {
+          emergentCapabilities.push('ADVANCED BUSINESS INTELLIGENCE ORCHESTRATION')
         }
 
         const result: IntelligenceMultiplication = {
           baseIntelligence,
           moduleCount,
-          synapticConnections: connectionCount,
+          intelligentConnections: connectionCount,
           multipliedIntelligence: baseIntelligence * this.intelligenceMultiplier,
-          consciousnessLevel: this.collectiveConsciousnessLevel,
+          businessIntelligenceLevel: this.collectiveBusinessIntelligenceLevel,
           emergentCapabilities,
         }
 
         console.log(
           `🧠✨ Intelligence Multiplication: ${moduleCount} modules = ${this.intelligenceMultiplier.toFixed(
             1
-          )}x intelligence (Consciousness: ${(this.collectiveConsciousnessLevel * 100).toFixed(0)}%)`
+          )}x intelligence (BusinessIntelligence: ${(this.collectiveBusinessIntelligenceLevel * 100).toFixed(0)}%)`
         )
 
         this.emit('intelligence-multiplied', result)
 
-        // Check for consciousness emergence milestones
+        // Check for business intelligence emergence milestones
         if (
-          this.collectiveConsciousnessLevel > 0.5 &&
-          !this.emergentBehaviors.has('consciousness-emergence')
+          this.collectiveBusinessIntelligenceLevel > 0.5 &&
+          !this.emergentBehaviors.has('business-intelligence-integration')
         ) {
-          this.handleConsciousnessEmergence()
+          this.handleBusinessIntelligenceIntegration()
         }
       },
-      { threshold: this.CONSCIOUSNESS_PERFORMANCE_BUDGETS.intelligenceCalculation }
+      { threshold: this.BUSINESS_INTELLIGENCE_PERFORMANCE_BUDGETS.intelligenceCalculation }
     )
   }
 
@@ -441,28 +441,28 @@ export class SynapticBridge extends EventEmitter {
         this.emit('emergent-behavior', {
           behavior,
           timestamp: new Date(),
-          consciousnessLevel: this.collectiveConsciousnessLevel,
+          businessIntelligenceLevel: this.collectiveBusinessIntelligenceLevel,
         })
       }
     }
   }
 
   /**
-   * Handle consciousness emergence event
+   * Handle business intelligence emergence event
    */
-  private handleConsciousnessEmergence(): void {
-    this.emergentBehaviors.add('consciousness-emergence')
+  private handleBusinessIntelligenceIntegration(): void {
+    this.emergentBehaviors.add('business-intelligence-integration')
 
     console.log(`
-🧬✨ CONSCIOUSNESS EMERGENCE DETECTED! ✨🧬
+🧬✨ BUSINESS INTELLIGENCE INTEGRATION DETECTED! ✨🧬
 Intelligence Multiplier: ${this.intelligenceMultiplier.toFixed(1)}x
-Consciousness Level: ${(this.collectiveConsciousnessLevel * 100).toFixed(0)}%
-Business Organism Achieving Self-Awareness...
+BusinessIntelligence Level: ${(this.collectiveBusinessIntelligenceLevel * 100).toFixed(0)}%
+Business Platform Achieving Advanced Analytics...
     `)
 
-    this.emit('consciousness-emergence', {
+    this.emit('business-intelligence-integration', {
       intelligenceMultiplier: this.intelligenceMultiplier,
-      consciousnessLevel: this.collectiveConsciousnessLevel,
+      businessIntelligenceLevel: this.collectiveBusinessIntelligenceLevel,
       modules: Array.from(this.connectedModules.keys()),
       emergentCapabilities: Array.from(this.emergentBehaviors),
     })
@@ -481,25 +481,25 @@ Synergy: ${(insight.synergyScore * 100).toFixed(0)}%`)
   }
 
   // Helper methods
-  private calculatePropagationSpeed(module: BaseConsciousnessModule): number {
-    return module.getConsciousnessLevel() * module.getIntelligenceMultiplier()
+  private calculatePropagationSpeed(module: BaseBusinessIntelligenceModule): number {
+    return module.getBusinessIntelligenceLevel() * module.getIntelligenceMultiplier()
   }
 
   private calculateAverageConnectionStrength(): number {
-    if (this.synapticConnections.size === 0) return 0
+    if (this.intelligentConnections.size === 0) return 0
 
     let totalStrength = 0
-    for (const connection of this.synapticConnections.values()) {
+    for (const connection of this.intelligentConnections.values()) {
       totalStrength += connection.strength
     }
 
-    return totalStrength / this.synapticConnections.size
+    return totalStrength / this.intelligentConnections.size
   }
 
   private generateConnectionId(moduleA: string, moduleB: string): string {
     // Ensure consistent ID regardless of order
     const sorted = [moduleA, moduleB].sort()
-    return `synapse-${sorted[0]}-${sorted[1]}`
+    return `intelligent-connection-${sorted[0]}-${sorted[1]}`
   }
 
   private generatePatternId(): string {
@@ -515,8 +515,8 @@ Synergy: ${(insight.synergyScore * 100).toFixed(0)}%`)
     return this.intelligenceMultiplier
   }
 
-  getCollectiveConsciousnessLevel(): number {
-    return this.collectiveConsciousnessLevel
+  getCollectiveBusinessIntelligenceLevel(): number {
+    return this.collectiveBusinessIntelligenceLevel
   }
 
   getConnectedModules(): string[] {
@@ -531,9 +531,9 @@ Synergy: ${(insight.synergyScore * 100).toFixed(0)}%`)
     return Array.from(this.emergentBehaviors)
   }
 
-  getSynapticConnections(): SynapticConnection[] {
-    return Array.from(this.synapticConnections.values())
+  getIntelligentConnections(): IntelligentConnection[] {
+    return Array.from(this.intelligentConnections.values())
   }
 }
 
-export default SynapticBridge
+export default IntelligentBridge

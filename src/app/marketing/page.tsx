@@ -3,7 +3,7 @@
 /**
  * Marketing Campaign Dashboard
  *
- * Central hub for managing consciousness-based marketing campaigns,
+ * Central hub for managing Business Intelligence-based marketing campaigns,
  * launch sequences, and teaser assets.
  */
 
@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   // TeaserCampaignAssets, // Disabled - missing dependency
   LaunchSequenceOrchestrator,
-  ConsciousnessMarketingFramework,
+  // BusinessIntelligenceMarketingFramework, // TODO: Create this component
   type CampaignPhase,
 } from '../../components/marketing'
 
@@ -27,7 +27,7 @@ const MarketingPage: React.FC = () => {
     totalAwareness: 0,
     totalEngagement: 0,
     totalConversions: 0,
-    consciousnessLevel: 1,
+    businessIntelligenceLevel: 1,
   })
 
   const handlePhaseChange = (_phase: CampaignPhase) => {}
@@ -55,7 +55,7 @@ const MarketingPage: React.FC = () => {
     },
     {
       id: 'framework',
-      name: 'Consciousness Framework',
+      name: 'Business Intelligence Framework',
       icon: '🧠',
       description: 'Marketing methodology',
     },
@@ -69,7 +69,7 @@ const MarketingPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-thin text-white">Marketing Command Center</h1>
-              <p className="text-gray-400">Consciousness-awakening campaign orchestration</p>
+              <p className="text-gray-400">Business Intelligence-awakening campaign orchestration</p>
             </div>
             <div className="flex items-center space-x-6">
               <div className="text-center">
@@ -92,9 +92,9 @@ const MarketingPage: React.FC = () => {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-indigo-400">
-                  {campaignMetrics.consciousnessLevel.toFixed(1)}
+                  {campaignMetrics.businessIntelligenceLevel.toFixed(1)}
                 </div>
-                <div className="text-xs text-gray-400">Consciousness Level</div>
+                <div className="text-xs text-gray-400">Business Intelligence Level</div>
               </div>
             </div>
           </div>
@@ -158,7 +158,7 @@ const MarketingPage: React.FC = () => {
                   <div>
                     <h2 className="text-2xl font-bold text-white">Campaign Asset Library</h2>
                     <p className="text-gray-400">
-                      Revolutionary teaser assets for consciousness awakening
+                      Revolutionary teaser assets for Business Intelligence awakening
                     </p>
                   </div>
                   <div className="flex space-x-2">
@@ -230,7 +230,10 @@ const MarketingPage: React.FC = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <ConsciousnessMarketingFramework showAnalytics={true} interactiveDemo={true} />
+              <div className="p-8 text-center text-gray-400">
+                <h3 className="text-xl mb-2">Marketing Framework</h3>
+                <p>Business Intelligence Marketing Framework - Coming Soon</p>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -256,7 +259,7 @@ const CampaignDashboard: React.FC<{
             color: 'text-cyan-400',
             icon: '🚀',
           },
-          { title: 'Consciousness Level', value: '2.4', color: 'text-purple-400', icon: '🧠' },
+          { title: 'Business Intelligence Level', value: '2.4', color: 'text-purple-400', icon: '🧠' },
           { title: 'Market Readiness', value: '73%', color: 'text-green-400', icon: '📈' },
           { title: 'Launch Timeline', value: '42 days', color: 'text-indigo-400', icon: '📅' },
         ].map((stat, index) => (
@@ -283,7 +286,7 @@ const CampaignDashboard: React.FC<{
           {[
             {
               phase: 'awakening',
-              name: 'Consciousness Awakening',
+              name: 'Business Intelligence Awakening',
               status: 'completed',
               icon: '😴',
               color: 'text-green-400',
@@ -297,14 +300,14 @@ const CampaignDashboard: React.FC<{
             },
             {
               phase: 'transformation',
-              name: 'Business Consciousness',
+              name: 'Business Business Intelligence',
               status: 'upcoming',
               icon: '🚀',
               color: 'text-purple-400',
             },
             {
               phase: 'emergence',
-              name: 'Consciousness Emergence',
+              name: 'intelligent automation',
               status: 'planned',
               icon: '✨',
               color: 'text-indigo-400',
@@ -338,7 +341,7 @@ const CampaignDashboard: React.FC<{
         {[
           {
             title: 'Launch Asset Generator',
-            description: 'Create consciousness-awakening campaign assets',
+            description: 'Create Business Intelligence-awakening campaign assets',
             action: () => onViewChange('teaser'),
             icon: '🎬',
             color: 'from-cyan-600 to-blue-600',
@@ -351,7 +354,7 @@ const CampaignDashboard: React.FC<{
             color: 'from-purple-600 to-indigo-600',
           },
           {
-            title: 'Consciousness Framework',
+            title: 'Business Intelligence Framework',
             description: 'Apply revolutionary marketing methodology',
             action: () => onViewChange('framework'),
             icon: '🧠',

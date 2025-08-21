@@ -21,25 +21,7 @@ vi.mock('framer-motion', () => ({
     div: ({ children, ...props }: any) => (
       <div
         {...props}
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
+        tabIndex={0}
       >
         {children}
       </div>
@@ -47,24 +29,6 @@ vi.mock('framer-motion', () => ({
     button: ({ children, ...props }: any) => (
       <button
         {...props}
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
-        aria-label="Button"
         aria-label="Button"
       >
         {children}
@@ -94,27 +58,7 @@ describe('Dynamic Module UI Rendering', () => {
 
       render(
         <ModuleGatedFeature requiredModule="crm">
-          <div
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-          >
+          <div tabIndex={0}>
             CRM Feature Content
           </div>
         </ModuleGatedFeature>
@@ -137,27 +81,7 @@ describe('Dynamic Module UI Rendering', () => {
 
       render(
         <ModuleGatedFeature requiredModule="accounting">
-          <div
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-          >
+          <div tabIndex={0}>
             Accounting Feature
           </div>
         </ModuleGatedFeature>
@@ -184,52 +108,12 @@ describe('Dynamic Module UI Rendering', () => {
         <ModuleGatedFeature
           requiredModule="hr"
           fallback={
-            <div
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-              tabindex="0"
-            >
+            <div tabIndex={0}>
               Custom HR Upgrade Message
             </div>
           }
         >
-          <div
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-          >
+          <div tabIndex={0}>
             HR Feature
           </div>
         </ModuleGatedFeature>
@@ -252,27 +136,7 @@ describe('Dynamic Module UI Rendering', () => {
 
       render(
         <ModuleGatedFeature requiredModule={['crm', 'accounting']}>
-          <div
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-            tabindex="0"
-          >
+          <div tabIndex={0}>
             Cross-Module Feature
           </div>
         </ModuleGatedFeature>

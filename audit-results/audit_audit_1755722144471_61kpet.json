@@ -1,0 +1,23 @@
+{
+  "audit_id": "audit_1755722144471_61kpet",
+  "audit_name": "input_validation_audit",
+  "execution_time": 0,
+  "findings": [],
+  "metrics": {
+    "issues_found": 0,
+    "critical_issues": 0,
+    "technical_debt_score": 0,
+    "maintainability_score": 100,
+    "security_score": 100,
+    "performance_score": 100
+  },
+  "chain_of_thought": [
+    "Loading audit template: input_validation_audit",
+    "Context loaded: ctx_1755722144457_1ohb7b",
+    "Analyzing: code, configuration, patterns",
+    "Executing generic audit: input_validation_audit",
+    "Calculated metrics: 6 metrics",
+    "Confidence score: 13%"
+  ],
+  "confidence_score": 13
+}

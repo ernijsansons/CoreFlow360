@@ -144,7 +144,7 @@ describe('Database Tenant Isolation', () => {
       const tenant1Subscription = {
         id: 'sub-1',
         userId: 'user-1',
-        tier: 'synaptic',
+        tier: 'INTELLIGENT',
         status: 'active',
         user: { tenantId: tenant1Id },
       }
@@ -152,7 +152,7 @@ describe('Database Tenant Isolation', () => {
       const tenant2Subscription = {
         id: 'sub-2',
         userId: 'user-2',
-        tier: 'neural',
+        tier: 'INTELLIGENT',
         status: 'active',
         user: { tenantId: tenant2Id },
       }
@@ -176,8 +176,8 @@ describe('Database Tenant Isolation', () => {
         where: { user: { tenantId: tenant2Id } },
       })
 
-      expect(sub1?.tier).toBe('synaptic')
-      expect(sub2?.tier).toBe('neural')
+      expect(sub1?.tier).toBe('INTELLIGENT')
+      expect(sub2?.tier).toBe('INTELLIGENT')
       expect(sub1?.id).not.toBe(sub2?.id)
     })
 

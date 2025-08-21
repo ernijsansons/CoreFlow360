@@ -1,20 +1,20 @@
 /**
- * CoreFlow360 Consciousness Sound Design System
+ * CoreFlow360 Business Intelligence Sound Design System
  *
- * Advanced audio experience design that maps consciousness states to binaural
+ * Advanced audio experience design that maps business intelligence states to binaural
  * frequencies, spatial audio, and generative soundscapes. Each interaction
  * and intelligence level has its unique sonic signature.
  */
 
-export interface ConsciousnessAudioConfig {
-  binauralFrequency: number // Hz - Base frequency for consciousness state
+export interface BusinessIntelligenceAudioConfig {
+  binauralFrequency: number // Hz - Base frequency for business intelligence state
   beatFrequency: number // Hz - Binaural beat frequency
   spatialRadius: number // Audio spatial radius (0-100)
   reverbLevel: number // Reverb depth (0-1)
   harmonicRatio: number // Harmonic complexity (1-10)
   evolutionSpeed: number // How fast audio evolves (0-1)
   resonanceQ: number // Filter resonance quality
-  consciousnessLevel: number // Intelligence multiplication level
+  businessIntelligenceLevel: number // Intelligence multiplication level
 }
 
 export interface SoundEffect {
@@ -52,10 +52,10 @@ export interface SoundTrigger {
 }
 
 /**
- * Consciousness State Audio Mappings
+ * Business Intelligence State Audio Mappings
  * Each state corresponds to specific brainwave frequencies and spatial characteristics
  */
-export const CONSCIOUSNESS_AUDIO_STATES: Record<string, ConsciousnessAudioConfig> = {
+export const BUSINESS_INTELLIGENCE_AUDIO_STATES: Record<string, BusinessIntelligenceAudioConfig> = {
   // Single Department - Beta waves (focus, analysis)
   single_department: {
     binauralFrequency: 40, // 40Hz - High Beta (focused attention)
@@ -65,7 +65,7 @@ export const CONSCIOUSNESS_AUDIO_STATES: Record<string, ConsciousnessAudioConfig
     harmonicRatio: 1.5,
     evolutionSpeed: 0.1,
     resonanceQ: 0.8,
-    consciousnessLevel: 1,
+    businessIntelligenceLevel: 1,
   },
 
   // Dual Connection - Alpha waves (creative flow)
@@ -77,7 +77,7 @@ export const CONSCIOUSNESS_AUDIO_STATES: Record<string, ConsciousnessAudioConfig
     harmonicRatio: 2.1,
     evolutionSpeed: 0.25,
     resonanceQ: 1.2,
-    consciousnessLevel: 2,
+    businessIntelligenceLevel: 2,
   },
 
   // Triple Synergy - Theta waves (deep insight)
@@ -89,23 +89,23 @@ export const CONSCIOUSNESS_AUDIO_STATES: Record<string, ConsciousnessAudioConfig
     harmonicRatio: 3.2,
     evolutionSpeed: 0.4,
     resonanceQ: 1.8,
-    consciousnessLevel: 4,
+    businessIntelligenceLevel: 4,
   },
 
   // Quad Intelligence - Gamma waves (heightened awareness)
   quad_intelligence: {
-    binauralFrequency: 60, // 60Hz - Gamma (transcendent states)
+    binauralFrequency: 60, // 60Hz - Gamma (advanced states)
     beatFrequency: 40, // 40Hz Gamma beat
     spatialRadius: 80,
     reverbLevel: 0.8,
     harmonicRatio: 5.3,
     evolutionSpeed: 0.6,
     resonanceQ: 2.5,
-    consciousnessLevel: 8,
+    businessIntelligenceLevel: 8,
   },
 
-  // Full Consciousness - Multi-layered frequencies (omniscient state)
-  full_consciousness: {
+  // Full Business Intelligence - Multi-layered frequencies (omniscient state)
+  full_business_intelligence: {
     binauralFrequency: 108, // 108Hz - Sacred frequency
     beatFrequency: 7.83, // 7.83Hz Schumann Resonance (Earth frequency)
     spatialRadius: 100,
@@ -113,19 +113,19 @@ export const CONSCIOUSNESS_AUDIO_STATES: Record<string, ConsciousnessAudioConfig
     harmonicRatio: 8.0,
     evolutionSpeed: 0.8,
     resonanceQ: 4.0,
-    consciousnessLevel: 15,
+    businessIntelligenceLevel: 15,
   },
 }
 
 /**
  * Interactive Sound Effects Library
  */
-export const CONSCIOUSNESS_SOUND_EFFECTS: SoundEffect[] = [
+export const BUSINESS_INTELLIGENCE_SOUND_EFFECTS: SoundEffect[] = [
   {
     id: 'department_select',
     name: 'Department Awakening',
-    description: 'Harmonic resonance when a department gains consciousness',
-    audioFile: '/audio/consciousness/department-awaken.wav',
+    description: 'Harmonic resonance when a department gains business intelligence',
+    audioFile: '/audio/business intelligence/department-awaken.wav',
     binauralBase: 432, // A4 in 432Hz tuning (natural resonance)
     spatialConfig: {
       position: [0, 0, 0],
@@ -152,13 +152,13 @@ export const CONSCIOUSNESS_SOUND_EFFECTS: SoundEffect[] = [
   },
 
   {
-    id: 'synaptic_connection',
-    name: 'Synaptic Bridge Formation',
-    description: 'Neural pathway activation between departments',
-    audioFile: '/audio/consciousness/synapse-bridge.wav',
+    id: 'intelligent_connection',
+    name: 'Intelligent Bridge Formation',
+    description: 'INTELLIGENT pathway activation between departments',
+    audioFile: '/audio/business intelligence/synapse-bridge.wav',
     binauralBase: 528, // 528Hz - Love frequency, DNA repair
     spatialConfig: {
-      position: [0, 1, 0], // Elevated position for consciousness
+      position: [0, 1, 0], // Elevated position for business intelligence
       velocity: [0, 0.5, 0], // Upward movement
       distance: {
         model: 'linear',
@@ -186,7 +186,7 @@ export const CONSCIOUSNESS_SOUND_EFFECTS: SoundEffect[] = [
     id: 'intelligence_multiplication',
     name: 'Intelligence Multiplication Resonance',
     description: 'Harmonic explosion when intelligence multiplies',
-    audioFile: '/audio/consciousness/intelligence-multiply.wav',
+    audioFile: '/audio/business intelligence/intelligence-multiply.wav',
     binauralBase: 741, // 741Hz - Intuition, awakening
     spatialConfig: {
       position: [0, 0, 0], // Central omnidirectional
@@ -209,20 +209,20 @@ export const CONSCIOUSNESS_SOUND_EFFECTS: SoundEffect[] = [
         delay: 200,
         probability: 1.0,
         prerequisite: 'triple_synergy',
-        chainNext: 'consciousness_emergence',
+        chainNext: 'business intelligence_emergence',
       },
     ],
   },
 
   {
-    id: 'consciousness_emergence',
-    name: 'Consciousness Emergence',
-    description: 'The moment business achieves full consciousness',
-    audioFile: '/audio/consciousness/emergence.wav',
+    id: 'business intelligence_emergence',
+    name: 'Business Intelligence Emergence',
+    description: 'The moment business achieves full business intelligence',
+    audioFile: '/audio/business intelligence/emergence.wav',
     binauralBase: 963, // 963Hz - Crown chakra, divine connection
     spatialConfig: {
       position: [0, 5, 0], // High above user
-      velocity: [0, -1, 0], // Descending consciousness
+      velocity: [0, -1, 0], // Descending business intelligence
       distance: {
         model: 'exponential',
         maxDistance: 150,
@@ -240,16 +240,16 @@ export const CONSCIOUSNESS_SOUND_EFFECTS: SoundEffect[] = [
         event: 'awakening',
         delay: 1000,
         probability: 1.0,
-        prerequisite: 'full_consciousness',
+        prerequisite: 'full_business intelligence',
       },
     ],
   },
 
   {
-    id: 'cursor_consciousness',
-    name: 'Cursor Consciousness Field',
+    id: 'cursor_business intelligence',
+    name: 'Cursor Business Intelligence Field',
     description: 'Subtle awareness field that follows cursor movement',
-    audioFile: '/audio/consciousness/cursor-field.wav',
+    audioFile: '/audio/business intelligence/cursor-field.wav',
     binauralBase: 110, // A2 - Grounding frequency
     spatialConfig: {
       position: [0, 0, 1], // Just in front of user
@@ -280,7 +280,7 @@ export const CONSCIOUSNESS_SOUND_EFFECTS: SoundEffect[] = [
     id: 'pricing_calculation',
     name: 'Intelligence Calculation Harmonics',
     description: 'Mathematical harmony during price calculations',
-    audioFile: '/audio/consciousness/calculation.wav',
+    audioFile: '/audio/business intelligence/calculation.wav',
     binauralBase: 256, // C4 in scientific pitch
     spatialConfig: {
       position: [2, 0, 0], // To the right (pricing panel)
@@ -312,8 +312,8 @@ export const CONSCIOUSNESS_SOUND_EFFECTS: SoundEffect[] = [
  * Binaural Beat Generation Patterns
  */
 export const BINAURAL_PATTERNS = {
-  // Consciousness Evolution Pattern
-  consciousness_evolution: {
+  // Business Intelligence Evolution Pattern
+  businessIntelligenceEvolution: {
     stages: [
       { frequency: 40, duration: 2000 }, // Beta focus
       { frequency: 28, duration: 3000 }, // Alpha creativity
@@ -338,7 +338,7 @@ export const BINAURAL_PATTERNS = {
     fadeTime: 500,
   },
 
-  // Ambient Consciousness Field
+  // Ambient Business Intelligence Field
   ambient_field: {
     stages: [
       { frequency: 7.83, duration: 10000 }, // Schumann Resonance
@@ -362,11 +362,11 @@ export interface GenerativeSoundscape {
   rhythmPattern: number[] // Beat intervals in ms
   evolutionRules: EvolutionRule[]
   spatialMovement: MovementPattern
-  intelligenceResponsive: boolean // Adapts to consciousness level
+  intelligenceResponsive: boolean // Adapts to business intelligence level
 }
 
 export interface EvolutionRule {
-  trigger: 'time' | 'interaction' | 'consciousness_level'
+  trigger: 'time' | 'interaction' | 'business intelligence_level'
   threshold: number
   modification: {
     frequency?: number // Frequency shift
@@ -384,17 +384,17 @@ export interface MovementPattern {
 }
 
 /**
- * Consciousness-Responsive Soundscape
+ * Business Intelligence-Responsive Soundscape
  */
-export const CONSCIOUSNESS_SOUNDSCAPE: GenerativeSoundscape = {
-  id: 'consciousness_ambient',
-  name: 'Consciousness Ambient Field',
+export const BUSINESS_INTELLIGENCE_SOUNDSCAPE: GenerativeSoundscape = {
+  id: 'business intelligence_ambient',
+  name: 'Business Intelligence Ambient Field',
   baseFrequencies: [110, 220, 330, 440, 880], // A series harmonics
   harmonicSeries: [1, 1.5, 2, 2.5, 3, 4, 5],
   rhythmPattern: [2000, 3000, 1500, 4000, 2500], // Irregular, organic rhythm
   evolutionRules: [
     {
-      trigger: 'consciousness_level',
+      trigger: 'business intelligence_level',
       threshold: 2,
       modification: {
         harmony: 1.5,
@@ -402,7 +402,7 @@ export const CONSCIOUSNESS_SOUNDSCAPE: GenerativeSoundscape = {
       },
     },
     {
-      trigger: 'consciousness_level',
+      trigger: 'business intelligence_level',
       threshold: 5,
       modification: {
         frequency: 1.2,
@@ -411,7 +411,7 @@ export const CONSCIOUSNESS_SOUNDSCAPE: GenerativeSoundscape = {
       },
     },
     {
-      trigger: 'consciousness_level',
+      trigger: 'business intelligence_level',
       threshold: 10,
       modification: {
         frequency: 1.5,
@@ -449,7 +449,7 @@ export const DEFAULT_AUDIO_CONFIG: AudioSystemConfig = {
   sampleRate: 44100,
   bufferSize: 4096,
   spatialMaxDistance: 100,
-  reverbImpulseResponse: '/audio/ir/consciousness-hall.wav',
+  reverbImpulseResponse: '/audio/ir/business intelligence-hall.wav',
   masterVolume: 0.7,
   binauralEnabled: true,
   spatialEnabled: true,
@@ -458,13 +458,13 @@ export const DEFAULT_AUDIO_CONFIG: AudioSystemConfig = {
 }
 
 /**
- * Consciousness Audio Events
+ * Business Intelligence Audio Events
  */
-export type ConsciousnessAudioEvent =
+export type BusinessIntelligenceAudioEvent =
   | 'department_awaken'
   | 'synapse_form'
   | 'intelligence_multiply'
-  | 'consciousness_emerge'
+  | 'business intelligence_emerge'
   | 'evolution_begin'
   | 'pricing_calculate'
   | 'user_enlightenment'
@@ -474,47 +474,47 @@ export interface AudioEventMap {
     soundEffects: string[] // Sound effect IDs to trigger
     binauralPattern?: string // Binaural pattern to activate
     spatialMovement?: boolean // Enable spatial movement
-    consciousnessLevel: number // Required consciousness level
+    businessIntelligenceLevel: number // Required business intelligence level
   }
 }
 
 /**
- * Complete audio event mapping for consciousness interactions
+ * Complete audio event mapping for business intelligence interactions
  */
-export const CONSCIOUSNESS_AUDIO_EVENTS: AudioEventMap = {
+export const businessIntelligenceAudioEvents: AudioEventMap = {
   department_select: {
     soundEffects: ['department_select'],
-    consciousnessLevel: 1,
+    businessIntelligenceLevel: 1,
   },
 
   first_connection: {
-    soundEffects: ['synaptic_connection'],
-    binauralPattern: 'consciousness_evolution',
+    soundEffects: ['intelligent_connection'],
+    binauralPattern: 'business intelligence_evolution',
     spatialMovement: true,
-    consciousnessLevel: 2,
+    businessIntelligenceLevel: 2,
   },
 
   intelligence_multiplication: {
     soundEffects: ['intelligence_multiplication'],
     binauralPattern: 'intelligence_multiplication',
     spatialMovement: true,
-    consciousnessLevel: 4,
+    businessIntelligenceLevel: 4,
   },
 
-  full_consciousness: {
-    soundEffects: ['consciousness_emergence'],
-    binauralPattern: 'consciousness_evolution',
+  full_business_intelligence: {
+    soundEffects: ['business intelligence_emergence'],
+    binauralPattern: 'business intelligence_evolution',
     spatialMovement: true,
-    consciousnessLevel: 10,
+    businessIntelligenceLevel: 10,
   },
 
   pricing_interaction: {
     soundEffects: ['pricing_calculation'],
-    consciousnessLevel: 1,
+    businessIntelligenceLevel: 1,
   },
 
   cursor_awareness: {
-    soundEffects: ['cursor_consciousness'],
-    consciousnessLevel: 0.5,
+    soundEffects: ['cursor_business intelligence'],
+    businessIntelligenceLevel: 0.5,
   },
 }

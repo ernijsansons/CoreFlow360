@@ -6,6 +6,32 @@
 import { z } from 'zod'
 import { prisma } from './db'
 
+// Progressive Multi-Business Pricing Model
+export const PROGRESSIVE_DISCOUNTS = {
+  1: 0,    // First business - no discount
+  2: 0.20, // Second business - 20% off
+  3: 0.35, // Third business - 35% off
+  4: 0.45, // Fourth business - 45% off
+  5: 0.50, // Fifth+ businesses - 50% off (maximum discount)
+};
+
+export function calculateProgressivePrice(
+  basePrice: number,
+  businessCount: number,
+  usersPerBusiness: number
+): { totalPrice: number; savings: number; discountRate: number } {
+  const discount = PROGRESSIVE_DISCOUNTS[Math.min(businessCount, 5)] || 0.50;
+  const fullPrice = basePrice + (usersPerBusiness * 12); // $12 per user
+  const discountedPrice = fullPrice * (1 - discount);
+  const savings = fullPrice - discountedPrice;
+  
+  return {
+    totalPrice: discountedPrice,
+    savings: savings,
+    discountRate: discount
+  };
+}
+
 // Pricing calculation request schema
 const PricingRequestSchema = z.object({
   modules: z.array(z.string()).min(1, 'At least one module required'),
@@ -153,21 +179,21 @@ export class UnifiedPricingEngine {
   private async validateModuleDependencies(modules: unknown[], selectedModules: string[]) {
     const errors: string[] = []
 
-    for (const module of modules) {
-      const dependencies = JSON.parse(module.dependencies || '[]') as string[]
-      const conflicts = JSON.parse(module.conflicts || '[]') as string[]
+    for (const mod of modules) {
+      const dependencies = JSON.parse(mod.dependencies || '[]') as string[]
+      const conflicts = JSON.parse(mod.conflicts || '[]') as string[]
 
       // Check dependencies
       for (const dependency of dependencies) {
         if (!selectedModules.includes(dependency)) {
-          errors.push(`Module '${module.moduleKey}' requires '${dependency}'`)
+          errors.push(`Module '${mod.moduleKey}' requires '${dependency}'`)
         }
       }
 
       // Check conflicts
       for (const conflict of conflicts) {
         if (selectedModules.includes(conflict)) {
-          errors.push(`Module '${module.moduleKey}' conflicts with '${conflict}'`)
+          errors.push(`Module '${mod.moduleKey}' conflicts with '${conflict}'`)
         }
       }
     }
@@ -181,17 +207,17 @@ export class UnifiedPricingEngine {
    * Calculate module breakdown
    */
   private calculateModuleBreakdown(modules: unknown[], userCount: number): ModuleBreakdown[] {
-    return modules.map((module) => {
-      const basePrice = parseFloat(module.basePrice)
-      const perUserPrice = parseFloat(module.perUserPrice)
-      const setupFee = parseFloat(module.setupFee || '0')
+    return modules.map((mod) => {
+      const basePrice = parseFloat(mod.basePrice)
+      const perUserPrice = parseFloat(mod.perUserPrice)
+      const setupFee = parseFloat(mod.setupFee || '0')
 
       // Use consistent pricing formula: max(basePrice, perUserPrice * userCount)
       const subtotal = Math.max(basePrice, perUserPrice * userCount)
 
       return {
-        moduleKey: module.moduleKey,
-        moduleName: module.name,
+        moduleKey: mod.moduleKey,
+        moduleName: mod.name,
         basePrice,
         perUserPrice,
         userCount,
@@ -318,29 +344,44 @@ export class UnifiedPricingEngine {
 
   /**
    * Calculate progressive discount for multi-business
+   * Enhanced progressive pricing model for business empire growth
    */
   private calculateProgressiveDiscount(billingOrder: number, subtotal: number): Discount | null {
     const progressiveDiscounts = {
       1: 0, // First business - no discount
-      2: 0.2, // Second business - 20% off
-      3: 0.35, // Third business - 35% off
-      4: 0.45, // Fourth business - 45% off
-      5: 0.5, // Fifth+ business - 50% off
+      2: 0.2, // Second business - 20% off (Smart Start tier)
+      3: 0.35, // Third business - 35% off (Business Growth tier)
+      4: 0.5, // Fourth business - 50% off (Business Empire tier)
+      5: 0.5, // Fifth+ business - 50% off (maintained Empire discount)
     }
 
     const discount = progressiveDiscounts[Math.min(billingOrder, 5)] || 0.5
 
     if (discount > 0) {
+      const tierName = this.getProgressiveTierName(billingOrder)
       return {
         type: 'progressive',
-        name: 'Multi-Business Discount',
+        name: `Multi-Business ${tierName} Discount`,
         amount: subtotal * discount,
         percentage: discount,
-        description: `${discount * 100}% discount for ${billingOrder}${this.getOrdinalSuffix(billingOrder)} business`,
+        description: `${discount * 100}% discount for ${billingOrder}${this.getOrdinalSuffix(billingOrder)} business - ${tierName}`,
       }
     }
 
     return null
+  }
+
+  /**
+   * Get tier name based on business order
+   */
+  private getProgressiveTierName(billingOrder: number): string {
+    const tierNames = {
+      2: 'Smart Start',
+      3: 'Business Growth',
+      4: 'Business Empire',
+      5: 'Empire Max',
+    }
+    return tierNames[Math.min(billingOrder, 5)] || 'Empire Max'
   }
 
   /**

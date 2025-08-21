@@ -141,7 +141,7 @@ const timeline: TimelineEvent[] = [
     achievements: [
       'Self-evolving AI systems',
       'Autonomous decision frameworks',
-      'Global AI consciousness network',
+      'Global AI BUSINESS INTELLIGENCE network',
     ],
   },
 ]
@@ -188,8 +188,8 @@ const leadership: TeamMember[] = [
   {
     name: 'Marcus Rodriguez',
     role: 'Chief Technology Officer & Co-Founder',
-    bio: 'Ex-Tesla AI architect, building the neural networks that power next-generation business intelligence.',
-    expertise: ['Neural Networks', 'Distributed Systems', 'Quantum Computing'],
+    bio: 'Ex-Tesla AI architect, building the SMART AUTOMATIONs that power next-generation business intelligence.',
+    expertise: ['SMART AUTOMATIONs', 'Distributed Systems', 'Quantum Computing'],
     avatar: '👨‍💻',
   },
   {
@@ -239,7 +239,7 @@ export default function AboutPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              We&apos;re not just building software. We&apos;re architecting the neural networks of
+              We&apos;re not just building software. We&apos;re architecting the SMART AUTOMATIONs of
               tomorrow&apos;s businesses, where artificial intelligence amplifies human potential
               and creates unprecedented possibilities.
             </motion.p>

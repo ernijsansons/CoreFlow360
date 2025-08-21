@@ -443,3 +443,5 @@ export function calculateROIComparison(
     savingsPercent,
   }
 }
+
+export { calculateProgressivePrice } from './unified-pricing-engine';

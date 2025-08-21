@@ -114,7 +114,7 @@ export class SEOOptimizer {
     return {
       title: 'Business Automation Software - Transform Your Operations',
       description:
-        'Turn your business into a revenue machine with CoreFlow360. Automate operations, increase profits by 247%, and save 30+ hours weekly. Start free trial today.',
+        'Turn your business into a BUSINESS EMPIRE with CoreFlow360. Automate operations, increase profits by 247%, and save 30+ hours weekly. Start free trial today.',
       keywords: [
         'business automation software',
         'ERP system',

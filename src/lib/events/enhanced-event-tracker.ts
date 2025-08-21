@@ -82,7 +82,7 @@ export const AIInteractionEventSchema = BaseEventSchema.extend({
     cost: z.number().optional(),
     accuracy: z.number().optional(),
     userSatisfaction: z.number().optional(),
-    consciousnessLevel: z.number().optional(),
+    businessIntelligenceLevel: z.number().optional(),
     crossModuleConnections: z.array(z.string()).optional(),
   }),
 })
@@ -252,7 +252,7 @@ export class EnhancedEventTracker {
   }
 
   /**
-   * Track AI interactions for consciousness multiplication tracking
+   * Track AI interactions for BUSINESS INTELLIGENCE multiplication tracking
    */
   async trackAIInteraction(event: Partial<AIInteractionEvent>): Promise<void> {
     const aiEvent = AIInteractionEventSchema.parse({
@@ -265,9 +265,9 @@ export class EnhancedEventTracker {
 
     await this.track(aiEvent)
 
-    // Track consciousness multiplication value
+    // Track BUSINESS INTELLIGENCE multiplication value
     if (aiEvent.properties.crossModuleConnections?.length) {
-      await this.trackConsciousnessMultiplication(aiEvent)
+      await this.trackBusinessIntelligenceMultiplication(aiEvent)
     }
   }
 
@@ -503,9 +503,9 @@ export class EnhancedEventTracker {
     await redis.lpush('payment_recovery_queue', JSON.stringify(event))
   }
 
-  private async trackConsciousnessMultiplication(event: AIInteractionEvent): Promise<void> {
+  private async trackBusinessIntelligenceMultiplication(event: AIInteractionEvent): Promise<void> {
     const multiplier = event.properties.crossModuleConnections?.length || 1
-    await redis.incrbyfloat('consciousness:multiplication', multiplier)
+    await redis.incrbyfloat('business-intelligence:multiplication', multiplier)
   }
 
   private async calculateProcessROI(event: BusinessProcessEvent): Promise<void> {

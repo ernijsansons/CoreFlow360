@@ -16,9 +16,9 @@ export default function ResourcesPage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {/* Partner portal content for resources section */}
             <div className="rounded-lg bg-purple-500/20 p-6">
-              <h3 className="mb-4 text-xl font-semibold text-white">Consciousness Tools</h3>
+              <h3 className="mb-4 text-xl font-semibold text-white">BUSINESS INTELLIGENCE Tools</h3>
               <p className="text-gray-300">
-                Access advanced consciousness transformation resources
+                Access advanced BUSINESS INTELLIGENCE transformation resources
               </p>
             </div>
           </div>

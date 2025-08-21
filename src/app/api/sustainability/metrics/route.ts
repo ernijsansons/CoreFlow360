@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
       user.tenant.id,
       startDate,
       now,
-      user.tenant.subscription?.tier || 'neural'
+      user.tenant.subscription?.tier || 'INTELLIGENT'
     )
 
     return NextResponse.json(metrics)
@@ -310,10 +310,10 @@ async function calculateSustainabilityMetrics(
 function calculateBackendCarbon(tier: string): number {
   // Carbon estimates based on subscription tier (kg CO2 per month)
   const tierMultipliers = {
-    neural: 1.0,
-    synaptic: 1.5,
+    INTELLIGENT: 1.0,
+    INTELLIGENT: 1.5,
     autonomous: 2.5,
-    transcendent: 4.0,
+    ADVANCED: 4.0,
   }
 
   const baseCarbon = 5.0 // Base server carbon footprint
@@ -325,10 +325,10 @@ function calculateBackendCarbon(tier: string): number {
 function calculateInfrastructureCarbon(tier: string): number {
   // Infrastructure carbon based on services used
   const tierMultipliers = {
-    neural: 0.5,
-    synaptic: 1.0,
+    INTELLIGENT: 0.5,
+    INTELLIGENT: 1.0,
     autonomous: 2.0,
-    transcendent: 3.5,
+    ADVANCED: 3.5,
   }
 
   const baseCarbon = 3.0 // Base infrastructure carbon
@@ -340,10 +340,10 @@ function calculateInfrastructureCarbon(tier: string): number {
 function calculateAICarbon(tier: string): number {
   // AI processing carbon footprint
   const tierMultipliers = {
-    neural: 1.0,
-    synaptic: 2.0,
+    INTELLIGENT: 1.0,
+    INTELLIGENT: 2.0,
     autonomous: 4.0,
-    transcendent: 8.0,
+    ADVANCED: 8.0,
   }
 
   const baseCarbon = 2.0 // Base AI carbon footprint

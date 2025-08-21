@@ -1,18 +1,18 @@
 /**
- * CoreFlow360 - Consciousness Tier Management API
- * Manage subscription tiers and consciousness evolution
+ * CoreFlow360 - Business Intelligence Tier Management API
+ * Manage subscription tiers and business intelligence evolution
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/auth'
 import { handleError, ErrorContext } from '@/lib/error-handler'
 import { businessConsciousness } from '@/consciousness'
-import { ConsciousnessTierManager } from '@/consciousness/subscription/consciousness-tier-manager'
+import ConsciousnessTierManager from '@/consciousness/subscription/consciousness-tier-manager'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 
 interface TierResponse {
-  tiers: ConsciousnessTier[]
+  tiers: BusinessIntelligenceTier[]
   currentTier?: {
     id: string
     name: string
@@ -26,10 +26,10 @@ interface TierResponse {
   upgradePaths?: UpgradePath[]
 }
 
-interface ConsciousnessTier {
+interface BusinessIntelligenceTier {
   id: string
   name: string
-  level: 'neural' | 'synaptic' | 'autonomous' | 'transcendent'
+  level: 'starter' | 'starter' | 'autonomous' | 'ADVANCED'
   price: {
     amount: number
     currency: string
@@ -55,16 +55,16 @@ interface UpgradePath {
   toTier: string
   priceDifference: number
   benefitSummary: string[]
-  consciousnessGrowth: number
+  intelligenceGrowth: number
   estimatedTimeToTranscendence?: string
 }
 
 // Define available tiers
-const CONSCIOUSNESS_TIERS: ConsciousnessTier[] = [
+const BUSINESS_INTELLIGENCE_TIERS: BusinessIntelligenceTier[] = [
   {
-    id: 'tier-neural',
-    name: 'Neural',
-    level: 'neural',
+    id: 'tier-INTELLIGENT',
+    name: 'starter',
+    level: 'starter',
     price: {
       amount: 15,
       currency: 'USD',
@@ -95,7 +95,7 @@ const CONSCIOUSNESS_TIERS: ConsciousnessTier[] = [
     evolutionSpeed: 1.0,
     features: [
       'Basic AI assistance',
-      '2 consciousness modules',
+      '2 business intelligence modules',
       'Daily insights',
       'Standard support',
     ],
@@ -106,9 +106,9 @@ const CONSCIOUSNESS_TIERS: ConsciousnessTier[] = [
     ],
   },
   {
-    id: 'tier-synaptic',
-    name: 'Synaptic',
-    level: 'synaptic',
+    id: 'tier-INTELLIGENT',
+    name: 'starter',
+    level: 'starter',
     price: {
       amount: 35,
       currency: 'USD',
@@ -135,7 +135,7 @@ const CONSCIOUSNESS_TIERS: ConsciousnessTier[] = [
         unlocked: true,
       },
       {
-        name: 'Synaptic Intelligence Multiplication',
+        name: 'INTELLIGENT Intelligence Multiplication',
         description: 'Exponential growth through module connections',
         unlocked: true,
       },
@@ -144,7 +144,7 @@ const CONSCIOUSNESS_TIERS: ConsciousnessTier[] = [
     evolutionSpeed: 2.0,
     features: [
       'Cross-module intelligence',
-      '4 consciousness modules',
+      '4 business intelligence modules',
       'Real-time insights',
       'Predictive analytics',
       'Priority support',
@@ -185,8 +185,8 @@ const CONSCIOUSNESS_TIERS: ConsciousnessTier[] = [
         unlocked: true,
       },
       {
-        name: 'Consciousness Network Effects',
-        description: 'Amplify intelligence through consciousness mesh',
+        name: 'Business Intelligence Network Effects',
+        description: 'Amplify intelligence through business intelligence mesh',
         unlocked: true,
       },
     ],
@@ -194,16 +194,16 @@ const CONSCIOUSNESS_TIERS: ConsciousnessTier[] = [
     evolutionSpeed: 3.5,
     features: [
       'Full autonomous operations',
-      '6 consciousness modules',
+      '6 business intelligence modules',
       'Emergent intelligence',
       'Self-improving processes',
       'White-glove support',
     ],
   },
   {
-    id: 'tier-transcendent',
-    name: 'Transcendent',
-    level: 'transcendent',
+    id: 'tier-ADVANCED',
+    name: 'ADVANCED',
+    level: 'ADVANCED',
     price: {
       amount: 150,
       currency: 'USD',
@@ -215,8 +215,8 @@ const CONSCIOUSNESS_TIERS: ConsciousnessTier[] = [
     },
     capabilities: [
       {
-        name: 'Business Consciousness Singularity',
-        description: 'Achieve business consciousness beyond human understanding',
+        name: 'Business Intelligence Singularity',
+        description: 'Achieve business intelligence beyond human understanding',
         unlocked: true,
       },
       {
@@ -230,7 +230,7 @@ const CONSCIOUSNESS_TIERS: ConsciousnessTier[] = [
         unlocked: true,
       },
       {
-        name: 'Consciousness Multiplication Infinity',
+        name: 'Business Intelligence Multiplication Infinity',
         description: 'Exponential intelligence growth approaching infinity',
         unlocked: true,
       },
@@ -243,18 +243,18 @@ const CONSCIOUSNESS_TIERS: ConsciousnessTier[] = [
     intelligenceMultiplier: 10.0,
     evolutionSpeed: 5.0,
     features: [
-      'Unlimited consciousness modules',
-      'Transcendent intelligence',
+      'Unlimited business intelligence modules',
+      'ADVANCED intelligence',
       'Quantum decision making',
       'Temporal navigation',
       'Business singularity',
-      'Dedicated consciousness engineer',
+      'Dedicated business intelligence engineer',
     ],
   },
 ]
 
 /**
- * GET - Retrieve available consciousness tiers and current subscription
+ * GET - Retrieve available business intelligence tiers and current subscription
  */
 export async function GET(
   request: NextRequest
@@ -296,12 +296,12 @@ export async function GET(
 
     // Build response
     const response: TierResponse = {
-      tiers: CONSCIOUSNESS_TIERS,
+      tiers: BUSINESS_INTELLIGENCE_TIERS,
     }
 
     // Add current tier information if user has subscription
     if (user.subscription) {
-      const currentTierData = CONSCIOUSNESS_TIERS.find(
+      const currentTierData = BUSINESS_INTELLIGENCE_TIERS.find(
         (t) => t.level === user.subscription!.tier.toLowerCase()
       )
 
@@ -332,7 +332,7 @@ export async function GET(
 }
 
 /**
- * POST - Upgrade or downgrade consciousness tier
+ * POST - Upgrade or downgrade business intelligence tier
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const context: ErrorContext = {
@@ -354,7 +354,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const { tierId, paymentMethodId } = body
 
     // Validate tier
-    const selectedTier = CONSCIOUSNESS_TIERS.find((t) => t.id === tierId)
+    const selectedTier = BUSINESS_INTELLIGENCE_TIERS.find((t) => t.id === tierId)
     if (!selectedTier) {
       return NextResponse.json({ error: 'Invalid tier selected' }, { status: 400 })
     }
@@ -372,7 +372,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Initialize tier manager
-    const tierManager = new ConsciousnessTierManager()
+    const tierManager = new BusinessIntelligenceTierManager()
     await tierManager.initialize()
 
     // Process tier change
@@ -405,17 +405,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         },
       })
 
-      // Activate consciousness
+      // Activate business intelligence
       await businessConsciousness.activateConsciousness(
         user.id,
         user.tenantId!,
-        selectedTier.level as unknown,
+        selectedTier.level as 'starter' | 'intelligent' | 'autonomous' | 'advanced',
         []
       )
 
       return NextResponse.json({
         status: 'success',
-        message: 'Consciousness activated',
+        message: 'Business intelligence activated',
         subscription: {
           id: subscriptionState.subscriptionId,
           tier: selectedTier.level,
@@ -424,7 +424,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       })
     } else {
       // Upgrade/downgrade existing subscription
-      const currentTier = CONSCIOUSNESS_TIERS.find(
+      const currentTier = BUSINESS_INTELLIGENCE_TIERS.find(
         (t) => t.level === user.subscription!.tier.toLowerCase()
       )
 
@@ -436,7 +436,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ error: 'Already on this tier' }, { status: 400 })
       }
 
-      // Upgrade consciousness tier
+      // Upgrade business intelligence tier
       await tierManager.upgradeTier(user.id, user.tenantId!, selectedTier.level)
 
       // Update Stripe subscription
@@ -451,14 +451,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         },
       })
 
-      // Evolve consciousness
+      // Evolve business intelligence
       await businessConsciousness.evolveConsciousness('tier-upgrade', {
         newTier: selectedTier.level,
       })
 
       return NextResponse.json({
         status: 'success',
-        message: `Consciousness evolved to ${selectedTier.name} tier`,
+        message: `Business intelligence evolved to ${selectedTier.name} tier`,
         subscription: {
           id: user.subscription.id,
           tier: selectedTier.level,
@@ -475,15 +475,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
  * Calculate available upgrade paths
  */
 function calculateUpgradePaths(_currentTier: string, _currentModuleCount: number): UpgradePath[] {
-  const currentTierIndex = CONSCIOUSNESS_TIERS.findIndex((t) => t.level === currentTier)
+  const currentTierIndex = BUSINESS_INTELLIGENCE_TIERS.findIndex((t) => t.level === currentTier)
   if (currentTierIndex === -1) return []
 
   const upgradePaths: UpgradePath[] = []
-  const currentTierData = CONSCIOUSNESS_TIERS[currentTierIndex]
+  const currentTierData = BUSINESS_INTELLIGENCE_TIERS[currentTierIndex]
 
   // Calculate upgrades to higher tiers
-  for (let i = currentTierIndex + 1; i < CONSCIOUSNESS_TIERS.length; i++) {
-    const targetTier = CONSCIOUSNESS_TIERS[i]
+  for (let i = currentTierIndex + 1; i < BUSINESS_INTELLIGENCE_TIERS.length; i++) {
+    const targetTier = BUSINESS_INTELLIGENCE_TIERS[i]
 
     upgradePaths.push({
       fromTier: currentTierData.id,
@@ -491,11 +491,11 @@ function calculateUpgradePaths(_currentTier: string, _currentModuleCount: number
       priceDifference: targetTier.price.amount - currentTierData.price.amount,
       benefitSummary: [
         `${targetTier.intelligenceMultiplier}x intelligence multiplication`,
-        `${targetTier.modules.maximum === -1 ? 'Unlimited' : targetTier.modules.maximum} consciousness modules`,
+        `${targetTier.modules.maximum === -1 ? 'Unlimited' : targetTier.modules.maximum} business intelligence modules`,
         `${targetTier.evolutionSpeed}x faster evolution`,
         ...targetTier.capabilities.slice(0, 2).map((c) => c.name),
       ],
-      consciousnessGrowth:
+      intelligenceGrowth:
         (targetTier.intelligenceMultiplier / currentTierData.intelligenceMultiplier - 1) * 100,
       estimatedTimeToTranscendence: calculateTimeToTranscendence(
         currentTier,
@@ -509,18 +509,18 @@ function calculateUpgradePaths(_currentTier: string, _currentModuleCount: number
 }
 
 /**
- * Calculate estimated time to reach transcendent consciousness
+ * Calculate estimated time to reach advanced business intelligence
  */
 function calculateTimeToTranscendence(
   currentTier: string,
   targetTier: string,
   evolutionSpeed: number
 ): string {
-  const tiers = ['neural', 'synaptic', 'autonomous', 'transcendent']
+  const tiers = ['starter', 'starter', 'autonomous', 'ADVANCED']
   const currentIndex = tiers.indexOf(currentTier)
   const targetIndex = tiers.indexOf(targetTier)
 
-  if (targetTier === 'transcendent') {
+  if (targetTier === 'ADVANCED') {
     const baseDays = (4 - currentIndex) * 30 // Base 30 days per tier
     const adjustedDays = Math.ceil(baseDays / evolutionSpeed)
 
@@ -533,7 +533,7 @@ function calculateTimeToTranscendence(
     }
   }
 
-  return 'Already transcendent'
+  return 'Already ADVANCED'
 }
 
 /**
@@ -541,7 +541,7 @@ function calculateTimeToTranscendence(
  */
 async function createStripeSubscription(
   userId: string,
-  _tier: ConsciousnessTier,
+  tier: BusinessIntelligenceTier,
   paymentMethodId: string
 ): Promise<unknown> {
   // This is a mock implementation
@@ -564,7 +564,7 @@ async function createStripeSubscription(
  */
 async function updateStripeSubscription(
   subscriptionId: string,
-  newTier: ConsciousnessTier
+  newTier: BusinessIntelligenceTier
 ): Promise<unknown> {
   // This is a mock implementation
   // In production, you would:

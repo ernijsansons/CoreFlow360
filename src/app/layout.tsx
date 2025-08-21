@@ -25,11 +25,11 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'CoreFlow360 - Business Automation Software | Turn Your Business Into a Revenue Machine',
+  title: 'CoreFlow360 - HVAC Business Empire Platform | Scale From 1 to 100+ Locations',
   description:
-    'Stop working IN your business. Start making money FROM your business. CoreFlow360 automates everything so you can focus on scaling and profits. +247% revenue increase, 30+ hours saved weekly.',
+    'The only platform built for ambitious HVAC contractors ready to dominate their market. Manage multiple businesses, territories, and teams from one intelligent platform. Scale from 1 to 100+ locations seamlessly.',
   keywords:
-    'business automation software, ERP system, workflow automation, business management platform, revenue optimization, process automation, business intelligence, CRM software, accounting automation',
+    'HVAC business software, HVAC management platform, multi-location HVAC software, HVAC empire building, HVAC business automation, HVAC contractor software, HVAC CRM, HVAC accounting, HVAC field service management',
   authors: [{ name: 'CoreFlow360' }],
   creator: 'CoreFlow360',
   publisher: 'CoreFlow360',
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'CoreFlow360 - Turn Your Business Into a Revenue Machine That Runs Itself',
+    title: 'CoreFlow360 - The Business Platform That Grows With Your Empire',
     description:
       'Stop working IN your business. Start making money FROM your business. +247% average revenue increase. 30+ hours saved per week. Free 30-day trial.',
     url: 'https://coreflow360.com',
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@CoreFlow360',
     creator: '@CoreFlow360',
-    title: 'CoreFlow360 - Turn Your Business Into a Revenue Machine',
+    title: 'CoreFlow360 - Turn Your Business Into a BUSINESS EMPIRE',
     description:
       'Stop working IN your business. Start making money FROM your business. +247% revenue increase, 30+ hours saved weekly. Free trial.',
     images: {

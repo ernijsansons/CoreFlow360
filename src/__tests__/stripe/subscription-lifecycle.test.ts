@@ -71,7 +71,7 @@ describe('Subscription Lifecycle', () => {
           data: [
             {
               price: {
-                id: 'price_synaptic_monthly',
+                id: 'price_INTELLIGENT_monthly',
                 unit_amount: 4900,
                 currency: 'usd',
               },
@@ -85,13 +85,13 @@ describe('Subscription Lifecycle', () => {
         id: 'local_sub_123',
         stripeSubscriptionId: 'sub_123',
         status: 'active',
-        tier: 'synaptic',
+        tier: 'INTELLIGENT',
       })
 
       // Simulate subscription creation request
       const subscriptionData = {
         userId: 'user-123',
-        priceId: 'price_synaptic_monthly',
+        priceId: 'price_INTELLIGENT_monthly',
         modules: ['crm', 'accounting'],
       }
 
@@ -100,7 +100,7 @@ describe('Subscription Lifecycle', () => {
 
       expect(stripe.subscriptions.create).toHaveBeenCalledWith({
         customer: 'cus_123',
-        items: [{ price: 'price_synaptic_monthly' }],
+        items: [{ price: 'price_INTELLIGENT_monthly' }],
         metadata: {
           userId: 'user-123',
           tenantId: 'tenant-123',
@@ -112,7 +112,7 @@ describe('Subscription Lifecycle', () => {
           userId: 'user-123',
           stripeSubscriptionId: 'sub_123',
           status: 'active',
-          tier: 'synaptic',
+          tier: 'INTELLIGENT',
           currentPeriodStart: expect.any(Date),
           currentPeriodEnd: expect.any(Date),
         },
@@ -150,7 +150,7 @@ describe('Subscription Lifecycle', () => {
 
       const subscriptionData = {
         userId: 'user-123',
-        priceId: 'price_neural_monthly',
+        priceId: 'price_INTELLIGENT_monthly',
       }
 
       const result = await createSubscription(subscriptionData)
@@ -188,7 +188,7 @@ describe('Subscription Lifecycle', () => {
 
       const subscriptionData = {
         userId: 'user-123',
-        priceId: 'price_synaptic_monthly',
+        priceId: 'price_INTELLIGENT_monthly',
       }
 
       const result = await createSubscription(subscriptionData)
@@ -208,7 +208,7 @@ describe('Subscription Lifecycle', () => {
             {
               id: 'si_123',
               price: {
-                id: 'price_neural_monthly',
+                id: 'price_INTELLIGENT_monthly',
                 unit_amount: 1500,
               },
             },
@@ -224,7 +224,7 @@ describe('Subscription Lifecycle', () => {
             {
               id: 'si_123',
               price: {
-                id: 'price_synaptic_monthly',
+                id: 'price_INTELLIGENT_monthly',
                 unit_amount: 4900,
               },
             },
@@ -238,8 +238,8 @@ describe('Subscription Lifecycle', () => {
 
       const upgradeData = {
         subscriptionId: 'sub_123',
-        newPriceId: 'price_synaptic_monthly',
-        newTier: 'synaptic',
+        newPriceId: 'price_INTELLIGENT_monthly',
+        newTier: 'INTELLIGENT',
       }
 
       const result = await upgradeSubscription(upgradeData)
@@ -248,7 +248,7 @@ describe('Subscription Lifecycle', () => {
         items: [
           {
             id: 'si_123',
-            price: 'price_synaptic_monthly',
+            price: 'price_INTELLIGENT_monthly',
           },
         ],
         proration_behavior: 'create_prorations',
@@ -256,7 +256,7 @@ describe('Subscription Lifecycle', () => {
 
       expect(prisma.subscription.update).toHaveBeenCalledWith({
         where: { stripeSubscriptionId: 'sub_123' },
-        data: { tier: 'synaptic' },
+        data: { tier: 'INTELLIGENT' },
       })
 
       expect(result.success).toBe(true)
@@ -371,7 +371,7 @@ describe('Subscription Lifecycle', () => {
 
       const subscriptionData = {
         userId: 'user-123',
-        priceId: 'price_synaptic_monthly',
+        priceId: 'price_INTELLIGENT_monthly',
       }
 
       const result = await createSubscription(subscriptionData)
@@ -390,7 +390,7 @@ describe('Subscription Lifecycle', () => {
 
       const subscriptionData = {
         userId: 'user-123',
-        priceId: 'price_synaptic_monthly',
+        priceId: 'price_INTELLIGENT_monthly',
       }
 
       const result = await createSubscription(subscriptionData)
@@ -410,7 +410,7 @@ describe('Subscription Lifecycle', () => {
 
       const upgradeData = {
         subscriptionId: 'sub_123',
-        newPriceId: 'price_synaptic_monthly',
+        newPriceId: 'price_INTELLIGENT_monthly',
       }
 
       const result = await upgradeSubscription(upgradeData)
@@ -577,9 +577,9 @@ async function cancelSubscription(data: any) {
 }
 
 function getTierFromPriceId(priceId: string): string {
-  if (priceId.includes('neural')) return 'neural'
-  if (priceId.includes('synaptic')) return 'synaptic'
+  if (priceId.includes('INTELLIGENT')) return 'INTELLIGENT'
+  if (priceId.includes('INTELLIGENT')) return 'INTELLIGENT'
   if (priceId.includes('autonomous')) return 'autonomous'
-  if (priceId.includes('transcendent')) return 'transcendent'
-  return 'neural'
+  if (priceId.includes('ADVANCED')) return 'ADVANCED'
+  return 'INTELLIGENT'
 }

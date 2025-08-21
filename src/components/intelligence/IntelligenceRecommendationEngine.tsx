@@ -4,7 +4,7 @@
  * Intelligence Recommendation Engine
  *
  * AI-powered recommendation system that provides personalized intelligence
- * multiplication strategies based on assessment results and consciousness level.
+ * multiplication strategies based on assessment results and BUSINESS INTELLIGENCE level.
  */
 
 import React, { useState, useEffect, useMemo } from 'react'
@@ -20,7 +20,7 @@ interface IntelligenceRecommendation {
   timeframe: string
   difficulty: 'easy' | 'medium' | 'complex' | 'advanced'
   intelligenceGain: number
-  consciousnessBoost: number
+  intelligenceBoost: number
   prerequisites: string[]
   actionSteps: string[]
   metrics: string[]
@@ -32,7 +32,7 @@ interface AssessmentData {
   overallScore: number
   dimensionScores: Record<string, number>
   intelligenceMultiplier: number
-  consciousnessLevel: number
+  intelligenceLevel: number
   blockers: string[]
 }
 
@@ -71,7 +71,7 @@ const IntelligenceRecommendationEngine: React.FC<IntelligenceRecommendationEngin
         timeframe: '2-3 months',
         difficulty: 'medium',
         intelligenceGain: 25,
-        consciousnessBoost: 1.5,
+        intelligenceBoost: 1.5,
         prerequisites: ['Leadership commitment', 'Change management readiness'],
         actionSteps: [
           'Audit current intelligence gaps',
@@ -101,7 +101,7 @@ const IntelligenceRecommendationEngine: React.FC<IntelligenceRecommendationEngin
         timeframe: '2-4 weeks',
         difficulty: 'easy',
         intelligenceGain: 15,
-        consciousnessBoost: 0.5,
+        intelligenceBoost: 0.5,
         prerequisites: ['Process documentation', 'Stakeholder buy-in'],
         actionSteps: [
           'Map current manual processes',
@@ -127,7 +127,7 @@ const IntelligenceRecommendationEngine: React.FC<IntelligenceRecommendationEngin
         timeframe: '6-8 weeks',
         difficulty: 'medium',
         intelligenceGain: 30,
-        consciousnessBoost: 2.0,
+        intelligenceBoost: 2.0,
         prerequisites: ['Data integration', 'Analytics tools', 'Trained analysts'],
         actionSteps: [
           'Consolidate data sources',
@@ -149,11 +149,11 @@ const IntelligenceRecommendationEngine: React.FC<IntelligenceRecommendationEngin
         priority: 'high',
         title: 'Implement Strategic Intelligence Framework',
         description: 'Create systematic approach to strategic thinking and planning',
-        impact: 'Elevate decision-making from tactical to strategic consciousness',
+        impact: 'Elevate decision-making from tactical to strategic BUSINESS INTELLIGENCE',
         timeframe: '8-12 weeks',
         difficulty: 'complex',
         intelligenceGain: 35,
-        consciousnessBoost: 2.5,
+        intelligenceBoost: 2.5,
         prerequisites: ['Executive alignment', 'Strategic planning capability'],
         actionSteps: [
           'Establish strategic intelligence unit',
@@ -179,11 +179,11 @@ const IntelligenceRecommendationEngine: React.FC<IntelligenceRecommendationEngin
         priority: 'medium',
         title: 'Build Collective Intelligence Network',
         description: 'Transform isolated teams into intelligence-multiplying networks',
-        impact: 'Unlock exponential intelligence through collective consciousness',
+        impact: 'Unlock exponential intelligence through collective BUSINESS INTELLIGENCE',
         timeframe: '10-16 weeks',
         difficulty: 'complex',
         intelligenceGain: 40,
-        consciousnessBoost: 3.0,
+        intelligenceBoost: 3.0,
         prerequisites: ['Team collaboration tools', 'Knowledge sharing culture'],
         actionSteps: [
           'Design intelligence sharing protocols',
@@ -201,29 +201,29 @@ const IntelligenceRecommendationEngine: React.FC<IntelligenceRecommendationEngin
       })
     }
 
-    // Advanced recommendations for high consciousness levels
-    if (assessmentData.consciousnessLevel >= 6) {
+    // Advanced recommendations for high BUSINESS INTELLIGENCE levels
+    if (assessmentData.intelligenceLevel >= 6) {
       recs.push({
         id: 'transcendence-1',
         category: 'transcendence',
         priority: 'medium',
-        title: 'Activate Business Consciousness Protocols',
-        description: 'Transition from intelligent business to conscious business organism',
-        impact: 'Achieve business consciousness emergence and transcendent capabilities',
+        title: 'Activate Business BUSINESS INTELLIGENCE Protocols',
+        description: 'Transition from intelligent business to conscious business ORGANIZATION',
+        impact: 'Achieve business intelligent automation and ADVANCED capabilities',
         timeframe: '3-6 months',
         difficulty: 'advanced',
         intelligenceGain: 50,
-        consciousnessBoost: 4.0,
-        prerequisites: ['High intelligence foundation', 'Consciousness readiness', 'Advanced team'],
+        intelligenceBoost: 4.0,
+        prerequisites: ['High intelligence foundation', 'BUSINESS INTELLIGENCE readiness', 'Advanced team'],
         actionSteps: [
-          'Establish consciousness monitoring systems',
-          'Implement business organism protocols',
-          'Activate transcendent decision-making',
-          'Create consciousness feedback loops',
+          'Establish BUSINESS INTELLIGENCE monitoring systems',
+          'Implement business ORGANIZATION protocols',
+          'Activate ADVANCED decision-making',
+          'Create BUSINESS INTELLIGENCE feedback loops',
         ],
         metrics: [
-          'Consciousness emergence indicators',
-          'Transcendent capability metrics',
+          'intelligent automation indicators',
+          'ADVANCED capability metrics',
           'Reality-shaping impact',
         ],
         icon: '✨',
@@ -243,7 +243,7 @@ const IntelligenceRecommendationEngine: React.FC<IntelligenceRecommendationEngin
         timeframe: '12-20 weeks',
         difficulty: 'complex',
         intelligenceGain: 45,
-        consciousnessBoost: 3.5,
+        intelligenceBoost: 3.5,
         prerequisites: ['Strong intelligence base', 'Multiplication mindset', 'Advanced systems'],
         actionSteps: [
           'Identify multiplication leverage points',
@@ -403,9 +403,9 @@ const IntelligenceRecommendationEngine: React.FC<IntelligenceRecommendationEngin
                 </div>
                 <div className="rounded-lg bg-black/30 p-3 text-center">
                   <div className="text-lg font-bold text-purple-400">
-                    +{recommendation.consciousnessBoost.toFixed(1)}
+                    +{recommendation.intelligenceBoost.toFixed(1)}
                   </div>
-                  <div className="text-xs text-gray-400">Consciousness Boost</div>
+                  <div className="text-xs text-gray-400">BUSINESS INTELLIGENCE Boost</div>
                 </div>
               </div>
 
@@ -557,9 +557,9 @@ const ImplementationGuide: React.FC<{
         </div>
         <div className="text-center">
           <div className="text-xl font-bold text-purple-400">
-            +{recommendation.consciousnessBoost.toFixed(1)}
+            +{recommendation.intelligenceBoost.toFixed(1)}
           </div>
-          <div className="text-xs text-gray-400">Consciousness Levels</div>
+          <div className="text-xs text-gray-400">BUSINESS INTELLIGENCE Levels</div>
         </div>
         <div className="text-center">
           <div className="text-xl font-bold text-white">{recommendation.timeframe}</div>

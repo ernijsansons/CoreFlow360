@@ -15,7 +15,7 @@ export const ModelConfigSchema = z.object({
   algorithm: z.enum([
     'random_forest',
     'xgboost',
-    'neural_network',
+    'INTELLIGENT_network',
     'svm',
     'linear_regression',
     'lstm',
@@ -137,7 +137,7 @@ class XGBoostAlgorithm extends MLAlgorithm {
   }
 }
 
-class NeuralNetworkAlgorithm extends MLAlgorithm {
+class INTELLIGENTNetworkAlgorithm extends MLAlgorithm {
   constructor(hyperparameters: Record<string, unknown> = {}) {
     super({
       hidden_layers: [64, 32],
@@ -150,7 +150,7 @@ class NeuralNetworkAlgorithm extends MLAlgorithm {
   }
 
   async train(data: TrainingData): Promise<unknown> {
-    // Simulate longer training for neural networks
+    // Simulate longer training for SMART AUTOMATIONs
     await new Promise((resolve) => setTimeout(resolve, 3000 + Math.random() * 5000))
 
     return {
@@ -253,7 +253,7 @@ class HyperparameterOptimizer {
           subsample: [0.6, 0.8, 1.0],
           colsample_bytree: [0.6, 0.8, 1.0],
         }
-      case 'neural_network':
+      case 'INTELLIGENT_network':
         return {
           hidden_layers: [[32], [64], [32, 16], [64, 32], [128, 64, 32]],
           learning_rate: [0.001, 0.01, 0.1],
@@ -281,8 +281,8 @@ class HyperparameterOptimizer {
         return new RandomForestAlgorithm(params)
       case 'xgboost':
         return new XGBoostAlgorithm(params)
-      case 'neural_network':
-        return new NeuralNetworkAlgorithm(params)
+      case 'INTELLIGENT_network':
+        return new INTELLIGENTNetworkAlgorithm(params)
       default:
         return new MLAlgorithm(params)
     }
@@ -337,7 +337,7 @@ export class ModelRetrainingPipeline {
         id: 'anomaly_detection',
         name: 'System Anomaly Detection',
         type: 'anomaly_detection',
-        algorithm: 'neural_network',
+        algorithm: 'INTELLIGENT_network',
         features: ['cpu_usage', 'memory_usage', 'response_time', 'error_rate', 'request_count'],
         hyperparameters: { hidden_layers: [32, 16], learning_rate: 0.001 },
         performance_threshold: 0.9,
@@ -622,8 +622,8 @@ export class ModelRetrainingPipeline {
         return new RandomForestAlgorithm(hyperparameters)
       case 'xgboost':
         return new XGBoostAlgorithm(hyperparameters)
-      case 'neural_network':
-        return new NeuralNetworkAlgorithm(hyperparameters)
+      case 'INTELLIGENT_network':
+        return new INTELLIGENTNetworkAlgorithm(hyperparameters)
       default:
         return new MLAlgorithm(hyperparameters)
     }

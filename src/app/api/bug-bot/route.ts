@@ -29,7 +29,7 @@ const BugReportSchema = z.object({
       'AUTHENTICATION',
       'PAYMENT',
       'AI_ML',
-      'CONSCIOUSNESS',
+      'BUSINESS INTELLIGENCE',
       'BUSINESS_LOGIC',
       'INFRASTRUCTURE',
     ])

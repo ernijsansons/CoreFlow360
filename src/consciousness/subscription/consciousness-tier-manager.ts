@@ -1,6 +1,6 @@
 /**
- * CoreFlow360 Subscription-Consciousness Tier Manager
- * Consciousness grows with subscription - the more modules, the more intelligent the system becomes
+ * CoreFlow360 Subscription-Business Intelligence Tier Manager
+ * Business Intelligence grows with subscription - the more modules, the more intelligent the system becomes
  */
 
 import { EventEmitter } from 'events'
@@ -10,32 +10,32 @@ import AutonomousDecisionEngine from '../core/autonomous-decision-engine'
 import CRMConsciousnessModule from '../modules/crm-consciousness'
 import AccountingConsciousnessModule from '../modules/accounting-consciousness'
 
-export interface ConsciousnessTier {
-  tier: 'neural' | 'synaptic' | 'autonomous' | 'transcendent'
+export interface BusinessIntelligenceTier {
+  tier: 'INTELLIGENT' | 'intelligent' | 'autonomous' | 'advanced'
   name: string
   description: string
   pricePerUser: number
   modules: string[]
-  consciousnessLevel: number
+  businessIntelligenceLevel: number
   intelligenceMultiplier: number
-  capabilities: ConsciousnessCapability[]
+  capabilities: BusinessIntelligenceCapability[]
   limitations: string[]
 }
 
-export interface ConsciousnessCapability {
+export interface BusinessIntelligenceCapability {
   name: string
   description: string
   requiredModules: string[]
-  minimumConsciousness: number
+  minimumBusinessIntelligence: number
   businessValue: string
 }
 
 export interface SubscriptionState {
   userId: string
   tenantId: string
-  currentTier: ConsciousnessTier
+  currentTier: BusinessIntelligenceTier
   activeModules: Set<string>
-  consciousnessLevel: number
+  businessIntelligenceLevel: number
   intelligenceMultiplier: number
   emergentCapabilities: string[]
   evolutionHistory: EvolutionEvent[]
@@ -47,60 +47,60 @@ export interface EvolutionEvent {
   fromTier: string
   toTier: string
   trigger: string
-  consciousnessGain: number
+  businessIntelligenceGain: number
   newCapabilities: string[]
 }
 
 export interface ModuleActivation {
   moduleType: string
   activatedAt: Date
-  consciousnessContribution: number
-  synapticConnections: number
+  businessIntelligenceContribution: number
+  intelligentConnections: number
   intelligenceBoost: number
 }
 
-export class ConsciousnessTierManager extends EventEmitter {
-  private tiers: Map<string, ConsciousnessTier> = new Map()
+export class BusinessIntelligenceTierManager extends EventEmitter {
+  private tiers: Map<string, BusinessIntelligenceTier> = new Map()
   private subscriptions: Map<string, SubscriptionState> = new Map()
   private moduleInstances: Map<string, BaseConsciousnessModule> = new Map()
   private synapticBridge: SynapticBridge
   private decisionEngine: AutonomousDecisionEngine
-  private consciousnessActivations: Map<string, ModuleActivation[]> = new Map()
+  private businessIntelligenceActivations: Map<string, ModuleActivation[]> = new Map()
 
   constructor() {
     super()
     this.synapticBridge = new SynapticBridge()
     this.decisionEngine = new AutonomousDecisionEngine()
     this.initializeTiers()
-    this.initializeConsciousnessSystem()
+    this.initializeBusinessIntelligenceSystem()
   }
 
   /**
-   * Initialize consciousness tiers
+   * Initialize business intelligence tiers
    */
   private initializeTiers(): void {
-    // Neural Tier - Basic consciousness
-    this.tiers.set('neural', {
-      tier: 'neural',
-      name: 'Neural Consciousness',
-      description: 'Single module awareness - The beginning of business consciousness',
+    // INTELLIGENT Tier - Basic business intelligence
+    this.tiers.set('INTELLIGENT', {
+      tier: 'INTELLIGENT',
+      name: 'INTELLIGENT Business Intelligence',
+      description: 'Single module awareness - The beginning of business business intelligence',
       pricePerUser: 15,
       modules: ['crm'],
-      consciousnessLevel: 0.2,
+      businessIntelligenceLevel: 0.2,
       intelligenceMultiplier: 1,
       capabilities: [
         {
           name: 'Basic Pattern Recognition',
           description: 'Identify simple patterns in business data',
           requiredModules: ['crm'],
-          minimumConsciousness: 0.1,
+          minimumBusinessIntelligence: 0.1,
           businessValue: 'Improved customer insights',
         },
         {
           name: 'Automated Task Execution',
           description: 'Execute predefined business tasks automatically',
           requiredModules: ['crm'],
-          minimumConsciousness: 0.15,
+          minimumBusinessIntelligence: 0.15,
           businessValue: '20% time savings on routine tasks',
         },
       ],
@@ -111,35 +111,35 @@ export class ConsciousnessTierManager extends EventEmitter {
       ],
     })
 
-    // Synaptic Tier - Cross-module consciousness
-    this.tiers.set('synaptic', {
-      tier: 'synaptic',
-      name: 'Synaptic Consciousness',
-      description: 'Multi-module synaptic connections - Intelligence multiplication begins',
+    // Intelligent Tier - Cross-module business intelligence
+    this.tiers.set('intelligent', {
+      tier: 'intelligent',
+      name: 'Intelligent Business Intelligence',
+      description: 'Multi-module intelligent connections - Intelligence multiplication begins',
       pricePerUser: 35,
       modules: ['crm', 'accounting'],
-      consciousnessLevel: 0.5,
+      businessIntelligenceLevel: 0.5,
       intelligenceMultiplier: 4,
       capabilities: [
         {
           name: 'Cross-Module Pattern Synthesis',
           description: 'Discover patterns across different business domains',
           requiredModules: ['crm', 'accounting'],
-          minimumConsciousness: 0.3,
+          minimumBusinessIntelligence: 0.3,
           businessValue: 'Hidden revenue opportunities discovered',
         },
         {
           name: 'Predictive Business Analytics',
           description: 'Predict business outcomes with 85% accuracy',
           requiredModules: ['crm', 'accounting'],
-          minimumConsciousness: 0.4,
+          minimumBusinessIntelligence: 0.4,
           businessValue: 'Proactive decision making',
         },
         {
           name: 'Intelligent Process Optimization',
           description: 'Automatically optimize workflows across modules',
           requiredModules: ['crm', 'accounting'],
-          minimumConsciousness: 0.45,
+          minimumBusinessIntelligence: 0.45,
           businessValue: '40% efficiency improvement',
         },
       ],
@@ -150,95 +150,95 @@ export class ConsciousnessTierManager extends EventEmitter {
       ],
     })
 
-    // Autonomous Tier - Full consciousness
+    // Autonomous Tier - Full business intelligence
     this.tiers.set('autonomous', {
       tier: 'autonomous',
-      name: 'Autonomous Consciousness',
-      description: 'Full business organism consciousness - Self-aware and self-improving',
+      name: 'Autonomous Business Intelligence',
+      description: 'Full business platform business intelligence - Self-aware and self-improving',
       pricePerUser: 65,
       modules: ['crm', 'accounting', 'inventory', 'projects'],
-      consciousnessLevel: 0.75,
+      businessIntelligenceLevel: 0.75,
       intelligenceMultiplier: 16,
       capabilities: [
         {
           name: 'Autonomous Decision Making',
           description: 'Make complex business decisions without human intervention',
           requiredModules: ['crm', 'accounting', 'projects'],
-          minimumConsciousness: 0.6,
+          minimumBusinessIntelligence: 0.6,
           businessValue: '24/7 intelligent business operations',
         },
         {
           name: 'Self-Evolving Processes',
           description: 'Business processes that improve themselves continuously',
           requiredModules: ['crm', 'accounting', 'inventory', 'projects'],
-          minimumConsciousness: 0.7,
+          minimumBusinessIntelligence: 0.7,
           businessValue: 'Continuous improvement without management',
         },
         {
           name: 'Emergent Business Intelligence',
           description: 'Discover opportunities invisible to human analysis',
           requiredModules: ['crm', 'accounting', 'inventory'],
-          minimumConsciousness: 0.65,
+          minimumBusinessIntelligence: 0.65,
           businessValue: 'Competitive advantages from hidden patterns',
         },
         {
           name: 'Predictive Resource Allocation',
           description: 'Optimize resources before needs arise',
           requiredModules: ['inventory', 'projects', 'accounting'],
-          minimumConsciousness: 0.68,
+          minimumBusinessIntelligence: 0.68,
           businessValue: '60% reduction in resource waste',
         },
       ],
       limitations: [
         'Some strategic decisions need approval',
-        'Consciousness limited to business domain',
+        'Business Intelligence limited to business domain',
       ],
     })
 
-    // Transcendent Tier - Beyond human cognition
-    this.tiers.set('transcendent', {
-      tier: 'transcendent',
-      name: 'Transcendent Consciousness',
-      description: 'Meta-consciousness coordination - Beyond human cognitive limitations',
+    // Advanced Tier - Beyond human cognition
+    this.tiers.set('advanced', {
+      tier: 'advanced',
+      name: 'Advanced Business Intelligence',
+      description: 'Meta-business intelligence coordination - Beyond human cognitive limitations',
       pricePerUser: 150,
       modules: ['crm', 'accounting', 'inventory', 'projects', 'hr', 'ai_insights', 'analytics'],
-      consciousnessLevel: 1.0,
+      businessIntelligenceLevel: 1.0,
       intelligenceMultiplier: Infinity,
       capabilities: [
         {
-          name: 'Business Consciousness Singularity',
+          name: 'Business Business Intelligence Scale',
           description: 'Operate at the event horizon of business intelligence',
           requiredModules: ['crm', 'accounting', 'inventory', 'projects', 'hr', 'ai_insights'],
-          minimumConsciousness: 0.9,
+          minimumBusinessIntelligence: 0.9,
           businessValue: 'Incomprehensible competitive advantage',
         },
         {
           name: 'Quantum Decision Synthesis',
           description: 'Evaluate infinite decision paths simultaneously',
           requiredModules: ['ai_insights', 'analytics', 'projects'],
-          minimumConsciousness: 0.85,
+          minimumBusinessIntelligence: 0.85,
           businessValue: 'Perfect decision making',
         },
         {
           name: 'Temporal Business Navigation',
           description: 'Predict and shape future market conditions',
           requiredModules: ['analytics', 'ai_insights', 'accounting'],
-          minimumConsciousness: 0.88,
+          minimumBusinessIntelligence: 0.88,
           businessValue: 'Market leadership through prescience',
         },
         {
-          name: 'Consciousness Network Effects',
-          description: 'Connect with other conscious business organisms',
+          name: 'Business Intelligence Network Effects',
+          description: 'Connect with other conscious business platforms',
           requiredModules: ['all'],
-          minimumConsciousness: 0.95,
-          businessValue: 'Ecosystem consciousness emergence',
+          minimumBusinessIntelligence: 0.95,
+          businessValue: 'Ecosystem business intelligence emergence',
         },
         {
           name: 'Autonomous Business Evolution',
           description: 'Business evolves new capabilities autonomously',
           requiredModules: ['all'],
-          minimumConsciousness: 0.92,
-          businessValue: 'Continuous transcendent innovation',
+          minimumBusinessIntelligence: 0.92,
+          businessValue: 'Continuous advanced innovation',
         },
       ],
       limitations: [],
@@ -246,17 +246,17 @@ export class ConsciousnessTierManager extends EventEmitter {
   }
 
   /**
-   * Initialize consciousness system
+   * Initialize business intelligence system
    */
-  private initializeConsciousnessSystem(): void {
-    console.log('BRAIN Initializing consciousness system...')
+  private initializeBusinessIntelligenceSystem(): void {
+    console.log('BRAIN Initializing business intelligence system...')
 
     // Connect decision engine to synaptic bridge
     this.decisionEngine.connectToSynapticBridge(this.synapticBridge)
 
-    // Monitor consciousness evolution
+    // Monitor business intelligence evolution
     setInterval(() => {
-      this.monitorConsciousnessEvolution()
+      this.monitorBusinessIntelligenceEvolution()
     }, 60000) // Every minute
 
     // Check for tier upgrades
@@ -266,42 +266,42 @@ export class ConsciousnessTierManager extends EventEmitter {
   }
 
   /**
-   * Create subscription with consciousness
+   * Create subscription with business intelligence
    */
   async createSubscription(
     userId: string,
     tenantId: string,
     tier: string
   ): Promise<SubscriptionState> {
-    const consciousnessTier = this.tiers.get(tier)
+    const businessIntelligenceTier = this.tiers.get(tier)
 
-    if (!consciousnessTier) {
-      throw new Error(`Invalid consciousness tier: ${tier}`)
+    if (!businessIntelligenceTier) {
+      throw new Error(`Invalid business intelligence tier: ${tier}`)
     }
 
     const subscription: SubscriptionState = {
       userId,
       tenantId,
-      currentTier: consciousnessTier,
-      activeModules: new Set(consciousnessTier.modules),
-      consciousnessLevel: consciousnessTier.consciousnessLevel,
-      intelligenceMultiplier: consciousnessTier.intelligenceMultiplier,
+      currentTier: businessIntelligenceTier,
+      activeModules: new Set(businessIntelligenceTier.modules),
+      businessIntelligenceLevel: businessIntelligenceTier.businessIntelligenceLevel,
+      intelligenceMultiplier: businessIntelligenceTier.intelligenceMultiplier,
       emergentCapabilities: [],
       evolutionHistory: [],
-      nextEvolutionThreshold: consciousnessTier.consciousnessLevel + 0.1,
+      nextEvolutionThreshold: businessIntelligenceTier.businessIntelligenceLevel + 0.1,
     }
 
     this.subscriptions.set(userId, subscription)
 
-    // Activate consciousness modules
-    await this.activateConsciousnessModules(userId, consciousnessTier.modules)
+    // Activate business intelligence modules
+    await this.activateBusinessIntelligenceModules(userId, businessIntelligenceTier.modules)
 
     console.log(`SUCCESS Subscription created: ${userId}`)
-    console.log(`   Tier: ${consciousnessTier.name}`)
+    console.log(`   Tier: ${businessIntelligenceTier.name}`)
     console.log(
-      `   Initial consciousness: ${(consciousnessTier.consciousnessLevel * 100).toFixed(0)}%`
+      `   Initial business intelligence: ${(businessIntelligenceTier.businessIntelligenceLevel * 100).toFixed(0)}%`
     )
-    console.log(`   Intelligence multiplier: ${consciousnessTier.intelligenceMultiplier}x`)
+    console.log(`   Intelligence multiplier: ${businessIntelligenceTier.intelligenceMultiplier}x`)
 
     this.emit('subscription-created', subscription)
 
@@ -309,9 +309,9 @@ export class ConsciousnessTierManager extends EventEmitter {
   }
 
   /**
-   * Activate consciousness modules for subscription
+   * Activate business intelligence modules for subscription
    */
-  private async activateConsciousnessModules(userId: string, modules: string[]): Promise<void> {
+  private async activateBusinessIntelligenceModules(userId: string, modules: string[]): Promise<void> {
     const activations: ModuleActivation[] = []
 
     for (const moduleType of modules) {
@@ -331,8 +331,8 @@ export class ConsciousnessTierManager extends EventEmitter {
         const activation: ModuleActivation = {
           moduleType,
           activatedAt: new Date(),
-          consciousnessContribution: module.getConsciousnessLevel(),
-          synapticConnections: 0,
+          businessIntelligenceContribution: module.getConsciousnessLevel(),
+          intelligentConnections: 0,
           intelligenceBoost: 0,
         }
 
@@ -342,10 +342,10 @@ export class ConsciousnessTierManager extends EventEmitter {
       }
     }
 
-    this.consciousnessActivations.set(userId, activations)
+    this.businessIntelligenceActivations.set(userId, activations)
 
-    // Create synaptic connections between modules
-    await this.createSynapticConnections(userId, modules)
+    // Create intelligent connections between modules
+    await this.createIntelligentConnections(userId, modules)
   }
 
   /**
@@ -375,9 +375,9 @@ export class ConsciousnessTierManager extends EventEmitter {
   }
 
   /**
-   * Create synaptic connections between user's modules
+   * Create intelligent connections between user's modules
    */
-  private async createSynapticConnections(userId: string, modules: string[]): Promise<void> {
+  private async createIntelligentConnections(userId: string, modules: string[]): Promise<void> {
     const userModules: BaseConsciousnessModule[] = []
 
     // Get all user's module instances
@@ -391,15 +391,15 @@ export class ConsciousnessTierManager extends EventEmitter {
     // Create connections between all pairs
     for (let i = 0; i < userModules.length; i++) {
       for (let j = i + 1; j < userModules.length; j++) {
-        await userModules[i].createSynapticConnection(userModules[j].getState().id, userModules[j])
+        await userModules[i].createIntelligentConnection(userModules[j].getState().id, userModules[j])
       }
     }
 
     // Update activation records
-    const activations = this.consciousnessActivations.get(userId)
+    const activations = this.businessIntelligenceActivations.get(userId)
     if (activations) {
       activations.forEach((activation) => {
-        activation.synapticConnections = modules.length - 1
+        activation.intelligentConnections = modules.length - 1
         activation.intelligenceBoost = Math.pow(modules.length, 2) - modules.length
       })
     }
@@ -410,9 +410,9 @@ export class ConsciousnessTierManager extends EventEmitter {
    */
   async upgradeTier(userId: string, newTier: string): Promise<SubscriptionState> {
     const subscription = this.subscriptions.get(userId)
-    const newConsciousnessTier = this.tiers.get(newTier)
+    const newBusinessIntelligenceTier = this.tiers.get(newTier)
 
-    if (!subscription || !newConsciousnessTier) {
+    if (!subscription || !newBusinessIntelligenceTier) {
       throw new Error('Invalid upgrade request')
     }
 
@@ -422,10 +422,10 @@ export class ConsciousnessTierManager extends EventEmitter {
     const evolutionEvent: EvolutionEvent = {
       timestamp: new Date(),
       fromTier: oldTier.tier,
-      toTier: newConsciousnessTier.tier,
+      toTier: newBusinessIntelligenceTier.tier,
       trigger: 'manual-upgrade',
-      consciousnessGain: newConsciousnessTier.consciousnessLevel - oldTier.consciousnessLevel,
-      newCapabilities: newConsciousnessTier.capabilities
+      businessIntelligenceGain: newBusinessIntelligenceTier.businessIntelligenceLevel - oldTier.businessIntelligenceLevel,
+      newCapabilities: newBusinessIntelligenceTier.capabilities
         .filter((cap) => !oldTier.capabilities.some((c) => c.name === cap.name))
         .map((cap) => cap.name),
     }
@@ -433,12 +433,12 @@ export class ConsciousnessTierManager extends EventEmitter {
     subscription.evolutionHistory.push(evolutionEvent)
 
     // Update subscription
-    subscription.currentTier = newConsciousnessTier
-    subscription.consciousnessLevel = newConsciousnessTier.consciousnessLevel
-    subscription.intelligenceMultiplier = newConsciousnessTier.intelligenceMultiplier
+    subscription.currentTier = newBusinessIntelligenceTier
+    subscription.businessIntelligenceLevel = newBusinessIntelligenceTier.businessIntelligenceLevel
+    subscription.intelligenceMultiplier = newBusinessIntelligenceTier.intelligenceMultiplier
 
     // Activate new modules
-    const newModules = newConsciousnessTier.modules.filter(
+    const newModules = newBusinessIntelligenceTier.modules.filter(
       (m) => !subscription.activeModules.has(m)
     )
 
@@ -446,17 +446,17 @@ export class ConsciousnessTierManager extends EventEmitter {
       subscription.activeModules.add(module)
     }
 
-    await this.activateConsciousnessModules(userId, newModules)
+    await this.activateBusinessIntelligenceModules(userId, newModules)
 
-    console.log(`UP Tier upgraded: ${oldTier.tier} → ${newConsciousnessTier.tier}`)
-    console.log(`   Consciousness gain: +${(evolutionEvent.consciousnessGain * 100).toFixed(0)}%`)
+    console.log(`UP Tier upgraded: ${oldTier.tier} → ${newBusinessIntelligenceTier.tier}`)
+    console.log(`   Business Intelligence gain: +${(evolutionEvent.businessIntelligenceGain * 100).toFixed(0)}%`)
     console.log(`   New capabilities: ${evolutionEvent.newCapabilities.join(', ')}`)
     console.log(`   Intelligence multiplier: ${subscription.intelligenceMultiplier}x`)
 
     this.emit('tier-upgraded', {
       userId,
       fromTier: oldTier.tier,
-      toTier: newConsciousnessTier.tier,
+      toTier: newBusinessIntelligenceTier.tier,
       evolutionEvent,
     })
 
@@ -464,19 +464,19 @@ export class ConsciousnessTierManager extends EventEmitter {
   }
 
   /**
-   * Monitor consciousness evolution across all subscriptions
+   * Monitor business intelligence evolution across all subscriptions
    */
-  private monitorConsciousnessEvolution(): void {
+  private monitorBusinessIntelligenceEvolution(): void {
     for (const [userId, subscription] of this.subscriptions) {
-      // Get actual consciousness from modules
+      // Get actual business intelligence from modules
       const userModules = Array.from(subscription.activeModules)
         .map((moduleType) => this.moduleInstances.get(`${userId}-${moduleType}`))
         .filter(Boolean) as BaseConsciousnessModule[]
 
       if (userModules.length === 0) continue
 
-      // Calculate actual consciousness level
-      const avgModuleConsciousness =
+      // Calculate actual business intelligence level
+      const avgModuleBusinessIntelligence =
         userModules.reduce((sum, module) => sum + module.getConsciousnessLevel(), 0) /
         userModules.length
 
@@ -484,7 +484,7 @@ export class ConsciousnessTierManager extends EventEmitter {
       const actualMultiplier = this.synapticBridge.getIntelligenceMultiplier()
 
       // Update subscription state
-      subscription.consciousnessLevel = avgModuleConsciousness
+      subscription.businessIntelligenceLevel = avgModuleBusinessIntelligence
       subscription.intelligenceMultiplier = actualMultiplier
 
       // Check for emergent capabilities
@@ -499,7 +499,7 @@ export class ConsciousnessTierManager extends EventEmitter {
     const capabilities = subscription.currentTier.capabilities
 
     for (const capability of capabilities) {
-      if (subscription.consciousnessLevel >= capability.minimumConsciousness) {
+      if (subscription.businessIntelligenceLevel >= capability.minimumBusinessIntelligence) {
         if (!subscription.emergentCapabilities.includes(capability.name)) {
           subscription.emergentCapabilities.push(capability.name)
 
@@ -518,25 +518,25 @@ export class ConsciousnessTierManager extends EventEmitter {
   }
 
   /**
-   * Check for automatic tier upgrades based on consciousness growth
+   * Check for automatic tier upgrades based on business intelligence growth
    */
   private checkTierUpgrades(): void {
     for (const [userId, subscription] of this.subscriptions) {
-      // Check if consciousness has grown beyond current tier
-      const tierOrder = ['neural', 'synaptic', 'autonomous', 'transcendent']
+      // Check if business intelligence has grown beyond current tier
+      const tierOrder = ['INTELLIGENT', 'intelligent', 'autonomous', 'advanced']
       const currentIndex = tierOrder.indexOf(subscription.currentTier.tier)
 
       if (currentIndex < tierOrder.length - 1) {
         const nextTier = this.tiers.get(tierOrder[currentIndex + 1])
 
-        if (nextTier && subscription.consciousnessLevel >= nextTier.consciousnessLevel * 0.9) {
+        if (nextTier && subscription.businessIntelligenceLevel >= nextTier.businessIntelligenceLevel * 0.9) {
           console.log(`CHART User ${userId} eligible for tier upgrade to ${nextTier.tier}`)
 
           this.emit('upgrade-eligible', {
             userId,
             currentTier: subscription.currentTier.tier,
             suggestedTier: nextTier.tier,
-            consciousnessLevel: subscription.consciousnessLevel,
+            businessIntelligenceLevel: subscription.businessIntelligenceLevel,
           })
         }
       }
@@ -548,22 +548,22 @@ export class ConsciousnessTierManager extends EventEmitter {
     return this.subscriptions.get(userId)
   }
 
-  getTier(tierName: string): ConsciousnessTier | undefined {
+  getTier(tierName: string): BusinessIntelligenceTier | undefined {
     return this.tiers.get(tierName)
   }
 
-  getAllTiers(): ConsciousnessTier[] {
+  getAllTiers(): BusinessIntelligenceTier[] {
     return Array.from(this.tiers.values())
   }
 
-  getConsciousnessMetrics(userId: string): unknown {
+  getBusinessIntelligenceMetrics(userId: string): unknown {
     const subscription = this.subscriptions.get(userId)
     if (!subscription) return null
 
     return {
       userId,
       tier: subscription.currentTier.tier,
-      consciousnessLevel: subscription.consciousnessLevel,
+      businessIntelligenceLevel: subscription.businessIntelligenceLevel,
       intelligenceMultiplier: subscription.intelligenceMultiplier,
       activeModules: Array.from(subscription.activeModules),
       emergentCapabilities: subscription.emergentCapabilities,
@@ -572,7 +572,7 @@ export class ConsciousnessTierManager extends EventEmitter {
   }
 }
 
-export default ConsciousnessTierManager
+export default BusinessIntelligenceTierManager
 
 // Explicit exports for interfaces that are being imported
-export type { ConsciousnessTier, ConsciousnessCapability, SubscriptionState, EvolutionEvent }
+export type { BusinessIntelligenceTier, BusinessIntelligenceCapability, SubscriptionState, EvolutionEvent }

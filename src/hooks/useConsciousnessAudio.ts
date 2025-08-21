@@ -1,64 +1,64 @@
 /**
- * CoreFlow360 Consciousness Audio Hook
+ * CoreFlow360 Business Intelligence Audio Hook
  *
- * React hook for managing consciousness audio experiences throughout
- * the application. Provides easy integration with business consciousness
+ * React hook for managing business intelligence audio experiences throughout
+ * the application. Provides easy integration with business intelligence
  * state changes and user interactions.
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import {
-  ConsciousnessAudioEvent,
+  BusinessIntelligenceAudioEvent,
   AudioSystemConfig,
   DEFAULT_AUDIO_CONFIG,
 } from '../lib/consciousness/soundDesign'
 
-interface ConsciousnessAudioState {
+interface BusinessIntelligenceAudioState {
   isEnabled: boolean
   isInitialized: boolean
-  consciousnessLevel: number
+  intelligenceLevel: number
   currentState: string
   spatialPosition: [number, number, number]
-  activeEvents: ConsciousnessAudioEvent[]
+  activeEvents: BusinessIntelligenceAudioEvent[]
   audioConfig: AudioSystemConfig
 }
 
-interface ConsciousnessAudioActions {
+interface BusinessIntelligenceAudioActions {
   enable: () => void
   disable: () => void
-  setConsciousnessLevel: (level: number) => void
+  setIntelligenceLevel: (level: number) => void
   updateSpatialPosition: (position: [number, number, number]) => void
-  triggerEvent: (event: ConsciousnessAudioEvent) => void
+  triggerEvent: (event: BusinessIntelligenceAudioEvent) => void
   updateConfig: (config: Partial<AudioSystemConfig>) => void
   playDepartmentAwakening: (departmentId: string) => void
   playConnectionSound: () => void
   playMultiplicationSound: () => void
-  playConsciousnessEmergence: () => void
+  playIntelligenceEmergence: () => void
 }
 
-interface UseConsciousnessAudioOptions {
+interface UseBusinessIntelligenceAudioOptions {
   initiallyEnabled?: boolean
-  initialConsciousnessLevel?: number
+  initialIntelligenceLevel?: number
   initialSpatialPosition?: [number, number, number]
   audioConfig?: Partial<AudioSystemConfig>
-  onAudioEvent?: (event: ConsciousnessAudioEvent) => void
+  onAudioEvent?: (event: BusinessIntelligenceAudioEvent) => void
   debugMode?: boolean
 }
 
-interface UseConsciousnessAudioReturn extends ConsciousnessAudioState, ConsciousnessAudioActions {
+interface UseBusinessIntelligenceAudioReturn extends BusinessIntelligenceAudioState, BusinessIntelligenceAudioActions {
   audioEngine: unknown | null
   setAudioEngine: (engine: unknown) => void
 }
 
 /**
- * Primary hook for consciousness audio integration
+ * Primary hook for business intelligence audio integration
  */
-export const useConsciousnessAudio = (
-  options: UseConsciousnessAudioOptions = {}
-): UseConsciousnessAudioReturn => {
+export const useBusinessIntelligenceAudio = (
+  options: UseBusinessIntelligenceAudioOptions = {}
+): UseBusinessIntelligenceAudioReturn => {
   const {
     initiallyEnabled = false,
-    initialConsciousnessLevel = 1,
+    initialIntelligenceLevel = 1,
     initialSpatialPosition = [0, 0, 0],
     audioConfig = {},
     onAudioEvent,
@@ -69,31 +69,31 @@ export const useConsciousnessAudio = (
   const [audioEngine, setAudioEngine] = useState<unknown>(null)
   const [isEnabled, setIsEnabled] = useState(initiallyEnabled)
   const [isInitialized, setIsInitialized] = useState(false)
-  const [consciousnessLevel, setConsciousnessLevel] = useState(initialConsciousnessLevel)
+  const [intelligenceLevel, setIntelligenceLevel] = useState(initialIntelligenceLevel)
   const [currentState, setCurrentState] = useState('single_department')
   const [spatialPosition, setSpatialPosition] =
     useState<[number, number, number]>(initialSpatialPosition)
-  const [activeEvents, setActiveEvents] = useState<ConsciousnessAudioEvent[]>([])
+  const [activeEvents, setActiveEvents] = useState<BusinessIntelligenceAudioEvent[]>([])
   const [fullAudioConfig, setFullAudioConfig] = useState<AudioSystemConfig>({
     ...DEFAULT_AUDIO_CONFIG,
     ...audioConfig,
   })
 
   // Refs for tracking
-  const lastConsciousnessLevel = useRef(consciousnessLevel)
+  const lastintelligenceLevel = useRef(intelligenceLevel)
   const eventTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map())
 
-  // Update consciousness state based on level
-  const updateConsciousnessState = useCallback(() => {
+  // Update business intelligence state based on level
+  const updateBusinessIntelligenceState = useCallback(() => {
     let newState = 'single_department'
 
-    if (consciousnessLevel >= 10) {
-      newState = 'full_consciousness'
-    } else if (consciousnessLevel >= 5) {
+    if (intelligenceLevel >= 10) {
+      newState = 'full_business_intelligence'
+    } else if (intelligenceLevel >= 5) {
       newState = 'quad_intelligence'
-    } else if (consciousnessLevel >= 3) {
+    } else if (intelligenceLevel >= 3) {
       newState = 'triple_synergy'
-    } else if (consciousnessLevel >= 2) {
+    } else if (intelligenceLevel >= 2) {
       newState = 'dual_connection'
     }
 
@@ -102,11 +102,11 @@ export const useConsciousnessAudio = (
 
       if (debugMode) {
         console.log(
-          `Consciousness state updated: ${currentState} -> ${newState} (level: ${consciousnessLevel})`
+          `Business intelligence state updated: ${currentState} -> ${newState} (level: ${intelligenceLevel})`
         )
       }
     }
-  }, [consciousnessLevel, currentState, debugMode])
+  }, [intelligenceLevel, currentState, debugMode])
 
   // Enable audio system
   const enable = useCallback(() => {
@@ -140,9 +140,9 @@ export const useConsciousnessAudio = (
     [audioEngine]
   )
 
-  // Trigger consciousness audio event
+  // Trigger business intelligence audio event
   const triggerEvent = useCallback(
-    (event: ConsciousnessAudioEvent) => {
+    (event: BusinessIntelligenceAudioEvent) => {
       if (!isEnabled || !audioEngine) {
         if (debugMode) {
         }
@@ -206,45 +206,45 @@ export const useConsciousnessAudio = (
     triggerEvent('intelligence_multiplication')
   }, [triggerEvent])
 
-  const playConsciousnessEmergence = useCallback(() => {
-    triggerEvent('full_consciousness')
+  const playIntelligenceEmergence = useCallback(() => {
+    triggerEvent('full_business_intelligence')
   }, [triggerEvent])
 
-  // Auto-trigger events based on consciousness level changes
+  // Auto-trigger events based on business intelligence level changes
   useEffect(() => {
-    const levelDiff = consciousnessLevel - lastConsciousnessLevel.current
+    const levelDiff = intelligenceLevel - lastintelligenceLevel.current
 
     if (levelDiff > 0 && isEnabled) {
-      // Consciousness level increased
-      if (consciousnessLevel >= 2 && lastConsciousnessLevel.current < 2) {
+      // Business intelligence level increased
+      if (intelligenceLevel >= 2 && lastintelligenceLevel.current < 2) {
         // First connection achieved
         setTimeout(() => playConnectionSound(), 500)
       }
 
-      if (consciousnessLevel >= 4 && lastConsciousnessLevel.current < 4) {
+      if (intelligenceLevel >= 4 && lastintelligenceLevel.current < 4) {
         // Intelligence multiplication begins
         setTimeout(() => playMultiplicationSound(), 800)
       }
 
-      if (consciousnessLevel >= 10 && lastConsciousnessLevel.current < 10) {
-        // Full consciousness emergence
-        setTimeout(() => playConsciousnessEmergence(), 1200)
+      if (intelligenceLevel >= 10 && lastintelligenceLevel.current < 10) {
+        // Full intelligent automation
+        setTimeout(() => playIntelligenceEmergence(), 1200)
       }
     }
 
-    lastConsciousnessLevel.current = consciousnessLevel
+    lastintelligenceLevel.current = intelligenceLevel
   }, [
-    consciousnessLevel,
+    intelligenceLevel,
     isEnabled,
     playConnectionSound,
     playMultiplicationSound,
-    playConsciousnessEmergence,
+    playIntelligenceEmergence,
   ])
 
-  // Update consciousness state when level changes
+  // Update business intelligence state when level changes
   useEffect(() => {
-    updateConsciousnessState()
-  }, [updateConsciousnessState])
+    updateBusinessIntelligenceState()
+  }, [updateBusinessIntelligenceState])
 
   // Initialize audio system
   useEffect(() => {
@@ -267,7 +267,7 @@ export const useConsciousnessAudio = (
     // State
     isEnabled,
     isInitialized,
-    consciousnessLevel,
+    intelligenceLevel,
     currentState,
     spatialPosition,
     activeEvents,
@@ -277,22 +277,22 @@ export const useConsciousnessAudio = (
     // Actions
     enable,
     disable,
-    setConsciousnessLevel,
+    setIntelligenceLevel,
     updateSpatialPosition,
     triggerEvent,
     updateConfig,
     playDepartmentAwakening,
     playConnectionSound,
     playMultiplicationSound,
-    playConsciousnessEmergence,
+    playIntelligenceEmergence,
     setAudioEngine,
   }
 }
 
 /**
- * Simplified hook for basic consciousness audio integration
+ * Simplified hook for basic business intelligence audio integration
  */
-export const useBasicConsciousnessAudio = (consciousnessLevel: number) => {
+export const useBasicBusinessIntelligenceAudio = (intelligenceLevel: number) => {
   const {
     enable,
     disable,
@@ -300,9 +300,9 @@ export const useBasicConsciousnessAudio = (consciousnessLevel: number) => {
     playDepartmentAwakening,
     playConnectionSound,
     playMultiplicationSound,
-    playConsciousnessEmergence,
-  } = useConsciousnessAudio({
-    initialConsciousnessLevel: consciousnessLevel,
+    playIntelligenceEmergence,
+  } = useBusinessIntelligenceAudio({
+    initialIntelligenceLevel: intelligenceLevel,
     initiallyEnabled: false,
   })
 
@@ -313,7 +313,7 @@ export const useBasicConsciousnessAudio = (consciousnessLevel: number) => {
     playAwakening: playDepartmentAwakening,
     playConnection: playConnectionSound,
     playMultiplication: playMultiplicationSound,
-    playEmergence: playConsciousnessEmergence,
+    playEmergence: playIntelligenceEmergence,
   }
 }
 
@@ -321,9 +321,9 @@ export const useBasicConsciousnessAudio = (consciousnessLevel: number) => {
  * Hook for pricing calculator audio integration
  */
 export const usePricingAudio = (intelligenceMultiplier: number) => {
-  const { triggerEvent, setConsciousnessLevel } = useConsciousnessAudio({
+  const { triggerEvent, setIntelligenceLevel } = useBusinessIntelligenceAudio({
     initiallyEnabled: true,
-    initialConsciousnessLevel: intelligenceMultiplier,
+    initialIntelligenceLevel: intelligenceMultiplier,
   })
 
   const handleDepartmentSelect = useCallback(() => {
@@ -340,10 +340,10 @@ export const usePricingAudio = (intelligenceMultiplier: number) => {
     }
   }, [intelligenceMultiplier, triggerEvent])
 
-  // Update consciousness level based on intelligence multiplier
+  // Update business intelligence level based on intelligence multiplier
   useEffect(() => {
-    setConsciousnessLevel(intelligenceMultiplier)
-  }, [intelligenceMultiplier, setConsciousnessLevel])
+    setIntelligenceLevel(intelligenceMultiplier)
+  }, [intelligenceMultiplier, setIntelligenceLevel])
 
   return {
     onDepartmentSelect: handleDepartmentSelect,
@@ -353,16 +353,16 @@ export const usePricingAudio = (intelligenceMultiplier: number) => {
 }
 
 /**
- * Hook for cursor consciousness audio effects
+ * Hook for cursor business intelligence audio effects
  */
-export const useCursorConsciousnessAudio = () => {
-  const { triggerEvent } = useConsciousnessAudio({
+export const useCursorBusinessIntelligenceAudio = () => {
+  const { triggerEvent } = useBusinessIntelligenceAudio({
     initiallyEnabled: true,
   })
 
   const handleCursorMove = useCallback(
     (_x: number, _y: number) => {
-      // Subtle cursor consciousness field
+      // Subtle cursor business intelligence field
       if (Math.random() < 0.05) {
         // 5% chance on mouse move
         triggerEvent('cursor_awareness')
@@ -375,3 +375,6 @@ export const useCursorConsciousnessAudio = () => {
     onCursorMove: handleCursorMove,
   }
 }
+
+// Export alias for compatibility
+export const useIntelligenceAudio = useBusinessIntelligenceAudio

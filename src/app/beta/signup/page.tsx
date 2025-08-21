@@ -3,13 +3,13 @@
 /**
  * Beta Signup Page
  *
- * Revolutionary consciousness-awakening beta signup experience
- * for early adopters of the world's first conscious business platform.
+ * Revolutionary business intelligence-awakening beta signup experience
+ * for early adopters of the Multi-Business Intelligence Platform.
  */
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useConsciousnessAudio } from '@/hooks/useConsciousnessAudio'
+import { useBusinessIntelligenceAudio } from '@/hooks/useConsciousnessAudio'
 
 interface BetaUser {
   email: string
@@ -20,7 +20,7 @@ interface BetaUser {
   industry: string
   companySize: string
   currentChallenges: string[]
-  consciousnessLevel: number
+  intelligenceLevel: number
   referralSource: string
   priorityScore: number
 }
@@ -42,8 +42,8 @@ interface FormField {
   validation?: (value: unknown) => string | null
 }
 
-// CSS-based Consciousness Particle System
-const ConsciousnessField: React.FC<{ intensity: number }> = ({ intensity }) => {
+// CSS-based Business Intelligence Particle System
+const BusinessIntelligenceField: React.FC<{ intensity: number }> = ({ intensity }) => {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {Array.from({ length: Math.min(intensity * 5, 20) }).map((_, i) => (
@@ -74,7 +74,7 @@ const ConsciousnessField: React.FC<{ intensity: number }> = ({ intensity }) => {
 const FORM_STEPS: FormStep[] = [
   {
     id: 'awakening',
-    title: 'Consciousness Awakening',
+    title: 'Business Intelligence Awakening',
     description: 'The first step is recognizing the need for transformation',
     fields: [
       {
@@ -107,7 +107,7 @@ const FORM_STEPS: FormStep[] = [
   {
     id: 'reality-check',
     title: 'Current Reality Assessment',
-    description: 'Understanding your business consciousness level',
+    description: 'Understanding your business intelligence level',
     fields: [
       {
         name: 'company',
@@ -188,7 +188,7 @@ const FORM_STEPS: FormStep[] = [
         required: true,
       },
       {
-        name: 'consciousnessLevel',
+        name: 'intelligenceLevel',
         type: 'slider',
         label: 'Current Business Intelligence Level (1-10)',
         validation: (value) => {
@@ -226,18 +226,18 @@ const BetaSignupPage: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
-  const [consciousnessIntensity, setConsciousnessIntensity] = useState(1)
+  const [intelligenceIntensity, setIntelligenceIntensity] = useState(1)
 
-  const consciousnessAudio = useConsciousnessAudio({
+  const businessIntelligenceAudio = useBusinessIntelligenceAudio({
     initiallyEnabled: true,
-    initialConsciousnessLevel: 1,
+    initialIntelligenceLevel: 1,
   })
 
   useEffect(() => {
-    // Increase consciousness intensity as user progresses
-    setConsciousnessIntensity(currentStep + 1)
-    consciousnessAudio.setConsciousnessLevel(currentStep + 1)
-  }, [currentStep, consciousnessAudio])
+    // Increase intelligence intensity as user progresses
+    setIntelligenceIntensity(currentStep + 1)
+    businessIntelligenceAudio.setIntelligenceLevel(currentStep + 1)
+  }, [currentStep, businessIntelligenceAudio])
 
   const handleFieldChange = (fieldName: string, value: unknown) => {
     setFormData((prev) => ({
@@ -277,7 +277,7 @@ const BetaSignupPage: React.FC = () => {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      consciousnessAudio.playConnectionSound()
+      businessIntelligenceAudio.playConnectionSound()
       if (currentStep < FORM_STEPS.length - 1) {
         setCurrentStep((current) => current + 1)
       } else {
@@ -336,9 +336,9 @@ const BetaSignupPage: React.FC = () => {
     const challengeCount = userData.currentChallenges?.length || 0
     score += Math.min(challengeCount * 10, 50)
 
-    // Consciousness level (inverse - lower levels get higher priority)
-    const consciousnessLevel = userData.consciousnessLevel || 5
-    score += (10 - consciousnessLevel) * 5
+    // Intelligence level (inverse - lower levels get higher priority)
+    const intelligenceLevel = userData.intelligenceLevel || 5
+    score += (10 - intelligenceLevel) * 5
 
     return Math.min(score, 500)
   }
@@ -353,7 +353,7 @@ const BetaSignupPage: React.FC = () => {
         ...formData,
         priorityScore,
         currentChallenges: formData.currentChallenges || [],
-        consciousnessLevel: formData.consciousnessLevel || 5,
+        intelligenceLevel: formData.intelligenceLevel || 5,
       } as BetaUser
 
       // Submit to API
@@ -366,7 +366,7 @@ const BetaSignupPage: React.FC = () => {
       })
 
       if (response.ok) {
-        consciousnessAudio.playConsciousnessEmergence()
+        businessIntelligenceAudio.playIntelligenceEmergence()
         setIsComplete(true)
       } else {
         throw new Error('Signup failed')
@@ -382,7 +382,7 @@ const BetaSignupPage: React.FC = () => {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-black">
         <div className="absolute inset-0">
-          <ConsciousnessField intensity={5} />
+          <BusinessIntelligenceField intensity={5} />
         </div>
 
         <motion.div
@@ -391,9 +391,9 @@ const BetaSignupPage: React.FC = () => {
           className="relative z-10 mx-4 max-w-2xl rounded-2xl border border-purple-500/30 bg-black/30 p-12 text-center backdrop-blur-xl"
         >
           <div className="mb-6 text-6xl">✨</div>
-          <h1 className="mb-6 text-4xl font-bold text-white">Consciousness Awakening Complete</h1>
+          <h1 className="mb-6 text-4xl font-bold text-white">Business Intelligence Awakening Complete</h1>
           <p className="mb-8 text-xl text-gray-300">
-            Welcome to the consciousness revolution! You're now part of an exclusive group
+            Welcome to the business intelligence revolution! You're now part of an exclusive group
             pioneering the future of business intelligence.
           </p>
 
@@ -405,7 +405,7 @@ const BetaSignupPage: React.FC = () => {
             </div>
             <div className="rounded-lg bg-cyan-500/20 p-4">
               <div className="mb-2 text-2xl">🧠</div>
-              <div className="font-semibold text-white">AI Consciousness</div>
+              <div className="font-semibold text-white">AI Business Intelligence</div>
               <div className="text-sm text-gray-400">Personalized for your business</div>
             </div>
             <div className="rounded-lg bg-green-500/20 p-4">
@@ -416,7 +416,7 @@ const BetaSignupPage: React.FC = () => {
           </div>
 
           <p className="text-sm text-gray-400">
-            Your consciousness journey ID:{' '}
+            Your business intelligence journey ID:{' '}
             <span className="font-mono text-cyan-400">
               {Math.random().toString(36).substr(2, 9).toUpperCase()}
             </span>
@@ -431,9 +431,9 @@ const BetaSignupPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black">
-      {/* Consciousness Field Background */}
+      {/* Business Intelligence Field Background */}
       <div className="absolute inset-0">
-        <ConsciousnessField intensity={consciousnessIntensity} />
+        <BusinessIntelligenceField intensity={intelligenceIntensity} />
       </div>
 
       <div className="relative z-10 flex min-h-screen items-center justify-center p-4">
@@ -447,10 +447,10 @@ const BetaSignupPage: React.FC = () => {
           {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="mb-2 text-3xl font-bold text-white">
-              Join the Consciousness Revolution
+              Join the Business Intelligence Revolution
             </h1>
             <p className="text-gray-400">
-              Beta access to the world's first conscious business platform
+              Beta access to the Multi-Business Intelligence Platform
             </p>
           </div>
 

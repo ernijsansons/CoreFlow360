@@ -21,7 +21,7 @@ const defaultConfig: TelemetryConfig = {
   traceRequests: true,
   collectMetrics: true,
   excludePaths: ['/health', '/_next/', '/favicon.ico', '/robots.txt', '/sitemap.xml'],
-  highSecurityEndpoints: ['/api/admin', '/api/stripe', '/api/voice', '/api/consciousness'],
+  highSecurityEndpoints: ['/api/admin', '/api/stripe', '/api/voice', '/api/BUSINESS INTELLIGENCE'],
 }
 
 /**

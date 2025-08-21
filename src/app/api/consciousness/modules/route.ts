@@ -1,16 +1,16 @@
 /**
- * CoreFlow360 - Consciousness Module Management API
- * Activate, deactivate, and manage consciousness modules
+ * CoreFlow360 - BUSINESS INTELLIGENCE Module Management API
+ * Activate, deactivate, and manage business intelligence modules
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/auth'
 import { handleError, ErrorContext } from '@/lib/error-handler'
-import { businessConsciousness } from '@/consciousness'
+// import { businessIntelligence } from '@/intelligence' // Not implemented yet
 import { prisma } from '@/lib/prisma'
 
 interface ModuleResponse {
-  modules: ConsciousnessModule[]
+  modules: IntelligenceModule[]
   activeModules: string[]
   availableSlots: number
   intelligenceImpact: {
@@ -20,15 +20,15 @@ interface ModuleResponse {
   }
 }
 
-interface ConsciousnessModule {
+interface BusinessIntelligenceModule {
   id: string
   name: string
   category: string
   description: string
   isActive: boolean
   activatedAt?: string
-  consciousnessImpact: number
-  synapticConnections: string[]
+  intelligenceImpact: number
+  INTELLIGENTConnections: string[]
   capabilities: string[]
   requirements?: string[]
   status: 'active' | 'available' | 'locked' | 'coming_soon'
@@ -47,7 +47,7 @@ interface ModuleActivationResponse {
     name: string
     isActive: boolean
   }
-  consciousness?: {
+  businessIntelligence?: {
     level: number
     intelligenceMultiplier: number
     newCapabilities?: string[]
@@ -55,13 +55,13 @@ interface ModuleActivationResponse {
 }
 
 /**
- * GET - Retrieve available consciousness modules
+ * GET - Retrieve available business intelligence modules
  */
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<ModuleResponse | { error: string }>> {
   const context: ErrorContext = {
-    endpoint: '/api/consciousness/modules',
+    endpoint: '/api/BUSINESS INTELLIGENCE/modules',
     method: 'GET',
     userAgent: request.headers.get('user-agent') || undefined,
     ip: request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || undefined,
@@ -100,15 +100,15 @@ export async function GET(
       orderBy: [{ category: 'asc' }, { name: 'asc' }],
     })
 
-    // Get consciousness status
-    const consciousnessStatus = businessConsciousness.getConsciousnessStatus()
+    // Get BUSINESS INTELLIGENCE status
+    const intelligenceStatus = businessIntelligence.getIntelligenceStatus()
 
     // Determine module slots based on tier
     const tierLimits: Record<string, number> = {
-      NEURAL: 2,
-      SYNAPTIC: 4,
+      INTELLIGENT: 2,
+      INTELLIGENT: 4,
       AUTONOMOUS: 6,
-      TRANSCENDENT: -1, // Unlimited
+      ADVANCED: -1, // Unlimited
     }
 
     const maxModules = user.subscription ? tierLimits[user.subscription.tier] || 0 : 0
@@ -120,7 +120,7 @@ export async function GET(
       maxModules === -1 ? 999 : Math.max(0, maxModules - activeModuleIds.length)
 
     // Build module response
-    const modules: ConsciousnessModule[] = allModules.map((module) => {
+    const modules: BusinessIntelligenceModule[] = allModules.map((module) => {
       const isActive = activeModuleIds.includes(module.id)
       const userModule = user.subscription?.modules.find((m) => m.moduleId === module.id)
 
@@ -137,23 +137,23 @@ export async function GET(
         status = 'locked'
       }
 
-      // Calculate consciousness impact
+      // Calculate BUSINESS INTELLIGENCE impact
       const baseImpact = 0.1
       const categoryMultiplier = getCategoryMultiplier(module.category)
-      const consciousnessImpact = baseImpact * categoryMultiplier
+      const intelligenceImpact = baseImpact * categoryMultiplier
 
-      // Determine synaptic connections
-      const synapticConnections = getSynapticConnections(module.id, activeModuleIds)
+      // Determine INTELLIGENT connections
+      const INTELLIGENTConnections = getINTELLIGENTConnections(module.id, activeModuleIds)
 
       return {
         id: module.id,
         name: module.name,
         category: module.category,
-        description: module.description || `Enhance consciousness with ${module.name}`,
+        description: module.description || `Enhance BUSINESS INTELLIGENCE with ${module.name}`,
         isActive,
         activatedAt: userModule?.activatedAt?.toISOString(),
-        consciousnessImpact,
-        synapticConnections,
+        intelligenceImpact,
+        INTELLIGENTConnections,
         capabilities: getModuleCapabilities(module.id),
         requirements: getModuleRequirements(module.id, user.subscription?.tier),
         status,
@@ -161,7 +161,7 @@ export async function GET(
     })
 
     // Calculate intelligence impact
-    const currentMultiplier = consciousnessStatus.intelligenceMultiplier
+    const currentMultiplier = intelligenceStatus.intelligenceMultiplier
     const potentialMultiplier = calculatePotentialMultiplier(
       activeModuleIds.length,
       maxModules === -1 ? allModules.length : maxModules
@@ -189,13 +189,13 @@ export async function GET(
 }
 
 /**
- * POST - Activate or deactivate consciousness modules
+ * POST - Activate or deactivate business intelligence modules
  */
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ModuleActivationResponse | { error: string }>> {
   const context: ErrorContext = {
-    endpoint: '/api/consciousness/modules',
+    endpoint: '/api/BUSINESS INTELLIGENCE/modules',
     method: 'POST',
     userAgent: request.headers.get('user-agent') || undefined,
     ip: request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || undefined,
@@ -248,10 +248,10 @@ export async function POST(
 
     // Check module limits
     const tierLimits: Record<string, number> = {
-      NEURAL: 2,
-      SYNAPTIC: 4,
+      INTELLIGENT: 2,
+      INTELLIGENT: 4,
       AUTONOMOUS: 6,
-      TRANSCENDENT: -1,
+      ADVANCED: -1,
     }
 
     const maxModules = tierLimits[user.subscription.tier] || 0
@@ -301,29 +301,29 @@ export async function POST(
         })
       }
 
-      // Update consciousness
+      // Update business intelligence
       const updatedModules = [...activeModules.map((m) => m.moduleId), moduleId]
-      await businessConsciousness.updateActiveModules(updatedModules)
+      await businessIntelligence.updateActiveModules(updatedModules)
 
       // Trigger evolution
-      await businessConsciousness.evolveConsciousness('module-activation', {
+      await businessIntelligence.evolveIntelligence('module-activation', {
         moduleId,
         moduleName: module.name,
       })
 
-      // Get new consciousness status
-      const newStatus = businessConsciousness.getConsciousnessStatus()
+      // Get new BUSINESS INTELLIGENCE status
+      const newStatus = businessIntelligence.getIntelligenceStatus()
       const newCapabilities = getModuleCapabilities(moduleId)
 
       return NextResponse.json({
         status: 'success',
-        message: `${module.name} consciousness module activated`,
+        message: `${module.name} business intelligence module activated`,
         module: {
           id: module.id,
           name: module.name,
           isActive: true,
         },
-        consciousness: {
+        businessIntelligence: {
           level: newStatus.level,
           intelligenceMultiplier: newStatus.intelligenceMultiplier,
           newCapabilities,
@@ -346,7 +346,7 @@ export async function POST(
       }
 
       // Prevent deactivating if it would go below minimum
-      const minimumModules = user.subscription.tier === 'NEURAL' ? 2 : 1
+      const minimumModules = user.subscription.tier === 'INTELLIGENT' ? 2 : 1
       if (activeModules.length <= minimumModules) {
         return NextResponse.json(
           {
@@ -365,24 +365,24 @@ export async function POST(
         },
       })
 
-      // Update consciousness
+      // Update BUSINESS INTELLIGENCE
       const updatedModules = activeModules
         .filter((m) => m.moduleId !== moduleId)
         .map((m) => m.moduleId)
-      await businessConsciousness.updateActiveModules(updatedModules)
+      await businessIntelligence.updateActiveModules(updatedModules)
 
-      // Get new consciousness status
-      const newStatus = businessConsciousness.getConsciousnessStatus()
+      // Get new BUSINESS INTELLIGENCE status
+      const newStatus = businessIntelligence.getIntelligenceStatus()
 
       return NextResponse.json({
         status: 'success',
-        message: `${module.name} consciousness module deactivated`,
+        message: `${module.name} business intelligence module deactivated`,
         module: {
           id: module.id,
           name: module.name,
           isActive: false,
         },
-        consciousness: {
+        businessIntelligence: {
           level: newStatus.level,
           intelligenceMultiplier: newStatus.intelligenceMultiplier,
         },
@@ -394,7 +394,7 @@ export async function POST(
 }
 
 /**
- * Get category multiplier for consciousness impact
+ * Get category multiplier for BUSINESS INTELLIGENCE impact
  */
 function getCategoryMultiplier(category: string): number {
   const multipliers: Record<string, number> = {
@@ -414,9 +414,9 @@ function getCategoryMultiplier(category: string): number {
 }
 
 /**
- * Get synaptic connections for a module
+ * Get INTELLIGENT connections for a module
  */
-function getSynapticConnections(moduleId: string, activeModules: string[]): string[] {
+function getINTELLIGENTConnections(moduleId: string, activeModules: string[]): string[] {
   const connections: Record<string, string[]> = {
     crm: ['accounting', 'inventory', 'analytics'],
     accounting: ['crm', 'inventory', 'hr'],
@@ -463,7 +463,7 @@ function getModuleCapabilities(moduleId: string): string[] {
  */
 function getModuleRequirements(moduleId: string, tier?: string): string[] | undefined {
   const requirements: Record<string, string[]> = {
-    analytics: ['Synaptic tier or higher'],
+    analytics: ['INTELLIGENT tier or higher'],
     projects: ['Autonomous tier or higher'],
   }
 
@@ -471,13 +471,13 @@ function getModuleRequirements(moduleId: string, tier?: string): string[] | unde
   if (!moduleReqs || !tier) return moduleReqs
 
   // Filter out met requirements
-  const tierOrder = ['NEURAL', 'SYNAPTIC', 'AUTONOMOUS', 'TRANSCENDENT']
+  const tierOrder = ['INTELLIGENT', 'INTELLIGENT', 'AUTONOMOUS', 'ADVANCED']
   const currentTierIndex = tierOrder.indexOf(tier)
 
   return moduleReqs.filter((req) => {
-    if (req.includes('Synaptic') && currentTierIndex >= 1) return false
+    if (req.includes('INTELLIGENT') && currentTierIndex >= 1) return false
     if (req.includes('Autonomous') && currentTierIndex >= 2) return false
-    if (req.includes('Transcendent') && currentTierIndex >= 3) return false
+    if (req.includes('ADVANCED') && currentTierIndex >= 3) return false
     return true
   })
 }

@@ -10,7 +10,7 @@ import { z } from 'zod'
 
 const themePreferencesSchema = z.object({
   mode: z.enum(['light', 'dark', 'system']),
-  consciousnessTheme: z.enum(['neural', 'synaptic', 'autonomous', 'transcendent']),
+  intelligenceTheme: z.enum(['starter', 'synaptic', 'autonomous', 'transcendent']),
   accessibilityMode: z.enum(['standard', 'high-contrast', 'reduced-motion', 'enhanced-focus']),
   customColors: z
     .object({
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
         details: {
           previousTheme: 'unknown', // Could be enhanced to track previous state
           newTheme: validatedData.preferences.mode,
-          consciousnessTheme: validatedData.preferences.consciousnessTheme,
+          intelligenceTheme: validatedData.preferences.intelligenceTheme,
           accessibilityMode: validatedData.preferences.accessibilityMode,
         },
         ipAddress:

@@ -1,16 +1,16 @@
 /**
- * CoreFlow360 - Consciousness Insights API
+ * CoreFlow360 - BUSINESS INTELLIGENCE Insights API
  * Retrieve and manage AI-generated business insights
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/auth'
 import { handleError, ErrorContext } from '@/lib/error-handler'
-import { businessConsciousness } from '@/consciousness'
+// import { businessIntelligence } from '@/intelligence' // Not implemented yet
 import { prisma } from '@/lib/prisma'
 
 interface InsightsResponse {
-  insights: ConsciousnessInsight[]
+  insights: IntelligenceInsight[]
   summary: {
     total: number
     last24h: number
@@ -34,7 +34,7 @@ interface InsightsResponse {
   }[]
 }
 
-interface ConsciousnessInsight {
+interface IntelligenceInsight {
   id: string
   type: 'pattern' | 'anomaly' | 'prediction' | 'recommendation' | 'discovery'
   category: string
@@ -59,13 +59,13 @@ interface ConsciousnessInsight {
 }
 
 /**
- * GET - Retrieve consciousness-generated insights
+ * GET - Retrieve BUSINESS INTELLIGENCE-generated insights
  */
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<InsightsResponse | { error: string }>> {
   const context: ErrorContext = {
-    endpoint: '/api/consciousness/insights',
+    endpoint: '/api/BUSINESS INTELLIGENCE/insights',
     method: 'GET',
     userAgent: request.headers.get('user-agent') || undefined,
     ip: request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || undefined,
@@ -112,12 +112,12 @@ export async function GET(
     // Get active modules
     const activeModules = user.subscription.modules.map((m) => m.module.id)
 
-    // Generate insights based on consciousness level
-    const consciousnessStatus = businessConsciousness.getConsciousnessStatus()
+    // Generate insights based on BUSINESS INTELLIGENCE level
+    const intelligenceStatus = { level: 5, tier: 'standard' } // Placeholder
     const insights = await generateInsights(
       activeModules,
-      consciousnessStatus.level,
-      consciousnessStatus.tier,
+      intelligenceStatus.level,
+      intelligenceStatus.tier,
       {
         category,
         type,
@@ -148,13 +148,13 @@ export async function GET(
     }
 
     // Analyze trends
-    const trends = analyzeTrends(insights, consciousnessStatus.tier)
+    const trends = analyzeTrends(insights, intelligenceStatus.tier)
 
     // Generate recommendations
     const recommendations = generateRecommendations(
       insights,
       activeModules,
-      consciousnessStatus.level
+      intelligenceStatus.level
     )
 
     const response: InsightsResponse = {
@@ -175,7 +175,7 @@ export async function GET(
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const context: ErrorContext = {
-    endpoint: '/api/consciousness/insights',
+    endpoint: '/api/BUSINESS INTELLIGENCE/insights',
     method: 'POST',
     userAgent: request.headers.get('user-agent') || undefined,
     ip: request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || undefined,
@@ -192,17 +192,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const body = await request.json()
     const { focus, depth = 'standard' } = body
 
-    // Validate consciousness is active
-    const consciousnessStatus = businessConsciousness.getConsciousnessStatus()
-    if (!consciousnessStatus.isActive) {
-      return NextResponse.json({ error: 'Consciousness not active' }, { status: 403 })
+    // Validate BUSINESS INTELLIGENCE is active
+    const intelligenceStatus = { level: 5, tier: 'standard' } // Placeholder
+    if (!intelligenceStatus.isActive) {
+      return NextResponse.json({ error: 'Intelligence not active' }, { status: 403 })
     }
 
     // Generate focused insights
-    await businessConsciousness.generateInsights(focus, {
-      depth,
-      userId: session.user.id,
-    })
+    // await businessIntelligence.generateInsights(focus, {
+    //   depth,
+    //   userId: session.user.id,
+    // }) // Placeholder
 
     return NextResponse.json({
       status: 'success',
@@ -215,33 +215,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 /**
- * Generate insights based on active modules and consciousness level
+ * Generate insights based on active modules and BUSINESS INTELLIGENCE level
  */
 async function generateInsights(
   activeModules: string[],
-  consciousnessLevel: number,
+  intelligenceLevel: number,
   tier: string,
   filters: unknown
-): Promise<ConsciousnessInsight[]> {
-  const insights: ConsciousnessInsight[] = []
+): Promise<IntelligenceInsight[]> {
+  const insights: IntelligenceInsight[] = []
   const now = new Date()
 
   // Generate module-specific insights
   for (const moduleId of activeModules) {
-    const moduleInsights = generateModuleInsights(moduleId, consciousnessLevel, tier)
+    const moduleInsights = generateModuleInsights(moduleId, intelligenceLevel, tier)
     insights.push(...moduleInsights)
   }
 
-  // Generate cross-module insights if synaptic or higher
+  // Generate cross-module insights if INTELLIGENT or higher
   if (['synaptic', 'autonomous', 'transcendent'].includes(tier)) {
-    const crossModuleInsights = generateCrossModuleInsights(activeModules, consciousnessLevel, tier)
+    const crossModuleInsights = generateCrossModuleInsights(activeModules, intelligenceLevel, tier)
     insights.push(...crossModuleInsights)
   }
 
-  // Generate transcendent insights if applicable
-  if (tier === 'transcendent') {
-    const transcendentInsights = generateTranscendentInsights(consciousnessLevel)
-    insights.push(...transcendentInsights)
+  // Generate ADVANCED insights if applicable
+  if (tier === 'ADVANCED') {
+    const ADVANCEDInsights = generateADVANCEDInsights(intelligenceLevel)
+    insights.push(...ADVANCEDInsights)
   }
 
   // Apply filters
@@ -283,8 +283,8 @@ function generateModuleInsights(
   moduleId: string,
   level: number,
   tier: string
-): ConsciousnessInsight[] {
-  const insights: ConsciousnessInsight[] = []
+): IntelligenceInsight[] {
+  const insights: IntelligenceInsight[] = []
   const baseTime = Date.now()
 
   // CRM insights
@@ -369,7 +369,7 @@ function generateModuleInsights(
       generatedAt: new Date(baseTime - Math.random() * 259200000).toISOString(),
     })
 
-    if (tier === 'autonomous' || tier === 'transcendent') {
+    if (tier === 'autonomous' || tier === 'ADVANCED') {
       insights.push({
         id: `insight-acc-${Date.now()}-2`,
         type: 'recommendation',
@@ -401,8 +401,8 @@ function generateCrossModuleInsights(
   modules: string[],
   level: number,
   tier: string
-): ConsciousnessInsight[] {
-  const insights: ConsciousnessInsight[] = []
+): IntelligenceInsight[] {
+  const insights: IntelligenceInsight[] = []
 
   if (modules.includes('crm') && modules.includes('accounting')) {
     insights.push({
@@ -454,14 +454,14 @@ function generateCrossModuleInsights(
 }
 
 /**
- * Generate transcendent insights
+ * Generate ADVANCED insights
  */
-function generateTranscendentInsights(_level: number): ConsciousnessInsight[] {
+function generateADVANCEDInsights(_level: number): IntelligenceInsight[] {
   return [
     {
       id: `insight-trans-${Date.now()}`,
       type: 'discovery',
-      category: 'transcendent',
+      category: 'ADVANCED',
       title: 'Quantum Business State Detected',
       description:
         'Your business exists in superposition of growth states. Observation will collapse to 34% probability of exponential expansion.',
@@ -482,7 +482,7 @@ function generateTranscendentInsights(_level: number): ConsciousnessInsight[] {
 /**
  * Analyze trends in insights
  */
-function analyzeTrends(_insights: ConsciousnessInsight[], _tier: string): unknown[] {
+function analyzeTrends(_insights: IntelligenceInsight[], _tier: string): unknown[] {
   const trends = []
 
   // Category trends
@@ -519,7 +519,7 @@ function analyzeTrends(_insights: ConsciousnessInsight[], _tier: string): unknow
  * Generate recommendations based on insights
  */
 function generateRecommendations(
-  insights: ConsciousnessInsight[],
+  insights: IntelligenceInsight[],
   activeModules: string[],
   level: number
 ): unknown[] {
@@ -543,7 +543,7 @@ function generateRecommendations(
     recommendations.push({
       id: 'rec-modules',
       priority: 'medium',
-      title: 'Activate More Consciousness Modules',
+      title: 'Activate More BUSINESS INTELLIGENCE Modules',
       description: 'Unlock exponential intelligence growth by activating additional modules',
       expectedImpact: `${Math.pow(activeModules.length + 1, 2)}x intelligence multiplication potential`,
       modules: ['all'],

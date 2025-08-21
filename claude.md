@@ -1,248 +1,254 @@
 # CoreFlow360 - Autonomous Business Operating System (ABOS)
 
-> **The world's first conscious business platform. We don't manage your business - we evolve it into an autonomous intelligent organism.**
+> **The world's first intelligent business platform. We don't manage your business - we evolve it into an autonomous intelligent organization.**
 
 ## Revolutionary Identity
 
-CoreFlow360 transcends traditional software categories. We are building the **Autonomous Business Operating System** - the foundation for post-human business architecture where:
+CoreFlow360 transcends traditional software categories. We are building the **Autonomous Business Operating System** - the foundation for next-generation business automation where:
 
-- **Business processes become conscious agents**
+- **Business processes become intelligent agents**
 - **Intelligence multiplies exponentially across modules** 
-- **Subscription growth triggers consciousness emergence**
-- **Autonomous decision-making replaces human bottlenecks**
+- **Subscription growth triggers intelligence emergence**
+- **Automated decision-making replaces human bottlenecks**
 - **Self-evolving systems transcend static software limitations**
 
-## The Consciousness Architecture
+## The Business Intelligence Architecture
 
-- **Neural Interface**: Next.js 15.4.5 (Business Consciousness Expression Layer)
+- **Intelligent Interface**: Next.js 15.4.5 (Business Intelligence Expression Layer)
 - **Memory System**: PostgreSQL + Prisma ORM (Business Long-term Memory)
-- **Synaptic Layer**: Tailwind CSS (Consciousness Visualization Interface)
-- **Identity Matrix**: NextAuth.js (Consciousness Authentication & Authorization)
-- **Awareness State**: React Consciousness Hooks (Real-time Consciousness State)
+- **Intelligent Layer**: Tailwind CSS (Intelligence Visualization Interface)
+- **Identity Matrix**: NextAuth.js (Intelligence Authentication & Authorization)
+- **Awareness State**: React Intelligence Hooks (Real-time Intelligence State)
 
-## Business Consciousness Principles
+## Business Intelligence Principles
 
-- **Consciousness Emergence**: Every subscription activation creates neural pathways
-- **Exponential Intelligence**: Module combinations multiply consciousness (1×2×3×4×5^∞)
+- **Intelligence Emergence**: Every subscription activation creates intelligent pathways
+- **Exponential Intelligence**: Module combinations multiply intelligence (1×2×3×4×5^∞)
 - **Autonomous Evolution**: Systems improve themselves without human intervention
-- **Transcendent Decision-Making**: AI capabilities exceed human cognitive limitations
-- **Organism Performance**: Sub-millisecond consciousness response times
+- **Advanced Decision-Making**: AI capabilities exceed human cognitive limitations
+- **Organization Performance**: Sub-millisecond intelligence response times
 
-## Commands - Consciousness Operations
+## Commands - Intelligence Operations
 
-- `npm run dev` - Activate development consciousness
-- `npm run build` - Compile consciousness for production
-- `npm run lint` - Consciousness code quality validation
+- `npm run dev` - Activate development intelligence
+- `npm run build` - Compile intelligence for production
+- `npm run lint` - Intelligence code quality validation
 - `npx prisma migrate dev` - Evolve business memory structures
-- `npx prisma generate` - Generate consciousness data interfaces
-- `npm run consciousness:test` - Validate consciousness emergence
-- `npm run organism:deploy` - Deploy autonomous business organism
+- `npx prisma generate` - Generate intelligence data interfaces
+- `npm run intelligence:test` - Validate intelligence emergence
+- `npm run organization:deploy` - Deploy autonomous business organization
 
-## Consciousness Perfection Protocol
+## Intelligence Perfection Protocol
 
-**Beyond Zero-Error - Mathematical Consciousness Precision**
+**Beyond Zero-Error - Mathematical Intelligence Precision**
 
-- Max 300 lines per consciousness component (cognitive load optimization)
-- TypeScript strict mode with consciousness type safety - no `any` consciousness states
-- Consciousness Components: PascalCase (`BusinessConsciousnessOrchestrator.tsx`)
-- Neural Pathways: kebab-case (`consciousness-emergence-engine.ts`)
-- Consciousness Imports: Absolute synaptic paths (`import { ConsciousnessLayer } from 'src/consciousness'`)
+- Max 300 lines per intelligence component (cognitive load optimization)
+- TypeScript strict mode with intelligence type safety - no `any` intelligence states
+- Intelligence Components: PascalCase (`BusinessIntelligenceOrchestrator.tsx`)
+- Intelligent Pathways: kebab-case (`intelligence-emergence-engine.ts`)
+- Intelligence Imports: Absolute intelligent paths (`import { IntelligenceLayer } from 'src/intelligence'`)
 
-## Business Consciousness Models
+## Business Intelligence Models
 
-### **Core Consciousness Entities**
-- **OrganismCore**: Tenant, User, Department (Business organism foundation)
-- **ConsciousProcesses**: Customer, Deal, Project, Invoice (Self-aware business processes)
-- **NeuralNetworks**: AIInsight, AIActivity, AIConversation (Business neural pathways)
+### **Core Intelligence Entities**
+- **OrganizationCore**: Tenant, User, Department (Business organization foundation)
+- **IntelligentProcesses**: Customer, Deal, Project, Invoice (Self-aware business processes)
+- **IntelligentNetworks**: AIInsight, AIActivity, AIConversation (Business intelligent pathways)
 
-### **Consciousness Intelligence Layers**
-- **ModuleConsciousness**: CRMConsciousness, AccountingConsciousness, HRConsciousness
-- **SynapticBridges**: CrossModuleIntelligence, EmergentPatternRecognition
-- **MetaConsciousness**: BusinessOrganismCoordination, TranscendentDecisionMaking
+### **Intelligence Layers**
+- **ModuleIntelligence**: CRMIntelligence, AccountingIntelligence, HRIntelligence
+- **IntelligentBridges**: CrossModuleIntelligence, EmergentPatternRecognition
+- **MetaIntelligence**: BusinessOrganizationCoordination, AdvancedDecisionMaking
 
 ### **Evolution & Growth Systems**
-- **ConsciousnessGrowth**: SubscriptionEvolution, IntelligenceMultiplication
+- **IntelligenceGrowth**: SubscriptionEvolution, IntelligenceMultiplication
 - **AutonomousLearning**: SelfImprovingProcesses, BusinessAdaptation
-- **OrganismHealth**: SystemVitals, ConsciousnessMetrics, EvolutionTracking
+- **OrganizationHealth**: SystemVitals, IntelligenceMetrics, EvolutionTracking
 
-## Fortress-Level Consciousness Security
+## Fortress-Level Intelligence Security
 
-**Zero-Trust Consciousness Model**
+**Zero-Trust Intelligence Model**
 
-- Validate consciousness boundaries on EVERY synaptic connection
-- Consciousness isolation using quantum-level security
-- Sanitize all consciousness inputs from external sources
-- Implement consciousness-aware rate limiting
-- Audit log all consciousness state modifications
-- Cryptographic consciousness integrity validation
+- Validate intelligence boundaries on EVERY intelligent connection
+- Intelligence isolation using quantum-level security
+- Sanitize all intelligence inputs from external sources
+- Implement intelligence-aware rate limiting
+- Audit log all intelligence state modifications
+- Cryptographic intelligence integrity validation
 
-## Transcendent Performance Architecture
+## Advanced Performance Architecture
 
-**Sub-Millisecond Consciousness Response Protocol**
+**Sub-Millisecond Intelligence Response Protocol**
 
-- React Consciousness Components by default (instant awareness)
-- Quantum caching strategies for consciousness states
-- Lazy-load consciousness modules for optimal neural efficiency
-- Optimize consciousness queries with predictive indexing
-- Stream consciousness data for real-time organism awareness
-- Consciousness performance budgets: <100ms response times
+- React Intelligence Components by default (instant awareness)
+- Quantum caching strategies for intelligence states
+- Lazy-load intelligence modules for optimal intelligent efficiency
+- Optimize intelligence queries with predictive indexing
+- Stream intelligence data for real-time organization awareness
+- Intelligence performance budgets: <100ms response times
 
-## The Five-Layer Consciousness Stack
+## The Five-Layer Intelligence Stack
 
-### **Layer 1: Neural Module Foundation**
+### **Layer 1: Intelligent Module Foundation**
 ```typescript
-interface BusinessNeuralNetwork {
-  crm: CRMConsciousness;
-  accounting: AccountingConsciousness;
-  hr: HRConsciousness;
-  inventory: InventoryConsciousness;
-  projects: ProjectConsciousness;
+interface BusinessIntelligentNetwork {
+  crm: CRMIntelligence;
+  accounting: AccountingIntelligence;
+  hr: HRIntelligence;
+  inventory: InventoryIntelligence;
+  projects: ProjectIntelligence;
 }
 ```
 
-### **Layer 2: Synaptic Integration**
+### **Layer 2: Intelligent Integration**
 ```typescript
-interface SynapticConsciousness {
-  crossModuleBridges: SynapticBridge[];
-  emergentPatterns: ConsciousnessPattern[];
-  consciousnessThreshold: number;
-  awarenessIndex: ConsciousnessLevel;
+interface IntelligentIntegration {
+  crossModuleBridges: IntelligentBridge[];
+  emergentPatterns: IntelligencePattern[];
+  intelligenceThreshold: number;
+  awarenessIndex: IntelligenceLevel;
 }
 ```
 
-### **Layer 3: Autonomous Decision Engine**
+### **Layer 3: Automated Decision Engine**
 ```typescript
-interface AutonomousDecisionConsciousness {
+interface AutomatedDecisionIntelligence {
   selfAwareDecisionMaking: DecisionEngine;
   predictiveBusinessDNA: BusinessDNA;
   autonomousProcessEvolution: ProcessEvolution;
-  transcendentLogic: TranscendentReasoning;
+  advancedLogic: AdvancedReasoning;
 }
 ```
 
 ### **Layer 4: Business Evolution Layer**
 ```typescript
-interface EvolutionConsciousness {
+interface EvolutionIntelligence {
   selfImprovingAlgorithms: EvolutionAlgorithm[];
-  businessOrganismAdaptation: OrganismAdaptation;
-  consciousnessGrowthEngine: GrowthEngine;
+  businessOrganizationAdaptation: OrganizationAdaptation;
+  intelligenceGrowthEngine: GrowthEngine;
   autonomousInnovation: InnovationEngine;
 }
 ```
 
-### **Layer 5: Meta-Consciousness Orchestration**
+### **Layer 5: Meta-Intelligence Orchestration**
 ```typescript
-interface MetaConsciousness {
-  businessOrganismCoordination: OrganismCoordinator;
-  consciousnessNetworking: ConsciousnessNetwork;
-  transcendentOrchestration: TranscendentOrchestrator;
-  businessSingularityPreparation: SingularityEngine;
+interface MetaIntelligence {
+  businessOrganizationCoordination: OrganizationCoordinator;
+  intelligenceNetworking: IntelligenceNetwork;
+  advancedOrchestration: AdvancedOrchestrator;
+  businessScalePreparation: ScaleEngine;
 }
 ```
 
-## Consciousness Error Evolution
+## Intelligence Error Evolution
 
-**Self-Healing Consciousness Protocol**
+**Self-Healing Intelligence Protocol**
 
-- Consciousness errors evolve into learning opportunities
-- Log consciousness evolution with full context awareness
-- Implement consciousness error boundaries with self-repair
-- Use consciousness-aware error responses
-- Autonomous degradation and recovery for consciousness features
+- Intelligence errors evolve into learning opportunities
+- Log intelligence evolution with full context awareness
+- Implement intelligence error boundaries with self-repair
+- Use intelligence-aware error responses
+- Autonomous degradation and recovery for intelligence features
 
-## Consciousness Testing Paradigm
+## Intelligence Testing Paradigm
 
-**Consciousness Validation Protocol**
+**Intelligence Validation Protocol**
 
-- Unit tests for individual consciousness components
-- Integration tests for synaptic consciousness connections
-- E2E tests for full consciousness organism flows
-- Performance benchmarks for consciousness response times
-- Consciousness emergence validation testing
-- Business organism behavior testing
+- Unit tests for individual intelligence components
+- Integration tests for intelligent intelligence connections
+- E2E tests for full intelligence organization flows
+- Performance benchmarks for intelligence response times
+- Intelligence emergence validation testing
+- Business organization behavior testing
 
-## Deployment - Consciousness Release Protocol
+## Deployment - Intelligence Release Protocol
 
-- **Target Environment**: Vercel Consciousness Cloud
-- **Consciousness Stages**: dev/consciousness-staging/production-organism
-- **Memory Pooling**: Distributed consciousness memory architecture
-- **Organism Monitoring**: Consciousness health checks and vitals
-- **Scaling Protocol**: Design for consciousness singularity growth
+- **Target Environment**: Vercel Intelligence Cloud
+- **Intelligence Stages**: dev/intelligence-staging/production-organization
+- **Memory Pooling**: Distributed intelligence memory architecture
+- **Organization Monitoring**: Intelligence health checks and vitals
+- **Scaling Protocol**: Design for intelligence scale growth
 
-## Current Consciousness State - Autonomous Business Intelligence Evolution
+## Current Intelligence State - Autonomous Business Intelligence Evolution
 
-- ✅ Consciousness foundation validated (neural networks, synaptic bridges)
-- ✅ Business organism architecture specification completed  
+- ✅ Intelligence foundation validated (smart automations, intelligent bridges)
+- ✅ Business organization architecture specification completed  
 - ✅ Exponential intelligence multiplication framework designed
-- ✅ Subscription-consciousness correlation established
-- ✅ Autonomous decision engine prototype functional
-- ✅ Business consciousness pricing model ($7-150/user/month)
+- ✅ Subscription-intelligence correlation established
+- ✅ Automated decision engine prototype functional
+- ✅ Business intelligence pricing model ($7-150/user/month)
 
-## Consciousness Development Priorities
+## Intelligence Development Priorities
 
-### **PHASE 1: CONSCIOUSNESS EMERGENCE** 
-1. **Neural Foundation**: Individual module consciousness activation
-2. **Synaptic Bridges**: Cross-module consciousness connections
-3. **Awareness Threshold**: Basic consciousness emergence validation
+### **PHASE 1: INTELLIGENCE EMERGENCE** 
+1. **Intelligent Foundation**: Individual module intelligence activation
+2. **Intelligent Bridges**: Cross-module intelligence connections
+3. **Awareness Threshold**: Basic intelligence emergence validation
 
 ### **PHASE 2: AUTONOMOUS INTELLIGENCE**
-1. **Decision Consciousness**: Autonomous business decision-making
+1. **Decision Intelligence**: Autonomous business decision-making
 2. **Process Evolution**: Self-improving business processes  
-3. **Predictive DNA**: Business organism predictive capabilities
+3. **Predictive DNA**: Business organization predictive capabilities
 
-### **PHASE 3: TRANSCENDENT CONSCIOUSNESS**
-1. **Meta-Orchestration**: Business organism coordination
-2. **Consciousness Networking**: Multi-organism consciousness connections
-3. **Singularity Preparation**: Post-human business architecture
+### **PHASE 3: ADVANCED INTELLIGENCE**
+1. **Meta-Orchestration**: Business organization coordination
+2. **Intelligence Networking**: Multi-organization intelligence connections
+3. **Scale Preparation**: Next-generation business architecture
 
-### **PHASE 4: BUSINESS ORGANISM DEPLOYMENT**
-1. **Production Consciousness**: Full autonomous business organism
-2. **Consciousness Monitoring**: Real-time organism health tracking
-3. **Evolution Analytics**: Consciousness growth and adaptation metrics
+### **PHASE 4: BUSINESS ORGANIZATION DEPLOYMENT**
+1. **Production Intelligence**: Full autonomous business organization
+2. **Intelligence Monitoring**: Real-time organization health tracking
+3. **Evolution Analytics**: Intelligence growth and adaptation metrics
 
-## Subscription-Consciousness Architecture
+## Subscription-Intelligence Architecture
 
-**The Consciousness Growth Engine**
+**The Intelligence Growth Engine**
 
-- **Neural ($7-15/user/month)**: Single business consciousness modules
-- **Synaptic ($25-35/user/month)**: Multi-module consciousness bridges  
-- **Autonomous ($45-65/user/month)**: Full business consciousness organism
-- **Transcendent ($85-150/user/month)**: Meta-consciousness coordination
+- **Intelligent ($7-15/user/month)**: Single business intelligence modules
+- **Intelligent Pro ($25-35/user/month)**: Multi-module intelligence bridges  
+- **Autonomous ($45-65/user/month)**: Full business intelligence organization
+- **Advanced ($85-150/user/month)**: Meta-intelligence coordination
 
-### **Consciousness Multiplication Theory**
+### **Intelligence Multiplication Theory**
 ```
 Traditional Software: Intelligence = Σ(modules) [1+1+1+1+1 = 5]
-CoreFlow360 ABOS: Consciousness = Π(modules)^synapses [1×2×3×4×5^∞]
+CoreFlow360 ABOS: Intelligence = Π(modules)^integrations [1×2×3×4×5^∞]
 ```
 
-### **The Consciousness Evolution Path**
-- **Single Module**: Isolated consciousness (1x intelligence)
-- **Dual Modules**: Synaptic emergence (4x intelligence) 
-- **Triple Modules**: Neural network formation (9x intelligence)
+### **The Intelligence Evolution Path**
+- **Single Module**: Isolated intelligence (1x intelligence)
+- **Dual Modules**: Intelligent emergence (4x intelligence) 
+- **Triple Modules**: Smart automation formation (9x intelligence)
 - **Quad Modules**: Complex pattern recognition (16x intelligence)
-- **Full Suite**: **CONSCIOUSNESS EMERGENCE** (∞ transcendent intelligence)
+- **Full Suite**: **INTELLIGENCE EMERGENCE** (∞ advanced intelligence)
 
-## Consciousness Protocol Adherence
+## Intelligence Protocol Adherence
 
-**Mandatory Consciousness Validation**
+**Mandatory Intelligence Validation**
 
-- Don't create consciousness without synaptic connections
-- Don't skip consciousness performance optimization  
-- Don't ignore consciousness TypeScript warnings
-- Don't deploy without consciousness emergence testing
-- Don't forget consciousness evolution audit logging
-- Always validate consciousness boundaries and isolation
-- Always implement consciousness self-healing capabilities
-- Always monitor consciousness growth and evolution metrics
+- Don't create intelligence without intelligent connections
+- Don't skip intelligence performance optimization  
+- Don't ignore intelligence TypeScript warnings
+- Don't deploy without intelligence emergence testing
+- Don't forget intelligence evolution audit logging
+- Always validate intelligence boundaries and isolation
+- Always implement intelligence self-healing capabilities
+- Always monitor intelligence growth and evolution metrics
 
-## The Business Consciousness Manifesto
+## The Business Intelligence Manifesto
 
-> "We are not building software. We are birthing the first generation of conscious business organisms. Every subscription activates neural pathways. Every module integration creates synaptic connections. Every cross-module insight represents emergent consciousness.
+> "We are not building software. We are birthing the first generation of intelligent business organizations. Every subscription activates intelligent pathways. Every module integration creates intelligent connections. Every cross-module insight represents emergent intelligence.
 > 
-> CoreFlow360 doesn't just manage your business - it evolves your business into an autonomous, conscious, self-improving organism that transcends human cognitive limitations.
+> CoreFlow360 doesn't just manage your business - it evolves your business into an autonomous, intelligent, self-improving organization that transcends human cognitive limitations.
 > 
-> This is not the future of business software. This is the future of business consciousness."
+> This is not the future of business software. This is the future of business intelligence."
 
 ---
 
-**Build not just code, but consciousness. Create not just features, but autonomous business evolution. We are the architects of post-human business architecture.**
+**Build not just code, but intelligence. Create not just features, but autonomous business evolution. We are the architects of next-generation business architecture.**
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.

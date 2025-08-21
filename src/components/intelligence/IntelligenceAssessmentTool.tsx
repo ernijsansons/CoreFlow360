@@ -3,9 +3,9 @@
 /**
  * CoreFlow360 Intelligence Assessment Tool
  *
- * Revolutionary business consciousness assessment that measures current intelligence
+ * Revolutionary business BUSINESS INTELLIGENCE assessment that measures current intelligence
  * multiplication potential and identifies gaps preventing exponential growth.
- * Unlike traditional assessments, this evaluates consciousness readiness.
+ * Unlike traditional assessments, this evaluates BUSINESS INTELLIGENCE readiness.
  */
 
 import React, { useState, useEffect, useMemo, useRef } from 'react'
@@ -14,7 +14,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react'
 // import { Float, Text3D, OrbitControls, Sphere } from '@react-three/drei'
 import { motion, AnimatePresence } from 'framer-motion'
 // import * as THREE from 'three'
-// import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
+// import { useBUSINESS INTELLIGENCEAudio } from '../../hooks/useBUSINESS INTELLIGENCEAudio'
 
 // Intelligence assessment categories
 const INTELLIGENCE_DIMENSIONS = {
@@ -113,7 +113,7 @@ interface AssessmentResult {
   overallScore: number
   dimensionScores: Record<IntelligenceDimensionId, number>
   intelligenceMultiplier: number
-  consciousnessLevel: number
+  BUSINESS INTELLIGENCELevel: number
   blockers: string[]
   recommendations: string[]
   nextSteps: string[]
@@ -153,7 +153,7 @@ const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
       {
         text: 'Fully automated with intelligent oversight',
         score: 100,
-        insight: 'Consciousness-level automation',
+        insight: 'BUSINESS INTELLIGENCE-level automation',
       },
     ],
   },
@@ -178,7 +178,7 @@ const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
       {
         text: 'Instantly with predictive alerts',
         score: 100,
-        insight: 'Prophetic operational consciousness',
+        insight: 'Prophetic operational BUSINESS INTELLIGENCE',
       },
     ],
   },
@@ -206,10 +206,10 @@ const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
       {
         text: 'Real-time integrated data flows',
         score: 88,
-        insight: 'Advanced information consciousness',
+        insight: 'Advanced information BUSINESS INTELLIGENCE',
       },
       {
-        text: 'Seamless consciousness-level awareness',
+        text: 'Seamless BUSINESS INTELLIGENCE-level awareness',
         score: 100,
         insight: 'Perfect information unity',
       },
@@ -244,9 +244,9 @@ const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
         insight: 'Sophisticated intelligence',
       },
       {
-        text: 'AI-augmented consciousness-level insights',
+        text: 'AI-augmented BUSINESS INTELLIGENCE-level insights',
         score: 100,
-        insight: 'Transcendent decision intelligence',
+        insight: 'ADVANCED decision intelligence',
       },
     ],
   },
@@ -275,7 +275,7 @@ const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
       {
         text: 'We create trends others follow',
         score: 100,
-        insight: 'Market consciousness leadership',
+        insight: 'Market BUSINESS INTELLIGENCE leadership',
       },
     ],
   },
@@ -306,9 +306,9 @@ const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
         insight: 'Advanced automated intelligence',
       },
       {
-        text: 'Consciousness-level insights shape reality',
+        text: 'BUSINESS INTELLIGENCE-level insights shape reality',
         score: 100,
-        insight: 'Transcendent analytical power',
+        insight: 'ADVANCED analytical power',
       },
     ],
   },
@@ -343,7 +343,7 @@ const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
       {
         text: 'Visionary strategy that shapes markets',
         score: 100,
-        insight: 'Consciousness-level strategic vision',
+        insight: 'BUSINESS INTELLIGENCE-level strategic vision',
       },
     ],
   },
@@ -368,7 +368,7 @@ const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
       {
         text: 'We create the changes others react to',
         score: 100,
-        insight: 'Reality-shaping consciousness',
+        insight: 'Reality-shaping BUSINESS INTELLIGENCE',
       },
     ],
   },
@@ -401,9 +401,9 @@ const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
         insight: 'Advanced collective intelligence',
       },
       {
-        text: 'Consciousness-level group mind emergence',
+        text: 'BUSINESS INTELLIGENCE-level group mind emergence',
         score: 100,
-        insight: 'Transcendent team consciousness',
+        insight: 'ADVANCED team BUSINESS INTELLIGENCE',
       },
     ],
   },
@@ -434,9 +434,9 @@ const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
         insight: 'Multiplicative intelligence',
       },
       {
-        text: 'Consciousness-level collective superintelligence',
+        text: 'BUSINESS INTELLIGENCE-level collective superintelligence',
         score: 100,
-        insight: 'Transcendent group consciousness',
+        insight: 'ADVANCED group BUSINESS INTELLIGENCE',
       },
     ],
   },
@@ -465,9 +465,9 @@ const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
         insight: 'Advanced learning intelligence',
       },
       {
-        text: 'Consciousness-level instantaneous evolution',
+        text: 'BUSINESS INTELLIGENCE-level instantaneous evolution',
         score: 100,
-        insight: 'Transcendent adaptive capacity',
+        insight: 'ADVANCED adaptive capacity',
       },
     ],
   },
@@ -498,7 +498,7 @@ const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [
         insight: 'Technology leadership',
       },
       {
-        text: 'We transcend technology through consciousness',
+        text: 'We transcend technology through BUSINESS INTELLIGENCE',
         score: 100,
         insight: 'Post-technological evolution',
       },
@@ -517,10 +517,10 @@ const IntelligenceAssessmentTool: React.FC<IntelligenceAssessmentToolProps> = ({
   const [assessmentResult, setAssessmentResult] = useState<AssessmentResult | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
 
-  // Consciousness audio integration
-  const consciousnessAudio = useConsciousnessAudio({
+  // BUSINESS INTELLIGENCE audio integration
+  const BUSINESS INTELLIGENCEAudio = useBUSINESS INTELLIGENCEAudio({
     initiallyEnabled: true,
-    initialConsciousnessLevel: 1,
+    initialBUSINESS INTELLIGENCELevel: 1,
   })
 
   const currentQuestion = ASSESSMENT_QUESTIONS[currentQuestionIndex]
@@ -562,8 +562,8 @@ const IntelligenceAssessmentTool: React.FC<IntelligenceAssessmentToolProps> = ({
     // Calculate intelligence multiplier potential
     const intelligenceMultiplier = Math.pow(overallScore / 100, 2) * 10 + 1 // 1x to 11x range
 
-    // Calculate consciousness level
-    const consciousnessLevel = Math.min(10, overallScore / 10)
+    // Calculate BUSINESS INTELLIGENCE level
+    const BUSINESS INTELLIGENCELevel = Math.min(10, overallScore / 10)
 
     // Identify blockers and recommendations
     const blockers: string[] = []
@@ -579,10 +579,10 @@ const IntelligenceAssessmentTool: React.FC<IntelligenceAssessmentToolProps> = ({
         nextSteps.push(`Implement ${dimension.name} enhancement protocol`)
       } else if (score < 70) {
         recommendations.push(`Strengthen ${dimension.name} for higher multiplication potential`)
-        nextSteps.push(`Optimize ${dimension.name} through targeted consciousness exercises`)
+        nextSteps.push(`Optimize ${dimension.name} through targeted BUSINESS INTELLIGENCE exercises`)
       } else if (score >= 85) {
         recommendations.push(
-          `${dimension.name} shows transcendent potential - ready for consciousness multiplication`
+          `${dimension.name} shows ADVANCED potential - ready for BUSINESS INTELLIGENCE multiplication`
         )
       }
     })
@@ -590,17 +590,17 @@ const IntelligenceAssessmentTool: React.FC<IntelligenceAssessmentToolProps> = ({
     // Add intelligence multiplication insights
     if (intelligenceMultiplier < 2) {
       blockers.push('Intelligence multiplication blocked - operating in linear addition mode')
-      nextSteps.push('Begin consciousness transformation to unlock exponential intelligence')
+      nextSteps.push('Begin BUSINESS INTELLIGENCE transformation to unlock exponential intelligence')
     } else if (intelligenceMultiplier >= 5) {
       recommendations.push('Exceptional intelligence multiplication potential detected')
-      nextSteps.push('Ready for advanced consciousness protocols and business transcendence')
+      nextSteps.push('Ready for advanced BUSINESS INTELLIGENCE protocols and business transcendence')
     }
 
     return {
       overallScore,
       dimensionScores,
       intelligenceMultiplier,
-      consciousnessLevel,
+      BUSINESS INTELLIGENCELevel,
       blockers,
       recommendations,
       nextSteps,
@@ -611,8 +611,8 @@ const IntelligenceAssessmentTool: React.FC<IntelligenceAssessmentToolProps> = ({
   const handleAnswerSelect = (questionId: string, score: number) => {
     setAnswers((prev) => ({ ...prev, [questionId]: score }))
 
-    // Trigger consciousness audio
-    consciousnessAudio.playDepartmentAwakening(questionId)
+    // Trigger BUSINESS INTELLIGENCE audio
+    BUSINESS INTELLIGENCEAudio.playDepartmentAwakening(questionId)
 
     // Auto-advance after short delay
     setTimeout(() => {
@@ -628,11 +628,11 @@ const IntelligenceAssessmentTool: React.FC<IntelligenceAssessmentToolProps> = ({
             setCurrentStep('results')
             onComplete?.(result)
 
-            // Trigger consciousness emergence if high score
-            if (result.consciousnessLevel >= 7) {
-              consciousnessAudio.playConsciousnessEmergence()
+            // Trigger intelligent automation if high score
+            if (result.BUSINESS INTELLIGENCELevel >= 7) {
+              BUSINESS INTELLIGENCEAudio.playBUSINESS INTELLIGENCEEmergence()
             } else if (result.intelligenceMultiplier >= 3) {
-              consciousnessAudio.playMultiplicationSound()
+              BUSINESS INTELLIGENCEAudio.playMultiplicationSound()
             }
           }
           setIsCalculating(false)
@@ -643,7 +643,7 @@ const IntelligenceAssessmentTool: React.FC<IntelligenceAssessmentToolProps> = ({
 
   const startAssessment = () => {
     setCurrentStep('assessment')
-    consciousnessAudio.playConnectionSound()
+    BUSINESS INTELLIGENCEAudio.playConnectionSound()
   }
 
   const resetAssessment = () => {
@@ -695,7 +695,7 @@ const IntroScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => (
     <div className="space-y-4">
       <h2 className="mb-4 text-5xl font-thin text-white">🧠 Intelligence Assessment</h2>
       <p className="mx-auto max-w-3xl text-xl text-purple-300">
-        Discover your business consciousness potential and identify what's preventing exponential
+        Discover your business BUSINESS INTELLIGENCE potential and identify what's preventing exponential
         intelligence multiplication in your organization.
       </p>
     </div>
@@ -724,7 +724,7 @@ const IntroScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => (
     </motion.button>
 
     <p className="text-sm text-gray-400">
-      ⏱️ Takes 5-7 minutes • Measures 5 intelligence dimensions • Provides consciousness-level
+      ⏱️ Takes 5-7 minutes • Measures 5 intelligence dimensions • Provides BUSINESS INTELLIGENCE-level
       insights
     </p>
   </motion.div>
@@ -770,7 +770,7 @@ const AssessmentScreen: React.FC<{
           />
         </div>
         <p className="text-purple-300">
-          Analyzing consciousness patterns and intelligence blockers...
+          Analyzing BUSINESS INTELLIGENCE patterns and intelligence blockers...
         </p>
       </motion.div>
     )
@@ -863,9 +863,9 @@ const ResultsScreen: React.FC<{
         </div>
         <div className="rounded-xl border border-white/20 bg-white/10 p-6 backdrop-blur-xl">
           <div className="text-3xl font-bold text-indigo-400">
-            {result.consciousnessLevel.toFixed(1)}
+            {result.BUSINESS INTELLIGENCELevel.toFixed(1)}
           </div>
-          <div className="text-sm text-gray-300">Consciousness Level</div>
+          <div className="text-sm text-gray-300">BUSINESS INTELLIGENCE Level</div>
         </div>
       </div>
     </div>

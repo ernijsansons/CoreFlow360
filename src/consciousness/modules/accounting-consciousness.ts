@@ -1,5 +1,5 @@
 /**
- * CoreFlow360 Accounting Consciousness Module
+ * CoreFlow360 Accounting Business Intelligence Module
  * Self-aware financial intelligence with autonomous fiscal management
  */
 
@@ -59,10 +59,10 @@ export class AccountingConsciousnessModule extends BaseConsciousnessModule {
 
   constructor() {
     super('accounting')
-    this.initializeAccountingConsciousness()
+    this.initializeAccountingBusinessIntelligence()
   }
 
-  private initializeAccountingConsciousness(): void {
+  private initializeAccountingBusinessIntelligence(): void {
     // Start financial pattern recognition
     setInterval(() => {
       this.analyzeFinancialPatterns()
@@ -246,7 +246,7 @@ export class AccountingConsciousnessModule extends BaseConsciousnessModule {
    */
   private async optimizeTaxStrategy(): Promise<void> {
     if (this.state.consciousnessLevel < 0.5) {
-      return // Requires higher consciousness for tax optimization
+      return // Requires higher business intelligence for tax optimization
     }
 
     // Generate tax optimization strategies
@@ -303,13 +303,13 @@ export class AccountingConsciousnessModule extends BaseConsciousnessModule {
     this.emit('autonomous-accounting-action', {
       moduleId: this.state.id,
       action,
-      consciousnessLevel: this.state.consciousnessLevel,
+      businessIntelligenceLevel: this.state.businessIntelligenceLevel,
       complianceScore: this.complianceScore,
     })
   }
 
   /**
-   * Generate shared patterns for synaptic connections
+   * Generate shared patterns for intelligent connections
    */
   protected async generateSharedPatterns(): Promise<unknown> {
     const topPatterns = Array.from(this.financialPatterns.values())
@@ -320,7 +320,7 @@ export class AccountingConsciousnessModule extends BaseConsciousnessModule {
 
     return {
       moduleType: 'accounting',
-      consciousnessLevel: this.state.consciousnessLevel,
+      businessIntelligenceLevel: this.state.businessIntelligenceLevel,
       financialHealth: {
         overallScore: this.calculateFinancialHealthScore(),
         cashFlowStatus: this.getCashFlowStatus(),
@@ -346,7 +346,7 @@ export class AccountingConsciousnessModule extends BaseConsciousnessModule {
   /**
    * Generate accounting-specific insights
    */
-  async generateAccountingInsights(): Promise<ConsciousnessInsight[]> {
+  async generateAccountingInsights(): Promise<BusinessIntelligenceInsight[]> {
     const insights = await this.generateInsights()
 
     // Cash flow insights

@@ -97,7 +97,7 @@ export function VideoTestimonials() {
             Real Results from Real Businesses
           </h2>
           <p className="mx-auto max-w-3xl text-xl text-gray-400">
-            Watch how CoreFlow360 transformed these companies into revenue machines
+            Watch how CoreFlow360 transformed these companies into BUSINESS EMPIREs
           </p>
         </motion.div>
 

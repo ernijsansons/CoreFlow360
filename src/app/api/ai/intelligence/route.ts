@@ -31,7 +31,7 @@ const analysisSchema = z.object({
 const trainingSchema = z.object({
   name: z.string(),
   architecture: z.enum([
-    'neural_network',
+    'INTELLIGENT_network',
     'random_forest',
     'gradient_boosting',
     'transformer',

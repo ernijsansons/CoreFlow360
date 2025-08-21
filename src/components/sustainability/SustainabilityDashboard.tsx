@@ -28,7 +28,7 @@ import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useConsciousnessTheme } from '@/contexts/ThemeContext'
+import { useBUSINESS INTELLIGENCETheme } from '@/contexts/ThemeContext'
 
 interface SustainabilityMetrics {
   carbonFootprint: {
@@ -81,7 +81,7 @@ export default function SustainabilityDashboard() {
   const [loading, setLoading] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly')
   const [showCalculator, setShowCalculator] = useState(false)
-  const { theme, intensity, consciousnessLevel } = useConsciousnessTheme()
+  const { theme, intensity, BUSINESS INTELLIGENCELevel } = useBUSINESS INTELLIGENCETheme()
 
   useEffect(() => {
     fetchSustainabilityMetrics()
@@ -128,7 +128,7 @@ export default function SustainabilityDashboard() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="border-consciousness-neural h-8 w-8 animate-spin rounded-full border-b-2"></div>
+        <div className="border-BUSINESS INTELLIGENCE-INTELLIGENT h-8 w-8 animate-spin rounded-full border-b-2"></div>
       </div>
     )
   }
@@ -190,7 +190,7 @@ export default function SustainabilityDashboard() {
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-consciousness-neural text-3xl font-bold">
+              <span className="text-BUSINESS INTELLIGENCE-INTELLIGENT text-3xl font-bold">
                 {metrics.efficiency.score}
               </span>
               <span className="text-muted-foreground">/100</span>
@@ -496,7 +496,7 @@ export default function SustainabilityDashboard() {
               <div className="space-y-4">
                 {metrics.efficiency.improvements.map((improvement, index) => (
                   <div key={index} className="flex items-start gap-3 rounded-lg border p-3">
-                    <div className="bg-consciousness-neural mt-2 h-2 w-2 rounded-full"></div>
+                    <div className="bg-BUSINESS INTELLIGENCE-INTELLIGENT mt-2 h-2 w-2 rounded-full"></div>
                     <div className="flex-1">
                       <p className="text-sm">{improvement}</p>
                     </div>

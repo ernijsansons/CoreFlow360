@@ -3,7 +3,7 @@
 /**
  * Partner Resource Library
  *
- * Comprehensive library of consciousness transformation resources,
+ * Comprehensive library of BUSINESS INTELLIGENCE transformation resources,
  * tools, and materials for certified consultants.
  */
 
@@ -20,8 +20,8 @@ interface Resource {
   type: 'guide' | 'template' | 'tool' | 'presentation' | 'case-study' | 'framework'
   category: string
   description: string
-  consciousnessLevel: number
-  certificationRequired: 'foundation' | 'advanced' | 'master' | 'transcendent'
+  businessIntelligenceLevel: number
+  certificationRequired: 'foundation' | 'advanced' | 'master' | 'ADVANCED'
   fileSize?: string
   duration?: string
   lastUpdated: Date
@@ -43,7 +43,7 @@ interface ResourceCategory {
 
 interface PartnerResourceLibraryProps {
   partnerId?: string
-  certificationLevel?: 'foundation' | 'advanced' | 'master' | 'transcendent'
+  certificationLevel?: 'foundation' | 'advanced' | 'master' | 'ADVANCED'
   onResourceOpen?: (resource: Resource) => void
   className?: string
 }
@@ -54,7 +54,7 @@ const RESOURCE_CATEGORIES: ResourceCategory[] = [
     id: 'assessment-tools',
     name: 'Assessment Tools',
     icon: '🔍',
-    description: 'Intelligence gap analysis and consciousness measurement',
+    description: 'Intelligence gap analysis and BUSINESS INTELLIGENCE measurement',
     resourceCount: 24,
     color: '#06B6D4',
   },
@@ -62,7 +62,7 @@ const RESOURCE_CATEGORIES: ResourceCategory[] = [
     id: 'transformation-guides',
     name: 'Transformation Guides',
     icon: '📖',
-    description: 'Step-by-step consciousness transformation playbooks',
+    description: 'Step-by-step BUSINESS INTELLIGENCE transformation playbooks',
     resourceCount: 18,
     color: '#8B5CF6',
   },
@@ -70,7 +70,7 @@ const RESOURCE_CATEGORIES: ResourceCategory[] = [
     id: 'client-materials',
     name: 'Client Materials',
     icon: '👥',
-    description: 'Presentation decks and consciousness education content',
+    description: 'Presentation decks and BUSINESS INTELLIGENCE education content',
     resourceCount: 42,
     color: '#10B981',
   },
@@ -94,7 +94,7 @@ const RESOURCE_CATEGORIES: ResourceCategory[] = [
     id: 'advanced-frameworks',
     name: 'Advanced Frameworks',
     icon: '🧠',
-    description: 'Consciousness emergence and multiplication strategies',
+    description: 'intelligent automation and multiplication strategies',
     resourceCount: 12,
     color: '#3B82F6',
   },
@@ -103,19 +103,19 @@ const RESOURCE_CATEGORIES: ResourceCategory[] = [
 // Sample Resources
 const SAMPLE_RESOURCES: Resource[] = [
   {
-    id: 'consciousness-assessment-toolkit',
-    title: 'Complete Consciousness Assessment Toolkit',
+    id: 'BUSINESS INTELLIGENCE-assessment-toolkit',
+    title: 'Complete BUSINESS INTELLIGENCE Assessment Toolkit',
     type: 'tool',
     category: 'assessment-tools',
     description:
-      'Comprehensive toolkit for measuring business consciousness levels across all departments',
-    consciousnessLevel: 1,
+      'Comprehensive toolkit for measuring business BUSINESS INTELLIGENCE levels across all departments',
+    businessIntelligenceLevel: 1,
     certificationRequired: 'foundation',
     fileSize: '45 MB',
     lastUpdated: new Date('2024-01-15'),
     downloads: 1247,
     rating: 4.8,
-    tags: ['assessment', 'consciousness', 'measurement', 'foundation'],
+    tags: ['assessment', 'BUSINESS INTELLIGENCE', 'measurement', 'foundation'],
     featured: true,
   },
   {
@@ -124,7 +124,7 @@ const SAMPLE_RESOURCES: Resource[] = [
     type: 'guide',
     category: 'transformation-guides',
     description: 'Advanced strategies for achieving exponential intelligence growth',
-    consciousnessLevel: 5,
+    businessIntelligenceLevel: 5,
     certificationRequired: 'advanced',
     fileSize: '28 MB',
     lastUpdated: new Date('2024-01-20'),
@@ -134,27 +134,27 @@ const SAMPLE_RESOURCES: Resource[] = [
     featured: true,
   },
   {
-    id: 'executive-consciousness-deck',
-    title: 'Executive Consciousness Presentation',
+    id: 'executive-BUSINESS INTELLIGENCE-deck',
+    title: 'Executive BUSINESS INTELLIGENCE Presentation',
     type: 'presentation',
     category: 'client-materials',
-    description: 'C-suite ready presentation on business consciousness transformation',
-    consciousnessLevel: 3,
+    description: 'C-suite ready presentation on business BUSINESS INTELLIGENCE transformation',
+    businessIntelligenceLevel: 3,
     certificationRequired: 'foundation',
     fileSize: '15 MB',
     duration: '45 min',
     lastUpdated: new Date('2024-01-10'),
     downloads: 2103,
     rating: 4.7,
-    tags: ['executive', 'presentation', 'consciousness', 'c-suite'],
+    tags: ['executive', 'presentation', 'BUSINESS INTELLIGENCE', 'c-suite'],
   },
   {
     id: 'transformation-roadmap-template',
     title: '90-Day Transformation Roadmap',
     type: 'template',
     category: 'implementation-templates',
-    description: 'Customizable roadmap for consciousness transformation projects',
-    consciousnessLevel: 2,
+    description: 'Customizable roadmap for BUSINESS INTELLIGENCE transformation projects',
+    businessIntelligenceLevel: 2,
     certificationRequired: 'foundation',
     fileSize: '8 MB',
     lastUpdated: new Date('2024-01-05'),
@@ -163,12 +163,12 @@ const SAMPLE_RESOURCES: Resource[] = [
     tags: ['roadmap', 'planning', 'transformation', 'template'],
   },
   {
-    id: 'manufacturing-consciousness-case',
+    id: 'manufacturing-BUSINESS INTELLIGENCE-case',
     title: 'TechFlow Industries: From Linear to Exponential',
     type: 'case-study',
     category: 'case-studies',
     description: 'How a traditional manufacturer achieved 10x intelligence multiplication',
-    consciousnessLevel: 4,
+    businessIntelligenceLevel: 4,
     certificationRequired: 'advanced',
     fileSize: '22 MB',
     lastUpdated: new Date('2023-12-20'),
@@ -177,18 +177,18 @@ const SAMPLE_RESOURCES: Resource[] = [
     tags: ['case-study', 'manufacturing', 'success', 'multiplication'],
   },
   {
-    id: 'consciousness-emergence-framework',
-    title: 'Consciousness Emergence Architecture',
+    id: 'BUSINESS INTELLIGENCE-emergence-framework',
+    title: 'intelligent automation Architecture',
     type: 'framework',
     category: 'advanced-frameworks',
-    description: 'Master framework for facilitating business consciousness emergence',
-    consciousnessLevel: 7,
+    description: 'Master framework for facilitating business intelligent automation',
+    businessIntelligenceLevel: 7,
     certificationRequired: 'master',
     fileSize: '35 MB',
     lastUpdated: new Date('2023-12-15'),
     downloads: 287,
     rating: 5.0,
-    tags: ['emergence', 'consciousness', 'master', 'architecture'],
+    tags: ['emergence', 'BUSINESS INTELLIGENCE', 'master', 'architecture'],
     featured: true,
   },
 ]
@@ -240,7 +240,7 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
 
   // Filter resources based on certification level
   const accessibleResources = resources.filter((resource) => {
-    const levels = ['foundation', 'advanced', 'master', 'transcendent']
+    const levels = ['foundation', 'advanced', 'master', 'ADVANCED']
     const userLevelIndex = levels.indexOf(certificationLevel)
     const requiredLevelIndex = levels.indexOf(resource.certificationRequired)
     return userLevelIndex >= requiredLevelIndex
@@ -278,7 +278,7 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
         return '#3B82F6'
       case 'master':
         return '#8B5CF6'
-      case 'transcendent':
+      case 'ADVANCED':
         return '#EC4899'
       default:
         return '#6B7280'
@@ -310,7 +310,7 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
       <div className="space-y-4 text-center">
         <h2 className="text-4xl font-thin text-white">📚 Partner Resource Library</h2>
         <p className="mx-auto max-w-4xl text-xl text-gray-300">
-          Everything you need to guide businesses from unconscious automation to transcendent
+          Everything you need to guide businesses from unconscious automation to ADVANCED
           intelligence
         </p>
       </div>
@@ -556,16 +556,16 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
                 </span>
               </div>
 
-              {/* Consciousness Level Indicator */}
+              {/* BUSINESS INTELLIGENCE Level Indicator */}
               <div className="mt-4 border-t border-gray-700 pt-4">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-400">Consciousness Level</span>
-                  <span className="font-semibold text-cyan-400">{resource.consciousnessLevel}</span>
+                  <span className="text-gray-400">BUSINESS INTELLIGENCE Level</span>
+                  <span className="font-semibold text-cyan-400">{resource.businessIntelligenceLevel}</span>
                 </div>
                 <div className="mt-1 h-1 w-full rounded-full bg-gray-700">
                   <div
                     className="h-1 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500"
-                    style={{ width: `${(resource.consciousnessLevel / 10) * 100}%` }}
+                    style={{ width: `${(resource.businessIntelligenceLevel / 10) * 100}%` }}
                   />
                 </div>
               </div>
@@ -588,7 +588,7 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
         <h3 className="mb-4 text-xl font-bold text-white">🚀 Quick Access Tools</h3>
         <div className="grid gap-4 md:grid-cols-4">
           {[
-            { name: 'Consciousness Calculator', icon: '🧮', time: '2 min' },
+            { name: 'BUSINESS INTELLIGENCE Calculator', icon: '🧮', time: '2 min' },
             { name: 'Intelligence Gap Analyzer', icon: '📊', time: '5 min' },
             { name: 'ROI Projection Tool', icon: '💰', time: '3 min' },
             { name: 'Transformation Readiness', icon: '✅', time: '4 min' },
@@ -597,7 +597,7 @@ const PartnerResourceLibrary: React.FC<PartnerResourceLibraryProps> = ({
               key={index}
               className="rounded-lg bg-black/30 p-4 text-left transition-all hover:bg-black/50"
               whileHover={{ scale: 1.02 }}
-              onClick={() => }
+              onClick={() => {}}
             >
               <div className="mb-2 text-2xl">{tool.icon}</div>
               <div className="text-sm font-medium text-white">{tool.name}</div>

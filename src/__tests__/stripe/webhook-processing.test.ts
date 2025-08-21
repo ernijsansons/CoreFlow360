@@ -32,7 +32,7 @@ describe('Stripe Webhook Processing', () => {
         status: 'succeeded',
         metadata: {
           tenantId: 'tenant-123',
-          subscriptionTier: 'synaptic',
+          subscriptionTier: 'INTELLIGENT',
           userId: 'user-456',
         },
       }

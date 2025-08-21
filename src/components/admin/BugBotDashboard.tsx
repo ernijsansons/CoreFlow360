@@ -262,7 +262,7 @@ export default function BugBotDashboard() {
         return <Shield className="h-4 w-4" />
       case 'AI_ML':
         return <Zap className="h-4 w-4" />
-      case 'CONSCIOUSNESS':
+      case 'BUSINESS INTELLIGENCE':
         return <Monitor className="h-4 w-4" />
       default:
         return <Bug className="h-4 w-4" />
@@ -454,7 +454,7 @@ export default function BugBotDashboard() {
                     <option value="PERFORMANCE">Performance</option>
                     <option value="SECURITY">Security</option>
                     <option value="AI_ML">AI/ML</option>
-                    <option value="CONSCIOUSNESS">Consciousness</option>
+                    <option value="BUSINESS INTELLIGENCE">BUSINESS INTELLIGENCE</option>
                     <option value="BUSINESS_LOGIC">Business Logic</option>
                   </select>
                 </div>

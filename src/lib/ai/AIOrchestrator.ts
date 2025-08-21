@@ -127,7 +127,7 @@ export interface AnalysisTask {
 export interface CustomModel {
   id: string
   name: string
-  architecture: 'neural_network' | 'random_forest' | 'gradient_boosting' | 'transformer' | 'lstm'
+  architecture: 'INTELLIGENT_network' | 'random_forest' | 'gradient_boosting' | 'transformer' | 'lstm'
   hyperparameters: Record<string, unknown>
   trainingConfig: {
     batchSize: number

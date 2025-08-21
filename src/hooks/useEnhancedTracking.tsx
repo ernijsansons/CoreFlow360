@@ -235,7 +235,7 @@ export function useEnhancedTracking() {
           cost: additionalData.cost,
           accuracy: additionalData.accuracy,
           userSatisfaction: additionalData.userSatisfaction,
-          consciousnessLevel: additionalData.consciousnessLevel,
+          BUSINESS INTELLIGENCELevel: additionalData.BUSINESS INTELLIGENCELevel,
           crossModuleConnections: additionalData.crossModuleConnections,
         },
       })
@@ -243,8 +243,8 @@ export function useEnhancedTracking() {
     [session]
   )
 
-  // Consciousness multiplication tracking
-  const trackConsciousnessMultiplication = useCallback(
+  // BUSINESS INTELLIGENCE multiplication tracking
+  const trackBUSINESS INTELLIGENCEMultiplication = useCallback(
     async (
       primaryModule: string,
       connectedModules: string[],
@@ -253,12 +253,12 @@ export function useEnhancedTracking() {
     ) => {
       await trackAIInteraction(primaryModule, 'cross_module', true, 0, {
         crossModuleConnections: connectedModules,
-        consciousnessLevel: intelligenceMultiplier,
+        BUSINESS INTELLIGENCELevel: intelligenceMultiplier,
         accuracy: 1.0, // Assume successful cross-module connection
       })
 
       // Track the multiplication event
-      await track('consciousness_multiplication', 'ai_interaction', {
+      await track('BUSINESS INTELLIGENCE_multiplication', 'ai_interaction', {
         primaryModule,
         connectedModules,
         intelligenceMultiplier,
@@ -412,9 +412,9 @@ export function useEnhancedTracking() {
     trackPaymentFlow,
     trackConversionFunnel,
 
-    // AI and consciousness
+    // AI and BUSINESS INTELLIGENCE
     trackAIInteraction,
-    trackConsciousnessMultiplication,
+    trackBUSINESS INTELLIGENCEMultiplication,
 
     // Business processes
     trackBusinessProcess,

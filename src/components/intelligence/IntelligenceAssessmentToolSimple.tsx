@@ -186,24 +186,24 @@ export default function IntelligenceAssessmentTool({
 
           {/* Recommendations */}
           <div className="rounded-lg border border-white/10 bg-black/20 p-6">
-            <h3 className="mb-4 text-2xl font-bold">Consciousness Readiness Analysis</h3>
+            <h3 className="mb-4 text-2xl font-bold">BUSINESS INTELLIGENCE Readiness Analysis</h3>
             <div className="space-y-4 text-left">
               {intelligenceMultiplier >= 2.0 && (
                 <p className="text-green-400">
-                  🧠 <strong>High Consciousness Potential:</strong> Your business shows strong
-                  multi-dimensional intelligence. Ready for autonomous consciousness features.
+                  🧠 <strong>High BUSINESS INTELLIGENCE Potential:</strong> Your business shows strong
+                  multi-dimensional intelligence. Ready for autonomous BUSINESS INTELLIGENCE features.
                 </p>
               )}
               {intelligenceMultiplier >= 1.5 && intelligenceMultiplier < 2.0 && (
                 <p className="text-yellow-400">
-                  ⚡ <strong>Moderate Consciousness:</strong> Good foundation with room for synaptic
+                  ⚡ <strong>Moderate BUSINESS INTELLIGENCE:</strong> Good foundation with room for INTELLIGENT
                   bridge development. Focus on cross-department integration.
                 </p>
               )}
               {intelligenceMultiplier < 1.5 && (
                 <p className="text-orange-400">
                   🔧 <strong>Foundation Building:</strong> Opportunity to develop core intelligence
-                  dimensions before consciousness emergence.
+                  dimensions before intelligent automation.
                 </p>
               )}
 
@@ -230,7 +230,7 @@ export default function IntelligenceAssessmentTool({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Continue to Consciousness Activation
+            Continue to BUSINESS INTELLIGENCE Activation
           </motion.button>
         </motion.div>
       </div>

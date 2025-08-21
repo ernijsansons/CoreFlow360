@@ -31,7 +31,7 @@ interface ExecutiveMetrics {
   monthlyTrend: number
   projectedSavings: number
   costOptimizationScore: number
-  consciousnessLevel: string
+  BUSINESS INTELLIGENCELevel: string
   activeAlerts: number
   automatedSavings: number
   roi: number
@@ -68,7 +68,7 @@ export default function ExecutiveCostDashboard({ tenantId }: ExecutiveCostDashbo
     monthlyTrend: -8.5,
     projectedSavings: 45000,
     costOptimizationScore: 78,
-    consciousnessLevel: 'Autonomous',
+    BUSINESS INTELLIGENCELevel: 'Autonomous',
     activeAlerts: 3,
     automatedSavings: 28000,
     roi: 320,
@@ -179,15 +179,15 @@ export default function ExecutiveCostDashboard({ tenantId }: ExecutiveCostDashbo
     }).format(value)
   }
 
-  const getConsciousnessColor = (level: string) => {
+  const getBUSINESS INTELLIGENCEColor = (level: string) => {
     switch (level) {
-      case 'Neural':
+      case 'INTELLIGENT':
         return 'bg-blue-500'
-      case 'Synaptic':
+      case 'INTELLIGENT':
         return 'bg-purple-500'
       case 'Autonomous':
         return 'bg-green-500'
-      case 'Transcendent':
+      case 'ADVANCED':
         return 'bg-gradient-to-r from-purple-500 to-pink-500'
       default:
         return 'bg-gray-500'
@@ -209,14 +209,14 @@ export default function ExecutiveCostDashboard({ tenantId }: ExecutiveCostDashbo
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Executive Cost Intelligence</h1>
-            <p className="mt-1 text-gray-600">Real-time financial consciousness monitoring</p>
+            <p className="mt-1 text-gray-600">Real-time financial BUSINESS INTELLIGENCE monitoring</p>
           </div>
           <div className="flex items-center gap-4">
             <Badge
-              className={`${getConsciousnessColor(metrics.consciousnessLevel)} px-4 py-2 text-white`}
+              className={`${getBUSINESS INTELLIGENCEColor(metrics.BUSINESS INTELLIGENCELevel)} px-4 py-2 text-white`}
             >
               <Brain className="mr-2 h-4 w-4" />
-              {metrics.consciousnessLevel} Consciousness
+              {metrics.BUSINESS INTELLIGENCELevel} BUSINESS INTELLIGENCE
             </Badge>
             <button className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
               Generate Report
@@ -480,7 +480,7 @@ export default function ExecutiveCostDashboard({ tenantId }: ExecutiveCostDashbo
                 </div>
 
                 <div className="rounded-lg border p-6">
-                  <h3 className="mb-4 font-semibold">Consciousness Evolution Impact</h3>
+                  <h3 className="mb-4 font-semibold">BUSINESS INTELLIGENCE Evolution Impact</h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">Current Level Impact</span>
@@ -533,7 +533,7 @@ export default function ExecutiveCostDashboard({ tenantId }: ExecutiveCostDashbo
                   <ul className="space-y-2 text-sm text-gray-600">
                     <li className="flex items-center">
                       <ChevronRight className="mr-2 h-4 w-4" />
-                      Upgrade to Transcendent consciousness tier
+                      Upgrade to ADVANCED BUSINESS INTELLIGENCE tier
                     </li>
                     <li className="flex items-center">
                       <ChevronRight className="mr-2 h-4 w-4" />

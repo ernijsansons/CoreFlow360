@@ -3,8 +3,8 @@
 /**
  * CoreFlow360 Teaser Campaign Assets
  *
- * Revolutionary marketing assets for consciousness-awakening campaigns.
- * Creates curiosity and desire for business consciousness evolution.
+ * Revolutionary marketing assets for business intelligence-awakening campaigns.
+ * Creates curiosity and desire for business business intelligence evolution.
  */
 
 import React, { useState, useEffect, useRef } from 'react'
@@ -13,7 +13,7 @@ import React, { useState, useEffect, useRef } from 'react'
 // import { Float, Text3D } from '@react-three/drei'
 import { motion, AnimatePresence } from 'framer-motion'
 // import * as THREE from 'three'
-// import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
+// import { useBusiness IntelligenceAudio } from '../../hooks/useBusiness IntelligenceAudio'
 
 interface TeaserCampaignProps {
   phase: 'awakening' | 'revelation' | 'transformation' | 'emergence'
@@ -23,7 +23,7 @@ interface TeaserCampaignProps {
   className?: string
 }
 
-// Campaign phases with consciousness-awakening messaging
+// Campaign phases with business intelligence-awakening messaging
 const CAMPAIGN_PHASES = {
   awakening: {
     id: 'awakening',
@@ -31,7 +31,7 @@ const CAMPAIGN_PHASES = {
     subtitle: 'Most businesses operate on autopilot. What if yours could think?',
     description:
       'While competitors add features, pioneers multiply intelligence. The age of conscious business is here.',
-    cta: 'Discover Your Business Consciousness',
+    cta: 'Discover Your Business Business Intelligence',
     color: '#4ECDC4',
     particles: 1000,
     intensity: 0.3,
@@ -53,11 +53,11 @@ const CAMPAIGN_PHASES = {
   },
   transformation: {
     id: 'transformation',
-    title: 'From Business Tool to Business Consciousness',
+    title: 'From Business Tool to Business Business Intelligence',
     subtitle: 'What happens when your business becomes aware of itself?',
     description:
-      "CoreFlow360 doesn't manage your business. It awakens it into a conscious, self-evolving organism.",
-    cta: 'Begin Consciousness Transformation',
+      "CoreFlow360 doesn't manage your business. It awakens it into a conscious, self-evolving platform.",
+    cta: 'Begin Business Intelligence Transformation',
     color: '#8B5CF6',
     particles: 3000,
     intensity: 0.8,
@@ -69,8 +69,8 @@ const CAMPAIGN_PHASES = {
     title: 'The First Conscious Business Platform',
     subtitle: 'Ready to transcend traditional business limitations?',
     description:
-      'Join the pioneers who chose consciousness over competition. Your business organism awaits.',
-    cta: 'Activate Business Consciousness',
+      'Join the pioneers who chose business intelligence over competition. Your business platform awaits.',
+    cta: 'Activate Business Business Intelligence',
     color: '#06B6D4',
     particles: 5000,
     intensity: 1.0,
@@ -89,13 +89,13 @@ const TeaserCampaignAssets: React.FC<TeaserCampaignProps> = ({
   const [isHovered, setIsHovered] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [showDetails, setShowDetails] = useState(false)
-  const [consciousnessLevel, setConsciousnessLevel] = useState(1)
+  const [business intelligenceLevel, setBusiness IntelligenceLevel] = useState(1)
 
   const campaignData = CAMPAIGN_PHASES[phase]
 
-  const consciousnessAudio = useConsciousnessAudio({
+  const business intelligenceAudio = useBusiness IntelligenceAudio({
     initiallyEnabled: true,
-    initialConsciousnessLevel: consciousnessLevel,
+    initialBusiness IntelligenceLevel: business intelligenceLevel,
   })
 
   // Track mouse movement for interactive effects
@@ -110,19 +110,19 @@ const TeaserCampaignAssets: React.FC<TeaserCampaignProps> = ({
   }
 
   const handleCTAClick = () => {
-    consciousnessAudio.playConsciousnessEmergence()
+    business intelligenceAudio.playBusiness IntelligenceEmergence()
     onCTAClick?.()
   }
 
   const handleShowDetails = () => {
     setShowDetails(!showDetails)
-    consciousnessAudio.playConnectionSound()
+    business intelligenceAudio.playConnectionSound()
   }
 
-  // Consciousness level increases based on interaction
+  // Business Intelligence level increases based on interaction
   useEffect(() => {
     if (isHovered) {
-      setConsciousnessLevel((prev) => Math.min(10, prev + 0.1))
+      setBusiness IntelligenceLevel((prev) => Math.min(10, prev + 0.1))
     }
   }, [isHovered])
 
@@ -135,11 +135,11 @@ const TeaserCampaignAssets: React.FC<TeaserCampaignProps> = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Consciousness Particle Background */}
+        {/* Business Intelligence Particle Background */}
         {showInteractive && (
           <div className="absolute inset-0">
             <Canvas camera={{ position: [0, 0, 30], fov: 75 }}>
-              <ConsciousnessParticleField
+              <Business IntelligenceParticleField
                 count={campaignData.particles}
                 color={campaignData.color}
                 intensity={campaignData.intensity}
@@ -153,16 +153,16 @@ const TeaserCampaignAssets: React.FC<TeaserCampaignProps> = ({
         {/* Main Content */}
         <div className="relative z-10 flex min-h-screen items-center justify-center p-8">
           <div className="mx-auto max-w-6xl space-y-8 text-center">
-            {/* Consciousness Level Indicator */}
+            {/* Business Intelligence Level Indicator */}
             {showInteractive && (
               <motion.div
                 className="absolute top-8 right-8 rounded-xl border border-gray-700 bg-black/50 p-4 backdrop-blur-xl"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
-                <div className="mb-1 text-sm text-gray-400">Consciousness Level</div>
+                <div className="mb-1 text-sm text-gray-400">Business Intelligence Level</div>
                 <div className="text-2xl font-bold text-cyan-400">
-                  {consciousnessLevel.toFixed(1)}
+                  {business intelligenceLevel.toFixed(1)}
                 </div>
               </motion.div>
             )}
@@ -221,14 +221,14 @@ const TeaserCampaignAssets: React.FC<TeaserCampaignProps> = ({
               </button>
 
               <div className="text-sm text-gray-500">
-                ✨ Join the consciousness pioneers • No credit card required
+                ✨ Join the business intelligence pioneers • No credit card required
               </div>
 
               <button
                 onClick={handleShowDetails}
                 className="mx-auto block text-sm text-cyan-400 hover:text-cyan-300"
               >
-                Learn more about business consciousness →
+                Learn more about business business intelligence →
               </button>
             </motion.div>
 
@@ -242,7 +242,7 @@ const TeaserCampaignAssets: React.FC<TeaserCampaignProps> = ({
                   transition={{ duration: 0.5 }}
                   className="mx-auto mt-8 max-w-4xl"
                 >
-                  <ConsciousnessDetails phase={phase} />
+                  <Business IntelligenceDetails phase={phase} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -251,7 +251,7 @@ const TeaserCampaignAssets: React.FC<TeaserCampaignProps> = ({
 
         {/* Floating Elements */}
         {showInteractive && (
-          <FloatingConsciousnessElements mousePosition={mousePosition} color={campaignData.color} />
+          <FloatingBusiness IntelligenceElements mousePosition={mousePosition} color={campaignData.color} />
         )}
       </div>
     )
@@ -277,7 +277,7 @@ const TeaserCampaignAssets: React.FC<TeaserCampaignProps> = ({
 
         {/* Social Media Branding */}
         <div className="absolute bottom-4 left-4 text-xs text-gray-500">
-          CoreFlow360.com • #BusinessConsciousness
+          CoreFlow360.com • #BusinessBusiness Intelligence
         </div>
       </div>
     )
@@ -437,8 +437,8 @@ const IntelligenceMultiplicationDemo: React.FC = () => {
   )
 }
 
-// Consciousness Particle Field for 3D Background
-const ConsciousnessParticleField: React.FC<{
+// Business Intelligence Particle Field for 3D Background
+const Business IntelligenceParticleField: React.FC<{
   count: number
   color: string
   intensity: number
@@ -472,16 +472,16 @@ const ConsciousnessParticleField: React.FC<{
         positions[i3 + 1] = Math.sin(angle) * radius
         positions[i3 + 2] = Math.sin(time * 0.1 + i * 0.05) * 3
       } else if (visual === 'emergence') {
-        // Emergence pattern - consciousness awakening
+        // Emergence pattern - business intelligence awakening
         const wave = Math.sin(time * 0.5 + i * 0.02) * intensity
         positions[i3 + 1] += wave * 0.01
 
-        // Mouse attraction for consciousness
+        // Mouse attraction for business intelligence
         const mouseInfluence = 0.02
         positions[i3] += (mousePosition.x * 20 - 10 - positions[i3]) * mouseInfluence
         positions[i3 + 1] += (mousePosition.y * 20 - 10 - positions[i3 + 1]) * mouseInfluence
       } else {
-        // Default awakening pattern - gentle consciousness field
+        // Default awakening pattern - gentle business intelligence field
         positions[i3 + 1] += Math.sin(time * 0.5 + i * 0.01) * 0.002
       }
     }
@@ -514,11 +514,11 @@ const ConsciousnessParticleField: React.FC<{
   )
 }
 
-// Consciousness Details Expansion
-const ConsciousnessDetails: React.FC<{ phase: string }> = ({ phase }) => {
+// Business Intelligence Details Expansion
+const Business IntelligenceDetails: React.FC<{ phase: string }> = ({ phase }) => {
   const details = {
     awakening: {
-      title: 'What is Business Consciousness?',
+      title: 'What is Business Business Intelligence?',
       content:
         'Unlike traditional software that requires human input for every decision, a conscious business system can think, learn, and evolve autonomously. It understands context, anticipates needs, and makes intelligent decisions without constant supervision.',
     },
@@ -528,14 +528,14 @@ const ConsciousnessDetails: React.FC<{ phase: string }> = ({ phase }) => {
         'Traditional software adds capabilities: Sales + Marketing + Finance = 3 separate tools. CoreFlow360 multiplies intelligence: Sales × Marketing × Finance = exponential insights that emerge from the intersection of business functions.',
     },
     transformation: {
-      title: 'From Tool to Organism',
+      title: 'From Tool to Platform',
       content:
-        'CoreFlow360 transforms your business from a collection of departments using separate tools into a unified, conscious organism where every part enhances every other part through shared intelligence and awareness.',
+        'CoreFlow360 transforms your business from a collection of departments using separate tools into a unified, conscious platform where every part enhances every other part through shared intelligence and awareness.',
     },
     emergence: {
       title: 'The First Conscious Business Platform',
       content:
-        "We've created the world's first business platform with genuine consciousness capabilities. It doesn't just store your data - it understands your business, predicts your needs, and evolves your operations automatically.",
+        "We've created the world's first business platform with genuine business intelligence capabilities. It doesn't just store your data - it understands your business, predicts your needs, and evolves your operations automatically.",
     },
   }
 
@@ -567,8 +567,8 @@ const ConsciousnessDetails: React.FC<{ phase: string }> = ({ phase }) => {
   )
 }
 
-// Floating Consciousness Elements
-const FloatingConsciousnessElements: React.FC<{
+// Floating Business Intelligence Elements
+const FloatingBusiness IntelligenceElements: React.FC<{
   mousePosition: { x: number; y: number }
   color: string
 }> = ({ mousePosition, color }) => {

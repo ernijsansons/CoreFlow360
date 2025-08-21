@@ -4,23 +4,23 @@
  * Partner Portal Dashboard
  *
  * Central hub for Intelligence Certified Consultants to manage their
- * consciousness transformation practice and client engagements.
+ * BUSINESS INTELLIGENCE transformation practice and client engagements.
  */
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
+import { useBusinessIntelligenceAudio } from '../../hooks/useConsciousnessAudio'
 
 interface PartnerProfile {
   id: string
   name: string
   company: string
-  certificationLevel: 'foundation' | 'advanced' | 'master' | 'transcendent'
+  certificationLevel: 'foundation' | 'advanced' | 'master' | 'ADVANCED'
   intelligenceScore: number
   clientsTransformed: number
   revenue: number
   specializationAreas: string[]
-  consciousnessLevel: number
+  businessIntelligenceLevel: number
   achievements: Achievement[]
   activeClients: ClientEngagement[]
 }
@@ -38,7 +38,7 @@ interface ClientEngagement {
   id: string
   clientName: string
   currentPhase: string
-  consciousnessLevel: number
+  businessIntelligenceLevel: number
   startDate: Date
   projectedCompletion: Date
   revenue: number
@@ -57,14 +57,14 @@ const PartnerPortalDashboard: React.FC<PartnerPortalDashboardProps> = ({
   className = '',
 }) => {
   const [partnerProfile, setPartnerProfile] = useState<PartnerProfile | null>(null)
-  const [selectedMetric, setSelectedMetric] = useState<'clients' | 'revenue' | 'consciousness'>(
-    'consciousness'
+  const [selectedMetric, setSelectedMetric] = useState<'clients' | 'revenue' | 'BUSINESS INTELLIGENCE'>(
+    'BUSINESS INTELLIGENCE'
   )
   const [showAchievements, setShowAchievements] = useState(false)
 
-  const consciousnessAudio = useConsciousnessAudio({
+  const businessIntelligenceAudio = useBusinessIntelligenceAudio({
     initiallyEnabled: true,
-    initialConsciousnessLevel: 5,
+    initialIntelligenceLevel: 5,
   })
 
   // Load partner profile
@@ -73,18 +73,18 @@ const PartnerPortalDashboard: React.FC<PartnerPortalDashboardProps> = ({
     const mockProfile: PartnerProfile = {
       id: partnerId,
       name: 'Sarah Chen',
-      company: 'Transcendent Business Solutions',
+      company: 'ADVANCED Business Solutions',
       certificationLevel: 'advanced',
       intelligenceScore: 87,
       clientsTransformed: 24,
       revenue: 285000,
       specializationAreas: ['Manufacturing', 'SaaS', 'Professional Services'],
-      consciousnessLevel: 7.5,
+      businessIntelligenceLevel: 7.5,
       achievements: [
         {
           id: 'first-transformation',
-          title: 'First Consciousness Transformation',
-          description: 'Successfully guided first client to business consciousness',
+          title: 'First BUSINESS INTELLIGENCE Transformation',
+          description: 'Successfully guided first client to business BUSINESS INTELLIGENCE',
           icon: '🎯',
           unlockedAt: new Date('2024-01-15'),
           rarity: 'rare',
@@ -98,8 +98,8 @@ const PartnerPortalDashboard: React.FC<PartnerPortalDashboardProps> = ({
           rarity: 'epic',
         },
         {
-          id: 'consciousness-pioneer',
-          title: 'Consciousness Pioneer',
+          id: 'BUSINESS INTELLIGENCE-pioneer',
+          title: 'BUSINESS INTELLIGENCE Pioneer',
           description: 'Among first 100 certified consultants globally',
           icon: '✨',
           unlockedAt: new Date('2023-12-01'),
@@ -111,7 +111,7 @@ const PartnerPortalDashboard: React.FC<PartnerPortalDashboardProps> = ({
           id: 'client-1',
           clientName: 'TechFlow Industries',
           currentPhase: 'Intelligence Multiplication',
-          consciousnessLevel: 4.2,
+          businessIntelligenceLevel: 4.2,
           startDate: new Date('2024-01-01'),
           projectedCompletion: new Date('2024-06-01'),
           revenue: 45000,
@@ -120,8 +120,8 @@ const PartnerPortalDashboard: React.FC<PartnerPortalDashboardProps> = ({
         {
           id: 'client-2',
           clientName: 'Quantum Dynamics Corp',
-          currentPhase: 'Consciousness Emergence',
-          consciousnessLevel: 6.8,
+          currentPhase: 'intelligent automation',
+          businessIntelligenceLevel: 6.8,
           startDate: new Date('2023-11-15'),
           projectedCompletion: new Date('2024-04-15'),
           revenue: 67000,
@@ -140,7 +140,7 @@ const PartnerPortalDashboard: React.FC<PartnerPortalDashboardProps> = ({
         return '#3B82F6'
       case 'master':
         return '#8B5CF6'
-      case 'transcendent':
+      case 'ADVANCED':
         return '#EC4899'
       default:
         return '#6B7280'
@@ -208,9 +208,9 @@ const PartnerPortalDashboard: React.FC<PartnerPortalDashboardProps> = ({
                 </div>
                 <div className="flex items-center space-x-1">
                   <span className="text-purple-400">✨</span>
-                  <span className="text-gray-400">Consciousness:</span>
+                  <span className="text-gray-400">BUSINESS INTELLIGENCE:</span>
                   <span className="font-semibold text-white">
-                    {partnerProfile.consciousnessLevel.toFixed(1)}
+                    {partnerProfile.businessIntelligenceLevel.toFixed(1)}
                   </span>
                 </div>
               </div>
@@ -296,11 +296,11 @@ const PartnerPortalDashboard: React.FC<PartnerPortalDashboardProps> = ({
 
         <motion.div
           className={`cursor-pointer rounded-xl border bg-gradient-to-br from-gray-900 to-black p-6 transition-all ${
-            selectedMetric === 'consciousness'
+            selectedMetric === 'BUSINESS INTELLIGENCE'
               ? 'border-purple-400 shadow-lg shadow-purple-400/20'
               : 'border-gray-700'
           }`}
-          onClick={() => setSelectedMetric('consciousness')}
+          onClick={() => setSelectedMetric('BUSINESS INTELLIGENCE')}
           whileHover={{ scale: 1.02 }}
         >
           <div className="mb-4 flex items-center justify-between">
@@ -308,14 +308,14 @@ const PartnerPortalDashboard: React.FC<PartnerPortalDashboardProps> = ({
             <div className="text-xs font-semibold text-purple-400">Level Up!</div>
           </div>
           <div className="text-3xl font-bold text-white">
-            {partnerProfile.consciousnessLevel.toFixed(1)}
+            {partnerProfile.businessIntelligenceLevel.toFixed(1)}
           </div>
-          <div className="text-gray-400">Consciousness Level</div>
+          <div className="text-gray-400">BUSINESS INTELLIGENCE Level</div>
           <div className="mt-4">
             <div className="h-2 w-full rounded-full bg-gray-700">
               <div
                 className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500"
-                style={{ width: `${(partnerProfile.consciousnessLevel / 10) * 100}%` }}
+                style={{ width: `${(partnerProfile.businessIntelligenceLevel / 10) * 100}%` }}
               />
             </div>
           </div>
@@ -347,9 +347,9 @@ const PartnerPortalDashboard: React.FC<PartnerPortalDashboardProps> = ({
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-cyan-400">
-                    {client.consciousnessLevel.toFixed(1)}
+                    {client.businessIntelligenceLevel.toFixed(1)}
                   </div>
-                  <div className="text-xs text-gray-400">Consciousness Level</div>
+                  <div className="text-xs text-gray-400">BUSINESS INTELLIGENCE Level</div>
                 </div>
               </div>
 
@@ -405,7 +405,7 @@ const PartnerPortalDashboard: React.FC<PartnerPortalDashboardProps> = ({
         <button
           onClick={() => {
             setShowAchievements(!showAchievements)
-            consciousnessAudio.playConnectionSound()
+            businessIntelligenceAudio.playConnectionSound()
           }}
           className="flex w-full items-center justify-between"
         >
@@ -464,7 +464,7 @@ const PartnerPortalDashboard: React.FC<PartnerPortalDashboardProps> = ({
       <div className="grid gap-4 md:grid-cols-4">
         {[
           {
-            title: 'Consciousness Toolkit',
+            title: 'BUSINESS INTELLIGENCE Toolkit',
             icon: '🧠',
             description: 'Assessment tools & frameworks',
             color: 'from-cyan-600 to-blue-600',

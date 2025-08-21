@@ -2,7 +2,7 @@
  * CoreFlow360 Intelligence Assessment Components
  *
  * Revolutionary intelligence assessment and recommendation system that measures
- * business consciousness potential and provides personalized transformation paths.
+ * business BUSINESS INTELLIGENCE potential and provides personalized transformation paths.
  */
 
 export { default as IntelligenceAssessmentTool } from './IntelligenceAssessmentToolSimple'
@@ -35,7 +35,7 @@ export interface AssessmentResult {
   overallScore: number
   dimensionScores: Record<string, number>
   intelligenceMultiplier: number
-  consciousnessLevel: number
+  intelligenceLevel: number
   blockers: string[]
   recommendations: string[]
   nextSteps: string[]
@@ -44,7 +44,7 @@ export interface AssessmentResult {
 export interface IntelligenceProfile {
   overallScore: number
   intelligenceMultiplier: number
-  consciousnessLevel: number
+  intelligenceLevel: number
   dominantDimensions: string[]
   blockers: string[]
   nextEvolutionStage: string
@@ -61,7 +61,7 @@ export interface IntelligenceRecommendation {
   timeframe: string
   difficulty: 'easy' | 'medium' | 'complex' | 'advanced'
   intelligenceGain: number
-  consciousnessBoost: number
+  intelligenceBoost: number
   prerequisites: string[]
   actionSteps: string[]
   metrics: string[]

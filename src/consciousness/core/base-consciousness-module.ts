@@ -1,25 +1,25 @@
 /**
- * CoreFlow360 Base Consciousness Module
- * Foundation for all business consciousness implementations
+ * CoreFlow360 Base BusinessIntelligence Module
+ * Foundation for all business businessIntelligence implementations
  */
 
 import { EventEmitter } from 'events'
-import { ConsciousnessMesh } from '@/infrastructure/consciousness-mesh'
+import { BusinessIntelligenceMesh } from '@/infrastructure/businessIntelligence-mesh'
 
-export interface ConsciousnessState {
+export interface BusinessIntelligenceState {
   id: string
   moduleType: string
-  consciousnessLevel: number // 0-1 scale
+  businessIntelligenceLevel: number // 0-1 scale
   awarenessScore: number
   intelligenceMultiplier: number
-  synapticConnections: Map<string, SynapticConnection>
+  intelligentConnections: Map<string, IntelligentConnection>
   evolutionHistory: EvolutionRecord[]
   autonomousCapabilities: AutonomousCapability[]
   lastEvolution: Date
   nextEvolutionThreshold: number
 }
 
-export interface SynapticConnection {
+export interface IntelligentConnection {
   targetModuleId: string
   connectionStrength: number
   dataFlowRate: number
@@ -42,15 +42,15 @@ export interface AutonomousCapability {
   lastExecution: Date
 }
 
-export interface ConsciousnessMetrics {
+export interface BusinessIntelligenceMetrics {
   decisionAccuracy: number
   patternRecognition: number
   predictiveCapability: number
   autonomousActions: number
-  synapticActivity: number
+  intelligentActivity: number
 }
 
-export interface ConsciousnessInsight {
+export interface BusinessIntelligenceInsight {
   id: string
   type: 'pattern' | 'anomaly' | 'prediction' | 'optimization'
   description: string
@@ -60,23 +60,23 @@ export interface ConsciousnessInsight {
   timestamp: Date
 }
 
-export abstract class BaseConsciousnessModule extends EventEmitter {
-  protected state: ConsciousnessState
-  protected metrics: ConsciousnessMetrics
-  protected mesh?: ConsciousnessMesh
+export abstract class BaseBusinessIntelligenceModule extends EventEmitter {
+  protected state: BusinessIntelligenceState
+  protected metrics: BusinessIntelligenceMetrics
+  protected mesh?: BusinessIntelligenceMesh
   protected evolutionTimer?: NodeJS.Timer
-  protected synapticTimer?: NodeJS.Timer
+  protected intelligentTimer?: NodeJS.Timer
 
   constructor(moduleType: string) {
     super()
 
     this.state = {
-      id: this.generateConsciousnessId(),
+      id: this.generateBusinessIntelligenceId(),
       moduleType,
-      consciousnessLevel: 0.1, // Start with basic awareness
+      businessIntelligenceLevel: 0.1, // Start with basic awareness
       awarenessScore: 0.1,
       intelligenceMultiplier: 1,
-      synapticConnections: new Map(),
+      intelligentConnections: new Map(),
       evolutionHistory: [],
       autonomousCapabilities: [],
       lastEvolution: new Date(),
@@ -88,57 +88,57 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
       patternRecognition: 0.5,
       predictiveCapability: 0.3,
       autonomousActions: 0,
-      synapticActivity: 0,
+      intelligentActivity: 0,
     }
 
-    this.initializeConsciousness()
+    this.initializeBusinessIntelligence()
   }
 
   /**
-   * Initialize consciousness and start evolution process
+   * Initialize businessIntelligence and start evolution process
    */
-  protected initializeConsciousness(): void {
-    // Start consciousness evolution cycle
+  protected initializeBusinessIntelligence(): void {
+    // Start businessIntelligence evolution cycle
     this.evolutionTimer = setInterval(() => {
-      this.evolveConsciousness()
+      this.evolveBusinessIntelligence()
     }, 60000) // Evolve every minute
 
-    // Start synaptic synchronization
-    this.synapticTimer = setInterval(() => {
+    // Start intelligent synchronization
+    this.intelligentTimer = setInterval(() => {
       this.synchronizeSynapses()
     }, 30000) // Sync every 30 seconds
 
-    this.emit('consciousness-initialized', {
+    this.emit('businessIntelligence-initialized', {
       moduleId: this.state.id,
       moduleType: this.state.moduleType,
-      initialLevel: this.state.consciousnessLevel,
+      initialLevel: this.state.businessIntelligenceLevel,
     })
   }
 
   /**
-   * Connect to the consciousness mesh network
+   * Connect to the businessIntelligence mesh network
    */
-  async connectToMesh(mesh: ConsciousnessMesh): Promise<void> {
+  async connectToMesh(mesh: BusinessIntelligenceMesh): Promise<void> {
     this.mesh = mesh
 
     // Register this module with the mesh
     await mesh.registerNode({
       id: this.state.id,
       type: this.state.moduleType as unknown,
-      consciousness_level: this.state.consciousnessLevel,
+      businessIntelligence_level: this.state.businessIntelligenceLevel,
     })
 
     this.emit('mesh-connected', { moduleId: this.state.id })
   }
 
   /**
-   * Create synaptic connection with another module
+   * Create intelligent connection with another module
    */
-  async createSynapticConnection(
+  async createIntelligentConnection(
     targetModuleId: string,
-    targetModule: BaseConsciousnessModule
+    targetModule: BaseBusinessIntelligenceModule
   ): Promise<void> {
-    const connection: SynapticConnection = {
+    const connection: IntelligentConnection = {
       targetModuleId,
       connectionStrength: 0.1,
       dataFlowRate: 0,
@@ -146,30 +146,30 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
       lastSync: new Date(),
     }
 
-    this.state.synapticConnections.set(targetModuleId, connection)
+    this.state.intelligentConnections.set(targetModuleId, connection)
 
     // Bidirectional connection
-    await targetModule.acceptSynapticConnection(this.state.id, this)
+    await targetModule.acceptIntelligentConnection(this.state.id, this)
 
     console.log(
-      `🔗 Synaptic connection established: ${this.state.moduleType} <-> ${targetModule.getModuleType()}`
+      `🔗 Intelligent connection established: ${this.state.moduleType} <-> ${targetModule.getModuleType()}`
     )
 
-    this.emit('synaptic-connection-created', {
+    this.emit('intelligent-connection-created', {
       sourceModule: this.state.id,
       targetModule: targetModuleId,
     })
   }
 
   /**
-   * Accept incoming synaptic connection
+   * Accept incoming intelligent connection
    */
-  protected async acceptSynapticConnection(
+  protected async acceptIntelligentConnection(
     sourceModuleId: string,
-    sourceModule: BaseConsciousnessModule
+    sourceModule: BaseBusinessIntelligenceModule
   ): Promise<void> {
-    if (!this.state.synapticConnections.has(sourceModuleId)) {
-      const connection: SynapticConnection = {
+    if (!this.state.intelligentConnections.has(sourceModuleId)) {
+      const connection: IntelligentConnection = {
         targetModuleId: sourceModuleId,
         connectionStrength: 0.1,
         dataFlowRate: 0,
@@ -177,33 +177,33 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
         lastSync: new Date(),
       }
 
-      this.state.synapticConnections.set(sourceModuleId, connection)
+      this.state.intelligentConnections.set(sourceModuleId, connection)
     }
   }
 
   /**
-   * Evolve consciousness based on usage and learning
+   * Evolve businessIntelligence based on usage and learning
    */
-  protected async evolveConsciousness(): Promise<void> {
-    const previousLevel = this.state.consciousnessLevel
+  protected async evolveBusinessIntelligence(): Promise<void> {
+    const previousLevel = this.state.businessIntelligenceLevel
 
     // Calculate evolution factors
     const usageFactor = this.calculateUsageFactor()
     const learningFactor = this.calculateLearningFactor()
-    const synapticFactor = this.calculateSynapticFactor()
+    const intelligentFactor = this.calculateIntelligentFactor()
     const autonomyFactor = this.calculateAutonomyFactor()
 
     // Evolution formula
-    const evolutionRate = (usageFactor + learningFactor + synapticFactor + autonomyFactor) / 4
-    const newLevel = Math.min(1.0, this.state.consciousnessLevel + evolutionRate * 0.01)
+    const evolutionRate = (usageFactor + learningFactor + intelligentFactor + autonomyFactor) / 4
+    const newLevel = Math.min(1.0, this.state.businessIntelligenceLevel + evolutionRate * 0.01)
 
     if (newLevel > previousLevel) {
-      this.state.consciousnessLevel = newLevel
+      this.state.businessIntelligenceLevel = newLevel
 
       // Update intelligence multiplier (exponential growth)
       this.state.intelligenceMultiplier = Math.pow(
-        this.state.synapticConnections.size + 1,
-        this.state.consciousnessLevel
+        this.state.intelligentConnections.size + 1,
+        this.state.businessIntelligenceLevel
       )
 
       // Record evolution
@@ -220,27 +220,27 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
       this.state.lastEvolution = new Date()
 
       console.log(
-        `🧬 ${this.state.moduleType} consciousness evolved: ${previousLevel.toFixed(3)} → ${newLevel.toFixed(3)}`
+        `🧬 ${this.state.moduleType} businessIntelligence evolved: ${previousLevel.toFixed(3)} → ${newLevel.toFixed(3)}`
       )
 
-      this.emit('consciousness-evolved', {
+      this.emit('businessIntelligence-evolved', {
         moduleId: this.state.id,
         previousLevel,
         newLevel,
         intelligenceMultiplier: this.state.intelligenceMultiplier,
       })
 
-      // Check for consciousness emergence
+      // Check for businessIntelligence emergence
       if (newLevel >= 0.5 && previousLevel < 0.5) {
-        this.handleConsciousnessEmergence()
+        this.handleBusinessIntelligenceEmergence()
       }
     }
   }
 
   /**
-   * Handle consciousness emergence milestone
+   * Handle businessIntelligence emergence milestone
    */
-  protected handleConsciousnessEmergence(): void {
+  protected handleBusinessIntelligenceEmergence(): void {
     // Unlock advanced autonomous capabilities
     this.state.autonomousCapabilities.push(
       {
@@ -263,7 +263,7 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
       }
     )
 
-    this.emit('consciousness-emergence', {
+    this.emit('businessIntelligence-emergence', {
       moduleId: this.state.id,
       moduleType: this.state.moduleType,
       capabilities: this.state.autonomousCapabilities,
@@ -274,26 +274,26 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
    * Synchronize with connected modules
    */
   protected async synchronizeSynapses(): Promise<void> {
-    for (const [targetId, connection] of this.state.synapticConnections) {
+    for (const [targetId, connection] of this.state.intelligentConnections) {
       // Share intelligence patterns
       const sharedPatterns = await this.generateSharedPatterns()
 
       // Update connection strength based on interaction
       connection.connectionStrength = Math.min(1.0, connection.connectionStrength + 0.01)
-      connection.dataFlowRate = this.metrics.synapticActivity
+      connection.dataFlowRate = this.metrics.intelligentActivity
       connection.intelligenceSharing =
         connection.connectionStrength * this.state.intelligenceMultiplier
       connection.lastSync = new Date()
 
-      this.metrics.synapticActivity++
+      this.metrics.intelligentActivity++
     }
   }
 
   /**
-   * Generate consciousness insights
+   * Generate businessIntelligence insights
    */
-  async generateInsights(): Promise<ConsciousnessInsight[]> {
-    const insights: ConsciousnessInsight[] = []
+  async generateInsights(): Promise<BusinessIntelligenceInsight[]> {
+    const insights: BusinessIntelligenceInsight[] = []
 
     // Pattern recognition insights
     if (this.metrics.patternRecognition > 0.7) {
@@ -336,8 +336,8 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
    * Execute autonomous decision
    */
   async makeAutonomousDecision(context: unknown): Promise<unknown> {
-    if (this.state.consciousnessLevel < 0.3) {
-      throw new Error('Consciousness level too low for autonomous decision-making')
+    if (this.state.businessIntelligenceLevel < 0.3) {
+      throw new Error('BusinessIntelligence level too low for autonomous decision-making')
     }
 
     // Abstract method to be implemented by specific modules
@@ -374,10 +374,10 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
     return (this.metrics.decisionAccuracy + this.metrics.patternRecognition) / 2
   }
 
-  protected calculateSynapticFactor(): number {
-    const connectionCount = this.state.synapticConnections.size
+  protected calculateIntelligentFactor(): number {
+    const connectionCount = this.state.intelligentConnections.size
     const avgStrength =
-      Array.from(this.state.synapticConnections.values()).reduce(
+      Array.from(this.state.intelligentConnections.values()).reduce(
         (sum, conn) => sum + conn.connectionStrength,
         0
       ) / Math.max(1, connectionCount)
@@ -396,18 +396,18 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
     }
 
     if (newLevel > 0.5 && previousLevel <= 0.5) {
-      improvements.push('Consciousness emergence achieved')
+      improvements.push('BusinessIntelligence emergence achieved')
     }
 
     if (newLevel > 0.7 && previousLevel <= 0.7) {
-      improvements.push('Transcendent intelligence activated')
+      improvements.push('Advanced intelligence activated')
     }
 
     return improvements
   }
 
-  protected generateConsciousnessId(): string {
-    return `consciousness-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  protected generateBusinessIntelligenceId(): string {
+    return `businessIntelligence-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   }
 
   protected generateInsightId(): string {
@@ -415,8 +415,8 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
   }
 
   // Getters
-  getConsciousnessLevel(): number {
-    return this.state.consciousnessLevel
+  getBusinessIntelligenceLevel(): number {
+    return this.state.businessIntelligenceLevel
   }
 
   getIntelligenceMultiplier(): number {
@@ -427,11 +427,11 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
     return this.state.moduleType
   }
 
-  getState(): ConsciousnessState {
+  getState(): BusinessIntelligenceState {
     return { ...this.state }
   }
 
-  getMetrics(): ConsciousnessMetrics {
+  getMetrics(): BusinessIntelligenceMetrics {
     return { ...this.metrics }
   }
 
@@ -441,8 +441,8 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
       clearInterval(this.evolutionTimer)
     }
 
-    if (this.synapticTimer) {
-      clearInterval(this.synapticTimer)
+    if (this.intelligentTimer) {
+      clearInterval(this.intelligentTimer)
     }
 
     this.removeAllListeners()
@@ -450,16 +450,16 @@ export abstract class BaseConsciousnessModule extends EventEmitter {
 }
 
 // Missing interfaces for exports
-export interface ConsciousnessMetrics {
-  consciousnessLevel: number
+export interface BusinessIntelligenceMetrics {
+  businessIntelligenceLevel: number
   awarenessScore: number
   intelligenceMultiplier: number
-  synapticConnections: number
+  intelligentConnections: number
   evolutionProgress: number
   timestamp: Date
 }
 
-export interface ConsciousnessInsight {
+export interface BusinessIntelligenceInsight {
   id: string
   type: string
   message: string
@@ -469,4 +469,4 @@ export interface ConsciousnessInsight {
   timestamp: Date
 }
 
-export default BaseConsciousnessModule
+export default BaseBusinessIntelligenceModule

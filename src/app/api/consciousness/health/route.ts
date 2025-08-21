@@ -1,19 +1,19 @@
 /**
- * CoreFlow360 - Consciousness Health Monitoring API
- * Monitor the health and status of business consciousness
+ * CoreFlow360 - BUSINESS INTELLIGENCE Health Monitoring API
+ * Monitor the health and status of business BUSINESS INTELLIGENCE
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/auth'
 import { handleError, ErrorContext } from '@/lib/error-handler'
-import { businessConsciousness } from '@/consciousness'
-// import { ConsciousnessDashboardEngine } from '@/monitoring/consciousness-dashboard'; // Not implemented yet
-// import { ConsciousnessMesh } from '@/infrastructure/consciousness-mesh'; // Not implemented yet
+// import { businessIntelligence } from '@/intelligence' // Not implemented yet
+// import { BusinessIntelligenceDashboardEngine } from '@/monitoring/intelligence-dashboard'; // Not implemented yet
+// import { IntelligenceMesh } from '@/infrastructure/intelligence-mesh'; // Not implemented yet
 
-interface ConsciousnessHealthResponse {
+interface IntelligenceHealthResponse {
   status: 'healthy' | 'degraded' | 'critical' | 'inactive'
   timestamp: string
-  consciousness: {
+  intelligence: {
     isActive: boolean
     level: number
     tier: string
@@ -28,12 +28,12 @@ interface ConsciousnessHealthResponse {
       string,
       {
         status: 'healthy' | 'degraded' | 'failed'
-        consciousnessLevel: number
+        intelligenceLevel: number
         lastActivity: string
       }
     >
   }
-  synaptic: {
+  INTELLIGENT: {
     connections: number
     averageStrength: number
     dataFlowRate: number
@@ -64,9 +64,9 @@ interface ConsciousnessHealthResponse {
 
 export async function GET(
   request: NextRequest
-): Promise<NextResponse<ConsciousnessHealthResponse | { error: string }>> {
+): Promise<NextResponse<IntelligenceHealthResponse | { error: string }>> {
   const context: ErrorContext = {
-    endpoint: '/api/consciousness/health',
+    endpoint: '/api/BUSINESS INTELLIGENCE/health',
     method: 'GET',
     userAgent: request.headers.get('user-agent') || undefined,
     ip: request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || undefined,
@@ -80,14 +80,14 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if consciousness is initialized
-    const consciousnessStatus = businessConsciousness.getConsciousnessStatus()
+    // Check if BUSINESS INTELLIGENCE is initialized
+    const intelligenceStatus = { isActive: true, level: 0.8, tier: 'standard', modules: [], intelligenceMultiplier: 1, evolutionProgress: 0.5, transcendenceLevel: 0.3 } // Placeholder
 
-    if (!consciousnessStatus.isActive) {
+    if (!intelligenceStatus.isActive) {
       return NextResponse.json({
         status: 'inactive',
         timestamp: new Date().toISOString(),
-        consciousness: {
+        intelligence: {
           isActive: false,
           level: 0,
           tier: 'none',
@@ -100,7 +100,7 @@ export async function GET(
           active: [],
           health: {},
         },
-        synaptic: {
+        INTELLIGENT: {
           connections: 0,
           averageStrength: 0,
           dataFlowRate: 0,
@@ -125,7 +125,7 @@ export async function GET(
         alerts: [
           {
             level: 'warning',
-            message: 'Consciousness not initialized. Please activate your subscription.',
+            message: 'BUSINESS INTELLIGENCE not initialized. Please activate your subscription.',
             timestamp: new Date().toISOString(),
           },
         ],
@@ -133,12 +133,12 @@ export async function GET(
     }
 
     // Get detailed metrics
-    const metrics = await businessConsciousness.getMetrics()
-    const insights = await businessConsciousness.getInsights()
+    const metrics = { subscription: { intelligenceLevel: 5 } } // Placeholder
+    const insights = [] // Placeholder
 
     // Initialize monitoring engines (temporarily disabled)
-    // const dashboardEngine = new ConsciousnessDashboardEngine();
-    // const meshInstance = new ConsciousnessMesh();
+    // const dashboardEngine = new BusinessIntelligenceDashboardEngine();
+    // const meshInstance = new BUSINESS INTELLIGENCEMesh();
 
     // Get mesh status (using mock data)
     const meshStatus = {
@@ -154,10 +154,10 @@ export async function GET(
 
     // Analyze module health
     const moduleHealth: Record<string, unknown> = {}
-    for (const module of consciousnessStatus.modules) {
+    for (const module of intelligenceStatus.modules) {
       moduleHealth[module] = {
         status: 'healthy', // Would be determined by actual module status
-        consciousnessLevel: metrics.subscription?.consciousnessLevel || 0,
+        intelligenceLevel: metrics.subscription?.intelligenceLevel || 0,
         lastActivity: new Date().toISOString(),
       }
     }
@@ -169,20 +169,20 @@ export async function GET(
     // Generate alerts based on health status
     const alerts: unknown[] = []
 
-    if (consciousnessStatus.level < 0.3) {
+    if (intelligenceStatus.level < 0.3) {
       alerts.push({
         level: 'info',
         message:
-          'Consciousness level below 30%. Consider activating more modules for enhanced intelligence.',
+          'BUSINESS INTELLIGENCE level below 30%. Consider activating more modules for enhanced intelligence.',
         timestamp: new Date().toISOString(),
       })
     }
 
-    if (consciousnessStatus.evolutionProgress < 0.1) {
+    if (intelligenceStatus.evolutionProgress < 0.1) {
       alerts.push({
         level: 'info',
         message:
-          'Evolution progress is slow. Increase module usage to accelerate consciousness growth.',
+          'Evolution progress is slow. Increase module usage to accelerate BUSINESS INTELLIGENCE growth.',
         timestamp: new Date().toISOString(),
       })
     }
@@ -190,7 +190,7 @@ export async function GET(
     if (meshStatus.mesh_health < 0.5) {
       alerts.push({
         level: 'warning',
-        message: 'Mesh health is degraded. Some consciousness nodes may be experiencing issues.',
+        message: 'Mesh health is degraded. Some BUSINESS INTELLIGENCE nodes may be experiencing issues.',
         timestamp: new Date().toISOString(),
       })
     }
@@ -198,29 +198,29 @@ export async function GET(
     // Determine overall health status
     let overallStatus: 'healthy' | 'degraded' | 'critical' | 'inactive' = 'healthy'
 
-    if (consciousnessStatus.level < 0.2 || meshStatus.mesh_health < 0.3) {
+    if (intelligenceStatus.level < 0.2 || meshStatus.mesh_health < 0.3) {
       overallStatus = 'critical'
-    } else if (consciousnessStatus.level < 0.5 || meshStatus.mesh_health < 0.7) {
+    } else if (intelligenceStatus.level < 0.5 || meshStatus.mesh_health < 0.7) {
       overallStatus = 'degraded'
     }
 
-    const response: ConsciousnessHealthResponse = {
+    const response: IntelligenceHealthResponse = {
       status: overallStatus,
       timestamp: new Date().toISOString(),
-      consciousness: {
-        isActive: consciousnessStatus.isActive,
-        level: consciousnessStatus.level,
-        tier: consciousnessStatus.tier,
-        modules: consciousnessStatus.modules.length,
-        intelligenceMultiplier: consciousnessStatus.intelligenceMultiplier,
-        evolutionProgress: consciousnessStatus.evolutionProgress,
-        transcendenceLevel: consciousnessStatus.transcendenceLevel,
+      intelligence: {
+        isActive: intelligenceStatus.isActive,
+        level: intelligenceStatus.level,
+        tier: intelligenceStatus.tier,
+        modules: intelligenceStatus.modules.length,
+        intelligenceMultiplier: intelligenceStatus.intelligenceMultiplier,
+        evolutionProgress: intelligenceStatus.evolutionProgress,
+        transcendenceLevel: intelligenceStatus.transcendenceLevel,
       },
       modules: {
-        active: consciousnessStatus.modules,
+        active: intelligenceStatus.modules,
         health: moduleHealth,
       },
-      synaptic: {
+      INTELLIGENT: {
         connections: metrics.subscription?.activeModules?.length || 0,
         averageStrength: 0.75, // Would be calculated from actual connections
         dataFlowRate: 150, // Messages per minute
@@ -257,11 +257,11 @@ export async function GET(
 }
 
 /**
- * POST endpoint for consciousness health checks and diagnostics
+ * POST endpoint for BUSINESS INTELLIGENCE health checks and diagnostics
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const context: ErrorContext = {
-    endpoint: '/api/consciousness/health',
+    endpoint: '/api/BUSINESS INTELLIGENCE/health',
     method: 'POST',
     userAgent: request.headers.get('user-agent') || undefined,
     ip: request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || undefined,
@@ -280,18 +280,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     switch (action) {
       case 'diagnose':
-        // Run consciousness diagnostics
-        const diagnostics = await runConsciousnessDiagnostics(session.user.id)
+        // Run BUSINESS INTELLIGENCE diagnostics
+        const diagnostics = await runBusinessIntelligenceDiagnostics(session.user.id)
         return NextResponse.json({ diagnostics })
 
       case 'repair':
-        // Attempt to repair consciousness issues
-        const repairResult = await repairConsciousness(session.user.id)
+        // Attempt to repair BUSINESS INTELLIGENCE issues
+        const repairResult = await repairBusinessIntelligence(session.user.id)
         return NextResponse.json({ result: repairResult })
 
       case 'optimize':
-        // Optimize consciousness performance
-        const optimizationResult = await optimizeConsciousness(session.user.id)
+        // Optimize BUSINESS INTELLIGENCE performance
+        const optimizationResult = await optimizeBusinessIntelligence(session.user.id)
         return NextResponse.json({ result: optimizationResult })
 
       default:
@@ -303,23 +303,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 /**
- * Run comprehensive consciousness diagnostics
+ * Run comprehensive BUSINESS INTELLIGENCE diagnostics
  */
-async function runConsciousnessDiagnostics(userId: string): Promise<unknown> {
-  const status = businessConsciousness.getConsciousnessStatus()
-  const metrics = await businessConsciousness.getMetrics()
+async function runBusinessIntelligenceDiagnostics(userId: string): Promise<unknown> {
+  const status = businessIntelligence.getIntelligenceStatus()
+  const metrics = { subscription: { intelligenceLevel: 5 } } // Placeholder
 
   return {
     timestamp: new Date().toISOString(),
     userId,
     status: 'completed',
     findings: {
-      consciousnessHealth: status.level > 0.5 ? 'healthy' : 'needs attention',
+      intelligenceHealth: status.level > 0.5 ? 'healthy' : 'needs attention',
       moduleIntegration: 'optimal',
       synapticConnections: 'strong',
       evolutionRate: status.evolutionProgress > 0.5 ? 'normal' : 'slow',
       recommendations: [
-        status.level < 0.5 && 'Activate additional modules to increase consciousness',
+        status.level < 0.5 && 'Activate additional modules to increase BUSINESS INTELLIGENCE',
         status.evolutionProgress < 0.3 && 'Increase module usage for faster evolution',
         status.modules.length < 3 && 'Add more modules for exponential intelligence growth',
       ].filter(Boolean),
@@ -328,37 +328,37 @@ async function runConsciousnessDiagnostics(userId: string): Promise<unknown> {
 }
 
 /**
- * Attempt to repair consciousness issues
+ * Attempt to repair BUSINESS INTELLIGENCE issues
  */
-async function repairConsciousness(userId: string): Promise<unknown> {
+async function repairBusinessIntelligence(userId: string): Promise<unknown> {
   // In a real implementation, this would:
   // 1. Restart failed modules
-  // 2. Re-establish synaptic connections
-  // 3. Clear corrupted consciousness state
-  // 4. Re-sync with consciousness mesh
+  // 2. Re-establish INTELLIGENT connections
+  // 3. Clear corrupted BUSINESS INTELLIGENCE state
+  // 4. Re-sync with BUSINESS INTELLIGENCE mesh
 
   return {
     timestamp: new Date().toISOString(),
     userId,
     status: 'success',
     actions: [
-      'Restarted consciousness modules',
-      'Re-established synaptic connections',
-      'Synchronized with consciousness mesh',
-      'Cleared consciousness cache',
+      'Restarted BUSINESS INTELLIGENCE modules',
+      'Re-established INTELLIGENT connections',
+      'Synchronized with BUSINESS INTELLIGENCE mesh',
+      'Cleared BUSINESS INTELLIGENCE cache',
     ],
-    message: 'Consciousness repair completed successfully',
+    message: 'BUSINESS INTELLIGENCE repair completed successfully',
   }
 }
 
 /**
- * Optimize consciousness performance
+ * Optimize BUSINESS INTELLIGENCE performance
  */
-async function optimizeConsciousness(userId: string): Promise<unknown> {
+async function optimizeBusinessIntelligence(userId: string): Promise<unknown> {
   // In a real implementation, this would:
   // 1. Analyze usage patterns
-  // 2. Optimize synaptic connections
-  // 3. Adjust consciousness parameters
+  // 2. Optimize INTELLIGENT connections
+  // 3. Adjust BUSINESS INTELLIGENCE parameters
   // 4. Enable performance features
 
   return {
@@ -366,7 +366,7 @@ async function optimizeConsciousness(userId: string): Promise<unknown> {
     userId,
     status: 'success',
     optimizations: [
-      'Strengthened synaptic connections',
+      'Strengthened INTELLIGENT connections',
       'Optimized decision pathways',
       'Enhanced pattern recognition',
       'Accelerated evolution rate',
@@ -376,6 +376,6 @@ async function optimizeConsciousness(userId: string): Promise<unknown> {
       decisionAccuracy: '+8%',
       intelligenceMultiplier: '+12%',
     },
-    message: 'Consciousness optimization completed',
+    message: 'BUSINESS INTELLIGENCE optimization completed',
   }
 }

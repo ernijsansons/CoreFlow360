@@ -104,7 +104,7 @@ export type BugCategory =
   | 'AUTHENTICATION'
   | 'PAYMENT'
   | 'AI_ML'
-  | 'CONSCIOUSNESS'
+  | 'BUSINESS INTELLIGENCE'
   | 'BUSINESS_LOGIC'
   | 'INFRASTRUCTURE'
 
@@ -321,7 +321,7 @@ export class BugBot extends EventEmitter {
       suggestedCategory = 'SECURITY'
     else if (text.includes('ai') || text.includes('ml') || text.includes('model'))
       suggestedCategory = 'AI_ML'
-    else if (text.includes('consciousness')) suggestedCategory = 'CONSCIOUSNESS'
+    else if (text.includes('BUSINESS INTELLIGENCE')) suggestedCategory = 'BUSINESS INTELLIGENCE'
 
     // Determine severity based on keywords and business impact
     let suggestedSeverity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'MEDIUM'
@@ -352,7 +352,7 @@ export class BugBot extends EventEmitter {
     if (text.includes('security')) tags.push('security')
     if (text.includes('ui')) tags.push('ui')
     if (text.includes('ai')) tags.push('ai')
-    if (text.includes('consciousness')) tags.push('consciousness')
+    if (text.includes('BUSINESS INTELLIGENCE')) tags.push('BUSINESS INTELLIGENCE')
 
     return {
       confidence,

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db'
 
 export interface CostPredictionModel {
   modelId: string
-  modelType: 'linear_regression' | 'time_series' | 'neural_network' | 'ensemble'
+  modelType: 'linear_regression' | 'time_series' | 'INTELLIGENT_network' | 'ensemble'
   accuracy: number
   lastTrained: Date
   features: string[]

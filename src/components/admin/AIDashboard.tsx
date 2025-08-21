@@ -240,7 +240,7 @@ export default function AIDashboard() {
     try {
       const result = await handleAIAction('train', {
         name: 'Custom Business Model',
-        architecture: 'neural_network',
+        architecture: 'INTELLIGENT_network',
         trainingConfig: {
           batchSize: 32,
           epochs: 50,

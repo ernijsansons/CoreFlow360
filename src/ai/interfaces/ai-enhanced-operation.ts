@@ -371,7 +371,7 @@ async function generatePredictions(
           { name: 'technical_fit', weight: 0.25, impact: 'positive' },
           { name: 'budget_confirmed', weight: 0.4, impact: 'positive' },
         ],
-        methodology: 'neural_network',
+        methodology: 'INTELLIGENT_network',
       })
       break
   }

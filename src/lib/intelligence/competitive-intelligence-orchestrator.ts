@@ -542,7 +542,7 @@ export class CompetitiveIntelligenceOrchestrator extends EventEmitter {
         marketShare: 15, // Mock data
         strengths: [
           'AI-first architecture',
-          'Consciousness-driven automation',
+          'BUSINESS INTELLIGENCE-driven automation',
           'Modular subscription model',
           'Multi-tenant scalability',
         ],
@@ -552,9 +552,9 @@ export class CompetitiveIntelligenceOrchestrator extends EventEmitter {
           'Geographic concentration',
         ],
         differentiation: [
-          'Autonomous business organism concept',
+          'Autonomous business ORGANIZATION concept',
           'Intelligence multiplication framework',
-          'Post-human business architecture',
+          'next-generation business automation',
         ],
       },
       leaders: [
@@ -611,7 +611,7 @@ export class CompetitiveIntelligenceOrchestrator extends EventEmitter {
           },
         ],
         opportunities: [
-          'Consciousness-level tenant isolation',
+          'BUSINESS INTELLIGENCE-level tenant isolation',
           'Dynamic resource scaling',
           'Predictive tenant management',
         ],
@@ -716,7 +716,7 @@ export class CompetitiveIntelligenceOrchestrator extends EventEmitter {
   private generateFilingRecommendations() {
     return [
       {
-        area: 'Consciousness-driven automation',
+        area: 'BUSINESS INTELLIGENCE-driven automation',
         priority: 'HIGH' as const,
         rationale: 'Core differentiating technology with strong IP potential',
         timeline: '3-6 months',
@@ -740,8 +740,8 @@ export class CompetitiveIntelligenceOrchestrator extends EventEmitter {
     return {
       whitespace: [
         'Autonomous business decision-making',
-        'Cross-system consciousness integration',
-        'Predictive business organism health',
+        'Cross-system BUSINESS INTELLIGENCE integration',
+        'Predictive business ORGANIZATION health',
       ],
       crowdedAreas: ['CRM automation', 'Financial reporting', 'User interface design'],
       trends: [
@@ -774,9 +774,9 @@ export class CompetitiveIntelligenceOrchestrator extends EventEmitter {
         id: 'rec_1',
         type: 'PRODUCT',
         priority: 'HIGH',
-        title: 'Accelerate Consciousness Integration Features',
+        title: 'Accelerate BUSINESS INTELLIGENCE Integration Features',
         description:
-          'Develop advanced consciousness-driven automation to maintain competitive advantage',
+          'Develop advanced BUSINESS INTELLIGENCE-driven automation to maintain competitive advantage',
         rationale: [
           'Unique positioning in market',
           'High customer demand',
@@ -805,7 +805,7 @@ export class CompetitiveIntelligenceOrchestrator extends EventEmitter {
           dependencies: ['Core platform stability'],
           milestones: [
             {
-              name: 'Consciousness framework design',
+              name: 'BUSINESS INTELLIGENCE framework design',
               date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
               deliverable: 'Technical specification',
             },
@@ -816,7 +816,7 @@ export class CompetitiveIntelligenceOrchestrator extends EventEmitter {
             metric: 'Customer adoption rate',
             target: 75,
             timeframe: '12 months',
-            measurement: 'Percentage of customers using consciousness features',
+            measurement: 'Percentage of customers using BUSINESS INTELLIGENCE features',
           },
         ],
         lastUpdated: new Date(),
@@ -826,7 +826,7 @@ export class CompetitiveIntelligenceOrchestrator extends EventEmitter {
         type: 'MARKET',
         priority: 'MEDIUM',
         title: 'Expand into Manufacturing Intelligence',
-        description: 'Target manufacturing sector with specialized consciousness modules',
+        description: 'Target manufacturing sector with specialized BUSINESS INTELLIGENCE modules',
         rationale: [
           'Underserved market segment',
           'High value proposition',
@@ -1079,7 +1079,7 @@ export class CompetitiveIntelligenceOrchestrator extends EventEmitter {
       status: 'PENDING',
       claims: 20,
       abstract:
-        'A system for autonomous management of business processes using consciousness-driven AI',
+        'A system for autonomous management of business processes using BUSINESS INTELLIGENCE-driven AI',
       classification: {
         ipc: ['G06F17/30'],
         cpc: ['G06F16/00'],
@@ -1132,7 +1132,7 @@ export class CompetitiveIntelligenceOrchestrator extends EventEmitter {
       opportunities: [
         {
           type: 'PRODUCT_GAP',
-          description: 'Consciousness-driven automation',
+          description: 'BUSINESS INTELLIGENCE-driven automation',
           estimatedValue: 5000000000,
           effort: 'HIGH',
           timeline: '2-3 years',

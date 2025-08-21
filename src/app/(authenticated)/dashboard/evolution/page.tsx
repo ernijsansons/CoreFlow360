@@ -12,7 +12,7 @@ const QuantumEvolutionDashboard = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex min-h-screen items-center justify-center bg-black">
-        <div className="text-white">Loading quantum dashboard...</div>
+        <div className="text-white">Loading business intelligence dashboard...</div>
       </div>
     ),
   }

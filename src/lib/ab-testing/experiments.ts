@@ -36,10 +36,10 @@ export const experiments: Experiment[] = [
     variants: [
       {
         id: 'control',
-        name: 'Control - Revenue Machine',
+        name: 'Control - BUSINESS EMPIRE',
         weight: 50,
         config: {
-          headline: 'Turn Your Business Into a Revenue Machine',
+          headline: 'Turn Your Business Into a BUSINESS EMPIRE',
           subheadline: 'That Runs Itself',
         },
       },

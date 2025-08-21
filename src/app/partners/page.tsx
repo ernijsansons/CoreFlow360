@@ -25,7 +25,7 @@ const PartnerPortalPage: React.FC = () => {
     id: 'partner-123',
     name: 'Sarah Chen',
     certificationLevel: 'advanced' as const,
-    consciousnessLevel: 7.5,
+    businessIntelligenceLevel: 7.5,
   })
 
   const navigationItems = [
@@ -60,9 +60,9 @@ const PartnerPortalPage: React.FC = () => {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-400">
-                  {partnerData.consciousnessLevel}
+                  {partnerData.businessIntelligenceLevel}
                 </div>
-                <div className="text-xs text-gray-400">Consciousness Level</div>
+                <div className="text-xs text-gray-400">BUSINESS INTELLIGENCE Level</div>
               </div>
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 font-bold text-white">
                 SC
@@ -115,7 +115,7 @@ const PartnerPortalPage: React.FC = () => {
                   if (section === 'resources') setActiveSection('resources')
                   else if (section === 'training') setActiveSection('training')
                   else if (section === 'community-hub') setActiveSection('community')
-                  else if (section === 'consciousness-toolkit') setActiveSection('resources')
+                  else if (section === 'BUSINESS INTELLIGENCE-toolkit') setActiveSection('resources')
                   else if (section === 'client-portal') setActiveSection('dashboard')
                   else if (section === 'training-academy') setActiveSection('training')
                 }}
@@ -239,7 +239,7 @@ const PartnerPortalPage: React.FC = () => {
             </div>
             <div>
               <div className="text-2xl font-bold text-indigo-400">8.4</div>
-              <div className="text-sm text-gray-400">Avg Consciousness Level</div>
+              <div className="text-sm text-gray-400">Avg BUSINESS INTELLIGENCE Level</div>
             </div>
           </div>
         </div>

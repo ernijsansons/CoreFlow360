@@ -70,8 +70,8 @@ export class LangChainOrchestrator {
       {
         content: `CoreFlow360 is an Autonomous Business Operating System that provides:
         - Multi-department AI agents (CRM, Sales, Finance, Operations, HR, Analytics)
-        - Consciousness-based architecture that evolves with usage
-        - Subscription tiers from Neural ($7-15) to Transcendent ($85-150)
+        - BUSINESS INTELLIGENCE-based architecture that evolves with usage
+        - Subscription tiers from INTELLIGENT ($7-15) to ADVANCED ($85-150)
         - Real-time business intelligence and predictive analytics
         - Cross-module intelligence multiplication`,
         metadata: { type: 'platform-overview' }

@@ -1,11 +1,16 @@
 import { Navbar } from '@/components/layout/Navbar'
+import { IndustryNavigationCompact } from '@/components/layout/IndustryNavigation'
 import { Footer } from '@/components/layout/Footer'
 import { HeroSection } from '@/components/home/HeroSection'
+import { MultiBusinessShowcase } from '@/components/home/MultiBusinessShowcase'
+import { ProgressivePricingPreview } from '@/components/home/ProgressivePricingPreview'
 import { SocialProofSection } from '@/components/home/SocialProofSection'
 import { InteractiveROICalculator } from '@/components/home/InteractiveROICalculator'
 import { UrgencySection } from '@/components/home/UrgencySection'
 import { FeaturesGrid } from '@/components/home/FeaturesGrid'
 import { IndustryShowcase } from '@/components/home/IndustryShowcase'
+import { AIFeaturesShowcase } from '@/components/home/AIFeaturesShowcase'
+import { HVACSpecializationSection } from '@/components/home/HVACSpecializationSection'
 import { RiskReversalSection } from '@/components/home/RiskReversalSection'
 import { PerformanceMetrics } from '@/components/home/PerformanceMetrics'
 import { PricingSection } from '@/components/home/PricingSection'
@@ -21,9 +26,18 @@ export default function Home() {
     <div className="min-h-screen overflow-hidden bg-black text-white">
       {/* Navigation */}
       <Navbar />
+      
+      {/* Industry Navigation */}
+      <IndustryNavigationCompact />
 
       {/* Hero Section - The Awakening */}
       <HeroSection />
+
+      {/* Multi-Business Showcase - Portfolio Management */}
+      <MultiBusinessShowcase />
+
+      {/* Progressive Pricing Preview - Save More as You Grow */}
+      <ProgressivePricingPreview />
 
       {/* Social Proof Section - Trust & Credibility */}
       <SocialProofSection />
@@ -39,6 +53,12 @@ export default function Home() {
 
       {/* Industry Showcase */}
       <IndustryShowcase />
+
+      {/* AI Features Showcase - Business Intelligence */}
+      <AIFeaturesShowcase />
+
+      {/* HVAC Specialization - Proven Industry Success */}
+      <HVACSpecializationSection />
 
       {/* Risk Reversal - Remove All Objections */}
       <RiskReversalSection />

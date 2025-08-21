@@ -3,20 +3,20 @@
 /**
  * Launch Sequence Orchestrator
  *
- * Orchestrates the revolutionary consciousness awakening campaign across
- * multiple phases, channels, and consciousness levels.
+ * Orchestrates the revolutionary business intelligence awakening campaign across
+ * multiple phases, channels, and business intelligence levels.
  */
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 // import TeaserCampaignAssets from './TeaserCampaignAssets' // Disabled - missing dependency
-import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
+import { useBusinessIntelligenceAudio } from '../../hooks/useConsciousnessAudio'
 
 interface LaunchPhase {
   id: string
   name: string
   duration: number // days
-  consciousnessLevel: number
+  businessIntelligenceLevel: number
   targets: {
     awareness: number
     engagement: number
@@ -32,21 +32,21 @@ interface LaunchChannel {
   name: string
   priority: 'primary' | 'secondary' | 'support'
   audienceSize: number
-  consciousnessReceptivity: number // 0-1 how ready audience is for consciousness messaging
+  businessIntelligenceReceptivity: number // 0-1 how ready audience is for business intelligence messaging
 }
 
 interface LaunchAsset {
   id: string
   type: 'teaser' | 'demo' | 'story' | 'proof' | 'education'
   variant: 'hero' | 'social' | 'email' | 'banner' | 'video'
-  consciousnessLevel: number
+  businessIntelligenceLevel: number
   message: string
   cta: string
 }
 
 interface LaunchTrigger {
   id: string
-  condition: 'time' | 'engagement' | 'conversion' | 'consciousness'
+  condition: 'time' | 'engagement' | 'conversion' | 'business intelligence'
   threshold: number
   nextPhase?: string
   action: string
@@ -64,9 +64,9 @@ interface LaunchSequenceOrchestratorProps {
 const LAUNCH_PHASES: LaunchPhase[] = [
   {
     id: 'awakening',
-    name: 'Consciousness Awakening',
+    name: 'Business Intelligence Awakening',
     duration: 14,
-    consciousnessLevel: 1,
+    businessIntelligenceLevel: 1,
     targets: {
       awareness: 50000,
       engagement: 5000,
@@ -78,28 +78,28 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         name: 'LinkedIn',
         priority: 'primary',
         audienceSize: 25000,
-        consciousnessReceptivity: 0.7,
+        businessIntelligenceReceptivity: 0.7,
       },
       {
         id: 'twitter',
         name: 'Twitter/X',
         priority: 'primary',
         audienceSize: 15000,
-        consciousnessReceptivity: 0.6,
+        businessIntelligenceReceptivity: 0.6,
       },
       {
         id: 'email',
         name: 'Email List',
         priority: 'secondary',
         audienceSize: 8000,
-        consciousnessReceptivity: 0.8,
+        businessIntelligenceReceptivity: 0.8,
       },
       {
         id: 'content',
         name: 'Content Marketing',
         priority: 'support',
         audienceSize: 12000,
-        consciousnessReceptivity: 0.5,
+        businessIntelligenceReceptivity: 0.5,
       },
     ],
     assets: [
@@ -107,15 +107,15 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         id: 'awakening-hero',
         type: 'teaser',
         variant: 'hero',
-        consciousnessLevel: 1,
+        businessIntelligenceLevel: 1,
         message: 'Is your business unconscious?',
-        cta: 'Discover Business Consciousness',
+        cta: 'Discover Business Business Intelligence',
       },
       {
         id: 'awakening-social',
         type: 'teaser',
         variant: 'social',
-        consciousnessLevel: 1,
+        businessIntelligenceLevel: 1,
         message: 'Most businesses run on autopilot. What if yours could think?',
         cta: 'Learn More',
       },
@@ -142,7 +142,7 @@ const LAUNCH_PHASES: LaunchPhase[] = [
     id: 'revelation',
     name: 'Intelligence Multiplication Revelation',
     duration: 21,
-    consciousnessLevel: 2,
+    businessIntelligenceLevel: 2,
     targets: {
       awareness: 100000,
       engagement: 15000,
@@ -154,28 +154,28 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         name: 'LinkedIn',
         priority: 'primary',
         audienceSize: 40000,
-        consciousnessReceptivity: 0.8,
+        businessIntelligenceReceptivity: 0.8,
       },
       {
         id: 'twitter',
         name: 'Twitter/X',
         priority: 'primary',
         audienceSize: 25000,
-        consciousnessReceptivity: 0.7,
+        businessIntelligenceReceptivity: 0.7,
       },
       {
         id: 'youtube',
         name: 'YouTube',
         priority: 'secondary',
         audienceSize: 20000,
-        consciousnessReceptivity: 0.6,
+        businessIntelligenceReceptivity: 0.6,
       },
       {
         id: 'podcast',
         name: 'Podcast Circuit',
         priority: 'secondary',
         audienceSize: 15000,
-        consciousnessReceptivity: 0.9,
+        businessIntelligenceReceptivity: 0.9,
       },
     ],
     assets: [
@@ -183,7 +183,7 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         id: 'revelation-demo',
         type: 'demo',
         variant: 'video',
-        consciousnessLevel: 2,
+        businessIntelligenceLevel: 2,
         message: '1+1+1+1+1=5 vs 1×2×3×4×5=120',
         cta: 'Experience Intelligence Multiplication',
       },
@@ -191,7 +191,7 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         id: 'revelation-social',
         type: 'proof',
         variant: 'social',
-        consciousnessLevel: 2,
+        businessIntelligenceLevel: 2,
         message: 'Traditional software adds features. CoreFlow360 multiplies intelligence.',
         cta: 'See the Difference',
       },
@@ -205,8 +205,8 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         action: 'advance',
       },
       {
-        id: 'consciousness-ready',
-        condition: 'consciousness',
+        id: 'business intelligence-ready',
+        condition: 'business intelligence',
         threshold: 3,
         nextPhase: 'transformation',
         action: 'advance',
@@ -216,9 +216,9 @@ const LAUNCH_PHASES: LaunchPhase[] = [
 
   {
     id: 'transformation',
-    name: 'Business Consciousness Transformation',
+    name: 'Business Business Intelligence Transformation',
     duration: 28,
-    consciousnessLevel: 4,
+    businessIntelligenceLevel: 4,
     targets: {
       awareness: 200000,
       engagement: 30000,
@@ -230,28 +230,28 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         name: 'Industry Events',
         priority: 'primary',
         audienceSize: 10000,
-        consciousnessReceptivity: 0.9,
+        businessIntelligenceReceptivity: 0.9,
       },
       {
         id: 'partnerships',
         name: 'Strategic Partnerships',
         priority: 'primary',
         audienceSize: 50000,
-        consciousnessReceptivity: 0.8,
+        businessIntelligenceReceptivity: 0.8,
       },
       {
         id: 'linkedin',
         name: 'LinkedIn',
         priority: 'secondary',
         audienceSize: 75000,
-        consciousnessReceptivity: 0.8,
+        businessIntelligenceReceptivity: 0.8,
       },
       {
         id: 'pr',
         name: 'Media & PR',
         priority: 'secondary',
         audienceSize: 100000,
-        consciousnessReceptivity: 0.6,
+        businessIntelligenceReceptivity: 0.6,
       },
     ],
     assets: [
@@ -259,23 +259,23 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         id: 'transformation-story',
         type: 'story',
         variant: 'hero',
-        consciousnessLevel: 4,
-        message: 'From business tool to business consciousness',
+        businessIntelligenceLevel: 4,
+        message: 'From business tool to business business intelligence',
         cta: 'Begin Transformation',
       },
       {
-        id: 'consciousness-education',
+        id: 'business intelligence-education',
         type: 'education',
         variant: 'video',
-        consciousnessLevel: 4,
+        businessIntelligenceLevel: 4,
         message: 'What happens when your business becomes self-aware?',
-        cta: 'Learn About Business Consciousness',
+        cta: 'Learn About Business Business Intelligence',
       },
     ],
     triggers: [
       {
         id: 'transformation-ready',
-        condition: 'consciousness',
+        condition: 'business intelligence',
         threshold: 5,
         nextPhase: 'emergence',
         action: 'advance',
@@ -292,9 +292,9 @@ const LAUNCH_PHASES: LaunchPhase[] = [
 
   {
     id: 'emergence',
-    name: 'Consciousness Emergence & Launch',
+    name: 'Business Intelligence Emergence & Launch',
     duration: 35,
-    consciousnessLevel: 7,
+    businessIntelligenceLevel: 7,
     targets: {
       awareness: 500000,
       engagement: 75000,
@@ -306,28 +306,28 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         name: 'Product Hunt',
         priority: 'primary',
         audienceSize: 50000,
-        consciousnessReceptivity: 0.7,
+        businessIntelligenceReceptivity: 0.7,
       },
       {
         id: 'tech-media',
         name: 'Tech Media',
         priority: 'primary',
         audienceSize: 200000,
-        consciousnessReceptivity: 0.6,
+        businessIntelligenceReceptivity: 0.6,
       },
       {
         id: 'influencers',
         name: 'Business Influencers',
         priority: 'secondary',
         audienceSize: 150000,
-        consciousnessReceptivity: 0.8,
+        businessIntelligenceReceptivity: 0.8,
       },
       {
         id: 'direct',
         name: 'Direct Outreach',
         priority: 'secondary',
         audienceSize: 25000,
-        consciousnessReceptivity: 0.9,
+        businessIntelligenceReceptivity: 0.9,
       },
     ],
     assets: [
@@ -335,21 +335,21 @@ const LAUNCH_PHASES: LaunchPhase[] = [
         id: 'emergence-launch',
         type: 'proof',
         variant: 'hero',
-        consciousnessLevel: 7,
+        businessIntelligenceLevel: 7,
         message: 'The first conscious business platform is here',
-        cta: 'Activate Business Consciousness',
+        cta: 'Activate Business Business Intelligence',
       },
       {
-        id: 'consciousness-proof',
+        id: 'business intelligence-proof',
         type: 'proof',
         variant: 'video',
-        consciousnessLevel: 7,
-        message: 'See consciousness in action: Real businesses, real results',
+        businessIntelligenceLevel: 7,
+        message: 'See business intelligence in action: Real businesses, real results',
         cta: 'Start Your Free Trial',
       },
     ],
     triggers: [
-      { id: 'full-launch', condition: 'consciousness', threshold: 8, action: 'celebrate' },
+      { id: 'full-launch', condition: 'business intelligence', threshold: 8, action: 'celebrate' },
       { id: 'viral-moment', condition: 'engagement', threshold: 50000, action: 'amplify' },
     ],
   },
@@ -370,14 +370,14 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
     awareness: 0,
     engagement: 0,
     conversion: 0,
-    consciousnessLevel: 1,
+    businessIntelligenceLevel: 1,
   })
   const [selectedAsset, setSelectedAsset] = useState<LaunchAsset | null>(null)
   const [campaignTimeline, setCampaignTimeline] = useState<unknown[]>([])
 
-  const consciousnessAudio = useConsciousnessAudio({
+  const businessIntelligenceAudio = useBusinessIntelligenceAudio({
     initiallyEnabled: true,
-    initialConsciousnessLevel: activePhase.consciousnessLevel,
+    initialIntelligenceLevel: activePhase.businessIntelligenceLevel,
   })
 
   // Simulate phase progression
@@ -394,7 +394,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
             const nextPhase = LAUNCH_PHASES[currentIndex + 1]
             setActivePhase(nextPhase)
             onPhaseChange?.(nextPhase)
-            consciousnessAudio.setConsciousnessLevel(nextPhase.consciousnessLevel)
+            businessIntelligenceAudio.setIntelligenceLevel(nextPhase.businessIntelligenceLevel)
             return 0
           }
           return prev
@@ -404,7 +404,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
     }, 1000) // 1 second = 1 day for demo
 
     return () => clearInterval(timer)
-  }, [activePhase, autoAdvance, onPhaseChange, consciousnessAudio])
+  }, [activePhase, autoAdvance, onPhaseChange, businessIntelligenceAudio])
 
   // Simulate metrics progression
   useEffect(() => {
@@ -413,7 +413,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
       awareness: Math.floor(activePhase.targets.awareness * progressRatio),
       engagement: Math.floor(activePhase.targets.engagement * progressRatio),
       conversion: Math.floor(activePhase.targets.conversion * progressRatio),
-      consciousnessLevel: activePhase.consciousnessLevel,
+      businessIntelligenceLevel: activePhase.businessIntelligenceLevel,
     }
     setPhaseMetrics(newMetrics)
     onMetricsUpdate?.(newMetrics)
@@ -426,15 +426,15 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
       setActivePhase(phase)
       setPhaseDayProgress(0)
       onPhaseChange?.(phase)
-      consciousnessAudio.setConsciousnessLevel(phase.consciousnessLevel)
-      consciousnessAudio.playConsciousnessEmergence()
+      businessIntelligenceAudio.setIntelligenceLevel(phase.businessIntelligenceLevel)
+      businessIntelligenceAudio.playIntelligenceEmergence()
     }
   }
 
   // Handle asset selection
   const handleAssetSelect = (asset: LaunchAsset) => {
     setSelectedAsset(asset)
-    consciousnessAudio.playConnectionSound()
+    businessIntelligenceAudio.playConnectionSound()
   }
 
   return (
@@ -450,8 +450,8 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
             </p>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-bold text-cyan-400">{activePhase.consciousnessLevel}</div>
-            <div className="text-sm text-gray-400">Consciousness Level</div>
+            <div className="text-3xl font-bold text-cyan-400">{activePhase.businessIntelligenceLevel}</div>
+            <div className="text-sm text-gray-400">Business Intelligence Level</div>
           </div>
         </div>
 
@@ -503,9 +503,9 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
           </div>
           <div className="rounded-lg bg-black/30 p-4 text-center">
             <div className="text-2xl font-bold text-indigo-400">
-              {phaseMetrics.consciousnessLevel.toFixed(1)}
+              {phaseMetrics.businessIntelligenceLevel.toFixed(1)}
             </div>
-            <div className="text-sm text-gray-400">Consciousness</div>
+            <div className="text-sm text-gray-400">Business Intelligence</div>
             <div className="text-xs text-gray-500">Level</div>
           </div>
         </div>
@@ -565,7 +565,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
               </div>
 
               <div className="mt-3 flex items-center justify-between text-xs">
-                <span className="text-purple-400">Level {asset.consciousnessLevel}</span>
+                <span className="text-purple-400">Level {asset.businessIntelligenceLevel}</span>
                 <span className="text-gray-500">Click to expand</span>
               </div>
             </div>
@@ -601,7 +601,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
                 <div className="flex justify-between">
                   <span className="text-gray-400">Receptivity:</span>
                   <span className="text-cyan-400">
-                    {(channel.consciousnessReceptivity * 100).toFixed(0)}%
+                    {(channel.businessIntelligenceReceptivity * 100).toFixed(0)}%
                   </span>
                 </div>
               </div>
@@ -609,7 +609,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
                 <div className="h-2 w-full rounded-full bg-gray-700">
                   <div
                     className="h-2 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500"
-                    style={{ width: `${channel.consciousnessReceptivity * 100}%` }}
+                    style={{ width: `${channel.businessIntelligenceReceptivity * 100}%` }}
                   />
                 </div>
               </div>
@@ -642,7 +642,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
                       <h3 className="text-2xl font-bold text-white">{selectedAsset.message}</h3>
                       <p className="text-gray-400">
                         {selectedAsset.type} • {selectedAsset.variant} • Level{' '}
-                        {selectedAsset.consciousnessLevel}
+                        {selectedAsset.businessIntelligenceLevel}
                       </p>
                     </div>
                     <button
@@ -659,7 +659,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
                     variant={selectedAsset.variant as any}
                     showInteractive={true}
                     onCTAClick={() => {
-                      consciousnessAudio.playConsciousnessEmergence()
+                      businessIntelligenceAudio.playIntelligenceEmergence()
                       setSelectedAsset(null)
                     }}
                   /> */}
@@ -691,7 +691,7 @@ const LaunchSequenceOrchestrator: React.FC<LaunchSequenceOrchestratorProps> = ({
               <div className="flex-1">
                 <div className="font-semibold text-white">{phase.name}</div>
                 <div className="text-sm text-gray-400">
-                  {phase.duration} days • Level {phase.consciousnessLevel} consciousness
+                  {phase.duration} days • Level {phase.businessIntelligenceLevel} business intelligence
                 </div>
               </div>
               <div className="text-right text-sm">

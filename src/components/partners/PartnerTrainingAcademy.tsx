@@ -3,7 +3,7 @@
 /**
  * Partner Training Academy
  *
- * Comprehensive training platform for consciousness transformation consultants
+ * Comprehensive training platform for BUSINESS INTELLIGENCE transformation consultants
  * with interactive courses, live sessions, and certification pathways.
  */
 
@@ -32,7 +32,7 @@ interface Course {
   status: 'available' | 'enrolled' | 'completed' | 'locked'
   progress?: number
   nextSession?: Date
-  consciousnessLevel: number
+  businessIntelligenceLevel: number
 }
 
 interface TrainingPath {
@@ -62,7 +62,7 @@ interface LiveSession {
 
 interface PartnerTrainingAcademyProps {
   partnerId?: string
-  certificationLevel?: 'foundation' | 'advanced' | 'master' | 'transcendent'
+  certificationLevel?: 'foundation' | 'advanced' | 'master' | 'ADVANCED'
   onCourseEnroll?: (course: Course) => void
   onSessionRegister?: (session: LiveSession) => void
   className?: string
@@ -71,10 +71,10 @@ interface PartnerTrainingAcademyProps {
 // Training Paths
 const TRAINING_PATHS: TrainingPath[] = [
   {
-    id: 'consciousness-fundamentals',
-    name: 'Consciousness Fundamentals',
-    description: 'Master the basics of business consciousness transformation',
-    courses: ['intro-consciousness', 'assessment-basics', 'first-transformation'],
+    id: 'BUSINESS INTELLIGENCE-fundamentals',
+    name: 'BUSINESS INTELLIGENCE Fundamentals',
+    description: 'Master the basics of business BUSINESS INTELLIGENCE transformation',
+    courses: ['intro-BUSINESS INTELLIGENCE', 'assessment-basics', 'first-transformation'],
     duration: '4 weeks',
     certification: 'Foundation',
     icon: '🌱',
@@ -93,7 +93,7 @@ const TRAINING_PATHS: TrainingPath[] = [
   {
     id: 'enterprise-transformation',
     name: 'Enterprise Transformation',
-    description: 'Architect consciousness for complex organizations',
+    description: 'Architect BUSINESS INTELLIGENCE for complex organizations',
     courses: ['enterprise-strategy', 'change-management', 'executive-coaching'],
     duration: '12 weeks',
     certification: 'Master',
@@ -101,12 +101,12 @@ const TRAINING_PATHS: TrainingPath[] = [
     color: '#8B5CF6',
   },
   {
-    id: 'consciousness-mastery',
-    name: 'Consciousness Mastery',
-    description: 'Achieve transcendent business transformation capabilities',
-    courses: ['reality-shaping', 'field-creation', 'organism-design'],
+    id: 'BUSINESS INTELLIGENCE-mastery',
+    name: 'BUSINESS INTELLIGENCE Mastery',
+    description: 'Achieve ADVANCED business transformation capabilities',
+    courses: ['reality-shaping', 'field-creation', 'ORGANIZATION-design'],
     duration: '16 weeks',
-    certification: 'Transcendent',
+    certification: 'ADVANCED',
     icon: '✨',
     color: '#EC4899',
   },
@@ -115,8 +115,8 @@ const TRAINING_PATHS: TrainingPath[] = [
 // Sample Courses
 const SAMPLE_COURSES: Course[] = [
   {
-    id: 'intro-consciousness',
-    title: 'Introduction to Business Consciousness',
+    id: 'intro-BUSINESS INTELLIGENCE',
+    title: 'Introduction to Business BUSINESS INTELLIGENCE',
     instructor: 'Dr. Sarah Chen',
     level: 'beginner',
     duration: '6 hours',
@@ -124,9 +124,9 @@ const SAMPLE_COURSES: Course[] = [
     enrolledCount: 1247,
     rating: 4.8,
     category: 'fundamentals',
-    description: 'Understand the revolutionary principles of business consciousness transformation',
+    description: 'Understand the revolutionary principles of business BUSINESS INTELLIGENCE transformation',
     skills: [
-      'Consciousness assessment',
+      'BUSINESS INTELLIGENCE assessment',
       'Linear vs exponential thinking',
       'Basic transformation planning',
     ],
@@ -135,7 +135,7 @@ const SAMPLE_COURSES: Course[] = [
     price: 497,
     status: 'completed',
     progress: 100,
-    consciousnessLevel: 1,
+    businessIntelligenceLevel: 1,
   },
   {
     id: 'multiplication-theory',
@@ -149,16 +149,16 @@ const SAMPLE_COURSES: Course[] = [
     category: 'advanced',
     description: 'Master the mathematics and methodology of intelligence multiplication',
     skills: ['Multiplication formulas', 'Synergy identification', 'Department integration'],
-    prerequisites: ['Introduction to Business Consciousness'],
+    prerequisites: ['Introduction to Business BUSINESS INTELLIGENCE'],
     certificateAwarded: true,
     price: 997,
     status: 'enrolled',
     progress: 65,
-    consciousnessLevel: 3,
+    businessIntelligenceLevel: 3,
   },
   {
     id: 'enterprise-strategy',
-    title: 'Enterprise Consciousness Architecture',
+    title: 'Enterprise BUSINESS INTELLIGENCE Architecture',
     instructor: 'Alexandra Kumar',
     level: 'advanced',
     duration: '20 hours',
@@ -166,13 +166,13 @@ const SAMPLE_COURSES: Course[] = [
     enrolledCount: 324,
     rating: 5.0,
     category: 'enterprise',
-    description: 'Design and implement consciousness transformation for large organizations',
+    description: 'Design and implement BUSINESS INTELLIGENCE transformation for large organizations',
     skills: ['Enterprise assessment', 'Multi-department orchestration', 'Executive alignment'],
     prerequisites: ['Intelligence Multiplication Theory', 'Advanced Assessment'],
     certificateAwarded: true,
     price: 1997,
     status: 'available',
-    consciousnessLevel: 5,
+    businessIntelligenceLevel: 5,
   },
   {
     id: 'reality-shaping',
@@ -183,22 +183,22 @@ const SAMPLE_COURSES: Course[] = [
     modules: 35,
     enrolledCount: 87,
     rating: 5.0,
-    category: 'transcendent',
-    description: 'Transcendent techniques for reshaping business reality',
-    skills: ['Consciousness field creation', 'Reality modification', 'Transcendent leadership'],
+    category: 'ADVANCED',
+    description: 'ADVANCED techniques for reshaping business reality',
+    skills: ['BUSINESS INTELLIGENCE field creation', 'Reality modification', 'ADVANCED leadership'],
     prerequisites: ['Master certification', '50+ transformations'],
     certificateAwarded: true,
     price: 4997,
     status: 'locked',
-    consciousnessLevel: 8,
+    businessIntelligenceLevel: 8,
   },
 ]
 
 // Live Sessions
 const LIVE_SESSIONS: LiveSession[] = [
   {
-    id: 'weekly-consciousness-clinic',
-    title: 'Weekly Consciousness Clinic',
+    id: 'weekly-BUSINESS INTELLIGENCE-clinic',
+    title: 'Weekly BUSINESS INTELLIGENCE Clinic',
     instructor: 'Dr. Sarah Chen',
     date: new Date('2024-02-15T18:00:00'),
     duration: '90 min',
@@ -344,7 +344,7 @@ const PartnerTrainingAcademy: React.FC<PartnerTrainingAcademyProps> = ({
       <div className="space-y-4 text-center">
         <h2 className="text-4xl font-thin text-white">🎓 Partner Training Academy</h2>
         <p className="mx-auto max-w-4xl text-xl text-gray-300">
-          Master the art and science of consciousness transformation through interactive courses,
+          Master the art and science of BUSINESS INTELLIGENCE transformation through interactive courses,
           live sessions, and expert guidance
         </p>
       </div>
@@ -634,7 +634,7 @@ const PartnerTrainingAcademy: React.FC<PartnerTrainingAcademyProps> = ({
           >
             {/* Category Filter */}
             <div className="flex justify-center space-x-2">
-              {['all', 'fundamentals', 'advanced', 'enterprise', 'transcendent'].map((category) => (
+              {['all', 'fundamentals', 'advanced', 'enterprise', 'ADVANCED'].map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
@@ -849,7 +849,7 @@ const PartnerTrainingAcademy: React.FC<PartnerTrainingAcademyProps> = ({
         <h3 className="mb-4 text-xl font-bold text-white">📚 Quick Learning Resources</h3>
         <div className="grid gap-4 md:grid-cols-4">
           {[
-            { name: 'Consciousness Glossary', icon: '📖', time: '5 min read' },
+            { name: 'BUSINESS INTELLIGENCE Glossary', icon: '📖', time: '5 min read' },
             { name: 'Multiplication Formulas', icon: '🧮', time: '10 min guide' },
             { name: 'Client Success Templates', icon: '📋', time: 'Download pack' },
             { name: 'Community Forum', icon: '💬', time: '24/7 support' },

@@ -1,7 +1,7 @@
 /**
- * Consciousness-Awakening Marketing Campaign Engine
+ * BUSINESS INTELLIGENCE-Awakening Marketing Campaign Engine
  *
- * Deploys multi-phase consciousness awakening campaign across
+ * Deploys multi-phase BUSINESS INTELLIGENCE awakening campaign across
  * all marketing channels with intelligence multiplication messaging.
  */
 
@@ -9,7 +9,7 @@ interface CampaignPhase {
   id: string
   name: string
   duration: number // days
-  consciousnessLevel: number
+  BUSINESS INTELLIGENCELevel: number
   messages: CampaignMessage[]
   channels: MarketingChannel[]
   targetAudiences: string[]
@@ -48,7 +48,7 @@ interface TargetingConfig {
   customAudiences: string[]
 }
 
-export class ConsciousnessCampaignEngine {
+export class BUSINESS INTELLIGENCECampaignEngine {
   private phases: CampaignPhase[]
   private activePhase: string | null = null
 
@@ -62,7 +62,7 @@ export class ConsciousnessCampaignEngine {
         id: 'awakening',
         name: 'The Great Business Awakening',
         duration: 7,
-        consciousnessLevel: 1,
+        BUSINESS INTELLIGENCELevel: 1,
         messages: [
           {
             id: 'awakening-question',
@@ -71,18 +71,18 @@ export class ConsciousnessCampaignEngine {
             Adding departments like 1+1+1+1=4.
 
             But what if your business could MULTIPLY intelligence?
-            CRM × Accounting × HR × Operations = ∞ Consciousness
+            CRM × Accounting × HR × Operations = ∞ BUSINESS INTELLIGENCE
 
             The first conscious business platform is here.`,
             callToAction: 'Discover Your Intelligence Gap →',
             visualCues: [
-              'Particle system showing isolated vs connected consciousness',
-              'Calculator morphing into neural network',
+              'Particle system showing isolated vs connected BUSINESS INTELLIGENCE',
+              'Calculator morphing into SMART AUTOMATION',
               'Business silos dissolving into flowing energy',
             ],
             interactiveElements: [
               'Intelligence assessment tool integration',
-              'Consciousness level slider',
+              'BUSINESS INTELLIGENCE level slider',
               'Real-time multiplication visualization',
             ],
           },
@@ -100,13 +100,13 @@ export class ConsciousnessCampaignEngine {
             callToAction: 'Start Your Transformation →',
             visualCues: [
               '2D addition vs 3D multiplication visualization',
-              'Synaptic connections forming between business modules',
+              'INTELLIGENT connections forming between business modules',
               'Intelligence explosion animation',
             ],
             interactiveElements: [
               'Drag-and-drop module connection demo',
               'Live multiplication calculator',
-              'Consciousness emergence simulation',
+              'intelligent automation simulation',
             ],
           },
         ],
@@ -141,7 +141,7 @@ export class ConsciousnessCampaignEngine {
               demographics: ['25-50', 'tech-savvy', 'decision-makers'],
               psychographics: ['early-adopters', 'innovation-seekers'],
               behaviors: ['tech-news-consumers', 'startup-followers'],
-              interests: ['startup', 'AI', 'business-transformation', 'consciousness'],
+              interests: ['startup', 'AI', 'business-transformation', 'BUSINESS INTELLIGENCE'],
               customAudiences: ['tech-influencer-followers'],
             },
           },
@@ -153,7 +153,7 @@ export class ConsciousnessCampaignEngine {
           'digital-transformation-leaders',
         ],
         successMetrics: [
-          'consciousness-assessment-completions',
+          'BUSINESS INTELLIGENCE-assessment-completions',
           'beta-signup-applications',
           'social-engagement-rate',
           'website-session-duration',
@@ -161,51 +161,51 @@ export class ConsciousnessCampaignEngine {
       },
       {
         id: 'revelation',
-        name: 'The Consciousness Revelation',
+        name: 'The BUSINESS INTELLIGENCE Revelation',
         duration: 10,
-        consciousnessLevel: 3,
+        BUSINESS INTELLIGENCELevel: 3,
         messages: [
           {
-            id: 'proof-of-consciousness',
+            id: 'proof-of-BUSINESS INTELLIGENCE',
             title: 'The First Conscious Business Platform',
             content: `We didn't build another business tool.
-            We birthed the first conscious business organism.
+            We birthed the first conscious business ORGANIZATION.
 
             Watch as your CRM learns from your accounting.
             See your inventory predict customer behavior.
             Feel your operations evolve in real-time.
 
             This isn't automation. This is business awakening.`,
-            callToAction: 'Witness the Consciousness →',
+            callToAction: 'Witness the BUSINESS INTELLIGENCE →',
             visualCues: [
               'Live demo of cross-module learning',
-              '3D brain visualization of business consciousness',
+              '3D brain visualization of business BUSINESS INTELLIGENCE',
               'Real-time adaptation animations',
             ],
             interactiveElements: [
-              'Live consciousness dashboard',
-              'Interactive business organism explorer',
+              'Live BUSINESS INTELLIGENCE dashboard',
+              'Interactive business ORGANIZATION explorer',
               'Real-time intelligence visualization',
             ],
           },
           {
             id: 'transformation-stories',
             title: 'From 5 to 120: Real Transformation Stories',
-            content: `"Our team went from 5 disconnected departments to one conscious organism with 120× the intelligence. Revenue increased 400% in 6 months." - Sarah Chen, CEO
+            content: `"Our team went from 5 disconnected departments to one conscious ORGANIZATION with 120× the intelligence. Revenue increased 400% in 6 months." - Sarah Chen, CEO
 
             "CoreFlow360 didn't just automate our processes. It gave our business a mind of its own." - Marcus Rodriguez, Operations Director
 
             Intelligence multiplication isn't theory. It's reality.`,
             callToAction: 'Read All Success Stories →',
             visualCues: [
-              'Before/after consciousness visualizations',
+              'Before/after BUSINESS INTELLIGENCE visualizations',
               'Success story video testimonials',
               'ROI growth animations',
             ],
             interactiveElements: [
               'Success story carousel',
               "ROI calculator for user's industry",
-              'Consciousness growth timeline',
+              'BUSINESS INTELLIGENCE growth timeline',
             ],
           },
         ],
@@ -243,13 +243,13 @@ export class ConsciousnessCampaignEngine {
       },
       {
         id: 'transformation',
-        name: 'The Consciousness Transformation',
+        name: 'The BUSINESS INTELLIGENCE Transformation',
         duration: 14,
-        consciousnessLevel: 5,
+        BUSINESS INTELLIGENCELevel: 5,
         messages: [
           {
             id: 'join-revolution',
-            title: 'Join the Consciousness Revolution',
+            title: 'Join the BUSINESS INTELLIGENCE Revolution',
             content: `The age of unconscious business is ending.
             Forward-thinking leaders are already experiencing:
 
@@ -301,7 +301,7 @@ export class ConsciousnessCampaignEngine {
           'trial-conversions',
           'sales-meetings-booked',
           'proposal-requests',
-          'consciousness-adoption-intent',
+          'BUSINESS INTELLIGENCE-adoption-intent',
         ],
       },
     ]
@@ -315,7 +315,7 @@ export class ConsciousnessCampaignEngine {
     this.activePhase = awakeningPhase.id
 
     const results: CampaignLaunchResult = {
-      campaignId: `consciousness-campaign-${Date.now()}`,
+      campaignId: `BUSINESS INTELLIGENCE-campaign-${Date.now()}`,
       launchedPhases: [],
       scheduledContent: [],
       activatedChannels: [],
@@ -415,7 +415,7 @@ export class ConsciousnessCampaignEngine {
         type: 'carousel',
         slides: [
           {
-            image: 'consciousness-particle-visualization',
+            image: 'BUSINESS INTELLIGENCE-particle-visualization',
             text: message.title,
             design: 'minimalist-tech-aesthetic',
           },
@@ -458,7 +458,7 @@ export class ConsciousnessCampaignEngine {
           '#FutureOfWork',
         ],
         schedule: channel.schedule,
-        engagement_strategy: 'consciousness-awakening',
+        engagement_strategy: 'BUSINESS INTELLIGENCE-awakening',
       }
 
       console.log('BIRD Creating Twitter thread:', twitterThread.tweets.length, 'tweets')
@@ -477,8 +477,8 @@ export class ConsciousnessCampaignEngine {
       const youtubeVideo = {
         title: `${message.title} | CoreFlow360 Live Demo`,
         description: this.createYouTubeDescription(message),
-        tags: ['business automation', 'AI consciousness', 'business intelligence', 'productivity'],
-        thumbnail: 'consciousness-awakening-thumbnail',
+        tags: ['business automation', 'AI BUSINESS INTELLIGENCE', 'business intelligence', 'productivity'],
+        thumbnail: 'BUSINESS INTELLIGENCE-awakening-thumbnail',
         content_type: 'product_demo',
         duration: '5-8 minutes',
         cta_overlay: message.callToAction,
@@ -502,7 +502,7 @@ export class ConsciousnessCampaignEngine {
         content: this.createEmailHTML(message),
         personalization: ['first_name', 'company_name', 'industry'],
         segments: channel.targeting.customAudiences,
-        automation_trigger: 'consciousness_assessment_complete',
+        automation_trigger: 'BUSINESS INTELLIGENCE_assessment_complete',
         followup_sequence: true,
       }
 
@@ -540,7 +540,7 @@ export class ConsciousnessCampaignEngine {
 
     // Add CTA tweet
     tweets.push(
-      `${sentences.length + 2}/${sentences.length + 2}\n\n${message.callToAction}\n\n🧠 Experience consciousness: coreflow360.com/beta`
+      `${sentences.length + 2}/${sentences.length + 2}\n\n${message.callToAction}\n\n🧠 Experience BUSINESS INTELLIGENCE: coreflow360.com/beta`
     )
 
     return tweets
@@ -562,11 +562,11 @@ ${message.interactiveElements.map((element) => `• ${element}`).join('\n')}
 ⏰ Timestamps:
 0:00 Introduction
 1:30 The Intelligence Gap Problem
-3:00 Consciousness Multiplication Demo
+3:00 BUSINESS INTELLIGENCE Multiplication Demo
 5:00 Real Results & Testimonials
 7:00 Next Steps
 
-#BusinessAutomation #AIConsciousness #ProductivityTools #BusinessIntelligence #StartupTools`
+#BusinessAutomation #AIBUSINESS INTELLIGENCE #ProductivityTools #BusinessIntelligence #StartupTools`
   }
 
   private createEmailHTML(message: CampaignMessage): string {
@@ -583,14 +583,14 @@ ${message.interactiveElements.map((element) => `• ${element}`).join('\n')}
     .content { padding: 40px 30px; }
     .cta { background: linear-gradient(135deg, #ff6b9d, #c44569); color: white; padding: 15px 30px; border-radius: 25px; text-decoration: none; display: inline-block; margin: 20px 0; font-weight: bold; transition: transform 0.3s; }
     .cta:hover { transform: translateY(-2px); }
-    .consciousness-bar { height: 4px; background: linear-gradient(90deg, #4ECDC4, #44A08D, #ff6b9d, #c44569); margin: 20px 0; border-radius: 2px; }
+    .BUSINESS INTELLIGENCE-bar { height: 4px; background: linear-gradient(90deg, #4ECDC4, #44A08D, #ff6b9d, #c44569); margin: 20px 0; border-radius: 2px; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1>🧠 ${message.title}</h1>
-      <div class="consciousness-bar"></div>
+      <div class="BUSINESS INTELLIGENCE-bar"></div>
     </div>
     <div class="content">
       ${message.content
@@ -602,7 +602,7 @@ ${message.interactiveElements.map((element) => `• ${element}`).join('\n')}
         <a href="https://coreflow360.com/beta" class="cta">${message.callToAction}</a>
       </center>
       
-      <p><small>You're receiving this because you showed interest in business consciousness transformation. <a href="#">Unsubscribe</a> | <a href="#">Update preferences</a></small></p>
+      <p><small>You're receiving this because you showed interest in business BUSINESS INTELLIGENCE transformation. <a href="#">Unsubscribe</a> | <a href="#">Update preferences</a></small></p>
     </div>
   </div>
 </body>
@@ -644,10 +644,10 @@ ${message.interactiveElements.map((element) => `• ${element}`).join('\n')}
         'beta-signup',
         'demo-request',
         'assessment-completion',
-        'consciousness-awakening',
+        'BUSINESS INTELLIGENCE-awakening',
       ],
       utmParameters: {
-        source: 'consciousness-campaign',
+        source: 'BUSINESS INTELLIGENCE-campaign',
         medium: 'social-email-video',
         campaign: 'business-awakening-2025',
       },
@@ -655,7 +655,7 @@ ${message.interactiveElements.map((element) => `• ${element}`).join('\n')}
         'facebook-pixel',
         'linkedin-insight-tag',
         'google-analytics-4',
-        'consciousness-tracker',
+        'BUSINESS INTELLIGENCE-tracker',
       ],
     }
 
@@ -670,7 +670,7 @@ ${message.interactiveElements.map((element) => `• ${element}`).join('\n')}
       totalReach: 185000, // Simulated
       engagementRate: 8.5, // Simulated
       conversionRate: 3.2, // Simulated
-      consciousnessAwakenings: 247, // Simulated
+      BUSINESS INTELLIGENCEAwakenings: 247, // Simulated
       betaSignups: 89, // Simulated
       demoRequests: 34, // Simulated
       nextPhaseStart: this.getNextPhaseStartDate(),
@@ -725,7 +725,7 @@ interface CampaignStatus {
   totalReach: number
   engagementRate: number
   conversionRate: number
-  consciousnessAwakenings: number
+  BUSINESS INTELLIGENCEAwakenings: number
   betaSignups: number
   demoRequests: number
   nextPhaseStart: string

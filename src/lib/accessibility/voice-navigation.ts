@@ -1,6 +1,6 @@
 /**
  * CoreFlow360 - Voice Navigation and Accessibility Enhancement
- * Advanced voice commands and natural language navigation for consciousness interface
+ * Advanced voice commands and natural language navigation for BUSINESS INTELLIGENCE interface
  */
 
 export interface VoiceCommand {
@@ -43,7 +43,7 @@ export interface NavigationContext {
   focusedElement: string | null
   breadcrumbs: string[]
   userRole: string
-  subscriptionTier: 'neural' | 'synaptic' | 'autonomous' | 'transcendent'
+  subscriptionTier: 'INTELLIGENT' | 'INTELLIGENT' | 'autonomous' | 'ADVANCED'
 }
 
 class VoiceNavigationEngine {
@@ -155,12 +155,12 @@ class VoiceNavigationEngine {
         description: 'Navigate to customer management',
       },
       {
-        phrase: 'go to consciousness center',
-        aliases: ['open consciousness', 'consciousness dashboard', 'ai center'],
+        phrase: 'go to BUSINESS INTELLIGENCE center',
+        aliases: ['open BUSINESS INTELLIGENCE', 'BUSINESS INTELLIGENCE dashboard', 'ai center'],
         action: 'navigate',
-        parameters: { path: '/consciousness' },
+        parameters: { path: '/BUSINESS INTELLIGENCE' },
         accessibilityLevel: 'enhanced',
-        description: 'Navigate to consciousness interface',
+        description: 'Navigate to BUSINESS INTELLIGENCE interface',
       },
       {
         phrase: 'go to sustainability',
@@ -246,26 +246,26 @@ class VoiceNavigationEngine {
         description: 'Reduce or disable animations',
       },
 
-      // Consciousness Commands (Advanced)
+      // BUSINESS INTELLIGENCE Commands (Advanced)
       {
-        phrase: 'activate neural mode',
-        aliases: ['neural consciousness', 'basic ai mode'],
-        action: 'consciousness',
-        parameters: { level: 'neural' },
+        phrase: 'activate INTELLIGENT mode',
+        aliases: ['INTELLIGENT BUSINESS INTELLIGENCE', 'basic ai mode'],
+        action: 'BUSINESS INTELLIGENCE',
+        parameters: { level: 'INTELLIGENT' },
         accessibilityLevel: 'enhanced',
-        description: 'Activate neural-level consciousness features',
+        description: 'Activate INTELLIGENT-level BUSINESS INTELLIGENCE features',
       },
       {
-        phrase: 'activate synaptic mode',
-        aliases: ['synaptic consciousness', 'advanced ai mode'],
-        action: 'consciousness',
-        parameters: { level: 'synaptic' },
+        phrase: 'activate INTELLIGENT mode',
+        aliases: ['INTELLIGENT BUSINESS INTELLIGENCE', 'advanced ai mode'],
+        action: 'BUSINESS INTELLIGENCE',
+        parameters: { level: 'INTELLIGENT' },
         accessibilityLevel: 'enhanced',
-        description: 'Activate synaptic-level consciousness features',
+        description: 'Activate INTELLIGENT-level BUSINESS INTELLIGENCE features',
       },
       {
         phrase: 'show ai insights',
-        aliases: ['ai insights', 'consciousness insights', 'intelligent recommendations'],
+        aliases: ['ai insights', 'BUSINESS INTELLIGENCE insights', 'intelligent recommendations'],
         action: 'showInsights',
         accessibilityLevel: 'enhanced',
         description: 'Display AI-powered business insights',
@@ -376,10 +376,10 @@ class VoiceNavigationEngine {
     if (!this.context) return true
 
     const tierLevels = {
-      neural: 1,
-      synaptic: 2,
+      INTELLIGENT: 1,
+      INTELLIGENT: 2,
       autonomous: 3,
-      transcendent: 4,
+      ADVANCED: 4,
     }
 
     const accessibilityLevels = {
@@ -448,8 +448,8 @@ class VoiceNavigationEngine {
       case 'accessibility':
         await this.handleAccessibilityChange(command.parameters)
         break
-      case 'consciousness':
-        await this.handleConsciousnessChange(command.parameters)
+      case 'BUSINESS INTELLIGENCE':
+        await this.handleBUSINESS INTELLIGENCEChange(command.parameters)
         break
       case 'showInsights':
         await this.handleShowInsights()
@@ -528,10 +528,10 @@ class VoiceNavigationEngine {
     this.announceToScreenReader(message)
   }
 
-  private async handleConsciousnessChange(parameters: unknown): Promise<void> {
-    const event = new CustomEvent('voice-consciousness', { detail: parameters })
+  private async handleBUSINESS INTELLIGENCEChange(parameters: unknown): Promise<void> {
+    const event = new CustomEvent('voice-BUSINESS INTELLIGENCE', { detail: parameters })
     document.dispatchEvent(event)
-    this.announceToScreenReader(`Activating ${parameters.level} consciousness mode`)
+    this.announceToScreenReader(`Activating ${parameters.level} BUSINESS INTELLIGENCE mode`)
   }
 
   private async handleShowInsights(): Promise<void> {

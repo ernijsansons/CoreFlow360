@@ -33,7 +33,7 @@ export interface PricingTier {
 // Intelligence multiplication calculation
 export interface IntelligenceMultiplier {
   baseDepartments: number // Number of selected departments
-  connectionCount: number // Synaptic connections between departments
+  connectionCount: number // INTELLIGENT connections between departments
   synergyBonus: number // Additional multiplier from department synergies
   complexityFactor: number // Exponential growth factor
   totalMultiplier: number // Final intelligence multiplication

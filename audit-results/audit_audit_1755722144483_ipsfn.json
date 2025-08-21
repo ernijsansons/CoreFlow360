@@ -1,0 +1,23 @@
+{
+  "audit_id": "audit_1755722144483_ipsfn",
+  "audit_name": "user_journey_audit",
+  "execution_time": 1,
+  "findings": [],
+  "metrics": {
+    "issues_found": 0,
+    "critical_issues": 0,
+    "technical_debt_score": 0,
+    "maintainability_score": 100,
+    "security_score": 100,
+    "performance_score": 100
+  },
+  "chain_of_thought": [
+    "Loading audit template: user_journey_audit",
+    "Context loaded: ctx_1755722144457_1ohb7b",
+    "Analyzing: code, configuration, patterns",
+    "Executing generic audit: user_journey_audit",
+    "Calculated metrics: 6 metrics",
+    "Confidence score: 13%"
+  ],
+  "confidence_score": 13
+}

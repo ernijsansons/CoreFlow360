@@ -13,14 +13,14 @@ import { FAQSection } from '@/components/sections/FAQSection'
 import { BetaCTA } from '@/components/marketing/BetaCTA'
 import { CTASection } from '@/components/home/CTASection'
 
-// Dynamic import for consciousness awakening
-const ConsciousnessAwakening = dynamic(
+// Dynamic import for business intelligence awakening
+const BusinessIntelligenceAwakening = dynamic(
   () => import('@/components/consciousness/awakening/ConsciousnessAwakeningSimple'),
   {
     ssr: false,
     loading: () => (
       <div className="flex min-h-screen items-center justify-center bg-black">
-        <div className="text-white">Awakening consciousness...</div>
+        <div className="text-white">Awakening business intelligence...</div>
       </div>
     ),
   }
@@ -29,17 +29,17 @@ const ConsciousnessAwakening = dynamic(
 export default function ConsciousnessLandingPage() {
   const [showContent, setShowContent] = useState(false)
 
-  // Handle consciousness completion
-  const handleConsciousnessComplete = () => {
+  // Handle business intelligence completion
+  const handleBusinessIntelligenceComplete = () => {
     setShowContent(true)
   }
 
   if (!showContent) {
     return (
       <div className="relative">
-        <ConsciousnessAwakening />
+        <BusinessIntelligenceAwakening />
         <button
-          onClick={handleConsciousnessComplete}
+          onClick={handleBusinessIntelligenceComplete}
           className="absolute right-8 bottom-8 z-50 animate-pulse rounded-lg border border-white/20 bg-white/10 px-6 py-3 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
         >
           Skip Experience →
@@ -53,12 +53,12 @@ export default function ConsciousnessLandingPage() {
       {/* Navigation */}
       <Navbar />
 
-      {/* Consciousness Hero - Simplified version */}
+      {/* Business Intelligence Hero - Simplified version */}
       <section className="relative flex min-h-screen items-center justify-center">
-        <div className="via-consciousness-neural/10 absolute inset-0 bg-gradient-to-b from-black to-black" />
+        <div className="via-cyan-400/10 absolute inset-0 bg-gradient-to-b from-black to-black" />
         <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
           <h1 className="mb-6 text-5xl font-bold md:text-7xl">
-            <span className="from-consciousness-neural to-consciousness-synaptic bg-gradient-to-r bg-clip-text text-transparent">
+            <span className="from-cyan-400 to-purple-400 bg-gradient-to-r bg-clip-text text-transparent">
               Your Business
             </span>
             <br />
@@ -68,7 +68,7 @@ export default function ConsciousnessLandingPage() {
             Welcome to the first Autonomous Business Operating System
           </p>
           <div className="flex justify-center gap-4">
-            <button className="bg-consciousness-synaptic hover:bg-consciousness-synaptic/80 rounded-lg px-8 py-4 font-semibold text-white transition-colors">
+            <button className="bg-cyan-600 hover:bg-cyan-600/80 rounded-lg px-8 py-4 font-semibold text-white transition-colors">
               Start Free Trial
             </button>
             <button className="rounded-lg border border-white/20 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20">
