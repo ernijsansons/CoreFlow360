@@ -32,7 +32,7 @@ import {
   CRMEvent,
   WorkflowCondition,
   WorkflowAction,
-} from '@/lib/crm/workflow-engine'
+} from '@/lib/crm/workflow-types'
 
 interface WorkflowManagerProps {
   onWorkflowEdit?: (workflow: WorkflowTrigger) => void

@@ -8,81 +8,24 @@ import { sendEmail } from '@/lib/email'
 import { createNotification } from '@/lib/notifications'
 // import { AIOrchestrator } from '@/ai/orchestration/AIOrchestrator' // TODO: Implement AI orchestrator
 
-export interface WorkflowTrigger {
-  id: string
-  name: string
-  description: string
-  event: CRMEvent
-  conditions: WorkflowCondition[]
-  actions: WorkflowAction[]
-  enabled: boolean
-  tenantId: string
-  createdAt: Date
-  updatedAt: Date
-}
+// Re-export types from the client-safe types file
+export type {
+  WorkflowTrigger,
+  WorkflowCondition,
+  WorkflowAction,
+  CRMEvent,
+  WorkflowExecution,
+  WorkflowMetrics,
+} from './workflow-types'
 
-export interface WorkflowCondition {
-  field: string
-  operator:
-    | 'equals'
-    | 'not_equals'
-    | 'greater_than'
-    | 'less_than'
-    | 'contains'
-    | 'not_contains'
-    | 'is_empty'
-    | 'is_not_empty'
-  value?: unknown
-  logic?: 'AND' | 'OR'
-}
+import type { CRMEvent, WorkflowTrigger, WorkflowCondition, WorkflowAction } from './workflow-types'
 
-export interface WorkflowAction {
-  type:
-    | 'send_email'
-    | 'create_task'
-    | 'update_field'
-    | 'create_notification'
-    | 'ai_analysis'
-    | 'webhook'
-    | 'assign_to_user'
-  config: Record<string, unknown>
-  delay?: number // Delay in minutes
-}
-
-export enum CRMEvent {
-  // Lead Events
-  LEAD_CREATED = 'lead_created',
-  LEAD_UPDATED = 'lead_updated',
-  LEAD_SCORE_CHANGED = 'lead_score_changed',
-  LEAD_CONVERTED = 'lead_converted',
-  LEAD_INACTIVE = 'lead_inactive',
-
-  // Customer Events
-  CUSTOMER_CREATED = 'customer_created',
-  CUSTOMER_UPDATED = 'customer_updated',
-  CUSTOMER_LIFECYCLE_CHANGED = 'customer_lifecycle_changed',
-  CUSTOMER_CHURNED = 'customer_churned',
-
-  // Deal Events
-  DEAL_CREATED = 'deal_created',
-  DEAL_UPDATED = 'deal_updated',
-  DEAL_STAGE_CHANGED = 'deal_stage_changed',
-  DEAL_WON = 'deal_won',
-  DEAL_LOST = 'deal_lost',
-  DEAL_STALLED = 'deal_stalled',
-
-  // Activity Events
-  ACTIVITY_CREATED = 'activity_created',
-  ACTIVITY_COMPLETED = 'activity_completed',
-  ACTIVITY_OVERDUE = 'activity_overdue',
-
-  // Communication Events
-  EMAIL_RECEIVED = 'email_received',
-  EMAIL_OPENED = 'email_opened',
-  EMAIL_CLICKED = 'email_clicked',
-  CALL_COMPLETED = 'call_completed',
-  MEETING_SCHEDULED = 'meeting_scheduled',
-  MEETING_COMPLETED = 'meeting_completed',
+// Placeholder for AI Orchestrator
+class AIOrchestrator {
+  async analyzeData(data: any) {
+    // TODO: Implement AI analysis
+    return { insights: [], recommendations: [] }
+  }
 }
 
 export class CRMWorkflowEngine {
@@ -534,7 +477,7 @@ export class CRMWorkflowEngine {
         id: 'wf-001',
         name: 'High-Value Lead Alert',
         description: 'Notify sales manager when high-value lead is created',
-        event: CRMEvent.LEAD_CREATED,
+        event: 'lead_created' as CRMEvent,
         conditions: [{ field: 'aiScore', operator: 'greater_than', value: 80 }],
         actions: [
           {
@@ -569,7 +512,7 @@ export class CRMWorkflowEngine {
         id: 'wf-002',
         name: 'Deal Stage Progression',
         description: 'Update deal probability and notify team on stage change',
-        event: CRMEvent.DEAL_STAGE_CHANGED,
+        event: 'deal_stage_changed' as CRMEvent,
         conditions: [],
         actions: [
           {
@@ -599,7 +542,7 @@ export class CRMWorkflowEngine {
         id: 'wf-003',
         name: 'Churn Prevention',
         description: 'Trigger retention workflow when customer shows churn signals',
-        event: CRMEvent.CUSTOMER_LIFECYCLE_CHANGED,
+        event: 'customer_lifecycle_changed' as CRMEvent,
         conditions: [{ field: 'lifecycle', operator: 'equals', value: 'at_risk' }],
         actions: [
           {
@@ -633,7 +576,7 @@ export class CRMWorkflowEngine {
         id: 'wf-004',
         name: 'Deal Won Celebration',
         description: 'Celebrate and follow up on won deals',
-        event: CRMEvent.DEAL_WON,
+        event: 'deal_won' as CRMEvent,
         conditions: [],
         actions: [
           {
@@ -667,7 +610,7 @@ export class CRMWorkflowEngine {
         id: 'wf-005',
         name: 'Lead Nurturing',
         description: 'Automated follow-up for inactive leads',
-        event: CRMEvent.LEAD_INACTIVE,
+        event: 'lead_inactive' as CRMEvent,
         conditions: [{ field: 'daysSinceLastContact', operator: 'greater_than', value: 7 }],
         actions: [
           {
