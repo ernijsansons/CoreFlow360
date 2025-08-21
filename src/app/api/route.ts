@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { withShutdownHandling } from '@/lib/server-config'
+// import { withShutdownHandling } from '@/lib/server-config'
 
 const getAPILandingHTML = () => `
 <!DOCTYPE html>
@@ -255,11 +255,11 @@ const getAPILandingHTML = () => `
  * GET /api
  * API landing page with links to documentation
  */
-export const GET = withShutdownHandling(async (_request: NextRequest) => {
+export const GET = async (_request: NextRequest) => {
   return new NextResponse(getAPILandingHTML(), {
     headers: {
       'Content-Type': 'text/html',
       'Cache-Control': 'public, max-age=3600',
     },
   })
-})
+}

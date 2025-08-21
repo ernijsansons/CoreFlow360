@@ -135,48 +135,49 @@ export function withShutdownHandling<T>(handler: (req: unknown, res: unknown) =>
 
 /**
  * Custom server setup for production deployments
+ * NOTE: This is not used in Vercel deployments
  */
-export async function createCustomServer() {
-  const express = (await import('express')).default
-  const next = (await import('next')).default
+// export async function createCustomServer() {
+//   const express = (await import('express')).default
+//   const next = (await import('next')).default
 
-  const dev = process.env.NODE_ENV !== 'production'
-  const app = next({ dev })
-  const handle = app.getRequestHandler()
+//   const dev = process.env.NODE_ENV !== 'production'
+//   const app = next({ dev })
+//   const handle = app.getRequestHandler()
 
-  return app.prepare().then(() => {
-    const server = express()
+//   return app.prepare().then(() => {
+//     const server = express()
 
-    // Health check endpoint that considers shutdown state
-    server.get('/health', (req: unknown, res: unknown) => {
-      const health = getServerHealth()
-      const statusCode = health.status === 'shutting_down' ? 503 : 200
-      res.status(statusCode).json(health)
-    })
+//     // Health check endpoint that considers shutdown state
+//     server.get('/health', (req: unknown, res: unknown) => {
+//       const health = getServerHealth()
+//       const statusCode = health.status === 'shutting_down' ? 503 : 200
+//       res.status(statusCode).json(health)
+//     })
 
-    // Add shutdown middleware to all routes
-    server.use((req: unknown, res: unknown, next: unknown) => {
-      if (gracefulShutdown.isShutdownInProgress()) {
-        return res.status(503).json({
-          error: 'Service unavailable',
-          message: 'Server is shutting down',
-          timestamp: new Date().toISOString(),
-        })
-      }
-      next()
-    })
+//     // Add shutdown middleware to all routes
+//     server.use((req: unknown, res: unknown, next: unknown) => {
+//       if (gracefulShutdown.isShutdownInProgress()) {
+//         return res.status(503).json({
+//           error: 'Service unavailable',
+//           message: 'Server is shutting down',
+//           timestamp: new Date().toISOString(),
+//         })
+//       }
+//       next()
+//     })
 
-    // Handle all other routes with Next.js
-    server.all('*', (req: unknown, res: unknown) => {
-      return handle(req, res)
-    })
+//     // Handle all other routes with Next.js
+//     server.all('*', (req: unknown, res: unknown) => {
+//       return handle(req, res)
+//     })
 
-    // Register HTTP server shutdown task
-    gracefulShutdown.registerTask(shutdownTasks.httpServer(server))
+//     // Register HTTP server shutdown task
+//     gracefulShutdown.registerTask(shutdownTasks.httpServer(server))
 
-    return server
-  })
-}
+//     return server
+//   })
+// }
 
 // Initialize server on module load in production
 if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
