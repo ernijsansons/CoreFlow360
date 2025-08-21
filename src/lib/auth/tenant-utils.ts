@@ -16,6 +16,11 @@ import { headers } from 'next/headers'
  * @throws Error if no valid session or tenant ID found
  */
 export async function getTenantFromSession(request?: NextRequest): Promise<string> {
+  // Build-time check to prevent authentication during static generation
+  if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV) {
+    throw new Error('Build-time: Authentication not available during static generation')
+  }
+
   try {
     // Get session from server
     const session = await auth()
@@ -59,6 +64,11 @@ export function validateTenantAccess(resourceTenantId: string, sessionTenantId: 
  * @throws Error if no valid session found
  */
 export async function getUserFromSession(): Promise<{ id: string; email?: string }> {
+  // Build-time check to prevent authentication during static generation
+  if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV) {
+    throw new Error('Build-time: Authentication not available during static generation')
+  }
+
   const session = await auth()
   
   if (!session?.user?.id) {

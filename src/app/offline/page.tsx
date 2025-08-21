@@ -477,7 +477,7 @@ function OfflinePageContent() {
           className="text-muted-foreground text-center text-sm"
         >
           {isOnline ? (
-            <p>All systems operational. Business intelligence level at {intelligenceLevel}%</p>
+            <p>All systems operational. Business intelligence level at {businessIntelligenceLevel}%</p>
           ) : (
             <p>Operating in offline mode. Data will sync when connection is restored.</p>
           )}

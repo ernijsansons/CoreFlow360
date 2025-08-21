@@ -26,8 +26,16 @@ export async function GET(request: NextRequest) {
     // Check database connection
     let dbStatus = 'unknown'
     try {
-      await prisma.$queryRaw`SELECT 1`
-      dbStatus = 'connected'
+      // Build-time check to prevent database access during static generation
+      if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV) {
+        dbStatus = 'build-time'
+      } else if (prisma) {
+        await prisma.$queryRaw`SELECT 1`
+        dbStatus = 'connected'
+      } else {
+        dbStatus = 'error'
+        console.error('Database health check failed: Prisma client is null')
+      }
     } catch (dbError) {
       dbStatus = 'error'
       console.error('Database health check failed:', dbError)
