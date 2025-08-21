@@ -23,7 +23,7 @@ k6-tests/
 .env.local
 .env.development
 .env.test
-.env.production
+# Keep .env.production for Vercel
 *.log
 .DS_Store
 
@@ -78,7 +78,7 @@ prisma/seed.ts
 
 # Local configuration
 .claude/
-CLAUDE.md
+# Keep CLAUDE.md as it's imported in the build
 
 # V0 development files
 v0-prompts/
@@ -91,8 +91,8 @@ monitoring/
 campaigns/
 reports/
 
-# Modules not needed for build
-src/modules/
+# Keep modules - they might be imported
+# src/modules/
 
 # Programs
 programs/

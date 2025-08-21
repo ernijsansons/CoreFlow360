@@ -76,8 +76,8 @@ const nextConfig = {
     appDir: true,
   },
 
-  // Standard output mode
-  output: 'standalone',
+  // Remove output mode for Vercel (handles this automatically)
+  // output: 'standalone',
 }
 
 // Temporarily disabled Sentry configuration
