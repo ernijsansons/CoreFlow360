@@ -19,18 +19,6 @@ const nextConfig: NextConfig = {
       'recharts'
     ],
   },
-    serverActions: {
-      allowedOrigins: ['localhost:3000'],
-      bodySizeLimit: '2mb',
-    },
-    optimizeCss: true,
-    optimizePackageImports: [
-      'lucide-react',
-      'framer-motion',
-      '@radix-ui/react-slider',
-      'recharts'
-    ],
-  },
   
   serverExternalPackages: ['prisma'],
   
