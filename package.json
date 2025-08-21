@@ -17,7 +17,7 @@
     "dev": "next dev",
     "build": "next build",
     "build:ci": "next build",
-    "vercel-build": "next build",
+    "vercel-build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 NEXT_TELEMETRY_DISABLED=1 CI=true next build",
     "build:with-prisma": "npx prisma generate && cross-env NODE_OPTIONS=--max-old-space-size=8192 NEXT_TELEMETRY_DISABLED=1 next build",
     "build:production": "cross-env NODE_OPTIONS=--max-old-space-size=8192 NEXT_TELEMETRY_DISABLED=1 next build",
     "build:production:with-prisma": "npx prisma generate && cross-env NODE_OPTIONS=--max-old-space-size=8192 NEXT_TELEMETRY_DISABLED=1 next build",
