@@ -10,7 +10,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 // import TeaserCampaignAssets from './TeaserCampaignAssets' // Disabled - missing dependency
-import { useBusinessIntelligenceAudio } from '../../hooks/useConsciousnessAudio'
+import { useBusinessIntelligenceAudio } from '../../hooks/useBusinessIntelligenceAudio'
 
 interface LaunchPhase {
   id: string

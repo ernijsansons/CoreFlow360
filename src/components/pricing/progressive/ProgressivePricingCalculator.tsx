@@ -1,16 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Slider } from '@/components/ui/slider'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { DollarSign, TrendingDown, Building, Users, Calculator } from 'lucide-react'
+import { DollarSign, TrendingDown, Building, Users, Calculator, Loader2 } from 'lucide-react'
+import { useToast } from '@/components/ui/use-toast'
 
 export function ProgressivePricingCalculator() {
   const [businessCount, setBusinessCount] = useState([2])
   const [usersPerBusiness, setUsersPerBusiness] = useState([15])
   const [selectedTier, setSelectedTier] = useState('professional')
+  const [isCalculating, setIsCalculating] = useState(false)
+  const [showLeadCapture, setShowLeadCapture] = useState(false)
+  const { toast } = useToast()
   
   const tiers = {
     starter: { name: 'Smart Start', basePrice: 29, perUserPrice: 7 },
@@ -34,7 +38,8 @@ export function ProgressivePricingCalculator() {
       // Apply progressive discounts
       if (i === 2) businessCost *= 0.8  // 20% discount
       if (i === 3) businessCost *= 0.65 // 35% discount  
-      if (i >= 4) businessCost *= 0.5   // 50% discount
+      if (i === 4) businessCost *= 0.55 // 45% discount
+      if (i >= 5) businessCost *= 0.5  // 50% discount
       
       totalCost += businessCost
       
@@ -55,6 +60,46 @@ export function ProgressivePricingCalculator() {
   
   const results = calculateSavings()
   const savingsPercentage = Math.round((results.monthlySavings / results.traditionalCost) * 100)
+  
+  // Fetch pricing from API (optional enhancement)
+  const fetchPricingFromAPI = useCallback(async () => {
+    setIsCalculating(true)
+    try {
+      const response = await fetch('/api/pricing/progressive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessCount: businessCount[0],
+          usersPerBusiness: usersPerBusiness[0],
+          tier: selectedTier
+        })
+      })
+      
+      if (!response.ok) throw new Error('Failed to calculate pricing')
+      
+      const data = await response.json()
+      
+      toast({
+        title: 'Pricing Calculated',
+        description: `Your custom quote has been prepared. Total savings: $${data.pricing.annualSavings.toLocaleString()}/year`,
+      })
+      
+      return data.pricing
+    } catch (error) {
+      toast({
+        title: 'Calculation Error',
+        description: 'Unable to calculate pricing. Please try again.',
+        variant: 'destructive'
+      })
+    } finally {
+      setIsCalculating(false)
+    }
+  }, [businessCount, usersPerBusiness, selectedTier, toast])
+  
+  const handleGetQuote = async () => {
+    await fetchPricingFromAPI()
+    setShowLeadCapture(true)
+  }
   
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -172,9 +217,15 @@ export function ProgressivePricingCalculator() {
                         <span className="font-medium">35% off</span>
                       </div>
                     )}
-                    {businessCount[0] >= 4 && (
+                    {businessCount[0] === 4 && (
                       <div className="flex justify-between text-green-600">
-                        <span>Business #4+:</span>
+                        <span>Business #4:</span>
+                        <span className="font-medium">45% off</span>
+                      </div>
+                    )}
+                    {businessCount[0] >= 5 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Business #5+:</span>
                         <span className="font-medium">50% off each</span>
                       </div>
                     )}
@@ -268,11 +319,26 @@ export function ProgressivePricingCalculator() {
 
                 {/* CTA Buttons */}
                 <div className="flex gap-3 pt-4">
-                  <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
-                    Start Free Trial
+                  <Button 
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    onClick={handleGetQuote}
+                    disabled={isCalculating}
+                  >
+                    {isCalculating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Calculating...
+                      </>
+                    ) : (
+                      'Get Custom Quote'
+                    )}
                   </Button>
-                  <Button variant="outline" className="flex-1">
-                    Book Demo
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => window.location.href = '/demo'}
+                  >
+                    See Demo
                   </Button>
                 </div>
               </div>

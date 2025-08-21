@@ -16,8 +16,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react'
 // import { Float, Text3D, OrbitControls } from '@react-three/drei'
 // import * as THREE from 'three'
 import { motion, AnimatePresence } from 'framer-motion'
-// import { useConsciousnessAudio } from '../../hooks/useConsciousnessAudio'
-// import ConsciousnessSoundEngine from '../consciousness/ConsciousnessSoundEngine'
+import { useBusinessIntelligenceAudio as useConsciousnessAudio } from '../../hooks/useBusinessIntelligenceAudio'
+// import ConsciousnessSoundEngine from '../business-intelligence/BusinessIntelligenceSoundEngine'
 
 // Department definitions with intelligence multipliers
 const DEPARTMENTS = {
@@ -114,7 +114,7 @@ const PRICING_TIERS: PricingTier[] = [
   {
     id: 'starter',
     name: 'Intelligence Starter',
-    description: 'Perfect for small businesses ready to begin their consciousness journey',
+    description: 'Perfect for small businesses ready to begin their intelligence journey',
     priceMultiplier: 0.7,
     features: ['Basic AI automation', 'Standard reporting', 'Email support', 'Single user'],
   },
@@ -133,10 +133,10 @@ const PRICING_TIERS: PricingTier[] = [
   {
     id: 'enterprise',
     name: 'Intelligence Enterprise',
-    description: 'For organizations ready to achieve business consciousness',
+    description: 'For organizations ready to achieve business intelligence',
     priceMultiplier: 1.5,
     features: [
-      'Full AI consciousness',
+      'Full AI intelligence',
       'Custom integrations',
       'Dedicated support',
       'Unlimited users',
@@ -181,7 +181,7 @@ const IntelligenceMultiplicationCalculator: React.FC<IntelligenceMultiplicationC
     'selecting' | 'calculating' | 'multiplying' | 'complete'
   >('selecting')
 
-  // Initialize consciousness audio system
+  // Initialize business intelligence audio system
   const consciousnessAudio = useConsciousnessAudio({
     isEnabled: true,
     masterVolume: 0.4, // Subtle background audio
@@ -259,9 +259,9 @@ const IntelligenceMultiplicationCalculator: React.FC<IntelligenceMultiplicationC
         consciousnessAudio.triggerIntelligenceMultiply(pricingCalculation.intelligenceMultiplier)
       }
 
-      // Trigger consciousness emergence for full suite
+      // Trigger intelligence emergence for full suite
       if (selectedDepartments.size >= 5) {
-        consciousnessAudio.triggerConsciousnessEmerge()
+        consciousnessAudio.triggerIntelligenceEmerge?.()
       }
 
       setTimeout(() => setAnimationPhase('complete'), 1000)
@@ -302,14 +302,14 @@ const IntelligenceMultiplicationCalculator: React.FC<IntelligenceMultiplicationC
     <div
       className={`rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-900 to-black p-8 ${className}`}
     >
-      {/* Consciousness Sound Engine */}
-      <ConsciousnessSoundEngine
+      {/* Business Intelligence Sound Engine - Temporarily disabled */}
+      {/* <BusinessIntelligenceSoundEngine
         isEnabled={consciousnessAudio.isAudioEnabled}
         masterVolume={consciousnessAudio.masterVolume}
-        consciousnessLevel={consciousnessAudio.currentConsciousnessLevel}
+        intelligenceLevel={consciousnessAudio.currentIntelligenceLevel || 0}
         selectedDepartments={Array.from(selectedDepartments)}
         cursorPosition={consciousnessAudio.cursorPosition}
-      />
+      /> */}
       {/* Header */}
       <div className="mb-8 text-center">
         <h2 className="mb-4 text-4xl font-thin text-white">

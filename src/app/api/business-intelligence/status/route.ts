@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withAuth, AuthenticatedSession } from '@/lib/auth/withAuth'
 import { createErrorContextWithUser } from '@/lib/error-handler/createErrorContext'
 import { handleError } from '@/lib/error-handler'
-import { businessConsciousness } from '@/consciousness'
+import { businessIntelligence } from '@/business-intelligence'
 import { prisma } from '@/lib/prisma'
 
 interface BusinessIntelligenceStatusResponse {
@@ -310,7 +310,7 @@ async function updateBusinessIntelligenceSettings(
 
     // Set BUSINESS INTELLIGENCE goals
     if (goals && Array.isArray(goals)) {
-      businessConsciousness.setConsciousnessGoals(goals)
+      businessIntelligence.setIntelligenceGoals(goals)
     }
 
     return NextResponse.json({

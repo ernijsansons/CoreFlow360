@@ -11,7 +11,7 @@ import {
   BusinessIntelligenceAudioEvent,
   AudioSystemConfig,
   DEFAULT_AUDIO_CONFIG,
-} from '../lib/consciousness/soundDesign'
+} from '../lib/business-intelligence/soundDesign'
 
 interface BusinessIntelligenceAudioState {
   isEnabled: boolean

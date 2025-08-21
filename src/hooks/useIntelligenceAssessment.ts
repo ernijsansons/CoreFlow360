@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react'
-import { useIntelligenceAudio } from './useConsciousnessAudio'
+import { useIntelligenceAudio } from './useBusinessIntelligenceAudio'
 import type {
   AssessmentResult,
   IntelligenceProfile,

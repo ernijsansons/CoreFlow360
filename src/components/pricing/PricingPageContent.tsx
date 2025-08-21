@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import ModuleSelectionDashboard from '@/components/subscription/ModuleSelectionDashboard'
 import CheckoutFlow from '@/components/subscription/CheckoutFlow'
+import { ProgressivePricingCalculator } from '@/components/pricing/progressive/ProgressivePricingCalculator'
 
 export default function PricingPageContent() {
   const router = useRouter()
@@ -145,6 +146,28 @@ export default function PricingPageContent() {
           </div>
         </div>
       </motion.div>
+
+      {/* Progressive Pricing Calculator - Above the fold */}
+      {!showCheckout && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="py-12 bg-gradient-to-br from-purple-50 to-blue-50"
+        >
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-3">
+                Multi-Business Progressive Pricing
+              </h2>
+              <p className="text-xl text-gray-600">
+                Save 20-50% when you manage multiple businesses with CoreFlow360
+              </p>
+            </div>
+            <ProgressivePricingCalculator />
+          </div>
+        </motion.div>
+      )}
 
       {/* Main Content */}
       <div className="py-8" data-section="pricing">

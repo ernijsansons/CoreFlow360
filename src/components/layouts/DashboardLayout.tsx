@@ -21,6 +21,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { IndustryToggle } from '@/components/IndustryToggle'
 import PerformanceTicker from '@/components/ui/PerformanceTicker'
+import { BusinessSwitcher } from '@/components/business/BusinessSwitcher'
 
 interface NavItem {
   name: string
@@ -79,6 +80,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="flex flex-shrink-0 items-center px-4">
                 <h1 className="text-xl font-bold text-blue-600">CoreFlow360</h1>
               </div>
+              
+              {/* Business Switcher - Mobile */}
+              <div className="px-4 py-3">
+                <div className="rounded-lg border-2 border-purple-500 p-2">
+                  <BusinessSwitcher showPortfolioOption={true} />
+                </div>
+              </div>
+              
               <div className="mt-5 h-0 flex-1 overflow-y-auto">
                 <nav className="space-y-1 px-2">
                   {navigation.map((item) => {
@@ -125,6 +134,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="flex h-16 flex-shrink-0 items-center border-r border-gray-200 bg-white px-4">
                 <h1 className="text-xl font-bold text-blue-600">CoreFlow360</h1>
               </div>
+              
+              {/* Business Switcher - Prominent Position */}
+              <div className="border-r border-gray-200 bg-white px-4 py-3">
+                <div className="rounded-lg border-2 border-purple-500 p-2">
+                  <BusinessSwitcher showPortfolioOption={true} />
+                </div>
+              </div>
+              
               <div className="flex flex-1 flex-col overflow-y-auto border-r border-gray-200 bg-white">
                 <nav className="flex-1 space-y-1 px-2 py-4">
                   {navigation.map((item) => {

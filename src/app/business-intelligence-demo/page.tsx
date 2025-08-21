@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 
 // Dynamic imports for performance
 const BusinessIntelligenceAwakening = dynamic(
-  () => import('@/components/consciousness/awakening/ConsciousnessAwakeningSimple'),
+  () => import('@/components/business-intelligence/awakening/BusinessIntelligenceAwakening'),
   {
     ssr: false,
     loading: () => (
@@ -16,8 +16,8 @@ const BusinessIntelligenceAwakening = dynamic(
   }
 )
 
-const QuantumEvolutionDashboard = dynamic(
-  () => import('@/components/consciousness/dashboard/QuantumEvolutionDashboard'),
+const BusinessEvolutionDashboard = dynamic(
+  () => import('@/components/business-intelligence/dashboard/BusinessEvolutionDashboard'),
   {
     ssr: false,
     loading: () => (
@@ -28,7 +28,7 @@ const QuantumEvolutionDashboard = dynamic(
   }
 )
 
-export default function ConsciousnessDemoPage() {
+export default function BusinessIntelligenceDemoPage() {
   const [activeDemo, setActiveDemo] = useState<'menu' | 'awakening' | 'dashboard'>('menu')
 
   if (activeDemo === 'awakening') {
@@ -48,7 +48,7 @@ export default function ConsciousnessDemoPage() {
   if (activeDemo === 'dashboard') {
     return (
       <div className="relative">
-        <QuantumEvolutionDashboard />
+        <BusinessEvolutionDashboard />
         <button
           onClick={() => setActiveDemo('menu')}
           className="absolute top-4 left-4 z-50 rounded-lg bg-white/10 px-4 py-2 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
@@ -91,7 +91,7 @@ export default function ConsciousnessDemoPage() {
               onClick={() => setActiveDemo('dashboard')}
               className="bg-purple-400/10 border-purple-400/30 animate-bounce hover:bg-purple-400/20 cursor-pointer rounded-lg border p-6 text-left transition-all"
             >
-              <h3 className="mb-2 text-lg font-medium">Quantum Dashboard</h3>
+              <h3 className="mb-2 text-lg font-medium">Business Evolution Dashboard</h3>
               <p className="text-sm text-gray-400">
                 Real-time business intelligence with AI evolution visualization
               </p>

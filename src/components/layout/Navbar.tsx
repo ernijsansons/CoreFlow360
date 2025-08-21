@@ -14,45 +14,124 @@ import { useTrackEvent } from '@/components/analytics/AnalyticsProvider'
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isProductOpen, setIsProductOpen] = useState(false)
+  const [showPersonaNav, setShowPersonaNav] = useState(false)
   const { trackEvent } = useTrackEvent()
+
+  const personaNavItems = [
+    { label: "I'm Building My First Empire", href: '/get-started/first-empire', icon: '🚀' },
+    { label: 'I Have 2-3 Businesses', href: '/get-started/growing-portfolio', icon: '📈' },
+    { label: 'I Have 4+ Businesses', href: '/get-started/established-empire', icon: '👑' },
+    { label: "I'm Acquiring Businesses", href: '/get-started/acquisition', icon: '🎯' },
+  ]
 
   const navItems = [
     {
-      label: 'Solutions',
+      label: 'Portfolio Management',
+      href: '/portfolio',
+      highlight: true,
+    },
+    {
+      label: 'Progressive Pricing',
+      href: '/pricing',
+      badge: 'Save 20-50%',
+    },
+    {
+      label: 'Multi-Business Tools',
       hasDropdown: true,
       items: [
         {
-          label: 'Smart Automation',
-          href: '/features/automation',
-          description: 'Automate repetitive tasks and workflows',
+          label: 'Cross-Business Employees',
+          href: '/features/employee-management',
+          description: 'Manage staff across multiple businesses',
         },
         {
-          label: 'Business Modules',
-          href: '/modules',
-          description: 'Complete ERP suite for every department',
+          label: 'Unified Customer Database',
+          href: '/features/customer-database',
+          description: 'One view for all customer relationships',
         },
         {
-          label: 'Industry Solutions',
-          href: '/industries',
-          description: 'HVAC, Professional Services, Manufacturing & more',
+          label: 'Consolidated Reporting',
+          href: '/features/reporting',
+          description: 'Portfolio-wide analytics and insights',
         },
         {
-          label: 'Integrations',
-          href: '/integrations',
-          description: 'Connect with 500+ business tools',
+          label: 'Business Acquisition Tools',
+          href: '/features/acquisition',
+          description: 'Streamline M&A and integration',
+        },
+        {
+          label: 'Resource Optimization',
+          href: '/features/optimization',
+          description: 'Share resources across your empire',
         },
       ],
     },
-    { label: 'Pricing', href: '/pricing' },
-    { label: 'Demo', href: '/demo' },
     { label: 'Success Stories', href: '/customers' },
-    { label: 'Contact', href: '/contact' },
+    {
+      label: 'Resources',
+      hasDropdown: true,
+      items: [
+        {
+          label: 'Multi-Business Guide',
+          href: '/resources/multi-business-guide',
+          description: 'Complete guide to building your empire',
+        },
+        {
+          label: 'ROI Calculator',
+          href: '/calculator',
+          description: 'Calculate your progressive savings',
+        },
+        {
+          label: 'Industry Templates',
+          href: '/templates',
+          description: 'Pre-built setups for your industry',
+        },
+        {
+          label: 'Partner Program',
+          href: '/partners',
+          description: 'Join our ecosystem',
+        },
+      ],
+    },
   ]
 
   return (
-    <nav className="fixed top-0 right-0 left-0 z-50 border-b border-gray-800/50 bg-black/80 backdrop-blur-md">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+    <>
+      {/* Persona Navigation Bar */}
+      {showPersonaNav && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-purple-600/95 backdrop-blur-sm">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex h-10 items-center justify-between">
+              <div className="flex items-center space-x-6">
+                <span className="text-xs font-medium text-purple-100">Choose your path:</span>
+                {personaNavItems.map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className="flex items-center space-x-1 text-xs text-white transition-colors hover:text-purple-200"
+                    onClick={() => trackEvent('persona_nav_clicked', { persona: item.label })}
+                  >
+                    <span>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </a>
+                ))}
+              </div>
+              <button
+                onClick={() => setShowPersonaNav(false)}
+                className="text-xs text-purple-200 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <nav className={`fixed right-0 left-0 z-50 border-b border-gray-800/50 bg-black/80 backdrop-blur-md ${
+        showPersonaNav ? 'top-10' : 'top-0'
+      }`}>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <motion.div
             className="flex items-center space-x-3"
@@ -119,10 +198,19 @@ export function Navbar() {
                 ) : (
                   <a
                     href={item.href}
-                    className="text-gray-300 transition-colors duration-200 hover:text-white"
+                    className={`flex items-center space-x-2 transition-colors duration-200 ${
+                      item.highlight 
+                        ? 'font-semibold text-violet-400 hover:text-violet-300' 
+                        : 'text-gray-300 hover:text-white'
+                    }`}
                     onClick={() => trackEvent('nav_clicked', { section: item.label })}
                   >
-                    {item.label}
+                    <span>{item.label}</span>
+                    {item.badge && (
+                      <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-400">
+                        {item.badge}
+                      </span>
+                    )}
                   </a>
                 )}
               </div>
@@ -131,6 +219,12 @@ export function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden items-center space-x-4 md:flex">
+            <button
+              onClick={() => setShowPersonaNav(!showPersonaNav)}
+              className="text-xs text-gray-400 transition-colors hover:text-white"
+            >
+              {showPersonaNav ? 'Hide' : 'Show'} Persona Guide
+            </button>
             <div onClick={() => trackEvent('nav_login_clicked', { location: 'navbar' })}>
               <a
                 href="/auth/signin"
@@ -195,17 +289,43 @@ export function Navbar() {
                     ) : (
                       <a
                         href={item.href}
-                        className="block text-gray-300 transition-colors duration-200 hover:text-white"
+                        className={`flex items-center justify-between text-gray-300 transition-colors duration-200 hover:text-white ${
+                          item.highlight ? 'font-semibold text-violet-400' : ''
+                        }`}
                         onClick={() => {
                           setIsOpen(false)
                           trackEvent('mobile_nav_clicked', { section: item.label })
                         }}
                       >
-                        {item.label}
+                        <span>{item.label}</span>
+                        {item.badge && (
+                          <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-400">
+                            {item.badge}
+                          </span>
+                        )}
                       </a>
                     )}
                   </div>
                 ))}
+
+                {/* Persona Navigation for Mobile */}
+                <div className="border-t border-gray-800/50 pt-4">
+                  <div className="mb-2 text-xs font-medium text-gray-400">Choose Your Path</div>
+                  {personaNavItems.map((item) => (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      className="flex items-center space-x-2 py-2 text-sm text-gray-300 transition-colors hover:text-white"
+                      onClick={() => {
+                        setIsOpen(false)
+                        trackEvent('mobile_persona_nav_clicked', { persona: item.label })
+                      }}
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.label}</span>
+                    </a>
+                  ))}
+                </div>
 
                 <div className="space-y-4 border-t border-gray-800/50 pt-4">
                   <div onClick={() => trackEvent('mobile_nav_login_clicked')}>
@@ -228,5 +348,6 @@ export function Navbar() {
         </AnimatePresence>
       </div>
     </nav>
+    </>
   )
 }

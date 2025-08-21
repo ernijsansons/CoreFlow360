@@ -6,8 +6,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/auth'
 import { handleError, ErrorContext } from '@/lib/error-handler'
-import { businessConsciousness } from '@/consciousness'
-import ConsciousnessTierManager from '@/consciousness/subscription/consciousness-tier-manager'
+import { businessIntelligence } from '@/business-intelligence'
+import IntelligenceTierManager from '@/business-intelligence/subscription/intelligence-tier-manager'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 

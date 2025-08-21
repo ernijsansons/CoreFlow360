@@ -84,14 +84,14 @@ export function HeroSection() {
                 <>
                   <DollarSign className="h-5 w-5 text-violet-400" />
                   <span className="font-semibold text-violet-300">
-                    $2.3M+ Saved Through Progressive Pricing
+                    {socialProofTest.config.display}
                   </span>
                 </>
               ) : (
                 <>
                   <Users className="h-5 w-5 text-violet-400" />
                   <span className="font-semibold text-violet-300">
-                    500+ Multi-Business Entrepreneurs
+                    {liveUsers.toLocaleString()}+ businesses transformed
                   </span>
                 </>
               )}
@@ -111,15 +111,15 @@ export function HeroSection() {
             transition={{ duration: 1, delay: 0.2 }}
           >
             <span className="text-white">
-              Build Your Business Empire
+              {headlineTest.config.headline || 'The Business Platform That'}
             </span>
             <br />
             <span className="bg-gradient-to-r from-violet-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-              {headlineTest.variant?.id === 'variant-a' ? 'With Intelligence That Grows With You' : 'With Intelligence That Grows With You'}
+              {headlineTest.variant?.id === 'variant-a' ? 'Scales Your Empire' : 'Grows With Your Empire'}
             </span>
             <br />
             <span className="text-4xl text-white md:text-5xl lg:text-6xl">
-              Save 20-50% with Progressive Pricing
+              {headlineTest.config.subheadline || 'From 1 to 100+ Locations'}
             </span>
           </motion.h1>
 
@@ -130,13 +130,13 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.3 }}
           >
-            The only platform designed for entrepreneurs managing multiple businesses.
+            Built for ambitious HVAC contractors ready to dominate their market.
             <span className="font-semibold text-emerald-400">
               {' '}
-              Progressive pricing that rewards portfolio growth
+              Manage multiple businesses, territories, and teams
             </span>{' '}
-            - the more businesses you add,
-            <span className="font-semibold text-violet-400"> the more you save per location.</span>
+            from one intelligent platform that
+            <span className="font-semibold text-violet-400"> grows with your empire.</span>
           </motion.p>
 
           {/* Explosive Results Grid */}
@@ -147,19 +147,19 @@ export function HeroSection() {
             transition={{ duration: 1, delay: 0.4 }}
           >
             <div className="rounded-2xl border border-emerald-500/50 bg-emerald-900/30 p-6">
-              <Users className="mx-auto mb-3 h-8 w-8 text-emerald-400" />
-              <div className="mb-2 text-3xl font-bold text-emerald-400">500+</div>
-              <div className="text-sm text-emerald-300">Multi-Business Entrepreneurs</div>
+              <DollarSign className="mx-auto mb-3 h-8 w-8 text-emerald-400" />
+              <div className="mb-2 text-3xl font-bold text-emerald-400">+247%</div>
+              <div className="text-sm text-emerald-300">Revenue Growth Across Locations*</div>
             </div>
             <div className="rounded-2xl border border-cyan-500/50 bg-cyan-900/30 p-6">
-              <DollarSign className="mx-auto mb-3 h-8 w-8 text-cyan-400" />
-              <div className="mb-2 text-3xl font-bold text-cyan-400">$2.3M+</div>
-              <div className="text-sm text-cyan-300">Saved Through Progressive Pricing</div>
+              <Clock className="mx-auto mb-3 h-8 w-8 text-cyan-400" />
+              <div className="mb-2 text-3xl font-bold text-cyan-400">1-100+</div>
+              <div className="text-sm text-cyan-300">Locations Managed Seamlessly*</div>
             </div>
             <div className="rounded-2xl border border-violet-500/50 bg-violet-900/30 p-6">
               <TrendingUp className="mx-auto mb-3 h-8 w-8 text-violet-400" />
-              <div className="mb-2 text-3xl font-bold text-violet-400">32%</div>
-              <div className="text-sm text-violet-300">Average Efficiency Gain</div>
+              <div className="mb-2 text-3xl font-bold text-violet-400">HVAC</div>
+              <div className="text-sm text-violet-300">Industry Specialized</div>
             </div>
           </motion.div>
 
@@ -178,10 +178,10 @@ export function HeroSection() {
                     <span className="font-bold text-red-400">{urgencyTest.config.message}</span>
                   </div>
                   <div className="mb-2 text-2xl font-bold text-white">
-                    Progressive Pricing Launch • Save up to 50%
+                    Multi-Business Pricing • Save 40% Per Location
                   </div>
                   <div className="font-mono text-lg text-red-300">{timeLeft}</div>
-                  <div className="mt-2 text-sm text-gray-400">Limited to first 100 multi-business owners</div>
+                  <div className="mt-2 text-sm text-gray-400">Limited to 47 HVAC contractors</div>
                 </>
               ) : urgencyTest.config.type === 'spots' ? (
                 <>
@@ -212,7 +212,7 @@ export function HeroSection() {
               }}
             >
               <span className="flex items-center gap-2">
-                {ctaTest.config.primaryCTA || 'Calculate Your Empire Savings'}
+                {ctaTest.config.primaryCTA || 'Start Free 30-Day Trial'}
                 <ArrowRight className="h-5 w-5" />
               </span>
             </GlowingButton>
@@ -223,7 +223,7 @@ export function HeroSection() {
                 ctaTest.trackConversion('secondary_cta_click')
               }}
             >
-              {ctaTest.config.secondaryCTA || 'See Portfolio Demo'}
+              {ctaTest.config.secondaryCTA || 'Watch 3-Min Demo'}
             </button>
           </motion.div>
 
@@ -240,7 +240,7 @@ export function HeroSection() {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-emerald-400" />
-              <span>Multi-business templates included</span>
+              <span>HVAC-ready templates included</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-emerald-400" />

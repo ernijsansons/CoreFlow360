@@ -20,15 +20,26 @@ export function calculateProgressivePrice(
   businessCount: number,
   usersPerBusiness: number
 ): { totalPrice: number; savings: number; discountRate: number } {
-  const discount = PROGRESSIVE_DISCOUNTS[Math.min(businessCount, 5)] || 0.50;
-  const fullPrice = basePrice + (usersPerBusiness * 12); // $12 per user
-  const discountedPrice = fullPrice * (1 - discount);
-  const savings = fullPrice - discountedPrice;
+  const pricePerBusiness = basePrice + (usersPerBusiness * 12); // $12 per user
+  let totalPrice = 0;
+  let totalFullPrice = 0;
+  
+  // Calculate total price with progressive discounts
+  for (let i = 1; i <= businessCount; i++) {
+    const businessIndex = Math.min(i, 5);
+    const discount = PROGRESSIVE_DISCOUNTS[businessIndex] ?? 0.50;
+    const businessPrice = pricePerBusiness * (1 - discount);
+    totalPrice += businessPrice;
+    totalFullPrice += pricePerBusiness;
+  }
+  
+  const savings = totalFullPrice - totalPrice;
+  const effectiveDiscountRate = businessCount > 0 ? savings / totalFullPrice : 0;
   
   return {
-    totalPrice: discountedPrice,
+    totalPrice: totalPrice,
     savings: savings,
-    discountRate: discount
+    discountRate: effectiveDiscountRate
   };
 }
 

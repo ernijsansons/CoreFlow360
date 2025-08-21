@@ -25,13 +25,13 @@ export function ProgressivePricingPreview() {
         >
           <div className="inline-flex items-center gap-2 mb-4">
             <Sparkles className="h-6 w-6 text-green-400" />
-            <span className="text-green-400 font-semibold">REVOLUTIONARY PRICING</span>
+            <span className="text-green-400 font-semibold">GAME-CHANGING PROGRESSIVE PRICING</span>
           </div>
-          <h2 className="text-4xl font-bold mb-4">
-            The More You Grow, The More You Save
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            The More Businesses You Add, The More You Save
           </h2>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Our progressive pricing model rewards your success. Add more businesses and unlock deeper discounts automatically.
+            Unlike traditional software that charges full price for each location, our progressive pricing rewards your growth with automatic discounts up to 50% off.
           </p>
         </motion.div>
 
@@ -71,14 +71,14 @@ export function ProgressivePricingPreview() {
                 <div className="mb-4 md:mb-0">
                   <div className="flex items-center gap-2 mb-2">
                     <TrendingDown className="h-5 w-5 text-green-400" />
-                    <span className="text-lg font-semibold">Example: 3 Businesses</span>
+                    <span className="text-lg font-semibold">Your Savings with 3 Businesses</span>
                   </div>
                   <div className="text-gray-400">
-                    Traditional: <span className="line-through">$537/mo</span>
-                    <span className="text-green-400 font-bold ml-2">You Pay: $438/mo</span>
+                    Traditional Software: <span className="line-through text-red-400">$537/mo</span>
+                    <span className="text-green-400 font-bold ml-2">CoreFlow360: $348/mo</span>
                   </div>
                   <div className="text-sm text-green-400 mt-1">
-                    Saving $99/month = $1,188/year
+                    Saving $189/month = $2,268/year
                   </div>
                 </div>
                 
@@ -101,7 +101,7 @@ export function ProgressivePricingPreview() {
             viewport={{ once: true }}
           >
             <p className="text-gray-400">
-              Join <span className="text-white font-semibold">347+ multi-business owners</span> already saving with progressive pricing
+              Join <span className="text-white font-semibold">500+ multi-business entrepreneurs</span> already saving with progressive pricing
             </p>
           </motion.div>
         </div>

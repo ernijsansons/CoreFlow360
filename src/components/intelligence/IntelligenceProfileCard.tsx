@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useIntelligenceAudio } from '../../hooks/useConsciousnessAudio'
+import { useIntelligenceAudio } from '../../hooks/useBusinessIntelligenceAudio'
 
 interface IntelligenceProfile {
   overallScore: number

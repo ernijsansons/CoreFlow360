@@ -15,7 +15,7 @@ import { CTASection } from '@/components/home/CTASection'
 
 // Dynamic import for business intelligence awakening
 const BusinessIntelligenceAwakening = dynamic(
-  () => import('@/components/consciousness/awakening/ConsciousnessAwakeningSimple'),
+  () => import('@/components/business-intelligence/awakening/BusinessIntelligenceAwakening'),
   {
     ssr: false,
     loading: () => (
@@ -26,7 +26,7 @@ const BusinessIntelligenceAwakening = dynamic(
   }
 )
 
-export default function ConsciousnessLandingPage() {
+export default function BusinessIntelligenceLandingPage() {
   const [showContent, setShowContent] = useState(false)
 
   // Handle business intelligence completion
@@ -62,7 +62,7 @@ export default function ConsciousnessLandingPage() {
               Your Business
             </span>
             <br />
-            <span className="text-white">Just Became Conscious</span>
+            <span className="text-white">Just Became Intelligent</span>
           </h1>
           <p className="mb-8 text-xl text-gray-300 md:text-2xl">
             Welcome to the first Autonomous Business Operating System

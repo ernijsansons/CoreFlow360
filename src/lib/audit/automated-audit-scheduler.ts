@@ -1,17 +1,17 @@
 import { logger } from '@/lib/logging/logger'
 import { prisma } from '@/lib/db'
 import { costManagementAuditor } from './cost-management-auditor'
-import { ConsciousnessCostOrchestrator } from './consciousness-cost-orchestrator'
+import { IntelligenceCostOrchestrator } from './intelligence-cost-orchestrator'
 import { predictiveCostEngine } from '@/lib/ai/predictive-cost-engine'
 
 export interface AuditSchedule {
   scheduleId: string
   tenantId: string
-  auditType: 'comprehensive' | 'targeted' | 'predictive' | 'consciousness'
+  auditType: 'comprehensive' | 'targeted' | 'predictive' | 'intelligence'
   frequency: 'hourly' | 'daily' | 'weekly' | 'monthly' | 'quarterly'
   cronExpression: string
   isActive: boolean
-  consciousnessLevel?: 'INTELLIGENT' | 'INTELLIGENT' | 'autonomous' | 'ADVANCED'
+  intelligenceLevel?: 'BASIC' | 'SMART' | 'autonomous' | 'ADVANCED'
   triggerConditions: AuditTriggerCondition[]
   notificationSettings: NotificationSettings
   lastRun?: Date
@@ -26,7 +26,7 @@ export interface AuditTriggerCondition {
     | 'anomaly_detected'
     | 'time_based'
     | 'usage_spike'
-    | 'consciousness_evolution'
+    | 'intelligence_evolution'
   condition: string
   value: number
   operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte'
@@ -385,7 +385,7 @@ class AutomatedAuditScheduler {
         if (!consciousnessLevel) {
           throw new Error('consciousness level required for consciousness audit')
         }
-        const orchestrator = new ConsciousnessCostOrchestrator({
+        const orchestrator = new IntelligenceCostOrchestrator({
           level: consciousnessLevel as unknown,
           optimizationStrategy: 'balanced',
           autonomousDecisionThreshold: 0.8,

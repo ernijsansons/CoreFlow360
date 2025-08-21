@@ -8,8 +8,8 @@ import DashboardLayout from '@/components/layouts/DashboardLayout'
 // Force dynamic rendering to prevent SSR issues
 // export const runtime = 'edge' // Temporarily disabled due to build issues
 
-const QuantumEvolutionDashboard = dynamicImport(
-  () => import('@/components/consciousness/dashboard/QuantumEvolutionDashboard'),
+const BusinessEvolutionDashboard = dynamicImport(
+  () => import('@/components/business-intelligence/dashboard/BusinessEvolutionDashboard'),
   {
     ssr: false,
     loading: () => (
@@ -23,7 +23,7 @@ const QuantumEvolutionDashboard = dynamicImport(
 export default function EvolutionDashboardPage() {
   return (
     <DashboardLayout>
-      <QuantumEvolutionDashboard />
+      <BusinessEvolutionDashboard />
     </DashboardLayout>
   )
 }
