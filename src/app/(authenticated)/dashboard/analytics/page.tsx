@@ -16,164 +16,19 @@ const CRMAnalyticsDashboard = lazy(() => import('@/components/crm/CRMAnalyticsDa
 
 // Analytics loading skeleton
 const AnalyticsLoadingSkeleton = () => (
-  <div
-    className="space-y-6"
-    tabindex="0"
-    tabindex="0"
-    tabindex="0"
-    tabindex="0"
-    tabindex="0"
-    tabindex="0"
-    tabindex="0"
-    tabindex="0"
-    tabindex="0"
-    tabindex="0"
-    tabindex="0"
-    tabindex="0"
-    tabindex="0"
-    tabindex="0"
-  >
-    <div
-      className="flex items-center justify-between"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-    >
-      <div
-        className="h-8 w-64 animate-pulse rounded bg-gray-200"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-      ></div>
-      <div
-        className="h-10 w-32 animate-pulse rounded bg-gray-200"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-      ></div>
+  <div className="space-y-6">
+    <div className="flex items-center justify-between">
+      <div className="h-8 w-64 animate-pulse rounded bg-gray-200"></div>
+      <div className="h-10 w-32 animate-pulse rounded bg-gray-200"></div>
     </div>
-    <div
-      className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-    >
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
       {[...Array(4)].map((_, i) => (
-        <div
-          key={i}
-          className="h-32 animate-pulse rounded bg-gray-200"
-          tabindex="0"
-          tabindex="0"
-          tabindex="0"
-          tabindex="0"
-          tabindex="0"
-          tabindex="0"
-          tabindex="0"
-          tabindex="0"
-          tabindex="0"
-          tabindex="0"
-          tabindex="0"
-          tabindex="0"
-          tabindex="0"
-          tabindex="0"
-        ></div>
+        <div key={i} className="h-32 animate-pulse rounded bg-gray-200"></div>
       ))}
     </div>
-    <div
-      className="grid grid-cols-1 gap-6 lg:grid-cols-2"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-      tabindex="0"
-    >
-      <div
-        className="h-80 animate-pulse rounded bg-gray-200"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-      ></div>
-      <div
-        className="h-80 animate-pulse rounded bg-gray-200"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-      ></div>
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="h-80 animate-pulse rounded bg-gray-200"></div>
+      <div className="h-80 animate-pulse rounded bg-gray-200"></div>
     </div>
   </div>
 )
@@ -196,23 +51,7 @@ export default function AnalyticsPage() {
 
   return (
     <DashboardLayout>
-      <div
-        className="px-4 sm:px-6 lg:px-8"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-        tabindex="0"
-      >
+      <div className="px-4 sm:px-6 lg:px-8">
         <ErrorBoundary onError={(error, errorInfo) => {}}>
           <Suspense fallback={<AnalyticsLoadingSkeleton />}>
             <CRMAnalyticsDashboard
