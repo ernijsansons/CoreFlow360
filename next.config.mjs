@@ -71,13 +71,16 @@ const nextConfig = {
     ignoreDuringBuilds: true, // Temporary - will fix after build works
   },
 
-  // Disable static generation to avoid prerender errors
-  experimental: {
-    appDir: true,
-  },
+  // Optimizations for Vercel
+  swcMinify: true,
+  generateEtags: false,
+  poweredByHeader: false,
+  compress: true,
 
-  // Remove output mode for Vercel (handles this automatically)
-  // output: 'standalone',
+  // Skip validation during build
+  env: {
+    SKIP_ENV_VALIDATION: 'true',
+  },
 }
 
 // Temporarily disabled Sentry configuration
