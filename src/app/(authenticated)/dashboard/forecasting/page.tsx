@@ -5,6 +5,8 @@
 
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import DashboardLayout from '@/components/layouts/DashboardLayout'
 import SalesForecasting from '@/components/crm/SalesForecasting'
 

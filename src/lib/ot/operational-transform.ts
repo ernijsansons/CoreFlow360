@@ -304,8 +304,8 @@ export class OperationalTransform extends EventEmitter {
    * Transform array operations
    */
   private transformArrayOperations(clientOp: Operation, serverOp: Operation): TransformResult {
-    const client = { ...clientOp }
-    const server = { ...serverOp }
+    let client = { ...clientOp }
+    let server = { ...serverOp }
 
     if (client.type === 'array_insert' && server.type === 'array_insert') {
       // Both insertions

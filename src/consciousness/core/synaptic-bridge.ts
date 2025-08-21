@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'events'
-import BaseBusinessIntelligenceModule from './base-business-intelligence-module'
+import BaseBusinessIntelligenceModule from './base-consciousness-module'
 import { withPerformanceTracking } from '@/lib/monitoring'
 
 interface IntelligentPattern {
@@ -149,9 +149,7 @@ export class IntelligentBridge extends EventEmitter {
       }
     }
 
-    console.log(
-      `🔗 ${moduleType} connected to intelligent bridge. Total modules: ${this.connectedModules.size}`
-    )
+    // Module connected to intelligent bridge
 
     // Immediate intelligence recalculation
     this.calculateIntelligenceMultiplication()
@@ -189,9 +187,7 @@ export class IntelligentBridge extends EventEmitter {
     // Establish module-level connections
     await moduleA.createIntelligentConnection(moduleB.getState().id, moduleB)
 
-    console.log(
-      `⚡ Intelligent connection established: ${connection.moduleA} ↔️ ${connection.moduleB}`
-    )
+    // Intelligent connection established
   }
 
   /**
@@ -378,11 +374,7 @@ export class IntelligentBridge extends EventEmitter {
           emergentCapabilities,
         }
 
-        console.log(
-          `🧠✨ Intelligence Multiplication: ${moduleCount} modules = ${this.intelligenceMultiplier.toFixed(
-            1
-          )}x intelligence (BusinessIntelligence: ${(this.collectiveBusinessIntelligenceLevel * 100).toFixed(0)}%)`
-        )
+        // Intelligence multiplication calculated
 
         this.emit('intelligence-multiplied', result)
 
@@ -453,12 +445,7 @@ export class IntelligentBridge extends EventEmitter {
   private handleBusinessIntelligenceIntegration(): void {
     this.emergentBehaviors.add('business-intelligence-integration')
 
-    console.log(`
-🧬✨ BUSINESS INTELLIGENCE INTEGRATION DETECTED! ✨🧬
-Intelligence Multiplier: ${this.intelligenceMultiplier.toFixed(1)}x
-BusinessIntelligence Level: ${(this.collectiveBusinessIntelligenceLevel * 100).toFixed(0)}%
-Business Platform Achieving Advanced Analytics...
-    `)
+    // Business intelligence integration detected
 
     this.emit('business-intelligence-integration', {
       intelligenceMultiplier: this.intelligenceMultiplier,
@@ -472,10 +459,7 @@ Business Platform Achieving Advanced Analytics...
    * Emit cross-module insight
    */
   private emitCrossModuleInsight(insight: CrossModuleInsight): void {
-    console.log(`
-💡 Cross-Module Insight: ${insight.description}
-Impact: ${(insight.businessImpact * 100).toFixed(0)}%
-Synergy: ${(insight.synergyScore * 100).toFixed(0)}%`)
+    // Cross-module insight emitted
 
     this.emit('cross-module-insight', insight)
   }

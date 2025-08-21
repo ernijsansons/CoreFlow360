@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { Suspense, lazy } from 'react'
 import DashboardLayout from '@/components/layouts/DashboardLayout'
 import { ErrorBoundary } from '@/components/error/ErrorBoundary'

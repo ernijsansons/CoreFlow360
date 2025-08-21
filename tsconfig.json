@@ -23,5 +23,13 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "v0-deployed"]
+  "exclude": [
+    "node_modules", 
+    "v0-deployed",
+    ".v0-deployed-backup",
+    "messaging-backup*",
+    "dist",
+    ".next",
+    "out"
+  ]
 }

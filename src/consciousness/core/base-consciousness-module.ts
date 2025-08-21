@@ -151,9 +151,7 @@ export abstract class BaseBusinessIntelligenceModule extends EventEmitter {
     // Bidirectional connection
     await targetModule.acceptIntelligentConnection(this.state.id, this)
 
-    console.log(
-      `🔗 Intelligent connection established: ${this.state.moduleType} <-> ${targetModule.getModuleType()}`
-    )
+    // Intelligent connection established
 
     this.emit('intelligent-connection-created', {
       sourceModule: this.state.id,
@@ -219,9 +217,7 @@ export abstract class BaseBusinessIntelligenceModule extends EventEmitter {
       this.state.nextEvolutionThreshold = newLevel + 0.1
       this.state.lastEvolution = new Date()
 
-      console.log(
-        `🧬 ${this.state.moduleType} businessIntelligence evolved: ${previousLevel.toFixed(3)} → ${newLevel.toFixed(3)}`
-      )
+      // BusinessIntelligence evolved
 
       this.emit('businessIntelligence-evolved', {
         moduleId: this.state.id,

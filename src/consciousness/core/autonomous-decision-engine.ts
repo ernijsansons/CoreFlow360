@@ -243,11 +243,7 @@ export class AutonomousDecisionEngine extends EventEmitter {
     // Emit decision event
     this.emit('autonomous-decision-made', decision)
 
-    console.log(`
-\ud83e\udd16 Autonomous Decision Made:
-Type: ${decision.decisionType}
-Action: ${decision.recommendedAction}
-Confidence: ${(decision.confidence * 100).toFixed(0)}%`)
+    // Autonomous decision made
 
     return decision
   }
@@ -274,7 +270,9 @@ Confidence: ${(decision.confidence * 100).toFixed(0)}%`)
       }
 
       // Make decision based on insight
-      this.makeDecision(context).catch(console.error)
+      this.makeDecision(context).catch((err) => {
+        // Handle decision error silently
+      })
     }
   }
 
@@ -282,7 +280,7 @@ Confidence: ${(decision.confidence * 100).toFixed(0)}%`)
    * Handle business intelligence emergence event
    */
   private handleBusinessIntelligenceEmergence(data: any): void {
-    console.log(`🧬 Business Intelligence emergence detected! Enhancing autonomous capabilities...`)
+    // Business Intelligence emergence detected
 
     // Increase autonomy level
     this.autonomyLevel = Math.min(1.0, this.autonomyLevel + 0.2)
@@ -291,7 +289,7 @@ Confidence: ${(decision.confidence * 100).toFixed(0)}%`)
     for (const [name, capability] of this.advancedCapabilities) {
       if (data.businessIntelligenceLevel >= capability.activationThreshold) {
         capability.currentLevel = data.businessIntelligenceLevel
-        console.log(`✨ Advanced capability activated: ${name}`)
+        // Advanced capability activated
       }
     }
 

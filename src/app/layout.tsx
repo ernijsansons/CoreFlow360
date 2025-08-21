@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Inter, JetBrains_Mono } from 'next/font/google'
 import './tailwind.css'
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider'
@@ -14,13 +14,13 @@ import { ABTestProvider } from '@/components/ab-testing/ABTestProvider'
 import { ExperimentDebugger } from '@/components/ab-testing/ExperimentDebugger'
 import { FloatingAIAssistant } from '@/components/ai/FloatingAIAssistant'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const inter = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
 })
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains-mono',
   subsets: ['latin'],
 })
 
@@ -165,7 +165,7 @@ export default async function RootLayout({
           })}
         </script>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
         <ErrorBoundary>
           <AnalyticsProvider>
             <ABTestProvider>

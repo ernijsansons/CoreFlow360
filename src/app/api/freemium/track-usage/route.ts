@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     const lastResetDate = new Date(freemiumUser.lastResetDate).toDateString()
 
     const isNewDay = today !== lastResetDate
-    const isNewWeek = (isNewWeek = isStartOfWeek(new Date(), new Date(freemiumUser.lastResetDate)))
+    const isNewWeek = isStartOfWeek(new Date(), new Date(freemiumUser.lastResetDate))
     const isNewMonth = new Date().getMonth() !== new Date(freemiumUser.lastResetDate).getMonth()
 
     // Increment usage counters

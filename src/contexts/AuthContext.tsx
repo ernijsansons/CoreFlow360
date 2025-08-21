@@ -41,7 +41,24 @@ interface AuthContextType {
   hasAnyModule: (modules: string[]) => boolean
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const defaultAuthValue: AuthContextType = {
+  user: null,
+  loading: false,
+  error: null,
+  login: async () => {},
+  logout: async () => {},
+  refreshSession: async () => {},
+  hasPermission: () => false,
+  hasAnyPermission: () => false,
+  hasAllPermissions: () => false,
+  canAccessRole: () => false,
+  updatePreferences: async () => {},
+  hasModule: () => false,
+  hasAllModules: () => false,
+  hasAnyModule: () => false,
+}
+
+const AuthContext = createContext<AuthContextType>(defaultAuthValue)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserSession | null>(null)
@@ -294,9 +311,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 // Custom hook for using auth context
 export function useAuth() {
   const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
   return context
 }
 

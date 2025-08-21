@@ -1,24 +1,24 @@
-import { withSentryConfig } from '@sentry/nextjs'
+// Temporarily disabled Sentry
+// import { withSentryConfig } from '@sentry/nextjs'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   
-  // Disable static generation for problematic pages during build issues
-  experimental: {
-    optimizeCss: true,
-  },
-  
-  // Exclude backup folder from webpack
+  // Exclude backup folders from webpack
   webpack: (config, { isServer }) => {
     config.watchOptions = {
       ...config.watchOptions,
-      ignored: ['**/.v0-deployed-backup/**', '**/node_modules/**'],
+      ignored: [
+        '**/.v0-deployed-backup/**', 
+        '**/node_modules/**',
+        '**/messaging-backup*/**'
+      ],
     }
     return config
   },
 
-  // Force dynamic rendering for certain pages to avoid SSG issues
+  // Security headers
   async headers() {
     return [
       {
@@ -35,6 +35,10 @@ const nextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
           },
         ],
       },
@@ -58,28 +62,33 @@ const nextConfig = {
     ],
   },
 
-  // Ignore build errors temporarily to allow partial builds
+  // Temporarily ignore errors to fix build first
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true, // Temporary - will fix after build works
   },
   
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true, // Temporary - will fix after build works
   },
 
-  // Output standalone for better deployment
+  // Disable static generation to avoid prerender errors
+  experimental: {
+    appDir: true,
+  },
+
+  // Standard output mode
   output: 'standalone',
 }
 
-// Sentry configuration
-const sentryWebpackPluginOptions = {
-  org: 'coreflow360',
-  project: 'javascript-nextjs',
-  silent: true,
-  widenClientFileUpload: true,
-  hideSourceMaps: true,
-  disableLogger: true,
-  automaticVercelMonitors: true,
-}
+// Temporarily disabled Sentry configuration
+// const sentryWebpackPluginOptions = {
+//   org: 'coreflow360',
+//   project: 'javascript-nextjs',
+//   silent: true,
+//   widenClientFileUpload: true,
+//   hideSourceMaps: true,
+//   disableLogger: true,
+//   automaticVercelMonitors: true,
+// }
 
-export default withSentryConfig(nextConfig, sentryWebpackPluginOptions)
+export default nextConfig

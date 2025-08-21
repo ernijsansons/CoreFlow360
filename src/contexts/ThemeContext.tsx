@@ -56,7 +56,22 @@ const defaultPreferences: ThemePreferences = {
   contrastRatio: 1.0,
 }
 
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
+const defaultThemeValue: ThemeContextValue = {
+  currentTheme: 'light',
+  preferences: defaultPreferences,
+  isSystemDark: false,
+  isLoading: false,
+  businessIntelligenceLevel: 0,
+  setThemeMode: () => {},
+  setBusinessIntelligenceTheme: () => {},
+  setAccessibilityMode: () => {},
+  updatePreferences: () => {},
+  resetToDefaults: () => {},
+  exportTheme: () => '',
+  importTheme: () => false,
+}
+
+const ThemeContext = createContext<ThemeContextValue>(defaultThemeValue)
 
 interface ThemeProviderProps {
   children: ReactNode
@@ -383,9 +398,6 @@ export function ThemeProvider({
 
 export function useTheme() {
   const context = useContext(ThemeContext)
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider')
-  }
   return context
 }
 

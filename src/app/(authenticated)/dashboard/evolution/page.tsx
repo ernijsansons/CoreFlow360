@@ -1,12 +1,14 @@
 'use client'
 
-import dynamic from 'next/dynamic'
+export const dynamic = 'force-dynamic'
+
+import dynamicImport from 'next/dynamic'
 import DashboardLayout from '@/components/layouts/DashboardLayout'
 
 // Force dynamic rendering to prevent SSR issues
-export const runtime = 'edge'
+// export const runtime = 'edge' // Temporarily disabled due to build issues
 
-const QuantumEvolutionDashboard = dynamic(
+const QuantumEvolutionDashboard = dynamicImport(
   () => import('@/components/consciousness/dashboard/QuantumEvolutionDashboard'),
   {
     ssr: false,

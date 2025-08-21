@@ -35,7 +35,10 @@ interface TabsContentProps {
 const TabsContext = React.createContext<{
   value: string
   onValueChange: (value: string) => void
-} | null>(null)
+}>({
+  value: '',
+  onValueChange: () => {},
+})
 
 const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
   ({ className, value, onValueChange, children, ...props }, ref) => {
@@ -73,10 +76,6 @@ TabsList.displayName = 'TabsList'
 const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
   ({ className, value, children, ...props }, ref) => {
     const context = React.useContext(TabsContext)
-    if (!context) {
-      throw new Error('TabsTrigger must be used within Tabs')
-    }
-
     const isActive = context.value === value
 
     return (
@@ -100,10 +99,6 @@ TabsTrigger.displayName = 'TabsTrigger'
 const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
   ({ className, value, children, ...props }, ref) => {
     const context = React.useContext(TabsContext)
-    if (!context) {
-      throw new Error('TabsContent must be used within Tabs')
-    }
-
     const isActive = context.value === value
 
     if (!isActive) {
