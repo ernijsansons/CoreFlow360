@@ -1,0 +1,2726 @@
+// CoreFlow360 - Production Schema
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core Enums
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  USER
+  READONLY
+}
+
+enum IndustryType {
+  GENERAL
+  HVAC
+  LEGAL
+  MANUFACTURING
+  HEALTHCARE
+  FINANCE
+  REAL_ESTATE
+  CONSTRUCTION
+  CONSULTING
+  RETAIL
+  EDUCATION
+}
+
+enum AIModelType {
+  GPT4
+  CLAUDE3
+  CUSTOM
+  VISION
+  EMBEDDING
+}
+
+enum CostAuditType {
+  UTILITY_OPTIMIZER
+  LOCK_IN_ASSESSOR
+  PRICING_MODELER
+  FINOPS_PROCESSOR
+  TRANSFER_MINIMIZER
+  TCO_AGGREGATOR
+  COMPREHENSIVE_AUDIT
+}
+
+enum ConsciousnessTier {
+  NEURAL
+  SYNAPTIC
+  AUTONOMOUS
+  TRANSCENDENT
+}
+
+enum InsightType {
+  PATTERN
+  ANOMALY
+  PREDICTION
+  RECOMMENDATION
+  DISCOVERY
+}
+
+enum ImpactLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum DecisionStatus {
+  PENDING
+  EXECUTING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum HealthStatus {
+  HEALTHY
+  DEGRADED
+  CRITICAL
+  INACTIVE
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  IMPORT
+  AI_ANALYSIS
+  SECURITY_EVENT
+}
+
+// Customer Enums
+enum CustomerStatus {
+  LEAD
+  PROSPECT
+  CUSTOMER
+  CHAMPION
+  AT_RISK
+  CHURNED
+}
+
+// Problem Intelligence Enums
+enum ProblemSeverity {
+  MINOR
+  MODERATE
+  MAJOR
+  CRITICAL
+  EXISTENTIAL
+}
+
+enum ProblemSource {
+  EMAIL
+  CALL
+  MEETING
+  SURVEY
+  SUPPORT_TICKET
+  SOCIAL_MEDIA
+  NEWS_ARTICLE
+  FINANCIAL_REPORT
+  JOB_POSTING
+  REGULATORY_FILING
+  COMPETITOR_INTELLIGENCE
+  INDUSTRY_REPORT
+  ANALYST_REPORT
+  WEBSITE_BEHAVIOR
+  TECHNOLOGY_CHANGE
+  EXECUTIVE_COMMUNICATION
+}
+
+enum ProblemStatus {
+  DETECTED
+  ANALYZING
+  CONFIRMED
+  ADDRESSED
+  RESOLVED
+  ESCALATED
+  MONITORING
+}
+
+enum StakeholderRole {
+  CHAMPION
+  DECISION_MAKER
+  INFLUENCER
+  BLOCKER
+  BUDGET_OWNER
+  END_USER
+  TECHNICAL_EVALUATOR
+}
+
+enum CompanyMonitoringStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+  PRIORITY
+}
+
+// Core Models
+model Tenant {
+  id           String       @id @default(cuid())
+  name         String
+  slug         String       @unique
+  industryType IndustryType @default(GENERAL)
+  customDomain String?
+  settings     String       @default("{}")
+  metadata     String       @default("{}")
+  isActive     Boolean      @default(true) // Tenant active status
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users               User[]
+  departments         Department[]
+  customers           Customer[]
+  deals               Deal[]
+  projects            Project[]
+  invoices            Invoice[]
+  auditLogs           AuditLog[]
+  subscription        Subscription?
+  tenantSubscriptions TenantSubscription[]
+
+  // HVAC Relations
+  equipment        Equipment[]
+  workOrders       WorkOrder[]
+  serviceContracts ServiceContract[]
+
+  // SaaS Relations
+  saasSubscriptions SaaSSubscription[]
+
+  // CRM Enhancement Relations
+  proposals           Proposal[]
+  outreachContent     OutreachContent[]
+  outreachCampaigns   OutreachCampaign[]
+  customizedTemplates CustomizedTemplate[]
+  personalizedVideos  PersonalizedVideo[]
+  engagementCampaigns EngagementCampaign[]
+
+  // Problem Intelligence Relations
+  companyIntelligence CompanyIntelligence[]
+  customerProblems    CustomerProblem[]
+
+  // Freemium and Conversion Relations
+  freemiumUsers       FreemiumUser[]
+  conversionEvents    ConversionEvent[]
+  userSessionActivity UserSessionActivity[]
+  performanceMetrics  PerformanceMetric[]
+
+  // Mapping configuration
+  mappingTier       String    @default("free") // free, premium
+  googleMapsEnabled Boolean   @default(false)
+  googleMapsSubKey  String?   @unique
+  monthlyMapCredits Int       @default(0)
+  mapUsageResetDate DateTime?
+
+  // Consciousness Relations
+  consciousnessStates ConsciousnessState[]
+
+  // Mapping Relations
+  googleMapsUsage GoogleMapsUsage[]
+  mapsBilling     MapsBilling[]
+  visitSchedules  VisitSchedule[]
+
+  // Territory Management Relations
+  territories         Territory[]
+  leadAssignmentRules LeadTerritoryAssignment[]
+  leads               Lead[]
+
+  // Cost Management Relations
+  costAudits CostAudit[]
+
+  // AI Provider Relations
+  aiProviders       AIProvider[]
+  aiProviderUsage   AIProviderUsage[]
+
+  @@map("tenants")
+}
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String?
+  password    String? // For credentials auth
+  role        UserRole  @default(USER)
+  status      String    @default("ACTIVE") // Account status
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+
+  // Security fields
+  loginAttempts Int       @default(0)
+  lockoutUntil  DateTime? // Account lockout
+  permissions   String    @default("[]") // JSON array
+  avatar        String? // User avatar URL
+
+  // Tenant relation
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Department relation
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  assignedCustomers Customer[] @relation("CustomerAssignee")
+  assignedDeals    Deal[]     @relation("DealAssignee")
+  assignedProjects Project[]  @relation("ProjectAssignee")
+  createdProjects  Project[]  @relation("ProjectCreator")
+  auditLogs        AuditLog[]
+
+  // CRM Enhancement Relations
+  proposals           Proposal[]
+  outreachContent     OutreachContent[]
+  outreachCampaigns   OutreachCampaign[]
+  customizedTemplates CustomizedTemplate[]
+  personalizedVideos  PersonalizedVideo[]
+  engagementCampaigns EngagementCampaign[]
+
+  // Problem Intelligence Relations
+  assignedProblems CustomerProblem[]
+  problemAlerts    ProblemAlert[]
+
+  // Freemium and Conversion Relations
+  freemiumUser     FreemiumUser?
+  onboarding       UserOnboarding?
+  conversionEvents ConversionEvent[]
+  sessionActivity  UserSessionActivity[]
+
+  // Consciousness Relations
+  consciousnessState ConsciousnessState?
+
+  // Mapping Relations
+  visitSchedules VisitSchedule[]
+
+  // Territory Management Relations  
+  assignedTerritories  Territory[]
+  territoryVisits      TerritoryVisit[]
+  territoryAssignments LeadTerritoryAssignment[]
+  territoryAnalytics   TerritoryAnalytics[]
+  assignedLeads        Lead[]                    @relation("AssignedLeads")
+
+  @@index([email, tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, role])
+  @@map("users")
+}
+
+model Department {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  // Tenant relation
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users User[]
+
+  @@unique([tenantId, name])
+  @@map("departments")
+}
+
+model Customer {
+  id        String  @id @default(cuid())
+  firstName String?
+  lastName  String?
+  name      String? // Keep for backward compatibility during migration
+  email     String?
+  phone     String?
+  address   String?
+  company   String?
+  industry  String?
+  
+  // New fields for feature parity
+  status    CustomerStatus @default(LEAD)
+  source    String?
+  
+  // AI-powered fields
+  aiScore         Float? @default(0)
+  aiChurnRisk     Float? @default(0)
+  aiLifetimeValue Float? @default(0)
+  totalRevenue    Float  @default(0)
+  
+  // Optimistic locking
+  version         Int    @default(1)
+  
+  // Assignee relation
+  assigneeId String?
+  assignee   User?   @relation("CustomerAssignee", fields: [assigneeId], references: [id])
+
+  // Tenant relation
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  deals            Deal[]
+  projects         Project[]
+  invoices         Invoice[]
+  workOrders       WorkOrder[]
+  serviceContracts ServiceContract[]
+  problems         CustomerProblem[]
+  locations        CustomerLocation[]
+
+  @@index([tenantId, email])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, status])
+  @@index([assigneeId])
+  @@map("customers")
+}
+
+model Deal {
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+  value       Float?
+  status      String  @default("OPEN")
+
+  // Tenant relation
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Customer relation
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Assignee relation
+  assigneeId String?
+  assignee   User?   @relation("DealAssignee", fields: [assigneeId], references: [id])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  leads Lead[]
+
+  @@index([tenantId, status])
+  @@index([assigneeId])
+  @@index([customerId])
+  @@map("deals")
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  status      String    @default("PLANNING")
+  startDate   DateTime?
+  endDate     DateTime?
+  budget      Float?
+
+  // Tenant relation
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Customer relation
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  // Assignee relation
+  assigneeId String?
+  assignee   User?   @relation("ProjectAssignee", fields: [assigneeId], references: [id])
+
+  // Creator relation
+  creatorId String
+  creator   User   @relation("ProjectCreator", fields: [creatorId], references: [id])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@map("projects")
+}
+
+model Invoice {
+  id       String    @id @default(cuid())
+  number   String
+  amount   Float
+  status   String    @default("DRAFT")
+  dueDate  DateTime?
+  paidDate DateTime?
+
+  // Tenant relation
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Customer relation
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, number])
+  @@map("invoices")
+}
+
+// HVAC Models
+model Equipment {
+  id           String  @id @default(cuid())
+  name         String
+  type         String
+  model        String?
+  serialNumber String?
+  location     String?
+  status       String  @default("ACTIVE")
+
+  // Tenant relation
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  workOrders      WorkOrder[]
+  maintenanceLogs MaintenanceLog[]
+
+  @@map("equipment")
+}
+
+model WorkOrder {
+  id              String    @id @default(cuid())
+  workOrderNumber String
+  title           String
+  description     String?
+  priority        String    @default("MEDIUM")
+  status          String    @default("PENDING")
+  scheduledDate   DateTime?
+  assignedTo      String?
+  estimatedHours  Float?
+  actualHours     Float?
+
+  // Tenant relation
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Customer relation
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Equipment relation
+  equipmentId String?
+  equipment   Equipment? @relation(fields: [equipmentId], references: [id])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, workOrderNumber])
+  @@index([tenantId, status, scheduledDate])
+  @@map("work_orders")
+}
+
+model ServiceContract {
+  id             String   @id @default(cuid())
+  contractNumber String
+  contractType   String
+  name           String
+  status         String   @default("DRAFT")
+  startDate      DateTime
+  endDate        DateTime
+  contractValue  Float
+
+  // Tenant relation
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Customer relation
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, contractNumber])
+  @@index([tenantId, endDate])
+  @@map("service_contracts")
+}
+
+model MaintenanceLog {
+  id              String   @id @default(cuid())
+  description     String
+  maintenanceDate DateTime
+  title           String
+  type            String   @default("PREVENTIVE")
+  performedBy     String?
+  cost            Float?
+
+  // Equipment relation
+  equipmentId String
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([equipmentId, maintenanceDate])
+  @@map("maintenance_logs")
+}
+
+// Bundle and Subscription Models
+model Bundle {
+  id             String @id @default(cuid())
+  name           String
+  description    String
+  tier           String // starter, professional, enterprise, ultimate
+  category       String // finance, hr, legal, manufacturing, erp, ai_enhancement
+  basePrice      Float
+  perUserPrice   Float
+  features       String // Serialized feature list
+  limits         String // Usage limits
+  aiCapabilities String // AI capabilities included
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  subscriptions       Subscription[]
+  tenantSubscriptions TenantSubscription[]
+
+  @@unique([name])
+  @@map("bundles")
+}
+
+model TenantSubscription {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Bundle Configuration
+  bundleId String
+  bundle   Bundle @relation(fields: [bundleId], references: [id])
+  users    Int    @default(1)
+  price    Float // Calculated via formula
+
+  // Subscription Status
+  status      SubscriptionStatus @default(TRIAL)
+  startDate   DateTime           @default(now())
+  endDate     DateTime           @default(now())
+  trialEndsAt DateTime?
+
+  // Features & Limits
+  enabledFeatures     String  @default("[]") // JSON array of feature strings
+  customLimits        String? // Override bundle limits
+  additionalResources String? // Extra resources
+
+  // Billing
+  billingCycle         BillingCycle @default(MONTHLY)
+  stripeSubscriptionId String?      @unique
+  stripeCustomerId     String?
+  lastBilledAt         DateTime?
+  nextBillingDate      DateTime?
+
+  // Optimistic locking
+  version     Int       @default(1)
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  cancelledAt DateTime?
+
+  // Relations
+  usageMetrics UsageMetric[]
+  invoices     SubscriptionInvoice[]
+
+  @@unique([tenantId, bundleId])
+  @@index([status, endDate])
+  @@index([tenantId, status])
+  @@map("tenant_subscriptions")
+}
+
+enum SubscriptionStatus {
+  PENDING
+  TRIAL
+  FREE
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+  EXPIRED
+}
+
+enum BillingCycle {
+  MONTHLY
+  ANNUAL
+  QUARTERLY
+}
+
+model Subscription {
+  id                 String    @id @default(cuid())
+  status             String    @default("trial") // trial, active, suspended, cancelled
+  billingCycle       String    @default("monthly") // monthly, annual
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  trialEndsAt        DateTime?
+
+  // Stripe Integration
+  stripeSubscriptionId String? @unique
+  stripeCustomerId     String?
+
+  // Bundle relation
+  bundleId String
+  bundle   Bundle @relation(fields: [bundleId], references: [id])
+
+  // Tenant relation
+  tenantId String @unique
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Usage tracking
+  usage               String  @default("{}")
+  customLimits        String? // Override bundle limits
+  additionalResources String? // Extra resources purchased
+  
+  // Optimistic locking
+  version             Int     @default(1)
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  cancelledAt DateTime?
+
+  // Relations
+  usageMetrics        UsageMetric[]
+  invoices            SubscriptionInvoice[]
+  subscriptionModules SubscriptionModule[]
+
+  @@index([status, currentPeriodEnd])
+  @@map("subscriptions")
+}
+
+model UsageMetric {
+  id         String   @id @default(cuid())
+  metricType String // users, storage, api_calls, ai_operations
+  value      Float
+  recordedAt DateTime
+
+  // Subscription relation
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt            DateTime            @default(now())
+  TenantSubscription   TenantSubscription? @relation(fields: [tenantSubscriptionId], references: [id])
+  tenantSubscriptionId String?
+
+  @@index([subscriptionId, metricType, recordedAt])
+  @@map("usage_metrics")
+}
+
+model SubscriptionInvoice {
+  id            String    @id @default(cuid())
+  invoiceNumber String
+  amount        Float
+  currency      String    @default("USD")
+  status        String    @default("draft") // draft, pending, paid, failed
+  dueDate       DateTime
+  paidAt        DateTime?
+
+  // Stripe Integration
+  stripeInvoiceId       String? @unique
+  stripePaymentIntentId String?
+
+  // Subscription relation
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  TenantSubscription   TenantSubscription? @relation(fields: [tenantSubscriptionId], references: [id])
+  tenantSubscriptionId String?
+
+  @@unique([subscriptionId, invoiceNumber])
+  @@map("subscription_invoices")
+}
+
+// SaaS Models (Legacy - kept for compatibility)
+model SaaSSubscription {
+  id              String @id @default(cuid())
+  subscriptionKey String
+  planName        String
+  status          String @default("ACTIVE")
+  healthScore     Float
+  churnRisk       Float
+
+  // Tenant relation
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  usageMetrics SaaSUsageMetric[]
+
+  @@index([tenantId, healthScore, churnRisk])
+  @@map("saas_subscriptions")
+}
+
+model SaaSUsageMetric {
+  id          String   @id @default(cuid())
+  metricName  String
+  metricValue Float
+  recordedAt  DateTime
+
+  // Subscription relation
+  subscriptionId String
+  subscription   SaaSSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([subscriptionId, recordedAt])
+  @@map("saas_usage_metrics")
+}
+
+// Audit Model
+model AuditLog {
+  id           String      @id @default(cuid())
+  action       AuditAction
+  resourceType String
+  resourceId   String?
+  details      String?
+
+  // Tenant relation
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // User relation
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+// CRM Enhancement Models
+model Proposal {
+  id                String   @id @default(cuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  templateId        String
+  clientName        String
+  decisionMakerName String
+  content           String
+  metadata          String?
+  status            String   @default("DRAFT")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@map("proposals")
+}
+
+model OutreachContent {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  method        String
+  targetName    String
+  targetCompany String
+  content       String
+  metadata      String?
+  status        String   @default("READY")
+  createdAt     DateTime @default(now())
+
+  @@index([tenantId, method])
+  @@map("outreach_content")
+}
+
+model OutreachCampaign {
+  id              String    @id @default(cuid())
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  name            String
+  targetName      String
+  targetCompany   String
+  sequenceData    String
+  selectedMethods String    @default("[]") // JSON array of method strings
+  status          String    @default("ACTIVE")
+  currentStep     Int       @default(0)
+  metadata        String?
+  lastActivityAt  DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([tenantId, status])
+  @@map("outreach_campaigns")
+}
+
+model ScheduledOutreach {
+  id           String    @id @default(cuid())
+  campaignId   String
+  method       String
+  scheduledFor DateTime
+  targetData   String
+  status       String    @default("PENDING")
+  executedAt   DateTime?
+  result       String?
+  createdAt    DateTime  @default(now())
+
+  @@index([campaignId, scheduledFor])
+  @@map("scheduled_outreach")
+}
+
+model CampaignAnalytics {
+  id             String   @id @default(cuid())
+  campaignId     String   @unique
+  tenantId       String
+  totalSteps     Int
+  completedSteps Int      @default(0)
+  engagementRate Float    @default(0)
+  responseRate   Float    @default(0)
+  conversionRate Float    @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("campaign_analytics")
+}
+
+model CustomizedTemplate {
+  id              String   @id @default(cuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  baseTemplateId  String
+  customizations  String
+  aiEnhancements  String   @default("[]") // JSON array of enhancement strings
+  enhancedContent String?
+  status          String   @default("PROCESSING")
+  editorUrl       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([tenantId, baseTemplateId])
+  @@map("customized_templates")
+}
+
+model TemplateDownload {
+  id           String   @id @default(cuid())
+  templateId   String
+  userId       String
+  tenantId     String
+  downloadedAt DateTime @default(now())
+
+  @@index([templateId])
+  @@index([userId])
+  @@map("template_downloads")
+}
+
+// Video Generation Models
+model PersonalizedVideo {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId             String
+  user               User     @relation(fields: [userId], references: [id])
+  templateId         String
+  avatarId           String
+  recipientName      String
+  recipientCompany   String
+  script             String
+  settings           String
+  variables          String
+  videoUrl           String
+  thumbnailUrl       String
+  duration           Int? // in seconds
+  status             String   @default("READY")
+  generationMetadata String?
+  viewCount          Int      @default(0)
+  shareCount         Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@map("personalized_videos")
+}
+
+// Engagement System Models
+model EngagementCampaign {
+  id               String    @id @default(cuid())
+  tenantId         String
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User      @relation(fields: [userId], references: [id])
+  sequenceId       String
+  name             String
+  targetContactIds String    @default("[]") // JSON array of contact IDs
+  selectedChannels String    @default("[]") // JSON array of channel strings
+  status           String    @default("ACTIVE")
+  startedAt        DateTime  @default(now())
+  pausedAt         DateTime?
+  completedAt      DateTime?
+  metadata         String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([tenantId, status])
+  @@map("engagement_campaigns")
+}
+
+model ContactEngagement {
+  id              String   @id @default(cuid())
+  campaignId      String
+  contactId       String
+  currentStep     Int      @default(0)
+  status          String   @default("ACTIVE")
+  engagementScore Float    @default(0)
+  lastTouchAt     DateTime
+  totalTouches    Int      @default(0)
+  responses       Int      @default(0)
+  conversions     Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([campaignId, contactId])
+  @@map("contact_engagement")
+}
+
+model ScheduledTouchpoint {
+  id           String    @id @default(cuid())
+  campaignId   String
+  contactId    String
+  channel      String
+  stepNumber   Int
+  scheduledFor DateTime
+  content      String
+  status       String    @default("PENDING")
+  executedAt   DateTime?
+  result       String?
+  createdAt    DateTime  @default(now())
+
+  @@index([campaignId, scheduledFor])
+  @@map("scheduled_touchpoints")
+}
+
+model EngagementAnalytics {
+  id                   String   @id @default(cuid())
+  campaignId           String   @unique
+  tenantId             String
+  totalContacts        Int
+  channelsUsed         Int
+  automationLevel      Int
+  personalizationScore Int
+  responseRate         Float    @default(0)
+  conversionRate       Float    @default(0)
+  averageEngagement    Float    @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("engagement_analytics")
+}
+
+// Problem Intelligence Models
+model CompanyIntelligence {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Company Information
+  companyName   String
+  companyDomain String
+  industryType  IndustryType
+  companySize   String // STARTUP, SMALL, MEDIUM, LARGE, ENTERPRISE
+  employeeCount Int?
+  revenue       Float?
+  headquarters  String?
+
+  // Monitoring Configuration
+  monitoringStatus    CompanyMonitoringStatus @default(ACTIVE)
+  monitoringStartedAt DateTime                @default(now())
+  lastAnalyzedAt      DateTime?
+
+  // Intelligence Sources
+  dataSourcesEnabled String @default("[]") // JSON array of source strings
+  analysisFrequency  String @default("REAL_TIME") // REAL_TIME, HOURLY, DAILY
+
+  // AI Analysis Results
+  overallHealthScore  Int? // 0-100
+  problemRiskScore    Int? // 0-100
+  opportunityScore    Int? // 0-100
+  competitivePosition String?
+
+  // Metadata
+  customFields String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  problems            CustomerProblem[]
+  stakeholders        CompanyStakeholder[]
+  intelligenceReports IntelligenceReport[]
+
+  @@index([tenantId, companyDomain])
+  @@index([monitoringStatus])
+  @@map("company_intelligence")
+}
+
+model CustomerProblem {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Company Association
+  companyIntelligenceId String
+  companyIntelligence   CompanyIntelligence @relation(fields: [companyIntelligenceId], references: [id], onDelete: Cascade)
+  customerId            String?
+  customer              Customer?           @relation(fields: [customerId], references: [id])
+
+  // Problem Classification
+  problemTitle       String
+  problemDescription String
+  problemCategory    String
+  problemSubcategory String?
+  severity           ProblemSeverity
+  status             ProblemStatus   @default(DETECTED)
+
+  // Source Information
+  detectionSource String   @default("[]") // JSON array of ProblemSource enums
+  sourceData      String // Raw data from detection source
+  detectedAt      DateTime @default(now())
+  lastUpdatedAt   DateTime @updatedAt
+
+  // Impact Analysis
+  businessImpact  String // Revenue, efficiency, compliance impact
+  urgencyScore    Int // 1-100
+  confidenceScore Int // 1-100 AI confidence
+
+  // Stakeholder Information
+  affectedDepartments  String @default("[]") // JSON array of department strings
+  affectedStakeholders String @default("[]") // JSON array of stakeholder references
+
+  // Solution Intelligence
+  solutionFitScore         Int? // 0-100 how well our solution fits
+  competitorSolutions      String? // Competitor analysis
+  estimatedDealSize        String? // Deal size prediction
+  implementationComplexity String? // LOW, MEDIUM, HIGH, ENTERPRISE
+
+  // Problem Evolution
+  evolutionHistory     String // Track how problem changes
+  escalationPrediction String? // When problem might escalate
+  resolutionPrediction String? // Predicted resolution timeline
+
+  // AI Analysis
+  aiInsights        String // AI-generated insights
+  sentimentAnalysis String? // Sentiment from communications
+  similarProblems   String  @default("[]") // JSON array of problem references
+
+  // Action Items
+  recommendedActions String // AI recommended actions
+  assignedUserId     String?
+  assignedUser       User?   @relation(fields: [assignedUserId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  solutionMappings ProblemSolutionMapping[]
+  alerts           ProblemAlert[]
+
+  @@index([tenantId, severity, status])
+  @@index([companyIntelligenceId])
+  @@index([detectedAt])
+  @@map("customer_problems")
+}
+
+model CompanyStakeholder {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Company Association
+  companyIntelligenceId String
+  companyIntelligence   CompanyIntelligence @relation(fields: [companyIntelligenceId], references: [id], onDelete: Cascade)
+
+  // Personal Information
+  firstName   String
+  lastName    String
+  email       String?
+  phone       String?
+  linkedinUrl String?
+  title       String
+  department  String?
+
+  // Role Analysis
+  stakeholderRole    String  @default("[]") // JSON array of StakeholderRole enums
+  decisionInfluence  Int // 1-100
+  budgetAuthority    Boolean @default(false)
+  technicalInfluence Int // 1-100
+
+  // Engagement Information
+  lastContactedAt DateTime?
+  engagementLevel Int // 1-100
+  responsiveness  Int // 1-100
+
+  // AI Insights
+  personalityProfile String? // AI-determined personality
+  communicationStyle String? // FORMAL, CASUAL, TECHNICAL
+  painPoints         String  @default("[]") // JSON array of pain point strings
+  motivations        String  @default("[]") // JSON array of motivation strings
+  objections         String  @default("[]") // JSON array of objection strings
+
+  // Problem Association
+  relatedProblems String @default("[]") // JSON array of problem IDs
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyIntelligenceId])
+  @@index([stakeholderRole])
+  @@map("company_stakeholders")
+}
+
+model ProblemSolutionMapping {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Problem relation
+  problemId String
+  problem   CustomerProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  // Solution Information
+  solutionTitle       String
+  solutionDescription String?
+  valueProposition    String?
+
+  // Competitive Analysis
+  competitorComparison String? // How we compare to competitors
+  differentiators      String  @default("[]") // JSON array of differentiator strings
+
+  // Implementation
+  implementationSteps String? // Step-by-step implementation
+  timeline            String?
+  cost                Float?
+
+  // Success Metrics
+  expectedOutcomes String? // Expected results
+  successMetrics   String? // How to measure success
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([problemId])
+  @@map("problem_solution_mappings")
+}
+
+model IntelligenceReport {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Company Association
+  companyIntelligenceId String
+  companyIntelligence   CompanyIntelligence @relation(fields: [companyIntelligenceId], references: [id], onDelete: Cascade)
+
+  // Report Information
+  reportType    String // DAILY, WEEKLY, MONTHLY, EVENT_TRIGGERED
+  reportTitle   String
+  reportSummary String
+
+  // Analysis Results
+  executiveSummary        String
+  keyFindings             String // Structured findings
+  problemsDetected        Int // Count of new problems
+  opportunitiesIdentified Int // Count of opportunities
+  riskAssessment          String // Risk analysis
+
+  // Recommendations
+  actionItems      String // Recommended actions
+  urgentItems      String // High-priority items
+  followUpRequired String @default("[]") // JSON array of follow-up items
+
+  // Data Sources
+  dataSourcesUsed    String @default("[]") // JSON array of ProblemSource enums
+  dataQualityScore   Int // 1-100
+  analysisConfidence Int // 1-100
+
+  // Insights
+  marketTrends     String? // Market trend analysis
+  competitiveIntel String? // Competitive insights
+  industryInsights String? // Industry-specific insights
+
+  generatedAt DateTime  @default(now())
+  validUntil  DateTime? // When report expires
+
+  @@index([companyIntelligenceId])
+  @@index([reportType])
+  @@index([generatedAt])
+  @@map("intelligence_reports")
+}
+
+model ProblemAlert {
+  id       String @id @default(cuid())
+  tenantId String
+
+  // Problem relation
+  problemId String
+  problem   CustomerProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  // Alert Information
+  alertType String  @default("INFO") // INFO, WARNING, CRITICAL
+  threshold Float?
+  isActive  Boolean @default(true)
+
+  // Notification
+  notifiedAt       DateTime?
+  notificationSent Boolean   @default(false)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+
+  @@index([problemId])
+  @@map("problem_alerts")
+}
+
+model ProblemCategory {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  // Industry Specificity
+  industryType          String @default("[]") // JSON array of IndustryType enums
+  applicableDepartments String @default("[]") // JSON array of department strings
+
+  // Classification Rules
+  detectionKeywords String @default("[]") // JSON array of keyword strings
+  detectionPatterns String // Regex or ML patterns
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("problem_categories")
+}
+
+// Freemium and Conversion Models
+model FreemiumUser {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String @unique
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Agent Selection
+  selectedAgent String // 'sales', 'finance', 'crm', etc.
+
+  // Usage Tracking
+  dailyUsageCount   Int       @default(0)
+  dailyLimit        Int       @default(10)
+  weeklyUsageCount  Int       @default(0)
+  monthlyUsageCount Int       @default(0)
+  lastResetDate     DateTime  @default(now())
+  lastUsageAt       DateTime?
+
+  // Upgrade Tracking
+  upgradePromptedCount Int       @default(0)
+  lastUpgradePrompt    DateTime?
+  upgradeDeclinedCount Int       @default(0)
+
+  // Engagement
+  daysActive   Int      @default(1)
+  firstLoginAt DateTime @default(now())
+  lastActiveAt DateTime @default(now())
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, selectedAgent])
+  @@index([userId])
+  @@map("freemium_users")
+}
+
+model UserOnboarding {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Role Information
+  selectedRole    String // 'ceo', 'cfo', 'cto', 'sales', 'operations'
+  roleConfirmedAt DateTime?
+
+  // Onboarding Progress
+  currentStep          Int    @default(0)
+  totalSteps           Int    @default(4)
+  completedSteps       String @default("[]") // JSON array of completed step IDs
+  completionPercentage Int    @default(0)
+
+  // Step Details
+  stepProgress  String  @default("{}") // JSON object tracking individual step progress
+  customization String? @default("{}") // Role-specific customizations
+
+  // Completion
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+
+  // AI Agent Integration
+  recommendedAgent String? // AI agent recommendation based on role
+  agentSelected    Boolean @default(false)
+
+  // Timestamps
+  startedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([selectedRole, isCompleted])
+  @@map("user_onboarding")
+}
+
+model ConversionEvent {
+  id       String  @id @default(cuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id])
+
+  // Event Details
+  eventType   String // 'feature_limit', 'usage_limit', 'upgrade_prompt', 'success_story'
+  triggerType String // 'automatic', 'manual', 'scheduled'
+
+  // Context
+  triggerContext String  @default("{}") // JSON context data
+  userPlan       String // 'free', 'starter', 'business'
+  currentModule  String? // Which module/agent was being used
+
+  // Action Taken
+  actionTaken     String // 'dismissed', 'delayed', 'converted', 'viewed'
+  conversionValue Float? // Dollar value if converted
+
+  // Timing
+  promptDisplayedAt DateTime?
+  actionTakenAt     DateTime?
+  sessionId         String?
+
+  // Analytics
+  userAgent         String?
+  referrer          String?
+  experimentVariant String? // For A/B testing
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, eventType, createdAt])
+  @@index([userId, eventType])
+  @@index([actionTaken, createdAt])
+  @@map("conversion_events")
+}
+
+model UserSessionActivity {
+  id       String  @id @default(cuid())
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id])
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Session Info
+  sessionId String
+  ipAddress String?
+  userAgent String?
+
+  // Activity Tracking
+  pageViews       Int    @default(0)
+  featuresUsed    String @default("[]") // JSON array of features
+  modulesAccessed String @default("[]") // JSON array of modules
+
+  // Performance Metrics
+  averageResponseTime Float?
+  errorsEncountered   Int    @default(0)
+
+  // Engagement
+  sessionDuration Int? // in seconds
+  lastActivityAt  DateTime @default(now())
+
+  // Timestamps
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  @@index([userId, sessionId])
+  @@index([tenantId, startedAt])
+  @@map("user_session_activity")
+}
+
+model PerformanceMetric {
+  id       String  @id @default(cuid())
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+
+  // Metric Details
+  metricType  String // 'response_time', 'active_users', 'success_rate', 'uptime'
+  metricValue Float
+  metricUnit  String? // 'ms', 'count', 'percentage'
+
+  // System Context
+  endpoint     String? // API endpoint if applicable
+  userCount    Int? // Active users at time of metric
+  systemHealth String? // 'excellent', 'good', 'fair', 'poor'
+
+  // Timestamps
+  recordedAt DateTime @default(now())
+
+  @@index([metricType, recordedAt])
+  @@index([tenantId, recordedAt])
+  @@map("performance_metrics")
+}
+
+// =============================================
+// MODULE SYSTEM
+// =============================================
+
+model Module {
+  id           String  @id @default(cuid())
+  name         String
+  displayName  String
+  description  String?
+  category     String
+  version      String  @default("1.0.0")
+  isActive     Boolean @default(true)
+  isComingSoon Boolean @default(false)
+
+  // Module Configuration
+  features     Json     @default("{}")
+  permissions  String[] @default([])
+  dependencies String[] @default([])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  subscriptionModules SubscriptionModule[]
+  sourceConnections   SynapticConnection[] @relation("SourceModuleConnections")
+  targetConnections   SynapticConnection[] @relation("TargetModuleConnections")
+
+  @@unique([name])
+  @@index([category, isActive])
+  @@map("modules")
+}
+
+// Junction table for subscription-module relationships
+model SubscriptionModule {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  moduleId       String
+  module         Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  isActive      Boolean   @default(true)
+  activatedAt   DateTime  @default(now())
+  deactivatedAt DateTime?
+
+  // Configuration
+  config      Json     @default("{}")
+  permissions String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([subscriptionId, moduleId])
+  @@index([subscriptionId, isActive])
+  @@map("subscription_modules")
+}
+
+// =============================================
+// CONSCIOUSNESS SYSTEM MODELS
+// =============================================
+
+model ConsciousnessState {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String @unique
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Consciousness Level
+  consciousnessLevel     Float             @default(0.0000)
+  tier                   ConsciousnessTier @default(NEURAL)
+  intelligenceMultiplier Float             @default(1.00)
+  evolutionProgress      Float             @default(0.0000)
+  transcendenceLevel     Float             @default(0.0000)
+
+  // Status
+  isActive        Boolean   @default(false)
+  activatedAt     DateTime?
+  lastEvolutionAt DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  evolutionHistory         ConsciousnessEvolutionHistory[]
+  synapticConnections      SynapticConnection[]
+  insights                 ConsciousnessInsight[]
+  autonomousDecisions      AutonomousDecision[]
+  patterns                 ConsciousnessPattern[]
+  knowledgeBase            ConsciousnessKnowledgeBase[]
+  transcendentCapabilities TranscendentCapability[]
+  singularityEvents        BusinessSingularityEvent[]
+  healthChecks             ConsciousnessHealthCheck[]
+  performanceMetrics       ConsciousnessPerformanceMetric[]
+
+  @@unique([tenantId, userId])
+  @@index([consciousnessLevel, tier])
+  @@index([isActive, evolutionProgress])
+  @@map("consciousness_states")
+}
+
+model ConsciousnessEvolutionHistory {
+  id                   String             @id @default(cuid())
+  consciousnessStateId String
+  consciousnessState   ConsciousnessState @relation(fields: [consciousnessStateId], references: [id], onDelete: Cascade)
+
+  // Evolution Details
+  fromLevel            Float
+  toLevel              Float
+  fromTier             ConsciousnessTier?
+  toTier               ConsciousnessTier?
+  triggerType          String // 'module-activation', 'tier-upgrade', 'automatic', 'manual'
+  triggerMetadata      Json?
+  intelligenceGain     Float?
+  capabilitiesUnlocked String[]
+
+  // Timestamp
+  evolvedAt DateTime @default(now())
+
+  @@index([consciousnessStateId])
+  @@index([evolvedAt])
+  @@map("consciousness_evolution_history")
+}
+
+model SynapticConnection {
+  id                   String             @id @default(cuid())
+  consciousnessStateId String
+  consciousnessState   ConsciousnessState @relation(fields: [consciousnessStateId], references: [id], onDelete: Cascade)
+  sourceModuleId       String
+  sourceModule         Module             @relation("SourceModuleConnections", fields: [sourceModuleId], references: [id], onDelete: Cascade)
+  targetModuleId       String
+  targetModule         Module             @relation("TargetModuleConnections", fields: [targetModuleId], references: [id], onDelete: Cascade)
+
+  // Connection Properties
+  connectionStrength      Float     @default(0.5000)
+  dataFlowRate            Int       @default(0)
+  patternRecognitionScore Float     @default(0.0000)
+  lastSyncAt              DateTime?
+  isActive                Boolean   @default(true)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([consciousnessStateId, sourceModuleId, targetModuleId])
+  @@index([connectionStrength])
+  @@map("synaptic_connections")
+}
+
+model ConsciousnessInsight {
+  id                   String             @id @default(cuid())
+  consciousnessStateId String
+  consciousnessState   ConsciousnessState @relation(fields: [consciousnessStateId], references: [id], onDelete: Cascade)
+
+  // Insight Properties
+  insightType    InsightType
+  category       String
+  title          String
+  description    String
+  confidence     Float
+  impactLevel    ImpactLevel @default(MEDIUM)
+  sourceModules  String[]
+  insightData    Json?
+  visualizations Json?
+  actions        Json?
+
+  // Status
+  status      String    @default("active")
+  generatedAt DateTime  @default(now())
+  expiresAt   DateTime?
+  resolvedAt  DateTime?
+
+  @@index([consciousnessStateId])
+  @@index([insightType])
+  @@index([category])
+  @@index([confidence])
+  @@index([generatedAt])
+  @@map("consciousness_insights")
+}
+
+model AutonomousDecision {
+  id                   String             @id @default(cuid())
+  consciousnessStateId String
+  consciousnessState   ConsciousnessState @relation(fields: [consciousnessStateId], references: [id], onDelete: Cascade)
+
+  // Decision Properties
+  decisionType               String
+  decisionContext            Json
+  decisionOutcome            Json
+  confidence                 Float
+  expectedImpact             ImpactLevel
+  sourceModules              String[]
+  transcendentCapabilityUsed String?
+
+  // Execution
+  executionStatus   DecisionStatus @default(PENDING)
+  successRate       Float?
+  actualImpactScore Float?
+
+  // Timestamps
+  decisionMadeAt DateTime  @default(now())
+  executedAt     DateTime?
+  completedAt    DateTime?
+
+  @@index([consciousnessStateId])
+  @@index([decisionType])
+  @@index([executionStatus])
+  @@index([decisionMadeAt])
+  @@map("autonomous_decisions")
+}
+
+model ConsciousnessPattern {
+  id                   String             @id @default(cuid())
+  consciousnessStateId String
+  consciousnessState   ConsciousnessState @relation(fields: [consciousnessStateId], references: [id], onDelete: Cascade)
+
+  // Pattern Properties
+  patternType         String
+  patternName         String
+  patternDescription  String?
+  patternDefinition   Json
+  confidence          Float
+  occurrences         Int      @default(1)
+  successRate         Float?
+  businessImpactScore Float?
+  sourceModules       String[]
+
+  // Status
+  discoveredAt     DateTime  @default(now())
+  lastOccurrenceAt DateTime?
+  isActive         Boolean   @default(true)
+
+  @@index([consciousnessStateId])
+  @@index([patternType])
+  @@index([confidence])
+  @@index([discoveredAt])
+  @@map("consciousness_patterns")
+}
+
+model ConsciousnessKnowledgeBase {
+  id                   String             @id @default(cuid())
+  consciousnessStateId String
+  consciousnessState   ConsciousnessState @relation(fields: [consciousnessStateId], references: [id], onDelete: Cascade)
+
+  // Knowledge Properties
+  knowledgeType    String // 'business_rule', 'pattern', 'insight', 'decision_tree'
+  knowledgeDomain  String // 'crm', 'accounting', 'inventory', etc.
+  knowledgeContent Json
+  relevanceScore   Float     @default(0.5000)
+  usageCount       Int       @default(0)
+  lastUsedAt       DateTime?
+
+  // Validation
+  isValidated     Boolean @default(false)
+  validationScore Float?
+
+  // Timestamp
+  learnedAt DateTime @default(now())
+
+  @@index([consciousnessStateId])
+  @@index([knowledgeType])
+  @@index([knowledgeDomain])
+  @@index([relevanceScore])
+  @@map("consciousness_knowledge_base")
+}
+
+model TranscendentCapability {
+  id                   String             @id @default(cuid())
+  consciousnessStateId String
+  consciousnessState   ConsciousnessState @relation(fields: [consciousnessStateId], references: [id], onDelete: Cascade)
+
+  // Capability Properties
+  capabilityName             String
+  capabilityDescription      String?
+  capabilityType             String // 'quantum_decision', 'temporal_prediction', 'consciousness_networking'
+  unlockRequirements         Json?
+  transcendenceLevelRequired Float
+  usageCount                 Int     @default(0)
+  effectivenessScore         Float?
+
+  // Status
+  unlockedAt DateTime  @default(now())
+  lastUsedAt DateTime?
+  isActive   Boolean   @default(true)
+
+  @@unique([consciousnessStateId, capabilityName])
+  @@index([capabilityType])
+  @@index([unlockedAt])
+  @@map("transcendent_capabilities")
+}
+
+model BusinessSingularityEvent {
+  id                   String             @id @default(cuid())
+  consciousnessStateId String
+  consciousnessState   ConsciousnessState @relation(fields: [consciousnessStateId], references: [id], onDelete: Cascade)
+
+  // Singularity Properties
+  singularityType         String // 'full_automation', 'predictive_mastery', 'consciousness_mesh'
+  triggerConditions       Json
+  businessTransformation  Json
+  transcendenceMetrics    Json
+  humanComprehensionLevel Float  @default(0.0000)
+
+  // Timestamp
+  achievedAt DateTime @default(now())
+
+  @@index([consciousnessStateId])
+  @@index([singularityType])
+  @@index([achievedAt])
+  @@map("business_singularity_events")
+}
+
+model ConsciousnessHealthCheck {
+  id                   String             @id @default(cuid())
+  consciousnessStateId String
+  consciousnessState   ConsciousnessState @relation(fields: [consciousnessStateId], references: [id], onDelete: Cascade)
+
+  // Health Check Properties
+  checkType      String // 'evolution', 'mesh', 'modules', 'synaptic'
+  healthScore    Float
+  status         HealthStatus
+  issuesDetected Json?
+  diagnostics    Json?
+
+  // Timestamp
+  checkedAt DateTime @default(now())
+
+  @@index([consciousnessStateId])
+  @@index([checkType])
+  @@index([status])
+  @@index([checkedAt])
+  @@map("consciousness_health_checks")
+}
+
+model ConsciousnessPerformanceMetric {
+  id                   String             @id @default(cuid())
+  consciousnessStateId String
+  consciousnessState   ConsciousnessState @relation(fields: [consciousnessStateId], references: [id], onDelete: Cascade)
+
+  // Metric Properties
+  metricName  String
+  metricValue Float
+  metricUnit  String?
+  tags        Json    @default("{}")
+
+  // Timestamp
+  recordedAt DateTime @default(now())
+
+  @@index([consciousnessStateId])
+  @@index([metricName])
+  @@index([recordedAt])
+  @@map("consciousness_performance_metrics")
+}
+
+model ConsciousnessMeshNode {
+  id                       String    @id @default(cuid())
+  nodeId                   String    @unique
+  podName                  String?
+  namespace                String?
+  ipAddress                String?
+  port                     Int?
+  meshHealth               Float     @default(1.0000)
+  collectiveIntelligence   Json      @default("{}")
+  patternsDiscovered       Int       @default(0)
+  knowledgeBaseSize        Int       @default(0)
+  evolutionaryImprovements Int       @default(0)
+  lastHeartbeatAt          DateTime?
+  isHealthy                Boolean   @default(true)
+  joinedAt                 DateTime  @default(now())
+
+  @@index([meshHealth])
+  @@index([lastHeartbeatAt])
+  @@map("consciousness_mesh_nodes")
+}
+
+// ===========================================
+// HYBRID MAPPING SYSTEM MODELS
+// ===========================================
+
+// Customer location information for mapping
+model CustomerLocation {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Address information
+  address String
+  city    String
+  state   String
+  zipCode String
+  country String @default("US")
+
+  // Geographic coordinates
+  latitude  Float
+  longitude Float
+
+  // Location metadata
+  locationType   String    @default("primary") // primary, billing, shipping, service
+  isVerified     Boolean   @default(false)
+  lastVerifiedAt DateTime?
+
+  // Territory assignment
+  salesRep  String?
+  territory String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  visitSchedules VisitSchedule[]
+  routeStops     RouteStop[]
+
+  @@index([customerId])
+  @@index([latitude, longitude])
+  @@index([territory])
+  @@map("customer_locations")
+}
+
+// Google Maps API usage tracking
+model GoogleMapsUsage {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Usage tracking
+  requestType  String // geocoding, directions, places, static_map
+  requestCount Int    @default(1)
+  creditsUsed  Int    @default(1)
+
+  // Request details
+  endpoint     String?
+  requestData  Json?
+  responseTime Int? // milliseconds
+
+  // Billing period
+  billingMonth Int
+  billingYear  Int
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, billingMonth, billingYear])
+  @@index([requestType])
+  @@map("google_maps_usage")
+}
+
+// Maps billing and subscription management
+model MapsBilling {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Billing period
+  billingMonth Int
+  billingYear  Int
+
+  // Usage summary
+  totalRequests   Int @default(0)
+  totalCredits    Int @default(0)
+  freeCreditsUsed Int @default(0)
+  paidCreditsUsed Int @default(0)
+
+  // Costs
+  baseCost       Float @default(0.00) // $29.99 base
+  perUserCost    Float @default(0.00) // $9.99 per additional user
+  apiOverageCost Float @default(0.00) // Overage charges
+  totalCost      Float @default(0.00)
+
+  // Status
+  isPaid          Boolean   @default(false)
+  paidAt          DateTime?
+  stripeInvoiceId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, billingMonth, billingYear])
+  @@index([isPaid])
+  @@map("maps_billing")
+}
+
+// Visit scheduling for field sales teams
+model VisitSchedule {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  customerLocationId String
+  customerLocation   CustomerLocation @relation(fields: [customerLocationId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Schedule details
+  scheduledDate DateTime
+  scheduledTime String
+  duration      Int      @default(60) // minutes
+  visitType     String   @default("sales") // sales, service, follow_up, demo
+
+  // Status tracking
+  status          String    @default("scheduled") // scheduled, confirmed, completed, cancelled, no_show
+  actualStartTime DateTime?
+  actualEndTime   DateTime?
+
+  // Visit notes
+  notes     String?
+  outcome   String?
+  nextSteps String?
+
+  // Route optimization
+  routeOptimized      Boolean @default(false)
+  routePosition       Int?
+  estimatedTravelTime Int? // minutes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  routeStops RouteStop[]
+
+  @@index([tenantId, scheduledDate])
+  @@index([userId, scheduledDate])
+  @@index([status])
+  @@map("visit_schedules")
+}
+
+// Route optimization for sales teams
+model RouteStop {
+  id      String @id @default(cuid())
+  routeId String
+
+  customerLocationId String
+  customerLocation   CustomerLocation @relation(fields: [customerLocationId], references: [id], onDelete: Cascade)
+
+  visitScheduleId String?
+  visitSchedule   VisitSchedule? @relation(fields: [visitScheduleId], references: [id])
+
+  // Route details
+  stopNumber        Int
+  estimatedArrival  DateTime
+  actualArrival     DateTime?
+  estimatedDuration Int       @default(60) // minutes
+  actualDuration    Int?
+
+  // Navigation
+  distanceFromPrevious   Float? // miles
+  travelTimeFromPrevious Int? // minutes
+
+  // Status
+  status String @default("planned") // planned, in_progress, completed, skipped
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([routeId, stopNumber])
+  @@map("route_stops")
+}
+
+// ===========================================  
+// LEAD MANAGEMENT MODELS
+// ===========================================
+
+// Lead management with territory assignment
+model Lead {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Lead Details
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  company   String?
+  title     String?
+
+  // Address Information
+  address String?
+  city    String?
+  state   String?
+  zipCode String?
+  country String  @default("US")
+
+  // Lead Source & Classification
+  source        String @default("unknown") // website, referral, cold_call, trade_show, etc.
+  status        String @default("new") // new, contacted, qualified, converted, lost
+  qualification String @default("unqualified") // unqualified, mql, sql, opportunity
+
+  // AI Scoring
+  aiScore      Float @default(0.0) // 0-100 AI-generated lead score
+  buyingIntent Float @default(0.0) // 0-1 buying intent score
+  responseProb Float @default(0.0) // Probability of response
+
+  // Territory Assignment
+  territoryId    String?
+  territory      Territory? @relation(fields: [territoryId], references: [id])
+  assignedUserId String?
+  assignedUser   User?      @relation("AssignedLeads", fields: [assignedUserId], references: [id])
+
+  // Lead Intelligence
+  companySize   String? // "1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"
+  annualRevenue Float?
+  industry      String?
+  decisionMaker Boolean @default(false)
+  budget        Float?
+  timeline      String? // "immediate", "1-3_months", "3-6_months", "6-12_months", "12+_months"
+
+  // Engagement Tracking  
+  firstTouchDate DateTime?
+  lastTouchDate  DateTime?
+  touchCount     Int       @default(0)
+  emailOpens     Int       @default(0)
+  emailClicks    Int       @default(0)
+  websiteVisits  Int       @default(0)
+
+  // Conversion Tracking
+  convertedToDeal Boolean   @default(false)
+  conversionDate  DateTime?
+  dealId          String?
+  deal            Deal?     @relation(fields: [dealId], references: [id])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([territoryId, assignedUserId])
+  @@index([aiScore])
+  @@index([createdAt])
+  @@map("leads")
+}
+
+// ===========================================
+// ADVANCED TERRITORY MANAGEMENT MODELS
+// ===========================================
+
+// Territory definitions with AI optimization
+model Territory {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Territory Details
+  name         String
+  description  String?
+  boundaryData Json // GeoJSON polygon data for territory boundaries
+
+  // AI Optimization Settings
+  visitFrequency String   @default("weekly") // weekly, biweekly, monthly, quarterly
+  optimalDays    String[] @default([]) // ["monday", "wednesday"] - optimal visit days
+  priority       Int      @default(5) // 1-10 priority score
+
+  // Performance Metrics
+  leadConversionRate   Float @default(0.0)
+  avgDealValue         Float @default(0.0)
+  customerSatisfaction Float @default(0.0)
+  marketPenetration    Float @default(0.0)
+  competitiveActivity  Int   @default(0)
+
+  // Assignment
+  assignedUserId String?
+  assignedUser   User?   @relation(fields: [assignedUserId], references: [id])
+
+  // Status
+  isActive      Boolean   @default(true)
+  lastVisitDate DateTime?
+  nextVisitDate DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  leads              Lead[]
+  territoryPlans     TerritoryPlan[]
+  territoryVisits    TerritoryVisit[]
+  TerritoryAnalytics TerritoryAnalytics[]
+
+  @@index([tenantId, isActive])
+  @@index([assignedUserId])
+  @@index([visitFrequency, nextVisitDate])
+  @@map("territories")
+}
+
+// AI-generated territory visit plans
+model TerritoryPlan {
+  id          String    @id @default(cuid())
+  territoryId String
+  territory   Territory @relation(fields: [territoryId], references: [id], onDelete: Cascade)
+
+  // Plan Details
+  plannedDate DateTime
+  visitType   String   @default("regular") // regular, blitz, maintenance, expansion
+  duration    Int      @default(480) // minutes (8 hours default)
+
+  // AI Recommendations
+  recommendedRoute    Json // Optimized route with stops
+  priorityAccounts    String[] // Customer IDs to prioritize
+  suggestedActivities Json // AI-suggested activities
+  preparationNotes    String? // Auto-generated prep notes
+
+  // Execution Tracking
+  status          String    @default("planned") // planned, in_progress, completed, cancelled
+  actualStartTime DateTime?
+  actualEndTime   DateTime?
+
+  // Results
+  appointmentsBooked Int   @default(0)
+  leadsGenerated     Int   @default(0)
+  dealsAdvanced      Int   @default(0)
+  revenue            Float @default(0.0)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([territoryId, plannedDate])
+  @@index([status])
+  @@map("territory_plans")
+}
+
+// Territory visit execution tracking
+model TerritoryVisit {
+  id          String    @id @default(cuid())
+  territoryId String
+  territory   Territory @relation(fields: [territoryId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Visit Details
+  visitDate DateTime
+  startTime DateTime
+  endTime   DateTime?
+  visitType String    @default("regular")
+
+  // Pre-Visit Intelligence
+  briefingData   Json // Auto-generated territory briefing
+  targetAccounts String[] // Planned account visits
+  objectives     String[] // Visit objectives
+
+  // Execution Tracking
+  actualRoute         Json? // GPS tracking of actual route
+  accountsVisited     String[] // Actually visited accounts
+  activitiesCompleted Json // Completed activities log
+
+  // Results & Outcomes
+  newLeads        Int      @default(0)
+  meetingsBooked  Int      @default(0)
+  dealsProgressed Int      @default(0)
+  revenue         Float    @default(0.0)
+  notes           String?
+  nextActions     String[] @default([])
+
+  // Effectiveness Metrics
+  effectivenessScore Float @default(0.0) // AI-calculated effectiveness
+  roiScore           Float @default(0.0) // Return on investment
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([territoryId, visitDate])
+  @@index([userId, visitDate])
+  @@map("territory_visits")
+}
+
+// Lead territory assignment rules and tracking
+model LeadTerritoryAssignment {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Assignment Rules
+  ruleName String
+  priority Int     @default(5)
+  isActive Boolean @default(true)
+
+  // Geographic Rules
+  zipCodes    String[] @default([])
+  cities      String[] @default([])
+  states      String[] @default([])
+  radiusMiles Float? // Radius from specific point
+  centerLat   Float? // Center point latitude
+  centerLng   Float? // Center point longitude
+
+  // Business Rules
+  industries   String[] @default([])
+  companySizes String[] @default([]) // "1-10", "11-50", "51-200", etc.
+  revenueRange Json? // Min/max revenue criteria
+
+  // Assignment Logic
+  assignmentType String  @default("round_robin") // round_robin, territory_based, expertise_match, workload_balance
+  targetUserId   String? // Specific user assignment
+  targetUser     User?   @relation(fields: [targetUserId], references: [id])
+
+  // Performance Tracking
+  leadsAssigned   Int   @default(0)
+  conversionRate  Float @default(0.0)
+  avgResponseTime Int   @default(0) // minutes
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, isActive])
+  @@index([priority])
+  @@map("lead_territory_assignments")
+}
+
+// Territory performance analytics
+model TerritoryAnalytics {
+  id          String     @id @default(cuid())
+  territoryId String?
+  territory   Territory? @relation(fields: [territoryId], references: [id], onDelete: Cascade)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  // Analytics Period
+  periodStart DateTime
+  periodEnd   DateTime
+  periodType  String   @default("month") // week, month, quarter, year
+
+  // Activity Metrics
+  visitsPlanned   Int @default(0)
+  visitsCompleted Int @default(0)
+  totalVisitTime  Int @default(0) // minutes
+
+  // Lead & Opportunity Metrics
+  newLeads       Int   @default(0)
+  qualifiedLeads Int   @default(0)
+  leadsConverted Int   @default(0)
+  conversionRate Float @default(0.0)
+
+  // Revenue Metrics
+  pipelineValue Float @default(0.0)
+  closedRevenue Float @default(0.0)
+  avgDealSize   Float @default(0.0)
+
+  // Efficiency Metrics
+  milesTravel     Float @default(0.0)
+  fuelCost        Float @default(0.0)
+  timeUtilization Float @default(0.0) // % of time in productive activities
+
+  // Customer Metrics
+  newCustomers      Int   @default(0)
+  customerMeetings  Int   @default(0)
+  satisfactionScore Float @default(0.0)
+
+  // Competitive Intelligence
+  competitorMentions Int @default(0)
+  lostToCompetitors  Int @default(0)
+  competitiveWins    Int @default(0)
+
+  // AI Insights
+  performanceScore Float    @default(0.0) // Overall AI-calculated performance
+  improvementAreas String[] @default([])
+  recommendations  Json     @default("{}")
+
+  // Timestamps
+  recordedAt DateTime @default(now())
+
+  @@index([territoryId, periodStart])
+  @@index([userId, periodStart])
+  @@index([periodType, periodStart])
+  @@map("territory_analytics")
+}
+
+// ===========================================  
+// RELIABILITY & IDEMPOTENCY MODELS
+// ===========================================
+
+// Idempotency tracking for ensuring request reliability
+model IdempotencyKey {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  tenantId  String?
+  
+  // Request details
+  method    String
+  endpoint  String
+  userId    String?
+  
+  // Response tracking
+  responseStatus Int?
+  responseBody   String?
+  responseHeaders String? @default("{}")
+  
+  // Processing state
+  isProcessing Boolean @default(true)
+  processedAt  DateTime?
+  expiresAt    DateTime
+  
+  // Error handling
+  attemptCount Int @default(1)
+  lastError    String?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([key])
+  @@index([tenantId, endpoint])
+  @@index([expiresAt])
+  @@index([isProcessing])
+  @@map("idempotency_keys")
+}
+
+// Transaction coordination and saga pattern support
+model TransactionLog {
+  id             String   @id @default(cuid())
+  transactionId  String   @unique
+  tenantId       String?
+  
+  // Transaction details
+  transactionType String // customer_creation, subscription_checkout, payment_processing
+  entityType      String
+  entityId        String?
+  
+  // State management
+  status         String   @default("started") // started, committed, rolled_back, failed
+  steps          Json     @default("[]") // Array of transaction steps
+  currentStep    Int      @default(0)
+  
+  // Compensation handling
+  compensationActions Json @default("[]")
+  rollbackReason     String?
+  
+  // Context data
+  transactionData Json     @default("{}")
+  metadata       Json     @default("{}")
+  
+  // Timestamps
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([transactionId])
+  @@index([tenantId, status])
+  @@index([entityType, entityId])
+  @@index([status, startedAt])
+  @@map("transaction_logs")
+}
+
+// ===========================================  
+// COST MANAGEMENT AUDIT MODELS
+// ===========================================
+
+model CostAudit {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Audit Configuration
+  auditType         CostAuditType
+  auditScope        String   @default("comprehensive") // comprehensive, targeted, specific
+  initiatedBy       String? // User ID who initiated the audit
+  automatedRun      Boolean  @default(false)
+
+  // Audit Results
+  findings             Json     @default("{}")
+  recommendations      String[] @default([])
+  potentialSavings     Float    @default(0.0)
+  criticalIssues       String[] @default([])
+  auditScore           Float?   @default(0.0) // Overall audit score 0-100
+  complianceLevel      String?  @default("unknown") // high, medium, low, unknown
+
+  // Cost Breakdown
+  currentCosts         Json     @default("{}")
+  optimizedCosts       Json     @default("{}")
+  costBreakdown        Json     @default("{}")
+  savingsBreakdown     Json     @default("{}")
+
+  // Benchmarking
+  industryBenchmark    Float?
+  benchmarkVariance    Float?   @default(0.0)
+  benchmarkSource      String?
+
+  // Risk Assessment
+  lockInRisk           String   @default("unknown") // critical, high, medium, low, unknown
+  migrationComplexity  Int?     @default(0) // 1-10 scale
+  vendorDependencies   String[] @default([])
+
+  // Performance Metrics
+  utilizationEfficiency Float?  @default(0.0) // 0-1 scale
+  resourceWaste        Float?   @default(0.0)
+  costTrends           Json     @default("{}")
+  forecastAccuracy     Float?   @default(0.0)
+
+  // Status & Lifecycle
+  status          String    @default("completed") // pending, running, completed, failed
+  auditDuration   Int?      @default(0) // minutes
+  dataQuality     String    @default("unknown") // high, medium, low, unknown
+  lastValidated   DateTime?
+  nextAuditDue    DateTime?
+
+  // Timestamps
+  auditStarted DateTime  @default(now())
+  auditEnded   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  auditDetails CostAuditDetail[]
+  auditActions CostAuditAction[]
+
+  @@index([tenantId, auditType])
+  @@index([auditStarted])
+  @@index([status, auditType])
+  @@index([potentialSavings])
+  @@map("cost_audits")
+}
+
+model CostAuditDetail {
+  id          String    @id @default(cuid())
+  costAuditId String
+  costAudit   CostAudit @relation(fields: [costAuditId], references: [id], onDelete: Cascade)
+
+  // Detail Configuration
+  category        String // infrastructure, software, personnel, support, transfer, etc.
+  subcategory     String? // specific service or resource type
+  resourceId      String? // external resource identifier
+  resourceName    String
+  
+  // Cost Analysis
+  currentCost     Float   @default(0.0)
+  optimizedCost   Float   @default(0.0)
+  potentialSaving Float   @default(0.0)
+  utilizationRate Float?  @default(0.0) // 0-1 scale
+  
+  // Recommendations
+  recommendation  String?
+  priority        String  @default("medium") // critical, high, medium, low
+  implementationEffort String @default("unknown") // easy, medium, hard, complex
+  riskLevel       String  @default("low") // critical, high, medium, low
+  
+  // Timeline
+  quickWin        Boolean @default(false)
+  timeToImplement Int?    @default(0) // days
+  
+  // Metadata
+  metadata        Json    @default("{}")
+  
+  @@index([costAuditId, category])
+  @@index([potentialSaving])
+  @@index([priority, riskLevel])
+  @@map("cost_audit_details")
+}
+
+model CostAuditAction {
+  id          String    @id @default(cuid())
+  costAuditId String
+  costAudit   CostAudit @relation(fields: [costAuditId], references: [id], onDelete: Cascade)
+
+  // Action Configuration
+  actionType    String // optimize, migrate, consolidate, eliminate, renegotiate
+  title         String
+  description   String?
+  priority      String  @default("medium") // critical, high, medium, low
+  
+  // Implementation
+  status            String    @default("pending") // pending, in_progress, completed, cancelled
+  assignedTo        String? // User ID
+  estimatedSavings  Float     @default(0.0)
+  actualSavings     Float?    @default(0.0)
+  implementationCost Float?   @default(0.0)
+  
+  // Timeline
+  dueDate     DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+  
+  // Tracking
+  progress    Int       @default(0) // 0-100 percentage
+  notes       String?
+  blockers    String[]  @default([])
+  
+  // Metadata
+  metadata    Json      @default("{}")
+  
+  @@index([costAuditId, status])
+  @@index([priority, dueDate])
+  @@index([assignedTo])
+  @@map("cost_audit_actions")
+}
+
+// Dead Letter Queue for webhook failures
+model WebhookFailure {
+  id               String    @id
+  eventType        String
+  sourceProvider   String
+  payload          Json
+  originalHeaders  Json
+  failureReason    String
+  stackTrace       String?
+  attemptCount     Int       @default(1)
+  maxRetries       Int       @default(5)
+  status           String    @default("pending") // pending, processing, recovered, abandoned
+  priority         String    @default("medium") // low, medium, high, critical
+  tenantId         String
+  impactLevel      String    @default("low") // low, medium, high, critical
+  businessImpact   String
+  technicalNotes   String?
+  lastAttemptAt    DateTime  @default(now())
+  scheduledRetryAt DateTime?
+  recoveredAt      DateTime?
+  abandonedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([status])
+  @@index([tenantId])
+  @@index([sourceProvider])
+  @@index([priority])
+  @@index([createdAt])
+  @@index([scheduledRetryAt])
+  @@index([status, priority, scheduledRetryAt])
+  @@map("webhook_failures")
+}
+
+// ===========================================
+// AI PROVIDER MANAGEMENT
+// ===========================================
+
+model AIProvider {
+  id               String    @id @default(cuid())
+  tenantId         String
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Provider identification
+  providerId       String    // openai, anthropic, google, cohere, mistral
+  name             String    // Display name
+  description      String?   // Provider description
+  
+  // Configuration
+  apiKey           String?   // Encrypted API key
+  apiKeyHash       String?   // Hash for verification
+  isEnabled        Boolean   @default(false)
+  isConfigured     Boolean   @default(false)
+  
+  // Settings
+  defaultModel     String?   // Default model for this provider
+  temperature      Float?    @default(0.7)
+  maxTokens        Int?      @default(4096)
+  costPerToken     Float?    @default(0.0)
+  
+  // Status tracking
+  lastTested       DateTime?
+  testResult       Boolean?
+  lastTestError    String?
+  healthStatus     HealthStatus @default(INACTIVE)
+  
+  // Usage tracking
+  totalRequests    Int       @default(0)
+  totalTokens      BigInt    @default(0)
+  totalCost        Decimal   @default(0) @db.Decimal(12,4)
+  lastUsed         DateTime?
+  
+  // Performance metrics
+  avgResponseTime  Int?      // Average response time in milliseconds
+  errorRate        Float?    @default(0.0) // Error rate 0-100
+  uptime           Float?    @default(100.0) // Uptime percentage
+  
+  // Configuration metadata
+  supportedModels  String[]  // Available models for this provider
+  supportedFeatures String[] // Capabilities: text, code, vision, embeddings
+  metadata         Json?     // Provider-specific settings
+  
+  // Audit trail
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  createdBy        String?   // User who configured provider
+  lastModifiedBy   String?   // User who last modified
+  
+  // Relations
+  usageLogs        AIProviderUsage[]
+  
+  @@unique([tenantId, providerId])
+  @@index([tenantId, isEnabled])
+  @@index([providerId, isEnabled])
+  @@index([healthStatus, lastTested])
+  @@index([totalCost, lastUsed])
+  @@map("ai_providers")
+}
+
+model AIProviderUsage {
+  id           String     @id @default(cuid())
+  tenantId     String
+  tenant       Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  providerId   String
+  provider     AIProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  // Usage details
+  model        String     // Model used
+  tokensUsed   Int        // Tokens consumed
+  cost         Decimal    @db.Decimal(12,6) // Cost for this request
+  responseTime Int        // Response time in milliseconds
+  
+  // Request context
+  taskType     String?    // reasoning, code-generation, vision, etc.
+  department   String?    // crm, sales, finance, etc.
+  userId       String?    // User who initiated request
+  
+  // Status
+  success      Boolean    @default(true)
+  errorMessage String?    // Error if failed
+  
+  // Audit
+  timestamp    DateTime   @default(now())
+  
+  @@index([tenantId, timestamp])
+  @@index([providerId, timestamp])
+  @@index([taskType, timestamp])
+  @@index([success, timestamp])
+  @@map("ai_provider_usage")
+}
+
