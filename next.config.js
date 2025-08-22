@@ -3,9 +3,6 @@ const nextConfig = {
   // Performance optimizations
   compress: true,
   poweredByHeader: false,
-  swcMinify: true,
-  
-  serverExternalPackages: ['prisma'],
   
   // Optimized image config for mobile performance
   images: {
