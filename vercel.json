@@ -1,22 +1,9 @@
 {
-  "framework": "nextjs",
   "buildCommand": "npx prisma generate && next build",
-  "installCommand": "npm ci --legacy-peer-deps",
-  "functions": {
-    "api/**/*.ts": {
-      "maxDuration": 30
-    }
-  },
+  "installCommand": "npm install --legacy-peer-deps",
   "build": {
     "env": {
-      "NODE_OPTIONS": "--max-old-space-size=8192",
-      "NEXT_TELEMETRY_DISABLED": "1",
-      "CI": "true",
-      "BUILDING_FOR_VERCEL": "1",
-      "NEXT_PHASE": "phase-production-build"
+      "NODE_OPTIONS": "--max-old-space-size=8192"
     }
-  },
-  "env": {
-    "BUILDING_FOR_VERCEL": "1"
   }
 }
