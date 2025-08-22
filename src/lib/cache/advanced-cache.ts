@@ -4,7 +4,7 @@
  */
 
 import { getRedis } from '@/lib/redis/client'
-import { productionMonitor } from '@/lib/monitoring/production-alerts'
+// import { productionMonitor } from '@/lib/monitoring/production-alerts'
 
 // Cache configuration types
 interface CacheConfig {
@@ -499,10 +499,10 @@ export class AdvancedCache {
       : 0
 
     // Report metrics to monitoring
-    productionMonitor.recordMetric('cache_hits', this.stats.hits)
-    productionMonitor.recordMetric('cache_misses', this.stats.misses)
-    productionMonitor.recordMetric('cache_hit_rate', this.stats.hitRate)
-    productionMonitor.recordMetric('cache_memory_usage', this.stats.memoryUsage)
+//     productionMonitor.recordMetric('cache_hits', this.stats.hits)
+//     productionMonitor.recordMetric('cache_misses', this.stats.misses)
+//     productionMonitor.recordMetric('cache_hit_rate', this.stats.hitRate)
+//     productionMonitor.recordMetric('cache_memory_usage', this.stats.memoryUsage)
   }
 
   private startCleanupRoutine(): void {

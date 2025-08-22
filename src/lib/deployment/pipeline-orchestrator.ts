@@ -3,7 +3,7 @@
  * Automated CI/CD pipeline management with intelligent deployment strategies
  */
 
-import { productionMonitor } from '@/lib/monitoring/production-alerts'
+// import { productionMonitor } from '@/lib/monitoring/production-alerts'
 import { advancedCache } from '@/lib/cache/advanced-cache'
 import { loadBalancer } from '@/lib/scaling/load-balancer'
 import { containerOrchestrator } from '@/lib/scaling/container-orchestrator'
@@ -240,7 +240,7 @@ export class PipelineOrchestrator {
     this.pipelines.set(pipelineId, pipeline)
     
     console.log(`Pipeline created: ${pipelineId} (${config.name})`)
-    productionMonitor.recordMetric('deployment_pipeline_created', 1)
+//     productionMonitor.recordMetric('deployment_pipeline_created', 1)
     
     return pipelineId
   }
@@ -306,7 +306,7 @@ export class PipelineOrchestrator {
     this.runDeploymentExecution(executionId)
     
     console.log(`Deployment started: ${executionId}`)
-    productionMonitor.recordMetric('deployment_execution_started', 1)
+//     productionMonitor.recordMetric('deployment_execution_started', 1)
     
     return executionId
   }
@@ -337,7 +337,7 @@ export class PipelineOrchestrator {
       await this.sendNotification(execution, 'deployment_cancelled', { reason })
       
       console.log(`Deployment cancelled: ${executionId} - ${reason}`)
-      productionMonitor.recordMetric('deployment_execution_cancelled', 1)
+//       productionMonitor.recordMetric('deployment_execution_cancelled', 1)
       
       return true
     }
@@ -372,7 +372,7 @@ export class PipelineOrchestrator {
     })
 
     console.log(`Rollback initiated: ${rollbackExecutionId} for ${executionId}`)
-    productionMonitor.recordMetric('deployment_rollback_initiated', 1)
+//     productionMonitor.recordMetric('deployment_rollback_initiated', 1)
     
     return rollbackExecutionId
   }
@@ -402,7 +402,7 @@ export class PipelineOrchestrator {
         }
 
         console.log(`Deployment approved: ${executionId} by ${approver}`)
-        productionMonitor.recordMetric('deployment_approved', 1)
+//         productionMonitor.recordMetric('deployment_approved', 1)
         
         return true
       }
@@ -501,7 +501,7 @@ export class PipelineOrchestrator {
       `https://api-${environment}.coreflow360.com`,
     ]
 
-    productionMonitor.recordMetric('infrastructure_deployment_completed', 1)
+//     productionMonitor.recordMetric('infrastructure_deployment_completed', 1)
     
     return {
       deploymentId,
@@ -894,8 +894,8 @@ export class PipelineOrchestrator {
     await this.clearDeploymentCaches(execution)
     
     // Record deployment metrics
-    productionMonitor.recordMetric('deployment_success', 1)
-    productionMonitor.recordMetric('deployment_duration', execution.duration || 0)
+//     productionMonitor.recordMetric('deployment_success', 1)
+//     productionMonitor.recordMetric('deployment_duration', execution.duration || 0)
   }
 
   private async updateLoadBalancerConfiguration(execution: DeploymentExecution): Promise<void> {

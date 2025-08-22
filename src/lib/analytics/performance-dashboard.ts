@@ -4,7 +4,7 @@
  */
 
 import { getRedis } from '@/lib/redis/client'
-import { productionMonitor } from '@/lib/monitoring/production-alerts'
+// import { productionMonitor } from '@/lib/monitoring/production-alerts'
 import { advancedCache } from '@/lib/cache/advanced-cache'
 
 // Performance metric types
@@ -286,7 +286,7 @@ export class PerformanceDashboard {
       }
 
       // Report to production monitor
-      productionMonitor.recordMetric(name, value)
+//       productionMonitor.recordMetric(name, value)
     } catch (error) {
       console.error('Record metric error:', error)
     }

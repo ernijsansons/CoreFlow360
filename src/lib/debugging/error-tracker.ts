@@ -4,7 +4,7 @@
  */
 
 import { getRedis } from '@/lib/redis/client'
-import { productionMonitor } from '@/lib/monitoring/production-alerts'
+// import { productionMonitor } from '@/lib/monitoring/production-alerts'
 import { advancedCache } from '@/lib/cache/advanced-cache'
 
 // Error severity levels
@@ -201,9 +201,9 @@ export class AdvancedErrorTracker {
       }
 
       // Send to monitoring system
-      productionMonitor.recordMetric('error_captured', 1)
-      productionMonitor.recordMetric(`error_${severity}`, 1)
-      productionMonitor.recordMetric(`error_category_${category}`, 1)
+//       productionMonitor.recordMetric('error_captured', 1)
+//       productionMonitor.recordMetric(`error_${severity}`, 1)
+//       productionMonitor.recordMetric(`error_category_${category}`, 1)
 
       // Check for alerts
       await this.checkErrorAlerts(structuredError)

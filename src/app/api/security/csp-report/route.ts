@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { reportCSPViolation } from '@/lib/security/advanced-security-headers'
-import { productionMonitor } from '@/lib/monitoring/production-alerts'
+// import { productionMonitor } from '@/lib/monitoring/production-alerts'
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
     await reportCSPViolation(violationDetails)
 
     // Record metrics
-    productionMonitor.recordMetric('csp_violation', 1)
-    productionMonitor.recordMetric('security_event', 1)
+    // productionMonitor.recordMetric('csp_violation', 1)
+    // productionMonitor.recordMetric('security_event', 1)
 
     // Log for debugging (only in non-production)
     if (process.env.NODE_ENV !== 'production') {
