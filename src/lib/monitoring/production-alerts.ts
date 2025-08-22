@@ -3,7 +3,7 @@
  * Enterprise-grade monitoring with health checks, metrics, and alerts
  */
 
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/db'
 import { getRedis } from '@/lib/redis/client'
 
 // Health check interfaces
@@ -174,9 +174,12 @@ export class ProductionMonitor {
 
   private async checkDatabase(): Promise<HealthCheckResult> {
     const start = Date.now()
+    const prisma = getPrisma()
     
     try {
-      await prisma.$queryRaw`SELECT 1`
+      if (prisma) {
+        await prisma.$queryRaw`SELECT 1`
+      }
       const responseTime = Date.now() - start
       
       return {
@@ -351,12 +354,13 @@ export class ProductionMonitor {
   }
 
   private async collectDatabaseMetrics(): Promise<Record<string, number>> {
+    const prisma = getPrisma()
     try {
-      const [userCount, sessionCount, activeSubscriptions] = await Promise.all([
+      const [userCount, sessionCount, activeSubscriptions] = prisma ? await Promise.all([
         prisma.user.count(),
         prisma.session.count(),
         prisma.subscription.count({ where: { status: 'ACTIVE' } }),
-      ])
+      ]) : [0, 0, 0]
       
       return {
         user_count: userCount,
@@ -512,13 +516,16 @@ export class ProductionMonitor {
   private async sendAlert(alertData: any): Promise<void> {
     // Implement your alerting logic here (Slack, email, PagerDuty, etc.)
     // For now, just log to audit table
+    const prisma = getPrisma()
     try {
-      await prisma.auditLog.create({
+      if (prisma) {
+        await prisma.auditLog.create({
         data: {
           action: 'SYSTEM_ALERT',
           metadata: alertData,
         },
       })
+      }
     } catch (error) {
       console.error('Failed to log alert:', error)
     }
