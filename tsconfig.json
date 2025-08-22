@@ -50,7 +50,6 @@
     "src/lib/ai/ai-model-performance-orchestrator.ts",
     "src/lib/crm/proposal-builder-engine.ts",
     "src/lib/marketing/**/*",
-    "src/lib/monitoring/**/*",
     "src/lib/testing/**/*",
     "src/lib/voice/**/*",
     "src/lib/websocket-server.ts",
