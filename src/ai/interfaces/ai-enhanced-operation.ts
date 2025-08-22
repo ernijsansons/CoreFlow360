@@ -10,8 +10,7 @@ import {
   executeSecureOperation,
   SecureOperationContext,
 } from '@/services/security/secure-operations'
-import { withPerformanceTracking } from '@/lib/utils/performance/performance-tracking'
-import { AuditLogger } from '@/lib/services/security/audit-logging'
+import { auditLogger } from '@/lib/services/security/audit-logging'
 
 // AI Configuration Types
 export interface AIConfiguration {
@@ -153,7 +152,7 @@ export async function withAIEnhancement<T = unknown>(
   // Wrap with security and performance tracking
   const secureContext: SecureOperationContext = {
     tenantId: context.tenantId,
-    userId: context.userId,
+    userId: context.userId || 'system', // Provide default for undefined userId
     operation: `ai_enhanced_${context.operation}`,
     entityType: context.entityType,
     entityId: context.entityId,
@@ -165,47 +164,45 @@ export async function withAIEnhancement<T = unknown>(
   }
 
   const result = await executeSecureOperation(secureContext, async () => {
-    return withPerformanceTracking(`ai_operation_${context.operation}`, async () => {
-      // 1. Execute the core operation
-      const operationResult = await operation()
+    // 1. Execute the core operation
+    const operationResult = await operation()
 
-      // 2. Perform AI analysis if enabled
-      if (shouldPerformAIAnalysis(context, governance)) {
-        try {
-          aiAnalysis = await performAIAnalysis(context, operationResult, config)
-          totalCost += aiAnalysis.cost
+    // 2. Perform AI analysis if enabled
+    if (shouldPerformAIAnalysis(context, governance)) {
+      try {
+        aiAnalysis = await performAIAnalysis(context, operationResult, config)
+        totalCost += aiAnalysis.cost
 
-          // 3. Log AI activity for audit
-          await AuditLogger.log({
-            action: 'CREATE',
-            entityType: 'ai_activity',
-            entityId: `ai_${Date.now()}`,
-            tenantId: context.tenantId,
-            userId: context.userId,
-            newValues: {
-              operation: context.operation,
-              model: config.model,
-              cost: aiAnalysis.cost,
-              confidence: aiAnalysis.confidence,
-              processingTime: aiAnalysis.processingTime,
-            },
-            metadata: {
-              department: context.department,
-              entityType: context.entityType,
-              entityId: context.entityId,
-            },
-          })
+        // 3. Log AI activity for audit
+        await auditLogger.log({
+          action: 'AI_ANALYSIS',
+          resource: 'ai_activity',
+          resourceId: `ai_${Date.now()}`,
+          tenantId: context.tenantId,
+          userId: context.userId || 'system',
+          severity: 'info',
+          category: 'system',
+          metadata: {
+            operation: context.operation,
+            model: config.model,
+            cost: aiAnalysis.cost,
+            confidence: aiAnalysis.confidence,
+            processingTime: aiAnalysis.processingTime,
+            department: context.department,
+            entityType: context.entityType,
+            entityId: context.entityId,
+          },
+        })
 
-          // 4. Store AI insights
-          await storeAIInsights(context, aiAnalysis)
-        } catch (aiError) {
-          console.warn('AI analysis failed, continuing with operation:', aiError)
-          // AI failure doesn't break the core operation
-        }
+        // 4. Store AI insights
+        await storeAIInsights(context, aiAnalysis)
+      } catch (aiError) {
+        console.warn('AI analysis failed, continuing with operation:', aiError)
+        // AI failure doesn't break the core operation
       }
+    }
 
-      return operationResult
-    })()
+    return operationResult
   })
 
   const aiEndTime = performance.now()

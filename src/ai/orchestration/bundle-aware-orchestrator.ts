@@ -8,16 +8,61 @@ import { prisma } from '@/lib/db'
 import type {
   BundleDefinition,
   AICapability,
-  AICapabilityType,
-  ExternalResource,
   BundleTier,
-  AIFlow,
-  AIFlowStep,
-  Subscription,
 } from '@/types/bundles'
-import { AI_CAPABILITIES, BUNDLE_PRESETS } from '@/lib/types/bundles'
+import { AI_CAPABILITIES } from '@/types/bundles'
 import { redis } from '@/lib/redis'
 import { performance } from 'perf_hooks'
+
+// Local types for missing bundle types
+const BUNDLE_PRESETS: Record<string, any> = {}
+
+interface Subscription {
+  customLimits?: any
+  id: string
+  tenantId: string
+  bundleId: string
+  status: 'active' | 'inactive' | 'pending'
+  aiCapabilities?: string[]
+}
+
+enum ExternalResource {
+  FINGPT = 'FINGPT',
+  FINROBOT = 'FINROBOT',
+  LANGCHAIN = 'LANGCHAIN',
+}
+
+interface AIFlowStep {
+  id: string
+  name: string
+  capability: string
+  resource?: ExternalResource
+  input: Record<string, any>
+  output?: Record<string, any>
+  dependencies?: string[]
+  fallbackStep?: boolean
+  retryPolicy?: {
+    maxAttempts: number
+    backoffMs: number
+  }
+  trigger?: {
+    type: 'schedule' | 'event' | 'manual'
+    config?: any
+  }
+}
+
+interface AIFlow {
+  id: string
+  name: string
+  description: string
+  steps: AIFlowStep[]
+  requiredCapabilities: string[]
+  requiredResources?: ExternalResource[]
+  minBundleTier?: BundleTier
+  estimatedDuration?: number
+  estimatedCost?: number
+  successRate?: number
+}
 
 export interface AIFlowContext {
   tenantId: string
@@ -40,7 +85,7 @@ export interface AIFlowResult {
 
 export interface AIFlowStepResult {
   stepId: string
-  capability: AICapabilityType
+  capability: string
   resource: ExternalResource
   startTime: number
   endTime: number
@@ -83,7 +128,7 @@ export class BundleAwareOrchestrator {
       }
 
       // Check usage limits
-      const withinLimits = await this.checkUsageLimits(context.subscription, flow.estimatedCost)
+      const withinLimits = await this.checkUsageLimits(context.subscription, flow.estimatedCost || 0)
 
       if (!withinLimits) {
         throw new Error('AI operation limit exceeded for current billing period')
@@ -418,7 +463,7 @@ export class BundleAwareOrchestrator {
   /**
    * Get capability by type
    */
-  private getCapability(type: AICapabilityType): AICapability | undefined {
+  private getCapability(type: string): AICapability | undefined {
     return AI_CAPABILITIES.find((cap) => cap.type === type)
   }
 
@@ -527,7 +572,7 @@ export class BundleAwareOrchestrator {
 
     const flows: AIFlow[] = []
 
-    if (bundle.aiCapabilities.some((cap) => cap.type === AICapabilityType.FINANCIAL_ANALYSIS)) {
+    if (bundle.aiCapabilities.some((cap) => cap.type === 'FINANCIAL_ANALYSIS')) {
       flows.push({
         id: 'financial-health-check',
         name: 'Financial Health Check',
@@ -536,7 +581,7 @@ export class BundleAwareOrchestrator {
           {
             id: 'analyze',
             name: 'Analyze Financial Data',
-            capability: AICapabilityType.FINANCIAL_ANALYSIS,
+            capability: 'FINANCIAL_ANALYSIS',
             resource: ExternalResource.FINGPT,
             input: {
               data: '{{context.financialData}}',
@@ -561,7 +606,7 @@ export class BundleAwareOrchestrator {
             config: { cron: '0 9 * * 1' }, // Every Monday at 9 AM
           },
         ],
-        requiredCapabilities: [AICapabilityType.FINANCIAL_ANALYSIS],
+        requiredCapabilities: ['FINANCIAL_ANALYSIS'],
         requiredResources: [ExternalResource.FINGPT],
         minBundleTier: BundleTier.PROFESSIONAL,
         estimatedDuration: 5000,
