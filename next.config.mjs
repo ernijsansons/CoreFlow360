@@ -62,13 +62,14 @@ const nextConfig = {
     ],
   },
 
-  // Temporarily ignore errors to fix build first
+  // TypeScript configuration - strict mode enabled
   typescript: {
-    ignoreBuildErrors: true, // Temporary - will fix after build works
+    ignoreBuildErrors: false,
   },
   
   eslint: {
-    ignoreDuringBuilds: true, // Temporary - will fix after build works
+    ignoreDuringBuilds: false,
+    dirs: ['src', 'prisma'], // Focus linting on key directories
   },
 
   // Optimizations for Vercel
@@ -77,9 +78,11 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
 
-  // Skip validation during build
+  // Environment validation enabled for production safety
   env: {
-    SKIP_ENV_VALIDATION: 'true',
+    // Environment variables that should be available on the client
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   },
 }
 

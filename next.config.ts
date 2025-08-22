@@ -4,10 +4,7 @@ const nextConfig: NextConfig = {
   // Performance optimizations
   compress: true,
   poweredByHeader: false,
-  
-  // Optimize build performance
   swcMinify: true,
-  compress: true,
   
   serverExternalPackages: ['prisma'],
   
@@ -24,10 +21,11 @@ const nextConfig: NextConfig = {
   
   // TypeScript and ESLint configuration
   typescript: {
-    ignoreBuildErrors: true, // Temporarily ignore for deployment
+    ignoreBuildErrors: false, // TypeScript strict mode enabled
   },
   eslint: {
-    ignoreDuringBuilds: true, // Temporarily ignore for deployment
+    ignoreDuringBuilds: false, // ESLint validation enabled
+    dirs: ['src', 'prisma'], // Focus on key directories
   },
   
   // Optimized experimental features
@@ -43,8 +41,6 @@ const nextConfig: NextConfig = {
       '@radix-ui/react-slider',
       'recharts'
     ],
-    // Reduce static generation during build
-    staticPageGenerationTimeout: 60,
   },
   
   // EMERGENCY: Build-time environment variables
