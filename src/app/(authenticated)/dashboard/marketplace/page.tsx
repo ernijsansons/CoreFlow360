@@ -97,10 +97,10 @@ export default function MarketplacePage() {
       const accessData = await accessResponse.json()
 
       if (modulesData.success && accessData.success) {
-        const accessibleModules = accessData.data.accessibleModules.map((m: unknown) => m.id)
+        const accessibleModules = accessData.data.accessibleModules.map((m: any) => m.id)
 
         // Combine data
-        const combinedModules = modulesData.data.map((module: unknown) => ({
+        const combinedModules = modulesData.data.map((module: any) => ({
           ...module,
           accessible: accessibleModules.includes(module.id),
         }))
@@ -202,7 +202,7 @@ export default function MarketplacePage() {
         </div>
         <select
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as unknown)}
+          onChange={(e) => setSortBy(e.target.value as any)}
           className="rounded-md border px-3 py-2"
         >
           <option value="popularity">Most Popular</option>

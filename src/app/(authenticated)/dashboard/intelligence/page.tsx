@@ -39,7 +39,7 @@ const IntelligencePage: React.FC = () => {
   } = useIntelligenceAssessment({
     enableAudio: true,
     persistResults: true,
-    _onAssessmentComplete: (result) => {},
+    onAssessmentComplete: (result) => {},
   })
 
   // Load saved profile on component mount
@@ -334,7 +334,6 @@ const IntelligencePage: React.FC = () => {
             onComplete={(result) => {
               // Results will be shown within the component
             }}
-            showVisualization={true}
           />
         </div>
       </div>

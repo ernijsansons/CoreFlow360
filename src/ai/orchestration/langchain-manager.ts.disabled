@@ -22,8 +22,7 @@ import { OpenAIEmbeddings } from '@langchain/openai'
 import { Document } from '@langchain/core/documents'
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { AIModelType, PrismaClient } from '@prisma/client'
-import { executeSecureOperation } from '@/lib/services/security/secure-operations'
-import { withPerformanceTracking } from '@/lib/utils/performance/performance-tracking'
+import { executeSecureOperation } from '@/services/security/secure-operations'
 import { Redis } from 'ioredis'
 
 // LangChain Configuration
@@ -33,10 +32,8 @@ export interface LangChainConfig {
   voyageApiKey?: string
   models: {
     [AIModelType.GPT4]: string
-    [AIModelType.GPT4_TURBO]: string
-    [AIModelType.CLAUDE3_OPUS]: string
-    [AIModelType.CLAUDE3_SONNET]: string
-    [AIModelType.CLAUDE3_HAIKU]: string
+    [AIModelType.CLAUDE3]: string
+    [AIModelType.CUSTOM]?: string
   }
   embeddings: {
     openai: {
@@ -403,7 +400,8 @@ export class LangChainManager {
     _predictionType: string,
     _features: Record<string, unknown>
   ): Promise<SequentialChain> {
-    return await withPerformanceTracking('create_prediction_chain', async () => {
+    // Process directly without performance tracking
+    return await (async () => {
       const llm = this.models.get(model)
       if (!llm) throw new Error(`Model not found: ${model}`)
 
@@ -638,7 +636,8 @@ export class LangChainManager {
     processType: 'extract' | 'summarize' | 'classify' | 'analyze',
     model: AIModelType = AIModelType.GPT4
   ): Promise<ChainResult> {
-    return await withPerformanceTracking('process_document_ai', async () => {
+    // Process directly without performance tracking
+    return await (async () => {
       // Load document from database
       const document = await this.prisma.document.findUnique({
         where: { id: documentId },
