@@ -849,12 +849,11 @@ export class CompanyIntelligenceOrchestrator {
    */
   private async storeInsight(insight: IntelligenceInsight): Promise<void> {
     // Convert insight to problem format and store
-    const prismaClient = this.prisma
-    if (!prismaClient) return
+    if (!prisma) return
     
     for (const analysisInsight of insight.insights) {
       if (analysisInsight.type === 'PROBLEM') {
-        await prismaClient.customerProblem.create({
+        await prisma.customerProblem.create({
           data: {
             tenantId: 'default', // Would be passed from context
             companyIntelligenceId: insight.companyId,
@@ -866,11 +865,23 @@ export class CompanyIntelligenceOrchestrator {
             sourceData: JSON.stringify(insight.rawData),
             confidenceScore: analysisInsight.confidence,
             urgencyScore: this.calculateUrgencyFromSeverity(analysisInsight.severity),
+            businessImpact: JSON.stringify({
+              severity: analysisInsight.severity,
+              affectedAreas: [],
+              estimatedImpact: 'Under analysis',
+            }),
+            evolutionHistory: JSON.stringify([{
+              timestamp: new Date().toISOString(),
+              status: 'DETECTED',
+              description: 'Initial detection by AI agent',
+              agentId: insight.agentId,
+            }]),
+            recommendedActions: JSON.stringify(['Review and assess the situation', 'Monitor for escalation']),
             aiInsights: JSON.stringify({
               agent: insight.agentId,
               evidence: analysisInsight.evidence,
               metadata: insight.metadata,
-            },
+            }),
           },
         })
       }

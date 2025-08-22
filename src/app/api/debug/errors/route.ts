@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/lib/auth'
 import { 
   advancedErrorTracker, 
   ErrorSeverity, 
@@ -17,7 +16,7 @@ import {
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -197,7 +196,7 @@ async function handleErrorCapture(request: NextRequest, body: any) {
 
 async function handleErrorResolve(request: NextRequest, body: any) {
   // Verify authentication for error resolution
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -224,7 +223,7 @@ async function handleErrorResolve(request: NextRequest, body: any) {
 
 async function handleStartDebugSession(request: NextRequest, body: any) {
   // Verify authentication
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -247,7 +246,7 @@ async function handleStartDebugSession(request: NextRequest, body: any) {
 
 async function handleEndDebugSession(request: NextRequest, body: any) {
   // Verify authentication
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -293,7 +292,7 @@ async function handleAddDebugLog(request: NextRequest, body: any) {
 export async function DELETE(request: NextRequest) {
   try {
     // Verify authentication and admin access
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

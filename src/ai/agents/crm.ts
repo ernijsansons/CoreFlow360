@@ -5,13 +5,13 @@
  * Autonomous customer relationship intelligence
  */
 
-import { AI_CONFIG } from '@/lib/config/ai.config'
+// import { defaultAIConfig } from '@/lib/config/ai.config'
 
 export class CRMAgent {
   constructor() {
     // // // // // // // // // // // // // // // // // // // // // // // console.log('🤝 CRM AI Agent initializing...');
-    // // // // // // // // // // // // // // // // // // // // // // // console.log(`🎯 Role: ${AI_CONFIG.agents.departmental.crm.role}`);
-    // // // // // // // // // // // // // // // // // // // // // // // console.log(`⚡ Capabilities: ${AI_CONFIG.agents.departmental.crm.capabilities.join(', ')}`);
+    // // // // // // // // // // // // // // // // // // // // // // // console.log(`🎯 Role: CRM AI Agent`);
+    // // // // // // // // // // // // // // // // // // // // // // // console.log(`⚡ Capabilities: Lead scoring, customer intelligence`);
   }
 
   async scoreLeads(leads: any[]) {

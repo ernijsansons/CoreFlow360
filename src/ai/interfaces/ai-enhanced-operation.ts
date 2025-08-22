@@ -9,7 +9,7 @@ import { AIModelType } from '@prisma/client'
 import {
   executeSecureOperation,
   SecureOperationContext,
-} from '@/lib/services/security/secure-operations'
+} from '@/services/security/secure-operations'
 import { withPerformanceTracking } from '@/lib/utils/performance/performance-tracking'
 import { AuditLogger } from '@/lib/services/security/audit-logging'
 

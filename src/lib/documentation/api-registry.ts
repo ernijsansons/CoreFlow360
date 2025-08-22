@@ -669,6 +669,3 @@ function registerAdminAPIs() {
     security: [{ BearerAuth: [] }],
   })
 }
-
-// Export initialization function
-export { initializeAPIDocumentation }

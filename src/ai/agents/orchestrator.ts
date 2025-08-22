@@ -5,15 +5,15 @@
  * The master AI that coordinates all other agents
  */
 
-import { AI_CONFIG } from '@/lib/config/ai.config'
+// import { defaultAIConfig } from '@/lib/config/ai.config'
 
 export class CentralOrchestrator {
   private agents: Map<string, any> = new Map()
 
   constructor() {
     // // // // // // // // // // // // // // // // // // // // // // // console.log('🧠 Central AI Orchestrator initializing...');
-    // // // // // // // // // // // // // // // // // // // // // // // console.log(`🎯 Role: ${AI_CONFIG.agents.orchestrator.role}`);
-    // // // // // // // // // // // // // // // // // // // // // // // console.log(`⚡ Capabilities: ${AI_CONFIG.agents.orchestrator.capabilities.join(', ')}`);
+    // // // // // // // // // // // // // // // // // // // // // // // console.log(`🎯 Role: Central AI Orchestrator`);
+    // // // // // // // // // // // // // // // // // // // // // // // console.log(`⚡ Capabilities: Agent coordination, decision making`);
   }
 
   async coordinateOperations() {

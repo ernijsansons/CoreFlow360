@@ -5,13 +5,12 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { openAPIGenerator } from '@/lib/documentation/openapi-generator'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication for sensitive API information
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     if (!session) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
