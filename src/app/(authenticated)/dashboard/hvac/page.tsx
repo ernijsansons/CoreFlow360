@@ -1,6 +1,6 @@
 /**
- * CoreFlow360 - HVAC Module Dashboard
- * Main dashboard for HVAC/Field Service management
+ * CoreFlow360 - HVAC Multi-Location Module Dashboard
+ * Centralized multi-location HVAC service management
  */
 
 'use client'
@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState } from 'react'
 import DashboardLayout from '@/components/layouts/DashboardLayout'
+import { HVACMultiLocationDashboard } from '@/components/hvac/HVACMultiLocationDashboard'
 import EquipmentManager from '@/components/hvac/EquipmentManager'
 import ServiceScheduler from '@/components/hvac/ServiceScheduler'
 import ContractManager from '@/components/hvac/ContractManager'
@@ -24,7 +25,8 @@ import {
 } from '@heroicons/react/24/outline'
 
 export default function HVACPage() {
-  const [activeTab, setActiveTab] = useState('equipment')
+  const [activeTab, setActiveTab] = useState('multi-location')
+  const [showMultiLocation, setShowMultiLocation] = useState(true)
 
   const handleEquipmentSelect = (_equipment: unknown) => {
     // TODO: Open equipment detail modal or navigate to equipment page
@@ -81,20 +83,23 @@ export default function HVACPage() {
 
   return (
     <DashboardLayout>
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="space-y-6">
-          {/* Header */}
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">HVAC Management</h1>
-            <p className="mt-2 text-gray-600">
-              Comprehensive field service management for HVAC operations
-            </p>
-          </div>
+      {showMultiLocation ? (
+        <HVACMultiLocationDashboard />
+      ) : (
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="space-y-6">
+            {/* Header */}
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">HVAC Management</h1>
+              <p className="mt-2 text-gray-600">
+                Comprehensive field service management for HVAC operations
+              </p>
+            </div>
 
-          {/* Navigation Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="equipment" className="flex items-center space-x-2">
+            {/* Navigation Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-6">
+                <TabsTrigger value="equipment" className="flex items-center space-x-2">
                 <WrenchScrewdriverIcon className="h-4 w-4" />
                 <span>Equipment</span>
               </TabsTrigger>
@@ -176,6 +181,7 @@ export default function HVACPage() {
           </Tabs>
         </div>
       </div>
+      )}
     </DashboardLayout>
   )
 }

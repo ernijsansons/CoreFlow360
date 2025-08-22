@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build:simple",
   "installCommand": "npm ci --legacy-peer-deps",
   "build": {
     "env": {
