@@ -1,4 +1,4 @@
-// Temporarily disabled Sentry
+// TODO: Install Sentry package in production: npm install @sentry/nextjs
 // import { withSentryConfig } from '@sentry/nextjs'
 
 /** @type {import('next').NextConfig} */
@@ -18,7 +18,8 @@ const nextConfig = {
     return config
   },
 
-  // Security headers
+  // Security headers - now handled by advanced security headers middleware
+  // Keeping basic headers as fallback
   async headers() {
     return [
       {
@@ -34,11 +35,37 @@ const nextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            value: 'strict-origin-when-cross-origin',
           },
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'off',
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Resource-Policy',
+            value: 'same-origin',
+          },
+        ],
+      },
+      // CSP reporting endpoint
+      {
+        source: '/api/security/csp-report',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'POST',
           },
         ],
       },
@@ -86,7 +113,7 @@ const nextConfig = {
   },
 }
 
-// Temporarily disabled Sentry configuration
+// TODO: Enable Sentry in production
 // const sentryWebpackPluginOptions = {
 //   org: 'coreflow360',
 //   project: 'javascript-nextjs',
@@ -97,4 +124,5 @@ const nextConfig = {
 //   automaticVercelMonitors: true,
 // }
 
+// export default withSentryConfig(nextConfig, sentryWebpackPluginOptions)
 export default nextConfig

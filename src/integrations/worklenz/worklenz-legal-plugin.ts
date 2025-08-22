@@ -1415,4 +1415,4 @@ class WorklenzAPIClient {
   }
 }
 
-export { WorklenzLegalPlugin }
+// Export handled by class declaration

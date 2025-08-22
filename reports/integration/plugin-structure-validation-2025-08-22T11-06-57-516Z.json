@@ -1,0 +1,81 @@
+{
+  "timestamp": "2025-08-22T11:06:57.516Z",
+  "summary": {
+    "totalPlugins": 7,
+    "validPlugins": 7,
+    "warningPlugins": 0,
+    "invalidPlugins": 0
+  },
+  "plugins": [
+    {
+      "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\bigcapital\\bigcapital-plugin.ts",
+      "className": "BigcapitalAccountingPlugin",
+      "pluginId": "bigcapital-accounting",
+      "module": "ACCOUNTING",
+      "hasRequiredMethods": true,
+      "hasConfiguration": true,
+      "hasCapabilities": true,
+      "issues": []
+    },
+    {
+      "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\carbon\\carbon-manufacturing-plugin.ts",
+      "className": "CarbonManufacturingPlugin",
+      "pluginId": "carbon-manufacturing",
+      "module": "MANUFACTURING",
+      "hasRequiredMethods": true,
+      "hasConfiguration": true,
+      "hasCapabilities": true,
+      "issues": []
+    },
+    {
+      "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\evergauzy\\evergauzy-hr-plugin.ts",
+      "className": "EverGauzyHRPlugin",
+      "pluginId": "evergauzy-hr",
+      "module": "HR",
+      "hasRequiredMethods": true,
+      "hasConfiguration": true,
+      "hasCapabilities": true,
+      "issues": []
+    },
+    {
+      "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\inventory\\inventory-management-plugin.ts",
+      "className": "InventoryManagementPlugin",
+      "pluginId": "inventory-management",
+      "module": "INVENTORY",
+      "hasRequiredMethods": true,
+      "hasConfiguration": true,
+      "hasCapabilities": true,
+      "issues": []
+    },
+    {
+      "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\plane\\plane-project-plugin.ts",
+      "className": "PlaneProjectPlugin",
+      "pluginId": "plane-project",
+      "module": "PROJECT_MANAGEMENT",
+      "hasRequiredMethods": true,
+      "hasConfiguration": true,
+      "hasCapabilities": true,
+      "issues": []
+    },
+    {
+      "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\twenty\\twenty-crm-plugin.ts",
+      "className": "TwentyCRMPlugin",
+      "pluginId": "twenty-crm",
+      "module": "CRM",
+      "hasRequiredMethods": true,
+      "hasConfiguration": true,
+      "hasCapabilities": true,
+      "issues": []
+    },
+    {
+      "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\worklenz\\worklenz-legal-plugin.ts",
+      "className": "WorklenzLegalPlugin",
+      "pluginId": "worklenz-legal",
+      "module": "PROJECT_MANAGEMENT",
+      "hasRequiredMethods": true,
+      "hasConfiguration": true,
+      "hasCapabilities": true,
+      "issues": []
+    }
+  ]
+}

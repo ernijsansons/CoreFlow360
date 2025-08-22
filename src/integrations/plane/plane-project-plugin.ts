@@ -1466,4 +1466,4 @@ class PlaneAPIClient {
   }
 }
 
-export { PlaneProjectPlugin }
+// Export handled by class declaration

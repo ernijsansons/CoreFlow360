@@ -4,7 +4,7 @@
  */
 
 import { execSync, spawn, ChildProcess } from 'child_process'
-import { writeFileSync, existsSync, mkdirSync } from 'fs'
+import { writeFileSync, existsSync, mkdirSync, readFileSync } from 'fs'
 import { join } from 'path'
 import { logger } from '@/lib/logging/logger'
 
@@ -400,7 +400,7 @@ function textSummary(data, options = {}) {
     try {
       const outputPath = join(this.resultsDir, `output-${testId}.json`)
       if (existsSync(outputPath)) {
-        import jsonOutput from 'fs'.readFileSync(outputPath, 'utf8')
+        const jsonOutput = readFileSync(outputPath, 'utf8')
         parsedData = JSON.parse(jsonOutput)
       }
     } catch (error) {

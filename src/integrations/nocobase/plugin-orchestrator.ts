@@ -181,8 +181,6 @@ export class NocoBaseOrchestrator extends Plugin {
             tenantId: 'system',
           }
         )
-
-        `)
       }
     )
   }

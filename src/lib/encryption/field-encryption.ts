@@ -30,6 +30,7 @@ interface EncryptedData {
 export class FieldEncryption {
   private masterKey: string
   private keyCache = new Map<string, Buffer>()
+  private keyVersion: number = 1
 
   constructor() {
     // During build time, use a placeholder key
@@ -42,11 +43,38 @@ export class FieldEncryption {
       // Use a valid placeholder key during build
       this.masterKey = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
     } else {
-      this.masterKey = config.ENCRYPTION_KEY || this.generateSecureKey()
+      // Load key from environment or generate a persistent one
+      this.masterKey = this.loadOrCreatePersistentKey()
       if (!this.masterKey || this.masterKey.length !== 64) {
         throw new Error('Invalid encryption key: must be 64 character hex string')
       }
     }
+  }
+
+  /**
+   * Load encryption key from environment or create a persistent one
+   * Keys are stored in environment variables and backed up securely
+   */
+  private loadOrCreatePersistentKey(): string {
+    // First, try to load from environment
+    const envKey = process.env.ENCRYPTION_KEY
+    if (envKey && envKey.length === 64) {
+      return envKey
+    }
+
+    // If no key exists, this is a critical error in production
+    // Keys must be set via environment variables
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'ENCRYPTION_KEY must be set in production environment. ' +
+        'Generate a key using: openssl rand -hex 32'
+      )
+    }
+
+    // In development, use a consistent development key
+    // This ensures data persistence across dev restarts
+    console.warn('⚠️  Using development encryption key. Set ENCRYPTION_KEY for production.')
+    return 'dev0123456789abcdef0123456789abcdef0123456789abcdef0123456789ab'
   }
 
   /**

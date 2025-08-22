@@ -100,7 +100,7 @@ export function MonitoringDashboard() {
     return `${days}d ${hours}h ${minutes}m`
   }
 
-  const getStatusColor = (_status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy':
         return 'text-green-400'

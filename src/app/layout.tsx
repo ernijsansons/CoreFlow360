@@ -13,6 +13,7 @@ import { MobileOptimizer } from '@/components/mobile/MobileOptimizer'
 import { ABTestProvider } from '@/components/ab-testing/ABTestProvider'
 import { ExperimentDebugger } from '@/components/ab-testing/ExperimentDebugger'
 import { FloatingAIAssistant } from '@/components/ai/FloatingAIAssistant'
+import CookieConsent from '@/components/legal/CookieConsent'
 
 const inter = Inter({
   variable: '--font-inter',
@@ -177,6 +178,7 @@ export default async function RootLayout({
                   <FloatingAIAssistant />
                   <FeedbackWidget />
                   <ExperimentDebugger />
+                  <CookieConsent />
                 </AuthErrorBoundary>
               </AuthProvider>
             </ABTestProvider>

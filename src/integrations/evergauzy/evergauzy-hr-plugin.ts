@@ -1050,4 +1050,4 @@ class EverGauzyAPIClient {
   }
 }
 
-export { EverGauzyHRPlugin }
+// Export handled by class declaration

@@ -235,7 +235,7 @@ export function useEnhancedTracking() {
           cost: additionalData.cost,
           accuracy: additionalData.accuracy,
           userSatisfaction: additionalData.userSatisfaction,
-          BUSINESS INTELLIGENCELevel: additionalData.BUSINESS INTELLIGENCELevel,
+          intelligenceLevel: additionalData.intelligenceLevel,
           crossModuleConnections: additionalData.crossModuleConnections,
         },
       })
@@ -244,7 +244,7 @@ export function useEnhancedTracking() {
   )
 
   // BUSINESS INTELLIGENCE multiplication tracking
-  const trackBUSINESS INTELLIGENCEMultiplication = useCallback(
+  const trackIntelligenceMultiplication = useCallback(
     async (
       primaryModule: string,
       connectedModules: string[],
@@ -253,7 +253,7 @@ export function useEnhancedTracking() {
     ) => {
       await trackAIInteraction(primaryModule, 'cross_module', true, 0, {
         crossModuleConnections: connectedModules,
-        BUSINESS INTELLIGENCELevel: intelligenceMultiplier,
+        intelligenceLevel: intelligenceMultiplier,
         accuracy: 1.0, // Assume successful cross-module connection
       })
 
@@ -414,7 +414,7 @@ export function useEnhancedTracking() {
 
     // AI and BUSINESS INTELLIGENCE
     trackAIInteraction,
-    trackBUSINESS INTELLIGENCEMultiplication,
+    trackIntelligenceMultiplication,
 
     // Business processes
     trackBusinessProcess,

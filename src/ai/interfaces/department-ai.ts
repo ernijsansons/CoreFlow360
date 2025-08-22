@@ -544,26 +544,4 @@ export interface CrossDepartmentAI {
   }>
 }
 
-export type {
-  DepartmentAI,
-  CRMAI,
-  SalesAI,
-  FinanceAI,
-  HRAI,
-  OperationsAI,
-  AnalyticsAI,
-  HVACSpecificAI,
-  LegalSpecificAI,
-  DepartmentAIFactory,
-  CrossDepartmentAI,
-  DepartmentAnalysisContext,
-  DepartmentPredictionContext,
-  DepartmentRecommendationContext,
-  DepartmentAutomationContext,
-  DepartmentAnalysisResult,
-  DepartmentPredictionResult,
-  DepartmentRecommendationResult,
-  DepartmentAutomationResult,
-  DepartmentHealthStatus,
-  DepartmentAIFeedback,
-}
+// Export types are handled by the interface declarations above

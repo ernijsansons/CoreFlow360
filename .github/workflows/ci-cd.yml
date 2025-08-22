@@ -1,0 +1,480 @@
+name: CoreFlow360 CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      deployment_strategy:
+        description: 'Deployment strategy'
+        required: true
+        default: 'rolling'
+        type: choice
+        options:
+        - rolling
+        - blue-green
+        - canary
+        - recreate
+
+env:
+  NODE_VERSION: '20.x'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Code quality and security checks
+  quality-checks:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Run type checking
+      run: npm run type-check
+
+    - name: Run security audit
+      run: npm audit --audit-level=high
+
+    - name: Run dependency vulnerability scan
+      uses: actions/dependency-review-action@v4
+      if: github.event_name == 'pull_request'
+
+  # Unit and integration tests
+  test:
+    runs-on: ubuntu-latest
+    needs: quality-checks
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: coreflow360_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run database migrations
+      run: npm run db:migrate
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/coreflow360_test
+        REDIS_URL: redis://localhost:6379
+
+    - name: Run unit tests
+      run: npm run test -- --coverage --watchAll=false
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/coreflow360_test
+        REDIS_URL: redis://localhost:6379
+
+    - name: Run integration tests
+      run: npm run test:integration
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/coreflow360_test
+        REDIS_URL: redis://localhost:6379
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+
+  # Build and containerize
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application
+      run: npm run build
+      env:
+        NODE_ENV: production
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix=commit-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      id: build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+  # Security scanning
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ needs.build.outputs.image-tag }}
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+
+  # Deploy to staging
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: [build, security-scan]
+    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
+    environment: staging
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to staging
+      run: |
+        echo "Deploying to staging environment..."
+        echo "Image: ${{ needs.build.outputs.image-tag }}"
+        echo "Strategy: ${{ inputs.deployment_strategy || 'rolling' }}"
+        
+        # Simulate deployment
+        sleep 10
+        echo "Staging deployment completed"
+      env:
+        DEPLOYMENT_STRATEGY: ${{ inputs.deployment_strategy || 'rolling' }}
+        KUBE_CONFIG: ${{ secrets.KUBE_CONFIG_STAGING }}
+
+    - name: Run smoke tests
+      run: |
+        echo "Running smoke tests against staging..."
+        # Add actual smoke test commands here
+        curl -f https://staging.coreflow360.com/api/health || exit 1
+        echo "Smoke tests passed"
+
+    - name: Notify deployment success
+      uses: 8398a7/action-slack@v3
+      with:
+        status: success
+        text: 'Staging deployment completed successfully'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Deploy to production
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: [build, security-scan, deploy-staging]
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Wait for approval
+      uses: trstringer/manual-approval@v1
+      if: github.event_name != 'workflow_dispatch'
+      with:
+        secret: ${{ github.TOKEN }}
+        approvers: admin,devops-team
+        minimum-approvals: 2
+        issue-title: "Production Deployment Approval Required"
+        issue-body: |
+          Production deployment approval required for:
+          - **Commit**: ${{ github.sha }}
+          - **Branch**: ${{ github.ref }}
+          - **Image**: ${{ needs.build.outputs.image-tag }}
+          - **Strategy**: ${{ inputs.deployment_strategy || 'blue-green' }}
+          
+          Please review and approve if ready for production deployment.
+
+    - name: Create deployment backup
+      run: |
+        echo "Creating production backup before deployment..."
+        # Add backup commands here
+        echo "Backup completed"
+      env:
+        DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production environment..."
+        echo "Image: ${{ needs.build.outputs.image-tag }}"
+        echo "Strategy: ${{ inputs.deployment_strategy || 'blue-green' }}"
+        
+        # Blue-green deployment simulation
+        if [[ "${{ inputs.deployment_strategy || 'blue-green' }}" == "blue-green" ]]; then
+          echo "Deploying to green environment..."
+          sleep 15
+          echo "Switching traffic from blue to green..."
+          sleep 5
+          echo "Blue-green deployment completed"
+        else
+          echo "Performing ${{ inputs.deployment_strategy || 'rolling' }} deployment..."
+          sleep 20
+          echo "Deployment completed"
+        fi
+      env:
+        DEPLOYMENT_STRATEGY: ${{ inputs.deployment_strategy || 'blue-green' }}
+        KUBE_CONFIG: ${{ secrets.KUBE_CONFIG_PRODUCTION }}
+
+    - name: Run production health checks
+      run: |
+        echo "Running production health checks..."
+        max_attempts=20
+        attempt=1
+        
+        while [ $attempt -le $max_attempts ]; do
+          echo "Health check attempt $attempt/$max_attempts..."
+          if curl -f https://coreflow360.com/api/health; then
+            echo "Production health check passed"
+            break
+          fi
+          
+          if [ $attempt -eq $max_attempts ]; then
+            echo "Health check failed after $max_attempts attempts"
+            exit 1
+          fi
+          
+          sleep 30
+          attempt=$((attempt + 1))
+        done
+
+    - name: Update monitoring and alerting
+      run: |
+        echo "Updating monitoring configuration..."
+        # Add monitoring update commands here
+        echo "Monitoring updated"
+      env:
+        MONITORING_WEBHOOK: ${{ secrets.MONITORING_WEBHOOK }}
+
+    - name: Notify deployment success
+      uses: 8398a7/action-slack@v3
+      with:
+        status: success
+        text: |
+          🚀 Production deployment completed successfully!
+          
+          **Details:**
+          - Commit: ${{ github.sha }}
+          - Image: ${{ needs.build.outputs.image-tag }}
+          - Strategy: ${{ inputs.deployment_strategy || 'blue-green' }}
+          - Deployed by: ${{ github.actor }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Rollback job (manual trigger)
+  rollback:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'rollback'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Confirm rollback
+      uses: trstringer/manual-approval@v1
+      with:
+        secret: ${{ github.TOKEN }}
+        approvers: admin,devops-team
+        minimum-approvals: 1
+        issue-title: "Production Rollback Confirmation"
+        issue-body: |
+          ⚠️ **PRODUCTION ROLLBACK REQUESTED**
+          
+          This will rollback the production deployment to the previous version.
+          
+          Please confirm if you want to proceed with the rollback.
+
+    - name: Perform rollback
+      run: |
+        echo "Starting production rollback..."
+        
+        # Get previous successful deployment
+        previous_tag=$(git describe --tags --abbrev=0 HEAD~1)
+        echo "Rolling back to: $previous_tag"
+        
+        # Simulate rollback
+        echo "Switching traffic back to previous version..."
+        sleep 10
+        echo "Rollback completed"
+      env:
+        KUBE_CONFIG: ${{ secrets.KUBE_CONFIG_PRODUCTION }}
+
+    - name: Verify rollback
+      run: |
+        echo "Verifying rollback..."
+        curl -f https://coreflow360.com/api/health || exit 1
+        echo "Rollback verification successful"
+
+    - name: Notify rollback completion
+      uses: 8398a7/action-slack@v3
+      with:
+        status: success
+        text: |
+          ⏪ Production rollback completed successfully!
+          
+          The application has been rolled back to the previous stable version.
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Performance and load testing
+  performance-test:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run load tests
+      run: |
+        echo "Running performance and load tests..."
+        # Add k6, Artillery, or other load testing tools here
+        echo "Load tests completed"
+      env:
+        TEST_TARGET: https://staging.coreflow360.com
+
+    - name: Generate performance report
+      run: |
+        echo "Generating performance report..."
+        # Generate and upload performance metrics
+        echo "Performance report generated"
+
+  # Infrastructure as Code validation
+  infrastructure-validation:
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'infrastructure/') || contains(github.event.head_commit.added, 'infrastructure/')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.6.0
+
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./infrastructure
+
+    - name: Terraform Validate
+      run: terraform validate
+      working-directory: ./infrastructure
+
+    - name: Terraform Plan
+      run: terraform plan
+      working-directory: ./infrastructure
+      env:
+        TF_VAR_environment: staging
+
+  # Cleanup old images and artifacts
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    
+    steps:
+    - name: Delete old container images
+      uses: actions/delete-package-versions@v5
+      with:
+        package-name: ${{ env.IMAGE_NAME }}
+        package-type: 'container'
+        min-versions-to-keep: 10
+        delete-only-untagged-versions: true

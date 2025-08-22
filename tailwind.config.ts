@@ -7,7 +7,7 @@ const config: Config = {
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
   ],
-  // Optimize for tree shaking by explicitly defining what to purge
+  // Safelist for dynamic classes
   safelist: [
     // Keep dynamic consciousness colors
     'bg-consciousness-neural',

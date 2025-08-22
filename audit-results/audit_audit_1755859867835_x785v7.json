@@ -1,0 +1,23 @@
+{
+  "audit_id": "audit_1755859867835_x785v7",
+  "audit_name": "code_quality_audit",
+  "execution_time": 0,
+  "findings": [],
+  "metrics": {
+    "issues_found": 0,
+    "critical_issues": 0,
+    "technical_debt_score": 0,
+    "maintainability_score": 100,
+    "security_score": 100,
+    "performance_score": 100
+  },
+  "chain_of_thought": [
+    "Loading audit template: code_quality_audit",
+    "Context loaded: ctx_1755859867813_q4p57k",
+    "Analyzing: code, configuration, patterns",
+    "Executing generic audit: code_quality_audit",
+    "Calculated metrics: 6 metrics",
+    "Confidence score: 13%"
+  ],
+  "confidence_score": 13
+}

@@ -305,7 +305,6 @@ export class CoreFlowEventBus extends EventEmitter {
           },
         })
 
-        `)
         this.emit('eventPublished', event)
 
         return event.id

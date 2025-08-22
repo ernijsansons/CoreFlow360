@@ -223,7 +223,7 @@ export async function withAIEnhancement<T = unknown>(
 
   return {
     data: result.data!,
-    aiAnalysis,
+    aiAnalysis: aiAnalysis!,
     performance: {
       duration: result.performance.duration,
       aiProcessingTime,
@@ -520,14 +520,4 @@ function calculateAICost(model: AIModelType, processingTime: number): number {
   return baseCost * timeFactor
 }
 
-export type {
-  AIConfiguration,
-  AIAnalysisContext,
-  AIAnalysisResult,
-  AIOperationResult,
-  AIGovernancePolicy,
-  AIInsight,
-  AIPrediction,
-  AIRecommendation,
-  AIAnomaly,
-}
+// Export types are handled by the interface declarations above

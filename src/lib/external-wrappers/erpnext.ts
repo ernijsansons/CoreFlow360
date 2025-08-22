@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod'
+import { randomUUID } from 'crypto'
 
 /*
 ✅ Pre-flight validation: ERPNext interface designed for HR and manufacturing operations
@@ -314,7 +315,7 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
     EmployeeSchema.parse(employeeData)
 
     const employee: Employee = {
-      id: `emp-${Date.now()}`,
+      id: randomUUID(),
       ...employeeData,
     }
 
@@ -366,7 +367,7 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
     periodEnd: string,
     employeeIds?: string[]
   ): Promise<PayrollProcess> {
-    const processId = `payroll-${Date.now()}`
+    const processId = randomUUID()
     let employees = Array.from(this.employees.values())
 
     if (employeeIds) {
@@ -397,7 +398,7 @@ export class MockERPNextPayrollService implements ERPNextPayrollService {
       const netPay = grossPay - totalDeductions
 
       const entry: PayrollEntry = {
-        id: `payroll-entry-${Date.now()}-${employee.id}`,
+        id: randomUUID(),
         employeeId: employee.id,
         payrollPeriod: `${periodStart}_${periodEnd}`,
         grossPay,
@@ -602,7 +603,7 @@ export class MockERPNextBOMService implements ERPNextBOMService {
 
   async createItem(itemData: Omit<Item, 'id'>): Promise<Item> {
     const item: Item = {
-      id: `item-${Date.now()}`,
+      id: randomUUID(),
       ...itemData,
     }
 
@@ -683,7 +684,7 @@ export class MockERPNextBOMService implements ERPNextBOMService {
     const rawMaterialCost = bomData.items.reduce((sum, item) => sum + item.amount, 0)
 
     const bom: BillOfMaterials = {
-      id: `bom-${Date.now()}`,
+      id: randomUUID(),
       bomNo,
       ...bomData,
       rawMaterialCost,
@@ -796,7 +797,7 @@ export class MockERPNextBOMService implements ERPNextBOMService {
     }, 0)
 
     const workOrder: WorkOrder = {
-      id: `wo-${Date.now()}`,
+      id: randomUUID(),
       workOrderNo,
       ...workOrderData,
       totalCost: operationsCost + materialsCost,
@@ -904,7 +905,7 @@ export class MockERPNextBOMService implements ERPNextBOMService {
 
     const optimizedBOM: BillOfMaterials = {
       ...bom,
-      id: `bom-opt-${Date.now()}`,
+      id: randomUUID(),
       bomNo: `${bom.bomNo}-OPT`,
       rawMaterialCost: bom.rawMaterialCost * optimizationFactor,
       totalCost: bom.rawMaterialCost * optimizationFactor + bom.operatingCost,

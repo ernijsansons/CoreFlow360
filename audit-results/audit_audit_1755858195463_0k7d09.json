@@ -1,0 +1,23 @@
+{
+  "audit_id": "audit_1755858195463_0k7d09",
+  "audit_name": "caching_strategy_audit",
+  "execution_time": 1,
+  "findings": [],
+  "metrics": {
+    "issues_found": 0,
+    "critical_issues": 0,
+    "technical_debt_score": 0,
+    "maintainability_score": 100,
+    "security_score": 100,
+    "performance_score": 100
+  },
+  "chain_of_thought": [
+    "Loading audit template: caching_strategy_audit",
+    "Context loaded: ctx_1755858195457_hcnps4",
+    "Analyzing: code, configuration, patterns",
+    "Executing generic audit: caching_strategy_audit",
+    "Calculated metrics: 6 metrics",
+    "Confidence score: 13%"
+  ],
+  "confidence_score": 13
+}

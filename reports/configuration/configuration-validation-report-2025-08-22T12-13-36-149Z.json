@@ -1,0 +1,244 @@
+{
+  "testSummary": {
+    "timestamp": "2025-08-22T12:13:36.148Z",
+    "totalPluginsTested": 7,
+    "systemConfigurationHealth": "INVALID",
+    "productionReady": false
+  },
+  "systemMetrics": {
+    "validPlugins": 0,
+    "warningPlugins": 0,
+    "invalidPlugins": 7,
+    "validPercentage": "0.0",
+    "totalConfigurationIssues": 12
+  },
+  "pluginDetails": [
+    {
+      "name": "TwentyCRMPlugin",
+      "module": "CRM",
+      "status": "INVALID",
+      "configurations": {
+        "total": 8,
+        "valid": 8,
+        "warning": 0,
+        "invalid": 0,
+        "missing": 0
+      },
+      "environmentVariables": {
+        "allPresent": false,
+        "requiredMissing": 2,
+        "optionalMissing": 2
+      },
+      "issues": {
+        "security": 0,
+        "performance": 0,
+        "recommendations": 2
+      },
+      "topRecommendations": [
+        "Set required environment variables: TWENTY_API_URL, TWENTY_API_KEY",
+        "Consider setting optional environment variables for enhanced features: TWENTY_WEBHOOK_SECRET, AI_MODEL_ENDPOINT"
+      ],
+      "readyForProduction": false
+    },
+    {
+      "name": "BigcapitalPlugin",
+      "module": "ACCOUNTING",
+      "status": "INVALID",
+      "configurations": {
+        "total": 8,
+        "valid": 8,
+        "warning": 0,
+        "invalid": 0,
+        "missing": 0
+      },
+      "environmentVariables": {
+        "allPresent": false,
+        "requiredMissing": 2,
+        "optionalMissing": 3
+      },
+      "issues": {
+        "security": 0,
+        "performance": 0,
+        "recommendations": 2
+      },
+      "topRecommendations": [
+        "Set required environment variables: BIGCAPITAL_API_URL, BIGCAPITAL_API_KEY",
+        "Consider setting optional environment variables for enhanced features: COMPLIANCE_WEBHOOK_URL, AI_ANOMALY_ENDPOINT, AUDIT_LOG_RETENTION"
+      ],
+      "readyForProduction": false
+    },
+    {
+      "name": "EverGauzyHRPlugin",
+      "module": "HR",
+      "status": "INVALID",
+      "configurations": {
+        "total": 8,
+        "valid": 7,
+        "warning": 0,
+        "invalid": 0,
+        "missing": 1
+      },
+      "environmentVariables": {
+        "allPresent": false,
+        "requiredMissing": 2,
+        "optionalMissing": 3
+      },
+      "issues": {
+        "security": 0,
+        "performance": 0,
+        "recommendations": 2
+      },
+      "topRecommendations": [
+        "Set required environment variables: EVERGAUZY_API_URL, EVERGAUZY_API_KEY",
+        "Consider setting optional environment variables for enhanced features: HR_AI_ENDPOINT, PERFORMANCE_ANALYTICS_KEY, GDPR_COMPLIANCE_MODE"
+      ],
+      "readyForProduction": false
+    },
+    {
+      "name": "PlaneProjectPlugin",
+      "module": "PROJECT_MANAGEMENT",
+      "status": "INVALID",
+      "configurations": {
+        "total": 8,
+        "valid": 6,
+        "warning": 0,
+        "invalid": 0,
+        "missing": 1
+      },
+      "environmentVariables": {
+        "allPresent": false,
+        "requiredMissing": 2,
+        "optionalMissing": 3
+      },
+      "issues": {
+        "security": 0,
+        "performance": 0,
+        "recommendations": 3
+      },
+      "topRecommendations": [
+        "Set required environment variables: PLANE_API_URL, PLANE_API_KEY",
+        "Consider setting optional environment variables for enhanced features: PROJECT_AI_ENDPOINT, COLLABORATION_WEBHOOK, REPORTING_SERVICE_URL",
+        "Provide a valid database connection string"
+      ],
+      "readyForProduction": false
+    },
+    {
+      "name": "CarbonManufacturingPlugin",
+      "module": "MANUFACTURING",
+      "status": "INVALID",
+      "configurations": {
+        "total": 8,
+        "valid": 7,
+        "warning": 0,
+        "invalid": 0,
+        "missing": 1
+      },
+      "environmentVariables": {
+        "allPresent": false,
+        "requiredMissing": 3,
+        "optionalMissing": 3
+      },
+      "issues": {
+        "security": 0,
+        "performance": 0,
+        "recommendations": 2
+      },
+      "topRecommendations": [
+        "Set required environment variables: CARBON_API_URL, CARBON_API_KEY, SENSOR_NETWORK_URL",
+        "Consider setting optional environment variables for enhanced features: PREDICTIVE_AI_ENDPOINT, QUALITY_CONTROL_WEBHOOK, HVAC_CONTROL_API"
+      ],
+      "readyForProduction": false
+    },
+    {
+      "name": "WorklenzLegalPlugin",
+      "module": "LEGAL",
+      "status": "INVALID",
+      "configurations": {
+        "total": 8,
+        "valid": 7,
+        "warning": 0,
+        "invalid": 0,
+        "missing": 1
+      },
+      "environmentVariables": {
+        "allPresent": false,
+        "requiredMissing": 2,
+        "optionalMissing": 3
+      },
+      "issues": {
+        "security": 0,
+        "performance": 0,
+        "recommendations": 2
+      },
+      "topRecommendations": [
+        "Set required environment variables: WORKLENZ_API_URL, WORKLENZ_API_KEY",
+        "Consider setting optional environment variables for enhanced features: LEGAL_AI_ENDPOINT, DOCUMENT_ANALYSIS_KEY, COMPLIANCE_API_URL"
+      ],
+      "readyForProduction": false
+    },
+    {
+      "name": "InventoryManagementPlugin",
+      "module": "INVENTORY",
+      "status": "INVALID",
+      "configurations": {
+        "total": 8,
+        "valid": 7,
+        "warning": 0,
+        "invalid": 0,
+        "missing": 1
+      },
+      "environmentVariables": {
+        "allPresent": false,
+        "requiredMissing": 2,
+        "optionalMissing": 3
+      },
+      "issues": {
+        "security": 0,
+        "performance": 0,
+        "recommendations": 2
+      },
+      "topRecommendations": [
+        "Set required environment variables: INVENTORY_API_URL, INVENTORY_API_KEY",
+        "Consider setting optional environment variables for enhanced features: DEMAND_FORECAST_AI_ENDPOINT, SUPPLY_CHAIN_API_URL, REORDER_WEBHOOK_URL"
+      ],
+      "readyForProduction": false
+    }
+  ],
+  "systemAnalysis": {
+    "overallHealth": "INVALID",
+    "criticalIssues": [
+      "TwentyCRMPlugin has invalid configuration",
+      "BigcapitalPlugin has invalid configuration",
+      "EverGauzyHRPlugin has invalid configuration",
+      "PlaneProjectPlugin has invalid configuration",
+      "CarbonManufacturingPlugin has invalid configuration",
+      "WorklenzLegalPlugin has invalid configuration",
+      "InventoryManagementPlugin has invalid configuration"
+    ],
+    "environmentalIssues": [
+      "TwentyCRMPlugin missing required environment variables",
+      "BigcapitalPlugin missing required environment variables",
+      "EverGauzyHRPlugin missing required environment variables",
+      "PlaneProjectPlugin missing required environment variables",
+      "CarbonManufacturingPlugin missing required environment variables"
+    ],
+    "systemRecommendations": [
+      "Fix configuration issues in 7 plugin(s) before production deployment",
+      "Set up proper environment variables for 7 plugin(s)"
+    ]
+  },
+  "actionItems": [
+    "Fix configuration issues in 7 invalid plugin(s)",
+    "Set required environment variables for 7 plugin(s)"
+  ],
+  "conclusions": {
+    "configurationValidationPassed": true,
+    "systemReadyForProduction": false,
+    "recommendedNextSteps": [
+      "Fix critical configuration issues before proceeding to production",
+      "Set up required environment variables for all plugins",
+      "Re-run configuration validation after fixes"
+    ],
+    "estimatedFixTime": "4-8 hours"
+  }
+}

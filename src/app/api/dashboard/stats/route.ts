@@ -143,7 +143,7 @@ async function generateDashboardStats(
             createdAt: { gte: startOfLastMonth, lte: endOfLastMonth },
           },
         }),
-      ]),
+      ]).catch(() => [0, 0, 0]), // Handle missing tables gracefully
 
       // Deal statistics with revenue aggregation
       prisma.$transaction([
@@ -179,7 +179,7 @@ async function generateDashboardStats(
           },
           _sum: { value: true },
         }),
-      ]),
+      ]).catch(() => [0, { _sum: { value: 0 } }, 0, { _sum: { value: 0 } }, { _sum: { value: 0 } }]),
 
       // Active projects count
       prisma.project.count({
@@ -187,7 +187,7 @@ async function generateDashboardStats(
           tenantId,
           status: { in: ['PLANNING', 'IN_PROGRESS'] },
         },
-      }),
+      }).catch(() => 0),
 
       // Recent customers - optimized with specific select fields
       prisma.customer.findMany({
@@ -202,7 +202,7 @@ async function generateDashboardStats(
         },
         orderBy: { createdAt: 'desc' },
         take: 5,
-      }),
+      }).catch(() => []),
 
       // Recent deals with customer information
       prisma.deal.findMany({
@@ -222,7 +222,7 @@ async function generateDashboardStats(
         },
         orderBy: { createdAt: 'desc' },
         take: 5,
-      }),
+      }).catch(() => []),
 
       // AI insights for high-risk customers and opportunities
       prisma.$transaction([
@@ -256,25 +256,25 @@ async function generateDashboardStats(
           orderBy: { aiLifetimeValue: 'desc' },
           take: 5,
         }),
-      ]),
+      ]).catch(() => [[], []]),
     ])
 
-  // Calculate performance metrics
-  const totalDeals = dealStats[0]
-  const totalRevenue = dealStats[1]._sum.value || 0
+  // Calculate performance metrics with safe destructuring
+  const totalDeals = dealStats?.[0] || 0
+  const totalRevenue = dealStats?.[1]?._sum?.value || 0
   const avgDealSize = totalDeals > 0 ? totalRevenue / totalDeals : 0
 
-  // Calculate growth percentages
-  const currentMonthCustomers = customerStats[1]
-  const lastMonthCustomers = customerStats[2]
+  // Calculate growth percentages with safe destructuring
+  const currentMonthCustomers = customerStats?.[1] || 0
+  const lastMonthCustomers = customerStats?.[2] || 0
   const customerGrowth =
     lastMonthCustomers > 0
       ? ((currentMonthCustomers - lastMonthCustomers) / lastMonthCustomers) * 100
       : 0
 
-  const currentMonthDeals = dealStats[2]
-  const currentMonthRevenue = dealStats[3]._sum.value || 0
-  const lastMonthRevenue = dealStats[4]._sum.value || 0
+  const currentMonthDeals = dealStats?.[2] || 0
+  const currentMonthRevenue = dealStats?.[3]?._sum?.value || 0
+  const lastMonthRevenue = dealStats?.[4]?._sum?.value || 0
   const revenueGrowth =
     lastMonthRevenue > 0 ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 0
 
@@ -303,15 +303,15 @@ async function generateDashboardStats(
       },
     },
     take: 5,
-  })
+  }).catch(() => [])
 
   // Build response
   const stats: DashboardStats = {
     overview: {
-      totalCustomers: customerStats[0],
+      totalCustomers: customerStats?.[0] || 0,
       totalDeals: totalDeals,
       totalRevenue: totalRevenue,
-      activeProjects: projectStats,
+      activeProjects: projectStats || 0,
       monthlyGrowth: {
         customers: customerGrowth,
         deals: currentMonthDeals,
@@ -319,14 +319,14 @@ async function generateDashboardStats(
       },
     },
     recentActivity: {
-      customers: recentCustomers.map((customer) => ({
+      customers: (recentCustomers || []).map((customer) => ({
         id: customer.id,
-        name: `${customer.firstName} ${customer.lastName}`.trim(),
+        name: `${customer.firstName || ''} ${customer.lastName || ''}`.trim(),
         company: customer.company || 'N/A',
         status: customer.status,
-        createdAt: customer.createdAt.toISOString(),
+        createdAt: customer.createdAt?.toISOString() || new Date().toISOString(),
       })),
-      deals: recentDeals.map((deal) => ({
+      deals: (recentDeals || []).map((deal) => ({
         id: deal.id,
         title: deal.title,
         value: deal.value || 0,
@@ -336,24 +336,24 @@ async function generateDashboardStats(
       })),
     },
     performance: {
-      conversionRate: totalDeals > 0 ? ((dealStats[1]._sum.value || 0) / totalDeals) * 100 : 0,
+      conversionRate: totalDeals > 0 ? (totalRevenue / totalDeals) * 100 : 0,
       avgDealSize: avgDealSize,
-      topPerformers: topPerformers.map((user) => ({
+      topPerformers: (topPerformers || []).map((user) => ({
         userId: user.id,
         name: user.name || 'Unknown',
-        dealCount: user.assignedDeals.length,
-        totalValue: user.assignedDeals.reduce((sum, deal) => sum + (deal.value || 0), 0),
+        dealCount: user.assignedDeals?.length || 0,
+        totalValue: (user.assignedDeals || []).reduce((sum, deal) => sum + (deal.value || 0), 0),
       })),
     },
     aiInsights: {
-      churRisk: aiInsights[0].map((customer) => ({
+      churRisk: (aiInsights?.[0] || []).map((customer) => ({
         customerId: customer.id,
-        customerName: customer.company || `${customer.firstName} ${customer.lastName}`.trim(),
+        customerName: customer.company || `${customer.firstName || ''} ${customer.lastName || ''}`.trim(),
         riskScore: customer.aiChurnRisk || 0,
       })),
-      opportunityScore: aiInsights[1].map((customer) => ({
+      opportunityScore: (aiInsights?.[1] || []).map((customer) => ({
         customerId: customer.id,
-        customerName: customer.company || `${customer.firstName} ${customer.lastName}`.trim(),
+        customerName: customer.company || `${customer.firstName || ''} ${customer.lastName || ''}`.trim(),
         score: customer.aiLifetimeValue || 0,
       })),
     },

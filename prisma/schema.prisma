@@ -2724,3 +2724,25 @@ model AIProviderUsage {
   @@map("ai_provider_usage")
 }
 
+// Monitoring and Alerting Models
+model MonitoringAlert {
+  id          String   @id @default(cuid())
+  alertId     String   @unique // External alert ID from monitoring system
+  name        String   // Human-readable alert name
+  severity    String   // low, medium, high, critical
+  metric      String   // The metric that triggered the alert
+  value       Float    // Current value of the metric
+  threshold   Float    // Threshold that was exceeded
+  context     String?  // JSON context data
+  resolved    Boolean  @default(false)
+  resolvedAt  DateTime?
+  timestamp   DateTime // When the alert was triggered
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([severity, resolved])
+  @@index([timestamp, resolved])
+  @@index([alertId, resolved])
+  @@map("monitoring_alerts")
+}
+

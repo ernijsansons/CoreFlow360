@@ -1,0 +1,251 @@
+{
+  "version": "1.0.0",
+  "backupDate": "2025-08-22T13:44:57.047Z",
+  "plugins": {
+    "bigcapital-accounting": {
+      "metadata": {
+        "id": "bigcapital-accounting",
+        "name": "Bigcapital AI-Enhanced Accounting",
+        "version": "1.0.0",
+        "description": "",
+        "module": "ACCOUNTING",
+        "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\bigcapital\\bigcapital-plugin.ts",
+        "className": "BigcapitalAccountingPlugin",
+        "dependencies": [],
+        "requiredPermissions": [
+          "accounting:read",
+          "accounting:write",
+          "ai:financial"
+        ],
+        "capabilities": {
+          "aiEnabled": true,
+          "realTimeSync": true,
+          "crossModuleData": true,
+          "industrySpecific": true,
+          "customFields": true
+        },
+        "apiEndpoints": 4,
+        "webhooks": 2,
+        "lastModified": "2025-08-22T11:05:45.888Z",
+        "checksum": "-4313d1a1"
+      },
+      "status": "ACTIVE",
+      "registrationDate": "2025-08-22T11:13:52.413Z",
+      "errors": [],
+      "lastActivated": "2025-08-22T11:13:52.429Z",
+      "performanceMetrics": {
+        "averageResponseTime": 185.538234671828,
+        "successRate": 0.9100180950081111,
+        "uptime": 0.9867134514993303,
+        "memoryUsage": 120.79229463822276
+      }
+    },
+    "carbon-manufacturing": {
+      "metadata": {
+        "id": "carbon-manufacturing",
+        "name": "Carbon AI-Enhanced Manufacturing",
+        "version": "1.0.0",
+        "description": "",
+        "module": "MANUFACTURING",
+        "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\carbon\\carbon-manufacturing-plugin.ts",
+        "className": "CarbonManufacturingPlugin",
+        "dependencies": [
+          "bigcapital-accounting",
+          "plane-project"
+        ],
+        "requiredPermissions": [
+          "manufacturing:read",
+          "manufacturing:write",
+          "ai:manufacturing"
+        ],
+        "capabilities": {
+          "aiEnabled": true,
+          "realTimeSync": true,
+          "crossModuleData": true,
+          "industrySpecific": true,
+          "customFields": true
+        },
+        "apiEndpoints": 7,
+        "webhooks": 3,
+        "lastModified": "2025-08-22T11:05:50.313Z",
+        "checksum": "37f3809c"
+      },
+      "status": "ACTIVE",
+      "registrationDate": "2025-08-22T11:13:52.413Z",
+      "errors": [],
+      "lastActivated": "2025-08-22T11:13:52.429Z",
+      "performanceMetrics": {
+        "averageResponseTime": 55.106259164406055,
+        "successRate": 0.9600453634754144,
+        "uptime": 0.9983916843540843,
+        "memoryUsage": 101.60653490607552
+      }
+    },
+    "evergauzy-hr": {
+      "metadata": {
+        "id": "evergauzy-hr",
+        "name": "Ever Gauzy AI-Enhanced HR",
+        "version": "1.0.0",
+        "description": "",
+        "module": "HR",
+        "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\evergauzy\\evergauzy-hr-plugin.ts",
+        "className": "EverGauzyHRPlugin",
+        "dependencies": [],
+        "requiredPermissions": [
+          "hr:read",
+          "hr:write",
+          "ai:hr"
+        ],
+        "capabilities": {
+          "aiEnabled": true,
+          "realTimeSync": true,
+          "crossModuleData": true,
+          "industrySpecific": true,
+          "customFields": true
+        },
+        "apiEndpoints": 6,
+        "webhooks": 3,
+        "lastModified": "2025-08-22T11:05:53.334Z",
+        "checksum": "-79200832"
+      },
+      "status": "ACTIVE",
+      "registrationDate": "2025-08-22T11:13:52.413Z",
+      "errors": [],
+      "lastActivated": "2025-08-22T11:13:52.429Z",
+      "performanceMetrics": {
+        "averageResponseTime": 126.99167889793857,
+        "successRate": 0.9071038240915223,
+        "uptime": 0.9642875327151962,
+        "memoryUsage": 134.96503245768923
+      }
+    },
+    "inventory-management": {
+      "metadata": {
+        "id": "inventory-management",
+        "name": "AI-Enhanced Inventory Management",
+        "version": "1.0.0",
+        "description": "",
+        "module": "INVENTORY",
+        "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\inventory\\inventory-management-plugin.ts",
+        "className": "InventoryManagementPlugin",
+        "dependencies": [
+          "twenty-crm",
+          "bigcapital-accounting",
+          "carbon-manufacturing"
+        ],
+        "requiredPermissions": [
+          "inventory:read",
+          "inventory:write",
+          "ai:inventory"
+        ],
+        "capabilities": {
+          "aiEnabled": true,
+          "realTimeSync": true,
+          "crossModuleData": true,
+          "industrySpecific": false,
+          "customFields": true
+        },
+        "apiEndpoints": 9,
+        "webhooks": 3,
+        "lastModified": "2025-08-22T11:05:56.754Z",
+        "checksum": "-32bf7640"
+      },
+      "status": "REGISTERED",
+      "registrationDate": "2025-08-22T11:13:52.413Z",
+      "errors": []
+    },
+    "plane-project": {
+      "metadata": {
+        "id": "plane-project",
+        "name": "Plane AI-Enhanced Project Management",
+        "version": "1.0.0",
+        "description": "",
+        "module": "PROJECT_MANAGEMENT",
+        "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\plane\\plane-project-plugin.ts",
+        "className": "PlaneProjectPlugin",
+        "dependencies": [],
+        "requiredPermissions": [
+          "project:read",
+          "project:write",
+          "ai:project"
+        ],
+        "capabilities": {
+          "aiEnabled": true,
+          "realTimeSync": true,
+          "crossModuleData": true,
+          "industrySpecific": true,
+          "customFields": true
+        },
+        "apiEndpoints": 6,
+        "webhooks": 3,
+        "lastModified": "2025-08-22T11:06:00.096Z",
+        "checksum": "-70a90df0"
+      },
+      "status": "REGISTERED",
+      "registrationDate": "2025-08-22T11:13:52.413Z",
+      "errors": []
+    },
+    "twenty-crm": {
+      "metadata": {
+        "id": "twenty-crm",
+        "name": "Twenty AI-Enhanced CRM",
+        "version": "1.0.0",
+        "description": "",
+        "module": "CRM",
+        "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\twenty\\twenty-crm-plugin.ts",
+        "className": "TwentyCRMPlugin",
+        "dependencies": [],
+        "requiredPermissions": [
+          "crm:read",
+          "crm:write",
+          "ai:crm"
+        ],
+        "capabilities": {
+          "aiEnabled": true,
+          "realTimeSync": true,
+          "crossModuleData": true,
+          "industrySpecific": true,
+          "customFields": true
+        },
+        "apiEndpoints": 6,
+        "webhooks": 3,
+        "lastModified": "2025-08-22T10:59:35.899Z",
+        "checksum": "55f2e24a"
+      },
+      "status": "REGISTERED",
+      "registrationDate": "2025-08-22T11:13:52.413Z",
+      "errors": []
+    },
+    "worklenz-legal": {
+      "metadata": {
+        "id": "worklenz-legal",
+        "name": "Worklenz AI-Enhanced Legal Management",
+        "version": "1.0.0",
+        "description": "",
+        "module": "PROJECT_MANAGEMENT",
+        "filePath": "C:\\Users\\ernij\\OneDrive\\Documents\\Cursor\\coreflow360\\src\\integrations\\worklenz\\worklenz-legal-plugin.ts",
+        "className": "WorklenzLegalPlugin",
+        "dependencies": [],
+        "requiredPermissions": [
+          "legal:read",
+          "legal:write",
+          "ai:legal"
+        ],
+        "capabilities": {
+          "aiEnabled": true,
+          "realTimeSync": true,
+          "crossModuleData": true,
+          "industrySpecific": true,
+          "customFields": true
+        },
+        "apiEndpoints": 8,
+        "webhooks": 3,
+        "lastModified": "2025-08-22T11:06:03.358Z",
+        "checksum": "15912035"
+      },
+      "status": "REGISTERED",
+      "registrationDate": "2025-08-22T11:13:52.413Z",
+      "errors": []
+    }
+  }
+}

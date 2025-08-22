@@ -659,4 +659,4 @@ class BigcapitalAPIClient {
   }
 }
 
-export { BigcapitalAccountingPlugin }
+// Export handled by class declaration

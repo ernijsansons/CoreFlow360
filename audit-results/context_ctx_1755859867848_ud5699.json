@@ -1,0 +1,51 @@
+{
+  "id": "ctx_1755859867848_ud5699",
+  "timestamp": "2025-08-22T10:51:07.848Z",
+  "scope": {
+    "security": [
+      "all"
+    ],
+    "performance": [
+      "all"
+    ],
+    "architecture": [
+      "all"
+    ],
+    "business_logic": [
+      "all"
+    ]
+  },
+  "criteria": {
+    "priority": "all",
+    "maxFindings": 1000,
+    "includeRecommendations": true
+  },
+  "codebase_metrics": {
+    "total_files": 250,
+    "total_lines": 45000,
+    "languages": [
+      "typescript",
+      "javascript",
+      "tsx"
+    ],
+    "frameworks": [
+      "nextjs",
+      "react",
+      "prisma"
+    ]
+  },
+  "system_architecture": {
+    "architecture_pattern": "layered",
+    "database": "postgresql",
+    "caching": "redis",
+    "deployment": "vercel"
+  },
+  "business_context": {
+    "domain": "erp_saas",
+    "user_base": "enterprise",
+    "compliance_requirements": [
+      "SOC2",
+      "GDPR"
+    ]
+  }
+}

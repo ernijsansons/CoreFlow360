@@ -1,0 +1,23 @@
+{
+  "audit_id": "audit_1755859867832_k42abr",
+  "audit_name": "logging_audit",
+  "execution_time": 0,
+  "findings": [],
+  "metrics": {
+    "issues_found": 0,
+    "critical_issues": 0,
+    "technical_debt_score": 0,
+    "maintainability_score": 100,
+    "security_score": 100,
+    "performance_score": 100
+  },
+  "chain_of_thought": [
+    "Loading audit template: logging_audit",
+    "Context loaded: ctx_1755859867813_q4p57k",
+    "Analyzing: code, configuration, patterns",
+    "Executing generic audit: logging_audit",
+    "Calculated metrics: 6 metrics",
+    "Confidence score: 13%"
+  ],
+  "confidence_score": 13
+}

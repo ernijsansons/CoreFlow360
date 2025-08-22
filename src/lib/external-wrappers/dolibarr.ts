@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod'
+import { randomUUID } from 'crypto'
 
 /*
 ✅ Pre-flight validation: Dolibarr interface designed for legal case management operations
@@ -416,7 +417,7 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
     const caseNumber = `CASE-${String(this.caseCounter++).padStart(6, '0')}`
 
     const legalCase: LegalCase = {
-      id: `case-${Date.now()}`,
+      id: randomUUID(),
       caseNumber,
       ...caseData,
       documents: [],
@@ -503,7 +504,7 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
     }
 
     const document: CaseDocument = {
-      id: `doc-${Date.now()}`,
+      id: randomUUID(),
       ...documentData,
       uploadedAt: new Date().toISOString(),
     }
@@ -558,7 +559,7 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
     }
 
     const note: CaseNote = {
-      id: `note-${Date.now()}`,
+      id: randomUUID(),
       ...noteData,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -612,7 +613,7 @@ export class MockDolibarrCaseService implements DolibarrCaseService {
     const hasConflicts = Math.random() < 0.1 // 10% chance of conflicts
 
     const result: ConflictCheckResult = {
-      id: `conflict-${Date.now()}`,
+      id: randomUUID(),
       checkDate: new Date().toISOString(),
       checkedBy: 'system-automated',
       conflicts: hasConflicts
@@ -667,7 +668,7 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
     const totalAmount = timeEntryData.isBillable ? billableHours * timeEntryData.billableRate : 0
 
     const timeEntry: TimeEntry = {
-      id: `time-${Date.now()}`,
+      id: randomUUID(),
       ...timeEntryData,
       duration,
       billableHours,
@@ -848,7 +849,7 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
   async approveTimeEntries(_timeEntryIds: string[], _approvedBy: string): Promise<TimeEntry[]> {
     const entries: TimeEntry[] = []
 
-    for (const id of timeEntryIds) {
+    for (const id of _timeEntryIds) {
       const entry = this.timeEntries.get(id)
       if (entry && entry.status === 'submitted') {
         const updatedEntry = {
@@ -874,7 +875,7 @@ export class MockDolibarrTimeService implements DolibarrTimeService {
     }
 
     const expense: TimeEntryExpense = {
-      id: `expense-${Date.now()}`,
+      id: randomUUID(),
       ...expenseData,
     }
 

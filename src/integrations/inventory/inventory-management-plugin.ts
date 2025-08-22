@@ -1683,4 +1683,4 @@ class InventoryAPIClient {
   }
 }
 
-export { InventoryManagementPlugin }
+// Export handled by class declaration

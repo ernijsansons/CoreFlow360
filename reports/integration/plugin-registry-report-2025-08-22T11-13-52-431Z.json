@@ -1,0 +1,20 @@
+{
+  "totalPlugins": 7,
+  "activePlugins": 3,
+  "inactivePlugins": 0,
+  "errorPlugins": 0,
+  "modulesCovered": [
+    "ACCOUNTING",
+    "MANUFACTURING",
+    "HR",
+    "INVENTORY",
+    "PROJECT_MANAGEMENT",
+    "CRM"
+  ],
+  "lastScan": "2025-08-22T11:13:52.431Z",
+  "registryHealth": "WARNING",
+  "issues": [
+    "Only 3/7 plugins are active"
+  ],
+  "recommendations": []
+}

@@ -1531,4 +1531,4 @@ class CarbonAPIClient {
   }
 }
 
-export { CarbonManufacturingPlugin }
+// Export handled by class declaration

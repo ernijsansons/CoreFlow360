@@ -1,0 +1,23 @@
+{
+  "audit_id": "audit_1755859431630_jupvws",
+  "audit_name": "database_performance_audit",
+  "execution_time": 1,
+  "findings": [],
+  "metrics": {
+    "issues_found": 0,
+    "critical_issues": 0,
+    "technical_debt_score": 0,
+    "maintainability_score": 100,
+    "security_score": 100,
+    "performance_score": 100
+  },
+  "chain_of_thought": [
+    "Loading audit template: database_performance_audit",
+    "Context loaded: ctx_1755859431626_00mbh",
+    "Analyzing: code, configuration, patterns",
+    "Executing generic audit: database_performance_audit",
+    "Calculated metrics: 6 metrics",
+    "Confidence score: 13%"
+  ],
+  "confidence_score": 13
+}

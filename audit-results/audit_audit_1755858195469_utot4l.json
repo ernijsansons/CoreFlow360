@@ -1,0 +1,23 @@
+{
+  "audit_id": "audit_1755858195469_utot4l",
+  "audit_name": "business_rules_audit",
+  "execution_time": 0,
+  "findings": [],
+  "metrics": {
+    "issues_found": 0,
+    "critical_issues": 0,
+    "technical_debt_score": 0,
+    "maintainability_score": 100,
+    "security_score": 100,
+    "performance_score": 100
+  },
+  "chain_of_thought": [
+    "Loading audit template: business_rules_audit",
+    "Context loaded: ctx_1755858195457_hcnps4",
+    "Analyzing: code, configuration, patterns",
+    "Executing generic audit: business_rules_audit",
+    "Calculated metrics: 6 metrics",
+    "Confidence score: 13%"
+  ],
+  "confidence_score": 13
+}

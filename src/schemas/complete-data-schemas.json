@@ -1,0 +1,329 @@
+{
+  "masterSchemas": {
+    "CustomerSchema": {
+      "fields": [
+        "id",
+        "name",
+        "email",
+        "phone",
+        "address",
+        "created_at",
+        "updated_at"
+      ],
+      "relationships": [
+        "orders",
+        "invoices",
+        "support_tickets"
+      ]
+    },
+    "EmployeeSchema": {
+      "fields": [
+        "id",
+        "name",
+        "email",
+        "department",
+        "role",
+        "hire_date",
+        "status"
+      ],
+      "relationships": [
+        "projects",
+        "tasks",
+        "evaluations"
+      ]
+    },
+    "ProductSchema": {
+      "fields": [
+        "id",
+        "sku",
+        "name",
+        "category",
+        "price",
+        "inventory_count"
+      ],
+      "relationships": [
+        "orders",
+        "suppliers",
+        "manufacturing_specs"
+      ]
+    },
+    "FinancialSchema": {
+      "fields": [
+        "id",
+        "transaction_type",
+        "amount",
+        "currency",
+        "date",
+        "reference"
+      ],
+      "relationships": [
+        "customer",
+        "invoice",
+        "account"
+      ]
+    },
+    "AIModelSchema": {
+      "fields": [
+        "id",
+        "model_type",
+        "task_type",
+        "confidence",
+        "result",
+        "metadata"
+      ],
+      "relationships": [
+        "source_module",
+        "processed_data",
+        "recommendations"
+      ]
+    }
+  },
+  "crossModuleMappings": [
+    {
+      "id": "mapping_1",
+      "source": "CRM",
+      "target": "Inventory",
+      "fieldMappings": 6
+    },
+    {
+      "id": "mapping_2",
+      "source": "Accounting",
+      "target": "Manufacturing",
+      "fieldMappings": 10
+    },
+    {
+      "id": "mapping_3",
+      "source": "HR",
+      "target": "Legal",
+      "fieldMappings": 5
+    },
+    {
+      "id": "mapping_4",
+      "source": "CRM",
+      "target": "Inventory",
+      "fieldMappings": 8
+    },
+    {
+      "id": "mapping_5",
+      "source": "Accounting",
+      "target": "Manufacturing",
+      "fieldMappings": 3
+    },
+    {
+      "id": "mapping_6",
+      "source": "HR",
+      "target": "Legal",
+      "fieldMappings": 10
+    },
+    {
+      "id": "mapping_7",
+      "source": "CRM",
+      "target": "Inventory",
+      "fieldMappings": 8
+    },
+    {
+      "id": "mapping_8",
+      "source": "Accounting",
+      "target": "Manufacturing",
+      "fieldMappings": 10
+    },
+    {
+      "id": "mapping_9",
+      "source": "HR",
+      "target": "Legal",
+      "fieldMappings": 8
+    },
+    {
+      "id": "mapping_10",
+      "source": "CRM",
+      "target": "Inventory",
+      "fieldMappings": 9
+    },
+    {
+      "id": "mapping_11",
+      "source": "Accounting",
+      "target": "Manufacturing",
+      "fieldMappings": 4
+    },
+    {
+      "id": "mapping_12",
+      "source": "HR",
+      "target": "Legal",
+      "fieldMappings": 10
+    },
+    {
+      "id": "mapping_13",
+      "source": "CRM",
+      "target": "Inventory",
+      "fieldMappings": 4
+    },
+    {
+      "id": "mapping_14",
+      "source": "Accounting",
+      "target": "Manufacturing",
+      "fieldMappings": 3
+    },
+    {
+      "id": "mapping_15",
+      "source": "HR",
+      "target": "Legal",
+      "fieldMappings": 4
+    },
+    {
+      "id": "mapping_16",
+      "source": "CRM",
+      "target": "Inventory",
+      "fieldMappings": 10
+    },
+    {
+      "id": "mapping_17",
+      "source": "Accounting",
+      "target": "Manufacturing",
+      "fieldMappings": 4
+    },
+    {
+      "id": "mapping_18",
+      "source": "HR",
+      "target": "Legal",
+      "fieldMappings": 9
+    },
+    {
+      "id": "mapping_19",
+      "source": "CRM",
+      "target": "Inventory",
+      "fieldMappings": 9
+    },
+    {
+      "id": "mapping_20",
+      "source": "Accounting",
+      "target": "Manufacturing",
+      "fieldMappings": 9
+    },
+    {
+      "id": "mapping_21",
+      "source": "HR",
+      "target": "Legal",
+      "fieldMappings": 6
+    },
+    {
+      "id": "mapping_22",
+      "source": "CRM",
+      "target": "Inventory",
+      "fieldMappings": 7
+    },
+    {
+      "id": "mapping_23",
+      "source": "Accounting",
+      "target": "Manufacturing",
+      "fieldMappings": 3
+    },
+    {
+      "id": "mapping_24",
+      "source": "HR",
+      "target": "Legal",
+      "fieldMappings": 9
+    },
+    {
+      "id": "mapping_25",
+      "source": "CRM",
+      "target": "Inventory",
+      "fieldMappings": 5
+    },
+    {
+      "id": "mapping_26",
+      "source": "Accounting",
+      "target": "Manufacturing",
+      "fieldMappings": 9
+    },
+    {
+      "id": "mapping_27",
+      "source": "HR",
+      "target": "Legal",
+      "fieldMappings": 4
+    },
+    {
+      "id": "mapping_28",
+      "source": "CRM",
+      "target": "Inventory",
+      "fieldMappings": 7
+    }
+  ],
+  "transformationRules": [
+    {
+      "name": "UUID Normalization",
+      "type": "format",
+      "applicableFields": 12
+    },
+    {
+      "name": "Timestamp Standardization",
+      "type": "datetime",
+      "applicableFields": 8
+    },
+    {
+      "name": "Phone Number Format",
+      "type": "phone",
+      "applicableFields": 5
+    },
+    {
+      "name": "Currency Conversion",
+      "type": "currency",
+      "applicableFields": 6
+    },
+    {
+      "name": "Address Standardization",
+      "type": "address",
+      "applicableFields": 4
+    },
+    {
+      "name": "Name Case Normalization",
+      "type": "text",
+      "applicableFields": 9
+    },
+    {
+      "name": "Email Validation",
+      "type": "email",
+      "applicableFields": 7
+    },
+    {
+      "name": "SKU Format Standardization",
+      "type": "sku",
+      "applicableFields": 3
+    },
+    {
+      "name": "Status Enum Mapping",
+      "type": "enum",
+      "applicableFields": 11
+    },
+    {
+      "name": "Decimal Precision Rules",
+      "type": "numeric",
+      "applicableFields": 6
+    },
+    {
+      "name": "JSON Schema Validation",
+      "type": "json",
+      "applicableFields": 4
+    },
+    {
+      "name": "Array Field Normalization",
+      "type": "array",
+      "applicableFields": 3
+    },
+    {
+      "name": "Boolean Standardization",
+      "type": "boolean",
+      "applicableFields": 5
+    },
+    {
+      "name": "Reference ID Mapping",
+      "type": "reference",
+      "applicableFields": 15
+    },
+    {
+      "name": "Metadata Structure Rules",
+      "type": "metadata",
+      "applicableFields": 8
+    }
+  ],
+  "generatedAt": "2025-08-22T13-29-19-385Z"
+}

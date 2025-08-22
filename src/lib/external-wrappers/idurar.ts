@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod'
+import { randomUUID } from 'crypto'
 
 /*
 ✅ Pre-flight validation: IDURAR interface designed for ERP operations with invoice focus
@@ -292,11 +293,11 @@ export class MockIDURARService implements IDURARService {
     }
 
     // Generate invoice
-    const invoiceId = `inv-${Date.now()}`
+    const invoiceId = randomUUID()
     const invoiceNumber = `INV-${String(this.invoiceCounter++).padStart(6, '0')}`
 
     const items: InvoiceItem[] = request.items.map((item, index) => ({
-      id: `item-${invoiceId}-${index}`,
+      id: randomUUID(),
       ...item,
       totalPrice: item.quantity * item.unitPrice,
     }))
@@ -433,7 +434,7 @@ export class MockIDURARService implements IDURARService {
     CustomerSchema.parse(customerData)
 
     const customer: Customer = {
-      id: `customer-${Date.now()}`,
+      id: randomUUID(),
       ...customerData,
       createdAt: new Date().toISOString(),
     }

@@ -944,4 +944,4 @@ export class TwentyCRMPlugin implements CoreFlowPlugin {
   }
 }
 
-export { TwentyCRMPlugin }
+// Export handled by class declaration

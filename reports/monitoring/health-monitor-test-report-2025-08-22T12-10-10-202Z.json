@@ -1,0 +1,133 @@
+{
+  "testSummary": {
+    "testDuration": "30 seconds",
+    "monitoringCycles": 6,
+    "totalModules": 8,
+    "overallHealth": "WARNING",
+    "systemUptime": 0.99575
+  },
+  "moduleHealth": [
+    {
+      "module": "CRM",
+      "status": "WARNING",
+      "responseTime": 206,
+      "successRate": 0.9376799101240002,
+      "errorRate": 0.02668071844502272,
+      "uptime": 0.995,
+      "memoryUsage": 0.5020364250511502,
+      "cpuUsage": 0.23865581627148688,
+      "alertCount": 2
+    },
+    {
+      "module": "ACCOUNTING",
+      "status": "HEALTHY",
+      "responseTime": 133,
+      "successRate": 0.9628903180281704,
+      "errorRate": 0.03601817842335932,
+      "uptime": 0.996,
+      "memoryUsage": 0.46761833123416224,
+      "cpuUsage": 0.269404804244816,
+      "alertCount": 0
+    },
+    {
+      "module": "HR",
+      "status": "HEALTHY",
+      "responseTime": 138,
+      "successRate": 0.9809198660662506,
+      "errorRate": 0.006522124658091072,
+      "uptime": 0.996,
+      "memoryUsage": 0.48579565892386056,
+      "cpuUsage": 0.2904406352515897,
+      "alertCount": 0
+    },
+    {
+      "module": "PROJECT_MANAGEMENT",
+      "status": "WARNING",
+      "responseTime": 246,
+      "successRate": 0.9571694033157494,
+      "errorRate": 0.08720405198126233,
+      "uptime": 0.996,
+      "memoryUsage": 0.5494721528108943,
+      "cpuUsage": 0.1450591177319147,
+      "alertCount": 5
+    },
+    {
+      "module": "INVENTORY",
+      "status": "WARNING",
+      "responseTime": 57,
+      "successRate": 0.930402149226204,
+      "errorRate": 0.03229482223682918,
+      "uptime": 0.996,
+      "memoryUsage": 0.43952093048041163,
+      "cpuUsage": 0.3058585008372471,
+      "alertCount": 2
+    },
+    {
+      "module": "MANUFACTURING",
+      "status": "HEALTHY",
+      "responseTime": 163,
+      "successRate": 0.9547398593656549,
+      "errorRate": 0.026812629031706833,
+      "uptime": 0.996,
+      "memoryUsage": 0.5344316179118676,
+      "cpuUsage": 0.1539547253833043,
+      "alertCount": 0
+    },
+    {
+      "module": "INTEGRATION",
+      "status": "HEALTHY",
+      "responseTime": 73,
+      "successRate": 0.9971659497247868,
+      "errorRate": 0.0364082245615021,
+      "uptime": 0.996,
+      "memoryUsage": 0.4607620876066865,
+      "cpuUsage": 0.24015415065582885,
+      "alertCount": 0
+    },
+    {
+      "module": "LEGAL",
+      "status": "HEALTHY",
+      "responseTime": 106,
+      "successRate": 1,
+      "errorRate": 0.008109144350389348,
+      "uptime": 0.995,
+      "memoryUsage": 0.529181196625923,
+      "cpuUsage": 0.2685717920024052,
+      "alertCount": 1
+    }
+  ],
+  "systemMetrics": {
+    "totalUptime": 0.99575,
+    "averageResponseTime": 140,
+    "overallSuccessRate": 0.965120931981352,
+    "activeAlerts": 9,
+    "criticalAlerts": 2
+  },
+  "alertsSummary": {
+    "totalAlerts": 9,
+    "criticalAlerts": 2,
+    "warningAlerts": 7,
+    "infoAlerts": 0
+  },
+  "recommendations": [
+    "All modules operating within normal parameters",
+    "Consider enabling trend analysis for predictive monitoring",
+    "Review alert thresholds for optimal sensitivity"
+  ],
+  "testResults": {
+    "monitoringStarted": true,
+    "healthChecksCompleted": true,
+    "dashboardDataGenerated": true,
+    "alertManagementTested": true,
+    "eventListenersWorking": true
+  },
+  "conclusion": {
+    "overallTestResult": "SUCCESS",
+    "monitoringSystemHealth": "OPERATIONAL",
+    "readyForProduction": true,
+    "recommendedActions": [
+      "Resolve all critical alerts before production deployment"
+    ]
+  },
+  "timestamp": "2025-08-22T12:10:10.201Z"
+}

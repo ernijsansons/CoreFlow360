@@ -347,8 +347,24 @@ vi.mock('@/lib/ai/bundle-orchestrator', () => ({
   })),
 }))
 
+// Import test utilities
+import { setupTestDatabase, teardownTestDatabase, cleanupTestDatabase } from './__tests__/utils/test-database'
+import { resetFaker } from './__tests__/utils/test-factories'
+
 // Global test setup
-beforeAll(() => {
+beforeAll(async () => {
+  // Reset faker seed for deterministic tests
+  resetFaker(12345)
+  
+  // Setup test database if needed
+  if (process.env.TEST_DATABASE_URL) {
+    try {
+      await setupTestDatabase()
+    } catch (error) {
+      console.warn('Could not setup test database:', error)
+    }
+  }
+  
   // Mock global fetch
   global.fetch = vi.fn()
   
@@ -383,15 +399,71 @@ beforeAll(() => {
     unobserve: vi.fn(),
     disconnect: vi.fn(),
   }))
+  
+  // Mock performance APIs
+  if (typeof global.performance === 'undefined') {
+    global.performance = {
+      now: vi.fn(() => Date.now()),
+      mark: vi.fn(),
+      measure: vi.fn(),
+      getEntriesByType: vi.fn(() => []),
+      getEntriesByName: vi.fn(() => []),
+      clearMarks: vi.fn(),
+      clearMeasures: vi.fn()
+    } as any
+  }
+  
+  // Mock crypto API
+  if (typeof global.crypto === 'undefined') {
+    global.crypto = {
+      randomUUID: vi.fn(() => '12345678-1234-1234-1234-123456789012'),
+      getRandomValues: vi.fn((arr) => {
+        for (let i = 0; i < arr.length; i++) {
+          arr[i] = Math.floor(Math.random() * 256)
+        }
+        return arr
+      })
+    } as any
+  }
+  
+  // Mock console for cleaner test output
+  if (process.env.NODE_ENV === 'test' && !process.env.VERBOSE_TESTS) {
+    global.console = {
+      ...console,
+      log: vi.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: console.error // Keep errors visible
+    }
+  }
 })
 
 // Cleanup after each test
-afterEach(() => {
+afterEach(async () => {
   cleanup()
   vi.clearAllMocks()
+  
+  // Clean test database if available
+  if (process.env.TEST_DATABASE_URL) {
+    try {
+      await cleanupTestDatabase()
+    } catch (error) {
+      console.warn('Could not cleanup test database:', error)
+    }
+  }
 })
 
 // Global teardown
-afterAll(() => {
+afterAll(async () => {
   vi.restoreAllMocks()
+  
+  // Teardown test database if available
+  if (process.env.TEST_DATABASE_URL) {
+    try {
+      await teardownTestDatabase()
+    } catch (error) {
+      console.warn('Could not teardown test database:', error)
+    }
+  }
 })
