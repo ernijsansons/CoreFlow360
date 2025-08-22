@@ -153,7 +153,7 @@
     "ml:pipeline": "tsx src/scripts/test-ml-pipeline.ts"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=18.17.0 <23.0.0"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
