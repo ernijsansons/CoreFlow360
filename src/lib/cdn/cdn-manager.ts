@@ -212,7 +212,6 @@ export class CDNManager {
    */
   async invalidateCache(paths: string[]): Promise<boolean> {
     if (!this.cdnConfig.invalidationEnabled || this.config.NODE_ENV !== 'production') {
-      ')
       return true
     }
 

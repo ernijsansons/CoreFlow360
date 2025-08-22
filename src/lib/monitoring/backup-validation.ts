@@ -640,7 +640,7 @@ export class BackupMonitor {
 
   private static async sendBackupAlert(message: string, severity: string): Promise<void> {
     // This would integrate with alerting systems
-    }]: ${message}`)
+    console.log(`[${severity}]: ${message}`)
   }
 
   static getMonitoringStatus(): {
