@@ -357,8 +357,10 @@ function calculateDCFValuation(data: z.infer<typeof CreateValuationSchema>): num
   let presentValue = 0
   for (let i = 0; i < data.dcfProjectedCashFlows.length; i++) {
     const cashFlow = data.dcfProjectedCashFlows[i]
-    const pv = cashFlow / Math.pow(1 + discountRate, i + 1)
-    presentValue += pv
+    if (cashFlow !== undefined) {
+      const pv = cashFlow / Math.pow(1 + discountRate, i + 1)
+      presentValue += pv
+    }
   }
   
   // Add terminal value
@@ -368,10 +370,12 @@ function calculateDCFValuation(data: z.infer<typeof CreateValuationSchema>): num
   } else {
     // Calculate terminal value using perpetuity growth model
     const finalCashFlow = data.dcfProjectedCashFlows[data.dcfProjectedCashFlows.length - 1]
-    const terminalCashFlow = finalCashFlow * (1 + growthRate)
-    const calculatedTerminalValue = terminalCashFlow / (discountRate - growthRate)
-    const terminalPV = calculatedTerminalValue / Math.pow(1 + discountRate, data.dcfProjectedCashFlows.length)
-    presentValue += terminalPV
+    if (finalCashFlow !== undefined) {
+      const terminalCashFlow = finalCashFlow * (1 + growthRate)
+      const calculatedTerminalValue = terminalCashFlow / (discountRate - growthRate)
+      const terminalPV = calculatedTerminalValue / Math.pow(1 + discountRate, data.dcfProjectedCashFlows.length)
+      presentValue += terminalPV
+    }
   }
   
   return Math.round(presentValue)
@@ -454,7 +458,7 @@ async function performAIValidation(data: z.infer<typeof CreateValuationSchema>, 
   const validation = {
     overallAssessment: 'REASONABLE',
     confidenceScore: 78,
-    suggestedAdjustments: [],
+    suggestedAdjustments: [] as Array<{ type: string; suggestion: string; impact: number }>,
     marketComparison: {
       industryMedian: valuation * 0.9,
       industryAverage: valuation * 1.1,
@@ -533,10 +537,10 @@ async function generateAISuggestions(data: z.infer<typeof DueDiligenceItemSchema
   const suggestions = {
     riskAssessment: {
       overallRisk: 'MEDIUM',
-      specificRisks: [],
-      mitigationStrategies: []
+      specificRisks: [] as string[],
+      mitigationStrategies: [] as string[]
     },
-    suggestions: []
+    suggestions: [] as string[]
   }
 
   switch (data.category) {
@@ -601,7 +605,8 @@ async function createDueDiligenceTemplate(opportunityId: string, template: strin
       itemName: templateItem.itemName,
       description: templateItem.description,
       priority: templateItem.priority,
-      documentsRequired: templateItem.documentsRequired
+      documentsRequired: templateItem.documentsRequired,
+      actionItems: []
     })
     items.push(item)
   }

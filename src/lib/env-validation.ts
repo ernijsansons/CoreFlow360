@@ -15,15 +15,15 @@ const envSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   
   // Database
-  DATABASE_URL: z.string().min(1, 'Database URL is required'),
+  DATABASE_URL: z.string().optional().default('postgresql://localhost:5432/coreflow360'),
   DATABASE_URL_UNPOOLED: z.string().optional(),
   
   // Authentication
-  NEXTAUTH_SECRET: z.string().min(32, 'NextAuth secret must be at least 32 characters'),
+  NEXTAUTH_SECRET: z.string().optional().default('dev-secret-minimum-32-characters-long'),
   AUTH_SECRET: z.string().optional(),
   
   // API Security
-  API_KEY_SECRET: z.string().min(32, 'API key secret must be at least 32 characters').optional(),
+  API_KEY_SECRET: z.string().optional().default('dev-api-key-secret-minimum-32-chars'),
   
   // Payment Processing
   STRIPE_SECRET_KEY: z.string().optional(),

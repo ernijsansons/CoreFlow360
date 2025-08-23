@@ -20,7 +20,7 @@ interface AIAgent {
   name: string
   role: string
   description: string
-  icon: unknown
+  icon: React.ComponentType<{ className?: string }>
   gradient: string
   capabilities: string[]
   monthlyValue: string

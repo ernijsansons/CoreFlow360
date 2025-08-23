@@ -448,7 +448,7 @@ function calculateEstimatedValuation(data: z.infer<typeof CreateOpportunitySchem
     data.industry.toLowerCase().includes(key)
   ) || 'default'
   
-  const multiple = industryMultiples[industryKey]
+  const multiple = industryMultiples[industryKey] || 2.5 // default fallback
   const revenueValuation = data.annualRevenue * multiple
   
   // Adjust for profitability

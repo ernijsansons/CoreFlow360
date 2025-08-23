@@ -22,7 +22,9 @@ export default async function MonitoringPage() {
     redirect('/auth/signin?callbackUrl=/admin/monitoring')
   }
 
-  if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
+  // Type assertion for role check
+  const userWithRole = session.user as any
+  if (userWithRole.role !== 'ADMIN' && userWithRole.role !== 'SUPER_ADMIN') {
     redirect('/dashboard')
   }
 

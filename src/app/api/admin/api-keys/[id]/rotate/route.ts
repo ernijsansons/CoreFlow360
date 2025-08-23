@@ -42,13 +42,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       rotationDate: validatedData.rotationDate,
     }
 
+    const user = session.user as any
     const result = await credentialManager.rotateAPIKey(
       keyId,
       rotateRequest,
-      session.user.tenantId,
-      session.user.id,
-      session.user.role,
-      session.user.permissions
+      user.tenantId || '',
+      user.id,
+      user.role || 'USER',
+      user.permissions || []
     )
 
     if (!result.success) {
@@ -78,11 +79,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    if (error.message === 'API key not found') {
+    const err = error as any
+    if (err.message === 'API key not found') {
       return NextResponse.json({ error: 'API key not found' }, { status: 404 })
     }
 
-    if (error.message === 'Unauthorized' || error.message === 'Forbidden') {
+    if (err.message === 'Unauthorized' || err.message === 'Forbidden') {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
 
@@ -166,7 +168,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       securityScore: key.securityScore,
     })
   } catch (error: unknown) {
-    if (error.message === 'API key not found') {
+    const err = error as any
+    if (err.message === 'API key not found') {
       return NextResponse.json({ error: 'API key not found' }, { status: 404 })
     }
 

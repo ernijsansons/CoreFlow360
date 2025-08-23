@@ -68,7 +68,7 @@ export default function AdminPage() {
     redirect('/login')
   }
 
-  const user = session.user as unknown
+  const user = session.user as any
 
   // Check if user has admin permissions
   if (!['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
