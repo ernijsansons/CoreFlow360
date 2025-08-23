@@ -1,9 +1,10 @@
 {
-  "buildCommand": "npx prisma generate && next build",
-  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm install @tailwindcss/postcss --legacy-peer-deps && npx prisma generate && next build",
+  "installCommand": "npm install --legacy-peer-deps --force",
   "build": {
     "env": {
-      "NODE_OPTIONS": "--max-old-space-size=8192"
+      "NODE_OPTIONS": "--max-old-space-size=8192",
+      "NODE_VERSION": "18"
     }
   },
   "functions": {
