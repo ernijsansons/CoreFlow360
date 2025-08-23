@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
-import './tailwind.css'
+import './globals.css'
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider'
 import { FeedbackWidget } from '@/components/feedback/FeedbackWidget'
