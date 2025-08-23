@@ -1,12 +1,14 @@
 import V0Navigation from '@/components/marketing/V0Navigation'
 import V0Hero from '@/components/marketing/V0Hero'
 import V0Pricing from '@/components/marketing/V0Pricing'
+import V0ROICalculator from '@/components/marketing/V0ROICalculator'
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-black">
       <V0Navigation />
       <V0Hero />
+      <V0ROICalculator />
       <V0Pricing />
       
       {/* Additional sections coming soon */}
@@ -18,7 +20,7 @@ export default function Home() {
           <p className="text-xl text-gray-300 mb-8">
             Now using the actual v0 design components with proper branding and features
           </p>
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-6 max-w-6xl mx-auto">
             <div className="p-6 bg-gray-800 rounded-2xl">
               <h3 className="text-lg font-semibold text-blue-400 mb-2">✅ Real v0 Navigation</h3>
               <p className="text-gray-400">Multi-business portfolio, industries dropdown</p>
@@ -28,13 +30,17 @@ export default function Home() {
               <p className="text-gray-400">Live stats, multi-business messaging</p>
             </div>
             <div className="p-6 bg-gray-800 rounded-2xl">
+              <h3 className="text-lg font-semibold text-green-400 mb-2">✅ Empire ROI Calculator</h3>
+              <p className="text-gray-400">Interactive savings calculator with progressive discounts</p>
+            </div>
+            <div className="p-6 bg-gray-800 rounded-2xl">
               <h3 className="text-lg font-semibold text-pink-400 mb-2">✅ Progressive Pricing</h3>
               <p className="text-gray-400">Forever Free, Growth, Empire, Enterprise tiers</p>
             </div>
           </div>
           
           <div className="mt-8 text-gray-400">
-            <p>🔄 Coming next: ROI Calculator, Success Stories, Industry Pages, AI Features</p>
+            <p>🔄 Coming next: Success Stories, Industry Pages, AI Features</p>
           </div>
         </div>
       </section>
