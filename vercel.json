@@ -1,6 +1,5 @@
 {
   "framework": "nextjs",
   "buildCommand": "npm install tailwindcss@3.4.1 autoprefixer postcss --legacy-peer-deps --force && npx prisma generate && next build",
-  "installCommand": "npm install --legacy-peer-deps --force",
-  "nodeVersion": "18.x"
+  "installCommand": "npm install --legacy-peer-deps --force"
 }

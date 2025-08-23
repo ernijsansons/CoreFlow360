@@ -4,7 +4,7 @@
  */
 
 import { loadBalancer, ServerInstance } from './load-balancer'
-import { productionMonitor } from '@/lib/monitoring/production-alerts'
+// import { productionMonitor } from '@/lib/monitoring/production-alerts'
 
 // Container platforms
 export enum ContainerPlatform {
@@ -209,7 +209,7 @@ export class ContainerOrchestrator {
       this.deployments.set(deploymentName, deployment)
 
       console.log(`Deployment scaled: ${deploymentName} -> ${replicas} replicas`)
-      productionMonitor.recordMetric('container_deployment_scaled', 1)
+      // productionMonitor.recordMetric('container_deployment_scaled', 1)
       
       return true
     } catch (error) {
@@ -250,7 +250,7 @@ export class ContainerOrchestrator {
       this.deployments.set(deploymentName, deployment)
       
       console.log(`Rolling update completed: ${deploymentName}`)
-      productionMonitor.recordMetric('container_deployment_updated', 1)
+      // productionMonitor.recordMetric('container_deployment_updated', 1)
       
       return true
     } catch (error) {
@@ -549,7 +549,7 @@ export class ContainerOrchestrator {
     this.deployments.set(deploymentId, config)
     
     console.log(`Created deployment: ${deploymentId}`)
-    productionMonitor.recordMetric('container_deployment_created', 1)
+    // productionMonitor.recordMetric('container_deployment_created', 1)
     
     return deploymentId
   }
@@ -559,7 +559,7 @@ export class ContainerOrchestrator {
     this.services.set(serviceId, config)
     
     console.log(`Created service: ${serviceId}`)
-    productionMonitor.recordMetric('container_service_created', 1)
+    // productionMonitor.recordMetric('container_service_created', 1)
     
     return serviceId
   }
@@ -597,7 +597,7 @@ export class ContainerOrchestrator {
     }, 2000)
 
     console.log(`Created container: ${containerId}`)
-    productionMonitor.recordMetric('container_created', 1)
+    // productionMonitor.recordMetric('container_created', 1)
     
     return containerId
   }
@@ -799,10 +799,10 @@ export class ContainerOrchestrator {
     const totalMemory = containers.reduce((sum, c) => sum + c.metrics.memory, 0)
     const runningContainers = containers.filter(c => c.status === ContainerStatus.RUNNING).length
 
-    productionMonitor.recordMetric('container_total_cpu', totalCPU)
-    productionMonitor.recordMetric('container_total_memory', totalMemory)
-    productionMonitor.recordMetric('container_running_count', runningContainers)
-    productionMonitor.recordMetric('container_total_count', containers.length)
+    // productionMonitor.recordMetric('container_total_cpu', totalCPU)
+    // productionMonitor.recordMetric('container_total_memory', totalMemory)
+    // productionMonitor.recordMetric('container_running_count', runningContainers)
+    // productionMonitor.recordMetric('container_total_count', containers.length)
   }
 
   private parseMemory(memoryString: string): number {

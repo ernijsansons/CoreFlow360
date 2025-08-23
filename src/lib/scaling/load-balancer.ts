@@ -4,7 +4,7 @@
  */
 
 import { getRedis } from '@/lib/redis/client'
-import { productionMonitor } from '@/lib/monitoring/production-alerts'
+// import { productionMonitor } from '@/lib/monitoring/production-alerts'
 import { advancedCache } from '@/lib/cache/advanced-cache'
 
 // Load balancing strategies
@@ -303,7 +303,7 @@ export class LoadBalancer {
       return selectedServer
     } catch (error) {
       console.error('Request routing failed:', error)
-      productionMonitor.recordMetric('load_balancer_routing_failed', 1)
+      // productionMonitor.recordMetric('load_balancer_routing_failed', 1)
       return null
     }
   }
@@ -347,9 +347,9 @@ export class LoadBalancer {
     await this.checkAutoScaling()
 
     // Record health metrics
-    productionMonitor.recordMetric(`server_${serverId}_cpu`, health.cpu)
-    productionMonitor.recordMetric(`server_${serverId}_memory`, health.memory)
-    productionMonitor.recordMetric(`server_${serverId}_response_time`, health.responseTime)
+    // productionMonitor.recordMetric(`server_${serverId}_cpu`, health.cpu)
+    // productionMonitor.recordMetric(`server_${serverId}_memory`, health.memory)
+    // productionMonitor.recordMetric(`server_${serverId}_response_time`, health.responseTime)
   }
 
   /**
@@ -755,7 +755,7 @@ export class LoadBalancer {
     
     // Record scaling event
     await this.redis?.set(lastScaleKey, now.toString())
-    productionMonitor.recordMetric(`auto_scale_${direction}`, 1)
+    // productionMonitor.recordMetric(`auto_scale_${direction}`, 1)
 
     // In production, this would trigger actual server provisioning/deprovisioning
     if (direction === 'up') {
@@ -910,8 +910,8 @@ export class LoadBalancer {
 
   private async recordRoutingMetrics(server: ServerInstance, request: any): Promise<void> {
     // Record routing decision metrics
-    productionMonitor.recordMetric('load_balancer_request_routed', 1)
-    productionMonitor.recordMetric(`load_balancer_server_${server.id}_requests`, 1)
+    // productionMonitor.recordMetric('load_balancer_request_routed', 1)
+    // productionMonitor.recordMetric(`load_balancer_server_${server.id}_requests`, 1)
   }
 
   private async drainServerConnections(serverId: string): Promise<void> {
