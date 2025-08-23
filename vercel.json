@@ -1,15 +1,6 @@
 {
-  "buildCommand": "npm install tailwindcss autoprefixer --legacy-peer-deps && npx prisma generate && next build",
+  "framework": "nextjs",
+  "buildCommand": "npm install tailwindcss@3.4.1 autoprefixer postcss --legacy-peer-deps --force && npx prisma generate && next build",
   "installCommand": "npm install --legacy-peer-deps --force",
-  "build": {
-    "env": {
-      "NODE_OPTIONS": "--max-old-space-size=8192",
-      "NODE_VERSION": "18"
-    }
-  },
-  "functions": {
-    "app/api/**/*.ts": {
-      "maxDuration": 30
-    }
-  }
+  "nodeVersion": "18.x"
 }
