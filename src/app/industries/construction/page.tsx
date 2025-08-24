@@ -1,49 +1,25 @@
-'use client'
+import V0Navigation from '@/components/marketing/V0Navigation'
+import V0ConstructionHero from '@/components/industries/V0ConstructionHero'
+import V0ConstructionFeatures from '@/components/industries/V0ConstructionFeatures'
+import V0ConstructionROICalculator from '@/components/industries/V0ConstructionROICalculator'
+import V0ConstructionTestimonials from '@/components/industries/V0ConstructionTestimonials'
+import V0Pricing from '@/components/marketing/V0Pricing'
 
-import { motion } from 'framer-motion'
-import { HardHat, Truck, Calendar, DollarSign, Users, MapPin, CheckCircle, AlertTriangle } from 'lucide-react'
-import { Navbar } from '@/components/layout/Navbar'
-import { Footer } from '@/components/layout/Footer'
+export const metadata = {
+  title: 'Construction Empire Builder | CoreFlow360 AI for Contractors',
+  description: 'Transform your construction business into an automated empire with AI employees. Manage multiple sites, automate project management, and scale with intelligent construction software.',
+  keywords: 'construction management software, contractor business automation, project management, multi-site construction management, construction empire builder'
+}
 
 export default function ConstructionPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
-      <Navbar />
-      <div className="pt-16">
-        <section className="bg-gradient-to-b from-yellow-950/20 to-black py-24">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="mb-8 text-5xl font-black md:text-7xl">
-              Built for Construction
-              <br />
-              <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                Project to Profit
-              </span>
-            </h1>
-            <p className="mx-auto max-w-3xl text-xl text-gray-300">
-              Manage multiple job sites, track equipment, optimize crews, and ensure projects finish on time and under budget.
-            </p>
-            <div className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-4">
-              <div className="rounded-xl border border-yellow-500/50 bg-yellow-900/30 p-4">
-                <div className="text-3xl font-bold text-yellow-400">312</div>
-                <div className="text-yellow-300">Construction Firms</div>
-              </div>
-              <div className="rounded-xl border border-yellow-500/50 bg-yellow-900/30 p-4">
-                <div className="text-3xl font-bold text-yellow-400">22%</div>
-                <div className="text-yellow-300">Project Margin Increase</div>
-              </div>
-              <div className="rounded-xl border border-yellow-500/50 bg-yellow-900/30 p-4">
-                <div className="text-3xl font-bold text-yellow-400">35%</div>
-                <div className="text-yellow-300">Fewer Delays</div>
-              </div>
-              <div className="rounded-xl border border-yellow-500/50 bg-yellow-900/30 p-4">
-                <div className="text-3xl font-bold text-yellow-400">$2.3M</div>
-                <div className="text-yellow-300">Average Savings</div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-      <Footer />
-    </div>
+    <main className="min-h-screen bg-black">
+      <V0Navigation />
+      <V0ConstructionHero />
+      <V0ConstructionFeatures />
+      <V0ConstructionROICalculator />
+      <V0ConstructionTestimonials />
+      <V0Pricing />
+    </main>
   )
 }
