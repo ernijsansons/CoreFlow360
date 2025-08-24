@@ -58,11 +58,11 @@ export default function V0Navigation() {
               </button>
               <div className="absolute top-full left-0 mt-2 w-64 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
                 <div className="p-4 space-y-3">
-                  <Link href="#hvac" className="block text-gray-300 hover:text-blue-400 transition-colors">
+                  <Link href="/industries/hvac" className="block text-gray-300 hover:text-blue-400 transition-colors">
                     <div className="font-semibold">🔧 HVAC</div>
                     <div className="text-sm text-gray-500">Heating, ventilation & air conditioning</div>
                   </Link>
-                  <Link href="#legal" className="block text-gray-300 hover:text-purple-400 transition-colors">
+                  <Link href="/industries/legal" className="block text-gray-300 hover:text-purple-400 transition-colors">
                     <div className="font-semibold">⚖️ Legal Services</div>
                     <div className="text-sm text-gray-500">Law firms and legal practices</div>
                   </Link>
@@ -146,10 +146,10 @@ export default function V0Navigation() {
                 <div className="space-y-3">
                   <div className="text-gray-400 text-sm font-medium">Industries</div>
                   <div className="ml-4 space-y-2">
-                    <Link href="#hvac" className="block text-gray-300 hover:text-blue-400 transition-colors">
+                    <Link href="/industries/hvac" className="block text-gray-300 hover:text-blue-400 transition-colors">
                       🔧 HVAC
                     </Link>
-                    <Link href="#legal" className="block text-gray-300 hover:text-purple-400 transition-colors">
+                    <Link href="/industries/legal" className="block text-gray-300 hover:text-purple-400 transition-colors">
                       ⚖️ Legal Services
                     </Link>
                     <Link href="#construction" className="block text-gray-300 hover:text-orange-400 transition-colors">
