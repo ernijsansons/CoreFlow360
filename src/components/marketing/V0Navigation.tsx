@@ -24,30 +24,32 @@ export default function V0Navigation() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
             <Link 
-              href="#portfolio-management" 
+              href="/portfolio-management" 
               className="text-gray-300 hover:text-white transition-colors relative group"
             >
               Portfolio Management
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 group-hover:w-full transition-all duration-300"></span>
             </Link>
             
-            <div className="relative group">
-              <button className="text-gray-300 hover:text-white transition-colors flex items-center">
-                Progressive Pricing
-                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {/* Dropdown would go here */}
-            </div>
-            
             <Link 
-              href="#success-stories" 
+              href="/pricing" 
               className="text-gray-300 hover:text-white transition-colors relative group"
+            >
+              Progressive Pricing
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-purple-500 group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            
+            <a 
+              href="#success-stories" 
+              className="text-gray-300 hover:text-white transition-colors relative group cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault()
+                document.getElementById('success-stories')?.scrollIntoView({ behavior: 'smooth' })
+              }}
             >
               Success Stories
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-purple-500 group-hover:w-full transition-all duration-300"></span>
-            </Link>
+            </a>
             
             <div className="relative group">
               <button className="text-gray-300 hover:text-white transition-colors flex items-center">
@@ -117,31 +119,32 @@ export default function V0Navigation() {
             <div className="container mx-auto px-4 py-6">
               <div className="flex flex-col space-y-6">
                 <Link 
-                  href="#portfolio-management" 
+                  href="/portfolio-management" 
                   className="text-gray-300 hover:text-white transition-colors text-lg"
                   onClick={() => setIsOpen(false)}
                 >
                   Portfolio Management
                 </Link>
                 
-                <div className="space-y-3">
-                  <div className="text-gray-400 text-sm font-medium">Progressive Pricing</div>
-                  <Link 
-                    href="#pricing" 
-                    className="text-gray-300 hover:text-white transition-colors ml-4"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    View Pricing Tiers
-                  </Link>
-                </div>
-                
                 <Link 
-                  href="#success-stories" 
+                  href="/pricing" 
                   className="text-gray-300 hover:text-white transition-colors text-lg"
                   onClick={() => setIsOpen(false)}
                 >
-                  Success Stories
+                  Progressive Pricing
                 </Link>
+                
+                <a 
+                  href="#success-stories" 
+                  className="text-gray-300 hover:text-white transition-colors text-lg cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setIsOpen(false)
+                    document.getElementById('success-stories')?.scrollIntoView({ behavior: 'smooth' })
+                  }}
+                >
+                  Success Stories
+                </a>
                 
                 <div className="space-y-3">
                   <div className="text-gray-400 text-sm font-medium">Industries</div>

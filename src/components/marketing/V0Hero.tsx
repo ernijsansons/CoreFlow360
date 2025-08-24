@@ -102,13 +102,17 @@ export default function V0Hero() {
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
               </Link>
               
-              <Link 
+              <a 
                 href="#roi-calculator"
-                className="group px-8 py-4 border-2 border-purple-500 hover:border-purple-400 text-white text-lg font-bold rounded-xl transition-all duration-300 hover:bg-purple-500/10"
+                className="group px-8 py-4 border-2 border-purple-500 hover:border-purple-400 text-white text-lg font-bold rounded-xl transition-all duration-300 hover:bg-purple-500/10 cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault()
+                  document.getElementById('roi-calculator')?.scrollIntoView({ behavior: 'smooth' })
+                }}
               >
                 Calculate Your Empire Savings
                 <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">→</span>
-              </Link>
+              </a>
             </div>
 
             {/* Trust Indicators */}
