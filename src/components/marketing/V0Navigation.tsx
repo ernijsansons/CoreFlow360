@@ -70,7 +70,7 @@ export default function V0Navigation() {
                     <div className="font-semibold">🏗️ Construction</div>
                     <div className="text-sm text-gray-500">General contractors and builders</div>
                   </Link>
-                  <Link href="#professional" className="block text-gray-300 hover:text-green-400 transition-colors">
+                  <Link href="/industries/professional" className="block text-gray-300 hover:text-green-400 transition-colors">
                     <div className="font-semibold">💼 Professional Services</div>
                     <div className="text-sm text-gray-500">Consulting and business services</div>
                   </Link>
@@ -155,7 +155,7 @@ export default function V0Navigation() {
                     <Link href="/industries/construction" className="block text-gray-300 hover:text-orange-400 transition-colors">
                       🏗️ Construction
                     </Link>
-                    <Link href="#professional" className="block text-gray-300 hover:text-green-400 transition-colors">
+                    <Link href="/industries/professional" className="block text-gray-300 hover:text-green-400 transition-colors">
                       💼 Professional Services
                     </Link>
                   </div>
